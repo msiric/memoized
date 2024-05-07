@@ -1,0 +1,92 @@
+export const metadata = {
+  title: 'Mastering JavaScript Primitive Data Structures',
+  description:
+    'This course provides a deep dive into JavaScript’s built-in data structures, with a focus on primitives and their role in technical interviews.',
+}
+
+# Mastering JavaScript Primitive Data Structures
+
+In this course, we will focus on JavaScript's built-in data structures, emphasizing the importance of primitives and their unique characteristics that are vital for technical interviews. Unlike other resources, this course delves into JavaScript-specific features like type coercion and truthy/falsy evaluation.
+
+## Introduction to JavaScript's Built-in Data Structures
+
+Technical interviews often probe deep into a candidate's understanding of language-specific features. For JavaScript, this includes a thorough grasp of built-in data structures. Most existing resources focus broadly on algorithms and data structures without tailoring to JavaScript's unique characteristics, such as its type coercion, truthy/falsy evaluation, and prototypal inheritance. This course aims to bridge this gap, providing nuanced insights into JavaScript that are directly applicable in technical interviews.
+
+## Understanding Primitives
+
+JavaScript primitives are fundamental data types that include String, Number, BigInt, Boolean, Symbol, null, and undefined. These types are immutable and are stored directly in stack memory, facilitating quick access and efficient storage management.
+
+### Characteristics of JavaScript Primitives
+
+#### Immutability
+
+```javascript
+let str = 'Hello'
+str = str + ' World' // Creates a new string, does not alter the original "Hello"
+console.log(str) // Outputs: "Hello World"
+```
+
+#### Copying by Value
+
+```javascript
+let a = 10
+let b = a
+a = 20
+console.log(a) // Outputs: 20
+console.log(b) // Outputs: 10 (remains unaffected by change to a)
+```
+
+#### Type Coercion
+
+```javascript
+let result = '3' + 4 // JavaScript converts 4 to a string and concatenates
+console.log(result) // Outputs: "34"
+```
+
+#### Variable Declaration
+
+```javascript
+function testVar() {
+  if (true) {
+    var x = 2 // Function-scoped
+  }
+  console.log(x) // Outputs: 2
+}
+
+function testLet() {
+  if (true) {
+    let y = 3 // Block-scoped
+    const z = 4 // Block-scoped, immutable
+  }
+  // console.log(y); // Error: y is not defined
+  // console.log(z); // Error: z is not defined
+}
+```
+
+### Handling Precisions and Limitations
+
+```javascript
+console.log(Number.MAX_SAFE_INTEGER) // Outputs: 9007199254740991
+console.log(9007199254740991 + 1) // Outputs: 9007199254740992 (safe)
+console.log(9007199254740991 + 2) // Outputs: 9007199254740992 (unsafe, precision lost)
+
+let big = BigInt(9007199254740991) + BigInt(2)
+console.log(big.toString()) // Outputs: "9007199254740993" (correctly handled with BigInt)
+```
+
+### Common Methods
+
+#### Strings
+
+```javascript
+let text = 'Hello, world!'
+console.log(text.includes('world')) // true
+console.log(text.slice(7, 12)) // "world"
+```
+
+#### Numbers
+
+```javascript
+console.log(Number.parseInt('100px')) // 100
+console.log(Number.parseFloat('10.5%')) // 10.5
+```
