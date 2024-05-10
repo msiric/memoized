@@ -1,0 +1,300 @@
+export const metadata = {
+  title: 'Quickstart',
+  description:
+    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
+}
+
+## Comprehensive Guide to JavaScript Primitives: BigInt and Boolean
+
+BigInt is a newer addition to JavaScript, introduced to handle integers larger than those that the Number type can safely represent.
+
+Characteristics and Purpose:
+
+BigInt allows representation of arbitrarily large integers. This is crucial when dealing with values exceeding 2^53 - 1, the largest number JavaScript can reliably represent with the Number type.
+Created by appending n to the end of an integer or by calling the BigInt() function.
+
+```js
+let largeNumber = 1234567890123456789012345678901234567890n;
+let sameLargeNumber = BigInt("1234567890123456789012345678901234567890");
+```
+
+**Use Cases:**
+
+Mathematical Calculations: Vital for sectors requiring precise large integer calculations like financial services, cryptography, and scientific computing where precision is mandatory.
+
+**Considerations:**
+
+Incompatibility with Number: Direct operations between BigInt and Number are not allowed. Any operation combining these two types must explicitly convert one type to the other.
+
+```js
+// Throws an error: Cannot mix BigInt and Number types
+// let result = 10n + 5; 
+
+// Correct usage:
+let result = 10n + BigInt(5);
+console.log(result); // 15n
+```
+
+JSON Serialization: BigInt is not serializable to JSON directly. This limitation needs handling via conversion if BigInt needs to be serialized.
+
+```js
+JSON.stringify({value: BigInt("10")}); // Throws TypeError
+
+```
+Boolean
+
+Boolean is a fundamental data type in JavaScript, representing truthy or falsy values and commonly used in control structures for flow management.
+
+**Characteristics:**
+
+Values: Only two possible values — true and false.
+
+**Syntax and Use:**
+
+```js
+if (true) {
+    console.log("This code executes!");
+}
+```
+
+**Conversion Rules:**
+
+Falsy Values: The following are evaluated to false when converted to a boolean — false, 0, -0, 0n, "" (empty string), null, undefined, and NaN.
+Truthy Values: All other values are considered truthy, meaning they evaluate to true in Boolean contexts.
+
+**Common Pitfalls:**
+
+Loose vs. Strict Comparison: Using == (loose comparison) can lead to unexpected type coercion, while === (strict comparison) checks both value and type, avoiding unintended conversions.
+
+```js
+console.log(0 == false);  // true (loose comparison)
+console.log(0 === false); // false (strict comparison)
+```
+
+**Practical Tips:**
+
+Understanding these primitives is crucial for robust JavaScript programming.
+During interviews, articulating when and why to use each type, especially underlining the nuances of BigInt and the behavior of truthy/falsy values in Boolean, demonstrates a deep understanding of JavaScript.
+
+Comprehensive Guide to JavaScript Primitives: Symbol, Null, and Undefined
+
+## Symbol
+
+Symbol is a unique and immutable primitive introduced in ECMAScript 2015 (ES6) primarily to avoid property name collisions in objects.
+
+**Characteristics and Purpose:**
+
+Each time Symbol() is called, it generates a completely unique identifier, which means no two symbols are ever the same, even if they have the same description.
+
+```js
+let mySymbol = Symbol("myUniqueIdentifier");
+let anotherSymbol = Symbol("myUniqueIdentifier");
+console.log(mySymbol === anotherSymbol); // false
+```
+
+**Use:**
+
+Symbols are commonly used as keys for object properties, allowing properties to be private and shielded from inadvertent changes when interfacing with third-party code.
+
+```js
+let obj = {
+    [mySymbol]: "value"
+};
+console.log(obj[mySymbol]);  // "value"
+```
+
+**Use Cases:**
+
+Private Properties: Although not truly private, using symbols as keys can simulate private properties since symbols are not accessible through normal object property enumeration.
+Metadata: Symbols can store metadata about object properties without affecting the actual data structure or causing conflicts.
+
+**Considerations:**
+
+Non-Enumerable: Properties keyed by symbols do not show up in Object.keys() or JSON.stringify(), making them good for non-destructive additions to objects.
+Global Symbol Registry: You can create global symbols that are accessible in different parts of your code via Symbol.for() and retrieved using Symbol.keyFor().
+
+```js
+let globalSymbol = Symbol.for("app.global");
+console.log(Symbol.keyFor(globalSymbol)); // "app.global"
+```
+
+## Null and Undefined
+
+null and undefined are two primitives that represent absence of value, but they are used in slightly different contexts.
+
+**Characteristics:**
+
+null: Intentionally set to indicate the absence of any object value. It is commonly used to denote that a variable intentionally does not point to any object.
+
+```js
+let nullified = null;
+console.log(nullified);  // null
+```
+
+undefined: Indicates that a variable has been declared but has not yet been assigned a value. It is the default value of variables.
+
+```js
+let uninitialized;
+console.log(uninitialized);  // undefined
+```
+
+**Use Cases:**
+
+Initialization: null is often used where an object is expected but none is relevant, such as in parameters for functions or when a function fails to find an object to return.
+Default Parameters: undefined is particularly useful in function parameters to trigger default values.
+
+```js
+function greet(name = "Guest") {
+  console.log(`Hello, ${name}!`);
+}
+greet();  // Outputs: Hello, Guest!
+```
+
+**Common Pitfalls:**
+
+Checking for Both: Since both null and undefined represent "no value," it's common to check for both using the loose equality == null.
+
+```js
+if (uninitialized == null) {
+    console.log("This checks for both null and undefined.");
+}
+```
+
+**Practical Tips for Interviews:**
+
+Understanding and correctly using null and undefined is crucial, as they often form the basis of checks in control flows and functions in JavaScript.
+Explaining when and why to use Symbol, especially its unique properties for creating non-colliding object keys, can demonstrate a deep understanding of JavaScript.
+
+## BigInt
+
+Characteristics
+
+Purpose: BigInt is a primitive that provides a way to represent whole numbers larger than the maximum safe integer limit that Number can handle (2^53 - 1).
+Syntax: Created by appending n to the end of an integer or by calling the BigInt() function.
+
+```js
+let largeNumber = 1234567890123456789012345678901234567890n;
+let sameLargeNumber = BigInt("1234567890123456789012345678901234567890");
+```
+
+Use Cases
+
+Mathematical Calculations: Essential for accurate large integer calculations, such as in financial services, cryptography, and scientific computing.
+
+Considerations
+
+Incompatibility with Number: You cannot directly mix BigInt and Number types in operations. You must explicitly convert them to the same type.
+JSON Serialization: BigInt is not serializable to JSON natively.
+
+## Boolean
+
+Characteristics
+
+Values: Only two possible values—true and false.
+Use: The fundamental type used in all JavaScript control structures for conditional testing.
+
+```js
+if (true) {
+    console.log("This code executes!");
+}
+```
+
+Conversion Rules
+
+Falsy Values: false, 0, -0, 0n, "", null, undefined, and NaN.
+Truthy Values: All other values are truthy.
+
+Common Pitfalls
+
+Loose vs. Strict Comparison: Using == can lead to unexpected type coercion. Always use === for comparison to avoid unintended conversions.
+
+## Symbol
+
+Characteristics
+
+Purpose: Used to create completely unique identifiers. Symbol() always returns a unique value.
+Use: Symbols are often used as property keys in objects to avoid property name collisions, especially in libraries and larger applications.
+
+```js
+let mySymbol = Symbol("myUniqueIdentifier");
+let obj = {
+    [mySymbol]: "value"
+};
+console.log(obj[mySymbol]);  // "value"
+```
+
+Use Cases
+
+Private Properties: Symbols can be used to somewhat simulate private properties in an object.
+
+Considerations
+
+Non-Enumerable: Properties keyed by symbols are not included in Object.keys() or JSON.stringify() outputs.
+
+## Null and Undefined
+
+Characteristics
+
+null: Intentional absence of any object value. It is used to represent "nothing," "empty," or "value unknown."
+undefined: Indicates that a variable has not been assigned a value.
+
+```js
+let uninitialized;
+let nullified = null;
+console.log(uninitialized);  // undefined
+console.log(nullified);  // null
+```
+
+Use Cases
+
+Initialization: null is often used where an object is expected but none is relevant.
+Default Parameters: undefined can trigger default parameter values in functions.
+
+Common Pitfalls
+
+Checking for Both: Often, you’ll need to check for both null and undefined when ensuring a variable has a usable, non-empty value.
+
+```js
+if (variable == null) {
+    console.log("This checks for both null and undefined.");
+}
+```
+
+Practical Tips for Interviews
+
+Understanding and correctly using these primitives is crucial, as they form the backbone of more complex structures and control flows in JavaScript.
+During interviews, explaining when and why to use each of these types, particularly the nuances of BigInt and Symbol, can help demonstrate a deep understanding of JavaScript.
+
+## BigInt Practicalities
+
+Performance Considerations: Operations involving BigInt can be slower than those involving Number due to the nature of arbitrary-precision arithmetic. Optimize by using BigInt only when necessary for handling values beyond the safe integer limit for Number.
+Interoperability: Converting between BigInt and Number must be done carefully, typically through explicit conversions (BigInt(number) or Number(bigint)) to avoid losing precision or causing runtime errors.
+
+## Boolean Coercion and Logic
+
+Logical Operators: The use of logical operators (&&, ||, !) with non-Boolean values can lead to non-intuitive results due to how JavaScript coerces types. For example, "hello" && 123 returns 123, and "hello" || 123 returns "hello".
+Short-circuit Evaluation: Understand how short-circuiting works in JavaScript for both && and || operators, which can be used to provide default values or execute functions conditionally.
+
+## Symbol and Its Metadata Usage
+
+Global Symbols: Use Symbol.for(key) and Symbol.keyFor(sym) to create and retrieve symbols from the global symbol registry. This can be particularly useful when modules or different parts of an application need to share symbols.
+Well-known Symbols: JavaScript has built-in symbols with special properties, like Symbol.iterator, Symbol.asyncIterator, and Symbol.toPrimitive. These can be used to customize the standard behavior of objects.
+
+## Null vs. Undefined
+Initialization and Declaration: Typically, undefined is used to indicate that a variable has been declared but not defined, while null is used explicitly by programmers to indicate the intentional absence of a value.
+API Responses and External Data: When interfacing with external data sources or APIs, be cautious with the use of null and undefined, as these may be used differently depending on the external source's conventions.
+
+## Type Checking and Safety
+
+**Typeof Operator: Using typeof can be tricky:**
+
+typeof null returns "object", which is a well-known JavaScript quirk.
+typeof for a BigInt returns "bigint", and for a Symbol, it returns "symbol".
+
+Strict Equality Checks: Use strict equality (===) to avoid pitfalls of type coercion that occurs with abstract equality (==).
+
+**Practical Interview Tips**
+
+Discussing Implications: When discussing your code or answering questions, talk about why you might choose null over undefined (or vice versa), or why BigInt might be necessary for a given problem.
+Edge Cases: Highlight understanding of edge cases, such as using Symbol for private properties or handling large numbers with BigInt.
+Performance Implications: Be prepared to discuss the performance implications of using these types, especially BigInt in performance-critical applications.
