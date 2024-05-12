@@ -1,8 +1,15 @@
-{/* Comprehensive Guide to Trees in JavaScript
-1. Introduction to Trees
+export const metadata = {
+  title: 'Quickstart',
+  description:
+    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
+}
+
+# Comprehensive Guide to Trees in JavaScript
+
 Trees are hierarchical data structures that consist of nodes connected by edges, with one node designated as the root from which all nodes branch out. Unlike linear data structures like arrays and linked lists, trees can have a non-linear and branched structure.
 
-Terminology:
+**Terminology:**
+
 Root: The topmost node of the tree, which serves as the origin of all other nodes.
 Child: A node directly connected to another node moving away from the Root.
 Parent: The converse notion of a child. A node is a parent if it has one or more nodes directly connected below it.
@@ -11,26 +18,38 @@ Leaf: Also known as a terminal node, a leaf is a node that does not have any chi
 Subtree: A subtree is any node in a tree along with its children, grandchildren, etc., as a tree itself.
 Levels: The level of a node is determined by the number of connections between the node and the root node. The root node is at level zero.
 Height: The height of a tree is the length of the longest path from the root to the furthest leaf.
-2. Types of Trees
+
+## Types of Trees
+
 Understanding different types of trees enhances the ability to choose the right tree for the right application.
 
-Binary Trees:
+**Binary Trees:**
+
 A binary tree is a tree where each node has no more than two child nodes, commonly referred to as the left child and the right child. This structure makes binary trees ideal for implementing efficient search operations.
-Binary Search Trees (BST):
+
+**Binary Search Trees (BST):**
+
 A Binary Search Tree is a binary tree with the added condition that for any given node, the values of all the nodes in the left subtree are lesser, and the values in the right subtree are greater. This property provides efficient support for operations like search, insert, and delete.
-Balanced Trees:
+
+**Balanced Trees:**
+
 AVL Trees: A self-balancing binary search tree where the heights of the two child subtrees of any node differ by no more than one, ensuring O(log n) time complexities for inserts, deletes, and searches.
 Red-Black Trees: Another type of self-balancing binary search tree, where each node stores an extra bit representing "color" ("red" or "black"), used to ensure the tree remains approximately balanced during insertions and deletions.
-Special Trees:
+
+**Special Trees:**
+
 B-Trees: Used extensively in databases and file systems, B-trees are a generalization of binary search trees in that a node can have more than two children.
 Tries: A tree data structure used mainly for storing strings in which each node might contain several references to other nodes, forming a lattice-like structure.
-3. Implementing Trees in JavaScript
+
+## Implementing Trees in JavaScript
+
 Let's begin by defining a basic tree node and then implement a binary search tree.
 
-Creating a Tree Node:
+**Creating a Tree Node:**
+
 Here's how you might define a basic tree node in JavaScript, suitable for building binary trees.
-javascript
-Copy code
+
+```js
 class TreeNode {
   constructor(value) {
     this.value = value;
@@ -38,10 +57,13 @@ class TreeNode {
     this.right = null;
   }
 }
-Inserting Nodes in a Binary Search Tree (BST):
+```
+
+**Inserting Nodes in a Binary Search Tree (BST):**
+
 Here's a simple implementation showing how to maintain the BST property when inserting new nodes.
-javascript
-Copy code
+
+```js
 class BinarySearchTree {
   constructor() {
     this.root = null;
@@ -73,15 +95,18 @@ class BinarySearchTree {
     }
   }
 }
+```
 
-4. Tree Traversal Techniques
+## Tree Traversal Techniques
+
 Traversal techniques in trees are methods to visit all the nodes in a specific order. Each traversal strategy serves different purposes and is useful in different scenarios:
 
-Depth-First Search (DFS):
+**Depth-First Search (DFS):**
+
 Depth-first search involves exploring as far as possible down one path before backing up and trying another. In binary trees, there are three common types of DFS:
 In-order Traversal: Visit the left branch, then the current node, and finally, the right branch. This traversal gives nodes in non-decreasing order for BSTs.
-javascript
-Copy code
+
+```js
 function inOrderTraversal(node) {
   if (node !== null) {
     inOrderTraversal(node.left);
@@ -89,9 +114,11 @@ function inOrderTraversal(node) {
     inOrderTraversal(node.right);
   }
 }
+```
+
 Pre-order Traversal: Visit the current node before its child nodes. This traversal is useful for creating a copy of the tree.
-javascript
-Copy code
+
+```js
 function preOrderTraversal(node) {
   if (node !== null) {
     console.log(node.value);
@@ -99,9 +126,11 @@ function preOrderTraversal(node) {
     preOrderTraversal(node.right);
   }
 }
+```
+
 Post-order Traversal: Visit the current node after its child nodes. This method is useful for deleting or freeing the space of the tree from leaf to root.
-javascript
-Copy code
+
+```js
 function postOrderTraversal(node) {
   if (node !== null) {
     postOrderTraversal(node.left);
@@ -109,10 +138,13 @@ function postOrderTraversal(node) {
     console.log(node.value);
   }
 }
-Breadth-First Search (BFS) or Level-order Traversal:
+```
+
+**Breadth-First Search (BFS) or Level-order Traversal:**
+
 This method visits all the nodes at the present depth level before moving on to nodes at the next depth level. It is commonly implemented using a queue.
-javascript
-Copy code
+
+```js
 function levelOrderTraversal(root) {
   let result = [];
   let queue = [];
@@ -131,18 +163,24 @@ function levelOrderTraversal(root) {
   }
   return result;
 }
-Applications of Each Traversal:
+```
+
+**Applications of Each Traversal:**
+
 In-order: Commonly used in BSTs for retrieving sorted data.
 Pre-order: Useful for copying the tree or examining tree structure quickly.
 Post-order: Used for deleting nodes or performing operations that require that children are processed before the parent.
 Breadth-first: Useful for finding the shortest path in unweighted graphs or for serialization/deserialization of a binary tree.
-5. Common Operations on Trees
+
+## Common Operations on Trees
+
 Operations on trees are crucial for managing and utilizing tree data structures effectively:
 
-Search:
+**Search:**
+
 Searching for a node in a binary search tree can be efficiently done by leveraging the BST property.
-javascript
-Copy code
+
+```js
 function searchBST(node, key) {
   if (node === null || node.value === key) {
     return node;
@@ -153,10 +191,13 @@ function searchBST(node, key) {
     return searchBST(node.right, key);
   }
 }
-Deletion:
+```
+
+**Deletion:**
+
 Deleting a node in a BST involves several cases including node with no child, one child, and two children.
-javascript
-Copy code
+
+```js
 function deleteNode(root, key) {
   if (root === null) return root;
   if (key < root.value) {
@@ -180,10 +221,13 @@ function findMin(node) {
   }
   return minv;
 }
-Finding Min/Max:
+```
+
+**Finding Min/Max:**
+
 Finding the minimum or maximum value in a BST can utilize the properties of the tree structure.
-javascript
-Copy code
+
+```js
 function findMinNode(node) {
   if (node === null) {
     return null;
@@ -203,19 +247,25 @@ function findMaxNode(node) {
   }
   return node;
 }
+```
 
-6. Common Interview Problems
+## Common Interview Problems
+
 Interview problems involving trees are designed to assess your problem-solving skills in a structured and hierarchical context. Here are some typical problems you might encounter:
 
-Balancing a Tree:
+**Balancing a Tree:**
+
 Maintaining balance in a binary search tree is crucial for ensuring optimal performance of search, insert, and delete operations. Interview questions might involve explaining or implementing tree rotations, or converting an unbalanced tree into a balanced one (e.g., AVL Tree, Red-Black Tree).
-javascript
-Copy code
+
+```js
 // Discussion or pseudo-code for rotating nodes to balance a tree
-Finding the Lowest Common Ancestor (LCA):
+```
+
+**Finding the Lowest Common Ancestor (LCA):**
+
 This problem involves finding the lowest (deepest) common ancestor of two nodes in a binary search tree or a binary tree. The solution leverages the properties of the BST or the structure of a binary tree to navigate towards the LCA.
-javascript
-Copy code
+
+```js
 function findLCA(root, node1, node2) {
   if (root == null) return null;
   if (root === node1 || root === node2) return root;
@@ -226,20 +276,26 @@ function findLCA(root, node1, node2) {
   if (left !== null && right !== null) return root;
   return left !== null ? left : right;
 }
-Path Sum:
+```
+
+**Path Sum:**
+
 The path sum problem asks whether there is a path from the root down to a leaf such that adding up all the values along the path equals a given number. This problem tests your ability to traverse the tree and handle recursion.
-javascript
-Copy code
+
+```js
 function hasPathSum(root, sum) {
   if (root == null) return false;
   if (root.value === sum && root.left == null && root.right == null) return true;
 
   return hasPathSum(root.left, sum - root.value) || hasPathSum(root.right, sum - root.value);
 }
-Serialize and Deserialize a Binary Tree:
+```
+
+**Serialize and Deserialize a Binary Tree:**
+
 Serialization of a tree involves converting a tree into a string or array, and deserialization is turning that string back into the same tree structure. This is a common problem for understanding how to handle tree data structures in a format that can be easily stored or transmitted.
-javascript
-Copy code
+
+```js
 function serialize(root) {
   if (root === null) return "null";
   return `${root.value},${serialize(root.left)},${serialize(root.right)}`;
@@ -257,53 +313,229 @@ function deserialize(data) {
   let nodeArray = data.split(",");
   return buildTree(nodeArray);
 }
-7. Advanced Tree Concepts
+```
+
+## Advanced Tree Concepts
+
 Advanced concepts in trees involve optimizing operations and expanding functionalities:
 
-Tree Rotations:
+**Tree Rotations:**
+
 Rotations are fundamental operations in balanced trees like AVL trees or Red-Black Trees to maintain their properties after insertions and deletions. These involve single or double rotations to rebalance the tree.
-Augmenting Trees:
+
+**Augmenting Trees:**
+
 Augmenting data structures involves storing additional information in each node. For example, an augmented tree might store subtree sizes or max/min elements at each node, which can be used to support dynamic order statistics, interval management, or other complex operations.
 
-Final Review and Resources for Trees
-Key Points Recap:
-Introduction to Trees:
+**Key Points Recap:**
+
+**Introduction to Trees:**
+
 Trees are hierarchical data structures consisting of nodes connected by edges, with a designated root node.
 Important terms include root, child, parent, sibling, leaf, subtree, levels, and height.
-Types of Trees:
+
+**Types of Trees:**
+
 Binary Trees: Each node has at most two children (left and right).
 Binary Search Trees (BSTs): A type of binary tree where each node ensures that left children are less than the parent node and right children are greater.
 Balanced Trees: Such as AVL trees and Red-Black Trees, which maintain specific balancing criteria to ensure efficient operations.
 Special Trees: Including B-Trees for databases and Tries for storing strings efficiently.
-Implementing Trees in JavaScript:
+
+**Implementing Trees in JavaScript:**
+
 Demonstrated how to create a basic tree node and a Binary Search Tree class, focusing on operations like insertion.
-Tree Traversal Techniques:
+
+**Tree Traversal Techniques:**
+
 DFS Variants: In-order, pre-order, and post-order traversals.
 BFS (Level-order Traversal): Uses a queue to traverse the tree level by level.
-Common Operations on Trees:
+
+**Common Operations on Trees:**
+
 Operations such as search, insertion, deletion, and finding minimum or maximum values in BSTs.
-Common Interview Problems:
+
+**Common Interview Problems:**
+
 Problems like finding the Lowest Common Ancestor (LCA), checking for a path sum, and serializing/deserializing trees.
-Advanced Tree Concepts:
+
+**Advanced Tree Concepts:**
+
 Discussed tree rotations in AVL and Red-Black Trees, and augmenting trees to store additional data for complex operations.
-Exercises and Challenges:
-Hands-On Coding:
+
+**Exercises and Challenges:**
+
+**Hands-On Coding:**
+
 Implement various types of trees and perform standard operations.
 Practice tree rotations and balancing techniques.
 Solve problems involving tree traversals and applications in different scenarios.
-Online Challenges:
+
+**Online Challenges:**
+
 Platforms like LeetCode, HackerRank, and CodeSignal offer a wealth of problems specifically focused on trees. Regular practice on these platforms can enhance your problem-solving skills and prepare you for technical interviews.
-Review Sessions and Interactive Learning:
-Regular Code Reviews and Walkthroughs:
+
+**Review Sessions and Interactive Learning:**
+
+**Regular Code Reviews and Walkthroughs:**
+
 Hold sessions to review tree implementations and walkthrough solutions to complex tree problems, which will help solidify understanding and address any lingering confusions.
-Live Coding Demonstrations:
+
+**Live Coding Demonstrations:**
+
 Use live coding platforms like JSFiddle or CodePen to demonstrate tree operations and solve problems in real-time, providing practical exposure to tree manipulation.
-Resources for Further Learning:
-Books and Online Courses:
+
+**Resources for Further Learning:**
+
+**Books and Online Courses:**
+
 "Introduction to Algorithms" by Cormen et al. is an excellent resource for in-depth understanding of trees and other data structures.
 Online courses from Coursera, edX, or Udacity provide structured learning paths for data structures, including extensive material on trees.
-Practice Platforms:
+
+**Practice Platforms:**
+
 Encourage regular practice on coding platforms that have dedicated sections for tree problems, enhancing both understanding and application skills.
-Visual Aids and Teaching Tools:
+
+**Visual Aids and Teaching Tools:**
+
 Use diagrams and animations to visually represent tree operations, transformations, and traversal methods.
-Utilize interactive development environments for real-time coding demonstrations and practice. */}
+Utilize interactive development environments for real-time coding demonstrations and practice.
+
+## Understanding Trees
+
+Basic Concept
+
+Hierarchical Structure: Trees consist of nodes connected by edges, with one node designated as the root. Each node contains data and references to its children, with no cycles (connections that loop back on themselves).
+Nodes and Edges: A node represents an element or data point, and edges represent the relationships or links between nodes.
+
+Key Properties
+
+Root: The top node from which all other nodes descend.
+Parent and Child Nodes: Each node (except the root) has one parent and zero or more children.
+Leaf Nodes: Nodes without any children.
+Depth and Height: Depth of a node is the number of edges from the node to the tree's root. Height of the tree is the maximum depth among all nodes.
+
+Types of Trees
+
+Binary Trees: Each node has at most two children (commonly referred to as left and right).
+Binary Search Trees (BST): A binary tree where each node has a value greater than all values in its left subtree and less than all values in its right subtree.
+Balanced Trees: AVL trees and red-black trees are types of self-balancing binary search trees where operations are guaranteed to be in logarithmic time.
+B-Trees: Used in databases, file systems, and indexes; allows for data retrieval, insertions, and deletions in logarithmic time.
+Trie (Prefix Tree): A specialized tree used in searching, especially for dictionaries; nodes store the part of a key.
+
+## Common Operations and Their Complexity
+
+Insertion: Depending on the type of tree, adding a node so that the tree's properties (like the BST property) are maintained.
+Deletion: Removing a node, which can be complex if the node has children since the tree needs restructuring.
+Search: Looking up a node with a given value or property.
+Traversal: Visiting all nodes in a specific order (e.g., in-order, pre-order, post-order for binary trees).
+
+## Implementation Example in JavaScript
+
+Here's a basic example of how to implement a binary search tree in JavaScript:
+
+```js
+class TreeNode {
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+class BinarySearchTree {
+    constructor() {
+        this.root = null;
+    }
+
+    insert(value) {
+        const newNode = new TreeNode(value);
+        if (this.root === null) {
+            this.root = newNode;
+        } else {
+            this._insertNode(this.root, newNode);
+        }
+    }
+
+    _insertNode(node, newNode) {
+        if (newNode.value < node.value) {
+            if (node.left === null) {
+                node.left = newNode;
+            } else {
+                this._insertNode(node.left, newNode);
+            }
+        } else {
+            if (node.right === null) {
+                node.right = newNode;
+            } else {
+                this._insertNode(node.right, newNode);
+            }
+        }
+    }
+    // Add methods for search and delete as needed
+}
+```
+
+## Advanced Techniques and Considerations
+
+Self-Balancing Trees
+
+Understanding AVL trees and red-black trees can be critical for ensuring performance stability in applications where frequent insertions and deletions occur.
+
+Tree Rotations
+
+A fundamental operation in self-balancing trees to maintain balance after modifications. This involves reorienting the tree around a pivot node.
+
+## Practical Interview Tips
+
+Problem Solving with Trees: Many algorithm problems, such as those involving depth-first search (DFS) or breadth-first search (BFS), are efficiently solved using trees. Be prepared to discuss and implement tree-based solutions.
+Complexity Analysis: Be able to discuss the time and space complexity of tree operations, especially comparing different types of trees.
+Real-World Applications: Discuss practical applications of trees, such as parsing expressions, managing hierarchical data, or implementing priority queues.
+
+## Advanced Tree Concepts and Operations
+
+Complex Tree Variants
+
+Segment Trees: Used for storing intervals or segments, and allow querying which of the stored segments contain a given point. They are particularly useful in geographical data systems and event scheduling.
+Fenwick Tree (Binary Indexed Tree): A data structure that provides efficient methods for calculating prefix sums in a table of numbers and is often used in query-intensive environments.
+
+Tree Traversal Strategies
+
+Level-order Traversal: This involves traversing the tree level by level. While commonly implemented using a queue, it's vital for applications like serialization/deserialization of trees.
+Morris Traversal: An advanced tree traversal technique that allows in-order traversal without using a stack or recursion, by linking predecessors to the current node temporarily.
+
+## Optimization Techniques
+
+Space Optimization
+
+Implicit Tree Structures: In certain scenarios like heaps implemented as arrays, the tree structure is implicit, saving space that pointers would otherwise occupy.
+
+Time Complexity Reduction
+
+Using augmented tree structures (like adding size or height metadata to nodes in AVL trees) can optimize certain operations, such as balancing, searching, or selecting a node by its rank.
+
+## Tree Problems in Interviews
+
+Common Interview Questions
+
+Dynamic Tree Problems: Questions might involve changing tree structures dynamically with operations like rotations, merges, or splits, particularly in self-balancing trees.
+Static Tree Problems: These typically involve queries and updates, such as finding the lowest common ancestor, tree diameter, or path sums.
+
+## Trees in System Design
+
+Database Indexing: B-Trees and Tries are extensively used in databases for indexing which allows quick retrieval of information.
+File Systems: The hierarchical structure of directories and files in most file systems is naturally represented using trees.
+
+## Practical Applications and Real-World Use Cases
+
+Network Routing Algorithms: Trees are used to manage and optimize routing paths in network algorithms.
+AI and Machine Learning: Decision trees are a type of model used for both classification and regression tasks in machine learning.
+
+## Common Mistakes and Pitfalls
+
+Recursive Tree Solutions: While recursive solutions are often elegant and straightforward for tree problems, they can lead to stack overflow if the tree is particularly deep. Iterative solutions or tail recursion should be considered in these cases.
+Ignoring Tree Balance: Implementing plain binary search trees without self-balancing can lead to poor performance (degrading to O(n) operations) if data insertion is skewed.
+
+## Interview Strategy and Discussion Points
+
+Algorithm Adaptation: Be prepared to adapt basic tree algorithms to handle modifications like deletions or balancing in binary search trees during interviews.
+Complexity Trade-offs: Discuss the trade-offs involved in using different types of trees for specific scenarios, such as why one might use a Red-Black Tree over an AVL Tree, or the benefits of using a Trie for prefix searching.
