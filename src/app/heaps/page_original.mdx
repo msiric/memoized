@@ -1,0 +1,455 @@
+export const metadata = {
+  title: 'Quickstart',
+  description:
+    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
+}
+
+# Comprehensive Guide to Heaps in JavaScript
+
+A heap is a specialized tree-based data structure that satisfies the heap property. This property distinguishes two types of heaps:
+
+Max Heap: In a max heap, for any given node C, if P is a parent node of C, then the key (value) of P is greater than or equal to the key of C. This ensures that the highest value is always at the root.
+Min Heap: Conversely, in a min heap, the key of P is less than or equal to the key of C, placing the smallest element at the root.
+
+**Real-World Analogy:**
+
+Imagine a heap as a priority queue, such as in scenarios where certain tasks need to be prioritized over others. In an emergency room, patients with more severe conditions are treated before those with minor issues. A max heap could represent this system, where higher priority corresponds to higher numeric values.
+
+## Understanding the Heap Structure
+
+Heaps are typically implemented as binary heaps due to their efficiency and simplicity.
+
+**Binary Heaps:**
+
+A binary heap is a complete binary tree, which can be efficiently implemented using an array. This structure ensures that the tree remains balanced, and all levels of the tree are fully filled except possibly for the last level, which is filled from left to right.
+
+**Heap Operations:**
+
+The primary operations of a heap involve maintaining the heap property while adding or removing elements:
+Insert (Add): Adding an element requires appending it at the end of the heap (the next open spot in the array) and then "bubbling up" this element to restore the heap property if it's violated.
+Extract (Remove): The root element (maximum in max heap or minimum in min heap) is removed. The last element in the heap is temporarily moved to the root, and then this element is "bubbled down" to restore the heap property.
+Peek: This operation simply returns the root element without removing it, providing quick access to the highest or lowest priority item.
+
+## Implementing a Heap in JavaScript
+
+Let's look at how to implement a min heap using an array representation in JavaScript.
+
+**Array Representation:**
+
+In an array-based heap, for any element at index i, its children are at indices 2*i + 1 (left child) and 2*i + 2 (right child), and its parent is at index Math.floor((i-1)/2).
+
+**Building a Min Heap Class:**
+
+Here's a simple implementation of a min heap:
+
+```js
+class MinHeap {
+  constructor() {
+    this.heap = [];
+  }
+
+  insert(value) {
+    this.heap.push(value);
+    this.bubbleUp();
+  }
+
+  bubbleUp() {
+    let index = this.heap.length - 1;
+    while (index > 0 && this.heap[Math.floor((index - 1) / 2)] > this.heap[index]) {
+      // Swap
+      [this.heap[Math.floor((index - 1) / 2)], this.heap[index]] = [this.heap[index], this.heap[Math.floor((index - 1) / 2)]];
+      index = Math.floor((index - 1) / 2);
+    }
+  }
+
+  extract() {
+    const min = this.heap[0];
+    this.heap[0] = this.heap.pop();
+    this.sinkDown(0);
+    return min;
+  }
+
+  sinkDown(index) {
+    let smallest = index;
+    let left = 2 * index + 1;
+    let right = 2 * index + 2;
+
+    if (left < this.heap.length && this.heap[left] < this.heap[smallest]) {
+      smallest = left;
+    }
+    if (right < this.heap.length && this.heap[right] < this.heap[smallest]) {
+      smallest = right;
+    }
+    if (smallest !== index) {
+      [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+      this.sinkDown(smallest);
+    }
+  }
+
+  peek() {
+    return this.heap[0];
+  }
+
+  isEmpty() {
+    return this.heap.length === 0;
+  }
+}
+```
+
+## Use Cases and Applications
+
+Heaps are incredibly versatile and find applications across a range of scenarios where managing priorities efficiently is crucial:
+
+**Priority Queues:**
+
+Heaps are commonly used to implement priority queues, which are crucial in many systems where elements need to be processed in order of priority rather than just the order they arrive.
+Operating Systems: Managing the scheduling of processes based on priority.
+Networking: In network routers, packets are prioritized for processing to manage network congestion.
+Dijkstra's Shortest Path Algorithm: Uses a priority queue to select the next vertex with the shortest tentative distance.
+
+**Heap Sort:**
+
+Heap sort is an efficient sorting algorithm that uses a binary heap to sort an array or list. The elements are first arranged into a max heap, allowing for repeated removal of the maximum element, which is swapped with the last item of the heap, then maintaining the heap property in the remaining heap.
+
+```js
+class MaxHeap {
+  constructor() {
+    this.heap = [];
+  }
+
+  // Assume methods insert, extract, and other necessary heap operations are defined here
+
+  sort() {
+    let result = [];
+    while (this.heap.length > 0) {
+      result.push(this.extract()); // Remove max element and add to result
+    }
+    return result;
+  }
+}
+
+let heap = new MaxHeap();
+[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5].forEach(el => heap.insert(el));
+console.log(heap.sort()); // Outputs the elements in sorted order
+```
+
+## Common Interview Questions
+
+Interviews often include problems that can be efficiently solved using heaps, testing both your understanding of the data structure and your ability to apply it to practical problems:
+
+**Kth Largest Element:**
+
+Use a min-heap to keep track of the k largest elements seen so far in an array. The root of the heap will always be the Kth largest element.
+
+```js
+function findKthLargest(nums, k) {
+  let minHeap = new MinHeap();
+  nums.forEach(num => {
+    minHeap.insert(num);
+    if (minHeap.heap.length > k) {
+      minHeap.extract(); // Keep only the k largest elements
+    }
+  });
+  return minHeap.peek(); // The kth largest element
+}
+```
+
+**Merge K Sorted Lists:**
+
+A common problem that involves merging multiple sorted lists into one sorted list can be efficiently handled using a min heap to always extract the smallest element from the lists.
+
+```js
+function mergeKLists(lists) {
+  let minHeap = new MinHeap();
+
+  // Insert the first element of each list into the heap
+  lists.forEach(list => {
+    if (list.length > 0) {
+      minHeap.insert({value: list[0], list});
+    }
+  });
+
+  let result = [];
+  while (!minHeap.isEmpty()) {
+    let {value, list} = minHeap.extract();
+    result.push(value);
+    list.shift(); // Remove the element from its list
+    if (list.length > 0) {
+      minHeap.insert({value: list[0], list});
+    }
+  }
+  return result;
+}
+```
+
+**Median Finder:**
+
+Design a data structure that finds the median of a data stream using two heaps; a max heap for the lower half, and a min heap for the upper half of the elements.
+
+```js
+class MedianFinder {
+  constructor() {
+    this.low = new MaxHeap(); // Max heap for the lower half
+    this.high = new MinHeap(); // Min heap for the upper half
+  }
+
+  addNum(num) {
+    if (this.low.isEmpty() || num < this.low.peek()) {
+      this.low.insert(num);
+    } else {
+      this.high.insert(num);
+    }
+
+    // Balance the heaps
+    if (this.low.heap.length > this.high.heap.length + 1) {
+      this.high.insert(this.low.extract());
+    } else if (this.high.heap.length > this.low.heap.length) {
+      this.low.insert(this.high.extract());
+    }
+  }
+
+  findMedian() {
+    if (this.low.heap.length > this.high.heap.length) {
+      return this.low.peek();
+    } else if (this.low.heap.length < this.high.heap.length) {
+      return this.high.peek();
+    } else {
+      return (this.low.peek() + this.high.peek()) / 2;
+    }
+  }
+}
+```
+
+## Advanced Concepts
+
+**Balanced Binary Search Trees vs. Heaps:**
+
+While both structures can support priority queue operations, heaps are typically faster for this purpose, offering O(log n) time complexity for insertions and deletions, whereas balanced BSTs might offer additional operations like search, which is also O(log n).
+
+**Fibonacci Heap:**
+
+Fibonacci heaps are an advanced heap type that offers better amortized running times for operations like insert, which is O(1), and decrease-key, which is crucial for algorithms like Dijkstra's and network optimization.
+
+**Key Points Recap:**
+
+Introduction to Heaps:
+
+Heaps are specialized tree-based data structures that satisfy the heap property.
+Max heaps prioritize the largest element at the top, while min heaps prioritize the smallest.
+
+Understanding Heap Structure:
+
+Binary heaps are efficient and implemented as complete binary trees.
+Key operations include insert (add), extract (remove), and peek.
+
+Implementing Heaps in JavaScript:
+
+Binary heaps can be represented using arrays for simplicity and efficiency.
+Demonstrated how to build a min heap class in JavaScript.
+
+Use Cases and Applications:
+
+Heaps serve as efficient priority queues.
+They are crucial for algorithms like Heap Sort and Dijkstra’s Shortest Path.
+
+Common Interview Questions:
+
+Problems like finding the Kth largest element, merging K sorted lists, and finding the median of a data stream effectively demonstrate the utility of heaps.
+
+Advanced Concepts:
+
+Compared heaps with balanced binary search trees.
+Introduced more complex heap structures like Fibonacci heaps for advanced operations.
+
+Exercises and Challenges:
+
+Hands-on Coding: Implement different types of heaps, such as max heaps, min heaps, and Fibonacci heaps. Use these implementations to solve practical problems like scheduling tasks, sorting data, and managing priorities in simulations.
+Online Challenges: Platforms like LeetCode, HackerRank, and Codewars feature problems that require understanding and applying heap operations. Regular practice on these platforms can help solidify your skills and prepare you for technical interviews.
+Review Sessions and Interactive Learning:
+Q&A Sessions: Regular interactive sessions to discuss heap operations, address doubts, and explore complex scenarios where heaps are used.
+Live Coding Demonstrations: Using environments like JSFiddle or CodePen, demonstrate heap operations and tackle common problems, which helps in visualizing the process and understanding the dynamic nature of heaps.
+
+Resources for Further Learning:
+
+Reading Materials:
+
+"Introduction to Algorithms" by Cormen et al. offers an extensive look at heaps and their algorithms.
+"Algorithms" by Robert Sedgewick and Kevin Wayne provides practical insights into implementing and using heaps.
+
+Video Tutorials:
+
+YouTube channels such as MIT OpenCourseWare or Khan Academy offer tutorials on heaps, explaining both the theoretical and practical aspects.
+Online courses from platforms like Coursera or edX that cover data structures and algorithms in depth.
+
+Teaching Tools:
+
+Visual Aids: Diagrams and animations that illustrate the heap structure and operations can enhance understanding, especially for visual learners.
+Interactive Development Environments: Engage with tools that allow for coding and immediate feedback to practice implementing heaps in real-time scenarios.
+
+## Understanding Heaps
+
+Basic Concepts
+
+Heap Property: This is the key feature that distinguishes heaps from other tree-based structures. In a max heap, every parent node has a value greater than or equal to its children. In a min heap, every parent node has a value less than or equal to its children.
+Complete Binary Tree: Heaps are always complete binary trees. This means they are as compact as possible. All the levels of the tree, except possibly the last one (deepest) are fully filled, and, if the last level of the tree is not complete, the nodes of that level are filled from left to right.
+
+Heap Representation
+
+Array Representation: Because of the complete binary tree property, heaps are typically represented as arrays. The root element will be at index 0. For any given node at index i:
+Its children are at indices 2i+1 (left child) and 2i+2 (right child).
+
+Its parent is at index ⌊(i−1)/2⌋.
+
+## Common Operations
+
+Insertion: Adding a new element to a heap involves appending the element at the end of the array and then "bubbling up" this element to maintain the heap property. This operation is O(logn) due to the height of the tree.
+Deletion of the Root: Removing the root (the max or min, depending on the heap type) involves removing the root element, replacing it with the last element in the array, and then "bubbling down" this element to maintain the heap property. This operation is also O(logn).
+
+Find Max/Min: This operation is O(1) as the max or min element is always at the root of the heap.
+
+Implementation Example in JavaScript
+
+Here’s a simple implementation of a Min Heap:
+
+```js
+class MinHeap {
+    constructor() {
+        this.heap = [];
+    }
+
+    insert(value) {
+        this.heap.push(value);
+        this.bubbleUp();
+    }
+
+    bubbleUp() {
+        let index = this.heap.length - 1;
+        const element = this.heap[index];
+
+        while (index > 0) {
+            let parentIndex = Math.floor((index - 1) / 2);
+            let parent = this.heap[parentIndex];
+
+            if (element >= parent) break;
+            this.heap[index] = parent;
+            this.heap[parentIndex] = element;
+            index = parentIndex;
+        }
+    }
+
+    extractMin() {
+        const min = this.heap[0];
+        const end = this.heap.pop();
+        if (this.heap.length > 0) {
+            this.heap[0] = end;
+            this.sinkDown();
+        }
+        return min;
+    }
+
+    sinkDown() {
+        let index = 0;
+        const length = this.heap.length;
+        const element = this.heap[0];
+
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild < element) {
+                    swap = leftChildIndex;
+                }
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if (
+                    (swap === null && rightChild < element) || 
+                    (swap !== null && rightChild < leftChild)
+                ) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            this.heap[index] = this.heap[swap];
+            this.heap[swap] = element;
+            index = swap;
+        }
+    }
+}
+```
+
+## Advanced Uses and Techniques
+
+Heapify: An efficient algorithm to convert an unordered array into a heap. This process runs in O(n) time, which is more efficient than inserting each element individually.
+Heapsort: A sorting algorithm that uses a heap to sort an array. The idea is to first turn the array into a max heap (so the largest item is at the front), then repeatedly remove the root (max) and restore the heap, decrementing the size of the heap each time.
+Priority Queues: Heaps are often used to implement priority queues because they allow quick access to the highest-priority element.
+
+## Practical Interview Tips
+
+Understanding Heap Operations: Be prepared to implement basic heap operations from scratch, understand the underlying algorithms, and analyze their time complexities.
+Discuss Applications: Discuss practical applications of heaps, such as event-driven simulation, scheduling algorithms (e.g., shortest job first), and bandwidth management with token bucket filtering.
+Problem Solving: Many algorithm problems, especially those involving dynamic data access where the priority can change (like in Dijkstra's algorithm), can be efficiently solved using heaps.
+
+## Advanced Heap Operations and Variants
+
+K-th Largest Element
+
+Heaps are particularly useful for problems where you need to maintain a running "top k" list, such as finding the k-th largest element in a stream of data. Using a min-heap of size k allows for efficient processing of this type of query.
+
+Merge K Sorted Arrays
+
+Heaps can efficiently merge multiple sorted arrays into one sorted array, which is useful in multi-way merge sorts or merging data from multiple sources. By maintaining a min-heap with one element from each array and repeatedly extracting the smallest element, you can perform the merge in O(nlogk) time where n is the total number of elements and k is the number of arrays.
+
+Soft Heaps
+
+Soft heaps are a probabilistic variant of heaps that allow for some corruption (errors) in the heap property but provide better amortized time complexity for certain operations. They are useful in scenarios where approximate answers are acceptable and efficiency is crucial.
+
+## Memory and Performance Optimization
+
+Lazy Deletion
+
+Instead of immediately deleting an element from a heap, it can be marked as deleted and actually removed during the next restructuring of the heap. This lazy approach can sometimes improve performance by reducing immediate overhead.
+
+Binomial Heaps and Fibonacci Heaps
+
+These are more complex heap structures that support quicker union operations, and in the case of Fibonacci heaps, quicker decrease-key operations, which are critical in advanced graph algorithms like Dijkstra's and Prim's.
+
+## Practical Applications and Real-World Use Cases
+
+Real-Time Data Processing
+
+Heaps are essential in real-time data processing, where you need to constantly provide maximum, minimum, or median values from a real-time data feed.
+
+Resource Management
+
+In operating systems, heaps can manage resources efficiently by prioritizing requests, jobs, or processes based on various metrics like priority or job size.
+
+## Common Mistakes and Pitfalls
+
+Heap Corruption
+
+Accidentally corrupting the heap structure, for instance by improperly maintaining the heap property during insertions or deletions, can lead to incorrect results and difficult-to-track bugs.
+
+Overuse for Simple Tasks
+
+While heaps provide excellent performance for priority-based tasks, using them for simple tasks where a basic array could suffice might lead to unnecessary complexity.
+
+## Interview Strategy and Discussion Points
+
+Algorithm Choice
+
+Discuss why a heap is chosen over other data structures like balanced binary search trees or hash tables in certain scenarios, particularly emphasizing its performance in priority queue implementation and bulk data operations.
+
+Space-Time Trade-offs
+
+Analyze and discuss the trade-offs involved in using heaps, particularly in terms of memory usage versus execution time, and when a heap might be less suitable compared to other data structures.
+
+Complex Heap Implementations
+
+Be prepared to discuss and possibly implement more complex heap operations, such as building a heap from an array (heapify), heap sort, or applying a heap in a non-traditional way, like in graph algorithms.

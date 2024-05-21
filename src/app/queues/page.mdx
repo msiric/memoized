@@ -1,0 +1,478 @@
+# **JavaScript Queues**
+
+Queues are a fundamental data structure used to store collections of elements in a First-In-First-Out (FIFO) manner. This means the first element added to the queue is the first one to be removed.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A queue is a linear data structure that follows the First-In-First-Out (FIFO) principle. Elements are added to the end of the queue and removed from the front.
+
+**Common Use Cases:**
+- Managing tasks in a sequential order (e.g., printer queue, task scheduling).
+- Implementing breadth-first search (BFS) in graph algorithms.
+- Handling requests in a server (e.g., request queue).
+- Implementing real-time systems (e.g., message queue).
+
+## **When to Use**
+- When you need a FIFO data structure.
+- When processing elements in the order they were added is essential.
+- When implementing algorithms that require level-order traversal or BFS.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Enqueue (add): O(1)
+- Dequeue (remove): O(1)
+- Peek: O(1)
+- Search: O(n)
+
+**Space Complexity:**
+- O(n), where n is the number of elements in the queue.
+
+## **Queue Operations and Methods**
+
+### **Creating a Queue**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    // Methods to be defined...
+}
+```
+
+### **Enqueuing Elements**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+}
+```
+
+### **Dequeuing Elements**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
+}
+```
+
+### **Peeking the Front Element**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
+
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+}
+```
+
+### **Checking if the Queue is Empty**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
+
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+
+    isEmpty() {
+        return this.items.length === 0;
+    }
+}
+```
+
+### **Getting the Size of the Queue**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
+
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+
+    isEmpty() {
+        return this.items.length === 0;
+    }
+
+    size() {
+        return this.items.length;
+    }
+}
+```
+
+### **Clearing the Queue**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
+
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+
+    isEmpty() {
+        return this.items.length === 0;
+    }
+
+    size() {
+        return this.items.length;
+    }
+
+    clear() {
+        this.items = [];
+    }
+}
+```
+
+## **Practical Tips and Tricks**
+
+- **Use Arrays for Simple Queues:**
+  In JavaScript, arrays can be used to implement simple queues because they provide built-in methods like `push`, `shift`, and `length`.
+  **Example:**
+  ```javascript
+  let queue = [];
+  queue.push(1);
+  queue.push(2);
+  console.log(queue.shift());  // Output: 1
+  console.log(queue);  // Output: [2]
+  ```
+
+- **Avoid Underflow Errors:**
+  Always check if the queue is empty before performing a `dequeue` operation to avoid underflow errors.
+  **Example:**
+  ```javascript
+  if (!queue.isEmpty()) {
+      queue.dequeue();
+  }
+  ```
+
+- **Use Queue for BFS:**
+  Implement Breadth-First Search (BFS) using a queue to manage the nodes to be visited.
+  **Example:**
+  ```javascript
+  function bfs(graph, start) {
+      let queue = [start];
+      let visited = new Set();
+
+      while (queue.length > 0) {
+          let node = queue.shift();
+          if (!visited.has(node)) {
+              visited.add(node);
+              console.log(node);
+              for (let neighbor of graph[node]) {
+                  queue.push(neighbor);
+              }
+          }
+      }
+  }
+  ```
+
+## **Common Gotchas**
+
+- **Queue Underflow:**
+  Always check if the queue is empty before performing a dequeue operation to avoid underflow errors.
+  **Example:**
+  ```javascript
+  if (!queue.isEmpty()) {
+      queue.dequeue();
+  } else {
+      console.log("Queue is empty");
+  }
+  ```
+
+- **Non-Primitive Data Types:**
+  When storing non-primitive data types in a queue, be mindful of references and mutations.
+  **Example:**
+  ```javascript
+  let queue = [];
+  let obj = {a: 1};
+  queue.push(obj);
+  obj.a = 2;
+  console.log(queue.front());  // Output: {a: 2}
+  ```
+
+## **Advanced Topics**
+
+### **Circular Queue**
+
+A circular queue, also known as a ring buffer, efficiently uses the space by wrapping around the end to the beginning.
+
+**Example:**
+```javascript
+class CircularQueue {
+    constructor(capacity) {
+        this.items = new Array(capacity);
+        this.capacity = capacity;
+        this.front = 0;
+        this.rear = 0;
+        this.size = 0;
+    }
+
+    enqueue(element) {
+        if (this.size === this.capacity) return "Overflow";
+        this.items[this.rear] = element;
+        this.rear = (this.rear + 1) % this.capacity;
+        this.size++;
+    }
+
+    dequeue() {
+        if (this.size === 0) return "Underflow";
+        let element = this.items[this.front];
+        this.front = (this.front + 1) % this.capacity;
+        this.size--;
+        return element;
+    }
+
+    peek() {
+        if (this.size === 0) return "No elements in Queue";
+        return this.items[this.front];
+    }
+
+    isEmpty() {
+        return this.size === 0;
+    }
+
+    isFull() {
+        return this.size === this.capacity;
+    }
+
+    getSize() {
+        return this.size;
+    }
+
+    clear() {
+        this.items = new Array(this.capacity);
+        this.front = 0;
+        this.rear = 0;
+        this.size = 0;
+    }
+}
+```
+
+### **Priority Queue**
+
+A priority queue is a special type of queue where elements are removed based on priority rather than insertion order.
+
+**Example:**
+```javascript
+class PriorityQueue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element, priority) {
+        let newItem = {element, priority};
+        let added = false;
+        for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i].priority > newItem.priority) {
+                this.items.splice(i, 1, newItem);
+                added = true;
+                break;
+            }
+        }
+        if (!added) {
+            this.items.push(newItem);
+        }
+    }
+
+    dequeue() {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.shift().element;
+    }
+
+    peek() {
+        if (this.items.length === 0) return "No elements in Queue";
+        return this.items[0].element;
+    }
+
+    isEmpty() {
+        return this.items.length === 0;
+    }
+
+    size() {
+        return this.items.length;
+    }
+
+    clear() {
+        this.items = [];
+    }
+}
+```
+
+## **Queue Algorithms**
+
+### **Breadth-First Search (BFS)**
+
+**Example:**
+```javascript
+function bfs(graph, start) {
+    let queue = [start];
+    let visited = new Set();
+
+    while (queue.length > 0) {
+        let node = queue.shift();
+        if (!visited.has(node)) {
+            visited.add(node);
+            console.log(node);
+            for (let neighbor of graph[node]) {
+                queue.push(neighbor);
+            }
+        }
+    }
+}
+
+let graph = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E']
+};
+
+bfs(graph, 'A');
+```
+
+### **Implementing a Cache Using a Queue**
+
+**Example:**
+```javascript
+class LRUCache {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.cache = new Map();
+        this.queue = [];
+    }
+
+    get(key) {
+        if (!this.cache.has(key)) return -1;
+        let value = this.cache.get(key);
+        this.queue = this.queue.filter(k => k !== key);
+        this.queue.push(key);
+        return value;
+    }
+
+    put(key, value) {
+        if (this.cache.has(key)) {
+            this.queue = this.queue.filter(k => k !== key);
+        } else if (this.queue.length === this.capacity) {
+            let oldestKey = this.queue.shift();
+            this.cache.delete(oldestKey);
+        }
+        this.cache.set(key, value);
+        this.queue.push(key);
+    }
+}
+
+let cache = new LRUCache(2);
+cache.put(1, 1);
+cache.put(2, 2);
+console.log(cache.get(1));  // Output: 1
+cache.put(3, 3);
+console.log(cache.get(2));  // Output: -1
+cache.put(4, 4);
+console.log(cache.get(1));  // Output: -1
+console.log(cache.get(3));  // Output: 3
+console.log(cache.get(4));  // Output: 4
+```
+
+## **Interview Tips and Tricks**
+
+- **Understand Basic Operations:**
+  Be comfortable with implementing enqueue, dequeue, peek, isEmpty, size, and clear operations.
+- **Practice Common Algorithms:**
+  Familiarize yourself with algorithms like BFS, implementing caches, and other queue-based problems.
+- **Consider Edge Cases:**
+  Always consider edge cases like empty queues, single element queues, and queue underflow.
+- **Optimize Space and Time:**
+  Understand how to implement queues efficiently using arrays and linked lists, and the trade-offs involved.
+
+## **Common Mistakes**
+
+- **Queue Underflow and Overflow:**
+  Be cautious of queue underflow when dequeuing from an empty queue and overflow in fixed-size queues.
+- **Incorrect Pointer Updates:**
+  When implementing queues with linked lists, ensure pointers are correctly updated during enqueue and dequeue operations.
+- **Ignoring Edge Cases:**
+  Consider all edge cases, such as operations on an empty queue or a queue with a single element.
+
+By mastering queues and understanding their intricacies, you will be well-equipped to handle a variety of interview questions and real-world problems involving FIFO data structures. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.
