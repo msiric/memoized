@@ -1,0 +1,229 @@
+# **Tree DFS (Depth-First Search)**
+
+The Depth-First Search (DFS) technique is a fundamental algorithm for traversing or searching tree and graph data structures. DFS explores as far down a branch as possible before backtracking and exploring other branches. There are three main types of DFS traversal for trees: pre-order, in-order, and post-order.
+
+## **Concept and Use Cases**
+
+**Definition:** 
+DFS is an algorithm for traversing or searching tree or graph data structures. It starts at the root node and explores as far down a branch as possible before backtracking. In trees, DFS can be implemented using recursion or a stack for an iterative approach.
+
+**Common Use Cases:**
+- Traversing or searching trees.
+- Evaluating expressions in expression trees.
+- Solving puzzles and games (e.g., maze solving, pathfinding).
+- Checking for cycles in graphs.
+
+## **When to Use**
+- When you need to traverse or explore nodes deeply before backtracking.
+- When solving problems that involve processing nodes in a specific order (pre-order, in-order, post-order).
+- When implementing algorithms that require depth-first traversal of a tree or graph.
+
+## **Time and Space Complexity**
+
+**Time Complexity:** 
+- O(n), where n is the number of nodes in the tree. Each node is visited once.
+
+**Space Complexity:**
+- O(h), where h is the height of the tree. This is the space required for the recursion stack or an explicit stack for the iterative approach. In the worst case, the height of the tree can be O(n) (e.g., in a skewed tree).
+
+## **Types of DFS Traversal**
+
+1. **Pre-Order Traversal:**
+   - Visit the root node.
+   - Traverse the left subtree.
+   - Traverse the right subtree.
+
+2. **In-Order Traversal:**
+   - Traverse the left subtree.
+   - Visit the root node.
+   - Traverse the right subtree.
+
+3. **Post-Order Traversal:**
+   - Traverse the left subtree.
+   - Traverse the right subtree.
+   - Visit the root node.
+
+## **Pre-Order Traversal**
+
+**Problem:** Given the root of a binary tree, return the pre-order traversal of its nodes' values.
+
+**Step-by-Step Solution:**
+1. Use a stack to keep track of nodes.
+2. Initialize the stack with the root node.
+3. While the stack is not empty, process each node and add its right and left children to the stack.
+4. Collect the values of nodes in pre-order.
+
+**Code Example:**
+```javascript
+class TreeNode {
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+function preOrderTraversal(root) {
+    if (root === null) return [];
+
+    const result = [];
+    const stack = [root];
+
+    while (stack.length > 0) {
+        const currentNode = stack.pop();
+        result.push(currentNode.value);
+
+        // Push right child first so that left child is processed first
+        if (currentNode.right !== null) {
+            stack.push(currentNode.right);
+        }
+        if (currentNode.left !== null) {
+            stack.push(currentNode.left);
+        }
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+
+console.log(preOrderTraversal(root));  // Output: [1, 2, 4, 5, 3]
+```
+
+**Tips and Tricks:**
+- Use a stack to keep track of nodes for the iterative approach.
+- Push the right child first so that the left child is processed first.
+- Collect the values of nodes in pre-order to get the correct traversal order.
+
+**Frequent Gotchas:**
+- Forgetting to handle edge cases, such as an empty tree.
+- Not pushing nodes onto the stack in the correct order, leading to incorrect traversal.
+- Mixing up the order of processing nodes, resulting in incorrect results.
+
+## **In-Order Traversal**
+
+**Problem:** Given the root of a binary tree, return the in-order traversal of its nodes' values.
+
+**Step-by-Step Solution:**
+1. Use a stack to keep track of nodes and a pointer to the current node.
+2. Traverse the left subtree, pushing nodes onto the stack.
+3. Process the root node.
+4. Traverse the right subtree.
+
+**Code Example:**
+```javascript
+function inOrderTraversal(root) {
+    const result = [];
+    const stack = [];
+    let current = root;
+
+    while (current !== null || stack.length > 0) {
+        // Reach the leftmost node of the current node
+        while (current !== null) {
+            stack.push(current);
+            current = current.left;
+        }
+
+        // Current must be null at this point
+        current = stack.pop();
+        result.push(current.value);
+
+        // We have visited the node and its left subtree. Now, it's right subtree's turn
+        current = current.right;
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+
+console.log(inOrderTraversal(root));  // Output: [4, 2, 5, 1, 3]
+```
+
+**Tips and Tricks:**
+- Use a stack to keep track of nodes for the iterative approach.
+- Traverse the left subtree first, then process the root node, and finally traverse the right subtree.
+- Collect the values of nodes in in-order to get the correct traversal order.
+
+**Frequent Gotchas:**
+- Forgetting to handle edge cases, such as an empty tree.
+- Not pushing nodes onto the stack in the correct order, leading to incorrect traversal.
+- Mixing up the order of processing nodes, resulting in incorrect results.
+
+## **Post-Order Traversal**
+
+**Problem:** Given the root of a binary tree, return the post-order traversal of its nodes' values.
+
+**Step-by-Step Solution:**
+1. Use a stack to keep track of nodes and a pointer to the last visited node.
+2. Traverse the left subtree, pushing nodes onto the stack.
+3. Traverse the right subtree.
+4. Process the root node after traversing both subtrees.
+
+**Code Example:**
+```javascript
+function postOrderTraversal(root) {
+    if (root === null) return [];
+
+    const result = [];
+    const stack = [];
+    let lastVisited = null;
+
+    while (root !== null || stack.length > 0) {
+        // Traverse the left subtree
+        while (root !== null) {
+            stack.push(root);
+            root = root.left;
+        }
+
+        // Peek the node from the stack
+        root = stack[stack.length - 1];
+
+        // If the right subtree is not traversed yet, traverse it
+        if (root.right !== null && lastVisited !== root.right) {
+            root = root.right;
+        } else {
+            // Process the root node
+            root = stack.pop();
+            result.push(root.value);
+            lastVisited = root;
+            root = null;  // Reset the root to null to backtrack
+        }
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+
+console.log(postOrderTraversal(root));  // Output: [4, 5, 2, 3, 1]
+```
+
+**Tips and Tricks:**
+- Use a stack to keep track of nodes for the iterative approach.
+- Use a pointer to keep track of the last visited node to ensure correct traversal.
+- Collect the values of nodes in post-order to get the correct traversal order.
+
+**Frequent Gotchas:**
+- Forgetting to handle edge cases, such as an empty tree.
+- Not pushing nodes onto the stack in the correct order, leading to incorrect traversal.
+- Mixing up the order of processing nodes, resulting in incorrect results.
+
+By mastering the Tree DFS (Depth-First Search) technique, you can efficiently solve a variety of problems involving pre-order, in-order, and post-order traversal of trees. This technique is essential for optimizing time complexity and handling tree-related data structures effectively in both technical interviews and real-world applications.
+
+ 

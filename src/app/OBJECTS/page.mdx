@@ -1,465 +1,417 @@
-export const metadata = {
-  title: 'Quickstart',
-  description:
-    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
-}
+# **JavaScript Objects**
 
-# Comprehensive Guide to JavaScript Objects
+Objects in JavaScript are a fundamental data type used to store collections of key-value pairs. They are a powerful and flexible data structure that allows for complex data management and manipulation.
 
-JavaScript objects are essential structures used to store collections of data and more complex entities. In essence, objects in JavaScript can be viewed as collections of properties.
+## **Concept and Use Cases**
 
-**Defining Objects:**
+**Definition:**
+A JavaScript object is a collection of key-value pairs, where each key (property name) is a string (or Symbol), and each value can be any data type, including another object or function.
 
-An object is a collection of properties, where each property is a key-value pair. The key (or property name) is usually a string or a symbol, and the value can be any data type, including numbers, strings, or even functions.
+**Common Use Cases:**
+- Storing and organizing related data.
+- Representing entities in applications (e.g., user profiles, product information).
+- Implementing data structures like hash maps.
+- Configuration objects for settings and options.
 
-**Comparison with Arrays:**
+## **When to Use**
+- When you need to store and manage collections of related data.
+- When you require dynamic properties that can be added or removed.
+- When you need to represent real-world entities with attributes and behaviors.
 
-Unlike arrays which are indexed collections, objects hold named properties. This difference is crucial:
-Arrays: Indexed by numbers, which makes them ideal for ordered collections where items are typically accessed sequentially.
-Objects: Properties are accessed via keys, making them ideal for representing more structured data where each piece of data can be uniquely identified by a string key or symbol.
+## **Time and Space Complexity**
 
-## Creating Objects
+**Time Complexity:**
+- Access by key: O(1)
+- Insertion/Deletion by key: O(1)
+- Iteration: O(n)
 
-Objects can be created in JavaScript using different syntaxes, each serving various purposes and use cases.
+**Space Complexity:**
+- O(n), where n is the number of properties in the object.
 
-**Object Literal Notation:**
+## **Object Operations and Methods**
 
-This is the most straightforward and widely used method to create objects due to its clarity and conciseness.
+### **Creating Objects**
 
-```js
-let car = {
-  make: 'Toyota',
-  model: 'Corolla',
-  year: 2022
-};
-```
-
-**Using the new Object() Syntax:**
-
-While not as common for creating simple objects, the new Object() syntax can be useful in certain scenarios, though object literal notation is preferred for readability and simplicity.
-
-```js
-let car = new Object();
-car.make = 'Toyota';
-car.model = 'Corolla';
-car.year = 2022;
-```
-
-## Accessing Properties
-
-Once an object is created, accessing its properties can be done in two main ways, which are useful in different contexts.
-
-**Dot Notation:**
-
-The most common way to access properties in an object. It’s concise and easy to read, but it requires that the property name is a valid identifier.
-
-```js
-console.log(car.make); // Outputs: 'Toyota'
-```
-
-**Bracket Notation:**
-
-This notation is powerful when accessing properties with dynamic names or names that aren't valid identifiers, such as spaces or special characters.
-
-```js
-console.log(car['model']); // Outputs: 'Corolla'
-// Useful when property names are variables
-let property = 'year';
-console.log(car[property]); // Outputs: 2022
-```
-
-## Adding and Deleting Properties
-
-JavaScript objects are dynamic, which means you can add or remove properties even after an object has been instantiated.
-
-**Adding Properties:**
-
-You can add new properties to an object at any time using either dot notation or bracket notation, depending on the situation.
-
-```js
-let car = { make: 'Toyota', model: 'Corolla', year: 2022 };
-car.color = 'blue'; // Adding a new property
-car['owner'] = 'John Doe'; // Adding another property using bracket notation
-console.log(car); // Outputs: { make: 'Toyota', model: 'Corolla', year: 2022, color: 'blue', owner: 'John Doe' }
-```
-
-**Deleting Properties:**
-
-The delete operator removes a property from an object. It's important to use this with caution to avoid unintentionally removing properties.
-
-```js
-delete car.year; // Removes the 'year' property
-console.log(car); // Outputs: { make: 'Toyota', model: 'Corolla', color: 'blue', owner: 'John Doe' }
-```
-
-## Methods
-
-Methods are functions that are stored as object properties, and they can use the object context to operate on the data that the object holds.
-
-**Defining Methods:**
-
-Here's how you can define a method within an object using function expressions.
-
-```js
-car.displayInfo = function() {
-  return `${this.make} ${this.model}, owned by ${this.owner}`;
-};
-```
-
-**Calling Methods:**
-
-Methods can be invoked similar to how you access properties but with parentheses to indicate a function call.
-
-```js
-console.log(car.displayInfo()); // Outputs: 'Toyota Corolla, owned by John Doe'
-```
-
-## The this Keyword in Methods
-
-The this keyword is pivotal within methods because it refers to the object from which the method is called, making it extremely useful for accessing other properties of the object.
-
-**Understanding this:**
-
-In the context of an object's method, this refers to the object itself. However, its value can change depending on the context in which a function is called, especially with callback functions or when passing methods as arguments.
-
-```js
-car.describe = function() {
-  return `${this.make} from ${this.year}`;
-};
-console.log(car.describe()); // Correctly references `car` object properties
-
-let describeFunc = car.describe;
-console.log(describeFunc()); // Often incorrect; `this` might not refer to `car` if the function loses its context
-```
-
-**Binding this:**
-
-If you need to ensure that this remains bound to the original object, you can use the bind method.
-
-```js
-let boundDescribe = describeFunc.bind(car);
-console.log(boundDescribe()); // Now correctly outputs 'Toyota from undefined' as year is deleted
-```
-
-## Object Methods from Object Global
-
-The global Object class in JavaScript provides several utility methods that can be incredibly useful for object manipulation and inspection. These methods can help you interact with objects more efficiently and understand their structure better.
-
-**Key Methods:**
-
-Object.keys(obj): Returns an array of a given object's own property names.
-
-```js
-console.log(Object.keys(car)); // ["make", "model", "color", "owner", "displayInfo", "describe"]
-Object.values(obj): Returns an array of a given object's own enumerable property values.
-```
-
-```js
-console.log(Object.values(car)); // ["Toyota", "Corolla", "blue", "John Doe", f, f]
-Object.entries(obj): Returns an array of a given object's own enumerable string-keyed property [key, value] pairs.
-```
-
-```js
-console.log(Object.entries(car)); // [["make", "Toyota"], ["model", "Corolla"], ...]
-Object.assign(target, ...sources): Copies all enumerable own properties from one or more source objects to a target object.
-```
-
-```js
-let newCar = Object.assign({}, car);
-console.log(newCar);
-Object.freeze(obj): Freezes an object. A frozen object can no longer be changed.
-```
-
-```js
-Object.freeze(car);
-car.newProperty = 'new'; // Will not have any effect
-console.log(car);
-Object.seal(obj): Prevents new properties from being added to an object and marks all existing properties as non-configurable.
-```
-
-```js
-Object.seal(car);
-delete car.owner; // Will not work
-console.log(car);
-```
-
-## Constructors and Prototypes
-
-JavaScript uses constructor functions and prototypes to provide object-oriented functionality in a way that can be more familiar to developers coming from class-based languages.
-
-**Using Constructors:**
-
-Constructor functions are used to create multiple instances of similar objects.
-
-```js
-function Car(make, model, year) {
-  this.make = make;
-  this.model = model;
-  this.year = year;
-}
-let myCar = new Car('Honda', 'Civic', 2023);
-console.log(myCar);
-```
-
-**Prototype Chain:**
-
-Every JavaScript object has a prototype. An object's prototype is an object itself from which the object inherits methods and properties.
-
-```js
-Car.prototype.describe = function() {
-  return `${this.make} ${this.model}, ${this.year}`;
-};
-console.log(myCar.describe()); // "Honda Civic, 2023"
-```
-
-## ES6+ Enhancements
-
-Recent versions of JavaScript have introduced significant improvements to how objects can be handled, making code more intuitive and easier to manage.
-
-**Class Syntax:**
-
-ES6 introduced the class syntax which is syntactic sugar over JavaScript's existing prototype-based inheritance and makes it easier to write and manage constructors.
-
-```js
-class Vehicle {
-  constructor(make, model) {
-    this.make = make;
-    this.model = model;
-  }
-
-  display() {
-    return `${this.make} ${this.model}`;
-  }
-}
-let myVehicle = new Vehicle('Ford', 'Mustang');
-console.log(myVehicle.display()); // "Ford Mustang"
-```
-
-**Enhanced Object Literals:**
-
-Object literals were enhanced to easily handle dynamic properties and concise method definitions.
-
-```js
-let brand = 'Ford';
-let car = {
-  [brand]: 'Mustang',
-  year: 2025,
-  displayInfo() {
-    return `${this.Ford} ${this.year}`;
-  }
-};
-console.log(car.displayInfo()); // "Mustang 2025"
-```
-
-## Practical Examples
-
-JavaScript objects are incredibly versatile and can be used in a myriad of practical applications to organize and process data efficiently.
-
-**Grouping Related Data and Functions:**
-
-Objects are ideal for encapsulating attributes and behaviors of something in a structured way. For example, representing a user in a system:
-
-```js
-let user = {
-  name: "John Doe",
-  age: 30,
-  login() {
-    console.log(`${this.name} has logged in.`);
-  }
-};
-user.login();  // Outputs: "John Doe has logged in."
-```
-
-**Using Objects as Dictionaries:**
-
-Objects can serve as dictionaries with dynamic keys for storing data in a key-value pair format, which is useful for lookups and data management.
-
-```js
-let settings = {
-  theme: "dark",
-  notifications: true,
-  updateSetting(key, value) {
-    this[key] = value;
-  }
-};
-settings.updateSetting('theme', 'light');
-console.log(settings.theme); // Outputs: "light"
-```
-
-## Common Mistakes and Misconceptions
-
-Understanding common pitfalls when working with objects can help prevent bugs and improve code reliability.
-
-**Mutable Object References vs. Primitive Value Copies:**
-
-A common error is not understanding that objects are passed by reference, not by value. This can lead to unintended side effects when objects are modified.
-
-```js
-let original = { value: 100 };
-let copy = original;
-copy.value = 200;
-console.log(original.value); // Outputs: 200, because 'copy' is a reference to 'original'
-```
-
-**Misunderstanding this Context:**
-
-The context of this can be confusing, especially in callbacks and events where this does not point to the object as expected.
-
-```js
+**Example:**
+```javascript
+let emptyObject = {};
 let person = {
-  name: 'Jane',
-  greet: function() {
-    setTimeout(function() {
-      console.log(`Hello, ${this.name}`);
-    }, 1000);
-  }
+    name: 'John',
+    age: 30,
+    isEmployed: true,
+    hobbies: ['reading', 'travelling'],
+    address: {
+        street: '123 Main St',
+        city: 'Anytown',
+        zip: '12345'
+    }
 };
-person.greet(); // Incorrectly outputs: "Hello, " because `this` in setTimeout doesn't point to `person`
 ```
 
-## Advanced Topics
+### **Accessing Properties**
 
-To further enhance your object manipulation skills, consider these advanced topics:
+**Example:**
+```javascript
+let person = {
+    name: 'John',
+    age: 30,
+    isEmployed: true
+};
 
-**Destructuring Objects:**
-
-Destructuring provides a way to extract multiple properties from an object in a single statement, making it easier to handle objects.
-
-```js
-let { name, age } = user;
-console.log(name); // Outputs: "John Doe"
-console.log(age);  // Outputs: 30
+console.log(person.name);  // Output: 'John'
+console.log(person['age']);  // Output: 30
 ```
 
-**Using Map and Set:**
+### **Modifying Properties**
 
-For collections of items where keys can be of any type and values need to be unique, the Map and Set objects offer more flexibility than regular objects.
+**Example:**
+```javascript
+let person = {
+    name: 'John',
+    age: 30
+};
 
-```js
-let map = new Map();
-map.set(user, { role: 'Admin' });
-console.log(map.get(user)); // Outputs: { role: 'Admin' }
-
-let set = new Set();
-set.add("apple");
-set.add("banana");
-console.log(set.has("apple")); // true
+person.age = 31;
+person['isEmployed'] = true;
+console.log(person);  // Output: {name: 'John', age: 31, isEmployed: true}
 ```
 
-## Understanding Objects in JavaScript
+### **Adding and Removing Properties**
 
-Property Access
+**Example:**
+```javascript
+let person = {
+    name: 'John'
+};
 
-Objects in JavaScript allow you to store data in key-value pairs. Accessing or setting a property is generally O(1) under typical conditions. However, if properties are frequently added and deleted, some JavaScript engines may downgrade the hidden class of the object, potentially affecting performance.
+person.age = 30;  // Adding a property
+console.log(person);  // Output: {name: 'John', age: 30}
 
-Prototype Chain
-
-Every JavaScript object has a prototype. When you attempt to access a property, it not only looks up on the object itself but also checks its prototype, and the prototype’s prototype, until it finds the property or reaches the end of the prototype chain. Understanding this can help in optimizing performance and avoiding unintended side effects.
-
-## Common Mistakes and Misunderstandings
-
-Using Objects as Maps
-
-While it's common to use plain objects as maps from keys to values, there are pitfalls:
-
-Prototype Pollution: Objects inherit properties from Object.prototype, which can lead to unexpected behavior if not handled properly. For instance, {} has a default toString property.
-Only String and Symbol Keys: Before ES6, object keys could only be strings or symbols, any other value would be converted to a string.
-
-Tip: Use Map for collections of key-value pairs; Map keys can be of any type and do not have the prototype pollution issue.
-
-Modifying Objects During Iteration
-
-Modifying an object (adding/removing properties) during iteration can lead to unexpected behavior because the iteration order is not guaranteed and might change as the object's structure changes.
-
-## Performance Tips and Tricks
-
-Object Destructuring
-
-Destructuring is syntactically convenient and helps in writing cleaner code. It's particularly useful in function parameters or in extracting multiple properties from an object:
-
-```js
-const person = { name: 'John', age: 30, job: 'Developer' };
-const { name, age } = person;
+delete person.age;  // Removing a property
+console.log(person);  // Output: {name: 'John'}
 ```
 
-Efficient Cloning and Merging
+### **Checking Property Existence**
 
-Shallow Copy: Object.assign({}, obj) or \{ ...obj } for a quick shallow copy.
-Deep Copy: For a deep copy, you might need a utility like JSON.parse(JSON.stringify(obj)), though be aware of its limitations with non-JSON-serializable data.
+**Example:**
+```javascript
+let person = {
+    name: 'John'
+};
 
-Property Enumeration
-
-Use Object.keys(), Object.values(), and Object.entries() to iterate over properties. These methods only consider the object's own properties (ignoring the prototype chain).
-
-## Advanced Usage
-
-Immutable Object Patterns
-
-For situations where immutability is necessary (e.g., in Redux state management), you should avoid directly modifying the object. Instead, use operations that return new objects:
-
-```js
-const newState = { ...state, newProp: 'value' };
+console.log('name' in person);  // Output: true
+console.log('age' in person);  // Output: false
 ```
 
-Memoization with Objects
+### **Iterating Over Properties**
 
-Objects can be useful for memoizing function results based on arguments:
+**Example:**
+```javascript
+let person = {
+    name: 'John',
+    age: 30,
+    isEmployed: true
+};
 
-```js
-const memoizedResults = {};
-function complexComputation(arg) {
-  if (!memoizedResults[arg]) {
-    memoizedResults[arg] = compute(arg); // Some expensive operation
-  }
-  return memoizedResults[arg];
+for (let key in person) {
+    if (person.hasOwnProperty(key)) {
+        console.log(`${key}: ${person[key]}`);
+    }
 }
+
+// Output:
+// name: John
+// age: 30
+// isEmployed: true
 ```
 
-Performance Considerations for Large Objects
+### **Object Methods**
 
-For very large objects or when performance is critical, consider:
+**Example:**
+```javascript
+let person = {
+    name: 'John',
+    age: 30,
+    greet: function() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+};
 
-Minimizing the number of properties on an object, as more properties can lead to slower property access.
-
-Using Map or other more specialized data structures depending on the operations needed (especially if frequent additions and deletions occur).
-
-## Using Object.freeze and Object.seal
-
-Object.freeze(): This method freezes an object, which means you can't add new properties, change existing properties, or delete properties. It's useful when you want to ensure that an object remains constant.
-Object.seal(): This method seals an object, allowing you to change existing properties but not add new properties or delete any. It's useful for locking down objects to prevent structural changes while allowing their existing properties to be mutable.
-
-## Performance Implications of Dynamic Property Access
-
-Adding or deleting properties dynamically can significantly alter an object's shape, leading to potential deoptimizations:
-
-Hidden Classes: JavaScript engines use hidden classes (or shapes) behind the scenes to optimize object access. Continuously adding new properties to an object can cause these optimizations to reset, reducing the efficiency of property access.
-Avoid Premature Optimization: While it's important to be aware of performance, it's also crucial not to over-optimize early. Make code readable and maintainable first, then optimize based on actual performance measurements.
-
-## Property Attributes and Descriptors
-
-Understanding property attributes can be crucial in some scenarios:
-
-Writable: Determines if the property value can be changed.
-Enumerable: Determines if the property is enumerable in for-loops.
-Configurable: Determines if the property can be deleted or changed.
-
-You can use Object.defineProperty() to set these attributes explicitly, which is particularly useful when you need to create an API that hides internal properties or controls their mutability:
-
-```js
-Object.defineProperty(obj, 'key', {
-  value: 'value',
-  writable: false,
-  enumerable: true,
-  configurable: false
-});
+person.greet();  // Output: 'Hello, my name is John'
 ```
 
-## Advanced Patterns: Proxy and Reflect
+### **Object Utility Methods**
 
-Proxy: JavaScript Proxy objects enable you to create a proxy for another object, which can intercept and redefine fundamental operations (like property lookup, assignment, enumeration, function invocation, etc.). This is particularly useful for creating reactive programming patterns, debugging, or performance monitoring wrappers.
-Reflect: The Reflect API provides methods for interceptable JavaScript operations. This is especially handy in conjunction with Proxy, as it allows you to handle default actions on the target object easily.
+**Example:**
+```javascript
+let person = {
+    name: 'John',
+    age: 30,
+    isEmployed: true
+};
 
-## Edge Cases and Gotchas
+console.log(Object.keys(person));  // Output: ['name', 'age', 'isEmployed']
+console.log(Object.values(person));  // Output: ['John', 30, true]
+console.log(Object.entries(person));  // Output: [['name', 'John'], ['age', 30], ['isEmployed', true]]
 
-Non-Object Values: Be careful when using methods like Object.keys() or Object.values() on non-object values (e.g., null or undefined), as these will throw a TypeError. Always ensure the data is properly validated or converted to an object form if necessary.
-Enumerable Properties in Prototypes: Remember that properties inherited from a prototype are not listed by methods like Object.keys() unless they are directly on the object. This can be a source of bugs if not properly understood.
+let newPerson = Object.assign({}, person, {age: 31});
+console.log(newPerson);  // Output: {name: 'John', age: 31, isEmployed: true}
+
+let personCopy = {...person};
+console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
+```
+
+## **Practical Tips and Tricks**
+
+- **Using `Object.freeze` to Make Objects Immutable:**
+  Prevent modifications to an object.
+  **Example:**
+  ```javascript
+  let person = {name: 'John'};
+  Object.freeze(person);
+  person.age = 30;  // This will not work
+  console.log(person);  // Output: {name: 'John'}
+  ```
+
+- **Cloning Objects:**
+  Use `Object.assign` or the spread operator to create shallow copies.
+  **Example:**
+  ```javascript
+  let original = {a: 1, b: 2};
+  let copy = Object.assign({}, original);
+  let spreadCopy = {...original};
+  console.log(copy);  // Output: {a: 1, b: 2}
+  console.log(spreadCopy);  // Output: {a: 1, b: 2}
+  ```
+
+- **Merging Objects:**
+  Combine properties from multiple objects.
+  **Example:**
+  ```javascript
+  let obj1 = {a: 1};
+  let obj2 = {b: 2};
+  let merged = {...obj1, ...obj2};
+  console.log(merged);  // Output: {a: 1, b: 2}
+  ```
+
+- **Nested Object Updates:**
+  Use the spread operator for nested object updates.
+  **Example:**
+  ```javascript
+  let person = {
+      name: 'John',
+      address: {
+          city: 'Anytown',
+          zip: '12345'
+      }
+  };
+  let updatedPerson = {
+      ...person,
+      address: {
+          ...person.address,
+          city: 'Newtown'
+      }
+  };
+  console.log(updatedPerson);
+  // Output: {name: 'John', address: {city: 'Newtown', zip: '12345'}}
+  ```
+
+## **Common Gotchas**
+
+- **Shallow Copy vs. Deep Copy:**
+  `Object.assign` and the spread operator create shallow copies, not deep copies.
+  **Example:**
+  ```javascript
+  let original = {a: 1, b: {c: 2}};
+  let copy = {...original};
+  copy.b.c = 3;
+  console.log(original.b.c);  // Output: 3 (original object is affected)
+  ```
+
+- **Property Enumeration Order:**
+  The order of property enumeration is not guaranteed in older JavaScript engines.
+  **Example:**
+  ```javascript
+  let obj = {b: 1, a: 2};
+  console.log(Object.keys(obj));  // Output: ['b', 'a'] (order may vary)
+  ```
+
+- **Prototype Pollution:**
+  Be cautious when merging or extending objects to avoid unintended prototype changes.
+  **Example:**
+  ```javascript
+  let obj = {};
+  Object.prototype.newProp = 'polluted';
+  console.log(obj.newProp);  // Output: 'polluted' (unintended prototype property)
+  ```
+
+## **Advanced Topics**
+
+### **Prototype and Inheritance**
+
+Objects in JavaScript have a prototype, which is another object from which they inherit properties and methods.
+
+**Example:**
+```javascript
+let person = {
+    greet: function() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+};
+
+let john = Object.create(person);
+john.name = 'John';
+john.greet();  // Output: 'Hello, my name is John'
+```
+
+### **Object-Oriented Programming (OOP)**
+
+JavaScript supports OOP through constructor functions and ES6 classes.
+
+**Example:**
+```javascript
+// Constructor Function
+function Person(name, age) {
+    this.name = name;
+    this.age = age;
+}
+
+Person.prototype.greet = function() {
+    console.log(`Hello, my name is ${this.name}`);
+};
+
+let john = new Person('John', 30);
+john.greet();  // Output: 'Hello, my name is John'
+
+// ES6 Class
+class Person {
+    constructor(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+}
+
+let jane = new Person('Jane', 25);
+jane.greet();  // Output: 'Hello, my name is Jane'
+```
+
+### **Symbols**
+
+Symbols are a unique and immutable data type used as property keys.
+
+**Example:**
+```javascript
+let sym = Symbol('description');
+let obj = {
+    [sym]: 'value'
+};
+console.log(obj[sym]);  // Output: 'value'
+```
+
+### **Private Properties**
+
+Using closures or `#` syntax (private class fields) to create private properties.
+
+**Example:**
+```javascript
+class Person {
+    #name;
+
+    constructor(name) {
+        this.#name = name;
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.#name}`);
+    }
+}
+
+let john = new Person('John');
+john.greet();  // Output: 'Hello, my name is John'
+// console.log(john.#name);  // SyntaxError: Private field '#name' must be declared in an enclosing class
+```
+
+## **Object Algorithms**
+
+### **Deep Cloning**
+
+**Example:**
+```javascript
+function deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) {
+        return obj.map(item => deepClone(item));
+    }
+    let clone = {};
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            clone[key] = deepClone(obj[key]);
+        }
+    }
+    return clone;
+}
+
+let original = {a: 1, b: {c: 2}};
+let copy = deepClone(original);
+copy.b.c = 3;
+console.log(original.b.c);  // Output: 2 (original object is not affected)
+```
+
+### **Merging Objects Recursively**
+
+**Example:**
+```javascript
+function mergeDeep(target, source) {
+    if (typeof target !== 'object' || typeof source !== 'object') return source;
+
+    for (let key in source) {
+        if (source.hasOwnProperty(key)) {
+            if (typeof source[key] === 'object' && source[key] !== null) {
+                target[key] = mergeDeep(target[key] || {}, source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        }
+    }
+    return target;
+}
+
+let obj1 = {a: 1, b: {c: 2}};
+let obj2 = {b: {d: 3}};
+let merged = mergeDeep(obj1, obj2);
+console.log(merged);  // Output: {a: 1, b: {c: 2, d: 3}}
+```
+
+## **Interview Tips and Tricks**
+
+- **Understand Prototypes:**
+  Have a solid understanding of prototype inheritance and how it works in JavaScript.
+
+- **Practice Object Methods:**
+  Be comfortable with methods like `Object.keys`, `Object.values`, `Object.entries`, and `Object.assign`.
+
+- **Handle Edge Cases:**
+  Consider scenarios with nested objects, circular references, and merging objects with conflicting properties.
+
+- **Use Symbols for Unique Keys:**
+  Utilize Symbols when you need unique keys that won't collide with other property keys.
+
+## **Common Mistakes**
+
+- **Overwriting Prototype Methods:**
+  Be cautious when modifying prototypes, as it affects all instances of the object.
+
+- **Using `for...in` Without `hasOwnProperty`:**
+  Always check `hasOwnProperty` to avoid iterating over inherited properties.
+
+- **Shallow vs. Deep Copy Confusion:**
+  Understand the difference between shallow and deep copies, especially when dealing with nested objects.
+
+- **Accidental Global Variables:**
+  Avoid creating global variables by using `var`, `let`, or `const` to declare properties.
+
+By mastering JavaScript objects and understanding their intricacies, you will be well-equipped to handle a variety of interview questions and real-world problems involving structured data. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.

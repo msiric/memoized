@@ -1,0 +1,250 @@
+# **Top K Elements**
+
+The Top K Elements technique is used to find the top, smallest, or most frequent 'K' elements from a given set. This technique is often applied using a heap (priority queue) for efficiency, as heaps allow for quick access to the smallest or largest elements.
+
+## **Concept and Use Cases**
+
+**Definition:**
+The Top K Elements technique involves identifying the top (largest, smallest, or most frequent) 'K' elements in a data set. Heaps (Min Heap or Max Heap) are commonly used to maintain the top 'K' elements efficiently.
+
+**Common Use Cases:**
+- Finding the K largest or smallest elements in an array.
+- Identifying the K most frequent elements in a data set.
+- Solving problems that require selecting the top K elements based on specific criteria.
+
+## **When to Use**
+- When you need to find the top K elements in a large data set efficiently.
+- When solving problems that involve selecting a subset of elements based on their order or frequency.
+- When handling real-time data streams and maintaining the top K elements dynamically.
+
+## **Time and Space Complexity**
+
+**Time Complexity:** 
+- O(n log K) for finding the top K elements in an array, where n is the number of elements in the array. This is because inserting and deleting elements from a heap takes O(log K) time and we perform these operations n times.
+
+**Space Complexity:**
+- O(K) for storing the top K elements in the heap.
+
+## **Finding the K Largest Elements**
+
+**Problem:** Given an array of integers, find the K largest elements.
+
+**Step-by-Step Solution:**
+1. Use a Min Heap to keep track of the top K largest elements.
+2. Iterate through each element in the array.
+3. If the heap size is less than K, insert the element into the heap.
+4. If the heap size is equal to K, compare the current element with the root of the heap. If the current element is larger, replace the root with the current element and reheapify.
+5. The heap will contain the top K largest elements at the end of the iteration.
+
+**Code Example:**
+```javascript
+class MinHeap {
+    constructor() {
+        this.heap = [];
+    }
+
+    size() {
+        return this.heap.length;
+    }
+
+    peek() {
+        return this.heap[0];
+    }
+
+    insert(value) {
+        this.heap.push(value);
+        this._heapifyUp();
+    }
+
+    extractMin() {
+        if (this.size() === 1) return this.heap.pop();
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop();
+        this._heapifyDown();
+        return min;
+    }
+
+    _heapifyUp() {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index] >= this.heap[parentIndex]) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    _heapifyDown() {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild < element) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild < element) || (swap !== null && rightChild < leftChild)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function findKthLargest(nums, k) {
+    const minHeap = new MinHeap();
+
+    for (const num of nums) {
+        minHeap.insert(num);
+        if (minHeap.size() > k) {
+            minHeap.extractMin();
+        }
+    }
+
+    return minHeap.peek();
+}
+
+// Example usage:
+const nums = [3, 2, 1, 5, 6, 4];
+const k = 2;
+console.log(findKthLargest(nums, k));  // Output: 5
+```
+
+**Tips and Tricks:**
+- Use a Min Heap to keep track of the top K largest elements efficiently.
+- Ensure the heap size does not exceed K by removing the smallest element when necessary.
+- The root of the Min Heap will contain the Kth largest element at the end of the iteration.
+
+**Frequent Gotchas:**
+- Forgetting to remove the smallest element from the heap when the heap size exceeds K.
+- Incorrectly maintaining the heap property during insertion and extraction.
+- Handling edge cases where the array has fewer than K elements.
+
+## **Finding the K Most Frequent Elements**
+
+**Problem:** Given an array of integers, find the K most frequent elements.
+
+**Step-by-Step Solution:**
+1. Use a hash map to count the frequency of each element in the array.
+2. Use a Min Heap to keep track of the top K most frequent elements.
+3. Iterate through each element in the hash map.
+4. If the heap size is less than K, insert the element into the heap.
+5. If the heap size is equal to K, compare the frequency of the current element with the root of the heap. If the current element has a higher frequency, replace the root with the current element and reheapify.
+6. The heap will contain the top K most frequent elements at the end of the iteration.
+
+**Code Example:**
+```javascript
+class MinHeap {
+    constructor() {
+        this.heap = [];
+    }
+
+    size() {
+        return this.heap.length;
+    }
+
+    peek() {
+        return this.heap[0];
+    }
+
+    insert(value) {
+        this.heap.push(value);
+        this._heapifyUp();
+    }
+
+    extractMin() {
+        if (this.size() === 1) return this.heap.pop();
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop();
+        this._heapifyDown();
+        return min;
+    }
+
+    _heapifyUp() {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].freq >= this.heap[parentIndex].freq) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    _heapifyDown() {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.freq < element.freq) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild.freq < element.freq) || (swap !== null && rightChild.freq < leftChild.freq)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function topKFrequent(nums, k) {
+    const frequencyMap = new Map();
+    for (const num of nums) {
+        frequencyMap.set(num, (frequencyMap.get(num) || 0) + 1);
+    }
+
+    const minHeap = new MinHeap();
+
+    for (const [num, freq] of frequencyMap) {
+        minHeap.insert({ num, freq });
+        if (minHeap.size() > k) {
+            minHeap.extractMin();
+        }
+    }
+
+    return minHeap.heap.map(entry => entry.num);
+}
+
+// Example usage:
+const nums = [1, 1, 1, 2, 2, 3];
+const k = 2;
+console.log(topKFrequent(nums, k));  // Output: [1, 2]
+```
+
+**Tips and Tricks:**
+- Use a hash map to count the frequency of each element efficiently.
+- Use a Min Heap to keep track of the top K most frequent elements.
+- The root of the Min Heap will contain the element with the lowest frequency among the top K elements.
+
+**Frequent Gotchas:**
+- Forgetting to remove the element with the lowest frequency from the heap when the heap size exceeds K.
+- Incorrectly maintaining the heap property during insertion and extraction.
+- Handling edge cases where the array has fewer than K unique elements.
+
+By mastering the Top K Elements technique, you can efficiently solve a variety of problems involving selecting the top K elements based on their order, frequency, or specific criteria. This technique is essential for optimizing time complexity and handling heap-related problems effectively in both technical interviews and real-world applications.
+
+ 

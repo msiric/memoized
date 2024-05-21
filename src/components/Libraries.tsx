@@ -2,11 +2,6 @@ import Image from 'next/image'
 
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
-import logoGo from '@/images/logos/go.svg'
-import logoNode from '@/images/logos/node.svg'
-import logoPhp from '@/images/logos/php.svg'
-import logoPython from '@/images/logos/python.svg'
-import logoRuby from '@/images/logos/ruby.svg'
 
 const libraries = [
   {
@@ -14,35 +9,35 @@ const libraries = [
     name: 'PHP',
     description:
       'A popular general-purpose scripting language that is especially suited to web development.',
-    logo: logoPhp,
+    logo: '/images/logos/php.svg',
   },
   {
     href: '#',
     name: 'Ruby',
     description:
       'A dynamic, open source programming language with a focus on simplicity and productivity.',
-    logo: logoRuby,
+    logo: '/images/logos/ruby.svg',
   },
   {
     href: '#',
     name: 'Node.js',
     description:
       'Node.js® is an open-source, cross-platform JavaScript runtime environment.',
-    logo: logoNode,
+    logo: '/images/logos/node.svg',
   },
   {
     href: '#',
     name: 'Python',
     description:
       'Python is a programming language that lets you work quickly and integrate systems more effectively.',
-    logo: logoPython,
+    logo: '/images/logos/python.svg',
   },
   {
     href: '#',
     name: 'Go',
     description:
       'An open-source programming language supported by Google with built-in concurrency.',
-    logo: logoGo,
+    logo: '/images/logos/go.svg',
   },
 ]
 

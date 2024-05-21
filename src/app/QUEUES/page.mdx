@@ -1,294 +1,130 @@
-export const metadata = {
-  title: 'Quickstart',
-  description:
-    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
-}
+# **JavaScript Queues**
 
-# Comprehensive Guide to Queues in JavaScript
+Queues are a fundamental data structure used to store collections of elements in a First-In-First-Out (FIFO) manner. This means the first element added to the queue is the first one to be removed.
 
-A queue is a straightforward yet powerful linear data structure that operates under the First In, First Out (FIFO) principle, where the first element added to the queue is the first to be removed. This ordering principle makes queues ideal for managing data in scenarios where order needs to be preserved.
+## **Concept and Use Cases**
 
-**Real-World Analogy:**
+**Definition:**
+A queue is a linear data structure that follows the First-In-First-Out (FIFO) principle. Elements are added to the end of the queue and removed from the front.
 
-A queue is like a line of people waiting at a bank or a grocery checkout. The first person to line up is the first to be served and leave, illustrating the FIFO concept clearly.
+**Common Use Cases:**
+- Managing tasks in a sequential order (e.g., printer queue, task scheduling).
+- Implementing breadth-first search (BFS) in graph algorithms.
+- Handling requests in a server (e.g., request queue).
+- Implementing real-time systems (e.g., message queue).
 
-## Basic Operations
+## **When to Use**
+- When you need a FIFO data structure.
+- When processing elements in the order they were added is essential.
+- When implementing algorithms that require level-order traversal or BFS.
 
-Queues support several fundamental operations that allow for the efficient management of data:
+## **Time and Space Complexity**
 
-**Enqueue:**
+**Time Complexity:**
+- Enqueue (add): O(1)
+- Dequeue (remove): O(1)
+- Peek: O(1)
+- Search: O(n)
 
-This operation adds an element to the end of the queue.
+**Space Complexity:**
+- O(n), where n is the number of elements in the queue.
 
-```js
-// Example of the enqueue operation
-function enqueue(element, queue) {
-  queue.push(element);
-}
-```
+## **Queue Operations and Methods**
 
-**Dequeue:**
+### **Creating a Queue**
 
-This operation removes the element at the front of the queue and returns it, adhering to the FIFO principle.
-
-```js
-// Example of the dequeue operation
-function dequeue(queue) {
-  if (queue.length === 0) {
-    return 'Underflow'; // Prevent dequeueing from an empty queue
-  }
-  return queue.shift();
-}
-```
-
-**Peek/Front:**
-
-This operation allows you to look at the front element of the queue without removing it, providing insight into the queue's state without altering it.
-
-```js
-// Example of the peek operation
-function peek(queue) {
-  return queue.length > 0 ? queue[0] : null;
-}
-```
-
-**isEmpty:**
-
-This method checks whether the queue is empty, which is crucial for preventing errors related to dequeueing from an empty queue.
-
-```js
-// Check if the queue is empty
-function isEmpty(queue) {
-  return queue.length === 0;
-}
-```
-
-## Implementing a Queue in JavaScript
-
-While JavaScript's array functions lend themselves naturally to queue operations, understanding how to implement a queue from scratch can be very instructive.
-
-**Using Array:**
-
-Arrays in JavaScript natively support enqueue and dequeue operations through the push and shift methods, respectively.
-
-```js
-let queue = [];
-queue.push(1);  // Enqueue an item
-console.log(queue.shift());  // Dequeue an item
-```
-
-**Creating a Queue Class:**
-
-For a deeper understanding and more control, implementing a queue as a class can encapsulate queue behavior more effectively.
-
-```js
-class Queue {
-  constructor() {
-    this.items = [];
-  }
-
-  enqueue(element) {
-    this.items.push(element);
-  }
-
-  dequeue() {
-    if (this.isEmpty()) {
-      return "Underflow";  // Prevents dequeueing from an empty queue
-    }
-    return this.items.shift();
-  }
-
-  front() {
-    return this.isEmpty() ? null : this.items[0];
-  }
-
-  isEmpty() {
-    return this.items.length === 0;
-  }
-}
-```
-
-## Use Cases and Applications
-
-Queues are versatile and find applications in various areas of computing due to their FIFO nature, which makes them ideal for managing tasks in the order they arrive.
-
-**Data Buffering:**
-
-Queues are used to manage data buffers, which temporarily hold data until it can be processed. This is common in scenarios like streaming data, where you might buffer video frames or network packets before processing them to ensure smooth playback or data handling.
-
-**Task Scheduling:**
-
-Operating systems use queues to manage processes and tasks. Tasks are queued according to various scheduling algorithms, ensuring efficient execution order and resource allocation. Web servers also use task queues to manage incoming requests, processing them in the order received.
-
-**Breadth-First Search (BFS):**
-
-In algorithms, queues are crucial for implementing BFS, which is used for traversing graphs or trees. This method uses a queue to hold nodes and explore all nodes at the present depth level before moving on to nodes at the next depth level.
-
-```js
-function bfs(graph, startNode) {
-  let queue = [startNode];
-  let visited = new Set();
-  visited.add(startNode);
-
-  while (queue.length > 0) {
-    let currentNode = queue.shift(); // Dequeues the front node
-    console.log(currentNode); // Process the current node
-
-    // Enqueue all unvisited adjacent nodes
-    graph[currentNode].forEach(node => {
-      if (!visited.has(node)) {
-        visited.add(node);
-        queue.push(node);
-      }
-    });
-  }
-}
-```
-
-## Common Interview Questions
-
-Understanding how to solve common problems using queues can significantly boost your problem-solving skills in interviews.
-
-**Implementing a Queue Using Stacks:**
-
-A popular interview question is to implement a queue using two stacks. The challenge is to use the LIFO nature of stacks to achieve the FIFO behavior of queues.
-
-```js
-class QueueUsingStacks {
-  constructor() {
-    this.inStack = [];
-    this.outStack = [];
-  }
-
-  enqueue(element) {
-    this.inStack.push(element);
-  }
-
-  dequeue() {
-    if (this.outStack.length === 0) {
-      while (this.inStack.length > 0) {
-        this.outStack.push(this.inStack.pop());
-      }
-    }
-    return this.outStack.pop();
-  }
-}
-```
-
-**Circular Queue (Ring Buffer):**
-
-Implementing a circular queue involves managing a fixed-size array in a way that it can wrap around at the ends. This type of queue is particularly useful in resource-restricted environments where maximizing the usage of space is crucial.
-
-**Queue Reversal:**
-
-This problem might involve using recursion or an additional data structure to reverse the order of elements in a queue.
-
-```js
-function reverseQueue(queue) {
-  if (queue.isEmpty()) {
-    return;
-  }
-  let element = queue.dequeue();
-  reverseQueue(queue);
-  queue.enqueue(element);
-}
-```
-
-## Advanced Queue Concepts
-
-Advanced concepts extend the basic queue model to suit specific needs, providing more functionality and flexibility.
-
-**Priority Queue:**
-
-A priority queue is an abstract data type where each element is associated with a priority and is served according to its priority. This is commonly implemented using heaps.
-
-**Deques (Double-Ended Queues):**
-
-Deques allow elements to be added or removed from both the front and the back, enhancing the functionality of a standard queue. This is particularly useful in scenarios that require more flexible data handling.
-
-## Exercises and Challenges
-
-Hands-on coding exercises are essential for mastering the use of queues. Here are some tasks you can undertake to improve your proficiency:
-
-**Coding Exercises:**
-
-Implement a Priority Queue: Create a priority queue that sorts elements based on their priority as they are added.
-Simulate a Restaurant Queue: Develop a queue system to manage the flow of customers in a restaurant, allowing for enqueue and dequeue operations as guests arrive and are seated.
-Use a Queue in a BFS Algorithm: Implement the Breadth-First Search algorithm using a queue to traverse a graph or tree structure.
-
-**Online Challenges:**
-
-Engage with platforms like HackerRank, LeetCode, or Codewars, where many problems involve the application of queue concepts. These challenges can help you hone your problem-solving skills and apply queue operations in various scenarios.
-
-## Review Sessions and Interactive Learning
-
-Interactive learning methods such as review sessions and live coding can significantly enhance your understanding and ability to apply concepts in practice.
-
-**Q&A Sessions:**
-
-Regular Q&A sessions provide an opportunity to clarify doubts, discuss complex topics, and deepen your understanding of queues. These sessions can be organized as webinars, live streams, or in-class discussions.
-
-**Live Coding:**
-
-Demonstrating queue operations through live coding sessions helps visualize their dynamic behavior and practical usage. Tools like JSFiddle or CodePen are great for these demonstrations, allowing for real-time coding and instant feedback.
-
-## Resources for Further Learning
-
-To continue developing your knowledge and skills in working with queues and other data structures, consider the following resources:
-
-**Reading Materials:**
-
-"Data Structures and Algorithms Made Easy" by Narasimha Karumanchi: A comprehensive guide that covers a wide range of topics, including queues.
-"Introduction to Algorithms" by Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest, and Clifford Stein: Offers in-depth discussions on the theory and practical applications of data structures.
-
-**Videos and Tutorials:**
-
-YouTube channels like "CS Dojo," "mycodeschool," and "The Coding Train" provide visual and practical explanations of queues and other data structures.
-Coursera and edX offer structured courses that include video lectures and interactive exercises on data structures.
-
-**Teaching Tools:**
-
-Visual Aids: Diagrams and animations can effectively illustrate how enqueue and dequeue operations work, especially showing how elements move through a queue.
-Interactive Development Environment (IDE): Utilizing online IDEs for coding practice helps apply what you've learned in a practical setting, allowing for experimentation and exploration of queue operations.
-
-## Understanding Queues
-
-Basic Concept
-
-FIFO Principle: Queues operate on the principle of "First In, First Out," where the first element added to the queue is the first one to be removed.
-
-**Main Operations:**
-
-Enqueue (Push): Add an item to the end of the queue.
-Dequeue (Pop): Remove the item from the front of the queue.
-Front (Peek): Retrieve the item at the front of the queue without removing it.
-
-**Implementation Options**
-
-Using Arrays: JavaScript's array data structure can be used to implement a queue, though it's not always efficient due to the need to shift elements when dequeuing.
-
-```js
+**Example:**
+```javascript
 class Queue {
     constructor() {
         this.items = [];
     }
 
-    enqueue(item) {
-        this.items.push(item);
+    // Methods to be defined...
+}
+```
+
+### **Enqueuing Elements**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+}
+```
+
+### **Dequeuing Elements**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
     }
 
     dequeue() {
-        if (this.isEmpty()) {
-            return 'Underflow'; // Queue is empty
-        }
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
+}
+```
+
+### **Peeking the Front Element**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
         return this.items.shift();
     }
 
-    peek() {
-        if (!this.isEmpty()) {
-            return this.items[0];
-        }
-        return null;
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+}
+```
+
+### **Checking if the Queue is Empty**
+
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        this.items.push(element);
+    }
+
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
+
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
     }
 
     isEmpty() {
@@ -297,85 +133,346 @@ class Queue {
 }
 ```
 
-Using Linked List: A more efficient implementation uses a linked list where enqueue operations happen at the tail and dequeue operations at the head, ensuring O(1) time complexity for both.
+### **Getting the Size of the Queue**
 
-## Common Operations and Their Complexity
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
 
-Enqueue: O(1) — Adding an item to the queue using an array's push method or the tail of a linked list.
-Dequeue: O(1) when using a linked list. When using arrays, shift() causes an O(n) complexity due to reindexing.
-Peek: O(1) — Accessing the front element is a constant-time operation.
-isEmpty: O(1) — Checking if the queue is empty is straightforward.
+    enqueue(element) {
+        this.items.push(element);
+    }
 
-## Use Cases and Applications
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
 
-Task Scheduling and Management
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
 
-Queues are widely used in operating systems to manage processes scheduled for execution.
+    isEmpty() {
+        return this.items.length === 0;
+    }
 
-Handling Asynchronous Data
+    size() {
+        return this.items.length;
+    }
+}
+```
 
-In programming environments that handle a lot of asynchronous operations, like JavaScript in the browser or Node.js, queues manage the execution order of asynchronous callbacks, especially in event handling.
+### **Clearing the Queue**
 
-Algorithmic Usage
+**Example:**
+```javascript
+class Queue {
+    constructor() {
+        this.items = [];
+    }
 
-Breadth-First Search (BFS): A queue is used to hold all the vertices to be explored in graph algorithms.
-Caching: Implemented as a queue with a fixed size can be used for Least Recently Used (LRU) caching.
+    enqueue(element) {
+        this.items.push(element);
+    }
 
-## Advanced Techniques and Considerations
+    dequeue() {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift();
+    }
 
-Circular Queue
+    front() {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
 
-A circular queue, or ring buffer, is a more sophisticated queue type that optimizes storage by connecting the end of the queue back to the beginning. This is useful for fixed-size queues and stream data management.
+    isEmpty() {
+        return this.items.length === 0;
+    }
 
-Priority Queue
+    size() {
+        return this.items.length;
+    }
 
-Not all queues are FIFO; priority queues dequeue elements based on priority rather than the order they were enqueued. This structure is essential for scenarios like emergency room management where priority is based on severity rather than arrival time.
+    clear() {
+        this.items = [];
+    }
+}
+```
 
-## Practical Interview Tips
+## **Practical Tips and Tricks**
 
-Implementation from Scratch: Be prepared to implement basic queue operations in an interview, possibly with a twist like a circular queue or a priority queue.
-Complexity Analysis: Discuss the time and space complexity of different queue implementations and operations.
-Real-World Applications: Explain how queues are used in real-world systems, such as in web server request handling or operating systems' task scheduling.
+- **Use Arrays for Simple Queues:**
+  In JavaScript, arrays can be used to implement simple queues because they provide built-in methods like `push`, `shift`, and `length`.
+  **Example:**
+  ```javascript
+  let queue = [];
+  queue.push(1);
+  queue.push(2);
+  console.log(queue.shift());  // Output: 1
+  console.log(queue);  // Output: [2]
+  ```
 
-## Advanced Queue Operations and Techniques
+- **Avoid Underflow Errors:**
+  Always check if the queue is empty before performing a `dequeue` operation to avoid underflow errors.
+  **Example:**
+  ```javascript
+  if (!queue.isEmpty()) {
+      queue.dequeue();
+  }
+  ```
 
-Double-Ended Queue (Deque)
+- **Use Queue for BFS:**
+  Implement Breadth-First Search (BFS) using a queue to manage the nodes to be visited.
+  **Example:**
+  ```javascript
+  function bfs(graph, start) {
+      let queue = [start];
+      let visited = new Set();
 
-Deques allow elements to be added or removed from both the front and the back of the queue. This flexibility makes them useful for scenarios where elements need to be processed from both ends, such as in certain caching algorithms or when implementing a steque (stack-queue).
+      while (queue.length > 0) {
+          let node = queue.shift();
+          if (!visited.has(node)) {
+              visited.add(node);
+              console.log(node);
+              for (let neighbor of graph[node]) {
+                  queue.push(neighbor);
+              }
+          }
+      }
+  }
+  ```
 
-Blocking Queues
+## **Common Gotchas**
 
-In multithreaded programming environments, blocking queues can play a crucial role. They ensure that dequeue operations block if the queue is empty, or enqueue operations block if the queue is full. This feature is essential for thread-safe operations where producers and consumers operate at different speeds.
+- **Queue Underflow:**
+  Always check if the queue is empty before performing a dequeue operation to avoid underflow errors.
+  **Example:**
+  ```javascript
+  if (!queue.isEmpty()) {
+      queue.dequeue();
+  } else {
+      console.log("Queue is empty");
+  }
+  ```
 
-## Implementation Variants and Efficiency
+- **Non-Primitive Data Types:**
+  When storing non-primitive data types in a queue, be mindful of references and mutations.
+  **Example:**
+  ```javascript
+  let queue = [];
+  let obj = {a: 1};
+  queue.push(obj);
+  obj.a = 2;
+  console.log(queue.front());  // Output: {a: 2}
+  ```
 
-Array vs. Linked List Implementation
+## **Advanced Topics**
 
-Array-Based Queues: While simple, using arrays can lead to inefficient dequeue operations (O(n) complexity due to the need to shift elements). However, they are straightforward and can be easily resized.
-Linked List-Based Queues: Provide O(1) complexity for both enqueue and dequeue by maintaining references to both head and tail nodes. They are more complex to implement but offer better performance for frequent enqueue and dequeue operations.
+### **Circular Queue**
 
-Circular Buffers
+A circular queue, also known as a ring buffer, efficiently uses the space by wrapping around the end to the beginning.
 
-A circular buffer, or ring buffer, is a queue that uses a fixed-size array and circular indexing to manage its entries. It is highly efficient for queues with a fixed maximum size and is commonly used in scenarios involving streaming data or resource pooling.
+**Example:**
+```javascript
+class CircularQueue {
+    constructor(capacity) {
+        this.items = new Array(capacity);
+        this.capacity = capacity;
+        this.front = 0;
+        this.rear = 0;
+        this.size = 0;
+    }
 
-## Common Mistakes and Pitfalls
+    enqueue(element) {
+        if (this.size === this.capacity) return "Overflow";
+        this.items[this.rear] = element;
+        this.rear = (this.rear + 1) % this.capacity;
+        this.size++;
+    }
 
-Queue Overflow and Underflow
+    dequeue() {
+        if (this.size === 0) return "Underflow";
+        let element = this.items[this.front];
+        this.front = (this.front + 1) % this.capacity;
+        this.size--;
+        return element;
+    }
 
-Overflow: Trying to add to a full queue, especially a fixed-size one, needs to be managed to prevent data loss.
-Underflow: Dequeueing from an empty queue should be handled gracefully, typically by throwing an exception or returning a special value indicating the queue is empty.
+    peek() {
+        if (this.size === 0) return "No elements in Queue";
+        return this.items[this.front];
+    }
 
-Memory Management
+    isEmpty() {
+        return this.size === 0;
+    }
 
-Particularly in environments with manual memory management, ensuring that dequeued objects are properly deallocated is critical to preventing memory leaks.
+    isFull() {
+        return this.size === this.capacity;
+    }
 
-## Edge Cases
+    getSize() {
+        return this.size;
+    }
 
-Single Element Operations: Edge cases such as adding or removing the last item in a queue can sometimes cause bugs if head and tail pointers are not updated correctly.
-Concurrency Issues: When implementing queues in environments that support concurrency, ensure that operations are atomic to prevent race conditions. This may require mutexes or other synchronization techniques.
+    clear() {
+        this.items = new Array(this.capacity);
+        this.front = 0;
+        this.rear = 0;
+        this.size = 0;
+    }
+}
+```
 
-## Practical Interview Strategy
+### **Priority Queue**
 
-Problem Solving with Queues: In interviews, demonstrate the ability to choose and justify the use of a queue over other data structures based on the problem's requirements, such as needing FIFO order.
-Optimization Discussions: Discuss how different implementations can be optimized for specific scenarios, like using a deque to enhance performance when both ends of the queue are accessed.
-Real-World Examples: Discuss real-world applications of queues to show a deep understanding of their practical uses, such as in print spooling or message queuing systems.
+A priority queue is a special type of queue where elements are removed based on priority rather than insertion order.
+
+**Example:**
+```javascript
+class PriorityQueue {
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element, priority) {
+        let newItem = {element, priority};
+        let added = false;
+        for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i].priority > newItem.priority) {
+                this.items.splice(i, 1, newItem);
+                added = true;
+                break;
+            }
+        }
+        if (!added) {
+            this.items.push(newItem);
+        }
+    }
+
+    dequeue() {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.shift().element;
+    }
+
+    peek() {
+        if (this.items.length === 0) return "No elements in Queue";
+        return this.items[0].element;
+    }
+
+    isEmpty() {
+        return this.items.length === 0;
+    }
+
+    size() {
+        return this.items.length;
+    }
+
+    clear() {
+        this.items = [];
+    }
+}
+```
+
+## **Queue Algorithms**
+
+### **Breadth-First Search (BFS)**
+
+**Example:**
+```javascript
+function bfs(graph, start) {
+    let queue = [start];
+    let visited = new Set();
+
+    while (queue.length > 0) {
+        let node = queue.shift();
+        if (!visited.has(node)) {
+            visited.add(node);
+            console.log(node);
+            for (let neighbor of graph[node]) {
+                queue.push(neighbor);
+            }
+        }
+    }
+}
+
+let graph = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E']
+};
+
+bfs(graph, 'A');
+```
+
+### **Implementing a Cache Using a Queue**
+
+**Example:**
+```javascript
+class LRUCache {
+    constructor(capacity) {
+        this.capacity = capacity;
+        this.cache = new Map();
+        this.queue = [];
+    }
+
+    get(key) {
+        if (!this.cache.has(key)) return -1;
+        let value = this.cache.get(key);
+        this.queue = this.queue.filter(k => k !== key);
+        this.queue.push(key);
+        return value;
+    }
+
+    put(key, value) {
+        if (this.cache.has(key)) {
+            this.queue = this.queue.filter(k => k !== key);
+        } else if (this.queue.length === this.capacity) {
+            let oldestKey = this.queue.shift();
+            this.cache.delete(oldestKey);
+        }
+        this.cache.set(key, value);
+        this.queue.push(key);
+    }
+}
+
+let cache = new LRUCache(2);
+cache.put(1, 1);
+cache.put(2, 2);
+console.log(cache.get(1));  // Output: 1
+cache.put(3, 3);
+console.log(cache.get(2));  // Output: -1
+cache.put(4, 4);
+console.log(cache.get(1));  // Output: -1
+console.log(cache.get(3));  // Output: 3
+console.log(cache.get(4));  // Output: 4
+```
+
+## **Interview Tips and Tricks**
+
+- **Understand Basic Operations:**
+  Be comfortable with implementing enqueue, dequeue, peek, isEmpty, size, and clear operations.
+- **Practice Common Algorithms:**
+  Familiarize yourself with algorithms like BFS, implementing caches, and other queue-based problems.
+- **Consider Edge Cases:**
+  Always consider edge cases like empty queues, single element queues, and queue underflow.
+- **Optimize Space and Time:**
+  Understand how to implement queues efficiently using arrays and linked lists, and the trade-offs involved.
+
+## **Common Mistakes**
+
+- **Queue Underflow and Overflow:**
+  Be cautious of queue underflow when dequeuing from an empty queue and overflow in fixed-size queues.
+- **Incorrect Pointer Updates:**
+  When implementing queues with linked lists, ensure pointers are correctly updated during enqueue and dequeue operations.
+- **Ignoring Edge Cases:**
+  Consider all edge cases, such as operations on an empty queue or a queue with a single element.
+
+By mastering queues and understanding their intricacies, you will be well-equipped to handle a variety of interview questions and real-world problems involving FIFO data structures. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.

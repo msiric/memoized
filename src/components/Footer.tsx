@@ -1,10 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 
 import { Button } from '@/components/Button'
-import { navigation } from '@/components/Navigation'
+import { usePages } from '@/hooks/usePages'
 
 function PageLink({
   label,
@@ -38,16 +37,7 @@ function PageLink({
 }
 
 function PageNavigation() {
-  let pathname = usePathname()
-  let allPages = navigation.flatMap((group) => group.links)
-  let currentPageIndex = allPages.findIndex((page) => page.href === pathname)
-
-  if (currentPageIndex === -1) {
-    return null
-  }
-
-  let previousPage = allPages[currentPageIndex - 1]
-  let nextPage = allPages[currentPageIndex + 1]
+  const { previousPage, nextPage } = usePages()
 
   if (!previousPage && !nextPage) {
     return null

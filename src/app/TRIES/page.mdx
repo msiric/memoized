@@ -1,351 +1,400 @@
-export const metadata = {
-  title: 'Quickstart',
-  description:
-    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
-}
+# **JavaScript Tries**
 
-# Comprehensive Guide to Tries in JavaScript
+Tries (also known as prefix trees) are a specialized tree-like data structure used to store associative data structures. A common application of a trie is storing a predictive text or an autocomplete dictionary.
 
-A trie, also known as a prefix tree, is a tree-like data structure that stores a dynamic set of strings where each node represents a common prefix shared by some keys. Each path down the tree may represent a word.
+## **Concept and Use Cases**
 
 **Definition:**
+A trie is a tree-like data structure that stores strings in a way that allows for efficient retrieval of keys with common prefixes. Each node represents a single character of the string.
 
-A trie organizes data in a way that allows for fast retrieval, typically used for strings. Each node in a trie could correspond to a letter of the alphabet, and links between nodes – edges – could represent the next characters in a string.
+**Common Use Cases:**
+- Autocomplete systems
+- Spell checkers
+- IP routing (Longest Prefix Matching)
+- T9 predictive text
+- Storing a large dictionary of words
 
-**Purpose and Benefits:**
+## **When to Use**
+- When you need to perform fast prefix-based searches.
+- When implementing autocomplete or spell-checking functionalities.
+- When managing a large set of strings that share common prefixes.
 
-Tries are incredibly efficient for several operations including searching, inserting, and deleting strings, especially when these operations are frequently performed. Key benefits include:
-Quick Lookups: Tries provide quick lookup times, often faster than hashing for small sets.
-Efficient Autocomplete: Ideal for features like autocomplete in search engines or text editors due to their ability to find all words with a given prefix efficiently.
-Space Efficiency: Tries can be space-efficient when storing large datasets with overlapping prefixes.
+## **Time and Space Complexity**
 
-## Understanding Trie Structure
+**Time Complexity:**
+- Insertion: O(m), where m is the length of the word.
+- Deletion: O(m), where m is the length of the word.
+- Search: O(m), where m is the length of the word.
 
-The structure of a trie is simple yet powerful, with each node typically containing the following components:
+**Space Complexity:**
+- O(n * m), where n is the number of keys and m is the average key length.
 
-**Basic Components:**
+## **Trie Operations and Methods**
 
-Children: Each node contains an array or hash table that points to its child nodes.
-End of Word Flag: A boolean flag that marks whether the node corresponds to the end of a word in the dictionary.
+### **Creating a Trie**
 
-**Characteristics:**
-
-The root node often represents an empty string and doesn't contain any character. Each level in the trie represents characters in the positions of strings managed by the trie.
-Each path from the root to a node represents a prefix of added strings, making it easy to traverse and manage prefixes effectively.
-
-## Implementing a Trie in JavaScript
-
-Implementing a trie involves creating node structures and methods for insertion, searching, and prefix checking. Here’s a basic implementation:
-
-**Trie Node Class:**
-
-A simple class to represent each node in the trie.
-
-```js
+**Example:**
+```javascript
 class TrieNode {
-  constructor() {
-    this.children = {};
-    this.isEndOfWord = false;
-  }
+    constructor() {
+        this.children = {};
+        this.isEndOfWord = false;
+    }
 }
-```
 
-**Trie Class Implementation:**
-
-The Trie class encapsulates methods for inserting words, searching for words, and checking if a prefix exists in the trie.
-
-```js
 class Trie {
-  constructor() {
-    this.root = new TrieNode();
-  }
-
-  insert(word) {
-    let currentNode = this.root;
-    for (let char of word) {
-      if (!currentNode.children[char]) {
-        currentNode.children[char] = new TrieNode();
-      }
-      currentNode = currentNode.children[char];
+    constructor() {
+        this.root = new TrieNode();
     }
-    currentNode.isEndOfWord = true;
-  }
 
-  search(word) {
-    let currentNode = this.root;
-    for (let char of word) {
-      if (!currentNode.children[char]) {
-        return false;
-      }
-      currentNode = currentNode.children[char];
-    }
-    return currentNode.isEndOfWord;
-  }
-
-  startsWith(prefix) {
-    let currentNode = this.root;
-    for (let char of prefix) {
-      if (!currentNode.children[char]) {
-        return false;
-      }
-      currentNode = currentNode.children[char];
-    }
-    return true;
-  }
+    // Methods to be defined...
 }
 ```
 
-## Trie Operations
+### **Inserting Words**
 
-Understanding the fundamental operations of a trie is essential for leveraging its capabilities effectively. These operations are centered around the dynamic handling of strings.
-
-**Insert:**
-
-The insert operation adds a word to the trie, creating new nodes for each character if they do not exist.
-
-```js
-insert(word) {
-  let currentNode = this.root;
-  for (let char of word) {
-    if (!currentNode.children[char]) {
-      currentNode.children[char] = new TrieNode();
-    }
-    currentNode = currentNode.children[char];
-  }
-  currentNode.isEndOfWord = true;  // Marks the end of a word
-}
-```
-
-**Search:**
-
-The search operation checks whether a word exists in the trie. It traverses the trie from the root to the leaf corresponding to the last character of the word, checking at the end if the node marks the end of a word.
-
-```js
-search(word) {
-  let currentNode = this.root;
-  for (let char of word) {
-    if (!currentNode.children[char]) {
-      return false;  // If the character path breaks, the word isn't present
-    }
-    currentNode = currentNode.children[char];
-  }
-  return currentNode.isEndOfWord;  // Verify if it's actually the end of the word
-}
-```
-
-**Prefix Search:**
-
-Checks if there is any word in the trie that starts with a given prefix. This is similar to the search operation but does not require checking the end-of-word flag.
-
-```js
-startsWith(prefix) {
-  let currentNode = this.root;
-  for (let char of prefix) {
-    if (!currentNode.children[char]) {
-      return false;
-    }
-    currentNode = currentNode.children[char];
-  }
-  return true;  // Only checks the presence of the prefix path
-}
-```
-
-## Advanced Trie Functions
-
-Building upon the basic operations, advanced trie functions address more complex needs such as deleting entries and providing suggestions for autocomplete.
-
-**Delete:**
-
-Deletion in a trie may involve removing the end-of-word flag and potentially deleting nodes that are no longer part of other words.
-
-```js
-delete(word) {
-  // Helper function to delete the word recursively
-  const deleteRecursively = (node, word, index) => {
-    if (index === word.length) {
-      if (!node.isEndOfWord) return false;
-      node.isEndOfWord = false;
-      return Object.keys(node.children).length === 0;
-    }
-    const char = word[index];
-    const childNode = node.children[char];
-    if (!childNode) return false;
-    const shouldDelete = deleteRecursively(childNode, word, index + 1);
-    if (shouldDelete) {
-      delete node.children[char];
-      return Object.keys(node.children).length === 0;
-    }
-    return false;
-  };
-
-  deleteRecursively(this.root, word, 0);
-}
-```
-
-**Autocomplete Suggestions:**
-
-Autocomplete functionality returns all words in the trie that start with a given prefix. This is crucial for applications like search engines or user interfaces that predict user input.
-
-```js
-findWordsWithPrefix(prefix) {
-  let currentNode = this.root;
-  const results = [];
-  
-  // Find the node which represents the last character of the prefix
-  for (let char of prefix) {
-    if (currentNode.children[char]) {
-      currentNode = currentNode.children[char];
-    } else {
-      return results;  // If no prefix is found, return an empty array
-    }
-  }
-
-  // Helper function to find all words from this node
-  const findAllWords = (node, currentPrefix) => {
-    if (node.isEndOfWord) {
-      results.push(currentPrefix);
-    }
-    for (let char in node.children) {
-      findAllWords(node.children[char], currentPrefix + char);
-    }
-  };
-
-  findAllWords(currentNode, prefix);
-  return results;
-}
-```
-
-## Common Interview Questions
-
-Tries are often featured in coding interviews, especially for problems related to string manipulation, autocomplete systems, and complex data retrieval. Here are some typical problems where tries are an effective solution:
-
-**Implementing a Phone Book:**
-
-Use a trie to manage a dynamic set of contacts, allowing efficient search, insert, and delete operations. This problem tests your ability to use tries in a practical application that involves prefix-based search.
-
-```js
-// Implementation would involve methods like insert, search, and maybe delete, similar to the Trie class discussed previously.
-```
-
-**Word Search:**
-
-Given a board of letters and a list of words, use a trie to find all the words on the board. This involves navigating the board in all possible directions from each cell and checking against the trie to see if a word exists.
-
-```js
-function findWords(board, words) {
-  const root = buildTrie(words);
-  const result = [];
-  for (let i = 0; i < board.length; i++) {
-    for (let j = 0; j < board[0].length; j++) {
-      dfs(board, i, j, root, result);
-    }
-  }
-  return result;
-
-  function dfs(board, i, j, node, result) {
-    let char = board[i][j];
-    if (char === '#' || !node.children[char]) {
-      return;
-    }
-    node = node.children[char];
-    if (node.isEndOfWord) {
-      result.push(node.word);  // store word
-      node.isEndOfWord = false; // prevent duplicate entries
+**Example:**
+```javascript
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
     }
 
-    board[i][j] = '#';  // mark visited
-    if (i > 0) dfs(board, i - 1, j, node, result);
-    if (j > 0) dfs(board, i, j - 1, node, result);
-    if (i < board.length - 1) dfs(board, i + 1, j, node, result);
-    if (j < board[0].length - 1) dfs(board, i, j + 1, node, result);
-    board[i][j] = char;  // restore letter
-  }
-
-  function buildTrie(words) {
-    const root = new TrieNode();
-    for (let word of words) {
-      let node = root;
-      for (let char of word) {
-        if (!node.children[char]) {
-          node.children[char] = new TrieNode();
+    insert(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
         }
-        node = node.children[char];
-      }
-      node.isEndOfWord = true;
-      node.word = word;
+        node.isEndOfWord = true;
     }
-    return root;
-  }
 }
 ```
 
-**Longest Common Prefix:**
+### **Searching for Words**
 
-Find the longest common prefix among a set of strings using a trie. This involves building a trie of all the strings and then finding the deepest path from the root that is common to all keys.
+**Example:**
+```javascript
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
+    }
 
-```js
-function longestCommonPrefix(strings) {
-  let root = buildTrie(strings);
-  let prefix = "";
-  while (root && !root.isEndOfWord && Object.keys(root.children).length === 1) {
-    let keys = Object.keys(root.children);
-    root = root.children[keys[0]];
-    prefix += keys[0];
-  }
-  return prefix;
+    insert(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
 }
 ```
 
-## Advanced Topics
+### **Checking for Prefixes**
 
-Advanced trie concepts include optimizations and specialized applications:
+**Example:**
+```javascript
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
+    }
 
-**Delete Operation:**
+    insert(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
 
-Deleting words from a trie efficiently involves recursively removing nodes that are no longer part of other words after the deletion of a specific word.
+    search(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
 
-**Autocomplete Suggestions:**
+    startsWith(prefix) {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return true;
+    }
+}
+```
 
-Extending the basic trie to support autocomplete functionalities involves traversing the trie to find all words stemming from a given prefix. This is crucial for applications like search engines or user interfaces.
+### **Deleting Words**
 
-## Exercises and Challenges
+**Example:**
+```javascript
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
+    }
 
-To master the trie data structure, here are some hands-on exercises and challenges:
+    insert(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
 
-**Implement and Extend Trie Functions:**
+    delete(word) {
+        const deleteRecursively = (node, word, depth = 0) => {
+            if (!node) return false;
 
-Add functions to count words, retrieve all words with a given prefix, and implement deletion.
-Modify the trie to handle different character sets or to be case-insensitive.
+            if (depth === word.length) {
+                if (!node.isEndOfWord) return false;
+                node.isEndOfWord = false;
+                return Object.keys(node.children).length === 0;
+            }
 
-**Problem-Solving:**
+            const char = word[depth];
+            if (deleteRecursively(node.children[char], word, depth + 1)) {
+                delete node.children[char];
+                return !node.isEndOfWord && Object.keys(node.children).length === 0;
+            }
+            return false;
+        };
 
-Use tries to solve complex problems like text justification, word boggle, or constructing palindromic sentences from a list of words.
-Mock Interviews and Problem-Solving Sessions:
-Regular practice sessions focused on trie-based problems can help you prepare for technical interviews and develop efficient problem-solving strategies.
+        deleteRecursively(this.root, word);
+    }
+}
+```
 
-## Understanding Tries
+## **Practical Tips and Tricks**
 
-Basic Concept
+- **Use Tries for Fast Prefix-Based Searches:**
+  Tries are very efficient for prefix-based searches, making them ideal for autocomplete systems.
+  **Example:**
+  ```javascript
+  let trie = new Trie();
+  trie.insert("apple");
+  trie.insert("app");
+  console.log(trie.startsWith("app"));  // Output: true
+  ```
 
-Structure: A trie is a tree-like data structure that stores a dynamic set of strings where each node represents a single character of a string. A path from the root to a node represents a prefix for one or several strings in the trie.
-Termination of Words: Nodes in a trie may contain a flag to indicate the end of a word. This helps distinguish between a word and a prefix.
+- **Handling Non-Alphabetic Characters:**
+  Tries can be extended to handle any set of characters, not just alphabetic ones.
+  **Example:**
+  ```javascript
+  let trie = new Trie();
+  trie.insert("12345");
+  trie.insert("123");
+  console.log(trie.startsWith("12"));  // Output: true
+  ```
 
-Key Properties
+- **Memory Usage:**
+  Be aware of the memory usage of tries, especially when storing a large number of strings with common prefixes.
 
-Space Optimization: Each node’s children are stored in an array or a hash map, which can significantly reduce the space needed as common prefixes are shared among entries.
-Time Efficiency: Searching for a key of length k takes O(k) time, making tries suitable for applications where search performance is critical.
+## **Common Gotchas**
 
-## Common Operations
+- **Case Sensitivity:**
+  Tries are case-sensitive by default. Ensure consistency in the case of characters being inserted and searched.
+  **Example:**
+  ```javascript
+  let trie = new Trie();
+  trie.insert("Apple");
+  console.log(trie.search("apple"));  // Output: false
+  ```
 
-Insertion: To insert a string, start at the root and travel down the tree following the path defined by the string characters. Create new nodes as necessary, and set an end-of-word flag at the last character of the string.
-Search: To search for a string, traverse from the root following the path defined by each character in the string. If the path exists and ends in a node marked as an end-of-word, the string is in the trie.
-Deletion: To delete a word, follow the path defined by the word and remove the end-of-word marker. If a node becomes empty (no children and no end-of-word marker), it can be deleted to free up space.
+- **Deleting Words:**
+  Ensure that deletion only removes the end-of-word marker if other words share the same prefix.
+  **Example:**
+  ```javascript
+  let trie = new Trie();
+  trie.insert("app");
+  trie.insert("apple");
+  trie.delete("app");
+  console.log(trie.search("apple"));  // Output: true
+  ```
 
-Implementation Example in JavaScript
+## **Advanced Topics**
 
-Here’s a basic example of how to implement a trie for storing strings:
+### **Autocomplete System**
 
-```js
+**Example:**
+```javascript
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
+
+    startsWith(prefix) {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return true;
+    }
+
+    autocomplete(prefix) {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return [];
+            }
+            node = node.children[char];
+        }
+        return this._collectWords(node, prefix);
+    }
+
+    _collectWords(node, prefix) {
+        let words = [];
+        if (node.isEndOfWord) {
+            words.push(prefix);
+        }
+        for (let char in node.children) {
+            words.push(...this._collectWords(node.children[char], prefix + char));
+        }
+        return words;
+    }
+}
+
+let trie = new Trie();
+trie.insert("apple");
+trie.insert("app");
+trie.insert("applet");
+trie.insert("banana");
+
+console.log(trie.autocomplete("app"));  // Output: ["app", "apple", "applet"]
+```
+
+### **Trie-Based Search Engine**
+
+**Example:**
+```javascript
+class TrieNode {
+    constructor() {
+        this.children = {};
+        this.isEndOfWord = false;
+        this.documentIds = new Set();
+    }
+}
+
+class Trie {
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word, documentId) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+            node.documentIds.add(documentId);
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word) {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return null;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord ? node.documentIds : null;
+    }
+
+    searchWithPrefix(prefix) {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return new Set();
+            }
+            node = node.children[char];
+        }
+        return this._collectDocumentIds(node);
+    }
+
+    _collectDocumentIds(node) {
+        let documentIds = new Set();
+        if (node.isEndOfWord) {
+            documentIds = new Set([...documentIds, ...node.documentIds]);
+        }
+        for (let char in node.children) {
+            documentIds = new Set([...documentIds, ...this._collectDocumentIds(node.children[char])]);
+        }
+        return documentIds;
+    }
+}
+
+let trie = new Trie();
+trie.insert("apple", 1);
+trie.insert("app", 1);
+trie.insert("applet", 2);
+trie.insert("banana", 3);
+
+console.log(trie.search("apple"));  // Output: Set { 1 }
+console.log(trie.searchWithPrefix("app"));  // Output: Set { 1, 2 }
+```
+
+## **Trie Algorithms**
+
+### **Word Search in a Grid**
+
+**Example:**
+```javascript
 class TrieNode {
     constructor() {
         this.children = {};
@@ -359,107 +408,189 @@ class Trie {
     }
 
     insert(word) {
-        let current = this.root;
+        let node = this.root;
         for (let char of word) {
-            if (!current.children[char]) {
-                current.children[char] = new TrieNode();
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
             }
-            current = current.children[char];
+            node = node.children[char];
         }
-        current.isEndOfWord = true;
+        node.isEndOfWord = true;
     }
 
     search(word) {
-        let current = this.root;
+        let node = this.root;
         for (let char of word) {
-            if (!current.children[char]) {
+            if (!node.children[char]) {
                 return false;
             }
-            current = current.children[char];
+            node = node.children[char];
         }
-        return current.isEndOfWord;
+        return node.isEndOfWord;
     }
 
-    // Additional methods like delete can be implemented as needed
+    startsWith(prefix) {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return true;
+    }
 }
+
+function findWords(board, words) {
+    let result = new Set();
+    let trie = new Trie();
+    for (let word of words) {
+        trie.insert(word);
+    }
+
+    let rows = board.length;
+    let cols = board[0].length;
+
+    function backtrack(row, col, node, path) {
+        if (node.isEndOfWord) {
+            result.add(path.join(''));
+        }
+
+        if (row < 0 || row >= rows || col < 0 || col >= cols || board[row][col] === '#') {
+            return;
+        }
+
+        let char = board[row][col];
+        if (!node.children[char]) {
+            return;
+        }
+
+        board[row][col] = '#';
+        path.push(char);
+
+        let directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+        for (let [dx, dy] of directions) {
+            backtrack(row + dx, col + dy, node.children[char], path);
+        }
+
+        path.pop();
+        board[row][col] = char;
+    }
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            backtrack(row, col, trie.root, []);
+        }
+    }
+
+    return Array.from(result);
+}
+
+let board = [
+    ['o', 'a', 'a', 'n'],
+    ['e', 't', 'a', 'e'],
+    ['i', 'h', 'k', 'r'],
+    ['i', 'f', 'l', 'v']
+];
+let words = ["oath", "pea", "eat", "rain"];
+console.log(findWords(board, words));  // Output: ["oath", "eat"]
 ```
 
-## Advanced Techniques and Considerations
+### **Implementing Ternary Search Trie**
 
-Auto-completion
+**Example:**
+```javascript
+class TSTNode {
+    constructor(char) {
+        this.char = char;
+        this.left = null;
+        this.middle = null;
+        this.right = null;
+        this.isEndOfWord = false;
+    }
+}
 
-Tries are exceptionally well-suited for implementing auto-completion features. By storing all possible continuations of a prefix as children of a given node, you can quickly retrieve all possible suffixes following a particular prefix.
+class TernarySearchTrie {
+    constructor() {
+        this.root = null;
+    }
 
-Prefix Counting
+    insert(word) {
+        this.root = this.insertRec(this.root, word, 0);
+    }
 
-Tries can be augmented to also store the count of words that share a particular prefix. This is useful for features like showing the number of search results while typing in a search query.
+    insertRec(node, word, index) {
+        let char = word[index];
 
-## Practical Applications
+        if (node === null) {
+            node = new TSTNode(char);
+        }
 
-Spell Checkers: By storing an entire dictionary in a trie, spell checkers can quickly suggest corrections and similar words.
-IP Routing: Tries can be used to store IP routing information efficiently, making them suitable for network routers to find destination networks based on IP addresses.
+        if (char < node.char) {
+            node.left = this.insertRec(node.left, word, index);
+        } else if (char > node.char) {
+            node.right = this.insertRec(node.right, word, index);
+        } else if (index < word.length - 1) {
+            node.middle = this.insertRec(node.middle, word, index + 1);
+        } else {
+            node.isEndOfWord = true;
+        }
 
-## Practical Interview Tips
+        return node;
+    }
 
-Problem Solving with Tries: Be prepared to solve problems that involve manipulating and searching large sets of strings or designing algorithms for features like spell checking or autocomplete.
-Optimization Discussions: Discuss the trade-offs involved in using tries versus other data structures like hash tables or balanced trees, particularly in terms of space vs. time.
-Real-World Examples: Explain how theoretical trie operations map to real-world applications, enhancing the practicality of your discussion.
+    search(word) {
+        let node = this.searchRec(this.root, word, 0);
+        return node !== null && node.isEndOfWord;
+    }
 
-## Advanced Trie Operations and Variants
+    searchRec(node, word, index) {
+        if (node === null) {
+            return null;
+        }
 
-Compressed Trie (Radix Tree)
+        let char = word[index];
 
-Efficiency Improvements: A compressed trie reduces the number of nodes by merging chains of nodes that have a single child. This can significantly reduce memory usage and improve lookup times, especially in sparse tries.
+        if (char < node.char) {
+            return this.searchRec(node.left, word, index);
+        } else if (char > node.char) {
+            return this.searchRec(node.right, word, index);
+        } else if (index < word.length - 1) {
+            return this.searchRec(node.middle, word, index + 1);
+        } else {
+            return node;
+        }
+    }
+}
 
-Ternary Search Tree
+let tst = new TernarySearchTrie();
+tst.insert("cat");
+tst.insert("cats");
+tst.insert("up");
+tst.insert("bug");
 
-Trade-offs: Ternary search trees (TSTs) blend elements of binary search trees and tries, providing a balance between the memory efficiency of tries and the speed of BSTs, especially useful for searches involving strings with a lot of common prefixes.
+console.log(tst.search("cats"));  // Output: true
+console.log(tst.search("bu"));    // Output: false
+```
 
-Suffix Trie
+## **Interview Tips and Tricks**
 
-Use Case: Often used for complex string operations like substring searches, suffix tries store every suffix of a given text, making them invaluable for text editing software and DNA sequence analysis.
+- **Understand Basic Operations:**
+  Be comfortable with implementing insert, search, startsWith, and delete operations.
+- **Practice Common Algorithms:**
+  Familiarize yourself with algorithms like autocomplete, spell checking, word search in a grid, and building a trie-based search engine.
+- **Consider Edge Cases:**
+  Always consider edge cases like empty strings, non-alphabetic characters, and case sensitivity.
+- **Optimize Space and Time:**
+  Understand how to implement tries efficiently and the trade-offs involved, especially in terms of memory usage.
 
-## Optimization Techniques
+## **Common Mistakes**
 
-Memory Optimization
+- **Case Sensitivity:**
+  Ensure consistency in character case during insertion and search operations.
+- **Memory Usage:**
+  Be aware of the memory overhead of storing large sets of strings with common prefixes.
+- **Handling Non-Alphabetic Characters:**
+  Ensure that the trie implementation can handle the character set required by the application.
 
-Node Structure: Reducing the size of trie nodes (e.g., using arrays of fixed size vs. hash maps for children) based on the expected character set can significantly impact memory usage.
-Lazy Expansion: Delay creating node children until absolutely necessary, which can save memory if many nodes would otherwise remain empty.
-
-Concurrency
-
-Thread-Safe Operations: Implementing a concurrent trie involves careful consideration of node mutations, potentially using lock-free techniques or fine-grained locking to ensure safe concurrent access.
-
-## Integration with Other Data Structures
-
-Hybrid Structures
-
-Combining tries with other data structures, such as hash tables for storing node children instead of arrays, can optimize performance based on specific use cases (e.g., dynamically sized character sets).
-
-Graph Representation
-
-Tries can be represented and manipulated as directed acyclic graphs (DAGs), especially in the context of minimizing the storage space for suffix trees or automating state machines.
-
-## Common Pitfalls
-
-Overhead Concerns
-
-While tries are highly efficient for certain types of lookups, the overhead of trie nodes (especially in languages without pointer optimizations) can be significant. Evaluating whether the use case justifies this overhead is crucial.
-
-Complexity of Implementation
-
-Implementing and maintaining tries, especially more complex variants like suffix trees or compressed tries, can be error-prone and require a deep understanding of the structure to avoid bugs.
-
-## Practical Interview Strategy
-
-Discuss Applications Beyond Text
-
-While tries are commonly associated with textual data, discussing their application in other domains (like routing or bioinformatics) can showcase a deeper understanding and versatility.
-
-Algorithmic Enhancements
-
-Be prepared to discuss how standard trie operations can be enhanced or optimized for specific scenarios, such as implementing deletion in a compressed trie or supporting wildcard characters in searches.
-
-Real-World Scalability
-
-Discuss scenarios where the scalability of tries to very large datasets might be a concern, and how you would address these issues in a real-world application, possibly involving distributed computing or specialized storage solutions.
+By mastering tries and understanding their intricacies, you will be well-equipped to handle a variety of interview questions and real-world problems involving prefix-based searches and efficient string storage. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.

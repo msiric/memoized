@@ -1,497 +1,332 @@
-export const metadata = {
-  title: 'Quickstart',
-  description:
-    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
+# **JavaScript Numbers**
+
+Numbers in JavaScript are a fundamental data type used to represent numeric values. JavaScript numbers are double-precision 64-bit binary format IEEE 754 values. This means they are floating-point numbers, and there is only one number type in JavaScript for both integers and floating-point numbers.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A number in JavaScript is a numeric data type used to perform arithmetic operations. JavaScript numbers can be integers, floating-point numbers, and special numeric values like `Infinity`, `-Infinity`, and `NaN` (Not-a-Number).
+
+**Common Use Cases:**
+- Performing arithmetic calculations.
+- Representing and manipulating date and time.
+- Working with user input that involves numeric data.
+- Implementing algorithms that require numerical computation.
+
+## **When to Use**
+- When performing mathematical calculations.
+- When working with any form of numerical data.
+- When needing to represent and manipulate dates and times.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Arithmetic operations (addition, subtraction, multiplication, division): O(1)
+- Parsing numbers from strings: O(n) (where n is the length of the string)
+- Converting numbers to strings: O(n) (where n is the number of digits)
+
+**Space Complexity:**
+- Depends on the representation of the number. Typically, it's constant space for individual numbers.
+
+## **Number Operations and Methods**
+
+### **Creating Numbers**
+
+**Example:**
+```javascript
+let integer = 42;
+let float = 3.14;
+let negative = -1;
+let scientific = 1.23e5;  // 123000
+let hex = 0xff;  // 255
+```
+
+### **Basic Arithmetic**
+
+**Example:**
+```javascript
+let a = 10;
+let b = 3;
+console.log(a + b);  // Output: 13
+console.log(a - b);  // Output: 7
+console.log(a * b);  // Output: 30
+console.log(a / b);  // Output: 3.3333333333333335
+console.log(a % b);  // Output: 1
+```
+
+### **Math Object Methods**
+
+**Example:**
+```javascript
+console.log(Math.PI);  // Output: 3.141592653589793
+console.log(Math.E);  // Output: 2.718281828459045
+
+console.log(Math.abs(-10));  // Output: 10
+console.log(Math.pow(2, 3));  // Output: 8
+console.log(Math.sqrt(16));  // Output: 4
+console.log(Math.round(4.6));  // Output: 5
+console.log(Math.ceil(4.2));  // Output: 5
+console.log(Math.floor(4.8));  // Output: 4
+console.log(Math.min(1, 2, 3));  // Output: 1
+console.log(Math.max(1, 2, 3));  // Output: 3
+console.log(Math.random());  // Output: Random number between 0 and 1
+```
+
+### **Special Numeric Values**
+
+**Example:**
+```javascript
+console.log(Infinity);  // Output: Infinity
+console.log(-Infinity);  // Output: -Infinity
+console.log(NaN);  // Output: NaN
+console.log(isNaN(NaN));  // Output: true
+console.log(isFinite(42));  // Output: true
+console.log(isFinite(Infinity));  // Output: false
+```
+
+### **Type Conversion**
+
+**Example:**
+```javascript
+let str = '123';
+let num = Number(str);
+console.log(num);  // Output: 123
+
+let strFloat = '123.45';
+let floatNum = parseFloat(strFloat);
+console.log(floatNum);  // Output: 123.45
+
+let strInt = '123.45';
+let intNum = parseInt(strInt);
+console.log(intNum);  // Output: 123
+```
+
+### **Number Formatting**
+
+**Example:**
+```javascript
+let num = 12345.6789;
+console.log(num.toFixed(2));  // Output: '12345.68'
+console.log(num.toPrecision(5));  // Output: '12346'
+console.log(num.toExponential(2));  // Output: '1.23e+4'
+console.log(num.toLocaleString());  // Output: '12,345.679' (varies by locale)
+```
+
+## **Practical Tips and Tricks**
+
+- **Using `Math.round` for Rounding:**
+  When you need to round a number to the nearest integer.
+  **Example:**
+  ```javascript
+  let num = 4.5;
+  console.log(Math.round(num));  // Output: 5
+  ```
+
+- **Generating Random Integers:**
+  Use `Math.random` in combination with `Math.floor` to generate random integers within a specific range.
+  **Example:**
+  ```javascript
+  function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  console.log(getRandomInt(1, 10));  // Output: Random integer between 1 and 10
+  ```
+
+- **Precision Issues with Floating-Point Arithmetic:**
+  Be aware of precision issues when working with floating-point numbers.
+  **Example:**
+  ```javascript
+  let a = 0.1;
+  let b = 0.2;
+  console.log(a + b);  // Output: 0.30000000000000004
+  ```
+
+- **Avoiding `parseInt` with Leading Zeros:**
+  `parseInt` interprets leading zeros as octal numbers in some cases. Use the radix parameter.
+  **Example:**
+  ```javascript
+  console.log(parseInt('010'));  // Output: 10 (modern JavaScript)
+  console.log(parseInt('010', 10));  // Output: 10 (explicit base 10)
+  ```
+
+## **Common Gotchas**
+
+- **NaN Propagation:**
+  Any arithmetic operation with `NaN` results in `NaN`.
+  **Example:**
+  ```javascript
+  let result = NaN + 5;
+  console.log(result);  // Output: NaN
+  ```
+
+- **Precision Errors:**
+  Floating-point arithmetic can lead to precision errors.
+  **Example:**
+  ```javascript
+  console.log(0.1 + 0.2 === 0.3);  // Output: false
+  ```
+
+- **Type Coercion:**
+  JavaScript implicitly converts types in some cases, which can lead to unexpected results.
+  **Example:**
+  ```javascript
+  console.log('5' - 3);  // Output: 2
+  console.log('5' + 3);  // Output: '53'
+  ```
+
+- **Infinity and Division by Zero:**
+  Dividing by zero results in `Infinity` or `-Infinity`.
+  **Example:**
+  ```javascript
+  console.log(1 / 0);  // Output: Infinity
+  console.log(-1 / 0);  // Output: -Infinity
+  ```
+
+## **Advanced Topics**
+
+### **BigInt**
+
+BigInt is a special numeric type that provides support for integers of arbitrary length. It can be used when integers larger than 2^53 - 1 are needed.
+
+**Example:**
+```javascript
+let bigInt = 1234567890123456789012345678901234567890n;
+console.log(bigInt);  // Output: 1234567890123456789012345678901234567890n
+
+let anotherBigInt = BigInt('1234567890123456789012345678901234567890');
+console.log(anotherBigInt);  // Output: 1234567890123456789012345678901234567890n
+
+let sum = bigInt + anotherBigInt;
+console.log(sum);  // Output: 2469135780246913578024691357802469135780n
+```
+
+### **Binary, Octal, and Hexadecimal Literals**
+
+JavaScript supports binary (`0b`), octal (`0o`), and hexadecimal (`0x`) literals for easier representation of these bases.
+
+**Example:**
+```javascript
+let binary = 0b1010;  // 10
+let octal = 0o12;  // 10
+let hex = 0xA;  // 10
+console.log(binary, octal, hex);  // Output: 10 10 10
+```
+
+### **Number Object Methods**
+
+JavaScript provides several useful methods for the `Number` object.
+
+**Example:**
+```javascript
+console.log(Number.isFinite(123));  // Output: true
+console.log(Number.isNaN(NaN));  // Output: true
+console.log(Number.isInteger(123.4));  // Output: false
+console.log(Number.parseFloat('123.45'));  // Output: 123.45
+console.log(Number.parseInt('123.45'));  // Output: 123
+```
+
+### **Handling Precision with `toFixed` and `toPrecision`**
+
+**Example:**
+```javascript
+let num = 123.456;
+console.log(num.toFixed(2));  // Output: '123.46'
+console.log(num.toPrecision(4));  // Output: '123.5'
+```
+
+## **Number Algorithms**
+
+### **Finding the Greatest Common Divisor (GCD)**
+
+**Example:**
+```javascript
+function gcd(a, b) {
+    while (b !== 0) {
+        let temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
 }
 
-# Comprehensive Guide to JavaScript Numbers
-
-In JavaScript, numbers are implemented as double-precision 64-bit binary format IEEE 754 values (commonly known as floating-point numbers). This implementation means that JavaScript does not differentiate between types of numbers, such as integers and floating points; all numbers are treated the same way.
-
-Uniform Number Type: JavaScript's unified approach simplifies the type system but introduces specific challenges, particularly in precision and handling very large or very small numbers.
-
-IEEE 754 Standard: This standard defines how numbers are stored and calculated, which can lead to precision issues that programmers need to be aware of, especially when performing arithmetic operations that require high precision.
-
-## Creating Numbers
-
-Numbers can be declared using literals directly in the code, which is straightforward and intuitive.
-
-**Using Literals:**
-
-```js
-let x = 123;
-let y = 93.75;
-let z = -456;
+console.log(gcd(48, 18));  // Output: 6
 ```
 
-**Number Constructor:**
+### **Prime Number Check**
 
-While not commonly used for creating new numbers (since the literal notation is shorter and faster), the Number() constructor can be useful for converting other types to numbers.
-
-```js
-let strNumber = "123";
-let num = Number(strNumber);
-console.log(num); // 123
-```
-
-## Number Properties
-
-The Number object in JavaScript holds several properties that are important for dealing with numeric values, especially to handle special numbers or edge cases.
-
-**Important Properties:**
-
-Number.MAX_VALUE: The largest positive representable number.
-
-```js
-console.log(Number.MAX_VALUE); // 1.7976931348623157e+308
-```
-
-Number.MIN_VALUE: The smallest positive representable number (closest to zero).
-
-```js
-console.log(Number.MIN_VALUE); // 5e-324
-```
-
-Number.POSITIVE_INFINITY and Number.NEGATIVE_INFINITY: Represent positive and negative infinity, used in overflow situations.
-
-```js
-console.log(1 / 0); // Infinity
-console.log(-1 / 0); // -Infinity
-```
-
-Number.NaN: Stands for "Not-a-Number", used to denote an unrepresentable or undefined result.
-
-```js
-console.log(0 / 0); // NaN
-```
-
-## Basic Arithmetic
-
-JavaScript provides standard arithmetic operations, but with nuances due to its floating-point number system.
-
-**Operations:**
-
-Addition, Subtraction, Multiplication, and Division:
-
-Simple arithmetic operations work as expected for the most part, but special attention must be given to the results, especially with division and multiplication.
-
-```js
-let sum = 0.1 + 0.2;  // Expect 0.3
-console.log(sum);  // Outputs: 0.30000000000000004
-```
-
-**Implications of Floating-Point Arithmetic:**
-
-Due to the IEEE 754 standard for floating-point arithmetic, operations can include errors when precision is vital. For example, adding 0.1 and 0.2 does not precisely equal 0.3 because of how these numbers are represented in binary.
-
-**Rounding Errors:**
-
-Such precision issues are important in scenarios like financial calculations, where rounding errors can lead to significant discrepancies.
-
-```js
-console.log((0.1 + 0.2).toFixed(2));  // "0.30", using toFixed to round to the nearest cent
-```
-
-## Advanced Numeric Functions
-
-The Math object in JavaScript provides many methods that help with more complex mathematical operations, crucial for calculations beyond basic arithmetic.
-
-**Key Methods:**
-
-Math.round(): Rounds to the nearest integer.
-
-```js
-console.log(Math.round(0.9));  // 1
-```
-
-Math.ceil(): Rounds a number upward to the nearest integer.
-
-```js
-console.log(Math.ceil(0.1));  // 1
-```
-
-Math.floor(): Rounds a number downward to the nearest integer.
-
-```js
-console.log(Math.floor(0.9));  // 0
-```
-
-Math.sqrt(): Returns the square root of a number.
-
-```js
-console.log(Math.sqrt(16));  // 4
-```
-
-Math.pow(): Raises a number to the power of another number.
-
-```js
-console.log(Math.pow(2, 3));  // 8
-```
-
-Math.random(): Generates a random number between 0 and 1.
-
-```js
-console.log(Math.random());  // Example output: 0.123456789
-```
-
-## Handling Precision
-
-Dealing with floating-point precision issues is critical in scenarios requiring high accuracy.
-
-**Common Techniques:**
-
-Using toFixed(): This method formats a number using fixed-point notation, often used to ensure a certain number of digits appear after the decimal place.
-
-```js
-let number = 0.1 + 0.2;
-console.log(number.toFixed(2));  // "0.30"
-```
-
-**Decimal Libraries:**
-
-When standard precision is not sufficient, especially in financial applications, libraries like decimal.js can be used to perform operations with arbitrary precision.
-
-```js
-// Example using decimal.js
-Decimal.set({ precision: 5 })
-let result = new Decimal(0.1).plus(new Decimal(0.2));
-console.log(result.toString());  // "0.3"
-```
-
-## Numeric Conversions and Parsing
-
-In JavaScript, converting strings to numbers is a common requirement, especially when dealing with user input or data serialization.
-
-**Methods for Converting Strings to Numbers:**
-
-parseInt() and parseFloat(): These functions parse a string argument and return an integer or floating-point number, respectively.
-
-```js
-console.log(parseInt("100px"));  // 100
-console.log(parseFloat("12.34em"));  // 12.34
-```
-
-The Unary + Operator: A quick and concise way to convert a value to a number.
-
-```js
-console.log(+"123");  // 123
-console.log(+"123.45");  // 123.45
-```
-
-Importance of Base in parseInt(): When using parseInt(), specifying the base (radix) is crucial for correctly parsing different numeral systems.
-
-```js
-console.log(parseInt("10", 10));  // 10, as a decimal integer
-console.log(parseInt("10", 16));  // 16, as a hexadecimal integer
-```
-
-## Common Numeric Problems in Interviews
-
-Interviews often feature problems that test numerical reasoning, manipulation, and the application of mathematical concepts.
-
-**Examples of Numeric Interview Problems:**
-
-Finding Prime Numbers: Use a sieve algorithm or trial division to determine primality.
-
-```js
+**Example:**
+```javascript
 function isPrime(num) {
-  for (let i = 2; i * i <= num; i++) {
-    if (num % i === 0) return false;
-  }
-  return num > 1;
+    if (num <= 1) return false;
+    if (num <= 3) return true;
+    if (num % 2 === 0 || num % 3 === 0) return false;
+
+    for (let i = 5; i * i <= num; i += 6) {
+        if (num % i === 0 || num % (i + 2) === 0) return false;
+    }
+
+    return true;
 }
+
+console.log(isPrime(11));  // Output: true
+console.log(isPrime(15));  // Output: false
 ```
 
-Calculating Factorials: Recursive or iterative solutions to compute factorial numbers.
+### **Generating Fibonacci Numbers**
 
-```js
-function factorial(n) {
-  if (n === 0) return 1;
-  let result = 1;
-  for (let i = 1; i <= n; i++) {
-    result *= i;
-  }
-  return result;
-}
-```
-
-Handling Large Integers: Use JavaScript's BigInt for very large integers.
-
-```js
-let largeNumber = BigInt(Number.MAX_SAFE_INTEGER) + BigInt(2);
-console.log(largeNumber);  // 9007199254740993n
-```
-
-Fibonacci Sequence: Efficient calculation using iterative methods.
-
-```js
+**Example:**
+```javascript
 function fibonacci(n) {
-  let a = 0, b = 1, c;
-  if (n === 0) return a;
-  for (let i = 2; i <= n; i++) {
-    c = a + b;
-    a = b;
-    b = c;
-  }
-  return b;
-}
-```
-
-Currency Formatting: Format numbers for display as prices.
-
-```js
-function formatCurrency(value) {
-  return '$' + value.toFixed(2);
-}
-console.log(formatCurrency(123.456));  // "$123.46"
-```
-
-## Debugging Numeric Issues
-
-Handling and debugging numeric issues can be challenging due to the subtleties of floating-point arithmetic and type conversions.
-
-**Strategies for Debugging Numeric Issues:**
-
-Check for Floating-Point Precision: Be wary of operations that assume perfect precision.
-
-Use Console Logs for Intermediate Values: Tracking how numbers change throughout your functions can help isolate where errors are introduced.
-
-Verify Type Conversions: Ensure that values are the expected type, especially after conversions, as JavaScript is loosely typed.
-
-Handling NaN and Infinity: Check operations to prevent unintended Infinity results and use isNaN() to check for NaN which can propagate through arithmetic operations unnoticed.
-
-## Exercises and Challenges
-
-Practicing with a variety of exercises is crucial to mastering the concepts we've discussed. Here are some exercises and challenges that range in difficulty:
-
-**Simple Arithmetic Calculations:**
-
-Write a function that calculates and returns the area of a circle given the radius.
-Implement a function that converts temperature from Celsius to Fahrenheit and vice versa.
-
-**Intermediate Challenges:**
-
-Create a function that solves quadratic equations using the quadratic formula. Ensure it can handle cases where there are no real roots.
-Develop a program that simulates rolling dice and calculates the statistical distribution of the outcomes over a large number of rolls.
-
-**Advanced Algorithmic Problems:**
-
-Implement an algorithm that finds all the prime factors of a given integer.
-Write a function that generates the first n numbers of the Fibonacci sequence using dynamic programming to optimize performance.
-Encourage using online coding platforms like LeetCode, HackerRank, or Codewars, which offer targeted problems on numeric algorithms to further hone these skills.
-
-## Interview Tips
-
-Being able to effectively describe numeric solutions during interviews is as important as solving the problems themselves. Here are some tips to enhance interview performance:
-
-**Clarity and Efficiency:**
-
-Always start by clearly defining the problem and outlining any assumptions.
-Discuss the time and space complexity of your proposed solution and why it’s efficient.
-
-**Accuracy in Explanations:**
-
-Be precise in how you describe operations and their results, particularly when dealing with edge cases.
-Use appropriate technical vocabulary to convey your understanding of the problem and solution.
-
-**Edge Cases:**
-
-Always consider edge cases in your solutions, such as zero, negative numbers, and very large values.
-
-Demonstrating awareness of these cases shows thoroughness in your problem-solving approach.
-
-## Tools and Resources
-
-To further explore and practice JavaScript numeric operations, here are some recommended tools and resources:
-
-**Tools:**
-
-Desmos Graphing Calculator: Great for visualizing functions and understanding complex equations.
-Wolfram Alpha: Useful for checking the results of complex calculations and understanding step-by-step solutions.
-
-**Resources:**
-
-MDN Web Docs: Offers comprehensive documentation on JavaScript's Number and Math objects.
-
-"JavaScript: The Definitive Guide" by David Flanagan: A thorough resource that includes details on how numbers and operations are handled in JavaScript.
-"JavaScript for Impatient Programmers" by Dr. Axel Rauschmayer: This book is great for understanding modern JavaScript, including ES6 features and numeric handling.
-
-## Understanding JavaScript Numbers
-
-Single Number Type
-
-JavaScript uses a single number type, Number, which is a double-precision 64-bit binary format IEEE 754 value (what many languages call "double"). This means there is no differentiation at the type level between integers and floats, which simplifies the language but introduces some challenges:
-
-```js
-let x = 0.1;
-let y = 0.2;
-let result = x + y; // Not exactly 0.3
-```
-
-Precision Issues
-
-Due to the binary floating-point format, some numbers can't be represented with perfect accuracy:
-
-```js
-console.log(0.1 + 0.2 === 0.3); // false
-```
-
-This is a classic floating-point precision issue, common in all languages that use IEEE 754 doubles, not just JavaScript.
-
-## Common Pitfalls and Misconceptions
-
-Safe Integer Range
-
-JavaScript numbers have a maximum safe integer range of -2^53 + 1 to 2^53 - 1. This is because numbers are stored with a finite precision, and not all integers outside this range can be represented accurately.
-
-```js
-console.log(Number.MAX_SAFE_INTEGER); // 9007199254740991
-console.log(Number.MIN_SAFE_INTEGER); // -9007199254740991
-```
-
-Operations involving integers larger than Number.MAX_SAFE_INTEGER or smaller than Number.MIN_SAFE_INTEGER can lead to precision loss and incorrect calculations.
-
-Checking for NaN
-
-The NaN (Not-a-Number) value is a unique aspect of JavaScript numbers. It's used to represent an undefined or erroneous numeric result. Special care is needed because NaN does not equal itself, and isNaN() must be used:
-
-```js
-let notANumber = 0 / 0; // NaN
-console.log(notANumber === NaN); // false
-console.log(isNaN(notANumber)); // true
-```
-
-## Performance Tips and Tricks
-
-Math Object for Mathematical Functions
-
-JavaScript provides the Math object that contains methods for mathematical constants and functions, which are highly optimized:
-
-```js
-let root = Math.sqrt(16); // 4
-let power = Math.pow(2, 3); // 8
-```
-
-These methods are not only concise but also usually faster than any equivalent functions you might manually code.
-
-Bitwise Operations
-
-Although JavaScript numbers are floating-point numbers, bitwise operations (|, &, ^, \<\<, >>) are performed on 32-bit signed integers. This can be used for some optimizations but requires careful handling to avoid unexpected behavior due to the conversion:
-
-```js
-let bitwiseResult = 1 | 2; // 3
-```
-
-Bitwise tricks can sometimes be used to perform integer-specific operations more quickly than their arithmetic counterparts.
-
-## Advanced Numeric Techniques
-
-Using BigInt for Large Integers
-
-For integers larger than Number.MAX_SAFE_INTEGER, JavaScript ES2020 introduced BigInt, an arbitrary-precision integer type:
-
-```js
-let bigNumber = BigInt(Number.MAX_SAFE_INTEGER) + 1n;
-console.log(bigNumber); // 9007199254740992n
-```
-
-BigInts can be used for accurately representing and manipulating large integers, which is particularly useful in domains like cryptography and when dealing with large datasets.
-
-Floating-Point Comparisons
-
-Due to precision issues with floating-point arithmetic, direct comparisons can lead to incorrect results. A common technique to compare floating-point numbers is to define a tolerance level:
-
-```js
-function areNumbersClose(a, b, tolerance = 0.000001) {
-    return Math.abs(a - b) < tolerance;
+    if (n <= 1) return n;
+    let fib = [0, 1];
+    for (let i = 2; i <= n; i++) {
+        fib[i] = fib[i - 1] + fib[i - 2];
+    }
+    return fib[n];
 }
 
-console.log(areNumbersClose(0.1 + 0.2, 0.3)); // true
+console.log(fibonacci(10));  // Output: 55
 ```
 
-## Number Conversion and Coercion
+### **Factorial Calculation**
 
-Implicit Coercion
-
-JavaScript performs type coercion in contexts involving mixed data types. This can lead to unexpected results, especially with arithmetic operations involving non-numeric types:
-
-```js
-let result = '3' + 2;  // "32", not 5
-let subtract = '10' - 5;  // 5, subtraction coerces into number
-```
-
-Being aware of these rules is crucial to avoid bugs and to use coercion to your advantage when needed.
-
-Explicit Conversion
-
-For reliable operations, explicit conversion to numbers is recommended when dealing with input data:
-
-```js
-let num = Number("123");  // converts string to number
-let int = parseInt("123px", 10);  // extracts integer from string
-let float = parseFloat("123.45");  // extracts floating-point number from string
-```
-
-Using these functions allows for clearer and more predictable code behavior, avoiding the pitfalls of JavaScript's type coercion.
-
-## Dealing with Decimal Operations
-
-Floating-Point Arithmetic
-
-Handling decimals in JavaScript can be tricky due to the floating-point precision issues. For operations requiring high precision, such as financial calculations, consider using a library designed to handle arbitrary precision arithmetic or decimals, like big.js or decimal.js.
-
-```js
-let sum = 0.1 + 0.2;  // 0.30000000000000004
-// Using a library might look like this:
-let Decimal = require('decimal.js');
-let result = new Decimal(0.1).add(new Decimal(0.2)).toFixed(2);  // "0.30"
-```
-
-Scaling Technique
-
-Another technique to handle precision issues is to scale numbers up, perform integer arithmetic, and then scale down:
-
-```js
-let result = (0.1 * 10 + 0.2 * 10) / 10;  // 0.3
-```
-
-This method can mitigate some of the issues but isn't foolproof for all cases and can still lead to errors in more complex calculations.
-
-## Advanced Mathematical Functions
-
-Trigonometric and Logarithmic Functions
-
-The Math object includes a suite of trigonometric and logarithmic functions, useful for scientific and engineering applications:
-
-```js
-let sine = Math.sin(Math.PI / 2);  // 1
-let log = Math.log(10);  // natural logarithm
-```
-
-These functions can be critical for algorithmic challenges that involve complex mathematical computations.
-
-## Performance Considerations
-
-Avoid Using Floats for Integer Operations
-
-Where possible, use integers instead of floats, especially in loops or high-volume calculations, to avoid the overhead of floating-point computation:
-
-```js
-for (let i = 0; i < 1000000; i++) {
-    // Integer operations
+**Example:**
+```javascript
+function factorial(n) {
+    if (n === 0 || n === 1) return 1;
+    return n * factorial(n - 1);
 }
+
+console.log(factorial(5));  // Output: 120
 ```
 
-Minimize Coercion Overhead
+## **Interview Tips and Tricks**
 
-Be aware of the potential overhead introduced by frequent type conversions and coercions, particularly in critical sections of code. Minimizing these can lead to performance gains.
+- **Understand Floating-Point Arithmetic:**
+  Be aware of precision issues with floating-point numbers and know how to handle them.
 
-## Utilizing Numeric Separators
+- **Practice Type Conversion:**
+  Be comfortable with converting between strings and numbers, and understand the nuances of `parseInt`, `parseFloat`, and `Number`.
 
-For better readability, especially with large numbers, ES2021 introduced numeric separators that allow underscores as digit separators:
+- **Master Common Algorithms:**
+  Familiarize yourself with common number algorithms such as GCD, prime checking, Fibonacci generation, and factorial calculation. These are frequently asked in interviews.
 
-```js
-let billion = 1_000_000_000;  // One billion
-let bytes = 0b1010_0001_1000_0101;  // Binary
-let hex = 0xA0_B0_C0;  // Hexadecimal
-```
+- **Edge Cases:**
+  Always consider edge cases such as very large numbers, very small numbers, and special values like `NaN`, `Infinity`, and `-Infinity`.
+
+## **Common Mistakes**
+
+- **Ignoring Precision Issues:**
+  Overlooking precision problems in floating-point arithmetic can lead to incorrect results.
+
+- **Type Coercion Pitfalls:**
+  Misunderstanding JavaScript's type coercion rules can result in unexpected behavior.
+
+- **Using `parseInt` Without Radix:**
+  Forgetting to specify the radix for `parseInt` can cause problems with leading zeros.
+
+- **Assuming All Numbers Are Safe Integers:**
+  JavaScript numbers can only safely represent integers in the range of `-(2^53 - 1)` to `(2^53 - 1)`. Use `BigInt` for larger integers.
+
+By mastering JavaScript numbers and understanding their intricacies, you will be well-equipped to handle a variety of interview questions and real-world problems involving numerical computations. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.

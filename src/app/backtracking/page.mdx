@@ -1,0 +1,361 @@
+# **Backtracking**
+
+Backtracking is a technique for solving computational problems incrementally, one piece at a time, and removing solutions that fail to satisfy the constraints of the problem at any point in time. It is often used to solve combinatorial problems.
+
+## **Concept and Use Cases**
+
+**Definition:**
+Backtracking is a method for finding all (or some) solutions to a problem by incrementally building candidates and abandoning them (backtracking) if they are not suitable.
+
+**Common Use Cases:**
+- Constraint satisfaction problems (e.g., Sudoku, N-Queens).
+- Combinatorial problems (e.g., permutations, subsets).
+- Pathfinding problems (e.g., maze solving).
+
+## **Key Concepts**
+
+1. **Incremental Construction:**
+   - Build the solution step by step, one piece at a time.
+   
+2. **Constraint Checking:**
+   - Check if the current partial solution is valid or should be abandoned.
+
+3. **Backtracking:**
+   - Abandon the current partial solution if it fails to satisfy constraints and backtrack to try another option.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Depends on the problem and the number of solutions. In the worst case, it can be exponential, O(b^d), where b is the branching factor and d is the depth of the tree.
+
+**Space Complexity:**
+- Depends on the depth of the recursion tree. Typically O(d), where d is the depth of the recursion tree.
+
+## **Backtracking Operations and Methods**
+
+### **N-Queens Problem**
+
+**Problem:**
+Place N queens on an N×N chessboard such that no two queens threaten each other.
+
+**Example:**
+```javascript
+function solveNQueens(n) {
+    let result = [];
+    let board = Array.from({ length: n }, () => Array(n).fill('.'));
+
+    function isSafe(board, row, col) {
+        for (let i = 0; i < col; i++) {
+            if (board[row][i] === 'Q') return false;
+        }
+        for (let i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+            if (board[i][j] === 'Q') return false;
+        }
+        for (let i = row, j = col; i < n && j >= 0; i++, j--) {
+            if (board[i][j] === 'Q') return false;
+        }
+        return true;
+    }
+
+    function solve(board, col) {
+        if (col === n) {
+            result.push(board.map(row => row.join('')));
+            return;
+        }
+        for (let i = 0; i < n; i++) {
+            if (isSafe(board, i, col)) {
+                board[i][col] = 'Q';
+                solve(board, col + 1);
+                board[i][col] = '.';
+            }
+        }
+    }
+
+    solve(board, 0);
+    return result;
+}
+
+console.log(solveNQueens(4));
+// Output: [
+//   [".Q..", "...Q", "Q...", "..Q."],
+//   ["..Q.", "Q...", "...Q", ".Q.."]
+// ]
+```
+
+### **Sudoku Solver**
+
+**Problem:**
+Fill a 9×9 grid so that each row, each column, and each of the nine 3×3 grids contain all of the digits from 1 to 9.
+
+**Example:**
+```javascript
+function solveSudoku(board) {
+    function isValid(board, row, col, num) {
+        for (let x = 0; x < 9; x++) {
+            if (board[row][x] === num || board[x][col] === num ||
+                board[Math.floor(row / 3) * 3 + Math.floor(x / 3)][Math.floor(col / 3) * 3 + x % 3] === num) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function solve() {
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                if (board[row][col] === '.') {
+                    for (let num = '1'; num <= '9'; num++) {
+                        if (isValid(board, row, col, num)) {
+                            board[row][col] = num;
+                            if (solve()) {
+                                return true;
+                            }
+                            board[row][col] = '.';
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    solve();
+}
+
+let board = [
+    ["5", "3", ".", ".", "7", ".", ".", ".", "."],
+    ["6", ".", ".", "1", "9", "5", ".", ".", "."],
+    [".", "9", "8", ".", ".", ".", ".", "6", "."],
+    ["8", ".", ".", ".", "6", ".", ".", ".", "3"],
+    ["4", ".", ".", "8", ".", "3", ".", ".", "1"],
+    ["7", ".", ".", ".", "2", ".", ".", ".", "6"],
+    [".", "6", ".", ".", ".", ".", "2", "8", "."],
+    [".", ".", ".", "4", "1", "9", ".", ".", "5"],
+    [".", ".", ".", ".", "8", ".", ".", "7", "9"]
+];
+
+solveSudoku(board);
+console.log(board);
+```
+
+### **Permutations**
+
+**Problem:**
+Generate all permutations of a given array of unique numbers.
+
+**Example:**
+```javascript
+function permute(nums) {
+    let result = [];
+
+    function backtrack(start) {
+        if (start === nums.length) {
+            result.push([...nums]);
+            return;
+        }
+        for (let i = start; i < nums.length; i++) {
+            [nums[start], nums[i]] = [nums[i], nums[start]];
+            backtrack(start + 1);
+            [nums[start], nums[i]] = [nums[i], nums[start]];
+        }
+    }
+
+    backtrack(0);
+    return result;
+}
+
+console.log(permute([1, 2, 3]));
+// Output: [
+//   [1, 2, 3],
+//   [1, 3, 2],
+//   [2, 1, 3],
+//   [2, 3, 1],
+//   [3, 2, 1],
+//   [3, 1, 2]
+// ]
+```
+
+### **Subset Sum**
+
+**Problem:**
+Find all subsets of a given set that sum up to a target value.
+
+**Example:**
+```javascript
+function subsetSum(nums, target) {
+    let result = [];
+
+    function backtrack(start, path, sum) {
+        if (sum === target) {
+            result.push([...path]);
+            return;
+        }
+        for (let i = start; i < nums.length; i++) {
+            if (sum + nums[i] <= target) {
+                path.push(nums[i]);
+                backtrack(i + 1, path, sum + nums[i]);
+                path.pop();
+            }
+        }
+    }
+
+    backtrack(0, [], 0);
+    return result;
+}
+
+console.log(subsetSum([2, 3, 6, 7], 7));
+// Output: [[7]]
+```
+
+## **Practical Tips and Tricks**
+
+- **Prune Early:**
+  Stop exploring a path as soon as it is determined to be invalid to save time.
+  
+- **Use Constraints:**
+  Apply constraints as early as possible to reduce the search space.
+
+- **Track State Efficiently:**
+  Use appropriate data structures to track the state (e.g., arrays, sets).
+
+## **Common Gotchas**
+
+- **Inefficient State Representation:**
+  Ensure the state is represented efficiently to avoid unnecessary computations.
+
+- **Deep Recursion:**
+  Be cautious of stack overflow with deep recursion. Consider using iterative solutions if needed.
+
+- **Incorrect Base Cases:**
+  Ensure that base cases are correctly defined to avoid infinite loops or incorrect results.
+
+## **Advanced Topics**
+
+### **Hamiltonian Path**
+
+**Problem:**
+Find a path in a graph that visits each vertex exactly once.
+
+**Example:**
+```javascript
+function hamiltonianPath(graph, V) {
+    let path = Array(V).fill(-1);
+    path[0] = 0;
+
+    function isSafe(v, pos) {
+        if (!graph[path[pos - 1]][v]) return false;
+        for (let i = 0; i < pos; i++) {
+            if (path[i] === v) return false;
+        }
+        return true;
+    }
+
+    function solve(pos) {
+        if (pos === V) return true;
+        for (let v = 1; v < V; v++) {
+            if (isSafe(v, pos)) {
+                path[pos] = v;
+                if (solve(pos + 1)) return true;
+                path[pos] = -1;
+            }
+        }
+        return false;
+    }
+
+    if (!solve(1)) {
+        console.log('No Hamiltonian Path found');
+        return false;
+    }
+
+    console.log('Hamiltonian Path:', path);
+    return true;
+}
+
+let graph = [
+    [0, 1, 1, 1, 0, 0, 0, 0],
+    [1, 0, 1, 0, 1, 0, 0, 0],
+    [1, 1, 0, 1, 1, 1, 0, 0],
+    [1, 0, 1, 0, 0, 1, 0, 0],
+    [0, 1, 1, 0, 0, 1, 1, 0],
+    [0, 0, 1, 1, 1, 0, 1, 1],
+    [0, 0, 0, 0, 1, 1, 0, 1],
+    [0, 0, 0, 0, 0, 1, 1, 0]
+];
+hamiltonianPath(graph, 8);
+```
+
+### **Word Search in a Grid**
+
+**Problem:**
+Given a 2D board and a word, find if the word exists in the grid. The word can be constructed from letters of sequentially adjacent cells, where "adjacent" cells are horizontally or vertically neighboring.
+
+**Example:**
+```javascript
+function exist(board, word) {
+    let rows = board.length;
+    let cols = board[0].length;
+
+    function dfs(row, col, index) {
+        if (index === word.length) return true;
+        if (row < 0 || row >= rows || col < 0 || col >= cols || board[row][col] !== word[index]) return false;
+
+        let temp = board[row][col];
+        board[row][col] = '#';
+
+        let found = dfs(row + 1, col, index + 1) ||
+                    dfs(row - 1, col, index + 1) ||
+                    dfs(row, col + 1, index + 1) ||
+                    dfs(row, col - 1, index + 1);
+
+        board[row][col] = temp;
+        return found;
+    }
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (board[row][col] === word[0] && dfs(row, col, 0)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+let board = [
+    ['A', 'B', 'C', 'E'],
+    ['S', 'F', 'C', 'S'],
+    ['A', 'D', 'E', 'E']
+];
+console.log(exist(board, 'ABCCED'));  // Output: true
+console.log(exist(board, 'SEE'));     // Output: true
+console.log(exist(board, 'ABCB'));    // Output: false
+```
+
+## **Interview Tips and Tricks**
+
+- **Start Simple:**
+  Begin with simple cases and gradually build up to more complex ones.
+
+- **Explain Your Approach:**
+  Clearly explain your approach and reasoning during interviews.
+
+- **Use Examples:**
+  Use examples to illustrate your approach and verify your solution.
+
+- **Optimize:**
+  Look for ways to prune the search space and optimize your solution.
+
+## **Common Mistakes**
+
+- **Incorrect Base Cases:**
+  Ensure that base cases are defined correctly to avoid infinite loops or incorrect results.
+
+- **Overlooking Constraints:**
+  Apply constraints as early as possible to reduce the search space.
+
+- **State Tracking:**
+  Properly manage the state (e.g., marking/unmarking cells in grid problems).
+
+By mastering backtracking and understanding its intricacies, you will be well-equipped to handle a variety of combinatorial and constraint satisfaction problems. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.

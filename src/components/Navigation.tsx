@@ -1,16 +1,20 @@
 'use client'
 
-import { useRef } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useRef } from 'react'
 
 import { Button } from '@/components/Button'
 import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
 import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
 import { remToPx } from '@/lib/remToPx'
+import { advancedTopics } from './AdvancedTopics'
+import { builtInDataStructures } from './BuiltInDataStructures'
+import { commonTechniques } from './CommonTechniques'
+import { userDefinedDataStructures } from './UserDefinedDataStructures'
 
 interface NavGroup {
   title: string
@@ -175,7 +179,7 @@ function NavigationGroup({
       <div className="relative mt-3 pl-2">
         <AnimatePresence initial={!isInsideMobileNavigation}>
           {isActiveGroup && (
-            <VisibleSectionHighlight group={group} pathname={pathname} />
+            <VisibleSectionHighlight group={group} pathname={pathname ?? ''} />
           )}
         </AnimatePresence>
         <motion.div
@@ -184,7 +188,7 @@ function NavigationGroup({
         />
         <AnimatePresence initial={false}>
           {isActiveGroup && (
-            <ActivePageMarker group={group} pathname={pathname} />
+            <ActivePageMarker group={group} pathname={pathname ?? ''} />
           )}
         </AnimatePresence>
         <ul role="list" className="border-l border-transparent">
@@ -231,26 +235,20 @@ function NavigationGroup({
 
 export const navigation: Array<NavGroup> = [
   {
-    title: 'Guides',
-    links: [
-      { title: 'Introduction', href: '/' },
-      { title: 'Quickstart', href: '/quickstart' },
-      { title: 'SDKs', href: '/sdks' },
-      { title: 'Authentication', href: '/authentication' },
-      { title: 'Pagination', href: '/pagination' },
-      { title: 'Errors', href: '/errors' },
-      { title: 'Webhooks', href: '/webhooks' },
-    ],
+    title: 'Built-In Data Structures',
+    links: [...builtInDataStructures],
   },
   {
-    title: 'Resources',
-    links: [
-      { title: 'Contacts', href: '/contacts' },
-      { title: 'Conversations', href: '/conversations' },
-      { title: 'Messages', href: '/messages' },
-      { title: 'Groups', href: '/groups' },
-      { title: 'Attachments', href: '/attachments' },
-    ],
+    title: 'User-Defined Data Structures',
+    links: [...userDefinedDataStructures],
+  },
+  {
+    title: 'Common Techniques',
+    links: [...commonTechniques],
+  },
+  {
+    title: 'Advanced Topics',
+    links: [...advancedTopics],
   },
 ]
 
