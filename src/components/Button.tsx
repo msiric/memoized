@@ -1,5 +1,5 @@
-import Link from 'next/link'
 import clsx from 'clsx'
+import Link from 'next/link'
 
 function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
@@ -14,7 +14,7 @@ function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   )
 }
 
-const variantStyles = {
+export const variantStyles = {
   primary:
     'rounded-full bg-zinc-900 py-1 px-3 text-white hover:bg-zinc-700 dark:bg-lime-400/10 dark:text-lime-400 dark:ring-1 dark:ring-inset dark:ring-lime-400/20 dark:hover:bg-lime-400/10 dark:hover:text-lime-300 dark:hover:ring-lime-300',
   secondary:
@@ -26,9 +26,10 @@ const variantStyles = {
   text: 'text-lime-500 hover:text-lime-600 dark:text-lime-400 dark:hover:text-lime-500',
 }
 
-type ButtonProps = {
+export type ButtonProps = {
   variant?: keyof typeof variantStyles
   arrow?: 'left' | 'right'
+  disabled?: boolean
 } & (
   | React.ComponentPropsWithoutRef<typeof Link>
   | (React.ComponentPropsWithoutRef<'button'> & { href?: undefined })
@@ -39,11 +40,13 @@ export function Button({
   className,
   children,
   arrow,
+  disabled,
   ...props
 }: ButtonProps) {
   className = clsx(
     'inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition',
     variantStyles[variant],
+    disabled && 'opacity-50 cursor-not-allowed',
     className,
   )
 
@@ -68,9 +71,17 @@ export function Button({
 
   if (typeof props.href === 'undefined') {
     return (
-      <button className={className} {...props}>
+      <button className={className} disabled={disabled} {...props}>
         {inner}
       </button>
+    )
+  }
+
+  if (disabled) {
+    return (
+      <span className={className} {...props}>
+        {inner}
+      </span>
     )
   }
 

@@ -1,14 +1,14 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { Logo } from '@/components/Logo'
 import { Navigation } from '@/components/Navigation'
-import { type Section, SectionProvider } from '@/components/SectionProvider'
+import { SectionProvider, type Section } from '@/components/SectionProvider'
 
 export function Layout({
   children,
@@ -20,7 +20,7 @@ export function Layout({
   let pathname = usePathname()
 
   return (
-    <SectionProvider sections={allSections[pathname] ?? []}>
+    <SectionProvider sections={allSections[pathname ?? ''] ?? []}>
       <div className="h-full lg:ml-72 xl:ml-80">
         <motion.header
           layoutScroll

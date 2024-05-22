@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { SignIn } from '@/components/SignIn'
+import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider, useTheme } from 'next-themes'
+import { useEffect } from 'react'
 
 function ThemeWatcher() {
   let { resolvedTheme, setTheme } = useTheme()
@@ -29,9 +31,12 @@ function ThemeWatcher() {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider attribute="class" disableTransitionOnChange>
-      <ThemeWatcher />
-      {children}
-    </ThemeProvider>
+    <SessionProvider>
+      <ThemeProvider attribute="class" disableTransitionOnChange>
+        <ThemeWatcher />
+        {children}
+        <SignIn />
+      </ThemeProvider>
+    </SessionProvider>
   )
 }

@@ -6,12 +6,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRef } from 'react'
 
-import { Button } from '@/components/Button'
 import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
 import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
 import { remToPx } from '@/lib/remToPx'
 import { advancedTopics } from './AdvancedTopics'
+import { AuthButton } from './AuthButton'
 import { builtInDataStructures } from './BuiltInDataStructures'
 import { commonTechniques } from './CommonTechniques'
 import { userDefinedDataStructures } from './UserDefinedDataStructures'
@@ -267,9 +267,7 @@ export function Navigation(props: React.ComponentPropsWithoutRef<'nav'>) {
           />
         ))}
         <li className="sticky bottom-0 z-10 mt-6 min-[416px]:hidden">
-          <Button href="#" variant="filled" className="w-full">
-            Sign in
-          </Button>
+          <AuthButton variant="filled" className="w-full" />
         </li>
       </ul>
     </nav>
