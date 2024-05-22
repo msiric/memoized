@@ -87,6 +87,9 @@ web_modules/
 .next
 out
 
+#Husky
+.husky/
+
 # Nuxt.js build / generate output
 .nuxt
 dist

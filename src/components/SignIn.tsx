@@ -2,6 +2,7 @@ import { appName } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import clsx from 'clsx'
 import { signIn } from 'next-auth/react'
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 export const SignIn = () => {
@@ -65,9 +66,12 @@ export const SignIn = () => {
         ref={modalRef}
       >
         <div className="mt-2 space-y-4">
-          <img
+          <Image
+            alt="Logo"
             src="https://www.svgrepo.com/show/475643/dribbble-color.svg"
             className="mx-auto w-10"
+            width="40"
+            height="40"
           />
           <h2 className="mb-8 text-center text-2xl font-bold text-cyan-900 dark:text-white">
             Log in to unlock the best of {appName}
@@ -88,10 +92,12 @@ export const SignIn = () => {
             )}
           >
             <div className="relative flex items-center justify-center space-x-4">
-              <img
+              <Image
                 src="https://www.svgrepo.com/show/475656/google-color.svg"
                 className="absolute left-0 w-5"
-                alt="google logo"
+                alt="Google logo"
+                width="20"
+                height="20"
               />
               <span className="block w-max text-sm font-semibold tracking-wide text-gray-700 transition duration-300 group-hover:text-lime-500 sm:text-base dark:text-white">
                 Continue with Google
