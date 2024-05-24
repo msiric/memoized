@@ -1,3 +1,5 @@
+import prisma from '@/lib/prisma'
+import { AuthProvider } from '@/types'
 import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
@@ -25,6 +27,61 @@ const handler = NextAuth({
     strategy: 'jwt',
   },
   secret: process.env.NEXTAUTH_SECRET as string,
+  callbacks: {
+    async session({ session, user, token }) {
+      if (session?.user) {
+        session.id = token.uid as string
+        session.userId = token.userId as string
+        session.provider = token.provider as AuthProvider
+      }
+      return session
+    },
+    async signIn({ user, account }) {
+      const email = user.email
+      const providerAccountId = account?.providerAccountId
+      const provider = account?.provider
+
+      if (!email || !providerAccountId || !provider) return false
+
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          accounts: {
+            some: {
+              provider,
+              providerAccountId,
+            },
+          },
+        },
+      })
+
+      if (existingUser) {
+        return true
+      }
+
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          name: user.name,
+          accounts: {
+            create: {
+              provider,
+              providerAccountId,
+            },
+          },
+        },
+      })
+
+      return newUser ? true : false
+    },
+    async jwt({ user, token }) {
+      if (user) {
+        token.uid = user.id
+        token.userId = user.userId
+        token.provider = user.provider
+      }
+      return token
+    },
+  },
 })
 
 export { handler as GET, handler as POST }

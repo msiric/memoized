@@ -6,39 +6,41 @@ export const userDefinedDataStructures = [
     href: '/linked-lists',
     title: 'Linked Lists',
     description:
-      'Read about the different types of errors returned by the API.',
+      'Learn about the various types of linked lists and their operations.',
   },
   {
     href: '/stacks',
     title: 'Stacks',
     description:
-      'Read about the different types of errors returned by the API.',
+      'Explore stack operations and their applications in computer science.',
   },
   {
     href: '/queues',
     title: 'Queues',
-    description: 'Learn how to authenticate your API requests.',
+    description:
+      'Understand the FIFO principle and how queues are implemented.',
   },
   {
     href: '/heaps',
     title: 'Heaps',
-    description: 'Understand how to work with paginated responses.',
+    description: 'Discover heap structures and their use in priority queues.',
   },
   {
     href: '/trees',
     title: 'Trees',
-    description: 'Understand how to work with paginated responses.',
+    description: 'Study tree structures and their traversal algorithms.',
   },
   {
     href: '/graphs',
     title: 'Graphs',
-    description: 'Understand how to work with paginated responses.',
+    description:
+      'Learn about graph representations and graph traversal methods.',
   },
   {
     href: '/tries',
     title: 'Tries',
     description:
-      'Learn how to programmatically configure webhooks for your app.',
+      'Understand trie data structures and their use in efficient searching.',
   },
 ]
 

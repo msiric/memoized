@@ -1,5 +1,6 @@
 'use client'
 
+import { remToPx } from '@/utils/helpers'
 import {
   createContext,
   useContext,
@@ -7,9 +8,7 @@ import {
   useLayoutEffect,
   useState,
 } from 'react'
-import { type StoreApi, createStore, useStore } from 'zustand'
-
-import { remToPx } from '@/lib/remToPx'
+import { createStore, useStore, type StoreApi } from 'zustand'
 
 export interface Section {
   id: string

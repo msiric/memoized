@@ -5,40 +5,40 @@ export const builtInDataStructures = [
   {
     href: '/strings',
     title: 'Strings',
-    description:
-      'Read about the different types of errors returned by the API.',
+    description: 'Explore string methods and their usage in JavaScript.',
   },
   {
     href: '/numbers',
     title: 'Numbers',
     description:
-      'Read about the different types of errors returned by the API.',
+      'Understand numerical operations and the Number object in JavaScript.',
   },
   {
     href: '/arrays',
     title: 'Arrays',
-    description: 'Learn how to authenticate your API requests.',
+    description: 'Learn about array methods and how to manipulate arrays.',
   },
   {
     href: '/objects',
     title: 'Objects',
-    description: 'Understand how to work with paginated responses.',
+    description:
+      'Discover object properties and how to work with objects in JavaScript.',
   },
   {
     href: '/sets',
     title: 'Sets',
-    description: 'Understand how to work with paginated responses.',
+    description: 'Understand the Set object and its unique element storage.',
   },
   {
     href: '/maps',
     title: 'Maps',
-    description: 'Understand how to work with paginated responses.',
+    description: 'Learn about the Map object and key-value pair management.',
   },
   {
     href: '/remaining-primitives',
     title: 'Remaining Primitives',
     description:
-      'Learn how to programmatically configure webhooks for your app.',
+      'Explore other JavaScript primitives such as boolean, null, and undefined.',
   },
 ]
 

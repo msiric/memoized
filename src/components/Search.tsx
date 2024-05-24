@@ -1,6 +1,15 @@
 'use client'
 
 import {
+  createAutocomplete,
+  type AutocompleteApi,
+  type AutocompleteCollection,
+  type AutocompleteState,
+} from '@algolia/autocomplete-core'
+import { Dialog, Transition } from '@headlessui/react'
+import clsx from 'clsx'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import {
   forwardRef,
   Fragment,
   Suspense,
@@ -11,15 +20,6 @@ import {
   useState,
 } from 'react'
 import Highlighter from 'react-highlight-words'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import {
-  type AutocompleteApi,
-  createAutocomplete,
-  type AutocompleteState,
-  type AutocompleteCollection,
-} from '@algolia/autocomplete-core'
-import { Dialog, Transition } from '@headlessui/react'
-import clsx from 'clsx'
 
 import { navigation } from '@/components/Navigation'
 import { type Result } from '@/mdx/search.mjs'
@@ -344,7 +344,7 @@ function SearchDialog({
     }
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
+      if (event.key === '/') {
         event.preventDefault()
         setOpen(true)
       }
@@ -454,14 +454,7 @@ function useSearchProps() {
 }
 
 export function Search() {
-  let [modifierKey, setModifierKey] = useState<string>()
   let { buttonProps, dialogProps } = useSearchProps()
-
-  useEffect(() => {
-    setModifierKey(
-      /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl ',
-    )
-  }, [])
 
   return (
     <div className="hidden lg:block lg:max-w-md lg:flex-auto">
@@ -473,8 +466,9 @@ export function Search() {
         <SearchIcon className="h-5 w-5 stroke-current" />
         Find something...
         <kbd className="ml-auto text-2xs text-zinc-400 dark:text-zinc-500">
-          <kbd className="font-sans">{modifierKey}</kbd>
-          <kbd className="font-sans">K</kbd>
+          <kbd className="flex h-5 w-5 items-center justify-center rounded-lg rounded-md border border-gray-200 bg-transparent p-1 font-sans dark:border-gray-500 dark:text-zinc-500">
+            /
+          </kbd>
         </kbd>
       </button>
       <Suspense fallback={null}>

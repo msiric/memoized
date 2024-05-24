@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import clsx from 'clsx'
 
-import { Feedback } from '@/components/Feedback'
+import { LessonStatus } from '@/components/LessonStatus'
 import { Heading } from '@/components/Heading'
 import { Prose } from '@/components/Prose'
 import { NextPage } from './NextPage'
@@ -19,7 +19,7 @@ export function wrapper({ children }: { children: React.ReactNode }) {
         <NextPage />
       </div>
       <footer className="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
-        <Feedback />
+        <LessonStatus />
       </footer>
     </article>
   )

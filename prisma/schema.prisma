@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  name       String?
+  email      String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  accounts   Account[]
+  subscriptions Subscription[]
+  progress   UserProgress[]
+}
+
+model Account {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  provider          String
+  providerAccountId String
+  createdAt         DateTime  @default(now())
+  user              User      @relation(fields: [userId], references: [id])
+  
+  @@unique([provider, providerAccountId])
+}
+
+model Content {
+  id         Int      @id @default(autoincrement())
+  title      String
+  description String?
+  slug       String   @unique
+  body       String
+  isPremium  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  progress   UserProgress[]
+}
+
+model Subscription {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  plan      String
+  status    String
+  startDate DateTime
+  endDate   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model UserProgress {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  contentId  Int
+  completed  Boolean  @default(false)
+  completedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+  content    Content  @relation(fields: [contentId], references: [id])
+
+  @@unique([userId, contentId])
+}
