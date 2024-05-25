@@ -7,7 +7,7 @@ import slugify from 'slugify'
 const prisma = new PrismaClient()
 
 async function syncContent() {
-  const contentDir = path.join(process.cwd(), 'src/app')
+  const contentDir = path.join(process.cwd(), 'src/app/(course)')
 
   for (let course of completeCurriculum) {
     const {

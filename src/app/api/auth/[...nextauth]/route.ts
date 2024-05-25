@@ -71,13 +71,6 @@ const handler = NextAuth({
               providerAccountId,
             },
           },
-          subscriptions: {
-            create: {
-              plan: SubscriptionPlan.MONTHLY,
-              status: SubscriptionStatus.ACTIVE,
-              startDate: new Date(),
-            },
-          },
         },
       })
 
