@@ -7,7 +7,7 @@ import {
 } from '@prisma/client'
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET ?? ''
-const webhookSecret = process.env.STRIPE_WEBHOOK ?? ''
+const STRIPE_WEBHOOK = process.env.STRIPE_WEBHOOK ?? ''
 
 const stripe = new Stripe(STRIPE_SECRET, {
   apiVersion: '2024-04-10',
@@ -15,11 +15,11 @@ const stripe = new Stripe(STRIPE_SECRET, {
 
 const prisma = new PrismaClient()
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// }
 
 const TEST_SUBSCRIPTION = {
   id: 'sub_1PK2fPBOG7dj7GmqpuWZLVra',
@@ -236,7 +236,7 @@ export async function POST(req: NextRequest) {
   let event: Stripe.Event
 
   try {
-    event = stripe.webhooks.constructEvent(buf, sig, webhookSecret)
+    event = stripe.webhooks.constructEvent(buf, sig, STRIPE_WEBHOOK)
   } catch (err) {
     return new NextResponse(`Webhook Error: ${(err as Error).message}`, {
       status: 400,
@@ -269,24 +269,66 @@ async function handleSubscriptionEvent(subscription: Stripe.Subscription) {
     ? new Date(subscription.ended_at * 1000)
     : null
 
-  if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
-    await prisma.subscription.updateMany({
-      where: { userId, stripeId: subscription.id },
-      data: { status, endDate },
+  try {
+    await prisma.$transaction(async (prisma) => {
+      if (
+        subscription.status === 'canceled' ||
+        subscription.status === 'unpaid'
+      ) {
+        await prisma.subscription.updateMany({
+          where: { userId, stripeId: subscription.id },
+          data: { status, endDate },
+        })
+      } else {
+        await prisma.subscription.upsert({
+          where: { stripeId: subscription.id },
+          update: { plan, status, startDate, endDate },
+          create: {
+            userId,
+            stripeId: subscription.id,
+            plan,
+            status,
+            startDate,
+            endDate,
+          },
+        })
+      }
     })
-  } else {
-    await prisma.subscription.upsert({
-      where: { stripeId: subscription.id },
-      update: { plan, status, startDate, endDate },
-      create: {
-        userId,
-        stripeId: subscription.id,
-        plan,
-        status,
-        startDate,
-        endDate,
-      },
-    })
+  } catch (error) {
+    console.error(`Database transaction failed: ${error}`)
+    // Compensation logic
+    await handleFailedSubscription(subscription)
+  }
+}
+
+async function handleFailedSubscription(subscription: Stripe.Subscription) {
+  try {
+    // Cancel the subscription
+    await stripe.subscriptions.cancel(subscription.id)
+    console.log(`Successfully canceled Stripe subscription: ${subscription.id}`)
+
+    // Issue a refund if there was an initial payment
+    if (subscription.latest_invoice) {
+      const invoice = await stripe.invoices.retrieve(
+        subscription.latest_invoice as string,
+      )
+      if (invoice.payment_intent) {
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          invoice.payment_intent as string,
+        )
+        if (paymentIntent.status === 'succeeded') {
+          await stripe.refunds.create({
+            payment_intent: paymentIntent.id,
+          })
+          console.log(
+            `Successfully refunded payment intent: ${paymentIntent.id}`,
+          )
+        }
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to handle failed subscription: ${error}`)
+    // Additional error handling or alerts can be placed here
   }
 }
 
