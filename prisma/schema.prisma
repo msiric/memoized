@@ -13,15 +13,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AccessOptions {
+  FREE
+  PREMIUM
+}
+
+enum SubscriptionPlan {
+  MONTHLY
+  YEARLY
+  LIFETIME
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String?
-  email      String   @unique
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  accounts   Account[]
-  subscriptions Subscription[]
-  progress   UserProgress[]
+  id              Int              @id @default(autoincrement())
+  name            String?
+  email           String           @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  accounts        Account[]
+  subscriptions   Subscription[]
+  progress        UserProgress[]
 }
 
 model Account {
@@ -36,27 +53,29 @@ model Account {
 }
 
 model Content {
-  id         Int      @id @default(autoincrement())
-  title      String
+  id          Int              @id @default(autoincrement())
+  title       String
   description String?
-  slug       String   @unique
-  body       String
-  isPremium  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  progress   UserProgress[]
+  slug        String           @unique
+  body        String
+  access      AccessOptions    @default(FREE)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  courseId    Int
+  course      Course           @relation(fields: [courseId], references: [id])
+  progress    UserProgress[]
 }
 
 model Subscription {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  plan      String
-  status    String
-  startDate DateTime
-  endDate   DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
+  id          Int               @id @default(autoincrement())
+  userId      Int
+  plan        SubscriptionPlan
+  status      SubscriptionStatus
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User              @relation(fields: [userId], references: [id])
 }
 
 model UserProgress {
@@ -71,4 +90,14 @@ model UserProgress {
   content    Content  @relation(fields: [contentId], references: [id])
 
   @@unique([userId, contentId])
+}
+
+model Course {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String?
+  slug        String           @unique
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  content     Content[]
 }

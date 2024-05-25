@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { AuthProvider } from '@/types'
+import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
@@ -28,7 +29,7 @@ const handler = NextAuth({
   },
   secret: process.env.NEXTAUTH_SECRET as string,
   callbacks: {
-    async session({ session, user, token }) {
+    async session({ session, token }) {
       if (session?.user) {
         session.id = token.uid as string
         session.userId = token.userId as string
@@ -43,6 +44,7 @@ const handler = NextAuth({
 
       if (!email || !providerAccountId || !provider) return false
 
+      // Check if the user already exists
       const existingUser = await prisma.user.findFirst({
         where: {
           accounts: {
@@ -58,6 +60,7 @@ const handler = NextAuth({
         return true
       }
 
+      // Create new user and account
       const newUser = await prisma.user.create({
         data: {
           email,
@@ -66,6 +69,13 @@ const handler = NextAuth({
             create: {
               provider,
               providerAccountId,
+            },
+          },
+          subscriptions: {
+            create: {
+              plan: SubscriptionPlan.MONTHLY,
+              status: SubscriptionStatus.ACTIVE,
+              startDate: new Date(),
             },
           },
         },

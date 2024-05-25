@@ -6,8 +6,15 @@ import { userDefinedDataStructures } from '@/components/UserDefinedDataStructure
 export const appName = 'Memoized'
 
 export const completeCurriculum = [
-  ...builtInDataStructures,
-  ...userDefinedDataStructures,
-  ...commonTechniques,
-  ...advancedTopics,
+  {
+    id: 'dsAlgo',
+    title: 'Data Structures and Algorithms',
+    description: 'The complete coding interview preparation',
+    curriculum: [
+      ...builtInDataStructures,
+      ...userDefinedDataStructures,
+      ...commonTechniques,
+      ...advancedTopics,
+    ],
+  },
 ]

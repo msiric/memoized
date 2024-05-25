@@ -1,5 +1,5 @@
 import { completeCurriculum } from '@/constants'
-import { PrismaClient } from '@prisma/client'
+import { AccessOptions, PrismaClient } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
@@ -9,36 +9,64 @@ const prisma = new PrismaClient()
 async function syncContent() {
   const contentDir = path.join(process.cwd(), 'src/app')
 
-  for (const item of completeCurriculum) {
-    const { title, description, href } = item
-    const slug = slugify(title, { lower: true })
+  for (let course of completeCurriculum) {
+    const {
+      title: courseTitle,
+      description: courseDescription,
+      curriculum: courseCurriculum,
+    } = course
+    const courseSlug = slugify(courseTitle, { lower: true })
 
-    const filePath = path.join(contentDir, href, 'page.mdx')
-    if (!fs.existsSync(filePath)) {
-      console.error(`File not found: ${filePath}`)
-      continue
-    }
-
-    const fileContents = fs.readFileSync(filePath, 'utf-8')
-
-    await prisma.content.upsert({
-      where: { slug },
+    const courseRecord = await prisma.course.upsert({
+      where: { slug: courseSlug },
       update: {
-        title,
-        description,
-        body: fileContents,
-        isPremium: false,
+        title: courseTitle,
+        description: courseDescription,
       },
       create: {
-        title,
-        description,
-        slug,
-        body: fileContents,
-        isPremium: false,
+        title: courseTitle,
+        description: courseDescription,
+        slug: courseSlug,
       },
     })
 
-    console.log(`Synced: ${title}`)
+    for (let item of courseCurriculum) {
+      const {
+        title: contentTitle,
+        description: contentDescription,
+        href: contentHref,
+      } = item
+      const slug = slugify(contentTitle, { lower: true })
+
+      const filePath = path.join(contentDir, contentHref, 'page.mdx')
+      if (!fs.existsSync(filePath)) {
+        console.error(`File not found: ${filePath}`)
+        continue
+      }
+
+      const fileContents = fs.readFileSync(filePath, 'utf-8')
+
+      await prisma.content.upsert({
+        where: { slug },
+        update: {
+          title: contentTitle,
+          description: contentDescription,
+          body: fileContents,
+          access: AccessOptions.FREE,
+          courseId: courseRecord.id,
+        },
+        create: {
+          title: contentTitle,
+          description: contentDescription,
+          slug,
+          body: fileContents,
+          access: AccessOptions.FREE,
+          courseId: courseRecord.id,
+        },
+      })
+
+      console.log(`Synced: ${contentTitle}`)
+    }
   }
 
   await prisma.$disconnect()
