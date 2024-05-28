@@ -11,7 +11,8 @@
     "prepare": "husky",
     "migrate": "npx prisma migrate dev",
     "generate": "npx prisma generate",
-    "sync": "tsx src/scripts/sync-content.ts"
+    "sync": "tsx src/scripts/sync-content.ts",
+    "webhook": "stripe listen --forward-to localhost:3000/api/webhook"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {

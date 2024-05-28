@@ -267,7 +267,7 @@ export function Navigation(props: React.ComponentPropsWithoutRef<'nav'>) {
           />
         ))}
         <li className="sticky bottom-0 z-10 mt-6 min-[416px]:hidden">
-          <AuthButton variant="filled" className="w-full" />
+          <AuthButton variant="filled" className="w-full" isMobile />
         </li>
       </ul>
     </nav>
