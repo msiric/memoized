@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
+import { stripe } from '@/lib/stripe'
 import { AuthProvider } from '@/types'
-import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
@@ -33,6 +33,8 @@ const handler = NextAuth({
       if (session?.user) {
         session.id = token.uid as string
         session.userId = token.userId as string
+        session.providerAccountId = token.providerAccountId as string
+        session.stripeCustomerId = token.stripeCustomerId as string
         session.provider = token.provider as AuthProvider
       }
       return session
@@ -44,27 +46,33 @@ const handler = NextAuth({
 
       if (!email || !providerAccountId || !provider) return false
 
-      // Check if the user already exists
-      const existingUser = await prisma.user.findFirst({
+      const existingAccount = await prisma.account.findUnique({
         where: {
-          accounts: {
-            some: {
-              provider,
-              providerAccountId,
-            },
+          provider_providerAccountId: {
+            provider,
+            providerAccountId,
           },
+        },
+        include: {
+          user: true,
         },
       })
 
-      if (existingUser) {
+      if (existingAccount) {
         return true
       }
 
-      // Create new user and account
+      const stripeCustomer = await stripe.customers.create({
+        email,
+        name: user.name || undefined,
+      })
+
+      // Create new user and account with Stripe customer ID
       const newUser = await prisma.user.create({
         data: {
           email,
           name: user.name,
+          stripeCustomerId: stripeCustomer.id,
           accounts: {
             create: {
               provider,
@@ -78,9 +86,18 @@ const handler = NextAuth({
     },
     async jwt({ user, token }) {
       if (user) {
-        token.uid = user.id
-        token.userId = user.userId
-        token.provider = user.provider
+        const account = await prisma.account.findUnique({
+          where: { providerAccountId: user.id },
+          include: { user: true },
+        })
+
+        if (account) {
+          token.uid = account.id
+          token.providerAccountId = account.providerAccountId
+          token.stripeCustomerId = account.user.stripeCustomerId
+          token.userId = account.user.id
+          token.provider = account.provider
+        }
       }
       return token
     },

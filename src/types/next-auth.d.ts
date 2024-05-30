@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth'
+import 'next-auth'
 import { AuthProvider } from '.'
 
 declare module 'next-auth' {
@@ -9,6 +9,8 @@ declare module 'next-auth' {
     id: string
     userId: string
     provider: AuthProvider
+    providerAccountId: string
+    stripeCustomerId: string
   }
   interface Account {
     provider: AuthProvider
