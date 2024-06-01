@@ -1,4 +1,4 @@
-import { completeCurriculum } from '@/constants'
+import { completeCurriculum } from '@/constants/curriculum'
 import { AccessOptions, PrismaClient } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 async function syncContent() {
   const contentDir = path.join(process.cwd(), 'src/app/(course)')
 
-  for (let course of completeCurriculum) {
+  for (const course of completeCurriculum) {
     const { title: courseTitle, description: courseDescription } = course
     const courseSlug = slugify(courseTitle, { lower: true })
 
@@ -26,7 +26,7 @@ async function syncContent() {
       },
     })
 
-    for (let section of course.sections) {
+    for (const section of course.sections) {
       const {
         title: sectionTitle,
         description: sectionDescription,
@@ -49,37 +49,38 @@ async function syncContent() {
         },
       })
 
-      for (let lesson of courseLessons) {
+      for (const lesson of courseLessons) {
         const {
           title: lessonTitle,
           description: lessonDescription,
-          href: lessonHref,
+          id: lessonId,
+          access: lessonAccess,
         } = lesson
         const lessonSlug = slugify(lessonTitle, { lower: true })
 
-        const filePath = path.join(contentDir, lessonHref, 'page.mdx')
+        const filePath = path.join(contentDir, lessonId, 'page.mdx')
         if (!fs.existsSync(filePath)) {
           console.error(`File not found: ${filePath}`)
           continue
         }
 
-        const fileContents = fs.readFileSync(filePath, 'utf-8')
+        const lessonContent = fs.readFileSync(filePath, 'utf-8')
 
         await prisma.lesson.upsert({
           where: { slug: lessonSlug },
           update: {
             title: lessonTitle,
             description: lessonDescription,
-            body: fileContents,
-            access: AccessOptions.FREE,
+            body: lessonContent,
+            access: lessonAccess,
             sectionId: sectionRecord.id,
           },
           create: {
             title: lessonTitle,
             description: lessonDescription,
             slug: lessonSlug,
-            body: fileContents,
-            access: AccessOptions.FREE,
+            body: lessonContent,
+            access: lessonAccess,
             sectionId: sectionRecord.id,
           },
         })

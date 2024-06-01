@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { AuthProvider } from '@/types'
-import NextAuth from 'next-auth'
+import NextAuth, { AuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 
@@ -11,7 +11,7 @@ const GITHUB_SECRET = process.env.GITHUB_SECRET
 const GOOGLE_ID = process.env.GOOGLE_ID
 const GOOGLE_SECRET = process.env.GOOGLE_SECRET
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     GithubProvider({
       clientId: GITHUB_ID ?? 'Ov23liRdhFixfTbBNcdB',
@@ -102,6 +102,8 @@ const handler = NextAuth({
       return token
     },
   },
-})
+}
+
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }

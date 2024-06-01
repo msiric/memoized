@@ -1,46 +1,62 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
+import { COURSE_PREFIX } from '@/constants'
+import { AccessOptions } from '@prisma/client'
 
 export const userDefinedDataStructures = [
   {
-    href: '/linked-lists',
+    id: '/linked-lists',
+    href: `${COURSE_PREFIX}/linked-lists`,
     title: 'Linked Lists',
     description:
       'Learn about the various types of linked lists and their operations.',
+    access: AccessOptions.FREE,
   },
   {
-    href: '/stacks',
+    id: '/stacks',
+    href: `${COURSE_PREFIX}/stacks`,
     title: 'Stacks',
     description:
       'Explore stack operations and their applications in computer science.',
+    access: AccessOptions.PREMIUM,
   },
   {
-    href: '/queues',
+    id: '/queues',
+    href: `${COURSE_PREFIX}/queues`,
     title: 'Queues',
     description:
       'Understand the FIFO principle and how queues are implemented.',
+    access: AccessOptions.PREMIUM,
   },
   {
-    href: '/heaps',
+    id: '/heaps',
+    href: `${COURSE_PREFIX}/heaps`,
     title: 'Heaps',
     description: 'Discover heap structures and their use in priority queues.',
+    access: AccessOptions.PREMIUM,
   },
   {
-    href: '/trees',
+    id: '/trees',
+    href: `${COURSE_PREFIX}/trees`,
     title: 'Trees',
     description: 'Study tree structures and their traversal algorithms.',
+    access: AccessOptions.PREMIUM,
   },
   {
-    href: '/graphs',
+    id: '/graphs',
+    href: `${COURSE_PREFIX}/graphs`,
     title: 'Graphs',
     description:
       'Learn about graph representations and graph traversal methods.',
+    access: AccessOptions.PREMIUM,
   },
   {
-    href: '/tries',
+    id: '/tries',
+    href: `${COURSE_PREFIX}/tries`,
     title: 'Tries',
     description:
       'Understand trie data structures and their use in efficient searching.',
+    access: AccessOptions.PREMIUM,
   },
 ]
 

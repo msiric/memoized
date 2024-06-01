@@ -20,13 +20,13 @@ export default async function CourseLayout({
   const allSectionsEntries = (await Promise.all(
     pages.map(async (filename) => [
       '/' + filename.replace(/(^|\/)page\.mdx$/, ''),
-      (await import(`./${filename}`)).sections,
+      (await import(`../../(course)/${filename}`)).sections,
     ]),
   )) as Array<[string, Array<Section>]>
   const allSections = Object.fromEntries(allSectionsEntries)
 
   return (
-    <div className="w-full">
+    <div className="h-full w-full">
       <Layout allSections={allSections}>{children}</Layout>
     </div>
   )

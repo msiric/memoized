@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { Subscription } from '@prisma/client'
 
-async function getUserWithCalculatedFields(userId: string) {
+export async function getUserWithCalculatedFields(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -37,11 +37,7 @@ async function getUserWithCalculatedFields(userId: string) {
 
 function checkSubscriptionStatus(subscription: Subscription) {
   const now = new Date()
-  if (
-    subscription.status === 'ACTIVE' &&
-    subscription.endDate &&
-    new Date(subscription.endDate) > now
-  ) {
+  if (subscription.status === 'ACTIVE') {
     return 'ACTIVE'
   } else if (subscription.status === 'CANCELED') {
     return 'CANCELED'
@@ -51,11 +47,3 @@ function checkSubscriptionStatus(subscription: Subscription) {
     return 'UNKNOWN'
   }
 }
-
-// Usage example
-getUserWithCalculatedFields('')
-  .then((user) => console.log(user))
-  .catch((err) => console.error(err))
-  .finally(async () => {
-    await prisma.$disconnect()
-  })

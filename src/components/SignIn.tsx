@@ -1,4 +1,4 @@
-import { appName } from '@/constants'
+import { APP_NAME } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import clsx from 'clsx'
 import { signIn } from 'next-auth/react'
@@ -59,10 +59,14 @@ export const SignIn = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300 ${isFullyVisible ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm transition-opacity duration-300 ${
+        isFullyVisible ? 'opacity-100' : 'opacity-0'
+      }`}
     >
       <div
-        className={`relative mx-4 w-full max-w-md transform rounded-xl border bg-white p-6 shadow-xl transition-transform duration-300 dark:bg-zinc-900 ${isFullyVisible ? 'scale-100' : 'scale-95'}`}
+        className={`relative mx-4 w-full max-w-md transform rounded-xl border bg-white p-6 shadow-xl transition-transform duration-300 dark:bg-zinc-900 ${
+          isFullyVisible ? 'scale-100' : 'scale-95'
+        }`}
         ref={modalRef}
       >
         <div className="mt-2 space-y-4">
@@ -74,7 +78,7 @@ export const SignIn = () => {
             height="40"
           />
           <h2 className="mb-8 text-center text-2xl font-bold text-cyan-900 dark:text-white">
-            Log in to unlock the best of {appName}
+            Log in to unlock the best of {APP_NAME}
           </h2>
         </div>
         <div className="mt-10 grid space-y-4">

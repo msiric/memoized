@@ -5,13 +5,26 @@ import { LessonStatus } from '@/components/LessonStatus'
 import { Heading } from '@/components/Heading'
 import { Prose } from '@/components/Prose'
 import { NextPage } from './NextPage'
+import { ReactNode } from 'react'
 
 export const a = Link
 export { Button } from '@/components/Button'
 export { CodeGroup, Code as code, Pre as pre } from '@/components/Code'
 export { DynamicImage as img } from '@/components/DynamicImage'
 
-export function wrapper({ children }: { children: React.ReactNode }) {
+export type WrapperProps = {
+  userId?: string
+  lessonId: string
+  completed: boolean
+  children: ReactNode
+}
+
+export const wrapper = function Wrapper({
+  userId,
+  lessonId,
+  completed,
+  children,
+}: WrapperProps) {
   return (
     <article className="flex h-full flex-col pb-10 pt-16">
       <Prose className="flex-auto">{children}</Prose>
@@ -19,7 +32,11 @@ export function wrapper({ children }: { children: React.ReactNode }) {
         <NextPage />
       </div>
       <footer className="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
-        <LessonStatus />
+        <LessonStatus
+          userId={userId}
+          lessonId={lessonId}
+          previouslyCompleted={completed}
+        />
       </footer>
     </article>
   )

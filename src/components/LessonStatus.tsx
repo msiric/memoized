@@ -1,6 +1,15 @@
 'use client'
 
-import { forwardRef, useState } from 'react'
+import { markLesson } from '@/actions/markLesson'
+import clsx from 'clsx'
+import { useSession } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
+import { forwardRef, useState, FormEvent } from 'react'
+
+export enum LessonCompleted {
+  'YES' = 'YES',
+  'NO' = 'NO',
+}
 
 function CheckIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
@@ -18,12 +27,20 @@ function CheckIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 }
 
 function MarkButton(
-  props: Omit<React.ComponentPropsWithoutRef<'button'>, 'type' | 'className'>,
+  props: Omit<
+    React.ComponentPropsWithoutRef<'button'>,
+    'type' | 'className'
+  > & { checked: boolean },
 ) {
   return (
     <button
       type="submit"
-      className="px-3 text-sm font-medium text-zinc-600 transition hover:bg-zinc-900/2.5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
+      className={clsx(
+        'px-3 text-sm font-medium text-zinc-600 transition hover:bg-zinc-900/2.5 hover:text-zinc-900 dark:hover:bg-white/5 dark:hover:text-white',
+        props.checked
+          ? 'bg-lime-500 text-white dark:bg-lime-700 dark:text-white'
+          : 'dark:text-zinc-400',
+      )}
       {...props}
     />
   )
@@ -31,8 +48,10 @@ function MarkButton(
 
 const MarkForm = forwardRef<
   React.ElementRef<'form'>,
-  Pick<React.ComponentPropsWithoutRef<'form'>, 'onSubmit'>
->(function MarkForm({ onSubmit }, ref) {
+  Pick<React.ComponentPropsWithoutRef<'form'>, 'onSubmit'> & {
+    completed: boolean
+  }
+>(function MarkForm({ onSubmit, completed }, ref) {
   return (
     <form
       ref={ref}
@@ -43,31 +62,51 @@ const MarkForm = forwardRef<
         Lesson completed?
       </p>
       <div className="group grid h-8 grid-cols-[1fr,1px,1fr] overflow-hidden rounded-full border border-zinc-900/10 dark:border-white/10">
-        <MarkButton data-response="yes">Yes</MarkButton>
+        <MarkButton checked={!!completed} data-response={LessonCompleted.YES}>
+          Yes
+        </MarkButton>
         <div className="bg-zinc-900/10 dark:bg-white/10" />
-        <MarkButton data-response="no">No</MarkButton>
+        <MarkButton checked={!completed} data-response={LessonCompleted.NO}>
+          No
+        </MarkButton>
       </div>
     </form>
   )
 })
 
-export function LessonStatus() {
-  let [submitted, setSubmitted] = useState(false)
+export type LessonStatusProps = {
+  userId?: string
+  lessonId: string
+  previouslyCompleted: boolean
+}
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+export function LessonStatus({
+  userId,
+  lessonId,
+  previouslyCompleted,
+}: LessonStatusProps) {
+  const [completed, setCompleted] = useState(previouslyCompleted)
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const button = document.activeElement as HTMLButtonElement
+    const response = button.getAttribute('data-response')
+    const currentlyCompleted = response === LessonCompleted.YES
 
-    const response = 'test'
-    // Handle the marking of the lesson as complete or not complete here
-    // For example, send the response to your backend or update the state
-
-    console.log(`Lesson marked as ${response}`) // Example logging
-    setSubmitted(true)
+    try {
+      await markLesson({ userId, lessonId, completed: currentlyCompleted })
+      setCompleted(currentlyCompleted)
+      console.log(
+        `Lesson marked as ${completed ? 'completed' : 'not completed'}`,
+      )
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
 
   return (
     <div className="relative h-8">
-      <MarkForm onSubmit={onSubmit} />
+      <MarkForm onSubmit={onSubmit} completed={completed} />
     </div>
   )
 }

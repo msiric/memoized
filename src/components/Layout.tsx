@@ -1,14 +1,13 @@
 'use client'
-
-import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { Logo } from '@/components/Logo'
 import { Navigation } from '@/components/Navigation'
 import { SectionProvider, type Section } from '@/components/SectionProvider'
+import { COURSE_PREFIX } from '@/constants'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export function Layout({
   children,
@@ -17,10 +16,12 @@ export function Layout({
   children: React.ReactNode
   allSections: Record<string, Array<Section>>
 }) {
-  let pathname = usePathname()
+  const pathname = usePathname()
+
+  const formattedPathname = pathname?.split(COURSE_PREFIX)[1]
 
   return (
-    <SectionProvider sections={allSections[pathname ?? ''] ?? []}>
+    <SectionProvider sections={allSections[formattedPathname ?? ''] ?? []}>
       <div className="h-full lg:ml-72 xl:ml-80">
         <motion.header
           layoutScroll
