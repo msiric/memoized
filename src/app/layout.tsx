@@ -1,6 +1,7 @@
 import { Providers } from '@/app/providers'
 import '@/styles/tailwind.css'
 import { type Metadata } from 'next'
+import NextTopLoader from 'nextjs-toploader'
 
 export const metadata: Metadata = {
   title: {
@@ -40,6 +41,7 @@ export default async function RootLayout({
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
+        <NextTopLoader color="#84cc16" showSpinner={false} />
         <Providers>
           <div className="w-full">{children}</div>
         </Providers>

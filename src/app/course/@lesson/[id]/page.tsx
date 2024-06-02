@@ -30,6 +30,19 @@ export default async function Lesson({ params }: { params: { id: string } }) {
 
   const Page = dynamic(
     () => import(`@/app/${CONTENT_FOLDER}/${params.id}/page.mdx`),
+    {
+      loading: () => (
+        <section className="h-screen bg-white dark:bg-zinc-900">
+          <div className="mx-auto h-full max-w-screen-xl px-4 py-8 sm:py-16 lg:px-6">
+            <div className="align-center mx-auto flex h-full max-w-screen-sm flex-col justify-center text-center">
+              <p className="mb-6 font-light text-gray-500 md:text-lg dark:text-gray-400">
+                Fetching lesson...
+              </p>
+            </div>
+          </div>
+        </section>
+      ),
+    },
   ) as unknown as JSXElementConstructor<{
     userId?: string
     lessonId: string
