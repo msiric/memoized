@@ -284,9 +284,7 @@ export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
   return (
     <nav {...props}>
       <ul role="list">
-        <TopLevelNavItem href="/">API</TopLevelNavItem>
-        <TopLevelNavItem href="#">Documentation</TopLevelNavItem>
-        <TopLevelNavItem href="#">Support</TopLevelNavItem>
+        <TopLevelNavItem href="/premium">Premium</TopLevelNavItem>
         {fullCurriculum?.map((course) =>
           course.sections.map((section, index) => (
             <NavigationGroup
