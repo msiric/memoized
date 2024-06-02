@@ -1,0 +1,307 @@
+# **Sqrt Decomposition**
+
+Sqrt Decomposition is a powerful technique used to solve range query problems efficiently. It is particularly useful for problems where both updates and queries need to be performed on an array.
+
+## **Concept and Use Cases**
+
+**Definition:**
+Sqrt Decomposition divides an array into blocks of size approximately √n, allowing for efficient range queries and updates by processing each block individually.
+
+**Common Use Cases:**
+- Range sum queries
+- Range minimum/maximum queries
+- Range updates
+
+## **Key Concepts**
+
+1. **Block Size:**
+   - The optimal block size is √n, where n is the size of the array.
+
+2. **Block Array:**
+   - An auxiliary array to store information about each block (e.g., sum, minimum, maximum).
+
+3. **Range Query:**
+   - A query that operates over a range of elements in the array.
+
+4. **Range Update:**
+   - An update that modifies a range of elements in the array.
+
+## **Time and Space Complexity**
+
+**Sqrt Decomposition:**
+- Query Time Complexity: O(√n)
+- Update Time Complexity: O(√n)
+- Space Complexity: O(√n) for the auxiliary block array.
+
+## **Sqrt Decomposition Implementation**
+
+### **Range Sum Query with Updates**
+
+**Steps:**
+1. Divide the array into blocks of size √n.
+2. Precompute the sum of each block.
+3. For range queries, compute the sum by combining full blocks and partial blocks.
+4. For updates, update the element and recompute the sum of the affected block.
+
+**Example:**
+```javascript
+class SqrtDecomposition {
+    constructor(arr) {
+        this.arr = arr;
+        this.n = arr.length;
+        this.blockSize = Math.ceil(Math.sqrt(this.n));
+        this.blocks = Array(Math.ceil(this.n / this.blockSize)).fill(0);
+
+        this.preprocess();
+    }
+
+    preprocess() {
+        for (let i = 0; i < this.n; i++) {
+            this.blocks[Math.floor(i / this.blockSize)] += this.arr[i];
+        }
+    }
+
+    update(index, value) {
+        const blockIndex = Math.floor(index / this.blockSize);
+        this.blocks[blockIndex] += value - this.arr[index];
+        this.arr[index] = value;
+    }
+
+    query(l, r) {
+        let sum = 0;
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                sum += this.arr[i];
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                sum += this.arr[i];
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                sum += this.blocks[i];
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                sum += this.arr[i];
+            }
+        }
+
+        return sum;
+    }
+}
+
+// Example usage:
+const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const sd = new SqrtDecomposition(arr);
+console.log(sd.query(1, 7));  // Output: 35 (sum of elements from index 1 to 7)
+sd.update(2, 10);
+console.log(sd.query(1, 7));  // Output: 42 (updated sum of elements from index 1 to 7)
+```
+
+### **Range Minimum Query with Updates**
+
+**Steps:**
+1. Divide the array into blocks of size √n.
+2. Precompute the minimum of each block.
+3. For range queries, find the minimum by combining full blocks and partial blocks.
+4. For updates, update the element and recompute the minimum of the affected block.
+
+**Example:**
+```javascript
+class SqrtDecompositionMin {
+    constructor(arr) {
+        this.arr = arr;
+        this.n = arr.length;
+        this.blockSize = Math.ceil(Math.sqrt(this.n));
+        this.blocks = Array(Math.ceil(this.n / this.blockSize)).fill(Infinity);
+
+        this.preprocess();
+    }
+
+    preprocess() {
+        for (let i = 0; i < this.n; i++) {
+            this.blocks[Math.floor(i / this.blockSize)] = Math.min(this.blocks[Math.floor(i / this.blockSize)], this.arr[i]);
+        }
+    }
+
+    update(index, value) {
+        const blockIndex = Math.floor(index / this.blockSize);
+        this.arr[index] = value;
+
+        let blockMin = Infinity;
+        const start = blockIndex * this.blockSize;
+        const end = Math.min((blockIndex + 1) * this.blockSize, this.n);
+
+        for (let i = start; i < end; i++) {
+            blockMin = Math.min(blockMin, this.arr[i]);
+        }
+
+        this.blocks[blockIndex] = blockMin;
+    }
+
+    query(l, r) {
+        let minVal = Infinity;
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                minVal = Math.min(minVal, this.arr[i]);
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                minVal = Math.min(minVal, this.arr[i]);
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                minVal = Math.min(minVal, this.blocks[i]);
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                minVal = Math.min(minVal, this.arr[i]);
+            }
+        }
+
+        return minVal;
+    }
+}
+
+// Example usage:
+const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const sdMin = new SqrtDecompositionMin(arr);
+console.log(sdMin.query(1, 7));  // Output: 2 (minimum of elements from index 1 to 7)
+sdMin.update(2, 0);
+console.log(sdMin.query(1, 7));  // Output: 0 (updated minimum of elements from index 1 to 7)
+```
+
+## **Practical Tips and Tricks**
+
+- **Choosing Block Size:**
+  The optimal block size is √n. Ensure to choose the block size accordingly for balanced time complexity.
+
+- **Handling Edge Cases:**
+  Ensure to handle edge cases such as very small arrays or queries that span multiple blocks correctly.
+
+- **Preprocessing:**
+  Preprocess the blocks correctly to ensure accurate query results.
+
+## **Common Gotchas**
+
+- **Block Index Calculation:**
+  Ensure correct calculation of block indices to avoid incorrect query and update results.
+
+- **Handling Partial Blocks:**
+  Properly handle partial blocks at the edges of the query range to ensure correct results.
+
+- **Update Operations:**
+  Ensure that update operations correctly recompute the affected block to maintain accurate results.
+
+## **Advanced Topics**
+
+### **Range Updates with Lazy Propagation**
+
+**Description:**
+Lazy propagation is an optimization technique that defers updates to blocks until necessary, reducing the time complexity of range updates.
+
+**Example:**
+```javascript
+class SqrtDecompositionLazy {
+    constructor(arr) {
+        this.arr = arr;
+        this.n = arr.length;
+        this.blockSize = Math.ceil(Math.sqrt(this.n));
+        this.blocks = Array(Math.ceil(this.n / this.blockSize)).fill(0);
+        this.lazy = Array(Math.ceil(this.n / this.blockSize)).fill(0);
+
+        this.preprocess();
+    }
+
+    preprocess() {
+        for (let i = 0; i < this.n; i++) {
+            this.blocks[Math.floor(i / this.blockSize)] += this.arr[i];
+        }
+    }
+
+    updateRange(l, r, value) {
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                this.arr[i] += value;
+                this.blocks[startBlock] += value;
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                this.arr[i] += value;
+                this.blocks[startBlock] += value;
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                this.lazy[i] += value;
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                this.arr[i] += value;
+                this.blocks[endBlock] += value;
+            }
+        }
+    }
+
+    queryRange(l, r) {
+        let sum = 0;
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                sum += this.arr[i] + this.lazy[startBlock];
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                sum += this.arr[i] + this.lazy[startBlock];
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                sum += this.blocks[i] + this.lazy[i] * this.blockSize;
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                sum += this.arr[i] + this.lazy[endBlock];
+            }
+        }
+
+        return sum;
+    }
+}
+
+// Example usage:
+const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const sdLazy = new SqrtDecompositionLazy(arr);
+console.log(sdLazy.queryRange(1, 7));  // Output: 35 (sum of elements from index 1 to 7)
+sdLazy.updateRange(2, 5, 3);
+console.log(sdLazy.queryRange(1, 7));  // Output: 50 (updated sum of elements from index 1 to 7)
+```
+
+## **Interview Tips and Tricks**
+
+- **Explain the Technique:**
+  Clearly explain the concept of Sqrt Decomposition, including block size calculation and the use of auxiliary arrays.
+
+- **Handling Edge Cases:**
+  Discuss how to handle edge cases, such as very small arrays or queries that span multiple blocks.
+
+- **Optimizations:**
+  Highlight potential optimizations, such as lazy propagation for efficient range updates.
+
+- **Use Cases:**
+  Provide examples of practical use cases for Sqrt Decomposition, such as range sum queries and range minimum queries.
+
+## **Common Mistakes**
+
+- **Incorrect Block Index Calculation:**
+  Ensure correct calculation of block indices to avoid incorrect query and update results.
+
+- **Handling Partial Blocks:**
+  Properly handle partial blocks at the edges of the query range to ensure correct results.
+
+- **Update Operations:**
+  Ensure that update operations correctly recompute the affected block to maintain accurate results.
+
+By mastering Sqrt Decomposition and understanding its intricacies, you will be well-equipped to handle a variety of range query problems with efficient and robust solutions. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.

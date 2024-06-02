@@ -4,6 +4,8 @@ import Link from 'next/link'
 
 import { Button } from '@/components/Button'
 import { usePages } from '@/hooks/usePages'
+import { useAuthStore } from '@/contexts/auth'
+import { useAccess } from '@/hooks/useAccess'
 
 function PageLink({
   label,
@@ -37,9 +39,12 @@ function PageLink({
 }
 
 function PageNavigation() {
-  const { previousPage, nextPage } = usePages()
+  const { previousPage, currentPage, nextPage } = usePages()
+  const userData = useAuthStore((state) => state.user)
 
-  if (!previousPage && !nextPage) {
+  const hasAccess = useAccess(userData, currentPage?.access)
+
+  if ((!previousPage && !nextPage) || !hasAccess) {
     return null
   }
 

@@ -17,6 +17,7 @@ import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
+import { useAccess } from '@/hooks/useAccess'
 
 function useInitialValue<T>(value: T, condition = true) {
   const initialValue = useRef(value).current
@@ -68,6 +69,8 @@ function NavLink({
     (lesson) => lesson === id,
   )
 
+  const hasAccess = useAccess(userData, access)
+
   return (
     <Link
       href={href}
@@ -88,9 +91,7 @@ function NavLink({
           {tag}
         </Tag>
       )}
-      {access === AccessOptions.PREMIUM &&
-      userData !== undefined &&
-      userData?.currentSubscription !== SubscriptionStatus.ACTIVE ? (
+      {!hasAccess ? (
         <IconWrapper
           icon={LockIcon}
           className="fill-zinc-600 dark:fill-zinc-400"

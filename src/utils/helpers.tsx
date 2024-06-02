@@ -1,3 +1,6 @@
+import { UserWithSubscriptionsAndProgress } from '@/services/user'
+import { AccessOptions, SubscriptionStatus } from '@prisma/client'
+
 export const remToPx = (remValue: number) => {
   const rootFontSize =
     typeof window === 'undefined'
@@ -12,3 +15,13 @@ export const toDateTime = (secs: number) => {
   t.setSeconds(secs)
   return t
 }
+
+export const userHasAccess = (
+  user: UserWithSubscriptionsAndProgress | null | undefined,
+  access: AccessOptions | undefined,
+) =>
+  user === undefined ||
+  access === undefined ||
+  access === AccessOptions.FREE ||
+  (access === AccessOptions.PREMIUM &&
+    user?.currentSubscription === SubscriptionStatus.ACTIVE)

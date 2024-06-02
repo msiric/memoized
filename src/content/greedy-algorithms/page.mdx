@@ -1,0 +1,291 @@
+# **Greedy Algorithms**
+
+Greedy algorithms are a class of algorithms that make a series of choices, each of which is the best or most optimal choice at the moment, with the hope that these local optimizations will lead to a globally optimal solution. Greedy algorithms are used to solve various optimization problems where the objective is to maximize or minimize some quantity.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A greedy algorithm is an algorithmic paradigm that builds up a solution piece by piece, always choosing the next piece that offers the most immediate benefit or the least immediate cost.
+
+**Common Use Cases:**
+- **Activity Selection:** Selecting the maximum number of activities that don't overlap.
+- **Huffman Coding:** Building a binary tree for efficient data compression.
+- **Kruskal's Algorithm:** Finding the minimum spanning tree in a graph.
+- **Prim's Algorithm:** Finding the minimum spanning tree in a graph.
+- **Dijkstra's Algorithm:** Finding the shortest path in a graph with non-negative weights.
+- **Fractional Knapsack Problem:** Maximizing the total value of items that can be carried in a knapsack of fixed capacity.
+
+## **When to Use**
+- When the problem can be broken down into a sequence of choices, and each choice looks best at that moment.
+- When you need an efficient and straightforward solution, and the greedy choice property holds (i.e., a local optimum leads to a global optimum).
+- When the problem exhibits optimal substructure (i.e., an optimal solution to the problem contains optimal solutions to subproblems).
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Depends on the specific problem and implementation, but greedy algorithms are generally efficient.
+
+**Space Complexity:**
+- Typically O(1) to O(n), depending on the problem and how much extra space is required for storage.
+
+## **Common Problems**
+
+1. **Huffman Coding:**
+   - **Problem:** Given a set of characters and their frequencies, build a Huffman Tree to generate prefix codes.
+   - **Approach:** Use a min-heap to build the tree, always merging the two nodes with the smallest frequencies.
+
+2. **Kruskal’s Algorithm:**
+   - **Problem:** Find the Minimum Spanning Tree (MST) of a graph.
+   - **Approach:** Use a greedy approach to always add the smallest edge that does not form a cycle.
+
+3. **Prim’s Algorithm:**
+   - **Problem:** Find the Minimum Spanning Tree (MST) of a graph.
+   - **Approach:** Use a priority queue to add the smallest edge connecting a vertex in the MST to a vertex outside the MST.
+
+4. **Dijkstra’s Algorithm:**
+   - **Problem:** Find the shortest path in a weighted graph with non-negative weights.
+   - **Approach:** Use a min-heap to always expand the shortest known distance to a vertex.
+
+## **Activity Selection Problem**
+
+**Problem:** Given a set of activities with start and end times, select the maximum number of activities that don't overlap.
+
+**Step-by-Step Solution:**
+1. Sort the activities by their end times.
+2. Initialize the last selected activity as the one that ends first.
+3. Iterate through the sorted activities, and for each activity, check if it starts after the last selected activity ends.
+4. If it does, select the activity and update the last selected activity.
+
+**Code Example:**
+```javascript
+function activitySelection(activities) {
+    // Sort activities by their end times
+    activities.sort((a, b) => a.end - b.end);
+
+    const selectedActivities = [];
+    let lastEndTime = -Infinity;
+
+    for (const activity of activities) {
+        if (activity.start >= lastEndTime) {
+            selectedActivities.push(activity);
+            lastEndTime = activity.end;
+        }
+    }
+
+    return selectedActivities;
+}
+
+// Example usage:
+const activities = [
+    { start: 1, end: 3 },
+    { start: 2, end: 4 },
+    { start: 3, end: 5 },
+    { start: 0, end: 6 },
+    { start: 5, end: 7 },
+    { start: 8, end: 9 },
+    { start: 5, end: 9 }
+];
+console.log(activitySelection(activities));
+// Output: [ { start: 1, end: 3 }, { start: 3, end: 5 }, { start: 5, end: 7 }, { start: 8, end: 9 } ]
+```
+
+**Tips and Tricks:**
+- Sort the activities by their end times to ensure the earliest finish time is chosen.
+- Use a greedy approach by always selecting the next activity that starts after the last selected activity ends.
+
+**Frequent Gotchas:**
+- Forgetting to sort the activities by their end times.
+- Incorrectly updating the last selected activity.
+
+## **Fractional Knapsack Problem**
+
+**Problem:** Given weights and values of items, determine the maximum value of items that can be carried in a knapsack of fixed capacity, where you can take fractions of items.
+
+**Step-by-Step Solution:**
+1. Calculate the value-to-weight ratio for each item.
+2. Sort the items by their value-to-weight ratio in descending order.
+3. Initialize the total value to 0 and the remaining capacity of the knapsack.
+4. Iterate through the sorted items, and for each item, add as much of the item to the knapsack as possible.
+5. If the entire item can be added, subtract its weight from the remaining capacity and add its value to the total value.
+6. If only a fraction of the item can be added, add the corresponding fraction of its value to the total value and break the loop.
+
+**Code Example:**
+```javascript
+function fractionalKnapsack(capacity, items) {
+    // Calculate the value-to-weight ratio for each item
+    items.forEach(item => item.ratio = item.value / item.weight);
+
+    // Sort items by their value-to-weight ratio in descending order
+    items.sort((a, b) => b.ratio - a.ratio);
+
+    let totalValue = 0;
+    let remainingCapacity = capacity;
+
+    for (const item of items) {
+        if (remainingCapacity >= item.weight) {
+            // Take the whole item
+            remainingCapacity -= item.weight;
+            totalValue += item.value;
+        } else {
+            // Take a fraction of the item
+            totalValue += item.value * (remainingCapacity / item.weight);
+            break;
+        }
+    }
+
+    return totalValue;
+}
+
+// Example usage:
+const capacity = 50;
+const items = [
+    { value: 60, weight: 10 },
+    { value: 100, weight: 20 },
+    { value: 120, weight: 30 }
+];
+console.log(fractionalKnapsack(capacity, items));  // Output: 240
+```
+
+**Tips and Tricks:**
+- Calculate the value-to-weight ratio to determine the most valuable items per unit weight.
+- Sort items by their value-to-weight ratio to ensure the most valuable items are chosen first.
+
+**Frequent Gotchas:**
+- Forgetting to sort the items by their value-to-weight ratio.
+- Incorrectly calculating the fraction of the item to be added to the knapsack.
+
+## **Prim’s Algorithm**
+
+**Problem:** Given a weighted, undirected graph, find the Minimum Spanning Tree (MST) using Prim’s Algorithm.
+
+**Step-by-Step Solution:**
+1. Initialize a priority queue (min-heap) to keep track of the edges with the smallest weights.
+2. Start from an arbitrary vertex and add all its edges to the priority queue.
+3. While the priority queue is not empty, extract the edge with the smallest weight.
+4. If the extracted edge connects to a vertex not already in the MST, add the vertex to the MST and add all its edges to the priority queue.
+5. Repeat the process until all vertices are included in the MST.
+
+**Code Example:**
+```javascript
+class MinHeap {
+    constructor() {
+        this.heap = [];
+    }
+
+    size() {
+        return this.heap.length;
+    }
+
+    insert(edge) {
+        this.heap.push(edge);
+        this._heapifyUp();
+    }
+
+    extractMin() {
+        if (this.size() === 1) return this.heap.pop();
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop();
+        this._heapifyDown();
+        return min;
+    }
+
+    _heapifyUp() {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].weight >= this.heap[parentIndex].weight) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    _heapifyDown() {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.weight < element.weight) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild.weight < element.weight) || (swap !== null && rightChild.weight < leftChild.weight)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+           
+
+ if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function primMST(graph) {
+    const mst = [];
+    const minHeap = new MinHeap();
+    const visited = Array(graph.length).fill(false);
+
+    // Start from vertex 0 (or any arbitrary vertex)
+    visited[0] = true;
+    for (const edge of graph[0]) {
+        minHeap.insert(edge);
+    }
+
+    while (minHeap.size() > 0) {
+        const { vertex, weight, to } = minHeap.extractMin();
+
+        if (!visited[to]) {
+            visited[to] = true;
+            mst.push({ vertex, weight, to });
+
+            for (const edge of graph[to]) {
+                if (!visited[edge.to]) {
+                    minHeap.insert(edge);
+                }
+            }
+        }
+    }
+
+    return mst;
+}
+
+// Example usage:
+const graph = [
+    [{ vertex: 0, to: 1, weight: 2 }, { vertex: 0, to: 3, weight: 6 }],
+    [{ vertex: 1, to: 0, weight: 2 }, { vertex: 1, to: 2, weight: 3 }, { vertex: 1, to: 3, weight: 8 }, { vertex: 1, to: 4, weight: 5 }],
+    [{ vertex: 2, to: 1, weight: 3 }, { vertex: 2, to: 4, weight: 7 }],
+    [{ vertex: 3, to: 0, weight: 6 }, { vertex: 3, to: 1, weight: 8 }, { vertex: 3, to: 4, weight: 9 }],
+    [{ vertex: 4, to: 1, weight: 5 }, { vertex: 4, to: 2, weight: 7 }, { vertex: 4, to: 3, weight: 9 }]
+];
+
+console.log(primMST(graph));
+// Output: 
+// [
+//     { vertex: 0, weight: 2, to: 1 },
+//     { vertex: 1, weight: 3, to: 2 },
+//     { vertex: 0, weight: 6, to: 3 },
+//     { vertex: 1, weight: 5, to: 4 }
+// ]
+```
+
+**Tips and Tricks:**
+- Use a priority queue to efficiently manage the edges with the smallest weights.
+- Keep track of visited vertices to avoid cycles and redundant edges.
+
+**Frequent Gotchas:**
+- Forgetting to mark vertices as visited, leading to cycles.
+- Incorrectly updating the priority queue with new edges.
+
+By mastering greedy algorithms and their common applications, you can efficiently solve a wide range of optimization problems in both technical interviews and real-world applications. Greedy algorithms are essential for their simplicity and efficiency, making them a valuable tool in any problem-solving toolkit.
+
+ 

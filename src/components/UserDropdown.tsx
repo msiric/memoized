@@ -1,12 +1,15 @@
 import { useProgressStore } from '@/contexts/progress'
+import { useSignOut } from '@/hooks/useSignOut'
 import clsx from 'clsx'
-import { signOut, useSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 export const UserDropdown = ({ isMobile = false }) => {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
+
+  const { signOut } = useSignOut()
 
   const currentProgress = useProgressStore((state) => state.currentProgress)
 

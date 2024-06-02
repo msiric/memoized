@@ -2,8 +2,11 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { PremiumCTA } from '@/components/PremiumCTA'
 import { CONTENT_FOLDER } from '@/constants'
 import prisma from '@/lib/prisma'
-import { getUserWithSubscriptions } from '@/services/user'
-import { AccessOptions, SubscriptionStatus } from '@prisma/client'
+import {
+  UserWithSubscriptionsAndProgress,
+  getUserWithSubscriptions,
+} from '@/services/user'
+import { userHasAccess } from '@/utils/helpers'
 import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
@@ -21,10 +24,12 @@ export default async function Lesson({ params }: { params: { id: string } }) {
     notFound()
   }
 
-  if (
-    lesson.access === AccessOptions.PREMIUM &&
-    user?.currentSubscription !== SubscriptionStatus.ACTIVE
-  ) {
+  const hasAccess = userHasAccess(
+    user as UserWithSubscriptionsAndProgress,
+    lesson.access,
+  )
+
+  if (!hasAccess) {
     return <PremiumCTA heading={lesson.title} />
   }
 

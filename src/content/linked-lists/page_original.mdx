@@ -1,0 +1,551 @@
+export const metadata = {
+  title: 'Quickstart',
+  description:
+    'This guide will get you all set up and ready to use the Protocol API. We’ll cover how to get started an API client and how to make your first API request.',
+}
+
+# Comprehensive Guide to Linked Lists in JavaScript
+
+Linked lists are a fundamental data structure used to store collections of elements in a sequential manner. Unlike arrays, linked lists store elements in nodes that are not placed contiguously in memory, providing unique advantages in certain scenarios.
+
+**Definition and Concept:**
+
+A linked list is composed of a series of nodes, where each node contains a data element and a reference (link) to the next node in the sequence. This structure allows for efficient insertions and deletions as it avoids the performance penalties of reindexing elements, like those in an array.
+
+**Types of Linked Lists:**
+
+Singly Linked Lists: Each node contains a single link field pointing to the next node in the list. This makes traversal straightforward but only in one direction.
+Doubly Linked Lists: Nodes contain two links, one pointing to the next node and one to the previous, allowing for bidirectional traversal.
+Circular Linked Lists: The last node points back to the first node, making the list circular. This can be implemented in both singly and doubly linked structures.
+
+## Why Use Linked Lists?
+
+Linked lists offer several advantages and some disadvantages compared to arrays, making them suitable for specific scenarios.
+
+**Advantages:**
+
+Dynamic Size: The size of a linked list can grow or shrink dynamically, so it's more flexible in using memory compared to arrays.
+Efficient Operations: Inserting or deleting nodes doesn't require shifting elements around as in arrays, which can lead to more efficient operations in scenarios where such modifications are frequent.
+
+**Disadvantages:**
+
+No Direct Access: Linked lists do not allow random access to elements, which means accessing an element requires traversing from the start of the list (or the end, in the case of a doubly linked list). This can lead to inefficiencies for certain operations.
+
+## Core Operations
+
+Understanding how to work with linked lists involves several core operations, including creating nodes, building the list, and modifying it through various methods.
+
+**Creating a Node:**
+
+Here's how you might define a simple node in a linked list.
+
+```js
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+  }
+}
+```
+
+**Building a Linked List:**
+
+This class starts the linked list, usually with a head node that points to null initially.
+
+```js
+class LinkedList {
+  constructor() {
+    this.head = null;
+    this.size = 0;
+  }
+}
+```
+
+**Insertion:**
+
+Adding elements to a linked list can be done in various positions: at the beginning, middle, or end.
+
+Insert at the beginning (push):
+
+```js
+LinkedList.prototype.push = function(value) {
+  const node = new Node(value);
+  node.next = this.head;
+  this.head = node;
+  this.size++;
+}
+```
+
+**Deletion:**
+
+Removing elements also needs to account for various cases, including removing the first or last item or a specific item based on its value.
+
+Remove a specific value:
+
+```js
+LinkedList.prototype.remove = function(value) {
+  let current = this.head;
+  let prev = null;
+  while (current != null) {
+    if (current.value === value) {
+      if (prev == null) {
+        this.head = current.next; // remove first node
+      } else {
+        prev.next = current.next; // remove middle or last node
+      }
+      this.size--;
+      return true;
+    }
+    prev = current;
+    current = current.next;
+  }
+  return false;
+}
+```
+
+**Traversal:**
+
+To traverse a linked list and print all elements, you can use a simple loop.
+
+```js
+LinkedList.prototype.print = function() {
+  let current = this.head;
+  while (current) {
+    console.log(current.value);
+    current = current.next;
+  }
+}
+```
+
+## Common Linked List Algorithms
+
+Linked lists are often used in interview settings and practical applications where their unique properties can be leveraged. Here are some key algorithms and operations you might implement with linked lists:
+
+**Searching for a Value:**
+
+Implementing a search function in a linked list involves traversing the list and checking each node's value.
+
+```js
+LinkedList.prototype.contains = function(value) {
+  let current = this.head;
+  while (current) {
+    if (current.value === value) {
+      return true;
+    }
+    current = current.next;
+  }
+  return false;
+}
+```
+
+**Reversing a Linked List:**
+
+Reversing a linked list is a common interview question that tests understanding of linked list operations.
+
+```js
+LinkedList.prototype.reverse = function() {
+  let prev = null;
+  let current = this.head;
+  while (current) {
+    let next = current.next;
+    current.next = prev;
+    prev = current;
+    current = next;
+  }
+  this.head = prev;
+}
+```
+
+Detecting a Loop (Floyd’s Cycle-Finding Algorithm):
+
+Also known as the "tortoise and the hare" algorithm, this is used to detect cycles in a linked list.
+
+```js
+LinkedList.prototype.hasCycle = function() {
+  let slow = this.head;
+  let fast = this.head;
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow === fast) {
+      return true; // Cycle detected
+    }
+  }
+  return false;
+}
+```
+
+## Doubly Linked Lists
+
+Doubly linked lists extend the concept of singly linked lists by allowing traversal in both directions, which can simplify certain operations.
+
+**Introduction and Structure:**
+
+Each node in a doubly linked list has two pointers, next and prev, pointing to the next and previous nodes, respectively.
+
+```js
+class DoublyLinkedNode {
+  constructor(value) {
+    this.value = value;
+    this.next = null;
+    this.prev = null;
+  }
+}
+```
+
+**Implementation:**
+
+Building a doubly linked list involves modifying the node insertion and removal logic to handle the prev pointer.
+
+```js
+class DoublyLinkedList {
+  constructor() {
+    this.head = null;
+    this.tail = null; // keeping track of the tail makes some operations easier
+  }
+
+  // Insert at the beginning
+  unshift(value) {
+    const newNode = new DoublyLinkedNode(value);
+    if (!this.head) {
+      this.head = this.tail = newNode;
+    } else {
+      this.head.prev = newNode;
+      newNode.next = this.head;
+      this.head = newNode;
+    }
+  }
+}
+```
+
+**Use Cases:**
+
+Doubly linked lists are particularly useful when you need to frequently add or remove nodes from both ends of the list, or when you need to traverse the list in both directions.
+
+## Circular Linked Lists
+
+Circular linked lists create loops where the last node points back to the first, making the list circular.
+
+**Concept:**
+
+This type of list is useful for applications where the list needs to be repeatedly cycled through (e.g., a round-robin scheduler).
+
+```js
+class CircularLinkedList extends LinkedList {
+  constructor() {
+    super();
+  }
+
+  // Overriding the push method to make the list circular
+  push(value) {
+    const newNode = new Node(value);
+    if (!this.head) {
+      this.head = newNode;
+      newNode.next = this.head;
+    } else {
+      let current = this.head;
+      while (current.next !== this.head) {
+        current = current.next;
+      }
+      current.next = newNode;
+      newNode.next = this.head;
+    }
+  }
+}
+```
+
+**Identifying Challenges:**
+
+Implementing operations in a circular linked list requires careful attention to prevent infinite loops during traversal or modification.
+
+## Interview Problems
+
+Linked lists are a popular topic in technical interviews due to their complex structure and the logical thinking required to manipulate them. Here are some typical problems and strategies for solving them:
+
+**Merging Two Sorted Linked Lists:**
+
+Create a new linked list that consists of the nodes of two lists taken in ascending order.
+
+```js
+function mergeLists(l1, l2) {
+  let dummy = new Node(0);
+  let tail = dummy;
+
+  while (l1 && l2) {
+    if (l1.value < l2.value) {
+      tail.next = l1;
+      l1 = l1.next;
+    } else {
+      tail.next = l2;
+      l2 = l2.next;
+    }
+    tail = tail.next;
+  }
+
+  tail.next = l1 || l2;
+  return dummy.next;
+}
+```
+
+**Finding the Middle of a Linked List:**
+
+Use the fast and slow pointer technique to find the middle node of a linked list.
+
+```js
+function findMiddle(head) {
+  let slow = head;
+  let fast = head;
+
+  while (fast && fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+  }
+
+  return slow; // slow will be at the middle when fast reaches the end
+}
+```
+
+**Removing Duplicates from a Linked List:**
+
+Remove all nodes that have duplicate numbers, leaving only distinct numbers from the original list.
+
+```js
+function removeDuplicates(head) {
+  let current = head;
+  while (current && current.next) {
+    if (current.value === current.next.value) {
+      current.next = current.next.next;
+    } else {
+      current = current.next;
+    }
+  }
+  return head;
+}
+```
+
+## Optimization and Best Practices
+
+Optimizing linked lists and adhering to best practices can significantly enhance performance and maintainability:
+
+**Memory Management:**
+
+In languages with manual memory management, it's crucial to deallocate removed nodes. In JavaScript, ensuring that removed nodes are not referenced elsewhere helps in garbage collection.
+
+**Code Optimization:**
+
+Writing clean, efficient linked list operations involves understanding the costs associated with each operation and optimizing them where possible, especially in terms of time complexity.
+
+## Exercises and Projects
+
+Hands-on practice is vital for mastering linked lists. Here are some tasks you might undertake:
+
+**Implement Various Linked List Operations:**
+
+Create functions to add, remove, and find nodes in singly, doubly, and circular linked lists.
+
+**Coding Challenges:**
+
+Participate in online platforms that offer linked list problems. This practice can help improve problem-solving speed and accuracy under timed conditions.
+
+## Review and Resources
+
+Consistent review and accessing quality resources are key to deepening your understanding of linked lists:
+
+**Summary and Review Sessions:**
+
+Regularly revisiting the concepts and operations covered can solidify knowledge and uncover areas needing further study.
+
+**Additional Learning Materials:**
+
+Online tutorials and videos can provide different perspectives and explanations that might resonate more clearly.
+
+Books on data structures and algorithms often cover linked lists in great detail and can be an excellent resource for in-depth study.
+
+## Understanding Linked Lists
+
+Basic Structure
+
+A linked list is a collection of elements called "nodes," each containing two parts:
+
+Data: The value or data that is being stored.
+Next: A reference (or link) to the next node in the sequence.
+
+This structure allows for efficient insertions and deletions as elements do not need to be contiguous in memory.
+
+Types of Linked Lists
+
+Singly Linked List: Each node has one link that points to the next node in the sequence, making it efficient for traversal in one direction.
+Doubly Linked List: Each node has two links, one pointing to the next node and one to the previous, facilitating bidirectional traversal.
+
+Creating a Node and a Linked List
+
+Here’s a basic example of how to create a singly linked list in JavaScript:
+
+```js
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+class LinkedList {
+    constructor() {
+        this.head = null;
+    }
+
+    append(data) {
+        let newNode = new Node(data);
+        if (!this.head) {
+            this.head = newNode;
+        } else {
+            let current = this.head;
+            while (current.next) {
+                current = current.next;
+            }
+            current.next = newNode;
+        }
+    }
+}
+```
+
+## Common Operations
+
+Insertion
+
+At the Head: O(1) as it involves changing the head of the list.
+At the Tail or Middle: O(n) due to the need to traverse the list to find the insertion point.
+
+Deletion
+
+By Value or Position: Requires traversal of the list until the node to delete is found, generally O(n).
+
+Search
+
+Find a Node: Linear search is O(n), as it may require scanning the entire list.
+
+Traversal
+
+Print All Values: Sequentially access each node starting from the head.
+
+## Performance Considerations
+
+Memory Usage: Each node in a linked list uses more memory than an array due to storage of additional references (next/prev).
+Runtime Efficiency: Insertions and deletions at known positions are efficient. However, searches are slower compared to arrays due to lack of direct access.
+
+## Advanced Techniques
+
+Reversing a Linked List
+
+A common interview question involves reversing a linked list, which tests understanding of node manipulation:
+
+```js
+reverse() {
+    let current = this.head;
+    let prev = null;
+    while (current) {
+        let next = current.next;
+        current.next = prev;
+        prev = current;
+        current = next;
+    }
+    this.head = prev;
+}
+```
+
+Cycle Detection
+
+Using Floyd's Cycle-Finding Algorithm (Tortoise and Hare), you can detect cycles within a linked list, which is another common interview challenge:
+
+```js
+hasCycle() {
+    let slow = this.head, fast = this.head;
+    while (fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if (slow === fast) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+## Practical Tips and Interview Pointers
+
+Implement Basic Methods: Be comfortable writing basic methods like append, delete, and find from scratch.
+Discuss Trade-offs: Be prepared to discuss the trade-offs between using a linked list and other data structures like arrays or trees.
+Optimization Questions: Be ready to answer questions on how to optimize certain operations, potentially using more complex data structures in conjunction with linked lists.
+
+## More Advanced Operations and Techniques
+
+Merging Two Sorted Linked Lists
+
+This is a common interview problem where you're given two sorted linked lists and you need to merge them into a single sorted linked list. This operation can be performed efficiently in O(n + m) time, where n and m are the lengths of the two linked lists.
+
+```js
+function mergeSortedLists(l1, l2) {
+    if (!l1) return l2;
+    if (!l2) return l1;
+
+    if (l1.data < l2.data) {
+        l1.next = mergeSortedLists(l1.next, l2);
+        return l1;
+    } else {
+        l2.next = mergeSortedLists(l1, l2.next);
+        return l2;
+    }
+}
+```
+
+Finding the Middle of a Linked List
+
+Finding the middle of a linked list in a single pass can be done using the two-pointer technique, where one pointer moves twice as fast as the other.
+
+```js
+function findMiddle(head) {
+    let slow = head, fast = head;
+    while (fast && fast.next) {
+        slow = slow.next;
+        fast = fast.next.next;
+    }
+    return slow;
+}
+```
+
+List Splitting
+
+In algorithms that involve dividing linked lists, such as in merge sort for linked lists, knowing how to split lists efficiently is essential.
+
+## Edge Cases and Common Pitfalls
+
+Handling Loops
+
+When manipulating linked lists, especially in operations that traverse or modify the list, ensure proper handling of the tail node to prevent creating unintentional loops which can lead to infinite loops during traversal.
+
+Memory Leaks
+
+In languages with manual memory management, care must be taken to properly free memory used by nodes that are removed from a linked list to avoid memory leaks. In JavaScript, ensuring that removed nodes do not hold references to other objects can help in their garbage collection.
+
+Robustness in Operations
+
+Operations on linked lists should check for edge cases:
+
+Empty list scenarios.
+
+Single-element lists, especially when deleting or reversing.
+Operations near the head and tail of the list, ensuring that head and tail pointers are updated correctly.
+
+## Using Linked Lists in Larger Structures
+
+Application in Other Data Structures
+
+Linked lists serve as the backbone for several other complex data structures:
+
+Stacks and Queues: Implementing these using linked lists can ensure O(1) time complexity for operations like push, pop, enqueue, and dequeue.
+Graph Adjacency Lists: Linked lists are ideal for dynamically sized adjacency lists in graphs.
+
+## Practical Interview Tips
+
+Visual Explanation: In interviews, when discussing linked lists, sketching out the list on a whiteboard can be immensely helpful in visually explaining your approach, especially for complex operations like reversing the list, merging, or cycle detection.
+Step-by-Step Logic: Walk through your logic step-by-step when describing how you're manipulating node links, which helps in showcasing your problem-solving approach and attention to detail.
