@@ -1,19 +1,22 @@
-import { navigation } from '@/components/Navigation'
+import { useProgressStore } from '@/contexts/progress'
 import { usePathname } from 'next/navigation'
 
 export const usePages = () => {
   const pathname = usePathname()
+  const fullCurriculum = useProgressStore((state) => state.fullCurriculum)
 
-  const currentSectionIndex = navigation.findIndex((section) =>
-    section.links.some((page) => page.href === pathname),
+  const courseSections = fullCurriculum[0]?.sections ?? []
+
+  const currentSectionIndex = courseSections.findIndex((section) =>
+    section.lessons.some((lesson) => lesson.href === pathname),
   )
 
   if (currentSectionIndex === -1) {
     return {}
   }
 
-  const currentSection = navigation[currentSectionIndex]
-  const allPagesInSection = currentSection.links
+  const currentSection = courseSections[currentSectionIndex]
+  const allPagesInSection = currentSection.lessons
   const currentPageIndex = allPagesInSection.findIndex(
     (page) => page.href === pathname,
   )
@@ -28,10 +31,10 @@ export const usePages = () => {
 
   const isEndOfSection = currentPageIndex === allPagesInSection.length - 1
   const isEndOfCourse =
-    currentSectionIndex === navigation.length - 1 && isEndOfSection
+    currentSectionIndex === courseSections.length - 1 && isEndOfSection
 
-  const previousSection = navigation[currentSectionIndex - 1]
-  const nextSection = navigation[currentSectionIndex + 1]
+  const previousSection = courseSections[currentSectionIndex - 1]
+  const nextSection = courseSections[currentSectionIndex + 1]
 
   return {
     previousPage,

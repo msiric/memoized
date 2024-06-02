@@ -20,9 +20,8 @@ import {
   useState,
 } from 'react'
 import Highlighter from 'react-highlight-words'
-
-import { navigation } from '@/components/Navigation'
 import { type Result } from '@/mdx/search.mjs'
+import { useProgressStore } from '@/contexts/progress'
 
 type EmptyObject = Record<string, never>
 
@@ -174,9 +173,12 @@ function SearchResult({
   query: string
 }) {
   const id = useId()
+  const fullCurriculum = useProgressStore((state) => state.fullCurriculum)
 
-  const sectionTitle = navigation.find((section) =>
-    section.links.find((link) => link.href === result.url.split('#')[0]),
+  const courseSections = fullCurriculum[0]?.sections ?? []
+
+  const sectionTitle = courseSections.find((section) =>
+    section.lessons.find((lesson) => lesson.href === result.url.split('#')[0]),
   )?.title
   const hierarchy = [sectionTitle, result.pageTitle].filter(
     (x): x is string => typeof x === 'string',

@@ -1,10 +1,9 @@
 'use client'
 
 import { markLesson } from '@/actions/markLesson'
+import { useProgressStore } from '@/contexts/progress'
 import clsx from 'clsx'
-import { useSession } from 'next-auth/react'
-import { usePathname } from 'next/navigation'
-import { forwardRef, useState, FormEvent } from 'react'
+import { FormEvent, forwardRef } from 'react'
 
 export enum LessonCompleted {
   'YES' = 'YES',
@@ -77,15 +76,18 @@ const MarkForm = forwardRef<
 export type LessonStatusProps = {
   userId?: string
   lessonId: string
-  previouslyCompleted: boolean
 }
 
-export function LessonStatus({
-  userId,
-  lessonId,
-  previouslyCompleted,
-}: LessonStatusProps) {
-  const [completed, setCompleted] = useState(previouslyCompleted)
+export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
+  const completedLessons = useProgressStore((state) => state.completedLessons)
+  const toggleCompletedLesson = useProgressStore(
+    (state) => state.toggleCompletedLesson,
+  )
+  const isCompleted = Array.from(completedLessons).some(
+    (lesson) => lesson === lessonId,
+  )
+
+  console.log('completed lessons', completedLessons, isCompleted)
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -95,9 +97,9 @@ export function LessonStatus({
 
     try {
       await markLesson({ userId, lessonId, completed: currentlyCompleted })
-      setCompleted(currentlyCompleted)
+      toggleCompletedLesson(lessonId)
       console.log(
-        `Lesson marked as ${completed ? 'completed' : 'not completed'}`,
+        `Lesson marked as ${isCompleted ? 'completed' : 'not completed'}`,
       )
     } catch (error) {
       console.error('Error:', error)
@@ -106,7 +108,7 @@ export function LessonStatus({
 
   return (
     <div className="relative h-8">
-      <MarkForm onSubmit={onSubmit} completed={completed} />
+      <MarkForm onSubmit={onSubmit} completed={isCompleted} />
     </div>
   )
 }

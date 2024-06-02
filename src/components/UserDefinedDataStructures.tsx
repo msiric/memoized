@@ -1,9 +1,10 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { COURSE_PREFIX } from '@/constants'
+import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
-export const userDefinedDataStructures = [
+export const userDefinedDataStructures: LessonConfig[] = [
   {
     id: '/linked-lists',
     href: `${COURSE_PREFIX}/linked-lists`,

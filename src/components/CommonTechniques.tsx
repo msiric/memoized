@@ -1,9 +1,10 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { COURSE_PREFIX } from '@/constants'
+import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
-export const commonTechniques = [
+export const commonTechniques: LessonConfig[] = [
   {
     id: '/sliding-window',
     href: `${COURSE_PREFIX}/sliding-window`,

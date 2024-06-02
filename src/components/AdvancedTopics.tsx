@@ -1,9 +1,10 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { COURSE_PREFIX } from '@/constants'
+import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
-export const advancedTopics = [
+export const advancedTopics: LessonConfig[] = [
   {
     id: '/dynamic-programming',
     href: `${COURSE_PREFIX}/dynamic-programming`,

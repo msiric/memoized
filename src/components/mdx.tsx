@@ -1,11 +1,10 @@
-import Link from 'next/link'
-import clsx from 'clsx'
-
-import { LessonStatus } from '@/components/LessonStatus'
 import { Heading } from '@/components/Heading'
+import { LessonStatus } from '@/components/LessonStatus'
 import { Prose } from '@/components/Prose'
-import { NextPage } from './NextPage'
+import clsx from 'clsx'
+import Link from 'next/link'
 import { ReactNode } from 'react'
+import { NextPage } from './NextPage'
 
 export const a = Link
 export { Button } from '@/components/Button'
@@ -15,14 +14,12 @@ export { DynamicImage as img } from '@/components/DynamicImage'
 export type WrapperProps = {
   userId?: string
   lessonId: string
-  completed: boolean
   children: ReactNode
 }
 
 export const wrapper = function Wrapper({
   userId,
   lessonId,
-  completed,
   children,
 }: WrapperProps) {
   return (
@@ -32,11 +29,7 @@ export const wrapper = function Wrapper({
         <NextPage />
       </div>
       <footer className="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
-        <LessonStatus
-          userId={userId}
-          lessonId={lessonId}
-          previouslyCompleted={completed}
-        />
+        <LessonStatus userId={userId} lessonId={lessonId} />
       </footer>
     </article>
   )

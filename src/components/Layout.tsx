@@ -1,24 +1,61 @@
 'use client'
+
 import { Footer } from '@/components/Footer'
 import { Header } from '@/components/Header'
 import { Logo } from '@/components/Logo'
 import { Navigation } from '@/components/Navigation'
 import { SectionProvider, type Section } from '@/components/SectionProvider'
 import { COURSE_PREFIX } from '@/constants'
+import { useAuthStore } from '@/contexts/auth'
+import { useProgressStore } from '@/contexts/progress'
+import { UserWithSubscriptionsAndProgress } from '@/services/user'
+import { Curriculum, LessonConfig } from '@/types'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
+
+export type LayoutProps = {
+  userData?: UserWithSubscriptionsAndProgress | null
+  allSections: Record<string, Array<Section>>
+  completedLessons?: string[]
+  fullCurriculum?: Curriculum[]
+  allLessons?: LessonConfig[]
+  children: React.ReactNode
+}
 
 export function Layout({
   children,
+  userData,
   allSections,
-}: {
-  children: React.ReactNode
-  allSections: Record<string, Array<Section>>
-}) {
+  completedLessons,
+  fullCurriculum,
+  allLessons,
+}: LayoutProps) {
   const pathname = usePathname()
 
   const formattedPathname = pathname?.split(COURSE_PREFIX)[1]
+
+  const setUser = useAuthStore((state) => state.setUser)
+  const initializeProgress = useProgressStore(
+    (state) => state.initializeProgress,
+  )
+
+  useEffect(() => {
+    initializeProgress(
+      completedLessons ?? [],
+      fullCurriculum ?? [],
+      allLessons ?? [],
+    )
+    setUser(userData ?? null)
+  }, [
+    completedLessons,
+    initializeProgress,
+    allLessons,
+    fullCurriculum,
+    setUser,
+    userData,
+  ])
 
   return (
     <SectionProvider sections={allSections[formattedPathname ?? ''] ?? []}>
@@ -34,7 +71,11 @@ export function Layout({
               </Link>
             </div>
             <Header />
-            <Navigation className="hidden lg:mt-10 lg:block" />
+            <Navigation
+              userData={userData}
+              fullCurriculum={fullCurriculum}
+              className="hidden lg:mt-10 lg:block"
+            />
           </div>
         </motion.header>
         <div className="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">

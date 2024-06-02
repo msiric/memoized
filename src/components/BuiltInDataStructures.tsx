@@ -1,9 +1,10 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { COURSE_PREFIX } from '@/constants'
+import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
-export const builtInDataStructures = [
+export const builtInDataStructures: LessonConfig[] = [
   {
     id: '/strings',
     href: `${COURSE_PREFIX}/strings`,

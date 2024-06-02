@@ -1,3 +1,4 @@
+import { useProgressStore } from '@/contexts/progress'
 import clsx from 'clsx'
 import { signOut, useSession } from 'next-auth/react'
 import Image from 'next/image'
@@ -7,11 +8,13 @@ export const UserDropdown = ({ isMobile = false }) => {
   const { data: session } = useSession()
   const [open, setOpen] = useState(false)
 
+  const currentProgress = useProgressStore((state) => state.currentProgress)
+
   const profileRef = useRef<HTMLButtonElement>(null)
 
   const user = session?.user
 
-  const currentProgress = '45%'
+  const formattedProgress = `${currentProgress.toFixed(2)}%`
 
   useEffect(() => {
     const handleDropDown = (e: MouseEvent) => {
@@ -60,7 +63,7 @@ export const UserDropdown = ({ isMobile = false }) => {
 
       <div
         className={clsx(
-          'w-50 absolute right-2 top-[64px] z-10 divide-y divide-gray-300 rounded-lg bg-gray-100 shadow dark:divide-gray-600 dark:bg-zinc-700',
+          'w-50 absolute right-2 top-[64px] z-10 divide-y divide-gray-300 rounded-lg bg-zinc-100 shadow dark:divide-gray-600 dark:bg-zinc-700',
           open ? '' : 'hidden',
           isMobile ? '-top-[228px] bottom-10 left-0 w-full' : '',
         )}
@@ -72,13 +75,15 @@ export const UserDropdown = ({ isMobile = false }) => {
         <div className="py-2">
           <div className="flex gap-1 px-4">
             <p className="block text-sm font-medium">Progress</p>
-            <p className="font-sm block text-xs">({currentProgress})</p>
+            <p className="font-sm block text-xs">({formattedProgress})</p>
           </div>
-          <div className="block h-2.5 w-full rounded-full bg-gray-100 px-4 dark:bg-zinc-700">
-            <div
-              className="mt-1 h-1.5 rounded-full bg-lime-600"
-              style={{ width: currentProgress }}
-            ></div>
+          <div className="block h-2.5 w-full rounded-full px-4 dark:bg-zinc-700">
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-zinc-500 dark:bg-white">
+              <div
+                className="h-1.5 bg-lime-500 dark:bg-lime-600"
+                style={{ width: formattedProgress }}
+              />
+            </div>
           </div>
         </div>
         <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
