@@ -5,24 +5,18 @@ import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
 import { useAuthStore } from '@/contexts/auth'
 import { useProgressStore } from '@/contexts/progress'
-import { UserWithSubscriptionsAndProgress } from '@/services/user'
-import { Curriculum, LessonConfig, SectionResult } from '@/types'
+import { Curriculum, SectionResult } from '@/types'
 import { remToPx } from '@/utils/helpers'
 import { AccessOptions, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
-
-interface NavGroup {
-  title: string
-  links: LessonConfig[]
-}
 
 function useInitialValue<T>(value: T, condition = true) {
   const initialValue = useRef(value).current
@@ -56,6 +50,7 @@ function NavLink({
   access,
   active = false,
   isAnchorLink = false,
+  onRef,
 }: {
   id: string
   href: string
@@ -64,6 +59,7 @@ function NavLink({
   access?: AccessOptions
   active?: boolean
   isAnchorLink?: boolean
+  onRef?: (ref: HTMLAnchorElement | null) => void
 }) {
   const userData = useAuthStore((state) => state.user)
   const completedLessons = useProgressStore((state) => state.completedLessons)
@@ -71,6 +67,14 @@ function NavLink({
   const isCompleted = Array.from(completedLessons).some(
     (lesson) => lesson === id,
   )
+
+  const linkRef = useRef<HTMLAnchorElement | null>(null)
+
+  useEffect(() => {
+    if (active && linkRef.current) {
+      linkRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [active])
 
   return (
     <Link
@@ -85,6 +89,10 @@ function NavLink({
           : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white',
         active && !isCompleted && 'text-zinc-900 dark:text-white',
       )}
+      ref={(node) => {
+        linkRef.current = node
+        if (onRef) onRef(node)
+      }}
     >
       <span className="truncate">{children}</span>
       {tag && (
@@ -269,7 +277,6 @@ function NavigationGroup({
 }
 
 export type NavigationProps = {
-  userData?: UserWithSubscriptionsAndProgress | null
   fullCurriculum?: Curriculum[]
 } & React.ComponentPropsWithoutRef<'nav'>
 

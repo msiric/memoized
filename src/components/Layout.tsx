@@ -70,9 +70,8 @@ export function Layout({
                 <Logo className="h-6" />
               </Link>
             </div>
-            <Header />
+            <Header fullCurriculum={fullCurriculum} />
             <Navigation
-              userData={userData}
               fullCurriculum={fullCurriculum}
               className="hidden lg:mt-10 lg:block"
             />
