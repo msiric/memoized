@@ -1,8 +1,10 @@
 'use client'
 
 import { markLesson } from '@/actions/markLesson'
+import { useAuthStore } from '@/contexts/auth'
 import { useProgressStore } from '@/contexts/progress'
 import clsx from 'clsx'
+import { useSession } from 'next-auth/react'
 import { FormEvent, forwardRef } from 'react'
 
 export enum LessonCompleted {
@@ -79,6 +81,9 @@ export type LessonStatusProps = {
 }
 
 export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
+  const { data: session } = useSession()
+
+  const openModal = useAuthStore((state) => state.openModal)
   const completedLessons = useProgressStore((state) => state.completedLessons)
   const toggleCompletedLesson = useProgressStore(
     (state) => state.toggleCompletedLesson,
@@ -89,6 +94,9 @@ export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (!session) {
+      return openModal()
+    }
     const button = document.activeElement as HTMLButtonElement
     const response = button.getAttribute('data-response')
     const currentlyCompleted = response === LessonCompleted.YES
