@@ -1,5 +1,6 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { PremiumCTA } from '@/components/PremiumCTA'
+import { CONTENT_FOLDER } from '@/constants'
 import prisma from '@/lib/prisma'
 import { getUserWithSubscriptions } from '@/services/user'
 import { AccessOptions, SubscriptionStatus } from '@prisma/client'
@@ -28,7 +29,7 @@ export default async function Lesson({ params }: { params: { id: string } }) {
   }
 
   const Page = dynamic(
-    () => import(`@/app/(course)/${params.id}/page.mdx`),
+    () => import(`@/app/${CONTENT_FOLDER}/${params.id}/page.mdx`),
   ) as unknown as JSXElementConstructor<{
     userId?: string
     lessonId: string

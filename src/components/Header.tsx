@@ -1,8 +1,3 @@
-import clsx from 'clsx'
-import { motion, useScroll, useTransform } from 'framer-motion'
-import Link from 'next/link'
-import { forwardRef } from 'react'
-
 import { Logo } from '@/components/Logo'
 import {
   MobileNavigation,
@@ -11,8 +6,12 @@ import {
 } from '@/components/MobileNavigation'
 import { MobileSearch, Search } from '@/components/Search'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { AuthButton } from './AuthButton'
 import { Curriculum } from '@/types'
+import clsx from 'clsx'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import Link from 'next/link'
+import { forwardRef } from 'react'
+import { AuthButton } from './AuthButton'
 
 function TopLevelNavItem({
   href,
@@ -84,9 +83,6 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
         <div className="flex items-center gap-5">
           <nav className="hidden md:block">
             <ul role="list" className="flex items-center gap-8">
-              <TopLevelNavItem href="/">API</TopLevelNavItem>
-              <TopLevelNavItem href="#">Documentation</TopLevelNavItem>
-              <TopLevelNavItem href="#">Support</TopLevelNavItem>
               <TopLevelNavItem href="/premium">Premium</TopLevelNavItem>
             </ul>
           </nav>

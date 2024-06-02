@@ -1,3 +1,4 @@
+import { CONTENT_FOLDER } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { AccessOptions, PrismaClient } from '@prisma/client'
 import fs from 'fs'
@@ -7,7 +8,7 @@ import slugify from 'slugify'
 const prisma = new PrismaClient()
 
 async function syncContent() {
-  const contentDir = path.join(process.cwd(), 'src/app/(course)')
+  const contentDir = path.join(process.cwd(), `src/${CONTENT_FOLDER}`)
 
   for (const course of completeCurriculum) {
     const { title: courseTitle, description: courseDescription } = course

@@ -46,7 +46,6 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
       completedLessons.add(lessonId)
     }
     const newProgress = calculateProgress(completedLessons, allLessons)
-    console.log('new', Array.from(completedLessons), newProgress)
     set({ completedLessons, currentProgress: newProgress })
   },
 }))

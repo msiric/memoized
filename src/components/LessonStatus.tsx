@@ -87,8 +87,6 @@ export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
     (lesson) => lesson === lessonId,
   )
 
-  console.log('completed lessons', completedLessons, isCompleted)
-
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const button = document.activeElement as HTMLButtonElement

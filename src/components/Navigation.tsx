@@ -12,7 +12,7 @@ import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
 import { CheckIcon } from './icons/CheckIcon'
@@ -68,14 +68,6 @@ function NavLink({
     (lesson) => lesson === id,
   )
 
-  const linkRef = useRef<HTMLAnchorElement | null>(null)
-
-  useEffect(() => {
-    if (active && linkRef.current) {
-      linkRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }, [active])
-
   return (
     <Link
       href={href}
@@ -89,10 +81,6 @@ function NavLink({
           : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white',
         active && !isCompleted && 'text-zinc-900 dark:text-white',
       )}
-      ref={(node) => {
-        linkRef.current = node
-        if (onRef) onRef(node)
-      }}
     >
       <span className="truncate">{children}</span>
       {tag && (
