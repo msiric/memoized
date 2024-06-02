@@ -34,7 +34,7 @@ export default async function Lesson({ params }: { params: { id: string } }) {
   }
 
   const Page = dynamic(
-    () => import(`@/app/${CONTENT_FOLDER}/${params.id}/page.mdx`),
+    () => import(`../../../../${CONTENT_FOLDER}/${params.id}/page.mdx`),
     {
       loading: () => (
         <section className="h-screen bg-white dark:bg-zinc-900">

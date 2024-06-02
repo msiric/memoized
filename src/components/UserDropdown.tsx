@@ -1,3 +1,5 @@
+'use client'
+
 import { useProgressStore } from '@/contexts/progress'
 import { useSignOut } from '@/hooks/useSignOut'
 import clsx from 'clsx'

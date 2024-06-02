@@ -1,3 +1,5 @@
+'use client'
+
 import { useProgressStore } from '@/contexts/progress'
 import { usePathname } from 'next/navigation'
 

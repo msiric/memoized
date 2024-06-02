@@ -12,6 +12,7 @@ export type LessonConfig = {
 
 export type LessonResult = {
   id: string
+  slug: string
   title: string
   href: string
   description: string | null
@@ -20,6 +21,7 @@ export type LessonResult = {
 
 export type SectionResult = {
   id: string
+  slug: string
   title: string
   description: string | null
   lessons: LessonResult[]
@@ -27,6 +29,7 @@ export type SectionResult = {
 
 export type Curriculum = {
   id: string
+  slug: string
   title: string
   description: string | null
   sections: SectionResult[]

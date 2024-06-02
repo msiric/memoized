@@ -12,11 +12,11 @@ export default async function Navigation() {
 
   const data = await getUserProgressWithLessons(session?.userId)
 
-  const pages = await glob('**/*.mdx', { cwd: `src/app/${CONTENT_FOLDER}` })
+  const pages = await glob('**/*.mdx', { cwd: `src/${CONTENT_FOLDER}` })
   const allSectionsEntries = (await Promise.all(
     pages.map(async (filename) => [
       '/' + filename.replace(/(^|\/)page\.mdx$/, ''),
-      (await import(`../../${CONTENT_FOLDER}/${filename}`)).sections,
+      (await import(`../../../${CONTENT_FOLDER}/${filename}`)).sections,
     ]),
   )) as Array<[string, Array<Section>]>
   const allSections = Object.fromEntries(allSectionsEntries)

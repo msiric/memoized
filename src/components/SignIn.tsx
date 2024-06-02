@@ -1,3 +1,5 @@
+'use client'
+
 import { APP_NAME } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import clsx from 'clsx'

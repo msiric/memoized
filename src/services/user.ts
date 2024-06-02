@@ -64,6 +64,7 @@ export async function getUserProgressWithLessons(userId?: string) {
 
   const currentSubscription =
     (user?.subscriptions?.length ?? 0) > 0 ? user?.subscriptions[0] : null
+
   const currentSubscriptionStatus = currentSubscription
     ? checkSubscriptionStatus(currentSubscription)
     : null
@@ -82,18 +83,20 @@ export async function getUserProgressWithLessons(userId?: string) {
     (acc, lesson) => {
       const {
         id: courseId,
+        slug: courseSlug,
         title: courseTitle,
         description: courseDescription,
       } = lesson.section.course
       const {
         id: sectionId,
+        slug: sectionSlug,
         title: sectionTitle,
         description: sectionDescription,
       } = lesson.section
       const {
         id: lessonId,
-        title: lessonTitle,
         slug: lessonSlug,
+        title: lessonTitle,
         description: lessonDescription,
         access: lessonAccess,
       } = lesson
@@ -102,6 +105,7 @@ export async function getUserProgressWithLessons(userId?: string) {
       if (!course) {
         course = {
           id: courseId,
+          slug: courseSlug,
           title: courseTitle,
           description: courseDescription,
           sections: [],
@@ -113,6 +117,7 @@ export async function getUserProgressWithLessons(userId?: string) {
       if (!section) {
         section = {
           id: sectionId,
+          slug: sectionSlug,
           title: sectionTitle,
           description: sectionDescription,
           lessons: [],
@@ -122,6 +127,7 @@ export async function getUserProgressWithLessons(userId?: string) {
 
       section.lessons.push({
         id: lessonId,
+        slug: lessonSlug,
         title: lessonTitle,
         href: `${COURSE_PREFIX}/${lessonSlug}`,
         description: lessonDescription,

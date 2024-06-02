@@ -1,3 +1,5 @@
+'use client'
+
 import { Button, ButtonProps } from '@/components/Button'
 import { useAuthStore } from '@/contexts/auth'
 import { signOut, useSession } from 'next-auth/react'
