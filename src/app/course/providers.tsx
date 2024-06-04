@@ -24,7 +24,7 @@ export const CourseProviders = ({
 }: CourseProvidersProps) => {
   const pathname = usePathname()
 
-  const formattedPathname = pathname?.split(COURSE_PREFIX)[1]
+  const formattedPathname = pathname?.split(COURSE_PREFIX)[1] ?? ''
 
   return (
     <SectionProvider sections={allSections?.[formattedPathname] ?? []}>

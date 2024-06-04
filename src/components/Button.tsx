@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import Link from 'next/link'
+import React, { MutableRefObject } from 'react'
 
 function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
@@ -35,59 +36,71 @@ export type ButtonProps = {
   | (React.ComponentPropsWithoutRef<'button'> & { href?: undefined })
 )
 
-export function Button({
-  variant = 'primary',
-  className,
-  children,
-  arrow,
-  disabled,
-  ...props
-}: ButtonProps) {
-  className = clsx(
-    'inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition',
-    variantStyles[variant],
-    disabled && 'opacity-50 cursor-not-allowed',
-    className,
-  )
-
-  const arrowIcon = (
-    <ArrowIcon
-      className={clsx(
-        'mt-0.5 h-5 w-5',
-        variant === 'text' && 'relative top-px',
-        arrow === 'left' && '-ml-1 rotate-180',
-        arrow === 'right' && '-mr-1',
-      )}
-    />
-  )
-
-  const inner = (
-    <>
-      {arrow === 'left' && arrowIcon}
-      {children}
-      {arrow === 'right' && arrowIcon}
-    </>
-  )
-
-  if (typeof props.href === 'undefined') {
-    return (
-      <button className={className} disabled={disabled} {...props}>
-        {inner}
-      </button>
+export const Button = React.forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  ButtonProps
+>(
+  (
+    { variant = 'primary', className, children, arrow, disabled, ...props },
+    ref,
+  ) => {
+    className = clsx(
+      'inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition',
+      variantStyles[variant],
+      disabled && 'opacity-50 cursor-not-allowed',
+      className,
     )
-  }
 
-  if (disabled) {
-    return (
-      <span className={className} {...props}>
-        {inner}
-      </span>
+    const arrowIcon = (
+      <ArrowIcon
+        className={clsx(
+          'mt-0.5 h-5 w-5',
+          variant === 'text' && 'relative top-px',
+          arrow === 'left' && '-ml-1 rotate-180',
+          arrow === 'right' && '-mr-1',
+        )}
+      />
     )
-  }
 
-  return (
-    <Link className={className} {...props}>
-      {inner}
-    </Link>
-  )
-}
+    const inner = (
+      <>
+        {arrow === 'left' && arrowIcon}
+        {children}
+        {arrow === 'right' && arrowIcon}
+      </>
+    )
+
+    if (typeof props.href === 'undefined') {
+      return (
+        <button
+          ref={ref as MutableRefObject<HTMLButtonElement>}
+          className={className}
+          disabled={disabled}
+          {...props}
+        >
+          {inner}
+        </button>
+      )
+    }
+
+    if (disabled) {
+      return (
+        <span ref={ref} className={className} {...props}>
+          {inner}
+        </span>
+      )
+    }
+
+    return (
+      <Link
+        ref={ref as MutableRefObject<HTMLAnchorElement>}
+        className={className}
+        {...props}
+      >
+        {inner}
+      </Link>
+    )
+  },
+)
+
+Button.displayName = 'Button'

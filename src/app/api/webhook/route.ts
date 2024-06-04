@@ -162,7 +162,7 @@ const manageSubscriptionStatusChange = async ({
     console.log('subscription id', subscriptionId, 'customer id', customerId)
     const recurringSubscription = existingSubscription
       ? await prisma.subscription.findUnique({
-          where: { id: subscriptionId?.toString() ?? '' },
+          where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
           include: {
             user: true,
           },
@@ -225,7 +225,7 @@ const manageSubscriptionStatusChange = async ({
     }
 
     await prisma.subscription.upsert({
-      where: { id: subscriptionData.stripeSubscriptionId },
+      where: { stripeSubscriptionId: subscriptionData.stripeSubscriptionId },
       update: subscriptionData,
       create: subscriptionData,
     })

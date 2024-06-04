@@ -1,38 +1,59 @@
 'use client'
 
+import { CUSTOMER_PORTAL_LINK } from '@/constants'
+import { useAuthStore } from '@/contexts/auth'
 import { useProgressStore } from '@/contexts/progress'
 import { useSignOut } from '@/hooks/useSignOut'
+import { getInitials } from '@/utils/helpers'
+import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
-import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
+import { Button } from './Button'
 
 export const UserDropdown = ({ isMobile = false }) => {
-  const { data: session } = useSession()
   const [open, setOpen] = useState(false)
 
   const { signOut } = useSignOut()
 
+  const user = useAuthStore((state) => state.user)
   const currentProgress = useProgressStore((state) => state.currentProgress)
-
-  const profileRef = useRef<HTMLButtonElement>(null)
-
-  const user = session?.user
 
   const formattedProgress = `${currentProgress.toFixed(2)}%`
 
+  const handleClick = () => {
+    signOut()
+    setOpen(false)
+  }
+
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  const userInitials = getInitials(user?.name ?? '')
+
   useEffect(() => {
-    const handleDropDown = (e: MouseEvent) => {
-      if (!profileRef.current?.contains(e.target as Node)) setOpen(false)
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        !buttonRef.current?.contains(event.target as Node)
+      ) {
+        setOpen(false)
+      }
     }
-    document.addEventListener('click', handleDropDown)
-  }, [])
+
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [dropdownRef, buttonRef])
 
   return (
     <>
       {isMobile ? (
-        <button
-          ref={profileRef}
+        <Button
+          ref={buttonRef}
           type="button"
           onClick={() => setOpen(!open)}
           className="flex w-full items-center gap-2 rounded-lg bg-zinc-700 px-3 py-1.5 text-sm font-medium text-white duration-150 hover:text-lime-400 active:text-lime-400"
@@ -45,28 +66,28 @@ export const UserDropdown = ({ isMobile = false }) => {
             width="24"
           />
           {user?.name ?? ''}
-        </button>
+        </Button>
       ) : (
-        <button
-          ref={profileRef}
-          className={
-            'flex rounded-full bg-gray-800 text-sm focus:ring-4 focus:ring-gray-300 md:me-0 dark:focus:ring-gray-600'
-          }
+        <Button
+          ref={buttonRef}
+          className={'flex items-center justify-center rounded-full text-sm'}
           type="button"
           onClick={() => setOpen(!open)}
         >
           <span className="sr-only">Open user menu</span>
           <Image
             alt="Avatar"
-            className="rounded-full"
+            className={clsx('rounded-full', userInitials && 'mr-2')}
             src={user?.image ?? ''}
-            height="32"
-            width="32"
+            height="20"
+            width="20"
           />
-        </button>
+          {userInitials}
+        </Button>
       )}
 
       <div
+        ref={dropdownRef}
         className={clsx(
           'w-50 absolute right-2 top-[64px] z-10 divide-y divide-gray-300 rounded-lg bg-zinc-100 shadow dark:divide-gray-600 dark:bg-zinc-700',
           open ? '' : 'hidden',
@@ -92,17 +113,28 @@ export const UserDropdown = ({ isMobile = false }) => {
           </div>
         </div>
         <ul className="py-2 text-sm text-gray-700 dark:text-gray-200">
-          <li>
-            <a
-              href="#"
-              className="block px-4 py-2 hover:bg-gray-200 dark:hover:bg-zinc-600 dark:hover:text-white"
-            >
-              Settings
-            </a>
-          </li>
+          {user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
+            user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
+              <li>
+                <p className="block w-full px-4 py-2">
+                  Lifetime access &#10024;
+                </p>
+              </li>
+            ) : (
+              <li>
+                <a
+                  href={CUSTOMER_PORTAL_LINK}
+                  target="_blank"
+                  className="block px-4 py-2 hover:bg-gray-200 dark:hover:bg-zinc-600 dark:hover:text-white"
+                >
+                  Subscription
+                </a>
+              </li>
+            )
+          ) : null}
           <li>
             <button
-              onClick={() => signOut()}
+              onClick={handleClick}
               className="block w-full px-4 py-2 text-left hover:bg-gray-200 dark:hover:bg-zinc-600 dark:hover:text-white"
             >
               Sign out

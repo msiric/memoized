@@ -1,8 +1,21 @@
 import { Logo } from '@/components/Logo'
 import { PricingTable } from '@/components/PricingTable'
+import { getUserWithSubscriptions } from '@/services/user'
+import { SubscriptionStatus } from '@prisma/client'
+import { getServerSession } from 'next-auth'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { authOptions } from '../api/auth/[...nextauth]/route'
 
-export default function Premium() {
+export default async function Premium() {
+  const session = await getServerSession(authOptions)
+
+  const data = await getUserWithSubscriptions(session?.userId ?? '')
+
+  if (data?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE) {
+    redirect('/')
+  }
+
   return (
     <section className="bg-white dark:bg-zinc-900">
       <div className="mx-6 mt-4 flex">

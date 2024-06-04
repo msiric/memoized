@@ -72,6 +72,7 @@ export const authOptions: AuthOptions = {
         data: {
           email,
           name: user.name,
+          image: user.image,
           stripeCustomerId: stripeCustomer.id,
           accounts: {
             create: {

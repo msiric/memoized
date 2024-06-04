@@ -25,7 +25,7 @@ export default async function Lesson({ params }: { params: { id: string } }) {
   }
 
   const hasAccess = userHasAccess(
-    user as UserWithSubscriptionsAndProgress,
+    user as UserWithSubscriptionsAndProgress | null,
     lesson.access,
   )
 

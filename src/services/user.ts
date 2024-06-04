@@ -1,7 +1,7 @@
 import { COURSE_PREFIX } from '@/constants'
 import prisma from '@/lib/prisma'
 import { Curriculum, SubscriptionStatus } from '@/types'
-import { Prisma, Subscription } from '@prisma/client'
+import { Prisma, Subscription, SubscriptionPlan } from '@prisma/client'
 
 export async function getUserWithSubscriptions(userId: string) {
   const user = await prisma.user.findUnique({
@@ -19,14 +19,20 @@ export async function getUserWithSubscriptions(userId: string) {
   }
 
   const currentSubscription =
-    user.subscriptions.length > 0 ? user.subscriptions[0] : null
+    (user?.subscriptions?.length ?? 0) > 0 ? user?.subscriptions[0] : null
+
+  const currentSubscriptionPlan = currentSubscription
+    ? currentSubscription.plan
+    : null
+
   const currentSubscriptionStatus = currentSubscription
     ? checkSubscriptionStatus(currentSubscription)
     : null
 
   return {
     ...user,
-    currentSubscription: currentSubscriptionStatus,
+    currentSubscriptionPlan,
+    currentSubscriptionStatus,
   }
 }
 
@@ -42,7 +48,11 @@ export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
       }
     }
   }
-}> & { currentSubscription: SubscriptionStatus | null; currentProgress: number }
+}> & {
+  currentSubscriptionPlan: SubscriptionPlan | null
+  currentSubscriptionStatus: SubscriptionStatus | null
+  currentProgress: number
+}
 
 export async function getUserProgressWithLessons(userId?: string) {
   const user = userId
@@ -64,6 +74,10 @@ export async function getUserProgressWithLessons(userId?: string) {
 
   const currentSubscription =
     (user?.subscriptions?.length ?? 0) > 0 ? user?.subscriptions[0] : null
+
+  const currentSubscriptionPlan = currentSubscription
+    ? currentSubscription.plan
+    : null
 
   const currentSubscriptionStatus = currentSubscription
     ? checkSubscriptionStatus(currentSubscription)
@@ -157,7 +171,8 @@ export async function getUserProgressWithLessons(userId?: string) {
     user: user
       ? {
           ...user,
-          currentSubscription: currentSubscriptionStatus,
+          currentSubscriptionPlan,
+          currentSubscriptionStatus,
           currentProgress,
         }
       : null,

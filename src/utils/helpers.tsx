@@ -24,4 +24,34 @@ export const userHasAccess = (
   access === undefined ||
   access === AccessOptions.FREE ||
   (access === AccessOptions.PREMIUM &&
-    user?.currentSubscription === SubscriptionStatus.ACTIVE)
+    user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE)
+
+export const capitalizeFirstLetter = (str: string) => {
+  if (typeof str !== 'string' || str.length === 0) {
+    return ''
+  }
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
+}
+
+export const getInitials = (name: string) => {
+  if (typeof name !== 'string' || name.trim() === '') {
+    return ''
+  }
+
+  name = name.trim().replace(/\s+/g, ' ')
+
+  const words = name.split(' ')
+
+  const initials = words.map((word) => {
+    if (word.includes('-')) {
+      return word
+        .split('-')
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('')
+    } else {
+      return word.charAt(0).toUpperCase()
+    }
+  })
+
+  return initials.join('')
+}

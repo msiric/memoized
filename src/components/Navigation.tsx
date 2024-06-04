@@ -3,10 +3,12 @@
 import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
 import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
+import { CUSTOMER_PORTAL_LINK } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import { useProgressStore } from '@/contexts/progress'
+import { useAccess } from '@/hooks/useAccess'
 import { Curriculum, SectionResult } from '@/types'
-import { remToPx } from '@/utils/helpers'
+import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
 import { AccessOptions, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
@@ -17,7 +19,6 @@ import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
-import { useAccess } from '@/hooks/useAccess'
 
 function useInitialValue<T>(value: T, condition = true) {
   const initialValue = useRef(value).current
@@ -26,19 +27,37 @@ function useInitialValue<T>(value: T, condition = true) {
 
 function TopLevelNavItem({
   href,
+  target,
+  disabled,
   children,
 }: {
-  href: string
+  href?: string
+  target?: '_blank' | '_self' | '_parent' | '_top'
+  disabled?: boolean
   children: React.ReactNode
 }) {
   return (
     <li className="md:hidden">
-      <Link
-        href={href}
-        className="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-      >
-        {children}
-      </Link>
+      {disabled ? (
+        <p className="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">
+          {children}
+        </p>
+      ) : target ? (
+        <a
+          href={href ?? ''}
+          target={target}
+          className="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+        >
+          {children}
+        </a>
+      ) : (
+        <Link
+          href={href ?? ''}
+          className="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+        >
+          {children}
+        </Link>
+      )}
     </li>
   )
 }
@@ -270,10 +289,22 @@ export type NavigationProps = {
 } & React.ComponentPropsWithoutRef<'nav'>
 
 export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
+  const user = useAuthStore((state) => state.user)
+
   return (
     <nav {...props}>
       <ul role="list">
-        <TopLevelNavItem href="/premium">Premium</TopLevelNavItem>
+        {user === undefined ? (
+          <TopLevelNavItem disabled>Loading</TopLevelNavItem>
+        ) : user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
+          <TopLevelNavItem href={CUSTOMER_PORTAL_LINK} target="_blank">
+            {capitalizeFirstLetter(
+              user?.currentSubscriptionPlan ?? 'Subscribed',
+            )}
+          </TopLevelNavItem>
+        ) : (
+          <TopLevelNavItem href="/premium">Premium</TopLevelNavItem>
+        )}
         {fullCurriculum?.map((course) =>
           course.sections.map((section, index) => (
             <NavigationGroup
