@@ -33,6 +33,7 @@ export default {
         '2xl': '40rem',
         '3xl': '50rem',
         '5xl': '66rem',
+        '8xl': '88rem',
       },
       opacity: {
         1: '0.01',

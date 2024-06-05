@@ -1,6 +1,6 @@
 import { CONTENT_FOLDER } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
-import { AccessOptions, PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'

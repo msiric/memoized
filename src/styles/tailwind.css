@@ -19,3 +19,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.shiki-magic-move-container {
+  background: transparent !important;
+  white-space: pre-wrap !important;
+}
