@@ -1,6 +1,161 @@
-import { AnimatedCode } from '@/components/Typewriter'
+import { AnimatedCode } from '@/components/AnimatedCode'
+import { codeToHtml } from 'shiki-v1'
 
-export default function Home() {
+const EXTENSION = 'ts'
+
+const codeSnippets = [
+  {
+    code: `function mergeIntervals(intervals) {
+    if (!intervals.length) return intervals;
+    intervals.sort((a, b) => a[0] - b[0]);
+    let result = [intervals[0]];
+    for (let i = 1; i < intervals.length; i++) {
+        let prev = result[result.length - 1];
+        let curr = intervals[i];
+        if (prev[1] >= curr[0]) {
+            prev[1] = Math.max(prev[1], curr[1]);
+        } else {
+            result.push(curr);
+        }
+    }
+    return result;
+}`,
+    tab: `merge-intervals.${EXTENSION}`,
+  },
+  {
+    code: `function binarySearch(arr, target) {
+  let left = 0, right = arr.length - 1;
+  while (left <= right) {
+      let mid = Math.floor((left + right) / 2);
+      if (arr[mid] === target) {
+          return mid;
+      }
+      if (arr[mid] < target) {
+          left = mid + 1;
+      } else {
+          right = mid - 1;
+      }
+  }
+  return -1;
+}`,
+    tab: `binary-search.${EXTENSION}`,
+  },
+  {
+    code: `function quickSort(arr) {
+  if (arr.length <= 1) return arr;
+  let pivot = arr[arr.length - 1];
+  let left = [];
+  let right = [];
+  for (let i = 0; i < arr.length - 1; i++) {
+      if (arr[i] < pivot) {
+          left.push(arr[i]);
+      }
+      else {
+          right.push(arr[i]);
+      }
+  }
+  return [...quickSort(left), pivot, ...quickSort(right)];
+}`,
+    tab: `quick-sort.${EXTENSION}`,
+  },
+  {
+    code: `function maxSubarraySum(arr, k) {
+  if (arr.length < k) {
+      return null;
+  }
+  let maxSum = 0;
+  for (let i = 0; i < k; i++) {
+      maxSum += arr[i];
+  }
+  let currentSum = maxSum;
+  for (let i = k; i < arr.length; i++) {
+      currentSum += arr[i] - arr[i - k];
+      maxSum = Math.max(maxSum, currentSum);
+  }
+  return maxSum;
+}`,
+    tab: `max-subarray-sum.${EXTENSION}`,
+  },
+  {
+    code: `function activitySelection(activities) {
+  activities.sort((a, b) => {
+      return a[1] - b[1]
+  });
+  let lastEndTime = 0;
+  const selected = [];
+  for (let activity of activities) {
+      const [start, end] = activity;
+      if (start >= lastEndTime) {
+          selected.push([start, end]);
+          lastEndTime = end;
+      }
+  }
+  return selected;
+}`,
+    tab: `activity-selection.${EXTENSION}`,
+  },
+  {
+    code: `function pairWithTargetSum(arr, target) {
+  let left = 0;
+  let right = arr.length - 1;
+  while (left < right) {
+      const sum = arr[left] + arr[right];
+      if (sum === target) return [left, right];
+      if (sum < target) {
+          left++;
+      }
+      else {
+          right--;
+      }
+  }
+  return [];
+}`,
+    tab: `pair-with-target-sum.${EXTENSION}`,
+  },
+  {
+    code: `function areAnagrams(s1, s2) {
+  if (s1.length !== s2.length) {
+      return false;
+  }
+  const count = {};
+  for (let char of s1) {
+      const val = count[char] || 0;
+      count[char] = val + 1;
+  }
+  for (let char of s2) {
+      if (!count[char]) return false;
+      count[char]--;
+  }
+  return true;
+}`,
+    tab: `are-anagrams.${EXTENSION}`,
+  },
+  {
+    code: `function validParantheses(s) {
+  const stack = [];
+  const pairs = { '(': ')', '{': '}', '[': ']' };
+  for (let char of s) {
+      if (pairs[char]) {
+          stack.push(char);
+      } else {
+          const match = stack.pop();
+          if (char !== pairs[match]) {
+              return false;
+          }
+      }
+  }
+  return stack.length === 0;
+}`,
+    tab: `valid-parantheses.${EXTENSION}`,
+  },
+]
+
+export default async function Home() {
+  const initialSnippet = await codeToHtml(codeSnippets[0]?.code, {
+    lang: 'ts',
+    theme: 'nord',
+  })
+
   return (
     <div className="flex w-full flex-col">
       <header className="sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-slate-900/5 transition duration-500 sm:px-6 lg:px-8 dark:bg-transparent dark:shadow-none">
@@ -169,7 +324,7 @@ export default function Home() {
       </header>
       <div className="overflow-hidden bg-slate-900 dark:-mb-32 dark:mt-[-4.75rem] dark:pb-32 dark:pt-[4.75rem]">
         <div className="py-16 sm:px-2 lg:relative lg:px-0 lg:py-20">
-          <div className="lg:max-w-8xl mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
+          <div className="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:max-w-8xl lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
             <div className="relative z-10 md:text-center lg:text-left">
               <div className="relative">
                 <p className="font-display inline bg-gradient-to-r from-indigo-200 via-sky-400 to-indigo-200 bg-clip-text text-5xl tracking-tight text-transparent">
@@ -388,40 +543,18 @@ export default function Home() {
                 <div className="relative rounded-2xl bg-[#0A101F]/80 ring-1 ring-white/10 backdrop-blur">
                   <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-sky-300/0 via-sky-300/70 to-sky-300/0" />
                   <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-blue-400/0 via-blue-400 to-blue-400/0" />
-                  <div className="py-4 pl-4">
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 42 10"
-                      fill="none"
-                      className="h-2.5 w-auto stroke-slate-500/30"
-                    >
-                      <circle cx={5} cy={5} r="4.5" />
-                      <circle cx={21} cy={5} r="4.5" />
-                      <circle cx={37} cy={5} r="4.5" />
-                    </svg>
-                    <div className="mt-4 flex space-x-2 text-xs">
-                      <div className="flex h-6 rounded-full bg-gradient-to-r from-sky-400/30 via-sky-400 to-sky-400/30 p-px font-medium text-sky-300">
-                        <div className="flex items-center rounded-full bg-slate-800 px-2.5">
-                          cache-advance.config.js
-                        </div>
-                      </div>
-                      <div className="flex h-6 rounded-full text-slate-500">
-                        <div className="flex items-center rounded-full px-2.5">
-                          package.json
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-6 flex items-start px-1 text-sm">
-                      <AnimatedCode />
-                    </div>
-                  </div>
+                  <AnimatedCode
+                    initialTab={codeSnippets[0].tab}
+                    initialSnippet={initialSnippet}
+                    codeSnippets={codeSnippets}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div className="max-w-8xl relative mx-auto flex w-full flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
+      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
         <div className="hidden lg:relative lg:block lg:flex-none">
           <div className="absolute inset-y-0 right-0 w-[50vw] bg-slate-50 dark:hidden" />
           <div className="absolute bottom-0 right-0 top-16 hidden h-12 w-px bg-gradient-to-t from-slate-800 dark:block" />

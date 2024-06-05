@@ -25,6 +25,16 @@ export default {
     },
     typography: typographyStyles,
     extend: {
+      animation: {
+        flipVertical: 'flipVertical 0.3s ease-in-out',
+      },
+      keyframes: {
+        flipVertical: {
+          '0%': { transform: 'rotateX(0deg)' },
+          '50%': { transform: 'rotateX(90deg)' },
+          '100%': { transform: 'rotateX(0deg)' },
+        },
+      },
       boxShadow: {
         glow: '0 0 4px rgb(0 0 0 / 0.1)',
       },

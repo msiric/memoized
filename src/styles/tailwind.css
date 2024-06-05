@@ -20,7 +20,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.shiki-magic-move-container {
+.shiki-magic-move-container, .shiki.nord {
   background: transparent !important;
   white-space: pre-wrap !important;
 }
