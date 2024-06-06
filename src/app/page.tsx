@@ -6,19 +6,19 @@ const EXTENSION = 'ts'
 const codeSnippets = [
   {
     code: `function mergeIntervals(intervals) {
-    if (!intervals.length) return intervals;
-    intervals.sort((a, b) => a[0] - b[0]);
-    let result = [intervals[0]];
-    for (let i = 1; i < intervals.length; i++) {
-        let prev = result[result.length - 1];
-        let curr = intervals[i];
-        if (prev[1] >= curr[0]) {
-            prev[1] = Math.max(prev[1], curr[1]);
-        } else {
-            result.push(curr);
-        }
+  if (!intervals.length) return intervals;
+  intervals.sort((a, b) => a[0] - b[0]);
+  let result = [intervals[0]];
+  for (let i = 1; i < intervals.length; i++) {
+    let prev = result[result.length - 1];
+    let curr = intervals[i];
+    if (prev[1] >= curr[0]) {
+      prev[1] = Math.max(prev[1], curr[1]);
+    } else {
+      result.push(curr);
     }
-    return result;
+  }
+  return result;
 }`,
     tab: `merge-intervals.${EXTENSION}`,
   },
@@ -26,15 +26,15 @@ const codeSnippets = [
     code: `function binarySearch(arr, target) {
   let left = 0, right = arr.length - 1;
   while (left <= right) {
-      let mid = Math.floor((left + right) / 2);
-      if (arr[mid] === target) {
-          return mid;
-      }
-      if (arr[mid] < target) {
-          left = mid + 1;
-      } else {
-          right = mid - 1;
-      }
+    let mid = Math.floor((left + right) / 2);
+    if (arr[mid] === target) {
+      return mid;
+    }
+    if (arr[mid] < target) {
+      left = mid + 1;
+    } else {
+      right = mid - 1;
+    }
   }
   return -1;
 }`,
@@ -44,33 +44,33 @@ const codeSnippets = [
     code: `function quickSort(arr) {
   if (arr.length <= 1) return arr;
   let pivot = arr[arr.length - 1];
-  let left = [];
-  let right = [];
+  let left = [], right = [];
   for (let i = 0; i < arr.length - 1; i++) {
-      if (arr[i] < pivot) {
-          left.push(arr[i]);
-      }
-      else {
-          right.push(arr[i]);
-      }
+    if (arr[i] < pivot) {
+      left.push(arr[i]);
+    }
+    else {
+      right.push(arr[i]);
+    }
   }
-  return [...quickSort(left), pivot, ...quickSort(right)];
+  return [...quickSort(left), 
+    pivot, ...quickSort(right)];
 }`,
     tab: `quick-sort.${EXTENSION}`,
   },
   {
     code: `function maxSubarraySum(arr, k) {
   if (arr.length < k) {
-      return null;
+    return null;
   }
   let maxSum = 0;
   for (let i = 0; i < k; i++) {
-      maxSum += arr[i];
+    maxSum += arr[i];
   }
   let currentSum = maxSum;
   for (let i = k; i < arr.length; i++) {
-      currentSum += arr[i] - arr[i - k];
-      maxSum = Math.max(maxSum, currentSum);
+    currentSum += arr[i] - arr[i - k];
+    maxSum = Math.max(maxSum, currentSum);
   }
   return maxSum;
 }`,
@@ -79,16 +79,16 @@ const codeSnippets = [
   {
     code: `function activitySelection(activities) {
   activities.sort((a, b) => {
-      return a[1] - b[1]
+    return a[1] - b[1]
   });
   let lastEndTime = 0;
   const selected = [];
   for (let activity of activities) {
-      const [start, end] = activity;
-      if (start >= lastEndTime) {
-          selected.push([start, end]);
-          lastEndTime = end;
-      }
+    const [start, end] = activity;
+    if (start >= lastEndTime) {
+      selected.push([start, end]);
+      lastEndTime = end;
+    }
   }
   return selected;
 }`,
@@ -99,14 +99,14 @@ const codeSnippets = [
   let left = 0;
   let right = arr.length - 1;
   while (left < right) {
-      const sum = arr[left] + arr[right];
-      if (sum === target) return [left, right];
-      if (sum < target) {
-          left++;
-      }
-      else {
-          right--;
-      }
+    const sum = arr[left] + arr[right];
+    if (sum === target) return [left, right];
+    if (sum < target) {
+      left++;
+    }
+    else {
+      right--;
+    }
   }
   return [];
 }`,
@@ -115,16 +115,16 @@ const codeSnippets = [
   {
     code: `function areAnagrams(s1, s2) {
   if (s1.length !== s2.length) {
-      return false;
+    return false;
   }
   const count = {};
   for (let char of s1) {
-      const val = count[char] || 0;
-      count[char] = val + 1;
+    const val = count[char] || 0;
+    count[char] = val + 1;
   }
   for (let char of s2) {
-      if (!count[char]) return false;
-      count[char]--;
+    if (!count[char]) return false;
+    count[char]--;
   }
   return true;
 }`,
@@ -135,14 +135,14 @@ const codeSnippets = [
   const stack = [];
   const pairs = { '(': ')', '{': '}', '[': ']' };
   for (let char of s) {
-      if (pairs[char]) {
-          stack.push(char);
-      } else {
-          const match = stack.pop();
-          if (char !== pairs[match]) {
-              return false;
-          }
+    if (pairs[char]) {
+      stack.push(char);
+    } else {
+      const match = stack.pop();
+      if (char !== pairs[match]) {
+        return false;
       }
+    }
   }
   return stack.length === 0;
 }`,
