@@ -71,7 +71,7 @@ export const AnimatedCode = ({
       <div className="mt-4 flex space-x-2 text-xs">
         <div
           className={clsx(
-            'flex h-6 rounded-full bg-gradient-to-r from-sky-400/30 via-sky-400 to-sky-400/30 p-px font-medium text-sky-300 will-change-transform',
+            'flex h-6 rounded-full bg-gradient-to-r from-lime-400/30 via-lime-400 to-lime-400/30 p-px font-medium text-lime-300 will-change-transform',
             flip && 'animate-flipVertical',
           )}
         >

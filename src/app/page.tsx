@@ -1,4 +1,5 @@
 import { AnimatedCode } from '@/components/AnimatedCode'
+import { Logo } from '@/components/Logo'
 import { codeToHtml } from 'shiki-v1'
 
 const EXTENSION = 'ts'
@@ -195,77 +196,8 @@ export default async function Home() {
         </div>
         <div className="relative flex flex-grow basis-0 items-center">
           <a aria-label="Home page" href="/">
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 36 36"
-              fill="none"
-              className="h-9 w-9 lg:hidden"
-            >
-              <g
-                fill="none"
-                stroke="#38BDF8"
-                strokeLinejoin="round"
-                strokeWidth={3}
-              >
-                <path d="M10.308 5L18 17.5 10.308 30 2.615 17.5 10.308 5z" />
-                <path d="M18 17.5L10.308 5h15.144l7.933 12.5M18 17.5h15.385L25.452 30H10.308L18 17.5z" />
-              </g>
-            </svg>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 227 36"
-              fill="none"
-              className="hidden h-9 w-auto fill-slate-700 lg:block dark:fill-sky-100"
-            >
-              <g
-                fill="none"
-                stroke="#38BDF8"
-                strokeLinejoin="round"
-                strokeWidth={3}
-              >
-                <path d="M10.308 5L18 17.5 10.308 30 2.615 17.5 10.308 5z" />
-                <path d="M18 17.5L10.308 5h15.144l7.933 12.5M18 17.5h15.385L25.452 30H10.308L18 17.5z" />
-              </g>
-              <path d="M55.96 26.2c-1.027 0-1.973-.173-2.84-.52a6.96 6.96 0 01-2.24-1.5 6.979 6.979 0 01-1.46-2.3c-.347-.893-.52-1.867-.52-2.92 0-1.027.18-1.973.54-2.84a6.71 6.71 0 011.52-2.28 6.922 6.922 0 012.3-1.52 7.48 7.48 0 012.86-.54c.667 0 1.32.093 1.96.28a6.12 6.12 0 011.78.78 5.7 5.7 0 011.4 1.24l-1.88 2.08a6.272 6.272 0 00-1-.82 3.728 3.728 0 00-1.08-.54 3.542 3.542 0 00-1.2-.2 4.14 4.14 0 00-1.62.32 3.991 3.991 0 00-1.3.9 4.197 4.197 0 00-.9 1.38 4.755 4.755 0 00-.32 1.78c0 .667.107 1.273.32 1.82.213.533.513.993.9 1.38.387.373.847.667 1.38.88.547.2 1.147.3 1.8.3a4.345 4.345 0 002.34-.68c.347-.213.653-.46.92-.74l1.46 2.34c-.32.36-.753.687-1.3.98a7.784 7.784 0 01-1.8.7c-.667.16-1.34.24-2.02.24zm6.99-.2l5.48-14h2.68l5.46 14h-3.08l-2.82-7.54c-.08-.213-.18-.487-.3-.82a922.595 922.595 0 00-.68-2.12 13.694 13.694 0 01-.24-.86l.54-.02c-.08.307-.174.627-.28.96-.094.32-.194.653-.3 1-.108.333-.22.66-.34.98-.12.32-.234.633-.34.94L65.91 26h-2.96zm2.54-2.94l.98-2.42h6.42l1 2.42h-8.4zm19.794 3.14c-1.026 0-1.973-.173-2.84-.52a6.96 6.96 0 01-2.24-1.5 6.98 6.98 0 01-1.46-2.3c-.346-.893-.52-1.867-.52-2.92 0-1.027.18-1.973.54-2.84a6.71 6.71 0 011.52-2.28 6.923 6.923 0 012.3-1.52 7.48 7.48 0 012.86-.54c.667 0 1.32.093 1.96.28a6.118 6.118 0 011.78.78c.547.347 1.014.76 1.4 1.24l-1.88 2.08a6.272 6.272 0 00-1-.82 3.728 3.728 0 00-1.08-.54 3.542 3.542 0 00-1.2-.2 4.14 4.14 0 00-1.62.32 3.992 3.992 0 00-1.3.9 4.197 4.197 0 00-.9 1.38 4.755 4.755 0 00-.32 1.78c0 .667.107 1.273.32 1.82.214.533.514.993.9 1.38.387.373.847.667 1.38.88.547.2 1.147.3 1.8.3a4.345 4.345 0 002.34-.68 4.53 4.53 0 00.92-.74l1.46 2.34c-.32.36-.753.687-1.3.98a7.784 7.784 0 01-1.8.7c-.666.16-1.34.24-2.02.24zm17.469-.2V12h3v14h-3zm-8.82 0V12h3v14h-3zm1.2-5.62l.02-2.72h9.14v2.72h-9.16zM110.402 26V12h9.46v2.64h-6.54v8.72h6.68V26h-9.6zm1.4-5.86v-2.56h7.1v2.56h-7.1zM122.437 26l5.48-14h2.68l5.46 14h-3.08l-2.82-7.54c-.08-.213-.18-.487-.3-.82l-.34-1.06-.34-1.06a14.73 14.73 0 01-.24-.86l.54-.02c-.08.307-.173.627-.28.96a63.3 63.3 0 01-.3 1c-.106.333-.22.66-.34.98-.12.32-.233.633-.34.94l-2.82 7.48h-2.96zm2.54-2.94l.98-2.42h6.42l1 2.42h-8.4zM139.023 26V12h5.74c1.027 0 1.953.173 2.78.52.84.333 1.56.813 2.16 1.44a6.097 6.097 0 011.4 2.2c.32.853.48 1.8.48 2.84 0 1.027-.16 1.973-.48 2.84a6.438 6.438 0 01-1.38 2.22 6.394 6.394 0 01-2.16 1.44c-.84.333-1.773.5-2.8.5h-5.74zm3-2.18l-.32-.52h2.96c.6 0 1.14-.1 1.62-.3.48-.213.887-.5 1.22-.86.347-.373.607-.827.78-1.36.173-.533.26-1.127.26-1.78a5.56 5.56 0 00-.26-1.76 3.595 3.595 0 00-.78-1.36 3.323 3.323 0 00-1.22-.86 3.948 3.948 0 00-1.62-.32h-3.02l.38-.48v9.6zM158.671 26l-5.58-14h3.18l2.92 7.58c.16.413.293.78.4 1.1.12.307.22.6.3.88.093.267.18.533.26.8.08.253.16.533.24.84l-.58.02c.107-.413.213-.793.32-1.14.107-.36.227-.733.36-1.12.133-.387.3-.847.5-1.38l2.76-7.58h3.16l-5.62 14h-2.62zm8.114 0l5.48-14h2.68l5.46 14h-3.08l-2.82-7.54c-.08-.213-.18-.487-.3-.82l-.34-1.06-.34-1.06a13.293 13.293 0 01-.24-.86l.54-.02c-.08.307-.173.627-.28.96a63.3 63.3 0 01-.3 1c-.107.333-.22.66-.34.98-.12.32-.233.633-.34.94l-2.82 7.48h-2.96zm2.54-2.94l.98-2.42h6.42l1 2.42h-8.4zM183.371 26V12h2.68l7.74 10.46h-.56c-.054-.413-.1-.813-.14-1.2l-.12-1.2c-.027-.413-.054-.833-.08-1.26-.014-.44-.027-.9-.04-1.38a56.825 56.825 0 01-.02-1.6V12h2.94v14h-2.72l-7.9-10.56.76.02c.066.693.12 1.287.16 1.78a36.623 36.623 0 01.18 2.2c.026.267.04.52.04.76.013.24.02.493.02.76V26h-2.94zm23.175.2c-1.027 0-1.973-.173-2.84-.52-.853-.36-1.6-.86-2.24-1.5a6.979 6.979 0 01-1.46-2.3c-.347-.893-.52-1.867-.52-2.92 0-1.027.18-1.973.54-2.84a6.71 6.71 0 011.52-2.28 6.919 6.919 0 012.3-1.52 7.48 7.48 0 012.86-.54c.667 0 1.32.093 1.96.28a6.12 6.12 0 011.78.78 5.7 5.7 0 011.4 1.24l-1.88 2.08a6.259 6.259 0 00-1-.82 3.721 3.721 0 00-1.08-.54 3.54 3.54 0 00-1.2-.2 4.14 4.14 0 00-1.62.32 3.991 3.991 0 00-1.3.9 4.206 4.206 0 00-.9 1.38 4.76 4.76 0 00-.32 1.78c0 .667.107 1.273.32 1.82.213.533.513.993.9 1.38.387.373.847.667 1.38.88.547.2 1.147.3 1.8.3a4.35 4.35 0 002.34-.68c.347-.213.653-.46.92-.74l1.46 2.34c-.32.36-.753.687-1.3.98a7.773 7.773 0 01-1.8.7c-.667.16-1.34.24-2.02.24zm8.649-.2V12h9.46v2.64h-6.54v8.72h6.68V26h-9.6zm1.4-5.86v-2.56h7.1v2.56h-7.1z" />
-            </svg>
+            <Logo className="h-7" />
           </a>
-        </div>
-        <div className="-my-5 mr-6 sm:mr-8 md:mr-0">
-          <button
-            type="button"
-            className="group flex h-6 w-6 items-center justify-center sm:justify-start md:h-auto md:w-80 md:flex-none md:rounded-lg md:py-2.5 md:pl-4 md:pr-3.5 md:text-sm md:ring-1 md:ring-slate-200 md:hover:ring-slate-300 lg:w-96 dark:md:bg-slate-800/75 dark:md:ring-inset dark:md:ring-white/5 dark:md:hover:bg-slate-700/40 dark:md:hover:ring-slate-500"
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 20 20"
-              className="h-5 w-5 flex-none fill-slate-400 group-hover:fill-slate-500 md:group-hover:fill-slate-400 dark:fill-slate-500"
-            >
-              <path d="M16.293 17.707a1 1 0 0 0 1.414-1.414l-1.414 1.414ZM9 14a5 5 0 0 1-5-5H2a7 7 0 0 0 7 7v-2ZM4 9a5 5 0 0 1 5-5V2a7 7 0 0 0-7 7h2Zm5-5a5 5 0 0 1 5 5h2a7 7 0 0 0-7-7v2Zm8.707 12.293-3.757-3.757-1.414 1.414 3.757 3.757 1.414-1.414ZM14 9a4.98 4.98 0 0 1-1.464 3.536l1.414 1.414A6.98 6.98 0 0 0 16 9h-2Zm-1.464 3.536A4.98 4.98 0 0 1 9 14v2a6.98 6.98 0 0 0 4.95-2.05l-1.414-1.414Z" />
-            </svg>
-            <span className="sr-only md:not-sr-only md:ml-2 md:text-slate-500 md:dark:text-slate-400">
-              Search docs
-            </span>
-            <kbd className="ml-auto hidden font-medium text-slate-400 md:block dark:text-slate-500">
-              <kbd className="font-sans">⌘</kbd>
-              <kbd className="font-sans">K</kbd>
-            </kbd>
-          </button>
-          <div
-            style={{
-              position: 'fixed',
-              top: 1,
-              left: 1,
-              width: 1,
-              height: 0,
-              padding: 0,
-              margin: '-1px',
-              overflow: 'hidden',
-              clip: 'rect(0, 0, 0, 0)',
-              whiteSpace: 'nowrap',
-              borderWidth: 0,
-              display: 'none',
-            }}
-          />
         </div>
         <div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
           <div className="relative z-10" data-headlessui-state="">
@@ -322,12 +254,12 @@ export default async function Home() {
           </a>
         </div>
       </header>
-      <div className="overflow-hidden bg-slate-900 dark:-mb-32 dark:mt-[-4.75rem] dark:pb-32 dark:pt-[4.75rem]">
+      <div className="overflow-hidden dark:-mb-32 dark:mt-[-4.75rem] dark:pb-32 dark:pt-[4.75rem]">
         <div className="py-16 sm:px-2 lg:relative lg:px-0 lg:py-20">
           <div className="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:max-w-8xl lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
             <div className="relative z-10 md:text-center lg:text-left">
               <div className="relative">
-                <p className="font-display inline bg-gradient-to-r from-indigo-200 via-sky-400 to-indigo-200 bg-clip-text text-5xl tracking-tight text-transparent">
+                <p className="font-display inline bg-gradient-to-r from-indigo-200 via-lime-400 to-indigo-200 bg-clip-text text-5xl tracking-tight text-transparent">
                   Never miss the cache again.
                 </p>
                 <p className="mt-3 text-2xl tracking-tight text-slate-400">
@@ -336,7 +268,7 @@ export default async function Home() {
                 </p>
                 <div className="mt-8 flex gap-4 md:justify-center lg:justify-start">
                   <a
-                    className="rounded-full bg-sky-300 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-sky-200 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-300/50 active:bg-sky-500"
+                    className="rounded-full bg-lime-300 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-lime-200 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300/50 active:bg-lime-500"
                     href="/"
                   >
                     Get started
@@ -438,9 +370,9 @@ export default async function Home() {
                       cy="574.062"
                       r="10.438"
                       transform="rotate(-180 484.301 574.062)"
-                      fill="#0EA5E9"
+                      fill="#A3E635"
                       fillOpacity=".42"
-                      stroke="#0EA5E9"
+                      stroke="#A3E635"
                     />
                     <circle
                       cx="384.1"
@@ -492,9 +424,9 @@ export default async function Home() {
                       cy="484.3"
                       r="10.438"
                       transform="rotate(-180 83.5 484.3)"
-                      fill="#0EA5E9"
+                      fill="#A3E635"
                       fillOpacity=".42"
-                      stroke="#0EA5E9"
+                      stroke="#A3E635"
                     />
                     <circle
                       cx="484.301"
@@ -538,11 +470,11 @@ export default async function Home() {
                 </svg>
               </div>
               <div className="relative">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-sky-300 via-sky-300/70 to-blue-300 opacity-10 blur-lg" />
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-sky-300 via-sky-300/70 to-blue-300 opacity-10" />
-                <div className="relative rounded-2xl bg-[#0A101F]/80 ring-1 ring-white/10 backdrop-blur">
-                  <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-sky-300/0 via-sky-300/70 to-sky-300/0" />
-                  <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-blue-400/0 via-blue-400 to-blue-400/0" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10 blur-lg" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10" />
+                <div className="relative rounded-2xl bg-[#18181b] ring-1 ring-white/10 backdrop-blur">
+                  <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-lime-300/0 via-lime-300/70 to-lime-300/0" />
+                  <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-lime-400/0 via-lime-400 to-lime-400/0" />
                   <AnimatedCode
                     initialTab={codeSnippets[0].tab}
                     initialSnippet={initialSnippet}
@@ -555,245 +487,24 @@ export default async function Home() {
         </div>
       </div>
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
-        <div className="hidden lg:relative lg:block lg:flex-none">
-          <div className="absolute inset-y-0 right-0 w-[50vw] bg-slate-50 dark:hidden" />
-          <div className="absolute bottom-0 right-0 top-16 hidden h-12 w-px bg-gradient-to-t from-slate-800 dark:block" />
-          <div className="absolute bottom-0 right-0 top-28 hidden w-px bg-slate-800 dark:block" />
-          <div className="sticky top-[4.75rem] -ml-0.5 h-[calc(100vh-4.75rem)] w-64 overflow-y-auto overflow-x-hidden py-16 pl-0.5 pr-8 xl:w-72 xl:pr-16">
-            <nav className="text-base lg:text-sm">
-              <ul role="list" className="space-y-9">
-                <li>
-                  <h2 className="font-display font-medium text-slate-900 dark:text-white">
-                    Introduction
-                  </h2>
-                  <ul
-                    role="list"
-                    className="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800"
-                  >
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 font-semibold text-sky-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-sky-500"
-                        href="/"
-                      >
-                        Getting started
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/installation"
-                      >
-                        Installation
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <h2 className="font-display font-medium text-slate-900 dark:text-white">
-                    Core concepts
-                  </h2>
-                  <ul
-                    role="list"
-                    className="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800"
-                  >
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/understanding-caching"
-                      >
-                        Understanding caching
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/predicting-user-behavior"
-                      >
-                        Predicting user behavior
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/basics-of-time-travel"
-                      >
-                        Basics of time-travel
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/introduction-to-string-theory"
-                      >
-                        Introduction to string theory
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/the-butterfly-effect"
-                      >
-                        The butterfly effect
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <h2 className="font-display font-medium text-slate-900 dark:text-white">
-                    Advanced guides
-                  </h2>
-                  <ul
-                    role="list"
-                    className="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800"
-                  >
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/writing-plugins"
-                      >
-                        Writing plugins
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/neuralink-integration"
-                      >
-                        Neuralink integration
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/temporal-paradoxes"
-                      >
-                        Temporal paradoxes
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/testing"
-                      >
-                        Testing
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/compile-time-caching"
-                      >
-                        Compile-time caching
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/predictive-data-generation"
-                      >
-                        Predictive data generation
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <h2 className="font-display font-medium text-slate-900 dark:text-white">
-                    API reference
-                  </h2>
-                  <ul
-                    role="list"
-                    className="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800"
-                  >
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/cacheadvance-predict"
-                      >
-                        CacheAdvance.predict()
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/cacheadvance-flush"
-                      >
-                        CacheAdvance.flush()
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/cacheadvance-revert"
-                      >
-                        CacheAdvance.revert()
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/cacheadvance-regret"
-                      >
-                        CacheAdvance.regret()
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <h2 className="font-display font-medium text-slate-900 dark:text-white">
-                    Contributing
-                  </h2>
-                  <ul
-                    role="list"
-                    className="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800"
-                  >
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/how-to-contribute"
-                      >
-                        How to contribute
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/architecture-guide"
-                      >
-                        Architecture guide
-                      </a>
-                    </li>
-                    <li className="relative">
-                      <a
-                        className="block w-full pl-3.5 text-slate-500 before:pointer-events-none before:absolute before:-left-1 before:top-1/2 before:hidden before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300"
-                        href="/docs/design-principles"
-                      >
-                        Design principles
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
         <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
           <article>
             <header className="mb-9 space-y-1">
-              <p className="font-display text-sm font-medium text-sky-500">
+              <p className="font-display text-sm font-medium text-lime-500">
                 Introduction
               </p>
               <h1 className="font-display text-3xl tracking-tight text-slate-900 dark:text-white">
                 Getting started
               </h1>
             </header>
-            <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.sky.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-sky-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.sky.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
+            <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
               <p className="lead">
                 Learn how to get CacheAdvance set up in your project in under
                 thirty minutes or it’s free.{' '}
               </p>
               <div className="not-prose my-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div className="group relative rounded-xl border border-slate-200 dark:border-slate-800">
-                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.sky.50)),var(--quick-links-hover-bg,theme(colors.sky.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.sky.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
+                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
                   <div className="relative overflow-hidden rounded-xl p-6">
                     <svg
                       aria-hidden="true"
@@ -810,9 +521,9 @@ export default async function Home() {
                           id=":S1:-gradient"
                           gradientTransform="matrix(0 21 -21 0 12 3)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                         <radialGradient
                           cx={0}
@@ -822,9 +533,9 @@ export default async function Home() {
                           id=":S1:-gradient-dark"
                           gradientTransform="matrix(0 21 -21 0 16 7)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                       </defs>
                       <g className="dark:hidden">
@@ -867,7 +578,7 @@ export default async function Home() {
                   </div>
                 </div>
                 <div className="group relative rounded-xl border border-slate-200 dark:border-slate-800">
-                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.sky.50)),var(--quick-links-hover-bg,theme(colors.sky.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.sky.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
+                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
                   <div className="relative overflow-hidden rounded-xl p-6">
                     <svg
                       aria-hidden="true"
@@ -884,9 +595,9 @@ export default async function Home() {
                           id=":S2:-gradient"
                           gradientTransform="matrix(0 21 -21 0 20 3)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                         <radialGradient
                           cx={0}
@@ -896,9 +607,9 @@ export default async function Home() {
                           id=":S2:-gradient-dark"
                           gradientTransform="matrix(0 22.75 -22.75 0 16 6.25)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                       </defs>
                       <g className="dark:hidden">
@@ -945,7 +656,7 @@ export default async function Home() {
                   </div>
                 </div>
                 <div className="group relative rounded-xl border border-slate-200 dark:border-slate-800">
-                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.sky.50)),var(--quick-links-hover-bg,theme(colors.sky.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.sky.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
+                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
                   <div className="relative overflow-hidden rounded-xl p-6">
                     <svg
                       aria-hidden="true"
@@ -962,9 +673,9 @@ export default async function Home() {
                           id=":S3:-gradient"
                           gradientTransform="matrix(0 21 -21 0 20 11)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                         <radialGradient
                           cx={0}
@@ -974,9 +685,9 @@ export default async function Home() {
                           id=":S3:-gradient-dark-1"
                           gradientTransform="matrix(0 22.75 -22.75 0 16 6.25)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                         <radialGradient
                           cx={0}
@@ -986,9 +697,9 @@ export default async function Home() {
                           id=":S3:-gradient-dark-2"
                           gradientTransform="matrix(0 14 -14 0 16 10)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                       </defs>
                       <g className="dark:hidden">
@@ -1053,7 +764,7 @@ export default async function Home() {
                   </div>
                 </div>
                 <div className="group relative rounded-xl border border-slate-200 dark:border-slate-800">
-                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.sky.50)),var(--quick-links-hover-bg,theme(colors.sky.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.sky.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
+                  <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
                   <div className="relative overflow-hidden rounded-xl p-6">
                     <svg
                       aria-hidden="true"
@@ -1070,9 +781,9 @@ export default async function Home() {
                           id=":S4:-gradient"
                           gradientTransform="matrix(0 21 -21 0 12 11)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                         <radialGradient
                           cx={0}
@@ -1082,9 +793,9 @@ export default async function Home() {
                           id=":S4:-gradient-dark"
                           gradientTransform="matrix(0 24.5 -24.5 0 16 5.5)"
                         >
-                          <stop stopColor="#0EA5E9" />
-                          <stop stopColor="#22D3EE" offset=".527" />
-                          <stop stopColor="#818CF8" offset={1} />
+                          <stop stopColor="#A3E635" />
+                          <stop stopColor="#84CC16" offset=".527" />
+                          <stop stopColor="#65A30D" offset={1} />
                         </radialGradient>
                       </defs>
                       <g className="dark:hidden">
@@ -1250,7 +961,7 @@ export default async function Home() {
                   <p className="font-display m-0 text-xl text-amber-900 dark:text-amber-500">
                     Oh no! Something bad happened!
                   </p>
-                  <div className="prose mt-2.5 text-amber-800 [--tw-prose-background:theme(colors.amber.50)] [--tw-prose-underline:theme(colors.amber.400)] prose-a:text-amber-900 prose-code:text-amber-900 dark:text-slate-300 dark:[--tw-prose-underline:theme(colors.sky.700)] dark:prose-code:text-slate-300">
+                  <div className="prose mt-2.5 text-amber-800 [--tw-prose-background:theme(colors.amber.50)] [--tw-prose-underline:theme(colors.amber.400)] prose-a:text-amber-900 prose-code:text-amber-900 dark:text-slate-300 dark:[--tw-prose-underline:theme(colors.lime.700)] dark:prose-code:text-slate-300">
                     <p>
                       This is what a disclaimer message looks like. You might
                       want to include inline <code>code</code> in it. Or maybe
@@ -1275,7 +986,7 @@ export default async function Home() {
                 Provident nam asperiores vel laboriosam omnis ducimus enim
                 nesciunt quaerat. Minus tempora cupiditate est quod.
               </p>
-              <div className="my-8 flex rounded-3xl bg-sky-50 p-6 dark:bg-slate-800/60 dark:ring-1 dark:ring-slate-300/10">
+              <div className="my-8 flex rounded-3xl bg-lime-50 p-6 dark:bg-slate-800/60 dark:ring-1 dark:ring-slate-300/10">
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 32 32"
@@ -1291,9 +1002,9 @@ export default async function Home() {
                       id=":S6:-gradient"
                       gradientTransform="matrix(0 21 -21 0 20 11)"
                     >
-                      <stop stopColor="#0EA5E9" />
-                      <stop stopColor="#22D3EE" offset=".527" />
-                      <stop stopColor="#818CF8" offset={1} />
+                      <stop stopColor="#A3E635" />
+                      <stop stopColor="#84CC16" offset=".527" />
+                      <stop stopColor="#65A30D" offset={1} />
                     </radialGradient>
                     <radialGradient
                       cx={0}
@@ -1303,9 +1014,9 @@ export default async function Home() {
                       id=":S6:-gradient-dark"
                       gradientTransform="matrix(0 24.5001 -19.2498 0 16 5.5)"
                     >
-                      <stop stopColor="#0EA5E9" />
-                      <stop stopColor="#22D3EE" offset=".527" />
-                      <stop stopColor="#818CF8" offset={1} />
+                      <stop stopColor="#A3E635" />
+                      <stop stopColor="#84CC16" offset=".527" />
+                      <stop stopColor="#65A30D" offset={1} />
                     </radialGradient>
                   </defs>
                   <g className="dark:hidden">
@@ -1336,10 +1047,10 @@ export default async function Home() {
                   </g>
                 </svg>
                 <div className="ml-4 flex-auto">
-                  <p className="font-display m-0 text-xl text-sky-900 dark:text-sky-400">
+                  <p className="font-display m-0 text-xl text-lime-900 dark:text-lime-400">
                     You should know!
                   </p>
-                  <div className="prose mt-2.5 text-sky-800 [--tw-prose-background:theme(colors.sky.50)] prose-a:text-sky-900 prose-code:text-sky-900 dark:text-slate-300 dark:prose-code:text-slate-300">
+                  <div className="prose mt-2.5 text-lime-800 [--tw-prose-background:theme(colors.lime.50)] prose-a:text-lime-900 prose-code:text-lime-900 dark:text-slate-300 dark:prose-code:text-slate-300">
                     <p>
                       This is what a disclaimer message looks like. You might
                       want to include inline <code>code</code> in it. Or maybe
@@ -1462,28 +1173,6 @@ export default async function Home() {
               </p>
             </div>
           </article>
-          <dl className="mt-12 flex border-t border-slate-200 pt-6 dark:border-slate-800">
-            <div className="ml-auto text-right">
-              <dt className="font-display text-sm font-medium text-slate-900 dark:text-white">
-                Next
-              </dt>
-              <dd className="mt-1">
-                <a
-                  className="flex items-center gap-x-1 text-base font-semibold text-slate-500 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-300"
-                  href="/docs/installation"
-                >
-                  Installation
-                  <svg
-                    viewBox="0 0 16 16"
-                    aria-hidden="true"
-                    className="h-4 w-4 flex-none fill-current"
-                  >
-                    <path d="m9.182 13.423-1.17-1.16 3.505-3.505H3V7.065h8.517l-3.506-3.5L9.181 2.4l5.512 5.511-5.511 5.512Z" />
-                  </svg>
-                </a>
-              </dd>
-            </div>
-          </dl>
         </div>
         <div className="hidden xl:sticky xl:top-[4.75rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.75rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6">
           <nav aria-labelledby="on-this-page-title" className="w-56">
@@ -1496,7 +1185,7 @@ export default async function Home() {
             <ol role="list" className="mt-4 space-y-3 text-sm">
               <li>
                 <h3>
-                  <a className="text-sky-500" href="#quick-start">
+                  <a className="text-lime-500" href="#quick-start">
                     Quick start
                   </a>
                 </h3>
