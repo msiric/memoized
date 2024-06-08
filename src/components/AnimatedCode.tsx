@@ -47,7 +47,7 @@ export const AnimatedCode = ({
     }, 2000)
 
     return () => clearInterval(interval)
-  }, [index])
+  }, [codeSnippets, index])
 
   useEffect(() => {
     if (flip) {

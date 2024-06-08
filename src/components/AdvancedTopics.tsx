@@ -1,13 +1,13 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
-import { COURSE_PREFIX } from '@/constants'
+import { ADVANCED_TOPICS_PREFIX, COURSE_PREFIX } from '@/constants'
 import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
 export const advancedTopics: LessonConfig[] = [
   {
     id: '/dynamic-programming',
-    href: `${COURSE_PREFIX}/dynamic-programming`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/dynamic-programming`,
     title: 'Dynamic Programming',
     description:
       'Solve complex problems by breaking them into simpler subproblems.',
@@ -15,7 +15,7 @@ export const advancedTopics: LessonConfig[] = [
   },
   {
     id: '/bloom-filters',
-    href: `${COURSE_PREFIX}/bloom-filters`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/bloom-filters`,
     title: 'Bloom Filters',
     description:
       'Probabilistic data structures for efficient set membership testing.',
@@ -23,21 +23,21 @@ export const advancedTopics: LessonConfig[] = [
   },
   {
     id: '/segment-trees',
-    href: `${COURSE_PREFIX}/segment-trees`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/segment-trees`,
     title: 'Segment Trees',
     description: 'Efficiently perform range queries on arrays.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/union-find',
-    href: `${COURSE_PREFIX}/union-find`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/union-find`,
     title: 'Union Find',
     description: 'Detect cycles and manage dynamic connectivity in graphs.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/minimum-spanning-trees',
-    href: `${COURSE_PREFIX}/minimum-spanning-trees`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/minimum-spanning-trees`,
     title: 'Minimum Spanning Trees',
     description:
       'Find the subset of edges that connects all vertices with the minimal total weight.',
@@ -45,21 +45,21 @@ export const advancedTopics: LessonConfig[] = [
   },
   {
     id: '/shortest-path-algorithms',
-    href: `${COURSE_PREFIX}/shortest-path-algorithms`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/shortest-path-algorithms`,
     title: 'Shortest Path Algorithms',
     description: 'Determine the shortest paths between nodes in a graph.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/maximum-flow',
-    href: `${COURSE_PREFIX}/maximum-flow`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/maximum-flow`,
     title: 'Maximum Flow',
     description: 'Calculate the maximum possible flow in a flow network.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/bit-manipulation',
-    href: `${COURSE_PREFIX}/bit-manipulation`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/bit-manipulation`,
     title: 'Bit Manipulation',
     description:
       'Perform operations directly on binary representations of numbers.',
@@ -67,35 +67,35 @@ export const advancedTopics: LessonConfig[] = [
   },
   {
     id: '/randomized-algorithms',
-    href: `${COURSE_PREFIX}/randomized-algorithms`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/randomized-algorithms`,
     title: 'Randomized Algorithms',
     description: 'Utilize randomness to solve problems efficiently.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/suffix-arrays-and-suffix-trees',
-    href: `${COURSE_PREFIX}/suffix-arrays-and-suffix-trees`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/suffix-arrays-and-suffix-trees`,
     title: 'Suffix Arrays and Suffix Trees',
     description: 'Advanced data structures for efficient string processing.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/approximation-algorithms',
-    href: `${COURSE_PREFIX}/approximation-algorithms`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/approximation-algorithms`,
     title: 'Approximation Algorithms',
     description: 'Find near-optimal solutions for hard optimization problems.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/sqrt-decomposition',
-    href: `${COURSE_PREFIX}/sqrt-decomposition`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/sqrt-decomposition`,
     title: 'Sqrt Decomposition',
     description: 'Divide problems into blocks for efficient query processing.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/network-flow-algorithms',
-    href: `${COURSE_PREFIX}/network-flow-algorithms`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/network-flow-algorithms`,
     title: 'Network Flow Algorithms',
     description:
       'Solve flow problems in networks, such as maximum flow and minimum cut.',
@@ -103,7 +103,7 @@ export const advancedTopics: LessonConfig[] = [
   },
   {
     id: '/convex-hull',
-    href: `${COURSE_PREFIX}/convex-hull`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/convex-hull`,
     title: 'Convex Hull',
     description:
       'Compute the smallest convex polygon enclosing a set of points.',
@@ -111,7 +111,7 @@ export const advancedTopics: LessonConfig[] = [
   },
   {
     id: '/combinatorial-optimization',
-    href: `${COURSE_PREFIX}/combinatorial-optimization`,
+    href: `${COURSE_PREFIX}${ADVANCED_TOPICS_PREFIX}/combinatorial-optimization`,
     title: 'Combinatorial Optimization',
     description:
       'Optimize an objective function within a finite set of possible solutions.',

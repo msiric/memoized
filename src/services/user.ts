@@ -1,4 +1,3 @@
-import { COURSE_PREFIX } from '@/constants'
 import prisma from '@/lib/prisma'
 import { Curriculum, SubscriptionStatus } from '@/types'
 import { Prisma, Subscription, SubscriptionPlan } from '@prisma/client'
@@ -99,20 +98,25 @@ export async function getUserProgressWithLessons(userId?: string) {
         id: courseId,
         slug: courseSlug,
         title: courseTitle,
+        order: courseOrder,
         description: courseDescription,
       } = lesson.section.course
       const {
         id: sectionId,
         slug: sectionSlug,
         title: sectionTitle,
+        order: sectionOrder,
         description: sectionDescription,
+        href: sectionHref,
       } = lesson.section
       const {
         id: lessonId,
         slug: lessonSlug,
         title: lessonTitle,
+        order: lessonOrder,
         description: lessonDescription,
         access: lessonAccess,
+        href: lessonHref,
       } = lesson
 
       let course = acc.find((course) => course.id === courseId)
@@ -122,6 +126,7 @@ export async function getUserProgressWithLessons(userId?: string) {
           slug: courseSlug,
           title: courseTitle,
           description: courseDescription,
+          order: courseOrder,
           sections: [],
         }
         acc.push(course)
@@ -134,6 +139,8 @@ export async function getUserProgressWithLessons(userId?: string) {
           slug: sectionSlug,
           title: sectionTitle,
           description: sectionDescription,
+          order: sectionOrder,
+          href: sectionHref,
           lessons: [],
         }
         course.sections.push(section)
@@ -143,9 +150,10 @@ export async function getUserProgressWithLessons(userId?: string) {
         id: lessonId,
         slug: lessonSlug,
         title: lessonTitle,
-        href: `${COURSE_PREFIX}/${lessonSlug}`,
+        href: lessonHref,
         description: lessonDescription,
         access: lessonAccess,
+        order: lessonOrder,
       })
 
       return acc
@@ -155,7 +163,7 @@ export async function getUserProgressWithLessons(userId?: string) {
 
   const lessons = allLessons.map((item) => ({
     id: item.id,
-    href: `${COURSE_PREFIX}/${item.slug}`,
+    href: item.href,
     title: item.title,
     description: item.description,
     access: item.access,

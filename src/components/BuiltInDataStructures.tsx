@@ -1,20 +1,20 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
-import { COURSE_PREFIX } from '@/constants'
+import { BUILT_IN_DATA_STRUCTURES_PREFIX, COURSE_PREFIX } from '@/constants'
 import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
 export const builtInDataStructures: LessonConfig[] = [
   {
     id: '/strings',
-    href: `${COURSE_PREFIX}/strings`,
+    href: `${COURSE_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/strings`,
     title: 'Strings',
     description: 'Explore string methods and their usage in JavaScript.',
     access: AccessOptions.FREE,
   },
   {
     id: '/numbers',
-    href: `${COURSE_PREFIX}/numbers`,
+    href: `${COURSE_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/numbers`,
     title: 'Numbers',
     description:
       'Understand numerical operations and the Number object in JavaScript.',
@@ -22,14 +22,14 @@ export const builtInDataStructures: LessonConfig[] = [
   },
   {
     id: '/arrays',
-    href: `${COURSE_PREFIX}/arrays`,
+    href: `${COURSE_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/arrays`,
     title: 'Arrays',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/objects',
-    href: `${COURSE_PREFIX}/objects`,
+    href: `${COURSE_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/objects`,
     title: 'Objects',
     description:
       'Discover object properties and how to work with objects in JavaScript.',
@@ -37,21 +37,21 @@ export const builtInDataStructures: LessonConfig[] = [
   },
   {
     id: '/sets',
-    href: `${COURSE_PREFIX}/sets`,
+    href: `${COURSE_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/sets`,
     title: 'Sets',
     description: 'Understand the Set object and its unique element storage.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/maps',
-    href: `${COURSE_PREFIX}/maps`,
+    href: `${COURSE_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/maps`,
     title: 'Maps',
     description: 'Learn about the Map object and key-value pair management.',
     access: AccessOptions.PREMIUM,
   },
   {
     id: '/remaining-primitives',
-    href: `${COURSE_PREFIX}/remaining-primitives`,
+    href: `${COURSE_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/remaining-primitives`,
     title: 'Remaining Primitives',
     description:
       'Explore other JavaScript primitives such as boolean, null, and undefined.',

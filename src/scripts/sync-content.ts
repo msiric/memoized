@@ -10,7 +10,7 @@ const prisma = new PrismaClient()
 async function syncContent() {
   const contentDir = path.join(process.cwd(), `src/${CONTENT_FOLDER}`)
 
-  for (const course of completeCurriculum) {
+  for (const [courseOrder, course] of completeCurriculum.entries()) {
     const { title: courseTitle, description: courseDescription } = course
     const courseSlug = slugify(courseTitle, { lower: true })
 
@@ -19,69 +19,94 @@ async function syncContent() {
       update: {
         title: courseTitle,
         description: courseDescription,
+        order: courseOrder,
+        href: '',
       },
       create: {
         title: courseTitle,
         description: courseDescription,
+        order: courseOrder,
         slug: courseSlug,
+        href: '',
       },
     })
 
-    for (const section of course.sections) {
+    for (const [sectionOrder, section] of course.sections.entries()) {
       const {
         title: sectionTitle,
         description: sectionDescription,
+        id: sectionId,
+        href: sectionHref,
         lessons: courseLessons,
       } = section
       const sectionSlug = slugify(sectionTitle, { lower: true })
+
+      const sectionPath = path.join(contentDir, sectionId, 'page.mdx')
+      if (!fs.existsSync(sectionPath)) {
+        console.error(`File not found: ${sectionPath}`)
+        continue
+      }
+
+      const sectionContent = fs.readFileSync(sectionPath, 'utf-8')
 
       const sectionRecord = await prisma.section.upsert({
         where: { slug: sectionSlug },
         update: {
           title: sectionTitle,
           description: sectionDescription,
+          body: sectionContent,
+          order: sectionOrder,
+          href: sectionHref,
           courseId: courseRecord.id,
         },
         create: {
           title: sectionTitle,
           description: sectionDescription,
+          body: sectionContent,
           slug: sectionSlug,
+          order: sectionOrder,
+          href: sectionHref,
           courseId: courseRecord.id,
         },
       })
 
-      for (const lesson of courseLessons) {
+      for (const [lessonOrder, lesson] of courseLessons.entries()) {
         const {
           title: lessonTitle,
           description: lessonDescription,
           id: lessonId,
           access: lessonAccess,
+          href: lessonHref,
         } = lesson
         const lessonSlug = slugify(lessonTitle, { lower: true })
 
-        const filePath = path.join(contentDir, lessonId, 'page.mdx')
-        if (!fs.existsSync(filePath)) {
-          console.error(`File not found: ${filePath}`)
+        const lessonPath = path.join(contentDir, lessonId, 'page.mdx')
+        if (!fs.existsSync(lessonPath)) {
+          console.error(`File not found: ${lessonPath}`)
           continue
         }
 
-        const lessonContent = fs.readFileSync(filePath, 'utf-8')
+        const lessonContent = fs.readFileSync(lessonPath, 'utf-8')
 
         await prisma.lesson.upsert({
           where: { slug: lessonSlug },
           update: {
             title: lessonTitle,
             description: lessonDescription,
+            order: lessonOrder,
             body: lessonContent,
             access: lessonAccess,
+            href: lessonHref,
             sectionId: sectionRecord.id,
           },
           create: {
             title: lessonTitle,
             description: lessonDescription,
+            order: lessonOrder,
             slug: lessonSlug,
             body: lessonContent,
             access: lessonAccess,
+            href: lessonHref,
             sectionId: sectionRecord.id,
           },
         })

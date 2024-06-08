@@ -3,7 +3,6 @@
 import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
 import { SectionProvider, type Section } from '@/components/SectionProvider'
-import { COURSE_PREFIX } from '@/constants'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -13,18 +12,18 @@ export type CourseProvidersProps = {
   allSections: Record<string, Array<Section>>
   header: ReactNode
   navigation: ReactNode
-  lesson: ReactNode
+  section: ReactNode
 }
 
 export const CourseProviders = ({
   allSections,
   header,
   navigation,
-  lesson,
+  section,
 }: CourseProvidersProps) => {
   const pathname = usePathname()
 
-  const formattedPathname = pathname?.split(COURSE_PREFIX)[1] ?? ''
+  const formattedPathname = `/${pathname?.split('/')?.at(-1) ?? ''}`
 
   return (
     <SectionProvider sections={allSections?.[formattedPathname] ?? []}>
@@ -44,7 +43,7 @@ export const CourseProviders = ({
           </div>
         </motion.header>
         <div className="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
-          <main className="flex-auto">{lesson}</main>
+          <main className="flex-auto">{section}</main>
           <Footer />
         </div>
       </div>

@@ -7,7 +7,7 @@ import { CUSTOMER_PORTAL_LINK } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import { useProgressStore } from '@/contexts/progress'
 import { useAccess } from '@/hooks/useAccess'
-import { Curriculum, SectionResult } from '@/types'
+import { Curriculum, LessonResult, SectionResult } from '@/types'
 import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
 import { AccessOptions, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
@@ -62,6 +62,43 @@ function TopLevelNavItem({
   )
 }
 
+function SectionLink({
+  id,
+  href,
+  active = false,
+  lessons = [],
+  children,
+}: {
+  id: string
+  href: string
+  active?: boolean
+  lessons?: LessonResult[]
+  children: React.ReactNode
+}) {
+  const completedLessons = useProgressStore((state) => state.completedLessons)
+
+  const isCompleted = lessons.every((lesson) => completedLessons.has(lesson.id))
+
+  return (
+    <Link
+      href={href}
+      aria-current={active ? 'page' : undefined}
+      className={clsx(
+        'flex items-center justify-between text-sm font-semibold',
+        active && 'font-bold',
+        isCompleted
+          ? 'text-lime-600 dark:text-lime-400'
+          : 'text-zinc-900 hover:text-zinc-900 dark:text-white dark:hover:text-white',
+      )}
+    >
+      <span className={clsx('truncate', active && 'border-b border-lime-500')}>
+        {children}
+      </span>
+      {isCompleted ? <IconWrapper icon={CheckIcon} /> : null}
+    </Link>
+  )
+}
+
 function NavLink({
   id,
   href,
@@ -95,7 +132,7 @@ function NavLink({
       href={href}
       aria-current={active ? 'page' : undefined}
       className={clsx(
-        'flex items-center justify-between gap-2 py-1 pr-3 text-sm transition',
+        'flex items-center justify-between gap-2 py-1 text-sm transition',
         isAnchorLink ? 'pl-7' : 'pl-4',
         active && 'font-semibold',
         isCompleted
@@ -207,17 +244,20 @@ function NavigationGroup({
     isInsideMobileNavigation,
   )
 
-  const isActiveGroup =
-    section.lessons.findIndex((lesson) => lesson.href === pathname) !== -1
+  const isActiveGroup = section.lessons.some(
+    (lesson) => lesson.href === pathname,
+  )
 
   return (
     <li className={clsx('relative mt-6', className)}>
-      <motion.h2
-        layout="position"
-        className="text-xs font-semibold text-zinc-900 dark:text-white"
+      <SectionLink
+        id={section.id}
+        href={section.href}
+        active={section.href === pathname}
+        lessons={section.lessons}
       >
         {section.title}
-      </motion.h2>
+      </SectionLink>
       <div className="relative mt-3 pl-2">
         <AnimatePresence initial={!isInsideMobileNavigation}>
           {isActiveGroup && (

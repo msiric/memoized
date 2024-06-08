@@ -1,10 +1,10 @@
+import { CONTENT_FOLDER } from '@/constants'
 import '@/styles/tailwind.css'
 import { Section } from '@prisma/client'
 import { glob } from 'fast-glob'
 import { type Metadata } from 'next'
 import { ReactNode } from 'react'
 import { CourseProviders } from './providers'
-import { CONTENT_FOLDER } from '@/constants'
 
 export const metadata: Metadata = {
   title: {
@@ -16,13 +16,13 @@ export const metadata: Metadata = {
 export type CourseLayoutProps = {
   header: ReactNode
   navigation: ReactNode
-  lesson: ReactNode
+  section: ReactNode
 }
 
 export default async function CourseLayout({
   header,
   navigation,
-  lesson,
+  section,
 }: CourseLayoutProps) {
   const pages = await glob('**/*.mdx', { cwd: `src/${CONTENT_FOLDER}` })
   const allSectionsEntries = (await Promise.all(
@@ -37,7 +37,7 @@ export default async function CourseLayout({
     <CourseProviders
       header={header}
       navigation={navigation}
-      lesson={lesson}
+      section={section}
       allSections={allSections}
     />
   )
