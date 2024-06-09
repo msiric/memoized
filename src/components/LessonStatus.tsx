@@ -3,6 +3,7 @@
 import { markLesson } from '@/actions/markLesson'
 import { useAuthStore } from '@/contexts/auth'
 import { useProgressStore } from '@/contexts/progress'
+import { usePages } from '@/hooks/usePages'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
 import { FormEvent, forwardRef } from 'react'
@@ -10,21 +11,6 @@ import { FormEvent, forwardRef } from 'react'
 export enum LessonCompleted {
   'YES' = 'YES',
   'NO' = 'NO',
-}
-
-function CheckIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
-      <circle cx="10" cy="10" r="10" strokeWidth="0" />
-      <path
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.5"
-        d="m6.75 10.813 2.438 2.437c1.218-4.469 4.062-6.5 4.062-6.5"
-      />
-    </svg>
-  )
 }
 
 function MarkButton(
@@ -82,6 +68,7 @@ export type LessonStatusProps = {
 
 export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
   const { data: session } = useSession()
+  const { isStartOfSection } = usePages()
 
   const openModal = useAuthStore((state) => state.openModal)
   const completedLessons = useProgressStore((state) => state.completedLessons)
@@ -111,6 +98,8 @@ export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
       console.error('Error:', error)
     }
   }
+
+  if (isStartOfSection) return null
 
   return (
     <div className="relative h-8">

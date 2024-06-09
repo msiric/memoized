@@ -3,7 +3,7 @@
 import { usePages } from '@/hooks/usePages'
 
 export function NextPage() {
-  const { nextPage, nextSection, isEndOfCourse, isEndOfSection } = usePages()
+  const { nextPage, nextSection, isEndOfSection, isEndOfCourse } = usePages()
 
   if (isEndOfCourse)
     return (
