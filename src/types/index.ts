@@ -28,6 +28,7 @@ export type SectionResult = {
   description: string | null
   order: number
   lessons: LessonResult[]
+  access?: AccessOptions
 }
 
 export type Curriculum = {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useProgressStore } from '@/contexts/progress'
+import { LessonResult, SectionResult } from '@/types'
 import { usePathname } from 'next/navigation'
 
 export const usePages = () => {
@@ -26,9 +27,9 @@ export const usePages = () => {
     (page) => page.href === pathname,
   )
 
-  let previousPage = null
-  let currentPage = null
-  let nextPage = null
+  let previousPage: LessonResult | SectionResult | null = null
+  let currentPage: LessonResult | SectionResult | null = null
+  let nextPage: LessonResult | SectionResult | null = null
 
   if (pathname === currentSection.href) {
     // We are at the section intro page
