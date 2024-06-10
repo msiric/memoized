@@ -30,6 +30,14 @@ export const userDefinedDataStructures: LessonConfig[] = [
     access: AccessOptions.PREMIUM,
   },
   {
+    id: '/hash-tables',
+    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/hash-tables`,
+    title: 'Hash Tables',
+    description:
+      'Delve into hash table implementation and its various use cases.',
+    access: AccessOptions.PREMIUM,
+  },
+  {
     id: '/heaps',
     href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/heaps`,
     title: 'Heaps',

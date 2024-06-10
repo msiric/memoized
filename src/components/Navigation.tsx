@@ -14,7 +14,7 @@ import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
 import { CheckIcon } from './icons/CheckIcon'
@@ -75,9 +75,26 @@ function SectionLink({
   lessons?: LessonResult[]
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+
   const completedLessons = useProgressStore((state) => state.completedLessons)
 
   const isCompleted = lessons.every((lesson) => completedLessons.has(lesson.id))
+
+  const sectionRef = useRef<HTMLAnchorElement | null>(null)
+
+  useEffect(() => {
+    if (active && sectionRef.current) {
+      setTimeout(
+        () =>
+          sectionRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          }),
+        250,
+      )
+    }
+  }, [active, pathname])
 
   return (
     <Link
@@ -90,6 +107,7 @@ function SectionLink({
           ? 'text-lime-600 dark:text-lime-400'
           : 'text-zinc-900 hover:text-zinc-900 dark:text-white dark:hover:text-white',
       )}
+      ref={sectionRef}
     >
       <span className={clsx('truncate', active && 'border-b border-lime-500')}>
         {children}
@@ -118,6 +136,8 @@ function NavLink({
   isAnchorLink?: boolean
   onRef?: (ref: HTMLAnchorElement | null) => void
 }) {
+  const pathname = usePathname()
+
   const userData = useAuthStore((state) => state.user)
   const completedLessons = useProgressStore((state) => state.completedLessons)
 
@@ -126,6 +146,21 @@ function NavLink({
   )
 
   const hasAccess = useAccess(userData, access)
+
+  const lessonRef = useRef<HTMLAnchorElement | null>(null)
+
+  useEffect(() => {
+    if (active && lessonRef.current) {
+      setTimeout(
+        () =>
+          lessonRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          }),
+        250,
+      )
+    }
+  }, [active, pathname])
 
   return (
     <Link
@@ -140,6 +175,7 @@ function NavLink({
           : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white',
         active && !isCompleted && 'text-zinc-900 dark:text-white',
       )}
+      ref={lessonRef}
     >
       <span className="truncate">{children}</span>
       {tag && (

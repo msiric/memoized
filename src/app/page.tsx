@@ -2,6 +2,19 @@ import { AnimatedCode } from '@/components/AnimatedCode'
 import { Logo } from '@/components/Logo'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
+import { BsNvidia } from 'react-icons/bs'
+import {
+  FaAirbnb,
+  FaAmazon,
+  FaApple,
+  FaGoogle,
+  FaMicrosoft,
+  FaTiktok,
+  FaTwitter,
+} from 'react-icons/fa'
+import { FaMeta } from 'react-icons/fa6'
+import { PiTreeView } from 'react-icons/pi'
+import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
 import { codeToHtml } from 'shiki-v1'
 
 const EXTENSION = 'ts'
@@ -448,19 +461,14 @@ export default async function Home() {
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
         <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
           <article>
+            <PiTreeView />
+
             <header className="mb-9 space-y-1">
-              <p className="font-display text-sm font-medium text-lime-500">
-                Introduction
-              </p>
-              <h1 className="font-display text-3xl tracking-tight text-slate-900 dark:text-white">
-                Getting started
-              </h1>
+              <h2 className="font-display text-center text-2xl tracking-tight text-slate-900 dark:text-white">
+                Content overview
+              </h2>
             </header>
             <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
-              <p className="lead">
-                Learn how to get CacheAdvance set up in your project in under
-                thirty minutes or it’s free.{' '}
-              </p>
               <div className="not-prose my-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {completeCurriculum[0].sections.map((section) => (
                   <div
@@ -487,321 +495,177 @@ export default async function Home() {
                   </div>
                 ))}
               </div>
-              <p>
-                Possimus saepe veritatis sint nobis et quam eos. Architecto
-                consequatur odit perferendis fuga eveniet possimus rerum cumque.
-                Ea deleniti voluptatum deserunt voluptatibus ut non iste.
-              </p>
-              <hr />
-              <h2 id="quick-start">Quick start</h2>
-              <p>
-                Sit commodi iste iure molestias qui amet voluptatem sed quaerat.
-                Nostrum aut pariatur. Sint ipsa praesentium dolor error cumque
-                velit tenetur.
-              </p>
-              <h3 id="installing-dependencies">Installing dependencies</h3>
-              <p>
-                Sit commodi iste iure molestias qui amet voluptatem sed quaerat.
-                Nostrum aut pariatur. Sint ipsa praesentium dolor error cumque
-                velit tenetur quaerat exercitationem. Consequatur et cum atque
-                mollitia qui quia necessitatibus.
-              </p>
-              <pre className="prism-code language-shell">
-                <code>
-                  <span className="token plain">
-                    npm install @tailwindlabs/cache-advance
-                  </span>
-                  {'\n'}
-                </code>
-              </pre>
-              <p>
-                Possimus saepe veritatis sint nobis et quam eos. Architecto
-                consequatur odit perferendis fuga eveniet possimus rerum cumque.
-                Ea deleniti voluptatum deserunt voluptatibus ut non iste.
-                Provident nam asperiores vel laboriosam omnis ducimus enim
-                nesciunt quaerat. Minus tempora cupiditate est quod.
-              </p>
-              <div className="my-8 flex rounded-3xl bg-amber-50 p-6 dark:bg-slate-800/60 dark:ring-1 dark:ring-slate-300/10">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  className="h-8 w-8 flex-none [--icon-background:theme(colors.amber.100)] [--icon-foreground:theme(colors.amber.900)]"
-                >
-                  <defs>
-                    <radialGradient
-                      cx={0}
-                      cy={0}
-                      r={1}
-                      gradientUnits="userSpaceOnUse"
-                      id=":S5:-gradient"
-                      gradientTransform="rotate(65.924 1.519 20.92) scale(25.7391)"
-                    >
-                      <stop stopColor="#FDE68A" offset=".08" />
-                      <stop stopColor="#F59E0B" offset=".837" />
-                    </radialGradient>
-                    <radialGradient
-                      cx={0}
-                      cy={0}
-                      r={1}
-                      gradientUnits="userSpaceOnUse"
-                      id=":S5:-gradient-dark"
-                      gradientTransform="matrix(0 24.5 -24.5 0 16 5.5)"
-                    >
-                      <stop stopColor="#FDE68A" offset=".08" />
-                      <stop stopColor="#F59E0B" offset=".837" />
-                    </radialGradient>
-                  </defs>
-                  <g className="dark:hidden">
-                    <circle cx={20} cy={20} r={12} fill="url(#:S5:-gradient)" />
-                    <path
-                      d="M3 16c0 7.18 5.82 13 13 13s13-5.82 13-13S23.18 3 16 3 3 8.82 3 16Z"
-                      fillOpacity="0.5"
-                      className="fill-[var(--icon-background)] stroke-[color:var(--icon-foreground)]"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="m15.408 16.509-1.04-5.543a1.66 1.66 0 1 1 3.263 0l-1.039 5.543a.602.602 0 0 1-1.184 0Z"
-                      className="fill-[var(--icon-foreground)] stroke-[color:var(--icon-foreground)]"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M16 23a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                      fillOpacity="0.5"
-                      stroke="currentColor"
-                      className="fill-[var(--icon-background)] stroke-[color:var(--icon-foreground)]"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </g>
-                  <g className="hidden dark:inline">
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M2 16C2 8.268 8.268 2 16 2s14 6.268 14 14-6.268 14-14 14S2 23.732 2 16Zm11.386-4.85a2.66 2.66 0 1 1 5.228 0l-1.039 5.543a1.602 1.602 0 0 1-3.15 0l-1.04-5.543ZM16 20a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"
-                      fill="url(#:S5:-gradient-dark)"
-                    />
-                  </g>
-                </svg>
-                <div className="ml-4 flex-auto">
-                  <p className="font-display m-0 text-xl text-amber-900 dark:text-amber-500">
-                    Oh no! Something bad happened!
-                  </p>
-                  <div className="prose mt-2.5 text-amber-800 [--tw-prose-background:theme(colors.amber.50)] [--tw-prose-underline:theme(colors.amber.400)] prose-a:text-amber-900 prose-code:text-amber-900 dark:text-slate-300 dark:[--tw-prose-underline:theme(colors.lime.700)] dark:prose-code:text-slate-300">
-                    <p>
-                      This is what a disclaimer message looks like. You might
-                      want to include inline <code>code</code> in it. Or maybe
-                      you’ll want to include a <a href="/">link</a> in it. I
-                      don’t think we should get too carried away with other
-                      scenarios like lists or tables — that would be silly.
-                    </p>
+              <div className="my-12">
+                <h2 className="font-display text-center text-2xl text-slate-900 dark:text-white">
+                  Leading Tech Companies Use Algorithmic Interviews
+                </h2>
+                <p className="mt-3 text-center text-slate-700 dark:text-slate-400">
+                  Algorithmic interviews are the standard for evaluating
+                  technical skills at major tech companies and in industries
+                  like finance and logistics. These interviews assess your
+                  problem-solving abilities, critical thinking, and technical
+                  proficiency. Embracing this format is essential for advancing
+                  your career as a software engineer and standing out in a
+                  competitive job market.
+                </p>
+                <div className="mt-8 grid grid-cols-3 gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+                  <div className="flex items-center justify-center">
+                    <FaMeta className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <FaAmazon className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <FaApple className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <SiNetflix className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <FaGoogle className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <FaMicrosoft className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <SiUber className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <SiTesla className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <FaTwitter className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <FaAirbnb className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <FaTiktok className="h-[30px] w-[30px]" />
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <BsNvidia className="h-[30px] w-[30px]" />
                   </div>
                 </div>
               </div>
-              <h3 id="configuring-the-library">Configuring the library</h3>
-              <p>
-                Sit commodi iste iure molestias qui amet voluptatem sed quaerat.
-                Nostrum aut pariatur. Sint ipsa praesentium dolor error cumque
-                velit tenetur quaerat exercitationem. Consequatur et cum atque
-                mollitia qui quia necessitatibus.
-              </p>
-              <p>
-                Possimus saepe veritatis sint nobis et quam eos. Architecto
-                consequatur odit perferendis fuga eveniet possimus rerum cumque.
-                Ea deleniti voluptatum deserunt voluptatibus ut non iste.
-                Provident nam asperiores vel laboriosam omnis ducimus enim
-                nesciunt quaerat. Minus tempora cupiditate est quod.
-              </p>
-              <div className="my-8 flex rounded-3xl bg-lime-50 p-6 dark:bg-slate-800/60 dark:ring-1 dark:ring-slate-300/10">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 32 32"
-                  fill="none"
-                  className="h-8 w-8 flex-none [--icon-background:theme(colors.white)] [--icon-foreground:theme(colors.slate.900)]"
-                >
-                  <defs>
-                    <radialGradient
-                      cx={0}
-                      cy={0}
-                      r={1}
-                      gradientUnits="userSpaceOnUse"
-                      id=":S6:-gradient"
-                      gradientTransform="matrix(0 21 -21 0 20 11)"
-                    >
-                      <stop stopColor="#A3E635" />
-                      <stop stopColor="#84CC16" offset=".527" />
-                      <stop stopColor="#65A30D" offset={1} />
-                    </radialGradient>
-                    <radialGradient
-                      cx={0}
-                      cy={0}
-                      r={1}
-                      gradientUnits="userSpaceOnUse"
-                      id=":S6:-gradient-dark"
-                      gradientTransform="matrix(0 24.5001 -19.2498 0 16 5.5)"
-                    >
-                      <stop stopColor="#A3E635" />
-                      <stop stopColor="#84CC16" offset=".527" />
-                      <stop stopColor="#65A30D" offset={1} />
-                    </radialGradient>
-                  </defs>
-                  <g className="dark:hidden">
-                    <circle cx={20} cy={20} r={12} fill="url(#:S6:-gradient)" />
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M20 24.995c0-1.855 1.094-3.501 2.427-4.792C24.61 18.087 26 15.07 26 12.231 26 7.133 21.523 3 16 3S6 7.133 6 12.23c0 2.84 1.389 5.857 3.573 7.973C10.906 21.494 12 23.14 12 24.995V27a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.005Z"
-                      className="fill-[var(--icon-background)]"
-                      fillOpacity="0.5"
-                    />
-                    <path
-                      d="M25 12.23c0 2.536-1.254 5.303-3.269 7.255l1.391 1.436c2.354-2.28 3.878-5.547 3.878-8.69h-2ZM16 4c5.047 0 9 3.759 9 8.23h2C27 6.508 21.998 2 16 2v2Zm-9 8.23C7 7.76 10.953 4 16 4V2C10.002 2 5 6.507 5 12.23h2Zm3.269 7.255C8.254 17.533 7 14.766 7 12.23H5c0 3.143 1.523 6.41 3.877 8.69l1.392-1.436ZM13 27v-2.005h-2V27h2Zm1 1a1 1 0 0 1-1-1h-2a3 3 0 0 0 3 3v-2Zm4 0h-4v2h4v-2Zm1-1a1 1 0 0 1-1 1v2a3 3 0 0 0 3-3h-2Zm0-2.005V27h2v-2.005h-2ZM8.877 20.921C10.132 22.136 11 23.538 11 24.995h2c0-2.253-1.32-4.143-2.731-5.51L8.877 20.92Zm12.854-1.436C20.32 20.852 19 22.742 19 24.995h2c0-1.457.869-2.859 2.122-4.074l-1.391-1.436Z"
-                      className="fill-[var(--icon-foreground)]"
-                    />
-                    <path
-                      d="M20 26a1 1 0 1 0 0-2v2Zm-8-2a1 1 0 1 0 0 2v-2Zm2 0h-2v2h2v-2Zm1 1V13.5h-2V25h2Zm-5-11.5v1h2v-1h-2Zm3.5 4.5h5v-2h-5v2Zm8.5-3.5v-1h-2v1h2ZM20 24h-2v2h2v-2Zm-2 0h-4v2h4v-2Zm-1-10.5V25h2V13.5h-2Zm2.5-2.5a2.5 2.5 0 0 0-2.5 2.5h2a.5.5 0 0 1 .5-.5v-2Zm2.5 2.5a2.5 2.5 0 0 0-2.5-2.5v2a.5.5 0 0 1 .5.5h2ZM18.5 18a3.5 3.5 0 0 0 3.5-3.5h-2a1.5 1.5 0 0 1-1.5 1.5v2ZM10 14.5a3.5 3.5 0 0 0 3.5 3.5v-2a1.5 1.5 0 0 1-1.5-1.5h-2Zm2.5-3.5a2.5 2.5 0 0 0-2.5 2.5h2a.5.5 0 0 1 .5-.5v-2Zm2.5 2.5a2.5 2.5 0 0 0-2.5-2.5v2a.5.5 0 0 1 .5.5h2Z"
-                      className="fill-[var(--icon-foreground)]"
-                    />
-                  </g>
-                  <g className="hidden dark:inline">
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M16 2C10.002 2 5 6.507 5 12.23c0 3.144 1.523 6.411 3.877 8.691.75.727 1.363 1.52 1.734 2.353.185.415.574.726 1.028.726H12a1 1 0 0 0 1-1v-4.5a.5.5 0 0 0-.5-.5A3.5 3.5 0 0 1 9 14.5V14a3 3 0 1 1 6 0v9a1 1 0 1 0 2 0v-9a3 3 0 1 1 6 0v.5a3.5 3.5 0 0 1-3.5 3.5.5.5 0 0 0-.5.5V23a1 1 0 0 0 1 1h.36c.455 0 .844-.311 1.03-.726.37-.833.982-1.626 1.732-2.353 2.354-2.28 3.878-5.547 3.878-8.69C27 6.507 21.998 2 16 2Zm5 25a1 1 0 0 0-1-1h-8a1 1 0 0 0-1 1 3 3 0 0 0 3 3h4a3 3 0 0 0 3-3Zm-8-13v1.5a.5.5 0 0 1-.5.5 1.5 1.5 0 0 1-1.5-1.5V14a1 1 0 1 1 2 0Zm6.5 2a.5.5 0 0 1-.5-.5V14a1 1 0 1 1 2 0v.5a1.5 1.5 0 0 1-1.5 1.5Z"
-                      fill="url(#:S6:-gradient-dark)"
-                    />
-                  </g>
-                </svg>
-                <div className="ml-4 flex-auto">
-                  <p className="font-display m-0 text-xl text-lime-900 dark:text-lime-400">
-                    You should know!
+              <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
+                <div className="my-12">
+                  <h3 className="text-xl font-semibold">
+                    Why Choose This Platform?
+                  </h3>
+                  <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
+                    <li>
+                      <strong>Depth and Practical Insights:</strong> The
+                      curriculum goes beyond surface-level knowledge, offering
+                      in-depth explanations and real-world applications to
+                      ensure you have a comprehensive understanding of each
+                      topic.
+                    </li>
+                    <li>
+                      <strong>Focus on JavaScript:</strong> Unlike other
+                      platforms that focus on Python or other languages, this
+                      platform is tailored specifically for JavaScript and
+                      TypeScript developers. This means you‘ll be learning in
+                      the context of the language you’ll be using, making the
+                      material more relevant and easier to apply.
+                    </li>
+                    <li>
+                      <strong>Interview-Ready:</strong> Every lesson is designed
+                      to help you ace technical interviews. The curriculum
+                      includes common interview techniques and strategies, so
+                      you‘ll be well-prepared to tackle any challenge that comes
+                      your way.
+                    </li>
+                    <li>
+                      <strong>Expert Tips and Tricks:</strong> Gain insights
+                      from an industry expert, with practical tips and tricks
+                      that can give you an edge in your interviews. Each lesson
+                      also covers common gotchas, helping you avoid the pitfalls
+                      that often trip up even experienced engineers.
+                    </li>
+                    <li>
+                      <strong>Interactive Learning:</strong> Engage with
+                      hands-on exercises, quizzes, and real-world coding
+                      challenges to reinforce your learning. This interactive
+                      approach ensures that you not only understand the concepts
+                      but can also apply them in practical scenarios.
+                    </li>
+                  </ul>
+
+                  <h3 className="mt-6 text-xl font-semibold">
+                    A Unique Approach to Interview Preparation
+                  </h3>
+                  <p className="mt-3 text-slate-700 dark:text-slate-400">
+                    Having been dissatisfied with existing interview preparation
+                    courses and platforms, I noticed a common issue: most of
+                    them focus on Python and start with implementing various
+                    data structures that aren‘t directly relevant to the
+                    language being used. This inspired me to create a platform
+                    specifically for JavaScript and TypeScript engineers,
+                    focusing on the tools and techniques most relevant to them.
                   </p>
-                  <div className="prose mt-2.5 text-lime-800 [--tw-prose-background:theme(colors.lime.50)] prose-a:text-lime-900 prose-code:text-lime-900 dark:text-slate-300 dark:prose-code:text-slate-300">
-                    <p>
-                      This is what a disclaimer message looks like. You might
-                      want to include inline <code>code</code> in it. Or maybe
-                      you’ll want to include a <a href="/">link</a> in it. I
-                      don’t think we should get too carried away with other
-                      scenarios like lists or tables — that would be silly.
-                    </p>
-                  </div>
+
+                  <h3 className="mt-6 text-xl font-semibold">
+                    Comprehensive Curriculum
+                  </h3>
+                  <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
+                    <li>
+                      <strong>Built-In Data Structures:</strong> Start with the
+                      basics and master JavaScript‘s built-in data structures.
+                      Learn about strings, numbers, arrays, objects, sets, and
+                      maps. Understand their concepts, use cases, time and space
+                      complexities, and practical tips and tricks.
+                    </li>
+                    <li>
+                      <strong>User-Defined Data Structures:</strong> Once you’ve
+                      mastered the basics, move on to custom data structures
+                      tailored for specific needs. Implement and optimize linked
+                      lists, stacks, queues, heaps, trees, graphs, tries, and
+                      more. Develop the skills to create efficient and effective
+                      data structures for any problem.
+                    </li>
+                    <li>
+                      <strong>Common Techniques:</strong> Explore widely-used
+                      algorithms and problem-solving techniques essential for
+                      coding interviews. Master techniques like sliding windows,
+                      two pointers, cyclic sort, tree and graph traversals,
+                      binary search, and many more.
+                    </li>
+                    <li>
+                      <strong>Advanced Topics:</strong> Dive into complex topics
+                      for an in-depth understanding of sophisticated algorithms.
+                      Study network flow algorithms, dynamic programming,
+                      segment trees, union find, minimum spanning trees,
+                      shortest path algorithms, and more. Gain a competitive
+                      edge with knowledge of advanced concepts and their
+                      practical applications.
+                    </li>
+                  </ul>
+
+                  <h3 className="mt-6 text-xl font-semibold">
+                    Practical Insights and Common Pitfalls
+                  </h3>
+                  <p className="mt-3 text-slate-700 dark:text-slate-400">
+                    In addition to covering the theoretical aspects, every
+                    lesson is packed with practical tips and tricks, along with
+                    insights into common pitfalls that often cause trouble for
+                    engineers. This ensures that you not only learn the concepts
+                    but also understand the nuances that can make a significant
+                    difference during an interview.
+                  </p>
+
+                  <h3 className="mt-6 text-xl font-semibold">
+                    Get Started Today!
+                  </h3>
+                  <p className="mt-3 text-slate-700 dark:text-slate-400">
+                    Join [Your Platform Name] and start your journey to becoming
+                    a JavaScript expert. Master data structures, algorithms, and
+                    interview techniques to land your dream job. With a focus on
+                    depth, practical insights, and interactive learning, you’ll
+                    be well-equipped to tackle any technical interview with
+                    confidence.
+                  </p>
                 </div>
               </div>
-              <hr />
-              <h2 id="basic-usage">Basic usage</h2>
-              <p>
-                Praesentium laudantium magni. Consequatur reiciendis aliquid
-                nihil iusto ut in et. Quisquam ut et aliquid occaecati. Culpa
-                veniam aut et voluptates amet perspiciatis. Qui exercitationem
-                in qui. Vel qui dignissimos sit quae distinctio.
-              </p>
-              <h3 id="your-first-cache">Your first cache</h3>
-              <p>
-                Minima vel non iste debitis. Consequatur repudiandae et quod
-                accusamus sit molestias consequatur aperiam. Et sequi ipsa eum
-                voluptatibus ipsam. Et quisquam ut.
-              </p>
-              <p>
-                Qui quae esse aspernatur fugit possimus. Quam sed molestiae
-                temporibus. Eum perferendis dignissimos provident ea et. Et
-                repudiandae quasi accusamus consequatur dolore nobis. Quia
-                reiciendis necessitatibus a blanditiis iste quia. Ut quis et
-                amet praesentium sapiente.
-              </p>
-              <p>
-                Atque eos laudantium. Optio odit aspernatur consequuntur
-                corporis soluta quidem sunt aut doloribus. Laudantium assumenda
-                commodi.
-              </p>
-              <h3 id="clearing-the-cache">Clearing the cache</h3>
-              <p>
-                Vel aut velit sit dolor aut suscipit at veritatis voluptas.
-                Laudantium tempore praesentium. Qui ut voluptatem.
-              </p>
-              <p>
-                Ea est autem fugiat velit esse a alias earum. Dolore non amet
-                soluta eos libero est. Consequatur qui aliquam qui odit eligendi
-                ut impedit illo dignissimos.
-              </p>
-              <p>
-                Ut dolore qui aut nam. Natus temporibus nisi voluptatum labore
-                est ex error vel officia. Vero repellendus ut. Suscipit
-                voluptate et placeat. Eius quo corporis ab et consequatur
-                quisquam. Nihil officia facere dolorem occaecati alias deleniti
-                deleniti in.
-              </p>
-              <h3 id="adding-middleware">Adding middleware</h3>
-              <p>
-                Officia nobis tempora maiores id iusto magni reprehenderit
-                velit. Quae dolores inventore molestiae perspiciatis aut. Quis
-                sequi officia quasi rem officiis officiis. Nesciunt ut
-                cupiditate. Sunt aliquid explicabo enim ipsa eum recusandae.
-                Vitae sunt eligendi et non beatae minima aut.
-              </p>
-              <p>
-                Harum perferendis aut qui quibusdam tempore laboriosam
-                voluptatum qui sed. Amet error amet totam exercitationem aut
-                corporis accusantium dolorum. Perspiciatis aut animi et. Sed
-                unde error ut aut rerum.
-              </p>
-              <p>
-                Ut quo libero aperiam mollitia est repudiandae quaerat corrupti
-                explicabo. Voluptas accusantium sed et doloribus voluptatem
-                fugiat a mollitia. Numquam est magnam dolorem asperiores fugiat.
-                Soluta et fuga amet alias temporibus quasi velit. Laudantium
-                voluptatum perspiciatis doloribus quasi facere. Eveniet deleniti
-                veniam et quia veritatis minus veniam perspiciatis.
-              </p>
-              <hr />
-              <h2 id="getting-help">Getting help</h2>
-              <p>
-                Consequuntur et aut quisquam et qui consequatur eligendi.
-                Necessitatibus dolorem sit. Excepturi cumque quibusdam soluta
-                ullam rerum voluptatibus. Porro illo sequi consequatur nisi
-                numquam nisi autem. Ut necessitatibus aut. Veniam ipsa
-                voluptatem sed.
-              </p>
-              <h3 id="submit-an-issue">Submit an issue</h3>
-              <p>
-                Inventore et aut minus ut voluptatem nihil commodi doloribus
-                consequatur. Facilis perferendis nihil sit aut aspernatur iure
-                ut dolores et. Aspernatur odit dignissimos. Aut qui est sint
-                sint.
-              </p>
-              <p>
-                Facere aliquam qui. Dolorem officia ipsam adipisci qui
-                molestiae. Error voluptatem reprehenderit ex.
-              </p>
-              <p>
-                Consequatur enim quia maiores aperiam et ipsum dicta. Quam ut
-                sit facere sit quae. Eligendi veritatis aut ut veritatis iste ut
-                adipisci illo.
-              </p>
-              <h3 id="join-the-community">Join the community</h3>
-              <p>
-                Praesentium facilis iste aliquid quo quia a excepturi. Fuga
-                reprehenderit illo sequi voluptatem voluptatem omnis. Id quia
-                consequatur rerum consectetur eligendi et omnis. Voluptates
-                iusto labore possimus provident praesentium id vel harum
-                quisquam. Voluptatem provident corrupti.
-              </p>
-              <p>
-                Eum et ut. Qui facilis est ipsa. Non facere quia sequi commodi
-                autem. Dicta autem sit sequi omnis impedit. Eligendi amet
-                dolorum magnam repudiandae in a.
-              </p>
-              <p>
-                Molestiae iusto ut exercitationem dolorem unde iusto tempora
-                atque nihil. Voluptatem velit facere laboriosam nobis ea.
-                Consequatur rerum velit ipsum ipsam. Et qui saepe consequatur
-                minima laborum tempore voluptatum et. Quia eveniet eaque sequi
-                consequatur nihil eos.
-              </p>
             </div>
           </article>
         </div>
