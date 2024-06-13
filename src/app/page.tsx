@@ -1,7 +1,9 @@
 import { AnimatedCode } from '@/components/AnimatedCode'
 import { Logo } from '@/components/Logo'
+import { OverlayedImage } from '@/components/OverlayedImage'
+import { Tabs } from '@/components/Tabs'
 import { completeCurriculum } from '@/constants/curriculum'
-import { SECTION_ICONS } from '@/constants/icons'
+import { DS_ICONS, SECTION_ICONS } from '@/constants/icons'
 import { BsNvidia } from 'react-icons/bs'
 import {
   FaAirbnb,
@@ -13,9 +15,103 @@ import {
   FaTwitter,
 } from 'react-icons/fa'
 import { FaMeta } from 'react-icons/fa6'
-import { PiTreeView } from 'react-icons/pi'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
 import { codeToHtml } from 'shiki-v1'
+
+const TEST_TABS = [
+  {
+    label: 'Profile',
+    content: (
+      <div>
+        <h3 className="mb-2 text-lg font-bold text-gray-900 dark:text-white">
+          Profile Tab
+        </h3>
+        <p className="mb-2">
+          This is some placeholder content the Profile tab associated content,
+          clicking another tab will toggle the visibility of this one for the
+          next.
+        </p>
+        <p>
+          The tab JavaScript swaps classes to control the content visibility and
+          styling.
+        </p>
+      </div>
+    ),
+    icon: (
+      <svg
+        className="me-2 h-4 w-4 text-white"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Dashboard',
+    content: <div>Dashboard Content</div>,
+    icon: (
+      <svg
+        className="me-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 18 18"
+      >
+        <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Settings',
+    content: <div>Settings Content</div>,
+    icon: (
+      <svg
+        className="me-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M18 7.5h-.423l-.452-1.09.3-.3a1.5 1.5 0 0 0 0-2.121L16.01 2.575a1.5 1.5 0 0 0-2.121 0l-.3.3-1.089-.452V2A1.5 1.5 0 0 0 11 .5H9A1.5 1.5 0 0 0 7.5 2v.423l-1.09.452-.3-.3a1.5 1.5 0 0 0-2.121 0L2.576 3.99a1.5 1.5 0 0 0 0 2.121l.3.3L2.423 7.5H2A1.5 1.5 0 0 0 .5 9v2A1.5 1.5 0 0 0 2 12.5h.423l.452 1.09-.3.3a1.5 1.5 0 0 0 0 2.121l1.415 1.413a1.5 1.5 0 0 0 2.121 0l.3-.3 1.09.452V18A1.5 1.5 0 0 0 9 19.5h2a1.5 1.5 0 0 0 1.5-1.5v-.423l1.09-.452.3.3a1.5 1.5 0 0 0 2.121 0l1.415-1.414a1.5 1.5 0 0 0 0-2.121l-.3-.3.452-1.09H18a1.5 1.5 0 0 0 1.5-1.5V9A1.5 1.5 0 0 0 18 7.5Zm-8 6a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Contact',
+    content: <div>Contact Content</div>,
+    icon: (
+      <svg
+        className="me-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M7.824 5.937a1 1 0 0 0 .726-.312 2.042 2.042 0 0 1 2.835-.065 1 1 0 0 0 1.388-1.441 3.994 3.994 0 0 0-5.674.13 1 1 0 0 0 .725 1.688Z" />
+        <path d="M17 7A7 7 0 1 0 3 7a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h1a1 1 0 0 0 1-1V7a5 5 0 1 1 10 0v7.083A2.92 2.92 0 0 1 12.083 17H12a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h1a1.993 1.993 0 0 0 1.722-1h.361a4.92 4.92 0 0 0 4.824-4H17a3 3 0 0 0 3-3v-2a3 3 0 0 0-3-3Z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Disabled',
+    content: <div>Disabled Content</div>,
+    icon: (
+      <svg
+        className="me-2 h-4 w-4 text-gray-400 dark:text-gray-500"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z" />
+      </svg>
+    ),
+    disabled: true,
+  },
+]
 
 const EXTENSION = 'ts'
 
@@ -459,12 +555,10 @@ export default async function Home() {
         </div>
       </div>
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
-        <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none lg:pl-8 lg:pr-0 xl:px-16">
+        <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
           <article>
-            <PiTreeView />
-
             <header className="mb-9 space-y-1">
-              <h2 className="font-display text-center text-2xl tracking-tight text-slate-900 dark:text-white">
+              <h2 className="font-display text-center text-4xl tracking-tight text-slate-900 dark:text-white">
                 Content overview
               </h2>
             </header>
@@ -473,7 +567,7 @@ export default async function Home() {
                 {completeCurriculum[0].sections.map((section) => (
                   <div
                     key={section.title}
-                    className="group relative rounded-xl border border-slate-200 dark:border-slate-800"
+                    className="group relative rounded-xl border border-lime-200 dark:border-lime-500"
                   >
                     <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
                     <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center">
@@ -495,289 +589,209 @@ export default async function Home() {
                   </div>
                 ))}
               </div>
+            </div>
+            <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
               <div className="my-12">
-                <h2 className="font-display text-center text-2xl text-slate-900 dark:text-white">
-                  Leading Tech Companies Use Algorithmic Interviews
-                </h2>
-                <p className="mt-3 text-center text-slate-700 dark:text-slate-400">
-                  Algorithmic interviews are the standard for evaluating
-                  technical skills at major tech companies and in industries
-                  like finance and logistics. These interviews assess your
-                  problem-solving abilities, critical thinking, and technical
-                  proficiency. Embracing this format is essential for advancing
-                  your career as a software engineer and standing out in a
-                  competitive job market.
+                <h3 className="text-xl font-semibold">
+                  Why Choose This Platform?
+                </h3>
+                <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
+                  <li>
+                    <strong>Depth and Practical Insights:</strong> The
+                    curriculum goes beyond surface-level knowledge, offering
+                    in-depth explanations and real-world applications to ensure
+                    you have a comprehensive understanding of each topic.
+                  </li>
+                  <li>
+                    <strong>Focus on JavaScript:</strong> Unlike other platforms
+                    that focus on Python or other languages, this platform is
+                    tailored specifically for JavaScript and TypeScript
+                    developers. This means you‘ll be learning in the context of
+                    the language you’ll be using, making the material more
+                    relevant and easier to apply.
+                  </li>
+                  <li>
+                    <strong>Interview-Ready:</strong> Every lesson is designed
+                    to help you ace technical interviews. The curriculum
+                    includes common interview techniques and strategies, so
+                    you‘ll be well-prepared to tackle any challenge that comes
+                    your way.
+                  </li>
+                  <li>
+                    <strong>Expert Tips and Tricks:</strong> Gain insights from
+                    an industry expert, with practical tips and tricks that can
+                    give you an edge in your interviews. Each lesson also covers
+                    common gotchas, helping you avoid the pitfalls that often
+                    trip up even experienced engineers.
+                  </li>
+                  <li>
+                    <strong>Interactive Learning:</strong> Engage with hands-on
+                    exercises, quizzes, and real-world coding challenges to
+                    reinforce your learning. This interactive approach ensures
+                    that you not only understand the concepts but can also apply
+                    them in practical scenarios.
+                  </li>
+                </ul>
+
+                <h3 className="mt-6 text-xl font-semibold">
+                  A Unique Approach to Interview Preparation
+                </h3>
+                <p className="mt-3 text-slate-700 dark:text-slate-400">
+                  Having been dissatisfied with existing interview preparation
+                  courses and platforms, I noticed a common issue: most of them
+                  focus on Python and start with implementing various data
+                  structures that aren‘t directly relevant to the language being
+                  used. This inspired me to create a platform specifically for
+                  JavaScript and TypeScript engineers, focusing on the tools and
+                  techniques most relevant to them.
                 </p>
-                <div className="mt-8 grid grid-cols-3 gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
-                  <div className="flex items-center justify-center">
-                    <FaMeta className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <FaAmazon className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <FaApple className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <SiNetflix className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <FaGoogle className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <FaMicrosoft className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <SiUber className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <SiTesla className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <FaTwitter className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <FaAirbnb className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <FaTiktok className="h-[30px] w-[30px]" />
-                  </div>
-                  <div className="flex items-center justify-center">
-                    <BsNvidia className="h-[30px] w-[30px]" />
-                  </div>
-                </div>
+
+                <h3 className="mt-6 text-xl font-semibold">
+                  Comprehensive Curriculum
+                </h3>
+                <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
+                  <li>
+                    <strong>Built-In Data Structures:</strong> Start with the
+                    basics and master JavaScript‘s built-in data structures.
+                    Learn about strings, numbers, arrays, objects, sets, and
+                    maps. Understand their concepts, use cases, time and space
+                    complexities, and practical tips and tricks.
+                  </li>
+                  <li>
+                    <strong>User-Defined Data Structures:</strong> Once you’ve
+                    mastered the basics, move on to custom data structures
+                    tailored for specific needs. Implement and optimize linked
+                    lists, stacks, queues, heaps, trees, graphs, tries, and
+                    more. Develop the skills to create efficient and effective
+                    data structures for any problem.
+                  </li>
+                  <li>
+                    <strong>Common Techniques:</strong> Explore widely-used
+                    algorithms and problem-solving techniques essential for
+                    coding interviews. Master techniques like sliding windows,
+                    two pointers, cyclic sort, tree and graph traversals, binary
+                    search, and many more.
+                  </li>
+                  <li>
+                    <strong>Advanced Topics:</strong> Dive into complex topics
+                    for an in-depth understanding of sophisticated algorithms.
+                    Study network flow algorithms, dynamic programming, segment
+                    trees, union find, minimum spanning trees, shortest path
+                    algorithms, and more. Gain a competitive edge with knowledge
+                    of advanced concepts and their practical applications.
+                  </li>
+                </ul>
+
+                <h3 className="mt-6 text-xl font-semibold">
+                  Practical Insights and Common Pitfalls
+                </h3>
+                <p className="mt-3 text-slate-700 dark:text-slate-400">
+                  In addition to covering the theoretical aspects, every lesson
+                  is packed with practical tips and tricks, along with insights
+                  into common pitfalls that often cause trouble for engineers.
+                  This ensures that you not only learn the concepts but also
+                  understand the nuances that can make a significant difference
+                  during an interview.
+                </p>
+
+                <h3 className="mt-6 text-xl font-semibold">
+                  Get Started Today!
+                </h3>
+                <p className="mt-3 text-slate-700 dark:text-slate-400">
+                  Join [Your Platform Name] and start your journey to becoming a
+                  JavaScript expert. Master data structures, algorithms, and
+                  interview techniques to land your dream job. With a focus on
+                  depth, practical insights, and interactive learning, you’ll be
+                  well-equipped to tackle any technical interview with
+                  confidence.
+                </p>
               </div>
-              <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
-                <div className="my-12">
-                  <h3 className="text-xl font-semibold">
-                    Why Choose This Platform?
-                  </h3>
-                  <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
-                    <li>
-                      <strong>Depth and Practical Insights:</strong> The
-                      curriculum goes beyond surface-level knowledge, offering
-                      in-depth explanations and real-world applications to
-                      ensure you have a comprehensive understanding of each
-                      topic.
-                    </li>
-                    <li>
-                      <strong>Focus on JavaScript:</strong> Unlike other
-                      platforms that focus on Python or other languages, this
-                      platform is tailored specifically for JavaScript and
-                      TypeScript developers. This means you‘ll be learning in
-                      the context of the language you’ll be using, making the
-                      material more relevant and easier to apply.
-                    </li>
-                    <li>
-                      <strong>Interview-Ready:</strong> Every lesson is designed
-                      to help you ace technical interviews. The curriculum
-                      includes common interview techniques and strategies, so
-                      you‘ll be well-prepared to tackle any challenge that comes
-                      your way.
-                    </li>
-                    <li>
-                      <strong>Expert Tips and Tricks:</strong> Gain insights
-                      from an industry expert, with practical tips and tricks
-                      that can give you an edge in your interviews. Each lesson
-                      also covers common gotchas, helping you avoid the pitfalls
-                      that often trip up even experienced engineers.
-                    </li>
-                    <li>
-                      <strong>Interactive Learning:</strong> Engage with
-                      hands-on exercises, quizzes, and real-world coding
-                      challenges to reinforce your learning. This interactive
-                      approach ensures that you not only understand the concepts
-                      but can also apply them in practical scenarios.
-                    </li>
-                  </ul>
 
-                  <h3 className="mt-6 text-xl font-semibold">
-                    A Unique Approach to Interview Preparation
-                  </h3>
-                  <p className="mt-3 text-slate-700 dark:text-slate-400">
-                    Having been dissatisfied with existing interview preparation
-                    courses and platforms, I noticed a common issue: most of
-                    them focus on Python and start with implementing various
-                    data structures that aren‘t directly relevant to the
-                    language being used. This inspired me to create a platform
-                    specifically for JavaScript and TypeScript engineers,
-                    focusing on the tools and techniques most relevant to them.
-                  </p>
-
-                  <h3 className="mt-6 text-xl font-semibold">
-                    Comprehensive Curriculum
-                  </h3>
-                  <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
-                    <li>
-                      <strong>Built-In Data Structures:</strong> Start with the
-                      basics and master JavaScript‘s built-in data structures.
-                      Learn about strings, numbers, arrays, objects, sets, and
-                      maps. Understand their concepts, use cases, time and space
-                      complexities, and practical tips and tricks.
-                    </li>
-                    <li>
-                      <strong>User-Defined Data Structures:</strong> Once you’ve
-                      mastered the basics, move on to custom data structures
-                      tailored for specific needs. Implement and optimize linked
-                      lists, stacks, queues, heaps, trees, graphs, tries, and
-                      more. Develop the skills to create efficient and effective
-                      data structures for any problem.
-                    </li>
-                    <li>
-                      <strong>Common Techniques:</strong> Explore widely-used
-                      algorithms and problem-solving techniques essential for
-                      coding interviews. Master techniques like sliding windows,
-                      two pointers, cyclic sort, tree and graph traversals,
-                      binary search, and many more.
-                    </li>
-                    <li>
-                      <strong>Advanced Topics:</strong> Dive into complex topics
-                      for an in-depth understanding of sophisticated algorithms.
-                      Study network flow algorithms, dynamic programming,
-                      segment trees, union find, minimum spanning trees,
-                      shortest path algorithms, and more. Gain a competitive
-                      edge with knowledge of advanced concepts and their
-                      practical applications.
-                    </li>
-                  </ul>
-
-                  <h3 className="mt-6 text-xl font-semibold">
-                    Practical Insights and Common Pitfalls
-                  </h3>
-                  <p className="mt-3 text-slate-700 dark:text-slate-400">
-                    In addition to covering the theoretical aspects, every
-                    lesson is packed with practical tips and tricks, along with
-                    insights into common pitfalls that often cause trouble for
-                    engineers. This ensures that you not only learn the concepts
-                    but also understand the nuances that can make a significant
-                    difference during an interview.
-                  </p>
-
-                  <h3 className="mt-6 text-xl font-semibold">
-                    Get Started Today!
-                  </h3>
-                  <p className="mt-3 text-slate-700 dark:text-slate-400">
-                    Join [Your Platform Name] and start your journey to becoming
-                    a JavaScript expert. Master data structures, algorithms, and
-                    interview techniques to land your dream job. With a focus on
-                    depth, practical insights, and interactive learning, you’ll
-                    be well-equipped to tackle any technical interview with
-                    confidence.
-                  </p>
+              <Tabs tabs={TEST_TABS} />
+            </div>
+          </article>
+        </div>
+      </div>
+      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center bg-zinc-800 sm:px-2 lg:px-8 xl:px-12">
+        <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <OverlayedImage
+              src="/images/covers/linked-lists-algorithms.png"
+              title="Linked Lists"
+              description="Algorithms"
+            />
+            <OverlayedImage
+              src="/images/covers/linked-lists-practical-tips.png"
+              title="Linked Lists"
+              description="Practical Tips"
+            />
+            <OverlayedImage
+              src="/images/covers/dynamic-programming-operations.png"
+              title="Dynamic Programming"
+              description="Operations"
+            />
+            <OverlayedImage
+              src="/images/covers/dynamic-programming-advanced-topics.png"
+              title="Dynamic Programming"
+              description="Advanced Topics"
+            />
+          </div>
+          <article>
+            <header className="mb-9 space-y-1">
+              <h2 className="font-display text-center text-4xl text-slate-900 dark:text-white">
+                Leading Tech Companies Use Algorithmic Interviews
+              </h2>
+            </header>
+            <div>
+              <p className="mt-3 text-center text-slate-700 dark:text-slate-400">
+                Algorithmic interviews are the standard for evaluating technical
+                skills at major tech companies and in industries like finance
+                and logistics. These interviews assess your problem-solving
+                abilities, critical thinking, and technical proficiency.
+                Embracing this format is essential for advancing your career as
+                a software engineer and standing out in a competitive job
+                market.
+              </p>
+              <div className="mt-8 grid grid-cols-3 gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+                <div className="flex items-center justify-center">
+                  <FaMeta className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <FaAmazon className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <FaApple className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <SiNetflix className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <FaGoogle className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <FaMicrosoft className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <SiUber className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <SiTesla className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <FaTwitter className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <FaAirbnb className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <FaTiktok className="h-[30px] w-[30px]" />
+                </div>
+                <div className="flex items-center justify-center">
+                  <BsNvidia className="h-[30px] w-[30px]" />
                 </div>
               </div>
             </div>
           </article>
-        </div>
-        <div className="hidden xl:sticky xl:top-[4.75rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.75rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6">
-          <nav aria-labelledby="on-this-page-title" className="w-56">
-            <h2
-              id="on-this-page-title"
-              className="font-display text-sm font-medium text-slate-900 dark:text-white"
-            >
-              On this page
-            </h2>
-            <ol role="list" className="mt-4 space-y-3 text-sm">
-              <li>
-                <h3>
-                  <a className="text-lime-500" href="#quick-start">
-                    Quick start
-                  </a>
-                </h3>
-                <ol
-                  role="list"
-                  className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
-                >
-                  <li>
-                    <a
-                      className="hover:text-slate-600 dark:hover:text-slate-300"
-                      href="#installing-dependencies"
-                    >
-                      Installing dependencies
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="hover:text-slate-600 dark:hover:text-slate-300"
-                      href="#configuring-the-library"
-                    >
-                      Configuring the library
-                    </a>
-                  </li>
-                </ol>
-              </li>
-              <li>
-                <h3>
-                  <a
-                    className="font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-                    href="#basic-usage"
-                  >
-                    Basic usage
-                  </a>
-                </h3>
-                <ol
-                  role="list"
-                  className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
-                >
-                  <li>
-                    <a
-                      className="hover:text-slate-600 dark:hover:text-slate-300"
-                      href="#your-first-cache"
-                    >
-                      Your first cache
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="hover:text-slate-600 dark:hover:text-slate-300"
-                      href="#clearing-the-cache"
-                    >
-                      Clearing the cache
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="hover:text-slate-600 dark:hover:text-slate-300"
-                      href="#adding-middleware"
-                    >
-                      Adding middleware
-                    </a>
-                  </li>
-                </ol>
-              </li>
-              <li>
-                <h3>
-                  <a
-                    className="font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-                    href="#getting-help"
-                  >
-                    Getting help
-                  </a>
-                </h3>
-                <ol
-                  role="list"
-                  className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400"
-                >
-                  <li>
-                    <a
-                      className="hover:text-slate-600 dark:hover:text-slate-300"
-                      href="#submit-an-issue"
-                    >
-                      Submit an issue
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="hover:text-slate-600 dark:hover:text-slate-300"
-                      href="#join-the-community"
-                    >
-                      Join the community
-                    </a>
-                  </li>
-                </ol>
-              </li>
-            </ol>
-          </nav>
         </div>
       </div>
     </div>

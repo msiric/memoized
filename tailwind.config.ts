@@ -51,6 +51,10 @@ export default {
         7.5: '0.075',
         15: '0.15',
       },
+      scale: {
+        '175': '1.75',
+        '200': '2',
+      },
     },
   },
   plugins: [typographyPlugin, headlessuiPlugin],

@@ -1,4 +1,4 @@
-import { AiOutlineFieldString } from 'react-icons/ai'
+import { TbQuotes } from 'react-icons/tb'
 import { GoNumber } from 'react-icons/go'
 import { MdDataArray } from 'react-icons/md'
 import { MdDataObject } from 'react-icons/md'
@@ -121,7 +121,7 @@ export const SECTION_ICONS = {
 }
 
 export const DS_ICONS = {
-  strings: <AiOutlineFieldString />,
+  strings: <TbQuotes />,
   numbers: <GoNumber />,
   arrays: <MdDataArray />,
   objects: <MdDataObject />,
