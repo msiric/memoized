@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { authOptions } from '../api/auth/[...nextauth]/route'
 
+// TODO - allow unauthenticated users to access page
+// add custom pricing table and show login modal on click if unauthenticated
 export default async function Premium() {
   const session = await getServerSession(authOptions)
 

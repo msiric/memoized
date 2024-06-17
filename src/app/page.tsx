@@ -1,24 +1,33 @@
 import { AnimatedCode } from '@/components/AnimatedCode'
 import { Logo } from '@/components/Logo'
 import { OverlayedImage } from '@/components/OverlayedImage'
-import { Tabs } from '@/components/Tabs'
+import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
+import Image from 'next/image'
+import Link from 'next/link'
 import { BsNvidia } from 'react-icons/bs'
 import {
   FaAirbnb,
   FaAmazon,
   FaApple,
+  FaBookOpen,
+  FaGithub,
   FaGoogle,
   FaMicrosoft,
   FaTiktok,
   FaTwitter,
 } from 'react-icons/fa'
 import { FaMeta } from 'react-icons/fa6'
+import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
+import {
+  MdInsights,
+  MdOutlineTipsAndUpdates,
+  MdOutlineTouchApp,
+} from 'react-icons/md'
+import { RiJavascriptLine } from 'react-icons/ri'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
 import { codeToHtml } from 'shiki-v1'
-import Image from 'next/image'
-import { APP_NAME } from '@/constants'
 
 const EXTENSION = 'ts'
 
@@ -190,7 +199,7 @@ export default async function Home() {
               fill="none"
               strokeWidth={2}
               strokeLinecap="round"
-              className="h-6 w-6 stroke-slate-500"
+              className="h-6 w-6 stroke-zinc-500"
             >
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
@@ -222,7 +231,7 @@ export default async function Home() {
             <svg
               aria-hidden="true"
               viewBox="0 0 16 16"
-              className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300"
+              className="h-6 w-6 fill-zinc-400 group-hover:fill-zinc-500 dark:group-hover:fill-zinc-300"
             >
               <path d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" />
             </svg>
@@ -235,25 +244,26 @@ export default async function Home() {
             <div className="relative z-10 md:text-center lg:text-left">
               <div className="relative">
                 <p className="font-display inline bg-gradient-to-r from-indigo-200 via-lime-400 to-indigo-200 bg-clip-text text-5xl tracking-tight text-transparent">
-                  Never miss the cache again.
+                  Master Technical Interviews the JavaScript Way
                 </p>
-                <p className="mt-3 text-2xl tracking-tight text-slate-400">
-                  Cache every single thing your app could ever do ahead of time,
-                  so your code never even has to run at all.
+                <p className="mt-3 text-2xl tracking-tight text-zinc-400">
+                  Unlock in-depth knowledge and practical skills to ace your
+                  coding interviews with confidence. Tailored specifically for
+                  JavaScript and TypeScript engineers.
                 </p>
                 <div className="mt-8 flex gap-4 md:justify-center lg:justify-start">
-                  <a
-                    className="rounded-full bg-lime-300 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-lime-200 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300/50 active:bg-lime-500"
-                    href="/"
+                  <Link
+                    className="rounded-full bg-lime-300 px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-lime-200 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300/50 active:bg-lime-500"
+                    href="/course/built-in-data-structures"
                   >
                     Get started
-                  </a>
-                  <a
-                    className="rounded-full bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 active:text-slate-400"
-                    href="/"
+                  </Link>
+                  <Link
+                    className="rounded-full bg-zinc-800 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/50 active:text-zinc-400"
+                    href="/premium"
                   >
-                    View on GitHub
-                  </a>
+                    View pricing
+                  </Link>
                 </div>
               </div>
             </div>
@@ -461,20 +471,247 @@ export default async function Home() {
           </div>
         </div>
       </div>
-      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
+      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-32">
         <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
           <article>
-            <header className="mb-9 space-y-1">
-              <h2 className="font-display text-center text-4xl tracking-tight text-slate-900 dark:text-white">
+            <section aria-label={`Why ${APP_NAME}?`} className="py-20 sm:py-32">
+              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl sm:text-center">
+                  <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
+                    Why {APP_NAME}?
+                  </h2>
+                  <p className="mt-2 text-lg text-zinc-400">
+                    Tailored interview prep for JavaScript engineers. Master
+                    data structures, algorithms, and practical insights
+                  </p>
+                </div>
+                <ul
+                  role="list"
+                  className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 text-sm sm:mt-20 sm:grid-cols-2 md:gap-y-10 lg:max-w-none lg:grid-cols-3"
+                >
+                  <li className="rounded-2xl border border-zinc-200 p-8">
+                    <MdInsights size="32px" />
+                    <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
+                      Depth and Practical Insights
+                    </h3>
+                    <p className="mt-2 text-zinc-400">
+                      The curriculum goes beyond surface-level knowledge,
+                      offering in-depth explanations and real-world applications
+                      to ensure you have a comprehensive understanding of each
+                      topic.
+                    </p>
+                  </li>
+                  <li className="rounded-2xl border border-zinc-200 p-8">
+                    <RiJavascriptLine size="32px" />
+                    <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
+                      Focus on JavaScript
+                    </h3>
+                    <p className="mt-2 text-zinc-400">
+                      Tailored specifically for JavaScript and TypeScript
+                      developers. This means you‘ll be learning in the context
+                      of the language you’ll be using, making the material more
+                      relevant and easier to apply.
+                    </p>
+                  </li>
+                  <li className="rounded-2xl border border-zinc-200 p-8">
+                    <FaBookOpen size="32px" />
+                    <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
+                      Interview-Ready
+                    </h3>
+                    <p className="mt-2 text-zinc-400">
+                      Designed to help you ace technical interviews. Includes
+                      common interview techniques and strategies, so you‘ll be
+                      well-prepared to tackle any challenge.
+                    </p>
+                  </li>
+                  <li className="rounded-2xl border border-zinc-200 p-8">
+                    <MdOutlineTipsAndUpdates size="32px" />
+                    <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
+                      Expert Tips and Tricks
+                    </h3>
+                    <p className="mt-2 text-zinc-400">
+                      Gain insights from an industry expert, with practical tips
+                      and tricks that can give you an edge in your interviews.
+                      Covers common gotchas to help you avoid pitfalls.
+                    </p>
+                  </li>
+                  <li className="rounded-2xl border border-zinc-200 p-8">
+                    <MdOutlineTouchApp size="32px" />
+                    <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
+                      Interactive Learning
+                    </h3>
+                    <p className="mt-2 text-zinc-400">
+                      Engage with hands-on exercises, quizzes, and real-world
+                      coding challenges to reinforce your learning. Ensures that
+                      you not only understand the concepts but can also apply
+                      them in practical scenarios.
+                    </p>
+                  </li>
+                  <li className="rounded-2xl border border-zinc-200 p-8">
+                    <LiaChalkboardTeacherSolid size="32px" />
+                    <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
+                      Advanced Topics
+                    </h3>
+                    <p className="mt-2 text-zinc-400">
+                      Dive deep into sophisticated algorithms and data
+                      structures. Gain knowledge of advanced concepts and their
+                      practical applications to stay ahead.
+                    </p>
+                  </li>
+                </ul>
+              </div>
+            </section>
+
+            <section
+              id="introduction"
+              aria-label="Introduction"
+              className="pb-16 pt-20 sm:pb-20 md:pt-36 lg:py-32"
+            >
+              <div className="mx-auto px-4 text-lg tracking-tight text-zinc-700 sm:px-6 md:max-w-2xl md:px-4 lg:max-w-4xl lg:px-12 dark:text-zinc-400">
+                <p className="font-display text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                  A Unique Approach to Interview Preparation
+                </p>
+                <p className="mt-4">
+                  Tired of interview prep courses that dive into data structures
+                  before you’ve mastered the language? Frustrated with lessons
+                  on algorithms that don’t explain their purpose, usage, or how
+                  to recognize patterns? This platform is tailored for
+                  JavaScript and TypeScript engineers, offering comprehensive
+                  coverage from the fundamentals of built-in data structures to
+                  advanced concepts. Learn the why, when, and how of algorithms
+                  and data structures, ensuring you have all the tools and
+                  techniques needed to excel in technical interviews.
+                </p>
+                <ul role="list" className="mt-8 space-y-3">
+                  <li className="flex">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 32 32"
+                      className="h-8 w-8 flex-none fill-lime-500"
+                    >
+                      <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                    </svg>
+                    <span className="ml-4">
+                      Practical Insights and Common Pitfalls: Every lesson is
+                      packed with practical tips and tricks, along with insights
+                      into common pitfalls that often cause trouble for
+                      engineers.
+                    </span>
+                  </li>
+                  <li className="flex">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 32 32"
+                      className="h-8 w-8 flex-none fill-lime-500"
+                    >
+                      <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                    </svg>
+                    <span className="ml-4">
+                      Interview Tips and Tricks: Each lesson includes specific
+                      strategies and tips for technical interviews, ensuring
+                      you‘re well-prepared to showcase your skills effectively.
+                    </span>
+                  </li>
+                  <li className="flex">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 32 32"
+                      className="h-8 w-8 flex-none fill-lime-500"
+                    >
+                      <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                    </svg>
+                    <span className="ml-4">
+                      Common Mistakes: Identify and avoid common mistakes that
+                      can hinder your performance. Each lesson highlights
+                      typical pitfalls and how to overcome them.
+                    </span>
+                  </li>
+                  <li className="flex">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 32 32"
+                      className="h-8 w-8 flex-none fill-lime-500"
+                    >
+                      <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                    </svg>
+                    <span className="ml-4">
+                      When to Use: Understand the practical applications of each
+                      data structure and algorithm. Learn when and why to use
+                      them in real-world scenarios.
+                    </span>
+                  </li>
+                  <li className="flex">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 32 32"
+                      className="h-8 w-8 flex-none fill-lime-500"
+                    >
+                      <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                    </svg>
+                    <span className="ml-4">
+                      Advanced Topics: Dive into complex topics for an in-depth
+                      understanding of sophisticated algorithms, including
+                      network flow algorithms, dynamic programming, segment
+                      trees, union find, minimum spanning trees, shortest path
+                      algorithms, and more.
+                    </span>
+                  </li>
+                </ul>
+                <p className="mt-8">
+                  Join {APP_NAME} and start your journey to becoming a
+                  JavaScript expert. Master data structures, algorithms, and
+                  interview techniques to land your dream job. With a focus on
+                  depth, practical insights, and interactive learning, you’ll be
+                  well-equipped to tackle any technical interview with
+                  confidence.
+                </p>
+              </div>
+            </section>
+
+            <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
+              <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
+                <article>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                    <OverlayedImage
+                      src="/images/covers/strings-practical-tips.png"
+                      title="Practical Tips"
+                      description="Enhance your string manipulation skills with practical advice."
+                    />
+                    <OverlayedImage
+                      src="/images/covers/linked-lists-algorithms.png"
+                      title="Algorithms"
+                      description="Discover tips and tricks to optimize your use of linked lists."
+                    />
+                    <OverlayedImage
+                      src="/images/covers/sliding-window-fixed-size.png"
+                      title="Common Techniques"
+                      description="Understand the sliding window technique for fixed-size problems."
+                    />
+                    <OverlayedImage
+                      src="/images/covers/dynamic-programming-advanced-topics.png"
+                      title="Advanced Topics"
+                      description="Dive deep into advanced topics in dynamic programming."
+                    />
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <header className="mx-auto max-w-2xl sm:text-center">
+              <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
                 Content overview
               </h2>
+              <p className="mt-2 text-lg text-zinc-400">
+                Tailored interview prep for JavaScript engineers. Master data
+                structures, algorithms, and practical insights
+              </p>
             </header>
-            <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
+            <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none px-4 dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 sm:px-6 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
               <div className="not-prose my-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {completeCurriculum[0].sections.map((section) => (
                   <div
                     key={section.title}
-                    className="group relative rounded-xl border border-lime-200 dark:border-lime-500"
+                    className="group relative rounded-xl"
                   >
                     <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
                     <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center">
@@ -483,135 +720,18 @@ export default async function Home() {
                           section.icon as keyof typeof SECTION_ICONS
                         ]
                       }
-                      <h2 className="font-display mt-4 text-base text-slate-900 dark:text-white">
+                      <h2 className="font-display mt-4 text-base text-zinc-900 dark:text-white">
                         <a href={section.href}>
                           <span className="absolute -inset-px rounded-xl" />
                           {section.title}
                         </a>
                       </h2>
-                      <p className="mt-1 text-sm text-slate-700 dark:text-slate-400">
+                      <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-400">
                         {section.about}
                       </p>
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-            <div className="prose-slate prose-headings:font-display prose max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-slate-900 prose-pre:shadow-lg prose-lead:text-slate-500 lg:prose-headings:scroll-mt-[8.5rem] dark:text-slate-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-slate-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-slate-300/10 dark:prose-hr:border-slate-800 dark:prose-lead:text-slate-400">
-              <div className="my-12">
-                <h3 className="text-xl font-semibold">
-                  Why Choose This Platform?
-                </h3>
-                <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
-                  <li>
-                    <strong>Depth and Practical Insights:</strong> The
-                    curriculum goes beyond surface-level knowledge, offering
-                    in-depth explanations and real-world applications to ensure
-                    you have a comprehensive understanding of each topic.
-                  </li>
-                  <li>
-                    <strong>Focus on JavaScript:</strong> Unlike other platforms
-                    that focus on Python or other languages, this platform is
-                    tailored specifically for JavaScript and TypeScript
-                    developers. This means you‘ll be learning in the context of
-                    the language you’ll be using, making the material more
-                    relevant and easier to apply.
-                  </li>
-                  <li>
-                    <strong>Interview-Ready:</strong> Every lesson is designed
-                    to help you ace technical interviews. The curriculum
-                    includes common interview techniques and strategies, so
-                    you‘ll be well-prepared to tackle any challenge that comes
-                    your way.
-                  </li>
-                  <li>
-                    <strong>Expert Tips and Tricks:</strong> Gain insights from
-                    an industry expert, with practical tips and tricks that can
-                    give you an edge in your interviews. Each lesson also covers
-                    common gotchas, helping you avoid the pitfalls that often
-                    trip up even experienced engineers.
-                  </li>
-                  <li>
-                    <strong>Interactive Learning:</strong> Engage with hands-on
-                    exercises, quizzes, and real-world coding challenges to
-                    reinforce your learning. This interactive approach ensures
-                    that you not only understand the concepts but can also apply
-                    them in practical scenarios.
-                  </li>
-                </ul>
-
-                <h3 className="mt-6 text-xl font-semibold">
-                  A Unique Approach to Interview Preparation
-                </h3>
-                <p className="mt-3 text-slate-700 dark:text-slate-400">
-                  Having been dissatisfied with existing interview preparation
-                  courses and platforms, I noticed a common issue: most of them
-                  focus on Python and start with implementing various data
-                  structures that aren‘t directly relevant to the language being
-                  used. This inspired me to create a platform specifically for
-                  JavaScript and TypeScript engineers, focusing on the tools and
-                  techniques most relevant to them.
-                </p>
-
-                <h3 className="mt-6 text-xl font-semibold">
-                  Comprehensive Curriculum
-                </h3>
-                <ul className="mt-3 list-disc pl-5 text-slate-700 dark:text-slate-400">
-                  <li>
-                    <strong>Built-In Data Structures:</strong> Start with the
-                    basics and master JavaScript‘s built-in data structures.
-                    Learn about strings, numbers, arrays, objects, sets, and
-                    maps. Understand their concepts, use cases, time and space
-                    complexities, and practical tips and tricks.
-                  </li>
-                  <li>
-                    <strong>User-Defined Data Structures:</strong> Once you’ve
-                    mastered the basics, move on to custom data structures
-                    tailored for specific needs. Implement and optimize linked
-                    lists, stacks, queues, heaps, trees, graphs, tries, and
-                    more. Develop the skills to create efficient and effective
-                    data structures for any problem.
-                  </li>
-                  <li>
-                    <strong>Common Techniques:</strong> Explore widely-used
-                    algorithms and problem-solving techniques essential for
-                    coding interviews. Master techniques like sliding windows,
-                    two pointers, cyclic sort, tree and graph traversals, binary
-                    search, and many more.
-                  </li>
-                  <li>
-                    <strong>Advanced Topics:</strong> Dive into complex topics
-                    for an in-depth understanding of sophisticated algorithms.
-                    Study network flow algorithms, dynamic programming, segment
-                    trees, union find, minimum spanning trees, shortest path
-                    algorithms, and more. Gain a competitive edge with knowledge
-                    of advanced concepts and their practical applications.
-                  </li>
-                </ul>
-
-                <h3 className="mt-6 text-xl font-semibold">
-                  Practical Insights and Common Pitfalls
-                </h3>
-                <p className="mt-3 text-slate-700 dark:text-slate-400">
-                  In addition to covering the theoretical aspects, every lesson
-                  is packed with practical tips and tricks, along with insights
-                  into common pitfalls that often cause trouble for engineers.
-                  This ensures that you not only learn the concepts but also
-                  understand the nuances that can make a significant difference
-                  during an interview.
-                </p>
-
-                <h3 className="mt-6 text-xl font-semibold">
-                  Get Started Today!
-                </h3>
-                <p className="mt-3 text-slate-700 dark:text-slate-400">
-                  Join {APP_NAME} and start your journey to becoming a
-                  JavaScript expert. Master data structures, algorithms, and
-                  interview techniques to land your dream job. With a focus on
-                  depth, practical insights, and interactive learning, you’ll be
-                  well-equipped to tackle any technical interview with
-                  confidence.
-                </p>
               </div>
             </div>
           </article>
@@ -621,12 +741,12 @@ export default async function Home() {
         <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
           <article>
             <header className="mb-9 space-y-1">
-              <h2 className="font-display text-center text-4xl text-slate-900 dark:text-white">
+              <h2 className="font-display text-center text-4xl text-zinc-900 dark:text-white">
                 Leading Tech Companies Use Algorithmic Interviews
               </h2>
             </header>
             <div>
-              <p className="mt-3 text-center text-slate-700 dark:text-slate-400">
+              <p className="mt-3 text-center text-zinc-300 dark:text-zinc-300">
                 Algorithmic interviews are the standard for evaluating technical
                 skills at major tech companies and in industries like finance
                 and logistics. These interviews assess your problem-solving
@@ -677,6 +797,148 @@ export default async function Home() {
           </article>
         </div>
       </div>
+
+      <section
+        id="faqs"
+        aria-labelledby="faqs-title"
+        className="py-20 sm:py-32"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl lg:mx-0">
+            <h2
+              id="faqs-title"
+              className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white"
+            >
+              Frequently Asked Questions
+            </h2>
+            <p className="mt-2 text-lg text-zinc-300">
+              If you have any other questions, feel free to{' '}
+              <a
+                href="mailto:info@example.com"
+                className="text-zinc-900 underline dark:text-white"
+              >
+                reach out to me
+              </a>
+              .
+            </p>
+          </div>
+          <ul
+            role="list"
+            className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:max-w-none lg:grid-cols-3"
+          >
+            <li>
+              <ul role="list" className="space-y-10">
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    Why focus on JavaScript and TypeScript?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    Many interview preparation courses focus on Python and often
+                    skip over the built-in data structures of the language. This
+                    platform is tailored specifically for JavaScript and
+                    TypeScript engineers, starting with the basics and covering
+                    everything necessary to tackle technical interviews.
+                  </p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    What kind of content can I expect?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    The platform covers a wide range of topics from built-in
+                    data structures to advanced algorithms. Each lesson includes
+                    practical tips, tricks, and insights into common pitfalls.
+                  </p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    How are the lessons structured?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    Each lesson begins with foundational concepts and gradually
+                    moves to more complex topics. Lessons are designed to be
+                    interactive, with hands-on exercises and real-world coding
+                    challenges.
+                  </p>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <ul role="list" className="space-y-10">
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    What makes this platform unique?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    Unlike other platforms, this one focuses on mastering
+                    JavaScript and TypeScript, starting from the basics and
+                    building up to advanced concepts. It provides practical
+                    insights and common pitfalls to ensure you’re well-prepared
+                    for technical interviews.
+                  </p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    How do I get started?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    Simply sign up on the platform and start with the
+                    introductory lessons. Each lesson is designed to build on
+                    the previous one, so it’s recommended to follow them in
+                    order.
+                  </p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    Are there any prerequisites?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    A basic understanding of JavaScript is helpful, but not
+                    required. The lessons start from the basics and gradually
+                    increase in complexity, making it suitable for both
+                    beginners and experienced developers.
+                  </p>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <ul role="list" className="space-y-10">
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    What if I get stuck?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    If you encounter any issues or have questions, you can reach
+                    out for support. I’m here to help you succeed and ensure you
+                    have a smooth learning experience.
+                  </p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    Is there any interactive content?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    Yes, each lesson includes hands-on exercises, quizzes, and
+                    real-world coding challenges to reinforce your learning and
+                    ensure you can apply the concepts in practical scenarios.
+                  </p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
+                    How can I track my progress?
+                  </h3>
+                  <p className="mt-4 text-sm text-zinc-400">
+                    The platform includes tools to track your progress through
+                    the lessons and exercises. You can see how far you’ve come
+                    and what areas you need to focus on.
+                  </p>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </section>
+
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
         <div className="flex min-w-0 max-w-2xl flex-auto flex-row-reverse items-center px-4 py-16 lg:max-w-none xl:px-16">
           <article className="flex w-full flex-row-reverse items-center">
@@ -694,19 +956,19 @@ export default async function Home() {
             </div>
             <div className="mr-8">
               <h2 className="mb-4 text-2xl font-bold">Track Your Progress</h2>
-              <p className="mb-4 text-lg">
+              <p className="mb-4 text-lg text-zinc-900 dark:text-zinc-400">
                 {APP_NAME} tracks your progress as you complete lessons, helping
                 you see your achievements and identify areas for improvement.
               </p>
-              <p className="mb-4 text-lg">
+              <p className="mb-4 text-lg text-zinc-900 dark:text-zinc-400">
                 Stay motivated by visualizing your learning journey and
                 achieving your goals more efficiently.
               </p>
-              <p className="mb-4 text-lg">
+              <p className="mb-4 text-lg text-zinc-900 dark:text-zinc-400">
                 New content is added regularly, giving you access to the latest
                 resources and tools for success in technical interviews.
               </p>
-              <p className="text-lg">
+              <p className="text-lg text-zinc-900 dark:text-zinc-400">
                 By tracking your progress and engaging with new content, you can
                 systematically build and reinforce your skills, making steady
                 improvements along the way.
@@ -715,34 +977,82 @@ export default async function Home() {
           </article>
         </div>
       </div>
-      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
-        <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
-          <article>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-              <OverlayedImage
-                src="/images/covers/strings-practical-tips.png"
-                title="Practical Tips"
-                description="Enhance your string manipulation skills with practical advice."
-              />
-              <OverlayedImage
-                src="/images/covers/linked-lists-algorithms.png"
-                title="Algorithms"
-                description="Discover tips and tricks to optimize your use of linked lists."
-              />
-              <OverlayedImage
-                src="/images/covers/sliding-window-fixed-size.png"
-                title="Common Techniques"
-                description="Understand the sliding window technique for fixed-size problems."
-              />
-              <OverlayedImage
-                src="/images/covers/dynamic-programming-advanced-topics.png"
-                title="Advanced Topics"
-                description="Dive deep into advanced topics in dynamic programming."
+
+      <section
+        aria-labelledby="author-section"
+        className="relative scroll-mt-14 pb-3 pt-8 sm:scroll-mt-32 sm:pb-16 sm:pt-10 lg:pt-16"
+      >
+        <div className="absolute inset-x-0 bottom-0 top-1/2 text-zinc-900/10 [mask-image:linear-gradient(transparent,white)]">
+          <svg aria-hidden="true" className="absolute inset-0 h-full w-full">
+            <defs>
+              <pattern
+                id=":S6:"
+                width={128}
+                height={128}
+                patternUnits="userSpaceOnUse"
+                x="50%"
+                y="100%"
+              >
+                <path d="M0 128V.5H128" fill="none" stroke="currentColor" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#:S6:)" />
+          </svg>
+        </div>
+        <div className="relative mx-auto max-w-5xl pt-16 sm:px-6">
+          <div className="sm:rounded-6xl rounded-3xl bg-zinc-800 pt-px">
+            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
+              <Image
+                alt="Author picture"
+                loading="lazy"
+                width={400}
+                height={400}
+                decoding="async"
+                data-nimg={1}
+                className="absolute inset-0 h-full w-full object-cover"
+                style={{ color: 'transparent' }}
+                src="https://avatars.githubusercontent.com/u/26199969?s=400&u=74701753b39e34fb8b83ce5f221d9dd5fa12064e&v=4"
               />
             </div>
-          </article>
+            <div className="px-4 py-10 sm:px-10 sm:py-16 md:py-20 lg:px-20 lg:py-32">
+              <p className="font-display mt-8 text-5xl font-extrabold tracking-tight text-zinc-900 sm:text-6xl dark:text-white">
+                <span className="block text-lime-500">Mario Širić –</span>{' '}
+                Hello, I’m the creator of {APP_NAME}.
+              </p>
+              <p className="mt-4 text-lg tracking-tight text-zinc-700 dark:text-zinc-300">
+                With years of experience in software engineering and a passion
+                for teaching, I created this platform to help JavaScript and
+                TypeScript engineers excel in their technical interviews. My
+                goal is to provide comprehensive, practical, and insightful
+                content that empowers you to master data structures and
+                algorithms.
+              </p>
+              <p className="mt-4 text-lg tracking-tight text-zinc-700 dark:text-zinc-300">
+                I‘ve worked in various tech industries, where I‘ve honed my
+                skills in problem-solving and software design. I‘ve faced the
+                challenges of technical interviews firsthand, and now I‘m here
+                to share my knowledge and experience to help you succeed.
+              </p>
+              <p className="mt-4 text-lg tracking-tight text-zinc-700 dark:text-zinc-300">
+                Join me on this journey to deepen your understanding of
+                JavaScript and TypeScript, and let‘s work together to achieve
+                your career goals.
+              </p>
+              <p className="mt-8">
+                <a
+                  className="inline-flex items-center text-base font-medium tracking-tight text-white"
+                  href="https://github.com/msiric"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaGithub size="40px" />
+                  <span className="ml-4">Follow on GitHub</span>
+                </a>
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }
