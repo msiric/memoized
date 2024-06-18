@@ -17,14 +17,14 @@ export const OverlayedImage = ({
   alt,
   description,
 }: OverlayedImageProps) => (
-  <article className="relative isolate flex max-w-lg flex-col justify-end overflow-hidden rounded-2xl">
+  <article className="relative isolate flex max-w-lg flex-col overflow-hidden rounded-2xl">
     <div className="relative w-full" style={{ aspectRatio: '1705 / 1608' }}>
       <Image
         src={src}
         alt={alt ?? 'Cover image'}
         layout="fill"
         objectFit="cover"
-        className="scale-200 absolute inset-0 h-full w-full origin-top-left transform rounded-2xl object-cover"
+        className="absolute inset-0 h-full w-full origin-top-left scale-200 transform object-cover"
       />
     </div>
     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-lime-900/10"></div>

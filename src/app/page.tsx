@@ -246,7 +246,7 @@ export default async function Home() {
                 <p className="font-display inline bg-gradient-to-r from-indigo-200 via-lime-400 to-indigo-200 bg-clip-text text-5xl tracking-tight text-transparent">
                   Master Technical Interviews the JavaScript Way
                 </p>
-                <p className="mt-3 text-2xl tracking-tight text-zinc-400">
+                <p className="mt-3 text-2xl tracking-tight text-zinc-300">
                   Unlock in-depth knowledge and practical skills to ace your
                   coding interviews with confidence. Tailored specifically for
                   JavaScript and TypeScript engineers.
@@ -480,7 +480,7 @@ export default async function Home() {
                   <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
                     Why {APP_NAME}?
                   </h2>
-                  <p className="mt-2 text-lg text-zinc-400">
+                  <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
                     Tailored interview prep for JavaScript engineers. Master
                     data structures, algorithms, and practical insights
                   </p>
@@ -494,7 +494,7 @@ export default async function Home() {
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Depth and Practical Insights
                     </h3>
-                    <p className="mt-2 text-zinc-400">
+                    <p className="mt-2 text-zinc-500 dark:text-zinc-300">
                       The curriculum goes beyond surface-level knowledge,
                       offering in-depth explanations and real-world applications
                       to ensure you have a comprehensive understanding of each
@@ -506,7 +506,7 @@ export default async function Home() {
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Focus on JavaScript
                     </h3>
-                    <p className="mt-2 text-zinc-400">
+                    <p className="mt-2 text-zinc-500 dark:text-zinc-300">
                       Tailored specifically for JavaScript and TypeScript
                       developers. This means you‘ll be learning in the context
                       of the language you’ll be using, making the material more
@@ -518,7 +518,7 @@ export default async function Home() {
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Interview-Ready
                     </h3>
-                    <p className="mt-2 text-zinc-400">
+                    <p className="mt-2 text-zinc-500 dark:text-zinc-300">
                       Designed to help you ace technical interviews. Includes
                       common interview techniques and strategies, so you‘ll be
                       well-prepared to tackle any challenge.
@@ -529,7 +529,7 @@ export default async function Home() {
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Expert Tips and Tricks
                     </h3>
-                    <p className="mt-2 text-zinc-400">
+                    <p className="mt-2 text-zinc-500 dark:text-zinc-300">
                       Gain insights from an industry expert, with practical tips
                       and tricks that can give you an edge in your interviews.
                       Covers common gotchas to help you avoid pitfalls.
@@ -540,7 +540,7 @@ export default async function Home() {
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Interactive Learning
                     </h3>
-                    <p className="mt-2 text-zinc-400">
+                    <p className="mt-2 text-zinc-500 dark:text-zinc-300">
                       Engage with hands-on exercises, quizzes, and real-world
                       coding challenges to reinforce your learning. Ensures that
                       you not only understand the concepts but can also apply
@@ -552,7 +552,7 @@ export default async function Home() {
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Advanced Topics
                     </h3>
-                    <p className="mt-2 text-zinc-400">
+                    <p className="mt-2 text-zinc-500 dark:text-zinc-300">
                       Dive deep into sophisticated algorithms and data
                       structures. Gain knowledge of advanced concepts and their
                       practical applications to stay ahead.
@@ -571,7 +571,7 @@ export default async function Home() {
                 <p className="font-display text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
                   A Unique Approach to Interview Preparation
                 </p>
-                <p className="mt-4">
+                <p className="mt-4 text-zinc-500 dark:text-zinc-300">
                   Tired of interview prep courses that dive into data structures
                   before you’ve mastered the language? Frustrated with lessons
                   on algorithms that don’t explain their purpose, usage, or how
@@ -591,7 +591,7 @@ export default async function Home() {
                     >
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
-                    <span className="ml-4">
+                    <span className="ml-4 text-zinc-500 dark:text-zinc-300">
                       Practical Insights and Common Pitfalls: Every lesson is
                       packed with practical tips and tricks, along with insights
                       into common pitfalls that often cause trouble for
@@ -606,7 +606,7 @@ export default async function Home() {
                     >
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
-                    <span className="ml-4">
+                    <span className="ml-4 text-zinc-500 dark:text-zinc-300">
                       Interview Tips and Tricks: Each lesson includes specific
                       strategies and tips for technical interviews, ensuring
                       you‘re well-prepared to showcase your skills effectively.
@@ -620,7 +620,7 @@ export default async function Home() {
                     >
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
-                    <span className="ml-4">
+                    <span className="ml-4 text-zinc-500 dark:text-zinc-300">
                       Common Mistakes: Identify and avoid common mistakes that
                       can hinder your performance. Each lesson highlights
                       typical pitfalls and how to overcome them.
@@ -634,7 +634,7 @@ export default async function Home() {
                     >
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
-                    <span className="ml-4">
+                    <span className="ml-4 text-zinc-500 dark:text-zinc-300">
                       When to Use: Understand the practical applications of each
                       data structure and algorithm. Learn when and why to use
                       them in real-world scenarios.
@@ -648,7 +648,7 @@ export default async function Home() {
                     >
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
-                    <span className="ml-4">
+                    <span className="ml-4 text-zinc-500 dark:text-zinc-300">
                       Advanced Topics: Dive into complex topics for an in-depth
                       understanding of sophisticated algorithms, including
                       network flow algorithms, dynamic programming, segment
@@ -657,7 +657,7 @@ export default async function Home() {
                     </span>
                   </li>
                 </ul>
-                <p className="mt-8">
+                <p className="mt-8 text-zinc-500 dark:text-zinc-300">
                   Join {APP_NAME} and start your journey to becoming a
                   JavaScript expert. Master data structures, algorithms, and
                   interview techniques to land your dream job. With a focus on
@@ -701,7 +701,7 @@ export default async function Home() {
               <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
                 Content overview
               </h2>
-              <p className="mt-2 text-lg text-zinc-400">
+              <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
                 Tailored interview prep for JavaScript engineers. Master data
                 structures, algorithms, and practical insights
               </p>
@@ -726,7 +726,7 @@ export default async function Home() {
                           {section.title}
                         </a>
                       </h2>
-                      <p className="mt-1 text-sm text-zinc-400 dark:text-zinc-400">
+                      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-300">
                         {section.about}
                       </p>
                     </div>
@@ -741,7 +741,7 @@ export default async function Home() {
         <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
           <article>
             <header className="mb-9 space-y-1">
-              <h2 className="font-display text-center text-4xl text-zinc-900 dark:text-white">
+              <h2 className="font-display text-center text-4xl text-white">
                 Leading Tech Companies Use Algorithmic Interviews
               </h2>
             </header>
@@ -757,40 +757,40 @@ export default async function Home() {
               </p>
               <div className="mt-8 grid grid-cols-3 gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
                 <div className="flex items-center justify-center">
-                  <FaMeta className="h-[30px] w-[30px]" />
+                  <FaMeta className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <FaAmazon className="h-[30px] w-[30px]" />
+                  <FaAmazon className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <FaApple className="h-[30px] w-[30px]" />
+                  <FaApple className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <SiNetflix className="h-[30px] w-[30px]" />
+                  <SiNetflix className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <FaGoogle className="h-[30px] w-[30px]" />
+                  <FaGoogle className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <FaMicrosoft className="h-[30px] w-[30px]" />
+                  <FaMicrosoft className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <SiUber className="h-[30px] w-[30px]" />
+                  <SiUber className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <SiTesla className="h-[30px] w-[30px]" />
+                  <SiTesla className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <FaTwitter className="h-[30px] w-[30px]" />
+                  <FaTwitter className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <FaAirbnb className="h-[30px] w-[30px]" />
+                  <FaAirbnb className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <FaTiktok className="h-[30px] w-[30px]" />
+                  <FaTiktok className="h-[30px] w-[30px] fill-white" />
                 </div>
                 <div className="flex items-center justify-center">
-                  <BsNvidia className="h-[30px] w-[30px]" />
+                  <BsNvidia className="h-[30px] w-[30px] fill-white" />
                 </div>
               </div>
             </div>
@@ -811,7 +811,7 @@ export default async function Home() {
             >
               Frequently Asked Questions
             </h2>
-            <p className="mt-2 text-lg text-zinc-300">
+            <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
               If you have any other questions, feel free to{' '}
               <a
                 href="mailto:info@example.com"
@@ -832,7 +832,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     Why focus on JavaScript and TypeScript?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     Many interview preparation courses focus on Python and often
                     skip over the built-in data structures of the language. This
                     platform is tailored specifically for JavaScript and
@@ -844,7 +844,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     What kind of content can I expect?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     The platform covers a wide range of topics from built-in
                     data structures to advanced algorithms. Each lesson includes
                     practical tips, tricks, and insights into common pitfalls.
@@ -854,7 +854,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     How are the lessons structured?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     Each lesson begins with foundational concepts and gradually
                     moves to more complex topics. Lessons are designed to be
                     interactive, with hands-on exercises and real-world coding
@@ -869,7 +869,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     What makes this platform unique?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     Unlike other platforms, this one focuses on mastering
                     JavaScript and TypeScript, starting from the basics and
                     building up to advanced concepts. It provides practical
@@ -881,7 +881,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     How do I get started?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     Simply sign up on the platform and start with the
                     introductory lessons. Each lesson is designed to build on
                     the previous one, so it’s recommended to follow them in
@@ -892,7 +892,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     Are there any prerequisites?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     A basic understanding of JavaScript is helpful, but not
                     required. The lessons start from the basics and gradually
                     increase in complexity, making it suitable for both
@@ -907,7 +907,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     What if I get stuck?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     If you encounter any issues or have questions, you can reach
                     out for support. I’m here to help you succeed and ensure you
                     have a smooth learning experience.
@@ -917,7 +917,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     Is there any interactive content?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     Yes, each lesson includes hands-on exercises, quizzes, and
                     real-world coding challenges to reinforce your learning and
                     ensure you can apply the concepts in practical scenarios.
@@ -927,7 +927,7 @@ export default async function Home() {
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
                     How can I track my progress?
                   </h3>
-                  <p className="mt-4 text-sm text-zinc-400">
+                  <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     The platform includes tools to track your progress through
                     the lessons and exercises. You can see how far you’ve come
                     and what areas you need to focus on.
@@ -943,32 +943,32 @@ export default async function Home() {
         <div className="flex min-w-0 max-w-2xl flex-auto flex-row-reverse items-center px-4 py-16 lg:max-w-none xl:px-16">
           <article className="flex w-full flex-row-reverse items-center">
             <div
-              className="relative w-full max-w-[600px] flex-shrink-0"
-              style={{ aspectRatio: '1604 / 1398' }}
+              className="relative w-full max-w-[400px] flex-shrink-0"
+              style={{ aspectRatio: '1398 / 1604' }}
             >
               <Image
                 alt="User progress"
                 src="/images/covers/user-progress.png"
                 layout="fill"
                 objectFit="contain"
-                className="absolute inset-0 h-full w-full rounded-2xl"
+                className="absolute inset-0 h-full w-full rounded-3xl"
               />
             </div>
             <div className="mr-8">
               <h2 className="mb-4 text-2xl font-bold">Track Your Progress</h2>
-              <p className="mb-4 text-lg text-zinc-900 dark:text-zinc-400">
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
                 {APP_NAME} tracks your progress as you complete lessons, helping
                 you see your achievements and identify areas for improvement.
               </p>
-              <p className="mb-4 text-lg text-zinc-900 dark:text-zinc-400">
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
                 Stay motivated by visualizing your learning journey and
                 achieving your goals more efficiently.
               </p>
-              <p className="mb-4 text-lg text-zinc-900 dark:text-zinc-400">
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
                 New content is added regularly, giving you access to the latest
                 resources and tools for success in technical interviews.
               </p>
-              <p className="text-lg text-zinc-900 dark:text-zinc-400">
+              <p className="text-lg text-zinc-500 dark:text-zinc-300">
                 By tracking your progress and engaging with new content, you can
                 systematically build and reinforce your skills, making steady
                 improvements along the way.
@@ -1015,11 +1015,11 @@ export default async function Home() {
               />
             </div>
             <div className="px-4 py-10 sm:px-10 sm:py-16 md:py-20 lg:px-20 lg:py-32">
-              <p className="font-display mt-8 text-5xl font-extrabold tracking-tight text-zinc-900 sm:text-6xl dark:text-white">
-                <span className="block text-lime-500">Mario Širić –</span>{' '}
-                Hello, I’m the creator of {APP_NAME}.
+              <p className="font-display mt-8 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
+                Hello, I’m Mario, the creator of{' '}
+                <span className="text-lime-500">{APP_NAME}</span>.
               </p>
-              <p className="mt-4 text-lg tracking-tight text-zinc-700 dark:text-zinc-300">
+              <p className="mt-4 text-lg tracking-tight text-zinc-300">
                 With years of experience in software engineering and a passion
                 for teaching, I created this platform to help JavaScript and
                 TypeScript engineers excel in their technical interviews. My
@@ -1027,13 +1027,13 @@ export default async function Home() {
                 content that empowers you to master data structures and
                 algorithms.
               </p>
-              <p className="mt-4 text-lg tracking-tight text-zinc-700 dark:text-zinc-300">
+              <p className="mt-4 text-lg tracking-tight text-zinc-300">
                 I‘ve worked in various tech industries, where I‘ve honed my
                 skills in problem-solving and software design. I‘ve faced the
                 challenges of technical interviews firsthand, and now I‘m here
                 to share my knowledge and experience to help you succeed.
               </p>
-              <p className="mt-4 text-lg tracking-tight text-zinc-700 dark:text-zinc-300">
+              <p className="mt-4 text-lg tracking-tight text-zinc-300">
                 Join me on this journey to deepen your understanding of
                 JavaScript and TypeScript, and let‘s work together to achieve
                 your career goals.
