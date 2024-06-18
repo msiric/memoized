@@ -2,9 +2,9 @@
 
 import { Button, ButtonProps } from '@/components/Button'
 import { useAuthStore } from '@/contexts/auth'
-import { signOut, useSession } from 'next-auth/react'
-import { UserDropdown } from './UserDropdown'
 import { useSignOut } from '@/hooks/useSignOut'
+import { useSession } from 'next-auth/react'
+import { UserDropdown } from './UserDropdown'
 
 export type AuthButtonProps = ButtonProps & { isMobile?: boolean }
 

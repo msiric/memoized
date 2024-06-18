@@ -8,53 +8,13 @@ import {
 } from '@/components/MobileNavigation'
 import { MobileSearch, Search } from '@/components/Search'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { CUSTOMER_PORTAL_LINK } from '@/constants'
-import { useAuthStore } from '@/contexts/auth'
 import { Curriculum } from '@/types'
-import { capitalizeFirstLetter } from '@/utils/helpers'
-import { SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { forwardRef } from 'react'
 import { AuthButton } from './AuthButton'
-
-function TopLevelNavItem({
-  href,
-  target,
-  disabled,
-  children,
-}: {
-  href?: string
-  target?: '_blank' | '_self' | '_parent' | '_top'
-  disabled?: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <li>
-      {disabled ? (
-        <p className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white">
-          {children}
-        </p>
-      ) : target ? (
-        <a
-          href={href ?? ''}
-          target={target}
-          className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-        >
-          {children}
-        </a>
-      ) : (
-        <Link
-          href={href ?? ''}
-          className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-        >
-          {children}
-        </Link>
-      )}
-    </li>
-  )
-}
+import { PremiumButton } from './PremiumButton'
 
 export type HeaderProps = {
   fullCurriculum?: Curriculum[]
@@ -63,8 +23,6 @@ export type HeaderProps = {
 
 export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
   function Header({ fullCurriculum, className }, ref) {
-    const user = useAuthStore((state) => state.user)
-
     const { isOpen: mobileNavIsOpen } = useMobileNavigationStore()
     const isInsideMobileNavigation = useIsInsideMobileNavigation()
 
@@ -109,18 +67,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
         <div className="flex items-center gap-5">
           <nav className="hidden md:block">
             <ul role="list" className="flex items-center gap-8">
-              {user === undefined ? (
-                <TopLevelNavItem disabled>Loading</TopLevelNavItem>
-              ) : user?.currentSubscriptionStatus ===
-                SubscriptionStatus.ACTIVE ? (
-                <TopLevelNavItem href={CUSTOMER_PORTAL_LINK} target="_blank">
-                  {capitalizeFirstLetter(
-                    user?.currentSubscriptionPlan ?? 'Subscribed',
-                  )}
-                </TopLevelNavItem>
-              ) : (
-                <TopLevelNavItem href="/premium">Premium</TopLevelNavItem>
-              )}
+              <PremiumButton />
             </ul>
           </nav>
           <div className="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15" />
