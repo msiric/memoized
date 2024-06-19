@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import Image from "next/legacy/image"
+import Image from "next/image"
 import { ReactNode } from 'react'
 
 export type OverlayedImageProps = {
@@ -22,10 +22,12 @@ export const OverlayedImage = ({
       <Image
         src={src}
         alt={alt ?? 'Cover image'}
-        layout="fill"
-        objectFit="cover"
         className="absolute inset-0 h-full w-full origin-top-left scale-200 transform object-cover"
-      />
+        fill
+        sizes="100vw"
+        style={{
+          objectFit: "cover"
+        }} />
     </div>
     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-lime-900/10"></div>
     <div className="my-4 flex flex-col px-4">

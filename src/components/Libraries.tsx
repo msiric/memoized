@@ -1,4 +1,4 @@
-import Image from "next/legacy/image"
+import Image from "next/image"
 
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
@@ -68,10 +68,13 @@ export function Libraries() {
               alt=""
               className="h-12 w-12"
               unoptimized
-            />
+              style={{
+                maxWidth: "100%",
+                height: "auto"
+              }} />
           </div>
         ))}
       </div>
     </div>
-  )
+  );
 }

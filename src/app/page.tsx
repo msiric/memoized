@@ -4,7 +4,7 @@ import { OverlayedImage } from '@/components/OverlayedImage'
 import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
-import Image from "next/legacy/image"
+import Image from "next/image"
 import Link from 'next/link'
 import { BsNvidia } from 'react-icons/bs'
 import {
@@ -949,10 +949,12 @@ export default async function Home() {
               <Image
                 alt="User progress"
                 src="/images/covers/user-progress.png"
-                layout="fill"
-                objectFit="contain"
                 className="absolute inset-0 h-full w-full rounded-3xl"
-              />
+                fill
+                sizes="100vw"
+                style={{
+                  objectFit: "contain"
+                }} />
             </div>
             <div className="mr-8">
               <h2 className="mb-4 text-2xl font-bold">Track Your Progress</h2>
@@ -1010,9 +1012,12 @@ export default async function Home() {
                 decoding="async"
                 data-nimg={1}
                 className="absolute inset-0 h-full w-full object-cover"
-                style={{ color: 'transparent' }}
                 src="https://avatars.githubusercontent.com/u/26199969?s=400&u=74701753b39e34fb8b83ce5f221d9dd5fa12064e&v=4"
-              />
+                style={{
+                  color: 'transparent',
+                  maxWidth: "100%",
+                  height: "auto"
+                }} />
             </div>
             <div className="px-4 py-10 sm:px-10 sm:py-16 md:py-20 lg:px-20 lg:py-32">
               <p className="font-display mt-8 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
@@ -1054,5 +1059,5 @@ export default async function Home() {
         </div>
       </section>
     </div>
-  )
+  );
 }

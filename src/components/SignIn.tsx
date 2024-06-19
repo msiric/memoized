@@ -4,7 +4,7 @@ import { APP_NAME } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import clsx from 'clsx'
 import { signIn } from 'next-auth/react'
-import Image from "next/legacy/image"
+import Image from "next/image"
 import { useEffect, useRef, useState } from 'react'
 
 export const SignIn = () => {
@@ -78,7 +78,10 @@ export const SignIn = () => {
             className="mx-auto w-10"
             width="40"
             height="40"
-          />
+            style={{
+              maxWidth: "100%",
+              height: "auto"
+            }} />
           <h2 className="mb-8 text-center text-2xl font-bold text-cyan-900 dark:text-white">
             Log in to unlock the best of {APP_NAME}
           </h2>
@@ -104,7 +107,10 @@ export const SignIn = () => {
                 alt="Google logo"
                 width="20"
                 height="20"
-              />
+                style={{
+                  maxWidth: "100%",
+                  height: "auto"
+                }} />
               <span className="block w-max text-sm font-semibold tracking-wide text-gray-700 transition duration-300 group-hover:text-lime-500 sm:text-base dark:text-white">
                 Continue with Google
               </span>
@@ -148,5 +154,5 @@ export const SignIn = () => {
         </div>
       </div>
     </div>
-  )
+  );
 }
