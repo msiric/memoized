@@ -4,7 +4,7 @@ import { OverlayedImage } from '@/components/OverlayedImage'
 import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
-import Image from 'next/image'
+import Image from "next/legacy/image"
 import Link from 'next/link'
 import { BsNvidia } from 'react-icons/bs'
 import {

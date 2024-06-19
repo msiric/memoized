@@ -7,7 +7,7 @@ import { useSignOut } from '@/hooks/useSignOut'
 import { getInitials } from '@/utils/helpers'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
-import Image from 'next/image'
+import Image from "next/legacy/image"
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './Button'
 

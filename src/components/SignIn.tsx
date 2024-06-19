@@ -4,7 +4,7 @@ import { APP_NAME } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import clsx from 'clsx'
 import { signIn } from 'next-auth/react'
-import Image from 'next/image'
+import Image from "next/legacy/image"
 import { useEffect, useRef, useState } from 'react'
 
 export const SignIn = () => {
