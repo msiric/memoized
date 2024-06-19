@@ -33,7 +33,7 @@ export const AuthButton = ({ isMobile = false, ...props }: AuthButtonProps) => {
     )
 
   return session ? (
-    <UserDropdown isMobile={isMobile} />
+    <UserDropdown {...props} isMobile={isMobile} />
   ) : (
     <Button {...props} onClick={handleClick}>
       Sign in

@@ -20,21 +20,21 @@ export const PremiumButton = ({
 
   const content = isMobile ? (
     user === undefined ? (
-      <p className="inline-flex w-full w-full justify-center gap-0.5 overflow-hidden rounded-full border border-lime-500 bg-white px-3 py-1 text-sm font-medium text-lime-500 transition hover:bg-lime-500 hover:text-white min-[768px]:hidden dark:bg-zinc-900 dark:hover:bg-lime-900 dark:hover:text-lime-500">
+      <p className="inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border border-lime-600 bg-lime-600 px-3 py-1 text-sm font-medium text-white transition hover:border-lime-500 hover:bg-lime-500 min-[768px]:hidden dark:bg-zinc-900 dark:text-lime-500 dark:hover:bg-lime-900 dark:hover:text-lime-500">
         Loading
       </p>
     ) : user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
       <a
         href={CUSTOMER_PORTAL_LINK}
         target="_blank"
-        className="inline-flex w-full w-full justify-center gap-0.5 overflow-hidden rounded-full border border-lime-500 bg-white px-3 py-1 text-sm font-medium text-lime-500 transition hover:bg-lime-500 hover:text-white min-[768px]:hidden dark:bg-zinc-900 dark:hover:bg-lime-900 dark:hover:text-lime-500"
+        className="inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border border-lime-600 bg-lime-600 px-3 py-1 text-sm font-medium text-white transition hover:border-lime-500 hover:bg-lime-500 min-[768px]:hidden dark:bg-zinc-900 dark:text-lime-500 dark:hover:bg-lime-900 dark:hover:text-lime-500"
       >
         {capitalizeFirstLetter(user?.currentSubscriptionPlan ?? 'Subscribed')}
       </a>
     ) : (
       <Link
         href="/premium"
-        className="inline-flex w-full w-full justify-center gap-0.5 overflow-hidden rounded-full border border-lime-500 bg-white px-3 py-1 text-sm font-medium text-lime-500 transition hover:bg-lime-500 hover:text-white min-[768px]:hidden dark:bg-zinc-900 dark:hover:bg-lime-900 dark:hover:text-lime-500"
+        className="inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border border-lime-600 bg-lime-600 px-3 py-1 text-sm font-medium text-white transition hover:border-lime-500 hover:bg-lime-500 min-[768px]:hidden dark:bg-zinc-900 dark:text-lime-500 dark:hover:bg-lime-900 dark:hover:text-lime-500"
       >
         Premium
       </Link>

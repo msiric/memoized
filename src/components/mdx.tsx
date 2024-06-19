@@ -6,10 +6,34 @@ import Link from 'next/link'
 import { ReactNode } from 'react'
 import { NextPage } from './NextPage'
 
-export const a = Link
 export { Button } from '@/components/Button'
 export { CodeGroup, Code as code, Pre as pre } from '@/components/Code'
 export { DynamicImage as img } from '@/components/DynamicImage'
+
+export type CustomLinkProps = {
+  href: string
+  children: ReactNode
+}
+
+const CustomLink = ({ href, children, ...rest }: CustomLinkProps) => {
+  const isExternal = href && (href.startsWith('http') || href.startsWith('//'))
+
+  if (isExternal) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
+        {children}
+      </a>
+    )
+  }
+
+  return (
+    <Link href={href} {...rest}>
+      {children}
+    </Link>
+  )
+}
+
+export const a = CustomLink
 
 export type WrapperProps = {
   userId?: string

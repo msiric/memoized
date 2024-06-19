@@ -45,7 +45,7 @@ export const Button = React.forwardRef<
     ref,
   ) => {
     className = clsx(
-      'inline-flex gap-0.5 justify-center overflow-hidden text-sm font-medium transition',
+      'inline-flex gap-0.5 items-center justify-center overflow-hidden text-sm font-medium transition',
       variantStyles[variant],
       disabled && 'opacity-50 cursor-not-allowed',
       className,
