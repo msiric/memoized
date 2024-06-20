@@ -128,3 +128,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# extracted practice problems
+src/scripts/duplicate_questions.mdx
+src/scripts/unique_questions.mdx
