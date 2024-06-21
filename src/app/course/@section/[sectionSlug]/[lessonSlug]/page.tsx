@@ -11,6 +11,7 @@ import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 import { JSXElementConstructor } from 'react'
+// import readingTime from 'reading-time'
 
 export default async function Lesson({
   params,
@@ -27,6 +28,8 @@ export default async function Lesson({
   if (!lesson) {
     notFound()
   }
+
+  // const stats = readingTime(lesson.body)
 
   const hasAccess = userHasAccess(
     user as UserWithSubscriptionsAndProgress | null,
