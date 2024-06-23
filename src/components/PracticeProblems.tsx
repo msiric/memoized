@@ -48,6 +48,8 @@ export const PracticeProblems = ({
     }
   }
 
+  if (!problems?.length) return null
+
   return (
     <>
       <h2
@@ -75,7 +77,7 @@ export const PracticeProblems = ({
         </a>
       </h2>
       <ol className="space-y-4">
-        {problems?.map((problem) => (
+        {problems.map((problem) => (
           <li key={problem.href}>
             <div className="flex items-center justify-between">
               <div className="flex flex-col items-start justify-center">
