@@ -41,7 +41,7 @@ export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
       orderBy: { startDate: 'desc' }
       take: 1
     }
-    progress: {
+    lessonProgress: {
       where: {
         completed: true
       }
@@ -62,7 +62,7 @@ export async function getUserProgressWithLessons(userId?: string) {
             orderBy: { startDate: 'desc' },
             take: 1,
           },
-          progress: {
+          lessonProgress: {
             where: {
               completed: true,
             },
@@ -169,7 +169,8 @@ export async function getUserProgressWithLessons(userId?: string) {
     access: item.access,
   }))
 
-  const completedLessons = user?.progress.filter((p) => p.completed).length
+  const completedLessons = user?.lessonProgress.filter((p) => p.completed)
+    .length
   const currentProgress =
     allLessons?.length > 0
       ? (completedLessons ?? 0 / allLessons.length) * 100

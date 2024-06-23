@@ -12,7 +12,7 @@ export default async function Navigation() {
   return (
     <Wrapper
       userData={data?.user}
-      completedLessons={data?.user?.progress.map((item) => item.lessonId)}
+      completedLessons={data?.user?.lessonProgress.map((item) => item.lessonId)}
       fullCurriculum={data?.curriculum as Curriculum[]}
       allLessons={data?.lessons as LessonConfig[]}
     />

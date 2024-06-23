@@ -1,6 +1,7 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { COMMON_TECHNIQUES_PREFIX, COURSE_PREFIX } from '@/constants'
+import { COMMON_TECHNIQUES_PROBLEMS } from '@/problems'
 import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
@@ -11,6 +12,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Sliding Window',
     description: 'Optimize window-based computations for arrays and strings.',
     access: AccessOptions.FREE,
+    problems: COMMON_TECHNIQUES_PROBLEMS.slidingWindow,
   },
   {
     id: '/two-pointers',
@@ -18,6 +20,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Two Pointers',
     description: 'Solve problems using two pointers to traverse arrays.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.twoPointers,
   },
   {
     id: '/fast-and-slow-pointers',
@@ -25,6 +28,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Fast and Slow Pointers',
     description: 'Detect cycles in linked lists and solve related problems.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.fastAndSlowPointers,
   },
   {
     id: '/merge-intervals',
@@ -32,6 +36,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Merge Intervals',
     description: 'Combine overlapping intervals efficiently.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.mergeIntervals,
   },
   {
     id: '/cyclic-sort',
@@ -39,6 +44,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Cyclic Sort',
     description: 'Sort an array with minimal extra space.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.cyclicSort,
   },
   {
     id: '/linked-list-reversal',
@@ -46,6 +52,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Linked List Reversal',
     description: 'Reverse linked lists in-place.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.linkedListReversal,
   },
   {
     id: '/tree-bfs',
@@ -53,6 +60,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Tree BFS',
     description: 'Traverse trees level by level using Breadth-First Search.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.treeBFS,
   },
   {
     id: '/tree-dfs',
@@ -60,6 +68,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Tree DFS',
     description: 'Explore trees deeply using Depth-First Search.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.treeDFS,
   },
   {
     id: '/two-heaps',
@@ -67,6 +76,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Two Heaps',
     description: 'Maintain two heaps to solve interval and median problems.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.twoHeaps,
   },
   {
     id: '/subsets',
@@ -74,6 +84,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Subsets',
     description: 'Generate all subsets of a given set.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.subsets,
   },
   {
     id: '/binary-search',
@@ -81,6 +92,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Binary Search',
     description: 'Efficiently search sorted arrays.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.binarySearch,
   },
   {
     id: '/top-k-elements',
@@ -88,6 +100,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Top K Elements',
     description: 'Find the top K elements in a collection.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.topKElements,
   },
   {
     id: '/k-way-merge',
@@ -95,6 +108,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'K-way Merge',
     description: 'Merge multiple sorted arrays.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.kWayMerge,
   },
   {
     id: '/graph-bfs',
@@ -102,6 +116,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Graph BFS',
     description: 'Traverse graphs using Breadth-First Search.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.graphBFS,
   },
   {
     id: '/graph-dfs',
@@ -109,6 +124,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Graph DFS',
     description: 'Explore graphs using Depth-First Search.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.graphDFS,
   },
   {
     id: '/topological-sort',
@@ -116,6 +132,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Topological Sort',
     description: 'Order tasks based on dependencies using topological sort.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.topologicalSort,
   },
   {
     id: '/matrix-traversal',
@@ -123,6 +140,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Matrix Traversal',
     description: 'Navigate through matrices efficiently.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.matrixTraversal,
   },
   {
     id: '/palindromic-subsequence',
@@ -130,6 +148,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Palindromic Subsequence',
     description: 'Identify palindromic subsequences within strings.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.palindromicSubsequence,
   },
   {
     id: '/longest-common-substring',
@@ -137,6 +156,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Longest Common Substring',
     description: 'Find the longest substring common to two strings.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.longestCommonSubstring,
   },
   {
     id: '/recursion-and-memoization',
@@ -144,6 +164,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Recursion and Memoization',
     description: 'Use recursive techniques and optimize with memoization.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.recursionAndMemoization,
   },
   {
     id: '/backtracking',
@@ -152,6 +173,7 @@ export const commonTechniques: LessonConfig[] = [
     description:
       'Find solutions by exploring all possible options and backtracking.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.backtracking,
   },
   {
     id: '/greedy-algorithms',
@@ -159,6 +181,7 @@ export const commonTechniques: LessonConfig[] = [
     title: 'Greedy Algorithms',
     description: 'Solve optimization problems using greedy strategies.',
     access: AccessOptions.PREMIUM,
+    problems: COMMON_TECHNIQUES_PROBLEMS.greedyAlgorithms,
   },
 ]
 

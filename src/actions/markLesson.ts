@@ -19,7 +19,7 @@ export async function markLesson({
     if (!userId) throw new Error('User unauthenticated')
     if (!lessonId) throw new Error('Lesson not found')
 
-    const userProgress = await prisma.userProgress.upsert({
+    const userLessonProgress = await prisma.userLessonProgress.upsert({
       where: {
         userId_lessonId: {
           userId: userId,
@@ -38,7 +38,7 @@ export async function markLesson({
       },
     })
 
-    return userProgress
+    return userLessonProgress
   } catch (error) {
     console.error(error)
     throw new Error('Internal Server Error')

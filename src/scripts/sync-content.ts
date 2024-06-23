@@ -88,7 +88,9 @@ async function syncContent() {
 
         const lessonContent = fs.readFileSync(lessonPath, 'utf-8')
 
-        await prisma.lesson.upsert({
+        const practiceProblems = lesson.problems
+
+        const lessonRecord = await prisma.lesson.upsert({
           where: { slug: lessonSlug },
           update: {
             title: lessonTitle,
@@ -110,6 +112,23 @@ async function syncContent() {
             sectionId: sectionRecord.id,
           },
         })
+
+        for (const problem of practiceProblems) {
+          await prisma.problem.upsert({
+            where: { href: problem.href },
+            update: {
+              title: problem.title,
+              lessonId: lessonRecord.id,
+              difficulty: problem.difficulty,
+            },
+            create: {
+              title: problem.title,
+              href: problem.href,
+              lessonId: lessonRecord.id,
+              difficulty: problem.difficulty,
+            },
+          })
+        }
 
         console.log(`Synced: ${lessonTitle}`)
       }

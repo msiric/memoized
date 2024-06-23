@@ -1,4 +1,4 @@
-import { AccessOptions } from '@prisma/client'
+import { AccessOptions, ProblemDifficulty } from '@prisma/client'
 
 export type AuthProvider = 'google' | 'github'
 
@@ -8,6 +8,7 @@ export type LessonConfig = {
   title: string
   description: string
   access: AccessOptions
+  problems: PracticeProblem[]
 }
 
 export type LessonResult = {
@@ -41,3 +42,9 @@ export type Curriculum = {
 }
 
 export type SubscriptionStatus = 'ACTIVE' | 'CANCELED' | 'EXPIRED' | 'UNKNOWN'
+
+export type PracticeProblem = {
+  href: string
+  title: string
+  difficulty: ProblemDifficulty
+}

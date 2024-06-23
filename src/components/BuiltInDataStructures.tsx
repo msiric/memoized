@@ -1,6 +1,7 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { BUILT_IN_DATA_STRUCTURES_PREFIX, COURSE_PREFIX } from '@/constants'
+import { BUILT_IN_DATA_STRUCTURES_PROBLEMS } from '@/problems'
 import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
@@ -11,6 +12,7 @@ export const builtInDataStructures: LessonConfig[] = [
     title: 'Strings',
     description: 'Explore string methods and their usage in JavaScript.',
     access: AccessOptions.FREE,
+    problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.strings,
   },
   {
     id: '/numbers',
@@ -19,6 +21,7 @@ export const builtInDataStructures: LessonConfig[] = [
     description:
       'Understand numerical operations and the Number object in JavaScript.',
     access: AccessOptions.PREMIUM,
+    problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.numbers,
   },
   {
     id: '/arrays',
@@ -26,6 +29,7 @@ export const builtInDataStructures: LessonConfig[] = [
     title: 'Arrays',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
+    problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.arrays,
   },
   {
     id: '/objects',
@@ -34,6 +38,7 @@ export const builtInDataStructures: LessonConfig[] = [
     description:
       'Discover object properties and how to work with objects in JavaScript.',
     access: AccessOptions.PREMIUM,
+    problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.objects,
   },
   {
     id: '/sets',
@@ -41,6 +46,7 @@ export const builtInDataStructures: LessonConfig[] = [
     title: 'Sets',
     description: 'Understand the Set object and its unique element storage.',
     access: AccessOptions.PREMIUM,
+    problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.sets,
   },
   {
     id: '/maps',
@@ -48,6 +54,7 @@ export const builtInDataStructures: LessonConfig[] = [
     title: 'Maps',
     description: 'Learn about the Map object and key-value pair management.',
     access: AccessOptions.PREMIUM,
+    problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.maps,
   },
   {
     id: '/remaining-primitives',
@@ -56,6 +63,7 @@ export const builtInDataStructures: LessonConfig[] = [
     description:
       'Explore other JavaScript primitives such as boolean, null, and undefined.',
     access: AccessOptions.PREMIUM,
+    problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.remainingPrimitives,
   },
 ]
 

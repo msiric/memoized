@@ -1,10 +1,12 @@
 import { Heading } from '@/components/Heading'
 import { LessonStatus } from '@/components/LessonStatus'
 import { Prose } from '@/components/Prose'
+import { Problem } from '@prisma/client'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 import { NextPage } from './NextPage'
+import { PracticeProblems } from './PracticeProblems'
 
 export { Button } from '@/components/Button'
 export { CodeGroup, Code as code, Pre as pre } from '@/components/Code'
@@ -38,17 +40,22 @@ export const a = CustomLink
 export type WrapperProps = {
   userId?: string
   lessonId: string
+  problems: Problem[]
   children: ReactNode
 }
 
 export const wrapper = function Wrapper({
   userId,
   lessonId,
+  problems,
   children,
 }: WrapperProps) {
   return (
     <article className="flex h-full flex-col pb-10 pt-16">
       <Prose className="flex-auto">{children}</Prose>
+      <div className="prose flex-auto dark:prose-invert [html_:where(&>*)]:mx-auto [html_:where(&>*)]:max-w-2xl [html_:where(&>*)]:lg:mx-[calc(50%-min(50%,theme(maxWidth.lg)))] [html_:where(&>*)]:lg:max-w-3xl">
+        <PracticeProblems problems={problems} />
+      </div>
       <div className="mx-auto mt-6 w-full max-w-2xl lg:max-w-5xl">
         <NextPage />
       </div>

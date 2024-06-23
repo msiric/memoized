@@ -1,6 +1,7 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { ADVANCED_TOPICS_PREFIX, COURSE_PREFIX } from '@/constants'
+import { ADVANCED_TOPICS_PROBLEMS } from '@/problems'
 import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
@@ -12,6 +13,7 @@ export const advancedTopics: LessonConfig[] = [
     description:
       'Solve complex problems by breaking them into simpler subproblems.',
     access: AccessOptions.FREE,
+    problems: ADVANCED_TOPICS_PROBLEMS.dynamicProgramming,
   },
   {
     id: '/bloom-filters',
@@ -20,6 +22,7 @@ export const advancedTopics: LessonConfig[] = [
     description:
       'Probabilistic data structures for efficient set membership testing.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.bloomFilters,
   },
   {
     id: '/segment-trees',
@@ -27,6 +30,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Segment Trees',
     description: 'Efficiently perform range queries on arrays.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.segmentTrees,
   },
   {
     id: '/union-find',
@@ -34,6 +38,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Union Find',
     description: 'Detect cycles and manage dynamic connectivity in graphs.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.unionFind,
   },
   {
     id: '/minimum-spanning-trees',
@@ -42,6 +47,7 @@ export const advancedTopics: LessonConfig[] = [
     description:
       'Find the subset of edges that connects all vertices with the minimal total weight.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.minimumSpanningTrees,
   },
   {
     id: '/shortest-path-algorithms',
@@ -49,6 +55,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Shortest Path Algorithms',
     description: 'Determine the shortest paths between nodes in a graph.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.shortestPathAlgorithms,
   },
   {
     id: '/maximum-flow',
@@ -56,6 +63,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Maximum Flow',
     description: 'Calculate the maximum possible flow in a flow network.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.maximumFlow,
   },
   {
     id: '/bit-manipulation',
@@ -64,6 +72,7 @@ export const advancedTopics: LessonConfig[] = [
     description:
       'Perform operations directly on binary representations of numbers.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.bitManipulation,
   },
   {
     id: '/randomized-algorithms',
@@ -71,6 +80,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Randomized Algorithms',
     description: 'Utilize randomness to solve problems efficiently.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.randomizedAlgorithms,
   },
   {
     id: '/suffix-arrays-and-suffix-trees',
@@ -78,6 +88,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Suffix Arrays and Suffix Trees',
     description: 'Advanced data structures for efficient string processing.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.suffixArraysAndSuffixTrees,
   },
   {
     id: '/approximation-algorithms',
@@ -85,6 +96,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Approximation Algorithms',
     description: 'Find near-optimal solutions for hard optimization problems.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.approximationAlgorithms,
   },
   {
     id: '/sqrt-decomposition',
@@ -92,6 +104,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Sqrt Decomposition',
     description: 'Divide problems into blocks for efficient query processing.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.sqrtDecomposition,
   },
   {
     id: '/network-flow-algorithms',
@@ -100,6 +113,7 @@ export const advancedTopics: LessonConfig[] = [
     description:
       'Solve flow problems in networks, such as maximum flow and minimum cut.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.networkFlowAlgorithms,
   },
   {
     id: '/convex-hull',
@@ -108,6 +122,7 @@ export const advancedTopics: LessonConfig[] = [
     description:
       'Compute the smallest convex polygon enclosing a set of points.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.convexHull,
   },
   {
     id: '/combinatorial-optimization',
@@ -116,6 +131,7 @@ export const advancedTopics: LessonConfig[] = [
     description:
       'Optimize an objective function within a finite set of possible solutions.',
     access: AccessOptions.PREMIUM,
+    problems: ADVANCED_TOPICS_PROBLEMS.combinatorialOptimization,
   },
 ]
 

@@ -1,6 +1,7 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import { COURSE_PREFIX, USER_DEFINED_DATA_STRUCTURES_PREFIX } from '@/constants'
+import { USER_DEFINED_DATA_STRUCTURES_PROBLEMS } from '@/problems'
 import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
 
@@ -12,6 +13,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description:
       'Learn about the various types of linked lists and their operations.',
     access: AccessOptions.FREE,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.linkedLists,
   },
   {
     id: '/stacks',
@@ -20,6 +22,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description:
       'Explore stack operations and their applications in computer science.',
     access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.stacks,
   },
   {
     id: '/queues',
@@ -28,6 +31,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description:
       'Understand the FIFO principle and how queues are implemented.',
     access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.queues,
   },
   {
     id: '/hash-tables',
@@ -36,6 +40,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description:
       'Delve into hash table implementation and its various use cases.',
     access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.hashTables,
   },
   {
     id: '/heaps',
@@ -43,6 +48,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     title: 'Heaps',
     description: 'Discover heap structures and their use in priority queues.',
     access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.heaps,
   },
   {
     id: '/trees',
@@ -50,6 +56,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     title: 'Trees',
     description: 'Study tree structures and their traversal algorithms.',
     access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.trees,
   },
   {
     id: '/graphs',
@@ -58,6 +65,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description:
       'Learn about graph representations and graph traversal methods.',
     access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.graphs,
   },
   {
     id: '/tries',
@@ -66,6 +74,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description:
       'Understand trie data structures and their use in efficient searching.',
     access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.tries,
   },
 ]
 

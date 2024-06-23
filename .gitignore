@@ -129,6 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# extracted practice problems
-src/scripts/duplicate_questions.mdx
-src/scripts/unique_questions.mdx
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

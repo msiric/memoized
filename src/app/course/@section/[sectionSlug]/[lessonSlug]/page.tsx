@@ -7,6 +7,7 @@ import {
   getUserWithSubscriptions,
 } from '@/services/user'
 import { userHasAccess } from '@/utils/helpers'
+import { Problem } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
@@ -21,7 +22,10 @@ export default async function Lesson({
   const session = await getServerSession(authOptions)
 
   const [lesson, user] = await Promise.all([
-    prisma.lesson.findUnique({ where: { slug: params.lessonSlug } }),
+    prisma.lesson.findUnique({
+      where: { slug: params.lessonSlug },
+      include: { problems: true },
+    }),
     session && getUserWithSubscriptions(session.userId),
   ])
 
@@ -59,7 +63,10 @@ export default async function Lesson({
   ) as unknown as JSXElementConstructor<{
     userId?: string
     lessonId: string
+    problems: Problem[]
   }>
 
-  return <Page userId={user?.id} lessonId={lesson.id} />
+  return (
+    <Page userId={user?.id} lessonId={lesson.id} problems={lesson.problems} />
+  )
 }
