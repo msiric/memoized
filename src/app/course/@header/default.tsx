@@ -1,6 +1,6 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getUserProgressWithLessons } from '@/services/user'
-import { Curriculum, LessonConfig } from '@/types'
+import { Curriculum, LessonConfig, ProblemConfig } from '@/types'
 import { Section } from '@prisma/client'
 import { glob } from 'fast-glob'
 import { getServerSession } from 'next-auth'
@@ -26,8 +26,12 @@ export default async function Header() {
       allSections={allSections}
       userData={data?.user}
       completedLessons={data?.user?.lessonProgress.map((item) => item.lessonId)}
+      completedProblems={data?.user?.problemProgress.map(
+        (item) => item.problemId,
+      )}
       fullCurriculum={data?.curriculum as Curriculum[]}
       allLessons={data?.lessons as LessonConfig[]}
+      allProblems={data?.problems as ProblemConfig[]}
     />
   )
 }

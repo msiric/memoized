@@ -1,12 +1,12 @@
 'use client'
 
-import { useProgressStore } from '@/contexts/progress'
+import { useContentStore } from '@/contexts/progress'
 import { LessonResult, SectionResult } from '@/types'
 import { usePathname } from 'next/navigation'
 
 export const usePages = () => {
   const pathname = usePathname()
-  const fullCurriculum = useProgressStore((state) => state.fullCurriculum)
+  const fullCurriculum = useContentStore((state) => state.fullCurriculum)
 
   const courseSections = fullCurriculum[0]?.sections ?? []
 

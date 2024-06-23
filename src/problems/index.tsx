@@ -1,5 +1,3 @@
-'use server'
-
 import { ProblemDifficulty } from '@prisma/client'
 
 export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {

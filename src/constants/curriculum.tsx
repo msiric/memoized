@@ -1,5 +1,3 @@
-'use server'
-
 import { advancedTopics } from '@/components/AdvancedTopics'
 import { builtInDataStructures } from '@/components/BuiltInDataStructures'
 import { commonTechniques } from '@/components/CommonTechniques'

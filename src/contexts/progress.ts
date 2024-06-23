@@ -1,40 +1,57 @@
-import { Curriculum, LessonConfig } from '@/types'
+import { Curriculum, LessonConfig, ProblemConfig } from '@/types'
 import { create } from 'zustand'
 
-interface ProgressStore {
+interface ContentStore {
   completedLessons: Set<string>
+  completedProblems: Set<string>
   fullCurriculum: Curriculum[]
   allLessons: LessonConfig[]
-  currentProgress: number
-  initializeProgress: (
+  allProblems: ProblemConfig[]
+  currentLessonProgress: number
+  currentProblemProgress: number
+  initializeContent: (
     completedLessons: string[],
+    completedProblems: string[],
     fullCurriculum: Curriculum[],
     allLessons: LessonConfig[],
+    allProblems: ProblemConfig[],
   ) => void
   toggleCompletedLesson: (lessonId: string) => void
+  toggleCompletedProblem: (problemId: string) => void
 }
 
-function calculateProgress(
-  completedLessons: Set<string>,
-  allLessons: LessonConfig[],
-) {
-  const progress = (completedLessons.size / allLessons.length) * 100
+function calculateProgress<T>(completed: Set<string>, total: T[]) {
+  const progress = (completed.size / total.length) * 100
   return progress
 }
 
-export const useProgressStore = create<ProgressStore>((set, get) => ({
+export const useContentStore = create<ContentStore>((set, get) => ({
   completedLessons: new Set<string>(),
+  completedProblems: new Set<string>(),
   fullCurriculum: [],
   allLessons: [],
-  currentProgress: 0,
-  initializeProgress: (lessons, curriculum, total) => {
+  allProblems: [],
+  currentLessonProgress: 0,
+  currentProblemProgress: 0,
+  initializeContent: (
+    lessons,
+    problems,
+    curriculum,
+    allLessons,
+    allProblems,
+  ) => {
     const completedLessonsSet = new Set(lessons)
-    const progress = calculateProgress(completedLessonsSet, total)
+    const completedProblemsSet = new Set(problems)
+    const lessonProgress = calculateProgress(completedLessonsSet, allLessons)
+    const problemProgress = calculateProgress(completedProblemsSet, allProblems)
     set({
       completedLessons: completedLessonsSet,
+      completedProblems: completedProblemsSet,
       fullCurriculum: curriculum,
-      allLessons: total,
-      currentProgress: progress,
+      allLessons: allLessons,
+      allProblems: allProblems,
+      currentLessonProgress: lessonProgress,
+      currentProblemProgress: problemProgress,
     })
   },
   toggleCompletedLesson: (lessonId: string) => {
@@ -45,7 +62,18 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     } else {
       completedLessons.add(lessonId)
     }
-    const newProgress = calculateProgress(completedLessons, allLessons)
-    set({ completedLessons, currentProgress: newProgress })
+    const newLessonProgress = calculateProgress(completedLessons, allLessons)
+    set({ completedLessons, currentLessonProgress: newLessonProgress })
+  },
+  toggleCompletedProblem: (problemId: string) => {
+    const completedProblems = new Set(get().completedProblems)
+    const allProblems = get().allProblems
+    if (completedProblems.has(problemId)) {
+      completedProblems.delete(problemId)
+    } else {
+      completedProblems.add(problemId)
+    }
+    const newProblemProgress = calculateProgress(completedProblems, allProblems)
+    set({ completedProblems, currentProblemProgress: newProblemProgress })
   },
 }))

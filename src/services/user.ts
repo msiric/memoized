@@ -50,7 +50,7 @@ export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
 }> & {
   currentSubscriptionPlan: SubscriptionPlan | null
   currentSubscriptionStatus: SubscriptionStatus | null
-  currentProgress: number
+  currentLessonProgress: number
 }
 
 export async function getUserProgressWithLessons(userId?: string) {
@@ -63,6 +63,11 @@ export async function getUserProgressWithLessons(userId?: string) {
             take: 1,
           },
           lessonProgress: {
+            where: {
+              completed: true,
+            },
+          },
+          problemProgress: {
             where: {
               completed: true,
             },
@@ -82,15 +87,18 @@ export async function getUserProgressWithLessons(userId?: string) {
     ? checkSubscriptionStatus(currentSubscription)
     : null
 
-  const allLessons = await prisma.lesson.findMany({
-    include: {
-      section: {
-        include: {
-          course: true,
+  const [allLessons, allProblems] = await Promise.all([
+    prisma.lesson.findMany({
+      include: {
+        section: {
+          include: {
+            course: true,
+          },
         },
       },
-    },
-  })
+    }),
+    prisma.problem.findMany(),
+  ])
 
   const curriculum: Curriculum[] = allLessons.reduce<Curriculum[]>(
     (acc, lesson) => {
@@ -169,11 +177,22 @@ export async function getUserProgressWithLessons(userId?: string) {
     access: item.access,
   }))
 
+  const problems = allProblems.map((item) => ({
+    id: item.id,
+  }))
+
   const completedLessons = user?.lessonProgress.filter((p) => p.completed)
     .length
-  const currentProgress =
+  const currentLessonProgress =
     allLessons?.length > 0
       ? (completedLessons ?? 0 / allLessons.length) * 100
+      : 0
+
+  const completedProblems = user?.problemProgress.filter((p) => p.completed)
+    .length
+  const currentProblemProgress =
+    allProblems?.length > 0
+      ? (completedProblems ?? 0 / allProblems.length) * 100
       : 0
 
   return {
@@ -182,11 +201,13 @@ export async function getUserProgressWithLessons(userId?: string) {
           ...user,
           currentSubscriptionPlan,
           currentSubscriptionStatus,
-          currentProgress,
+          currentLessonProgress,
+          currentProblemProgress,
         }
       : null,
     curriculum,
     lessons,
+    problems,
   }
 }
 

@@ -11,6 +11,10 @@ export type LessonConfig = {
   problems: PracticeProblem[]
 }
 
+export type ProblemConfig = {
+  id: string
+}
+
 export type LessonResult = {
   id: string
   slug: string

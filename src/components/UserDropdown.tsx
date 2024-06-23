@@ -2,7 +2,7 @@
 
 import { CUSTOMER_PORTAL_LINK } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
-import { useProgressStore } from '@/contexts/progress'
+import { useContentStore } from '@/contexts/progress'
 import { useSignOut } from '@/hooks/useSignOut'
 import { getInitials } from '@/utils/helpers'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
@@ -17,9 +17,15 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
   const { signOut } = useSignOut()
 
   const user = useAuthStore((state) => state.user)
-  const currentProgress = useProgressStore((state) => state.currentProgress)
+  const currentLessonProgress = useContentStore(
+    (state) => state.currentLessonProgress,
+  )
+  const currentProblemProgress = useContentStore(
+    (state) => state.currentProblemProgress,
+  )
 
-  const formattedProgress = `${currentProgress.toFixed(2)}%`
+  const formattedLessonProgress = `${currentLessonProgress.toFixed(2)}%`
+  const formattedProblemProgress = `${currentProblemProgress.toFixed(2)}%`
 
   const handleClick = () => {
     signOut()
@@ -109,18 +115,35 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
           <div className="truncate font-medium">{user?.email ?? ''}</div>
         </div>
         <div className="py-2">
-          <div className="flex gap-1 px-4">
-            <p className="block text-sm font-medium text-white">Progress</p>
-            <p className="font-sm block text-xs text-white">
-              ({formattedProgress})
-            </p>
-          </div>
-          <div className="block h-2.5 w-full rounded-full px-4">
-            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white">
-              <div
-                className="h-1.5 bg-lime-600"
-                style={{ width: formattedProgress }}
-              />
+          <p className="block px-4 text-sm font-bold text-white">Progress</p>
+          <div>
+            <div className="flex gap-1 px-4">
+              <p className="block text-sm text-white">Lessons</p>
+              <p className="font-sm block text-xs text-white">
+                ({formattedLessonProgress})
+              </p>
+            </div>
+            <div className="block h-2.5 w-full rounded-full px-4">
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-1.5 bg-lime-500"
+                  style={{ width: formattedLessonProgress }}
+                />
+              </div>
+            </div>
+            <div className="flex gap-1 px-4">
+              <p className="block text-sm text-white">Problems</p>
+              <p className="font-sm block text-xs text-white">
+                ({formattedProblemProgress})
+              </p>
+            </div>
+            <div className="block h-2.5 w-full rounded-full px-4">
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-1.5 bg-indigo-400"
+                  style={{ width: formattedProblemProgress }}
+                />
+              </div>
             </div>
           </div>
         </div>

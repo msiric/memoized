@@ -1,13 +1,59 @@
+'use client'
+
+import { markProblem } from '@/actions/markProblem'
+import { useAuthStore } from '@/contexts/auth'
+import { useContentStore } from '@/contexts/progress'
+import { capitalizeFirstLetter } from '@/utils/helpers'
 import { Problem } from '@prisma/client'
+import { useSession } from 'next-auth/react'
+import { ChangeEvent } from 'react'
 
 export type PracticeProblemsProps = {
+  userId?: string
   problems: Problem[]
 }
 
-export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
+export const PracticeProblems = ({
+  userId,
+  problems,
+}: PracticeProblemsProps) => {
+  const { data: session } = useSession()
+
+  const openModal = useAuthStore((state) => state.openModal)
+
+  const completedProblems = useContentStore((state) => state.completedProblems)
+  const toggleCompletedProblem = useContentStore(
+    (state) => state.toggleCompletedProblem,
+  )
+
+  async function onCheckboxChange(
+    event: ChangeEvent<HTMLInputElement>,
+    problemId: string,
+  ) {
+    if (!session) {
+      return openModal()
+    }
+    const currentlyCompleted = event.currentTarget.checked
+
+    try {
+      await markProblem({ userId, problemId, completed: currentlyCompleted })
+      toggleCompletedProblem(problemId)
+      console.log(
+        `Problem ${problemId} marked as ${
+          currentlyCompleted ? 'completed' : 'not completed'
+        }`,
+      )
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
   return (
     <>
-      <h2 className="!mt-16 scroll-mt-24" id="practice-problems">
+      <h2
+        className="!mt-16 scroll-mt-24 text-2xl font-bold"
+        id="practice-problems"
+      >
         <a
           className="group text-inherit no-underline hover:text-inherit"
           href="#practice-problems"
@@ -28,12 +74,38 @@ export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
           <strong>Practice Problems</strong>
         </a>
       </h2>
-      <ol>
+      <ol className="space-y-4">
         {problems.map((problem) => (
           <li key={problem.href}>
-            <a href={problem.href} target="_blank" rel="noopener noreferrer">
-              {problem.title}
-            </a>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col items-start justify-center">
+                <a
+                  href={problem.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-lime-500 hover:underline"
+                >
+                  {problem.title}
+                </a>
+                <span className="text-sm text-zinc-600 dark:text-zinc-300">
+                  Difficulty:{' '}
+                  <span className="font-bold">
+                    {capitalizeFirstLetter(problem.difficulty)}
+                  </span>
+                </span>
+              </div>
+              <label className="flex cursor-pointer items-center space-x-2 text-zinc-600 dark:text-zinc-300">
+                <input
+                  type="checkbox"
+                  checked={completedProblems.has(problem.id)}
+                  className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500 focus:accent-lime-600"
+                  onChange={(event) => onCheckboxChange(event, problem.id)}
+                />
+                <span className="text-sm text-zinc-600 dark:text-zinc-300">
+                  Completed
+                </span>
+              </label>
+            </div>
           </li>
         ))}
       </ol>

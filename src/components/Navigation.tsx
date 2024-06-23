@@ -4,7 +4,7 @@ import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
 import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
 import { useAuthStore } from '@/contexts/auth'
-import { useProgressStore } from '@/contexts/progress'
+import { useContentStore } from '@/contexts/progress'
 import { useAccess } from '@/hooks/useAccess'
 import { Curriculum, LessonResult, SectionResult } from '@/types'
 import { remToPx } from '@/utils/helpers'
@@ -40,7 +40,7 @@ function SectionLink({
 }) {
   const pathname = usePathname()
 
-  const completedLessons = useProgressStore((state) => state.completedLessons)
+  const completedLessons = useContentStore((state) => state.completedLessons)
 
   const isCompleted = lessons.every((lesson) => completedLessons.has(lesson.id))
 
@@ -102,7 +102,7 @@ function NavLink({
   const pathname = usePathname()
 
   const userData = useAuthStore((state) => state.user)
-  const completedLessons = useProgressStore((state) => state.completedLessons)
+  const completedLessons = useContentStore((state) => state.completedLessons)
 
   const isCompleted = Array.from(completedLessons).some(
     (lesson) => lesson === id,

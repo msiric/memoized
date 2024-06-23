@@ -1,5 +1,7 @@
 'use client'
 
+import { useContentStore } from '@/contexts/progress'
+import { type Result } from '@/mdx/search.mjs'
 import {
   createAutocomplete,
   type AutocompleteApi,
@@ -10,9 +12,9 @@ import { Dialog, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
-  forwardRef,
   Fragment,
   Suspense,
+  forwardRef,
   useCallback,
   useEffect,
   useId,
@@ -20,8 +22,6 @@ import {
   useState,
 } from 'react'
 import Highlighter from 'react-highlight-words'
-import { type Result } from '@/mdx/search.mjs'
-import { useProgressStore } from '@/contexts/progress'
 
 type EmptyObject = Record<string, never>
 
@@ -173,7 +173,7 @@ function SearchResult({
   query: string
 }) {
   const id = useId()
-  const fullCurriculum = useProgressStore((state) => state.fullCurriculum)
+  const fullCurriculum = useContentStore((state) => state.fullCurriculum)
 
   const courseSections = fullCurriculum[0]?.sections ?? []
 
