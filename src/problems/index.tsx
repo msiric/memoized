@@ -893,7 +893,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
   ],
 }
 
-export const ALL_QUESTIONS = [
+export const ALL_PROBLEMS = [
   ...Object.values(BUILT_IN_DATA_STRUCTURES_PROBLEMS).flatMap((lesson) =>
     lesson.map((item) => item.href),
   ),
