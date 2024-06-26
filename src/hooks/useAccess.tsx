@@ -1,3 +1,5 @@
+'use client'
+
 import { UserWithSubscriptionsAndProgress } from '@/services/user'
 import { userHasAccess } from '@/utils/helpers'
 import { AccessOptions } from '@prisma/client'
