@@ -3,19 +3,14 @@
 import { markProblem } from '@/actions/markProblem'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
-import { ProblemRow } from '@/types'
-import { Lesson } from '@prisma/client'
+import { ProblemRow, ProblemStatus } from '@/types'
+import { ProblemFilter, filterAndSortProblems } from '@/utils/helpers'
+import { Lesson, ProblemDifficulty } from '@prisma/client'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6'
-
-const DIFFICULTY_ORDER = {
-  EASY: 1,
-  MEDIUM: 2,
-  HARD: 3,
-}
 
 const TABLE_COLUMNS = [
   { key: 'title', title: 'Title', sortable: true },
@@ -44,80 +39,42 @@ export const ProblemList = ({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
   const [problems, setProblems] = useState<ProblemRow[]>(filteredProblems)
   const [lessons] = useState<Partial<Lesson>[]>(initialLessons)
-  const [search, setSearch] = useState(searchParams.get('search') || '')
+  const [search, setSearch] = useState(searchParams?.get('search') || '')
   const [difficulty, setDifficulty] = useState<string | null>(
-    searchParams.get('difficulty') || '',
+    searchParams?.get('difficulty') || '',
   )
   const [status, setStatus] = useState<string | null>(
-    searchParams.get('status') || '',
+    searchParams?.get('status') || '',
   )
   const [lesson, setLesson] = useState<string | null>(
-    searchParams.get('lesson') || '',
+    searchParams?.get('lesson') || '',
   )
   const [sortColumn, setSortColumn] = useState<string | null>(
-    searchParams.get('sortColumn') || null,
+    searchParams?.get('sortColumn') || null,
   )
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(
-    (searchParams.get('sortOrder') as 'asc' | 'desc' | null) || null,
+    (searchParams?.get('sortOrder') as 'asc' | 'desc' | null) || null,
   )
 
-  const filterAndSortProblems = useCallback(() => {
-    let filteredProblems = allProblems
-
-    if (search) {
-      filteredProblems = filteredProblems.filter((problem) =>
-        problem.title.toLowerCase().includes(search.toLowerCase()),
-      )
+  const filterAndSortProblemsClient = useCallback(() => {
+    const filter: ProblemFilter = {
+      search,
+      difficulty: difficulty as ProblemDifficulty,
+      status: status as ProblemStatus,
+      lesson: lesson as string,
+      sortColumn: sortColumn as string,
+      sortOrder: sortOrder as 'asc' | 'desc',
     }
 
-    if (difficulty) {
-      filteredProblems = filteredProblems.filter(
-        (problem) => problem.difficulty === difficulty,
-      )
-    }
-
-    if (status) {
-      filteredProblems = filteredProblems.filter((problem) =>
-        status === 'COMPLETED'
-          ? problem.problemProgress.some((progress) => progress.completed)
-          : problem.problemProgress.every((progress) => !progress.completed),
-      )
-    }
-
-    if (lesson) {
-      filteredProblems = filteredProblems.filter(
-        (problem) => lesson === problem.lesson.slug,
-      )
-    }
-
-    if (sortColumn) {
-      filteredProblems.sort((a, b) => {
-        if (sortColumn === 'title') {
-          return sortOrder === 'asc'
-            ? a.title.localeCompare(b.title)
-            : b.title.localeCompare(a.title)
-        }
-        if (sortColumn === 'difficulty') {
-          return sortOrder === 'asc'
-            ? DIFFICULTY_ORDER[a.difficulty] - DIFFICULTY_ORDER[b.difficulty]
-            : DIFFICULTY_ORDER[b.difficulty] - DIFFICULTY_ORDER[a.difficulty]
-        }
-        if (sortColumn === 'lesson') {
-          return sortOrder === 'asc'
-            ? a.lesson.title.localeCompare(b.lesson.title)
-            : b.lesson.title.localeCompare(a.lesson.title)
-        }
-        return 0
-      })
-    }
-
-    setProblems(filteredProblems)
+    const newProblems = filterAndSortProblems(allProblems, filter)
+    setProblems(newProblems)
   }, [allProblems, search, difficulty, status, lesson, sortColumn, sortOrder])
 
   useEffect(() => {
-    filterAndSortProblems()
+    filterAndSortProblemsClient()
   }, [
     search,
     difficulty,
@@ -125,17 +82,17 @@ export const ProblemList = ({
     lesson,
     sortColumn,
     sortOrder,
-    filterAndSortProblems,
+    filterAndSortProblemsClient,
   ])
 
   useEffect(() => {
-    setSearch(searchParams.get('search') || '')
-    setDifficulty(searchParams.get('difficulty') || '')
-    setStatus(searchParams.get('status') || '')
-    setLesson(searchParams.get('lesson') || '')
-    setSortColumn(searchParams.get('sortColumn') || null)
+    setSearch(searchParams?.get('search') || '')
+    setDifficulty(searchParams?.get('difficulty') || '')
+    setStatus(searchParams?.get('status') || '')
+    setLesson(searchParams?.get('lesson') || '')
+    setSortColumn(searchParams?.get('sortColumn') || null)
     setSortOrder(
-      (searchParams.get('sortOrder') as 'asc' | 'desc' | null) || null,
+      (searchParams?.get('sortOrder') as 'asc' | 'desc' | null) || null,
     )
   }, [searchParams])
 
@@ -158,19 +115,23 @@ export const ProblemList = ({
   }
 
   const handleSort = (column: string) => {
+    let newSortOrder: 'asc' | 'desc' | null = 'asc'
+
     if (sortColumn === column) {
       if (sortOrder === 'asc') {
-        setSortOrder('desc')
+        newSortOrder = 'desc'
       } else if (sortOrder === 'desc') {
-        setSortOrder(null)
+        newSortOrder = null
         setSortColumn(null)
       } else {
-        setSortOrder('asc')
+        newSortOrder = 'asc'
       }
     } else {
       setSortColumn(column)
-      setSortOrder('asc')
+      newSortOrder = 'asc'
     }
+
+    setSortOrder(newSortOrder)
   }
 
   const handleResetFilters = () => {
