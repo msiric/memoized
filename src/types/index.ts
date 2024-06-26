@@ -57,7 +57,7 @@ export type ProblemRow = {
   id: string
   title: string
   difficulty: ProblemDifficulty
-  lesson: { title: string }
+  lesson: { title: string; slug: string }
   problemProgress: { completed: boolean }[]
 }
 

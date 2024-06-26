@@ -25,20 +25,20 @@ export function Wrapper({
   allProblems,
 }: LayoutProps) {
   const setUser = useAuthStore((state) => state.setUser)
-  const initializeContent = useContentStore((state) => state.initializeContent)
+  const updateContent = useContentStore((state) => state.updateContent)
 
   useEffect(() => {
-    initializeContent(
-      completedLessons ?? [],
-      completedProblems ?? [],
-      fullCurriculum ?? [],
-      allLessons ?? [],
-      allProblems ?? [],
+    updateContent(
+      completedLessons,
+      completedProblems,
+      fullCurriculum,
+      allLessons,
+      allProblems,
     )
     setUser(userData ?? null)
   }, [
     completedLessons,
-    initializeContent,
+    updateContent,
     allLessons,
     fullCurriculum,
     setUser,

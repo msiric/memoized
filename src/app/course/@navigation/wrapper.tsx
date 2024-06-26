@@ -1,7 +1,6 @@
 'use client'
 
 import { Navigation } from '@/components/Navigation'
-import { type Section } from '@/components/SectionProvider'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { UserWithSubscriptionsAndProgress } from '@/services/user'
@@ -10,9 +9,6 @@ import { useEffect } from 'react'
 
 export type LayoutProps = {
   userData?: UserWithSubscriptionsAndProgress | null
-  allSections?: Record<string, Array<Section>>
-  completedLessons?: string[]
-  completedProblems?: string[]
   fullCurriculum?: Curriculum[]
   allLessons?: LessonConfig[]
   allProblems?: ProblemConfig[]
@@ -20,32 +16,22 @@ export type LayoutProps = {
 
 export function Wrapper({
   userData,
-  completedLessons,
-  completedProblems,
   fullCurriculum,
   allLessons,
   allProblems,
 }: LayoutProps) {
   const setUser = useAuthStore((state) => state.setUser)
-  const initializeContent = useContentStore((state) => state.initializeContent)
+  const updateContent = useContentStore((state) => state.updateContent)
 
   useEffect(() => {
-    initializeContent(
-      completedLessons ?? [],
-      completedProblems ?? [],
-      fullCurriculum ?? [],
-      allLessons ?? [],
-      allProblems ?? [],
-    )
+    updateContent(undefined, undefined, fullCurriculum, allLessons, allProblems)
     setUser(userData ?? null)
   }, [
-    completedLessons,
-    initializeContent,
+    updateContent,
     allLessons,
     fullCurriculum,
     setUser,
     userData,
-    completedProblems,
     allProblems,
   ])
 

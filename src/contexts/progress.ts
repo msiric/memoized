@@ -9,6 +9,13 @@ interface ContentStore {
   allProblems: ProblemConfig[]
   currentLessonProgress: number
   currentProblemProgress: number
+  updateContent: (
+    completedLessons?: string[],
+    completedProblems?: string[],
+    fullCurriculum?: Curriculum[],
+    allLessons?: LessonConfig[],
+    allProblems?: ProblemConfig[],
+  ) => void
   initializeContent: (
     completedLessons: string[],
     completedProblems: string[],
@@ -33,6 +40,29 @@ export const useContentStore = create<ContentStore>((set, get) => ({
   allProblems: [],
   currentLessonProgress: 0,
   currentProblemProgress: 0,
+  updateContent: (lessons, problems, curriculum, allLessons, allProblems) => {
+    const completedLessonsSet = lessons ? new Set(lessons) : null
+    const completedProblemsSet = problems ? new Set(problems) : null
+    const lessonProgress =
+      completedLessonsSet && allLessons
+        ? calculateProgress(completedLessonsSet, allLessons)
+        : null
+    const problemProgress =
+      completedProblemsSet && allProblems
+        ? calculateProgress(completedProblemsSet, allProblems)
+        : null
+
+    set((prevState) => ({
+      ...prevState,
+      ...(curriculum && { fullCurriculum: curriculum }),
+      ...(allLessons && { allLessons }),
+      ...(allProblems && { allProblems }),
+      ...(completedLessonsSet && { completedLessons: completedLessonsSet }),
+      ...(completedProblemsSet && { completedProblems: completedProblemsSet }),
+      ...(lessonProgress && { currentLessonProgress: lessonProgress }),
+      ...(problemProgress && { currentProblemProgress: problemProgress }),
+    }))
+  },
   initializeContent: (
     lessons,
     problems,

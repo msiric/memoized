@@ -3,27 +3,39 @@
 import { markProblem } from '@/actions/markProblem'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
-import { useDebounce } from '@/hooks/useDebounce'
 import { ProblemRow } from '@/types'
+import { Lesson } from '@prisma/client'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { ChangeEvent, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6'
+
+const DIFFICULTY_ORDER = {
+  EASY: 1,
+  MEDIUM: 2,
+  HARD: 3,
+}
 
 const TABLE_COLUMNS = [
   { key: 'title', title: 'Title', sortable: true },
   { key: 'difficulty', title: 'Difficulty', sortable: true },
-  { key: 'tags', title: 'Tags', sortable: true },
+  { key: 'lesson', title: 'Lesson', sortable: true },
   { key: 'status', title: 'Status', sortable: false },
   { key: 'completed', title: 'Completed', sortable: false },
 ]
 
 type ProblemListProps = {
-  initialProblems: ProblemRow[]
+  allProblems: ProblemRow[]
+  filteredProblems: ProblemRow[]
+  initialLessons: Partial<Lesson>[]
 }
 
-export const ProblemList = ({ initialProblems }: ProblemListProps) => {
+export const ProblemList = ({
+  allProblems,
+  filteredProblems,
+  initialLessons,
+}: ProblemListProps) => {
   const { data: session } = useSession()
   const toggleCompletedProblem = useContentStore(
     (state) => state.toggleCompletedProblem,
@@ -32,7 +44,8 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const [problems, setProblems] = useState<ProblemRow[]>(initialProblems)
+  const [problems, setProblems] = useState<ProblemRow[]>(filteredProblems)
+  const [lessons] = useState<Partial<Lesson>[]>(initialLessons)
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [difficulty, setDifficulty] = useState<string | null>(
     searchParams.get('difficulty') || '',
@@ -40,64 +53,91 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
   const [status, setStatus] = useState<string | null>(
     searchParams.get('status') || '',
   )
-  const [tags, setTags] = useState<string[]>(
-    searchParams.get('tags')
-      ? (searchParams.get('tags') as string).split(',')
-      : [],
+  const [lesson, setLesson] = useState<string | null>(
+    searchParams.get('lesson') || '',
   )
-  const [sortColumn, setSortColumn] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null)
+  const [sortColumn, setSortColumn] = useState<string | null>(
+    searchParams.get('sortColumn') || null,
+  )
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(
+    (searchParams.get('sortOrder') as 'asc' | 'desc' | null) || null,
+  )
 
-  const debouncedSearch = useDebounce(search, 500)
+  const filterAndSortProblems = useCallback(() => {
+    let filteredProblems = allProblems
 
-  useEffect(() => {
-    const fetchProblems = async () => {
-      const params = new URLSearchParams({
-        ...(debouncedSearch && { search: debouncedSearch as string }),
-        ...(difficulty && { difficulty: difficulty as string }),
-        ...(status && { status: status as string }),
-        ...(tags.length && { tags: tags.join(',') }),
-        ...(sortColumn && { sortColumn }),
-        ...(sortOrder && { sortOrder }),
+    if (search) {
+      filteredProblems = filteredProblems.filter((problem) =>
+        problem.title.toLowerCase().includes(search.toLowerCase()),
+      )
+    }
+
+    if (difficulty) {
+      filteredProblems = filteredProblems.filter(
+        (problem) => problem.difficulty === difficulty,
+      )
+    }
+
+    if (status) {
+      filteredProblems = filteredProblems.filter((problem) =>
+        status === 'COMPLETED'
+          ? problem.problemProgress.some((progress) => progress.completed)
+          : problem.problemProgress.every((progress) => !progress.completed),
+      )
+    }
+
+    if (lesson) {
+      filteredProblems = filteredProblems.filter(
+        (problem) => lesson === problem.lesson.slug,
+      )
+    }
+
+    if (sortColumn) {
+      filteredProblems.sort((a, b) => {
+        if (sortColumn === 'title') {
+          return sortOrder === 'asc'
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title)
+        }
+        if (sortColumn === 'difficulty') {
+          return sortOrder === 'asc'
+            ? DIFFICULTY_ORDER[a.difficulty] - DIFFICULTY_ORDER[b.difficulty]
+            : DIFFICULTY_ORDER[b.difficulty] - DIFFICULTY_ORDER[a.difficulty]
+        }
+        if (sortColumn === 'lesson') {
+          return sortOrder === 'asc'
+            ? a.lesson.title.localeCompare(b.lesson.title)
+            : b.lesson.title.localeCompare(a.lesson.title)
+        }
+        return 0
       })
-
-      const response = await fetch(`/api/problems?${params}`)
-      const data = await response.json()
-      setProblems(data.problems)
     }
 
-    fetchProblems()
-  }, [debouncedSearch, difficulty, status, tags, sortColumn, sortOrder])
+    setProblems(filteredProblems)
+  }, [allProblems, search, difficulty, status, lesson, sortColumn, sortOrder])
 
   useEffect(() => {
-    const query = new URLSearchParams(searchParams.toString())
-
-    const params = {
-      search,
-      difficulty,
-      status,
-      tags: tags.length ? tags.join(',') : '',
-      sortColumn,
-      sortOrder,
-    }
-
-    Object.entries(params).forEach(([key, value]) => {
-      if (value) query.set(key, value)
-      else query.delete(key)
-    })
-
-    router.push(`${pathname}?${query.toString()}`)
+    filterAndSortProblems()
   }, [
-    difficulty,
-    pathname,
-    router,
     search,
-    searchParams,
+    difficulty,
     status,
-    tags,
+    lesson,
     sortColumn,
     sortOrder,
+    filterAndSortProblems,
   ])
+
+  useEffect(() => {
+    setSearch(searchParams.get('search') || '')
+    setDifficulty(searchParams.get('difficulty') || '')
+    setStatus(searchParams.get('status') || '')
+    setLesson(searchParams.get('lesson') || '')
+    setSortColumn(searchParams.get('sortColumn') || null)
+    setSortOrder(
+      (searchParams.get('sortOrder') as 'asc' | 'desc' | null) || null,
+    )
+  }, [searchParams])
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value)
@@ -113,12 +153,8 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
     setStatus(event.target.value || null)
   }
 
-  const handleTagsChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = Array.from(
-      event.target.selectedOptions,
-      (option) => option.value,
-    )
-    setTags(value)
+  const handleLessonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setLesson(event.target.value || null)
   }
 
   const handleSort = (column: string) => {
@@ -141,12 +177,20 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
     setSearch('')
     setDifficulty(null)
     setStatus(null)
-    setTags([])
+    setLesson(null)
     setSortColumn(null)
     setSortOrder(null)
 
     const query = new URLSearchParams()
-    router.push(`${pathname}?${query.toString()}`)
+    window.history.replaceState(
+      {
+        ...window.history.state,
+        as: `${pathname}?${query.toString()}`,
+        url: `${pathname}?${query.toString()}`,
+      },
+      '',
+      `${pathname}?${query.toString()}`,
+    )
   }
 
   const toggleCompletion = async (problemId: string) => {
@@ -154,10 +198,13 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
       problem.id === problemId
         ? {
             ...problem,
-            problemProgress: problem.problemProgress.map((progress) => ({
-              ...progress,
-              completed: !progress.completed,
-            })),
+            problemProgress:
+              problem.problemProgress.length === 0
+                ? [{ completed: true }]
+                : problem.problemProgress.map((progress) => ({
+                    ...progress,
+                    completed: !progress.completed,
+                  })),
           }
         : problem,
     )
@@ -186,6 +233,43 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
       console.error('Error:', error)
     }
   }
+
+  useEffect(() => {
+    const query = new URLSearchParams()
+
+    const params = {
+      search,
+      difficulty,
+      status,
+      lesson,
+      sortColumn,
+      sortOrder,
+    }
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) query.set(key, value)
+      else query.delete(key)
+    })
+
+    window.history.replaceState(
+      {
+        ...window.history.state,
+        as: `${pathname}?${query.toString()}`,
+        url: `${pathname}?${query.toString()}`,
+      },
+      '',
+      `${pathname}?${query.toString()}`,
+    )
+  }, [
+    search,
+    difficulty,
+    status,
+    lesson,
+    sortColumn,
+    sortOrder,
+    router,
+    pathname,
+  ])
 
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -248,15 +332,16 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
           <option value="COMPLETED">Completed</option>
         </select>
         <select
-          multiple
-          value={tags}
-          onChange={handleTagsChange}
+          value={lesson || ''}
+          onChange={handleLessonChange}
           className="rounded border p-2"
         >
-          {/* Replace with dynamic tag options */}
-          <option value="linked-lists">Linked Lists</option>
-          <option value="trees">Trees</option>
-          <option value="graphs">Graphs</option>
+          <option value="">All Lessons</option>
+          {lessons.map((lesson) => (
+            <option key={lesson.slug} value={lesson.slug}>
+              {lesson.title}
+            </option>
+          ))}
         </select>
       </div>
       <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
@@ -291,33 +376,46 @@ export const ProblemList = ({ initialProblems }: ProblemListProps) => {
           </tr>
         </thead>
         <tbody>
-          {problems.map((problem) => (
-            <tr
-              key={problem.id}
-              className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
-            >
-              <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
-                {problem.title}
-              </td>
-              <td className="px-6 py-4">{problem.difficulty}</td>
-              <td className="px-6 py-4">{problem.lesson.title}</td>
-              <td className="px-6 py-4">
-                {problem.problemProgress.some((progress) => progress.completed)
-                  ? 'Completed'
-                  : 'To Do'}
-              </td>
-              <td className="px-6 py-4">
-                <input
-                  type="checkbox"
-                  checked={problem.problemProgress.some(
+          {problems.length > 0 ? (
+            problems.map((problem) => (
+              <tr
+                key={problem.id}
+                className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
+              >
+                <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
+                  {problem.title}
+                </td>
+                <td className="px-6 py-4">{problem.difficulty}</td>
+                <td className="px-6 py-4">{problem.lesson.title}</td>
+                <td className="px-6 py-4">
+                  {problem.problemProgress.some(
                     (progress) => progress.completed,
-                  )}
-                  onChange={(event) => onCheckboxChange(event, problem.id)}
-                  className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500 focus:accent-lime-600"
-                />
+                  )
+                    ? 'Completed'
+                    : 'To Do'}
+                </td>
+                <td className="px-6 py-4">
+                  <input
+                    type="checkbox"
+                    checked={problem.problemProgress.some(
+                      (progress) => progress.completed,
+                    )}
+                    onChange={(event) => onCheckboxChange(event, problem.id)}
+                    className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500 focus:accent-lime-600"
+                  />
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600">
+              <td
+                colSpan={TABLE_COLUMNS.length}
+                className="whitespace-nowrap px-6 py-4 text-center font-medium text-gray-900 dark:text-white"
+              >
+                No problems found.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

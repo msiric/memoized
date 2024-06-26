@@ -1,6 +1,8 @@
 import { UserWithSubscriptionsAndProgress } from '@/services/user'
 import { AccessOptions, SubscriptionStatus } from '@prisma/client'
 
+export const isServer = typeof window === 'undefined'
+
 export const remToPx = (remValue: number) => {
   const rootFontSize =
     typeof window === 'undefined'
