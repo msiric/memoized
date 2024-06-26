@@ -36,11 +36,10 @@ const MarkButton = ({ checked, onClick, children }: MarkButtonProps) => {
 }
 
 export type LessonStatusProps = {
-  userId?: string
   lessonId: string
 }
 
-export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
+export function LessonStatus({ lessonId }: LessonStatusProps) {
   const { data: session } = useSession()
   const { isStartOfSection } = usePages()
 
@@ -57,7 +56,7 @@ export function LessonStatus({ userId, lessonId }: LessonStatusProps) {
     }
 
     try {
-      await markLesson({ userId, lessonId, completed })
+      await markLesson({ lessonId, completed })
       toggleCompletedLesson(lessonId)
       console.log(
         `Lesson marked as ${completed ? 'completed' : 'not completed'}`,

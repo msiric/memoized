@@ -1,23 +1,22 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import prisma from '@/lib/prisma'
+import { getServerSession } from 'next-auth'
 
 export type MarkProblemArgs = {
-  userId?: string
   problemId?: string
   completed: boolean
 }
 
-export async function markProblem({
-  userId,
-  problemId,
-  completed,
-}: MarkProblemArgs) {
+export async function markProblem({ problemId, completed }: MarkProblemArgs) {
   try {
-    if (!userId) throw new Error('User unauthenticated')
+    const session = await getServerSession(authOptions)
+
+    if (!session) throw new Error('User unauthenticated')
     if (!problemId) throw new Error('Problem not found')
+
+    const userId = session.userId
 
     const userProblemProgress = await prisma.userProblemProgress.upsert({
       where: {

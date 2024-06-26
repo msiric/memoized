@@ -52,3 +52,13 @@ export type PracticeProblem = {
   title: string
   difficulty: ProblemDifficulty
 }
+
+export type ProblemRow = {
+  id: string
+  title: string
+  difficulty: ProblemDifficulty
+  lesson: { title: string }
+  problemProgress: { completed: boolean }[]
+}
+
+export type ProblemStatus = 'TODO' | 'COMPLETED'

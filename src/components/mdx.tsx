@@ -54,13 +54,13 @@ export const wrapper = function Wrapper({
     <article className="flex h-full flex-col pb-10 pt-16">
       <Prose className="flex-auto">{children}</Prose>
       <div className="prose flex-auto dark:prose-invert [html_:where(&>*)]:mx-auto [html_:where(&>*)]:max-w-2xl [html_:where(&>*)]:lg:mx-[calc(50%-min(50%,theme(maxWidth.lg)))] [html_:where(&>*)]:lg:max-w-3xl">
-        <PracticeProblems userId={userId} problems={problems} />
+        <PracticeProblems problems={problems} />
       </div>
       <div className="mx-auto mt-6 w-full max-w-2xl lg:max-w-5xl">
         <NextPage />
       </div>
       <footer className="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
-        <LessonStatus userId={userId} lessonId={lessonId} />
+        <LessonStatus lessonId={lessonId} />
       </footer>
     </article>
   )

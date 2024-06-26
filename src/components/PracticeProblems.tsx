@@ -13,10 +13,7 @@ export type PracticeProblemsProps = {
   problems?: Problem[]
 }
 
-export const PracticeProblems = ({
-  userId,
-  problems,
-}: PracticeProblemsProps) => {
+export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
   const { data: session } = useSession()
 
   const openModal = useAuthStore((state) => state.openModal)
@@ -36,7 +33,7 @@ export const PracticeProblems = ({
     const currentlyCompleted = event.currentTarget.checked
 
     try {
-      await markProblem({ userId, problemId, completed: currentlyCompleted })
+      await markProblem({ problemId, completed: currentlyCompleted })
       toggleCompletedProblem(problemId)
       console.log(
         `Problem ${problemId} marked as ${
