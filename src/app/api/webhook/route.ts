@@ -159,7 +159,6 @@ const manageSubscriptionStatusChange = async ({
   existingSubscription = false,
 }: SubscriptionManagerArgs) => {
   try {
-    console.log('subscription id', subscriptionId, 'customer id', customerId)
     const recurringSubscription = existingSubscription
       ? await prisma.subscription.findUnique({
           where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },

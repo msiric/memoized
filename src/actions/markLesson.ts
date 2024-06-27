@@ -18,7 +18,7 @@ export async function markLesson({ lessonId, completed }: MarkLessonArgs) {
 
     const userId = session.userId
 
-    const userLessonProgress = await prisma.userLessonProgress.upsert({
+    await prisma.userLessonProgress.upsert({
       where: {
         userId_lessonId: {
           userId: userId,
@@ -37,7 +37,7 @@ export async function markLesson({ lessonId, completed }: MarkLessonArgs) {
       },
     })
 
-    return userLessonProgress
+    return new Response(JSON.stringify({ success: true }))
   } catch (error) {
     console.error(error)
     throw new Error('Internal Server Error')

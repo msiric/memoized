@@ -45,6 +45,10 @@ export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
       where: {
         completed: true
       }
+      select: {
+        lessonId: true
+        completed: true
+      }
     }
   }
 }> & {
@@ -66,9 +70,17 @@ export async function getUserProgressWithLessons(userId?: string) {
             where: {
               completed: true,
             },
+            select: {
+              lessonId: true,
+              completed: true,
+            },
           },
           problemProgress: {
             where: {
+              completed: true,
+            },
+            select: {
+              problemId: true,
               completed: true,
             },
           },

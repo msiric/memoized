@@ -18,7 +18,7 @@ export async function markProblem({ problemId, completed }: MarkProblemArgs) {
 
     const userId = session.userId
 
-    const userProblemProgress = await prisma.userProblemProgress.upsert({
+    await prisma.userProblemProgress.upsert({
       where: {
         userId_problemId: {
           userId: userId,
@@ -37,7 +37,7 @@ export async function markProblem({ problemId, completed }: MarkProblemArgs) {
       },
     })
 
-    return userProblemProgress
+    return new Response(JSON.stringify({ success: true }))
   } catch (error) {
     console.error(error)
     throw new Error('Internal Server Error')
