@@ -64,15 +64,25 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
           )}
         />
         <Search />
-        <div className="flex items-center gap-5 lg:hidden">
-          <MobileNavigation fullCurriculum={fullCurriculum} />
-          <Link href="/" aria-label="Home">
-            <Logo className="h-6" />
-          </Link>
-        </div>
+        {!fullWidth && (
+          <div className="flex items-center gap-5 lg:hidden">
+            <MobileNavigation fullCurriculum={fullCurriculum} />
+            <Link href="/" aria-label="Home">
+              <Logo className="h-6" />
+            </Link>
+          </div>
+        )}
         <div className="flex items-center gap-5">
           <nav className="hidden md:block">
             <ul role="list" className="flex items-center gap-8">
+              <li>
+                <Link
+                  href="/problems"
+                  className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                >
+                  Problems
+                </Link>
+              </li>
               <PremiumButton />
             </ul>
           </nav>

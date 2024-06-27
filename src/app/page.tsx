@@ -4,7 +4,7 @@ import { OverlayedImage } from '@/components/OverlayedImage'
 import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
-import Image from "next/image"
+import Image from 'next/image'
 import Link from 'next/link'
 import { BsNvidia } from 'react-icons/bs'
 import {
@@ -187,40 +187,6 @@ export default async function Home() {
   return (
     <div className="flex w-full flex-col">
       <header className="sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-zinc-900/5 transition duration-500 sm:px-6 lg:px-8 dark:bg-zinc-900/95 dark:shadow-none dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-zinc-900/75">
-        <div className="mr-6 flex lg:hidden">
-          <button
-            type="button"
-            className="relative"
-            aria-label="Open navigation"
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              strokeWidth={2}
-              strokeLinecap="round"
-              className="h-6 w-6 stroke-zinc-500"
-            >
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          </button>
-          <div
-            style={{
-              position: 'fixed',
-              top: 1,
-              left: 1,
-              width: 1,
-              height: 0,
-              padding: 0,
-              margin: '-1px',
-              overflow: 'hidden',
-              clip: 'rect(0, 0, 0, 0)',
-              whiteSpace: 'nowrap',
-              borderWidth: 0,
-              display: 'none',
-            }}
-          />
-        </div>
         <div className="relative flex flex-grow basis-0 items-center">
           <a aria-label="Home page" href="/">
             <Logo className="h-7" />
@@ -953,8 +919,9 @@ export default async function Home() {
                 fill
                 sizes="100vw"
                 style={{
-                  objectFit: "contain"
-                }} />
+                  objectFit: 'contain',
+                }}
+              />
             </div>
             <div className="mr-8">
               <h2 className="mb-4 text-2xl font-bold">Track Your Progress</h2>
@@ -1015,9 +982,10 @@ export default async function Home() {
                 src="https://avatars.githubusercontent.com/u/26199969?s=400&u=74701753b39e34fb8b83ce5f221d9dd5fa12064e&v=4"
                 style={{
                   color: 'transparent',
-                  maxWidth: "100%",
-                  height: "auto"
-                }} />
+                  maxWidth: '100%',
+                  height: 'auto',
+                }}
+              />
             </div>
             <div className="px-4 py-10 sm:px-10 sm:py-16 md:py-20 lg:px-20 lg:py-32">
               <p className="font-display mt-8 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
@@ -1059,5 +1027,5 @@ export default async function Home() {
         </div>
       </section>
     </div>
-  );
+  )
 }

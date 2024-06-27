@@ -340,14 +340,24 @@ export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
             />
           )),
         )}
-        <li className="sticky bottom-0 z-10 mt-6 flex justify-between gap-2">
-          <AuthButton
-            variant="filled"
-            className="w-full min-[416px]:hidden"
-            isMobile
-          />
-          <PremiumButton isMobile withList={false} />
-        </li>
+        <div className="sticky bottom-0 z-10 flex flex-col justify-between gap-2">
+          <li className="bottom-0 z-10 flex justify-between gap-2">
+            <AuthButton
+              variant="filled"
+              className="mt-6 w-full truncate min-[416px]:hidden"
+              isMobile
+            />
+            <Link
+              href="/problems"
+              className="mt-6 inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-900 transition hover:bg-zinc-200 min-[768px]:hidden dark:bg-zinc-800 dark:text-zinc-400 dark:ring-1 dark:ring-inset dark:ring-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            >
+              Problems
+            </Link>
+          </li>
+          <li className="bottom-0 z-10 flex justify-between gap-2">
+            <PremiumButton isMobile withList={false} />
+          </li>
+        </div>
       </ul>
     </nav>
   )

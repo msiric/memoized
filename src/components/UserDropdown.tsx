@@ -76,7 +76,7 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
               height: 'auto',
             }}
           />
-          {user?.name ?? ''}
+          <span className="truncate">{user?.name ?? ''}</span>
         </Button>
       ) : (
         <Button
@@ -98,16 +98,19 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
               height: 'auto',
             }}
           />
-          {userInitials}
+
+          <span className="truncate">{userInitials}</span>
         </Button>
       )}
 
       <div
         ref={dropdownRef}
         className={clsx(
-          'w-50 absolute right-2 top-[64px] z-10 divide-y divide-zinc-300 divide-zinc-600 rounded-lg bg-zinc-900 shadow dark:bg-zinc-700',
+          'w-50 absolute right-2 top-[64px] z-10 max-w-[300px] divide-y divide-zinc-300 divide-zinc-600 rounded-lg bg-zinc-900 shadow dark:bg-zinc-700',
           open ? '' : 'hidden',
-          isMobile ? '!-top-[228px] bottom-10 left-0 w-full bg-zinc-100' : '',
+          isMobile
+            ? '!-top-[230px] bottom-[84px] left-0 block w-full bg-zinc-100 min-[416px]:hidden'
+            : '',
         )}
       >
         <div className="px-4 py-3 text-sm text-white">
