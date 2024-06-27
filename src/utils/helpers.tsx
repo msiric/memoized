@@ -94,13 +94,14 @@ export const filterAndSortProblems = (
 
   if (difficulty) {
     filteredProblems = filteredProblems.filter(
-      (problem) => problem.difficulty === difficulty,
+      (problem) =>
+        problem.difficulty.toLowerCase() === difficulty.toLowerCase(),
     )
   }
 
   if (status) {
     filteredProblems = filteredProblems.filter((problem) =>
-      status === 'COMPLETED'
+      status.toLowerCase() === 'completed'
         ? problem.problemProgress.some((progress) => progress.completed)
         : problem.problemProgress.every((progress) => !progress.completed),
     )

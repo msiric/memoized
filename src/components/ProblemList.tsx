@@ -4,19 +4,23 @@ import { markProblem } from '@/actions/markProblem'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { ProblemRow, ProblemStatus } from '@/types'
-import { ProblemFilter, filterAndSortProblems } from '@/utils/helpers'
+import {
+  ProblemFilter,
+  capitalizeFirstLetter,
+  filterAndSortProblems,
+} from '@/utils/helpers'
 import { Lesson, ProblemDifficulty } from '@prisma/client'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6'
+import { Select } from './Select'
 
 const TABLE_COLUMNS = [
   { key: 'title', title: 'Title', sortable: true },
   { key: 'difficulty', title: 'Difficulty', sortable: true },
   { key: 'lesson', title: 'Lesson', sortable: true },
-  { key: 'status', title: 'Status', sortable: false },
   { key: 'completed', title: 'Completed', sortable: false },
 ]
 
@@ -42,21 +46,24 @@ export const ProblemList = ({
 
   const [problems, setProblems] = useState<ProblemRow[]>(filteredProblems)
   const [lessons] = useState<Partial<Lesson>[]>(initialLessons)
-  const [search, setSearch] = useState(searchParams?.get('search') || '')
+  const [search, setSearch] = useState(
+    searchParams?.get('search')?.toLowerCase() || '',
+  )
   const [difficulty, setDifficulty] = useState<string | null>(
-    searchParams?.get('difficulty') || '',
+    searchParams?.get('difficulty')?.toLowerCase() || '',
   )
   const [status, setStatus] = useState<string | null>(
-    searchParams?.get('status') || '',
+    searchParams?.get('status')?.toLowerCase() || '',
   )
   const [lesson, setLesson] = useState<string | null>(
-    searchParams?.get('lesson') || '',
+    searchParams?.get('lesson')?.toLowerCase() || '',
   )
   const [sortColumn, setSortColumn] = useState<string | null>(
-    searchParams?.get('sortColumn') || null,
+    searchParams?.get('sortColumn')?.toLowerCase() || null,
   )
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(
-    (searchParams?.get('sortOrder') as 'asc' | 'desc' | null) || null,
+    (searchParams?.get('sortOrder')?.toLowerCase() as 'asc' | 'desc' | null) ||
+      null,
   )
 
   const filterAndSortProblemsClient = useCallback(() => {
@@ -208,7 +215,7 @@ export const ProblemList = ({
     }
 
     Object.entries(params).forEach(([key, value]) => {
-      if (value) query.set(key, value)
+      if (value) query.set(key, value.toLowerCase())
       else query.delete(key)
     })
 
@@ -233,15 +240,12 @@ export const ProblemList = ({
   ])
 
   return (
-    <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-      <div className="bg-white pb-4 dark:bg-gray-900">
-        <label htmlFor="table-search" className="sr-only">
-          Search
-        </label>
-        <div className="relative mt-1">
+    <div className="relative mx-auto my-10 max-w-[1024px] overflow-x-auto shadow-md">
+      <div className="mb-4 flex space-x-4">
+        <div className="relative">
           <div className="rtl:inset-r-0 pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
             <svg
-              className="h-4 w-4 text-gray-500 dark:text-gray-400"
+              className="h-4 w-4 text-white"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -258,80 +262,85 @@ export const ProblemList = ({
           </div>
           <input
             type="text"
-            id="table-search"
             value={search}
             onChange={handleSearch}
-            className="block w-80 rounded-lg border border-gray-300 bg-gray-50 ps-10 pt-2 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            className="focus:ring-0.5 block w-full max-w-80 appearance-none rounded-lg border border-zinc-300 bg-zinc-50 py-2.5 ps-10 text-sm text-zinc-900 placeholder-white focus:border-lime-500 focus:outline-none focus:ring-lime-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white dark:placeholder-white dark:focus:border-lime-500 dark:focus:ring-lime-500"
             placeholder="Search for items"
           />
         </div>
+        <Select
+          value={difficulty || ''}
+          onChange={handleDifficultyChange}
+          variant="primary"
+          size="medium"
+          options={[
+            { value: '', label: 'All Difficulties' },
+            { value: 'easy', label: 'Easy' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'hard', label: 'Hard' },
+          ]}
+        />
+        <Select
+          value={status || ''}
+          onChange={handleStatusChange}
+          variant="primary"
+          size="medium"
+          options={[
+            { value: '', label: 'All Statuses' },
+            { value: 'todo', label: 'To Do' },
+            { value: 'completed', label: 'Completed' },
+          ]}
+        />
+        <Select
+          value={lesson || ''}
+          onChange={handleLessonChange}
+          variant="primary"
+          size="medium"
+          options={[
+            { value: '', label: 'All Lessons' },
+            ...lessons.map((lesson) => ({
+              value: lesson.slug ?? '',
+              label: lesson.title ?? '',
+            })),
+          ]}
+        />
         <button
           onClick={handleResetFilters}
-          className="rounded bg-red-500 p-2 text-white"
+          className="rounded text-sm text-white"
         >
           Reset Filters
         </button>
       </div>
-      <div className="mb-4 flex space-x-4">
-        <select
-          value={difficulty || ''}
-          onChange={handleDifficultyChange}
-          className="rounded border p-2"
-        >
-          <option value="">All Difficulties</option>
-          <option value="EASY">Easy</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="HARD">Hard</option>
-        </select>
-        <select
-          value={status || ''}
-          onChange={handleStatusChange}
-          className="rounded border p-2"
-        >
-          <option value="">All Statuses</option>
-          <option value="TODO">To Do</option>
-          <option value="COMPLETED">Completed</option>
-        </select>
-        <select
-          value={lesson || ''}
-          onChange={handleLessonChange}
-          className="rounded border p-2"
-        >
-          <option value="">All Lessons</option>
-          {lessons.map((lesson) => (
-            <option key={lesson.slug} value={lesson.slug}>
-              {lesson.title}
-            </option>
-          ))}
-        </select>
-      </div>
-      <table className="w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400">
-        <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
+      <table className="w-full overflow-hidden rounded-lg text-left text-sm text-zinc-500 rtl:text-right dark:text-zinc-400">
+        <thead className="bg-zinc-50 text-xs uppercase text-zinc-700 dark:bg-zinc-700 dark:text-zinc-400">
           <tr>
-            {TABLE_COLUMNS.map((column) => (
-              <th key={column.key} scope="col" className="px-6 py-3">
-                <button
-                  className={clsx(
-                    'flex items-center uppercase',
-                    column.sortable ? 'cursor-pointer' : 'cursor-default',
-                  )}
-                  onClick={() =>
-                    column.sortable ? handleSort(column.key) : null
-                  }
-                >
-                  {column.title}
-                  {column.sortable ? (
-                    sortColumn === column.key ? (
-                      sortOrder === 'asc' ? (
-                        <FaSortUp className="ms-1.5 h-2.5 w-2.5" />
+            {TABLE_COLUMNS.map((column, index) => (
+              <th key={column.key} scope="col" className={clsx('px-6 py-3')}>
+                <div className="flex w-full">
+                  <button
+                    className={clsx(
+                      'flex w-full items-center uppercase',
+                      column.sortable ? 'cursor-pointer' : 'cursor-default',
+                      index !== 0 && 'justify-center',
+                    )}
+                    onClick={() =>
+                      column.sortable ? handleSort(column.key) : null
+                    }
+                  >
+                    {column.title}
+                    {column.sortable ? (
+                      sortColumn === column.key ? (
+                        sortOrder === 'asc' ? (
+                          <FaSortUp className="ms-1.5 h-2.5 w-2.5" />
+                        ) : (
+                          <FaSortDown className="ms-1.5 h-2.5 w-2.5" />
+                        )
                       ) : (
-                        <FaSortDown className="ms-1.5 h-2.5 w-2.5" />
+                        <FaSort className="ms-1.5 h-2.5 w-2.5" />
                       )
-                    ) : (
-                      <FaSort className="ms-1.5 h-2.5 w-2.5" />
-                    )
-                  ) : null}
-                </button>
+                    ) : null}
+                  </button>
+                </div>
               </th>
             ))}
           </tr>
@@ -341,21 +350,18 @@ export const ProblemList = ({
             problems.map((problem) => (
               <tr
                 key={problem.id}
-                className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600"
+                className="border-b bg-white last:border-b-0 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-600"
               >
-                <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white">
+                <td className="whitespace-nowrap px-6 py-4 font-medium text-zinc-900 dark:text-white">
                   {problem.title}
                 </td>
-                <td className="px-6 py-4">{problem.difficulty}</td>
-                <td className="px-6 py-4">{problem.lesson.title}</td>
-                <td className="px-6 py-4">
-                  {problem.problemProgress.some(
-                    (progress) => progress.completed,
-                  )
-                    ? 'Completed'
-                    : 'To Do'}
+                <td className="px-6 py-4 text-center">
+                  {capitalizeFirstLetter(problem.difficulty)}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 text-center">
+                  {problem.lesson.title}
+                </td>
+                <td className="px-6 py-4 text-center">
                   <input
                     type="checkbox"
                     checked={problem.problemProgress.some(
@@ -368,10 +374,10 @@ export const ProblemList = ({
               </tr>
             ))
           ) : (
-            <tr className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600">
+            <tr className="border-b bg-white hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-600">
               <td
                 colSpan={TABLE_COLUMNS.length}
-                className="whitespace-nowrap px-6 py-4 text-center font-medium text-gray-900 dark:text-white"
+                className="whitespace-nowrap px-6 py-4 text-center font-medium text-zinc-900 dark:text-white"
               >
                 No problems found.
               </td>
