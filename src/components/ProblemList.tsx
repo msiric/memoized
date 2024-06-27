@@ -149,15 +149,14 @@ export const ProblemList = ({
     setSortColumn(null)
     setSortOrder(null)
 
-    const query = new URLSearchParams()
     window.history.replaceState(
       {
         ...window.history.state,
-        as: `${pathname}?${query.toString()}`,
-        url: `${pathname}?${query.toString()}`,
+        as: pathname,
+        url: pathname,
       },
       '',
-      `${pathname}?${query.toString()}`,
+      pathname,
     )
   }
 
@@ -219,14 +218,17 @@ export const ProblemList = ({
       else query.delete(key)
     })
 
+    const queryString = query.toString()
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname
+
     window.history.replaceState(
       {
         ...window.history.state,
-        as: `${pathname}?${query.toString()}`,
-        url: `${pathname}?${query.toString()}`,
+        as: newUrl,
+        url: newUrl,
       },
       '',
-      `${pathname}?${query.toString()}`,
+      newUrl,
     )
   }, [
     search,
