@@ -1,7 +1,9 @@
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import prisma from '@/lib/prisma'
 import { ProblemStatus } from '@/types'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemDifficulty } from '@prisma/client'
+import { getServerSession } from 'next-auth'
 
 export interface ProblemFilter {
   difficulty?: ProblemDifficulty
@@ -13,6 +15,8 @@ export interface ProblemFilter {
 }
 
 export async function getProblems(filter: ProblemFilter = {}) {
+  const session = await getServerSession(authOptions)
+
   const { difficulty, status, lesson, search, sortColumn, sortOrder } = filter
 
   const [problems, lessons] = await Promise.all([
@@ -25,8 +29,12 @@ export async function getProblems(filter: ProblemFilter = {}) {
           },
         },
         problemProgress: {
+          where: {
+            userId: session?.userId ?? '',
+          },
           select: {
             completed: true,
+            completedAt: true,
           },
         },
       },

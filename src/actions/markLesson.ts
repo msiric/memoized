@@ -37,7 +37,9 @@ export async function markLesson({ lessonId, completed }: MarkLessonArgs) {
       },
     })
 
-    return new Response(JSON.stringify({ success: true }))
+    return {
+      message: true,
+    }
   } catch (error) {
     console.error(error)
     throw new Error('Internal Server Error')
