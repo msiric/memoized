@@ -247,7 +247,7 @@ export const ProblemList = ({
         <div className="relative">
           <div className="rtl:inset-r-0 pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
             <svg
-              className="h-4 w-4 text-white"
+              className="h-4 w-4 text-zinc-900 dark:text-white"
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -266,7 +266,7 @@ export const ProblemList = ({
             type="text"
             value={search}
             onChange={handleSearch}
-            className="focus:ring-0.5 block w-full max-w-80 appearance-none rounded-lg border border-zinc-300 bg-zinc-50 py-2.5 ps-10 text-sm text-zinc-900 placeholder-white focus:border-lime-500 focus:outline-none focus:ring-lime-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white dark:placeholder-white dark:focus:border-lime-500 dark:focus:ring-lime-500"
+            className="focus:ring-0.5 block w-full max-w-80 appearance-none rounded-lg border border-zinc-300 bg-zinc-50 py-2.5 ps-10 text-sm text-zinc-900 placeholder-zinc-900 focus:border-lime-500 focus:outline-none focus:ring-lime-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white dark:placeholder-white dark:placeholder-white dark:focus:border-lime-500 dark:focus:ring-lime-500"
             placeholder="Search for items"
           />
         </div>
