@@ -1,14 +1,15 @@
 import { Logo } from '@/components/Logo'
 import { PricingTable } from '@/components/PricingTable'
+import { STRIPE_PRICE_IDS } from '@/constants'
+import { stripe } from '@/lib/stripe'
 import { getUserWithSubscriptions } from '@/services/user'
 import { SubscriptionStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import Stripe from 'stripe'
 import { authOptions } from '../api/auth/[...nextauth]/route'
 
-// TODO - allow unauthenticated users to access page
-// add custom pricing table and show login modal on click if unauthenticated
 export default async function Premium() {
   const session = await getServerSession(authOptions)
 
@@ -17,6 +18,17 @@ export default async function Premium() {
   if (data?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE) {
     redirect('/')
   }
+
+  const prices = await Promise.all(
+    STRIPE_PRICE_IDS.map((id) =>
+      stripe.prices.retrieve(id, { expand: ['product'] }),
+    ),
+  )
+
+  const plainPrices = prices.map((price) => ({
+    ...price,
+    product: { ...(price.product as Stripe.Product) },
+  }))
 
   return (
     <section className="bg-white dark:bg-zinc-900">
@@ -27,15 +39,15 @@ export default async function Premium() {
       </div>
       <div className="mx-auto mt-6 max-w-screen-xl px-4 py-8 lg:px-6 lg:py-16">
         <div className="mx-auto mb-8 max-w-screen-md text-center lg:mb-12">
-          <h2 className="font-extrabold text-gray-500 sm:text-2xl dark:text-white">
+          <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
             The ultimate JavaScript platform for mastering coding interviews.
           </h2>
-          <p className="mb-5 mt-2 font-light text-gray-500 sm:text-xl dark:text-gray-400">
+          <p className="mb-5 font-light text-zinc-500 sm:text-xl dark:text-zinc-400">
             Invest in your future, enhance your skills and land your dream job
             with confidence
           </p>
         </div>
-        <PricingTable />
+        <PricingTable prices={plainPrices} session={session} />
       </div>
     </section>
   )
