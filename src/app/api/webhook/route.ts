@@ -2,7 +2,7 @@ import Stripe from 'stripe'
 // import {
 //   upsertProductRecord,
 //   upsertPriceRecord,
-//   manageSubscriptionStatusChange,
+//   updateSubscriptionDetails,
 //   deleteProductRecord,
 //   deletePriceRecord
 // } from '@/utils/supabase/admin';
@@ -86,7 +86,7 @@ function getStatusFromStripeStatus(
   }
 }
 
-async function handleFailedSubscription(
+async function handleFailedRecurringSubscription(
   subscriptionId?: string | Stripe.Subscription | null,
 ) {
   try {
@@ -125,7 +125,7 @@ async function handleFailedSubscription(
   }
 }
 
-async function handleFailedLifetimeSubscription(sessionId?: string | null) {
+async function handleFailedOneTimePayment(sessionId?: string | null) {
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
       expand: ['line_items'],
@@ -150,16 +150,16 @@ async function handleFailedLifetimeSubscription(sessionId?: string | null) {
 type SubscriptionManagerArgs = {
   subscriptionId?: string | Stripe.Subscription | null
   customerId?: string | null
-  existingSubscription?: boolean
+  existing?: boolean
 }
 
-const manageSubscriptionStatusChange = async ({
+const updateSubscriptionDetails = async ({
   subscriptionId,
   customerId,
-  existingSubscription = false,
+  existing = false,
 }: SubscriptionManagerArgs) => {
   try {
-    const recurringSubscription = existingSubscription
+    const recurringSubscription = existing
       ? await prisma.subscription.findUnique({
           where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
           include: {
@@ -168,7 +168,7 @@ const manageSubscriptionStatusChange = async ({
         })
       : null
 
-    const user = existingSubscription
+    const user = existing
       ? recurringSubscription?.user
       : await prisma.user.findUnique({
           where: { id: customerId ?? '' },
@@ -230,7 +230,7 @@ const manageSubscriptionStatusChange = async ({
     })
   } catch (err) {
     console.log(err)
-    await handleFailedSubscription(subscriptionId)
+    await handleFailedRecurringSubscription(subscriptionId)
     throw new Error(`Subscription insert/update failed`)
   }
 }
@@ -240,7 +240,7 @@ type OneTimePurchaseManagerArgs = {
   customerId?: string | null
 }
 
-const manageLifetimeAccessPurchase = async ({
+const createLifetimeAccess = async ({
   sessionId,
   customerId,
 }: OneTimePurchaseManagerArgs) => {
@@ -293,7 +293,7 @@ const manageLifetimeAccessPurchase = async ({
     })
   } catch (err) {
     console.log(err)
-    await handleFailedLifetimeSubscription(sessionId)
+    await handleFailedOneTimePayment(sessionId)
     throw new Error(`Subscription insert failed`)
   }
 }
@@ -334,28 +334,26 @@ export async function POST(req: Request) {
         //   break;
         case 'customer.subscription.created':
         case 'customer.subscription.updated':
-        case 'customer.subscription.deleted':
+        case 'customer.subscription.deleted': {
           const subscription = event.data.object as Stripe.Subscription
-          await manageSubscriptionStatusChange({
-            subscriptionId: subscription.id,
-            existingSubscription: true,
-          })
+          const { id: subscriptionId } = subscription
+          await updateSubscriptionDetails({ subscriptionId, existing: true })
           break
-        case 'checkout.session.completed':
+        }
+        case 'checkout.session.completed': {
           const checkoutSession = event.data.object as Stripe.Checkout.Session
+          const {
+            subscription: subscriptionId,
+            id: sessionId,
+            client_reference_id: customerId,
+          } = checkoutSession
           if (checkoutSession.mode === 'subscription') {
-            const subscriptionId = checkoutSession.subscription
-            const customerId = checkoutSession.client_reference_id
-            await manageSubscriptionStatusChange({ subscriptionId, customerId })
+            await updateSubscriptionDetails({ subscriptionId, customerId })
           } else if (checkoutSession.mode === 'payment') {
-            const sessionId = checkoutSession.id
-            const customerId = checkoutSession.client_reference_id
-            await manageLifetimeAccessPurchase({
-              sessionId,
-              customerId,
-            })
+            await createLifetimeAccess({ sessionId, customerId })
           }
           break
+        }
         default:
           return console.log('Unhandled relevant event')
       }
