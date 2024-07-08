@@ -37,6 +37,7 @@ export type SelectProps = {
   variant?: keyof typeof variantStyles
   size?: keyof typeof sizeStyles
   options: { value: string; label: string }[]
+  className?: string
 } & Omit<React.ComponentPropsWithoutRef<'select'>, 'size'>
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -45,7 +46,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     ref,
   ) => {
     return (
-      <div className="relative">
+      <div className="relative w-full">
         <select
           ref={ref}
           className={clsx(
