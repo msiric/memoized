@@ -150,16 +150,16 @@ async function handleFailedOneTimePayment(sessionId?: string | null) {
 type SubscriptionManagerArgs = {
   subscriptionId?: string | Stripe.Subscription | null
   customerId?: string | null
-  existing?: boolean
+  updateAction?: boolean
 }
 
 const updateSubscriptionDetails = async ({
   subscriptionId,
   customerId,
-  existing = false,
+  updateAction = false,
 }: SubscriptionManagerArgs) => {
   try {
-    const recurringSubscription = existing
+    const recurringSubscription = updateAction
       ? await prisma.subscription.findUnique({
           where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
           include: {
@@ -168,7 +168,7 @@ const updateSubscriptionDetails = async ({
         })
       : null
 
-    const user = existing
+    const user = updateAction
       ? recurringSubscription?.user
       : await prisma.user.findUnique({
           where: { id: customerId ?? '' },
@@ -336,8 +336,9 @@ export async function POST(req: Request) {
         case 'customer.subscription.updated':
         case 'customer.subscription.deleted': {
           const subscription = event.data.object as Stripe.Subscription
+          const updateAction = event.type !== 'customer.subscription.created'
           const { id: subscriptionId } = subscription
-          await updateSubscriptionDetails({ subscriptionId, existing: true })
+          await updateSubscriptionDetails({ subscriptionId, updateAction })
           break
         }
         case 'checkout.session.completed': {
