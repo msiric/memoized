@@ -37,7 +37,7 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
 
     const { errorRedirect, sessionUrl } = await createCheckout(
       price,
-      currentPath,
+      currentPath ?? '',
     )
 
     if (errorRedirect) {
@@ -109,8 +109,12 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
                 >
                   {hasActiveSubscription
                     ? currentActiveSubscription?.priceId === price.id
-                      ? 'Subscribed'
-                      : 'Subscribe'
+                      ? price.type === 'one_time'
+                        ? 'Purchased'
+                        : 'Subscribed'
+                      : price.type === 'one_time'
+                        ? 'Purchase'
+                        : 'Subscribe'
                     : priceIdLoading === price.id
                       ? 'Processing...'
                       : price.type === 'one_time'
@@ -122,7 +126,9 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
                   onClick={() => openModal()}
                   className="rounded-lg bg-lime-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-lime-700 focus:ring-4 focus:ring-lime-200 dark:text-white dark:focus:ring-lime-900"
                 >
-                  Log in to Subscribe
+                  {price.type === 'one_time'
+                    ? 'Log in to purchase'
+                    : 'Log in to subscribe'}
                 </button>
               )}
             </div>

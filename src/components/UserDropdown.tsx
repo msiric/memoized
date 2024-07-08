@@ -44,7 +44,7 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
 
   const handleStripePortalRequest = async () => {
     setIsSubmitting(true)
-    const redirectUrl = await createPortal(currentPath)
+    const redirectUrl = await createPortal(currentPath ?? '')
     setIsSubmitting(false)
     return router.push(redirectUrl)
   }

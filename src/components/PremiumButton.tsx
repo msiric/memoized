@@ -31,7 +31,7 @@ export const PremiumButton = ({
 
   const handleStripePortalRequest = async () => {
     setIsSubmitting(true)
-    const redirectUrl = await createPortal(currentPath)
+    const redirectUrl = await createPortal(currentPath ?? '')
     setIsSubmitting(false)
     return router.push(redirectUrl)
   }
