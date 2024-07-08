@@ -62,18 +62,12 @@ export const authOptions: AuthOptions = {
         return true
       }
 
-      const stripeCustomer = await stripe.customers.create({
-        email,
-        name: user.name || undefined,
-      })
-
       // Create new user and account with Stripe customer ID
       const newUser = await prisma.user.create({
         data: {
           email,
           name: user.name,
           image: user.image,
-          stripeCustomerId: stripeCustomer.id,
           accounts: {
             create: {
               provider,
@@ -89,13 +83,13 @@ export const authOptions: AuthOptions = {
       if (user) {
         const account = await prisma.account.findUnique({
           where: { providerAccountId: user.id },
-          include: { user: true },
+          include: { user: { include: { customer: true } } },
         })
 
         if (account) {
           token.uid = account.id
           token.providerAccountId = account.providerAccountId
-          token.stripeCustomerId = account.user.stripeCustomerId
+          token.stripeCustomerId = account.user.customer?.stripeCustomerId ?? ''
           token.userId = account.user.id
           token.provider = account.provider
         }

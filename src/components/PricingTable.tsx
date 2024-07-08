@@ -1,40 +1,58 @@
 'use client'
 
-import { Session } from 'next-auth'
-import { signIn } from 'next-auth/react'
+import { createCheckout } from '@/actions/createCheckout'
+import { useAuthStore } from '@/contexts/auth'
+import { UserWithSubscriptionsAndProgress } from '@/services/user'
+import { SubscriptionStatus } from '@prisma/client'
+import { useSession } from 'next-auth/react'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import Stripe from 'stripe'
 
 export type PricingTableProps = {
   prices: (Stripe.Price & { product: Stripe.Product })[]
-  session: Session | null
+  user: UserWithSubscriptionsAndProgress | null
 }
 
-export const PricingTable = ({ prices, session }: PricingTableProps) => {
-  const [loading, setLoading] = useState(false)
+export const PricingTable = ({ prices, user }: PricingTableProps) => {
+  const router = useRouter()
+  const currentPath = usePathname()
+  const { data: session } = useSession()
+  const [priceIdLoading, setPriceIdLoading] = useState<string>()
 
-  const handleSubscribe = async (priceId: string) => {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ priceId, userId: session?.userId ?? '' }),
-      })
+  const openModal = useAuthStore((state) => state.openModal)
 
-      const data = await response.json()
-      if (data.url) {
-        window.location.href = data.url
-      } else {
-        setLoading(false)
-      }
-    } catch (error) {
-      setLoading(false)
-      console.error('Error creating checkout session:', error)
-      alert('Error creating checkout session')
+  const hasActiveSubscription =
+    user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
+
+  const currentActiveSubscription = user?.customer?.subscriptions[0]
+
+  const handleStripeCheckout = async (price: Stripe.Price) => {
+    setPriceIdLoading(price.id)
+
+    if (!session?.userId) {
+      setPriceIdLoading(undefined)
+      openModal()
     }
+
+    const { errorRedirect, sessionUrl } = await createCheckout(
+      price,
+      currentPath,
+    )
+
+    if (errorRedirect) {
+      setPriceIdLoading(undefined)
+      return router.push(errorRedirect)
+    }
+
+    if (!sessionUrl) {
+      setPriceIdLoading(undefined)
+      return
+    }
+
+    router.push(sessionUrl)
+
+    setPriceIdLoading(undefined)
   }
 
   return (
@@ -83,19 +101,25 @@ export const PricingTable = ({ prices, session }: PricingTableProps) => {
               </ul>
               {session ? (
                 <button
-                  onClick={() => handleSubscribe(price.id)}
-                  disabled={loading}
-                  className="rounded-lg bg-lime-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-lime-700 focus:ring-4 focus:ring-lime-200 dark:text-white dark:focus:ring-lime-900"
+                  onClick={() => handleStripeCheckout(price)}
+                  disabled={
+                    hasActiveSubscription || priceIdLoading === price.id
+                  }
+                  className="rounded-lg bg-lime-600 px-5 py-2.5 text-center text-sm font-medium text-white enabled:hover:bg-lime-700 enabled:focus:ring-4 enabled:focus:ring-lime-200 disabled:opacity-50 dark:text-white enabled:dark:focus:ring-lime-900"
                 >
-                  {loading
-                    ? 'Processing...'
-                    : price.type === 'one_time'
-                      ? 'Purchase'
-                      : 'Subscribe'}
+                  {hasActiveSubscription
+                    ? currentActiveSubscription?.priceId === price.id
+                      ? 'Subscribed'
+                      : 'Subscribe'
+                    : priceIdLoading === price.id
+                      ? 'Processing...'
+                      : price.type === 'one_time'
+                        ? 'Purchase'
+                        : 'Subscribe'}
                 </button>
               ) : (
                 <button
-                  onClick={() => signIn()}
+                  onClick={() => openModal()}
                   className="rounded-lg bg-lime-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-lime-700 focus:ring-4 focus:ring-lime-200 dark:text-white dark:focus:ring-lime-900"
                 >
                   Log in to Subscribe

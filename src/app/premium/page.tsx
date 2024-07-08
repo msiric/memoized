@@ -2,22 +2,19 @@ import { Logo } from '@/components/Logo'
 import { PricingTable } from '@/components/PricingTable'
 import { STRIPE_PRICE_IDS } from '@/constants'
 import { stripe } from '@/lib/stripe'
-import { getUserWithSubscriptions } from '@/services/user'
-import { SubscriptionStatus } from '@prisma/client'
+import {
+  UserWithSubscriptionsAndProgress,
+  getUserWithSubscriptions,
+} from '@/services/user'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import Stripe from 'stripe'
 import { authOptions } from '../api/auth/[...nextauth]/route'
 
 export default async function Premium() {
   const session = await getServerSession(authOptions)
 
-  const data = await getUserWithSubscriptions(session?.userId ?? '')
-
-  if (data?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE) {
-    redirect('/')
-  }
+  const user = await getUserWithSubscriptions(session?.userId ?? '', false)
 
   const prices = await Promise.all(
     STRIPE_PRICE_IDS.map((id) =>
@@ -47,7 +44,10 @@ export default async function Premium() {
             with confidence
           </p>
         </div>
-        <PricingTable prices={plainPrices} session={session} />
+        <PricingTable
+          prices={plainPrices}
+          user={user as UserWithSubscriptionsAndProgress | null}
+        />
       </div>
     </section>
   )

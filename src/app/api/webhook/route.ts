@@ -8,8 +8,12 @@ import Stripe from 'stripe'
 // } from '@/utils/supabase/admin';
 import prisma from '@/lib/prisma'
 import { STRIPE_WEBHOOK, stripe } from '@/lib/stripe'
-import { toDateTime } from '@/utils/helpers'
-import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
+import {
+  getPlanFromStripePlan,
+  getStatusFromStripeStatus,
+  toDateTime,
+} from '@/utils/helpers'
+import { SubscriptionStatus } from '@prisma/client'
 
 const relevantEvents = new Set([
   //   'product.created',
@@ -23,68 +27,6 @@ const relevantEvents = new Set([
   'customer.subscription.updated',
   'customer.subscription.deleted',
 ])
-
-let cachedPrices: Record<string, Stripe.Price> | null = null
-let lastFetchTime = 0
-const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
-
-async function fetchPricesFromStripe() {
-  const prices = await stripe.prices.list({ limit: 100 })
-  return prices.data.reduce(
-    (acc, price) => {
-      acc[price.id] = price
-      return acc
-    },
-    {} as Record<string, Stripe.Price>,
-  )
-}
-
-async function getCachedPrices() {
-  const now = Date.now()
-  if (!cachedPrices || now - lastFetchTime > CACHE_DURATION) {
-    cachedPrices = await fetchPricesFromStripe()
-    lastFetchTime = now
-  }
-  return cachedPrices
-}
-
-async function getPlanFromStripePlan(
-  priceId: string,
-): Promise<SubscriptionPlan | void> {
-  const prices = await getCachedPrices()
-  const price = prices[priceId]
-
-  if (!price) return console.log(`Unknown price ID`)
-
-  switch (price.nickname) {
-    case 'Monthly':
-      return SubscriptionPlan.MONTHLY
-    case 'Yearly':
-      return SubscriptionPlan.YEARLY
-    case 'Lifetime':
-      return SubscriptionPlan.LIFETIME
-    default:
-      return console.log(`Unknown price nickname`)
-  }
-}
-
-function getStatusFromStripeStatus(
-  status: Stripe.Subscription.Status,
-): SubscriptionStatus {
-  switch (status) {
-    case 'active':
-      return SubscriptionStatus.ACTIVE
-    case 'canceled':
-      return SubscriptionStatus.CANCELED
-    case 'incomplete':
-    case 'incomplete_expired':
-    case 'past_due':
-    case 'unpaid':
-      return SubscriptionStatus.EXPIRED
-    default:
-      return SubscriptionStatus.EXPIRED
-  }
-}
 
 async function handleFailedRecurringSubscription(
   subscriptionId?: string | Stripe.Subscription | null,
@@ -163,18 +105,19 @@ const updateSubscriptionDetails = async ({
       ? await prisma.subscription.findUnique({
           where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
           include: {
-            user: true,
+            customer: true,
           },
         })
       : null
 
-    const user = updateAction
-      ? recurringSubscription?.user
-      : await prisma.user.findUnique({
-          where: { id: customerId ?? '' },
+    const customer = updateAction
+      ? recurringSubscription?.customer
+      : await prisma.customer.findUnique({
+          where: { stripeCustomerId: customerId ?? '' },
         })
 
-    if (!user) return console.log(`Customer lookup failed: No customer found`)
+    if (!customer)
+      return console.log(`Customer lookup failed: No customer found`)
 
     const subscription = await stripe.subscriptions.retrieve(
       subscriptionId?.toString() ?? '',
@@ -197,7 +140,7 @@ const updateSubscriptionDetails = async ({
 
     const subscriptionData = {
       stripeSubscriptionId: subscription.id,
-      userId: user.id,
+      customerId: customer.id,
       metadata: subscription.metadata,
       status: subscriptionStatus,
       plan: subscriptionPlan,
@@ -245,11 +188,12 @@ const createLifetimeAccess = async ({
   customerId,
 }: OneTimePurchaseManagerArgs) => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: customerId ?? '' },
+    const customer = await prisma.customer.findUnique({
+      where: { stripeCustomerId: customerId ?? '' },
     })
 
-    if (!user) return console.log(`Customer lookup failed: No customer found`)
+    if (!customer)
+      return console.log(`Customer lookup failed: No customer found`)
 
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
       expand: ['line_items'],
@@ -270,7 +214,7 @@ const createLifetimeAccess = async ({
 
     const subscriptionData = {
       stripeSubscriptionId: session.id,
-      userId: user.id,
+      customerId: customer.id,
       metadata: session.metadata ?? {},
       status: subscriptionStatus,
       plan: subscriptionPlan,

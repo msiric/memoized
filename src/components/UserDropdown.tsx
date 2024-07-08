@@ -1,6 +1,6 @@
 'use client'
 
-import { CUSTOMER_PORTAL_LINK } from '@/constants'
+import { createPortal } from '@/actions/createPortal'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useSignOut } from '@/hooks/useSignOut'
@@ -8,11 +8,16 @@ import { getInitials } from '@/utils/helpers'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import Image from 'next/image'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './Button'
 
 export const UserDropdown = ({ isMobile = false, ...props }) => {
+  const router = useRouter()
+  const currentPath = usePathname()
+
   const [open, setOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { signOut } = useSignOut()
 
@@ -36,6 +41,13 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   const userInitials = getInitials(user?.name ?? '')
+
+  const handleStripePortalRequest = async () => {
+    setIsSubmitting(true)
+    const redirectUrl = await createPortal(currentPath)
+    setIsSubmitting(false)
+    return router.push(redirectUrl)
+  }
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -160,20 +172,23 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
               </li>
             ) : (
               <li>
-                <a
-                  href={CUSTOMER_PORTAL_LINK}
-                  target="_blank"
-                  className="block px-4 py-2 hover:bg-zinc-600 hover:text-white"
+                <button
+                  onClick={handleStripePortalRequest}
+                  disabled={isSubmitting}
+                  className={clsx(
+                    'block w-full px-4 py-2 text-left hover:bg-zinc-600 hover:text-white disabled:opacity-50',
+                    isSubmitting && 'cursor-wait',
+                  )}
                 >
                   Subscription
-                </a>
+                </button>
               </li>
             )
           ) : null}
           <li>
             <button
               onClick={handleClick}
-              className="block w-full px-4 py-2 text-left hover:bg-zinc-600 hover:text-white"
+              className="block w-full px-4 py-2 text-left hover:bg-zinc-600 hover:text-white disabled:opacity-50"
             >
               Sign out
             </button>

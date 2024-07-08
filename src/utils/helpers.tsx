@@ -1,10 +1,18 @@
+import { stripe } from '@/lib/stripe'
 import { UserWithSubscriptionsAndProgress } from '@/services/user'
 import { ProblemRow, ProblemStatus } from '@/types'
 import {
   AccessOptions,
   ProblemDifficulty,
+  SubscriptionPlan,
   SubscriptionStatus,
 } from '@prisma/client'
+import Stripe from 'stripe'
+
+let cachedPrices: Record<string, Stripe.Price> | null = null
+let lastFetchTime = 0
+
+const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
 
 const DIFFICULTY_ORDER = {
   EASY: 1,
@@ -135,4 +143,86 @@ export const filterAndSortProblems = (
   }
 
   return filteredProblems
+}
+
+export const getURL = (path: string = '') => {
+  // Check if NEXT_PUBLIC_SITE_URL is set and non-empty. Set this to your site URL in production env.
+  let url =
+    process?.env?.NEXT_PUBLIC_SITE_URL &&
+    process.env.NEXT_PUBLIC_SITE_URL.trim() !== ''
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : // If not set, check for NEXT_PUBLIC_VERCEL_URL, which is automatically set by Vercel.
+        process?.env?.NEXT_PUBLIC_VERCEL_URL &&
+          process.env.NEXT_PUBLIC_VERCEL_URL.trim() !== ''
+        ? process.env.NEXT_PUBLIC_VERCEL_URL
+        : // If neither is set, default to localhost for local development.
+          'http://localhost:3000/'
+
+  // Trim the URL and remove trailing slash if exists.
+  url = url.replace(/\/+$/, '')
+  // Make sure to include `https://` when not localhost.
+  url = url.includes('http') ? url : `https://${url}`
+  // Ensure path starts without a slash to avoid double slashes in the final URL.
+  path = path.replace(/^\/+/, '')
+
+  // Concatenate the URL and the path.
+  return path ? `${url}/${path}` : url
+}
+
+export const fetchPricesFromStripe = async () => {
+  const prices = await stripe.prices.list({ limit: 100 })
+  return prices.data.reduce(
+    (acc, price) => {
+      acc[price.id] = price
+      return acc
+    },
+    {} as Record<string, Stripe.Price>,
+  )
+}
+
+export const getCachedPrices = async () => {
+  const now = Date.now()
+  if (!cachedPrices || now - lastFetchTime > CACHE_DURATION) {
+    cachedPrices = await fetchPricesFromStripe()
+    lastFetchTime = now
+  }
+  return cachedPrices
+}
+
+export const getPlanFromStripePlan = async (
+  priceId: string,
+): Promise<SubscriptionPlan | void> => {
+  const prices = await getCachedPrices()
+  const price = prices[priceId]
+
+  if (!price) return console.log(`Unknown price ID`)
+
+  switch (price.nickname) {
+    case 'Monthly':
+      return SubscriptionPlan.MONTHLY
+    case 'Yearly':
+      return SubscriptionPlan.YEARLY
+    case 'Lifetime':
+      return SubscriptionPlan.LIFETIME
+    default:
+      return console.log(`Unknown price nickname`)
+  }
+}
+
+export const getStatusFromStripeStatus = (
+  status: Stripe.Subscription.Status,
+): SubscriptionStatus => {
+  switch (status) {
+    case 'active':
+      return SubscriptionStatus.ACTIVE
+    case 'canceled':
+      return SubscriptionStatus.CANCELED
+    case 'incomplete':
+    case 'incomplete_expired':
+    case 'past_due':
+    case 'unpaid':
+      return SubscriptionStatus.EXPIRED
+    default:
+      return SubscriptionStatus.EXPIRED
+  }
 }

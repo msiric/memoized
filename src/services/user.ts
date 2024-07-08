@@ -2,23 +2,32 @@ import prisma from '@/lib/prisma'
 import { Curriculum, SubscriptionStatus } from '@/types'
 import { Prisma, Subscription, SubscriptionPlan } from '@prisma/client'
 
-export async function getUserWithSubscriptions(userId: string) {
+export async function getUserWithSubscriptions(
+  userId: string,
+  throwEarly = true,
+) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
-      subscriptions: {
-        orderBy: { startDate: 'desc' },
-        take: 1,
+      customer: {
+        include: {
+          subscriptions: {
+            orderBy: { startDate: 'desc' },
+            take: 1,
+          },
+        },
       },
     },
   })
 
-  if (!user) {
+  if (!user && throwEarly) {
     throw new Error('User not found')
   }
 
   const currentSubscription =
-    (user?.subscriptions?.length ?? 0) > 0 ? user?.subscriptions[0] : null
+    (user?.customer?.subscriptions?.length ?? 0) > 0
+      ? user?.customer?.subscriptions[0]
+      : null
 
   const currentSubscriptionPlan = currentSubscription
     ? currentSubscription.plan
@@ -37,9 +46,13 @@ export async function getUserWithSubscriptions(userId: string) {
 
 export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
   include: {
-    subscriptions: {
-      orderBy: { startDate: 'desc' }
-      take: 1
+    customer: {
+      include: {
+        subscriptions: {
+          orderBy: { startDate: 'desc' }
+          take: 1
+        }
+      }
     }
     lessonProgress: {
       where: {
@@ -62,9 +75,13 @@ export async function getUserProgressWithLessons(userId?: string) {
     ? await prisma.user.findUnique({
         where: { id: userId },
         include: {
-          subscriptions: {
-            orderBy: { startDate: 'desc' },
-            take: 1,
+          customer: {
+            include: {
+              subscriptions: {
+                orderBy: { startDate: 'desc' },
+                take: 1,
+              },
+            },
           },
           lessonProgress: {
             where: {
@@ -89,7 +106,9 @@ export async function getUserProgressWithLessons(userId?: string) {
     : null
 
   const currentSubscription =
-    (user?.subscriptions?.length ?? 0) > 0 ? user?.subscriptions[0] : null
+    (user?.customer?.subscriptions?.length ?? 0) > 0
+      ? user?.customer?.subscriptions[0]
+      : null
 
   const currentSubscriptionPlan = currentSubscription
     ? currentSubscription.plan
