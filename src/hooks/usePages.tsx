@@ -1,5 +1,6 @@
 'use client'
 
+import { COURSE_PREFIX } from '@/constants'
 import { useContentStore } from '@/contexts/progress'
 import { LessonResult, SectionResult } from '@/types'
 import { usePathname } from 'next/navigation'
@@ -7,6 +8,8 @@ import { usePathname } from 'next/navigation'
 export const usePages = () => {
   const pathname = usePathname()
   const fullCurriculum = useContentStore((state) => state.fullCurriculum)
+
+  const isIntroduction = pathname === COURSE_PREFIX
 
   const courseSections = fullCurriculum[0]?.sections ?? []
 
@@ -18,7 +21,7 @@ export const usePages = () => {
   )
 
   if (currentSectionIndex === -1) {
-    return {}
+    return { isIntroduction }
   }
 
   const currentSection = courseSections[currentSectionIndex]
@@ -54,6 +57,7 @@ export const usePages = () => {
   const nextSection = courseSections[currentSectionIndex + 1] || null
 
   return {
+    isIntroduction,
     previousPage,
     currentPage,
     nextPage,

@@ -3,7 +3,15 @@
 import { usePages } from '@/hooks/usePages'
 
 export function NextPage() {
-  const { nextPage, nextSection, isEndOfSection, isEndOfCourse } = usePages()
+  const {
+    isIntroduction,
+    nextPage,
+    nextSection,
+    isEndOfSection,
+    isEndOfCourse,
+  } = usePages()
+
+  if (isIntroduction) return null
 
   if (isEndOfCourse)
     return (

@@ -41,7 +41,7 @@ export type LessonStatusProps = {
 
 export function LessonStatus({ lessonId }: LessonStatusProps) {
   const { data: session } = useSession()
-  const { isStartOfSection } = usePages()
+  const { isStartOfSection, isIntroduction } = usePages()
 
   const openModal = useAuthStore((state) => state.openModal)
   const completedLessons = useContentStore((state) => state.completedLessons)
@@ -66,7 +66,7 @@ export function LessonStatus({ lessonId }: LessonStatusProps) {
     }
   }
 
-  if (isStartOfSection) return null
+  if (isStartOfSection || isIntroduction) return null
 
   return (
     <div className="relative flex h-8 items-center justify-center gap-6 md:justify-start">
