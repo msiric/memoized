@@ -11,6 +11,16 @@ export const completeCurriculum = [
     description: 'The complete coding interview preparation',
     sections: [
       {
+        id: '/',
+        href: `${COURSE_PREFIX}`,
+        title: 'Introduction',
+        description: 'Getting started with Data Structures and Algorithms',
+        about:
+          'Get started with the fundamentals of Data Structures and Algorithms. Understand the importance and applications of these concepts in programming and problem-solving. Learn about common data structures like arrays, linked lists, stacks, queues, trees, graphs, and more. Master essential algorithms for searching, sorting, and optimization. Prepare yourself for coding interviews and real-world challenges.',
+        icon: '',
+        lessons: [],
+      },
+      {
         id: '/built-in-data-structures',
         href: `${COURSE_PREFIX}/built-in-data-structures`,
         title: 'Built-In Data Structures',
