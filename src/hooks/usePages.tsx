@@ -8,10 +8,18 @@ import { usePathname } from 'next/navigation'
 export const usePages = () => {
   const pathname = usePathname()
   const fullCurriculum = useContentStore((state) => state.fullCurriculum)
+  const courseSections = fullCurriculum[0]?.sections ?? []
 
   const isIntroduction = pathname === COURSE_PREFIX
 
-  const courseSections = fullCurriculum[0]?.sections ?? []
+  if (isIntroduction) {
+    return {
+      isIntroduction,
+      previousPage: null,
+      currentPage: null,
+      nextPage: courseSections[0],
+    }
+  }
 
   // Find the current section
   const currentSectionIndex = courseSections.findIndex(
@@ -21,7 +29,7 @@ export const usePages = () => {
   )
 
   if (currentSectionIndex === -1) {
-    return { isIntroduction }
+    return {}
   }
 
   const currentSection = courseSections[currentSectionIndex]

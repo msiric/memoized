@@ -3,9 +3,9 @@
 import Link from 'next/link'
 
 import { Button } from '@/components/Button'
-import { usePages } from '@/hooks/usePages'
 import { useAuthStore } from '@/contexts/auth'
 import { useAccess } from '@/hooks/useAccess'
+import { usePages } from '@/hooks/usePages'
 
 function PageLink({
   label,
