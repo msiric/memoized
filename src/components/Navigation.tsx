@@ -1,5 +1,6 @@
 'use client'
 
+import { createPortal } from '@/actions/createPortal'
 import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
 import { useSectionStore } from '@/components/SectionProvider'
 import { Tag } from '@/components/Tag'
@@ -7,16 +8,19 @@ import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useAccess } from '@/hooks/useAccess'
 import { Curriculum, LessonResult, SectionResult } from '@/types'
-import { remToPx } from '@/utils/helpers'
-import { AccessOptions } from '@prisma/client'
+import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
+import {
+  AccessOptions,
+  SubscriptionPlan,
+  SubscriptionStatus,
+} from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
 import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
-import { PremiumButton } from './PremiumButton'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
 
@@ -77,6 +81,82 @@ function SectionLink({
       </span>
       {isCompleted ? <IconWrapper icon={CheckIcon} /> : null}
     </Link>
+  )
+}
+
+export const NavPremiumButton = () => {
+  const router = useRouter()
+  const currentPath = usePathname()
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const user = useAuthStore((state) => state.user)
+
+  const currentSubscription = capitalizeFirstLetter(
+    user?.currentSubscriptionPlan ?? 'Subscribed',
+  )
+
+  const handleStripePortalRequest = async () => {
+    setIsSubmitting(true)
+    const redirectUrl = await createPortal(currentPath ?? '')
+    setIsSubmitting(false)
+    return router.push(redirectUrl)
+  }
+
+  const content =
+    user === undefined ? (
+      <p className="inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border border-lime-600 bg-lime-600 px-3 py-1 text-sm font-medium text-white transition hover:border-lime-500 hover:bg-lime-500 min-[768px]:hidden dark:bg-zinc-900 dark:text-lime-500 dark:hover:bg-lime-900 dark:hover:text-lime-500">
+        Loading
+      </p>
+    ) : user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
+      user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
+        <p className="inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border border-lime-600 bg-lime-600 px-3 py-1 text-sm font-medium text-white transition hover:border-lime-500 hover:bg-lime-500 min-[768px]:hidden dark:bg-zinc-900 dark:text-lime-500 dark:hover:bg-lime-900 dark:hover:text-lime-500">
+          {currentSubscription}
+        </p>
+      ) : (
+        <li className="md:hidden">
+          <button
+            onClick={handleStripePortalRequest}
+            disabled={isSubmitting}
+            className={clsx(
+              'text-md block py-1 text-zinc-600 transition hover:text-zinc-900 disabled:opacity-50 dark:text-white dark:hover:text-lime-500',
+              isSubmitting && 'cursor-wait',
+            )}
+          >
+            {currentSubscription}
+          </button>
+        </li>
+      )
+    ) : (
+      <li className="md:hidden">
+        <Link
+          href="/premium"
+          className="text-md block py-1 text-zinc-600 transition hover:text-zinc-900 dark:text-white dark:hover:text-lime-500"
+        >
+          Premium
+        </Link>
+      </li>
+    )
+
+  return <li>{content}</li>
+}
+
+function TopLevelNavItem({
+  href,
+  children,
+}: {
+  href: string
+  children: React.ReactNode
+}) {
+  return (
+    <li className="md:hidden">
+      <Link
+        href={href}
+        className="text-md block py-1 text-zinc-600 transition hover:text-zinc-900 dark:text-white dark:hover:text-lime-500"
+      >
+        {children}
+      </Link>
+    </li>
   )
 }
 
@@ -342,13 +422,13 @@ export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
   return (
     <nav {...props}>
       <ul role="list">
+        <div className="mt-6 flex flex-col gap-2 md:hidden">
+          <TopLevelNavItem href="/problems">Problems</TopLevelNavItem>
+          <NavPremiumButton />
+        </div>
         {sortedContent?.map((course) =>
           course.sections.map((section, index) => (
-            <NavigationGroup
-              key={section.title}
-              section={section}
-              className={index === 0 ? 'md:mt-0' : ''}
-            />
+            <NavigationGroup key={section.title} section={section} />
           )),
         )}
         <div className="sticky bottom-0 z-10 flex flex-col justify-between gap-2">
@@ -358,15 +438,6 @@ export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
               className="mt-6 w-full truncate min-[416px]:hidden"
               isMobile
             />
-            <Link
-              href="/problems"
-              className="mt-6 inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border bg-zinc-100 px-3 py-1 text-sm font-medium text-zinc-900 transition hover:bg-zinc-200 min-[768px]:hidden dark:bg-zinc-800 dark:text-zinc-400 dark:ring-1 dark:ring-inset dark:ring-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-            >
-              Problems
-            </Link>
-          </li>
-          <li className="bottom-0 z-10 flex justify-between gap-2">
-            <PremiumButton isMobile withList={false} />
           </li>
         </div>
       </ul>
