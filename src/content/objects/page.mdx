@@ -10,7 +10,7 @@ Objects in JavaScript are a fundamental data type used to store collections of k
 ## **Concept and Use Cases**
 
 **Definition:**
-A JavaScript object is a collection of key-value pairs, where each key (property name) is a string (or Symbol), and each value can be any data type, including another object or function.
+A JavaScript object is a mutable collection of key-value pairs, where each key (property name) is a string (or Symbol), and each value can be any data type, including another object or function.
 
 **Common Use Cases:**
 - Storing and organizing related data.
@@ -341,8 +341,10 @@ john.greet();  // Output: 'Hello, my name is John'
 ```
 
 ## **Object Algorithms**
+Below are some common object algorithms you should be familiar with:
 
 ### **Deep Cloning**
+Deep cloning creates a complete copy of an object, including all nested objects and arrays.
 
 **Example:**
 ```javascript
@@ -367,6 +369,7 @@ console.log(original.b.c);  // Output: 2 (original object is not affected)
 ```
 
 ### **Merging Objects Recursively**
+Merging objects recursively combines properties of multiple objects into one, including nested objects.
 
 **Example:**
 ```javascript

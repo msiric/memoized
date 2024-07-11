@@ -10,7 +10,7 @@ Numbers in JavaScript are a fundamental data type used to represent numeric valu
 ## **Concept and Use Cases**
 
 **Definition:**
-A number in JavaScript is a numeric data type used to perform arithmetic operations. JavaScript numbers can be integers, floating-point numbers, and special numeric values like `Infinity`, `-Infinity`, and `NaN` (Not-a-Number).
+A number in JavaScript is an immutable numeric data type used to perform arithmetic operations. JavaScript numbers can be integers, floating-point numbers, and special numeric values like `Infinity`, `-Infinity`, and `NaN` (Not-a-Number).
 
 **Common Use Cases:**
 - Performing arithmetic calculations.
@@ -127,6 +127,25 @@ console.log(num.toLocaleString());  // Output: '12,345.679' (varies by locale)
   console.log(Math.round(num));  // Output: 5
   ```
 
+- **Using `Math.ceil` for Rounding Up:**
+  When you need to round a number up to the nearest integer.
+  **Example:**
+  ```javascript
+  let num = 4.1;
+  console.log(Math.ceil(num));  // Output: 5
+  ```
+
+- **Using `Math.trunc` for Truncating:**
+  When you need to remove the fractional part of a number, effectively rounding towards zero.
+  **Example:**
+  ```javascript
+  let num = 4.9;
+  console.log(Math.trunc(num));  // Output: 4
+
+  let numNegative = -4.9;
+  console.log(Math.trunc(numNegative));  // Output: -4
+  ```
+
 - **Generating Random Integers:**
   Use `Math.random` in combination with `Math.floor` to generate random integers within a specific range.
   **Example:**
@@ -241,8 +260,10 @@ console.log(num.toPrecision(4));  // Output: '123.5'
 ```
 
 ## **Number Algorithms**
+Below are some common number algorithms you should be familiar with:
 
 ### **Finding the Greatest Common Divisor (GCD)**
+The GCD of two numbers is the largest number that divides both of them without leaving a remainder.
 
 **Example:**
 ```javascript
@@ -259,6 +280,7 @@ console.log(gcd(48, 18));  // Output: 6
 ```
 
 ### **Prime Number Check**
+A prime number check determines if a number is a prime, which means it is greater than 1 and has no divisors other than 1 and itself.
 
 **Example:**
 ```javascript
@@ -279,6 +301,7 @@ console.log(isPrime(15));  // Output: false
 ```
 
 ### **Generating Fibonacci Numbers**
+Generating Fibonacci numbers involves creating a sequence where each number is the sum of the two preceding ones.
 
 **Example:**
 ```javascript
@@ -295,6 +318,7 @@ console.log(fibonacci(10));  // Output: 55
 ```
 
 ### **Factorial Calculation**
+Calculating the factorial of a number involves multiplying the number by all positive integers less than it.
 
 **Example:**
 ```javascript

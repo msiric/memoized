@@ -3,7 +3,18 @@
 import { COURSE_PREFIX } from '@/constants'
 import { useContentStore } from '@/contexts/progress'
 import { LessonResult, SectionResult } from '@/types'
+import { AccessOptions } from '@prisma/client'
 import { usePathname } from 'next/navigation'
+
+const introPage = {
+  id: '/introduction',
+  slug: 'introduction',
+  href: `${COURSE_PREFIX}`,
+  title: 'Introduction',
+  description: 'Course introduction',
+  access: AccessOptions.FREE,
+  order: -1,
+}
 
 export const usePages = () => {
   const pathname = usePathname()
@@ -42,8 +53,24 @@ export const usePages = () => {
   let currentPage: LessonResult | SectionResult | null = null
   let nextPage: LessonResult | SectionResult | null = null
 
-  if (pathname === currentSection.href) {
+  const isFirstSection = pathname === courseSections[0].href
+  const isStartOfSection = pathname === currentSection.href
+  const isEndOfSection = currentPageIndex === allPagesInSection.length - 1
+  const isEndOfCourse =
+    currentSectionIndex === courseSections.length - 1 && isEndOfSection
+
+  const previousSection = courseSections[currentSectionIndex - 1] || null
+  const nextSection = courseSections[currentSectionIndex + 1] || null
+
+  if (isFirstSection) {
+    // We are at the first section of the course
+    previousPage = introPage
+    currentPage = courseSections[0] || null
+    nextPage = courseSections[0]?.lessons?.[0] || null
+  } else if (pathname === currentSection.href) {
     // We are at the section intro page
+    previousPage =
+      courseSections[currentSectionIndex - 1]?.lessons?.at(-1) || null
     currentPage = currentSection
     nextPage = allPagesInSection[0] || null
   } else if (currentPageIndex !== -1) {
@@ -53,16 +80,10 @@ export const usePages = () => {
         ? currentSection
         : allPagesInSection[currentPageIndex - 1] || null
     currentPage = allPagesInSection[currentPageIndex]
-    nextPage = allPagesInSection[currentPageIndex + 1] || null
+    nextPage = isEndOfSection
+      ? nextSection
+      : allPagesInSection[currentPageIndex + 1] || null
   }
-
-  const isStartOfSection = pathname === currentSection.href
-  const isEndOfSection = currentPageIndex === allPagesInSection.length - 1
-  const isEndOfCourse =
-    currentSectionIndex === courseSections.length - 1 && isEndOfSection
-
-  const previousSection = courseSections[currentSectionIndex - 1] || null
-  const nextSection = courseSections[currentSectionIndex + 1] || null
 
   return {
     isIntroduction,

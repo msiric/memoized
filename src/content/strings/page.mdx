@@ -236,8 +236,11 @@ console.log(String.fromCodePoint(0x1D306));  // Output: '𝌆'
 ```
 
 ## **String Algorithms**
+Below are some common string algorithms you should be familiar with:
+
 
 ### **Reversing a String**
+Reversing a string is a common operation where the order of characters in the string is reversed.
 
 **Example:**
 ```javascript
@@ -246,9 +249,20 @@ function reverseString(str) {
 }
 
 console.log(reverseString('Hello, World!'));  // Output: '!dlroW ,olleH'
+
+// Reversing with a loop
+function reverseStringLoop(str) {
+    let reversed = '';
+    for (let char of str) {
+        reversed = char + reversed;
+    }
+    return reversed;
+}
+console.log(reverseStringLoop('JavaScript'));  // Output: 'tpircSavaJ'
 ```
 
 ### **Palindrome Check**
+A palindrome check determines if a string reads the same forward and backward, ignoring non-alphanumeric characters and case differences.
 
 **Example:**
 ```javascript
@@ -259,9 +273,26 @@ function isPalindrome(str) {
 }
 
 console.log(isPalindrome('A man, a plan, a canal, Panama'));  // Output: true
+
+// Palindrome check using two pointers
+function isPalindromeTwoPointers(str) {
+    let cleaned = str.replace(/[^A-Za-z0-9]/g, '').toLowerCase();
+    let left = 0;
+    let right = cleaned.length - 1;
+    while (left < right) {
+        if (cleaned[left] !== cleaned[right]) {
+            return false;
+        }
+        left++;
+        right--;
+    }
+    return true;
+}
+console.log(isPalindromeTwoPointers('racecar'));  // Output: true
 ```
 
 ### **Anagram Check**
+An anagram check verifies if two strings contain the same characters in the same frequency, ignoring spaces and case differences.
 
 **Example:**
 ```javascript
@@ -271,9 +302,25 @@ function areAnagrams(str1, str2) {
 }
 
 console.log(areAnagrams('listen', 'silent'));  // Output: true
+
+// Anagram check using character counts
+function areAnagramsCharCount(str1, str2) {
+    let charCount = str => {
+        let count = {};
+        str.replace(/[^A-Za-z0-9]/g, '').toLowerCase().split('').forEach(char => {
+            count[char] = (count[char] || 0) + 1;
+        });
+        return count;
+    };
+    let count1 = charCount(str1);
+    let count2 = charCount(str2);
+    return JSON.stringify(count1) === JSON.stringify(count2);
+}
+console.log(areAnagramsCharCount('anagram', 'nagaram'));  // Output: true
 ```
 
 ### **Substring Search (Knuth-Morris-Pratt Algorithm)**
+The Knuth-Morris-Pratt (KMP) algorithm searches for occurrences of a "pattern" string within a "text" string efficiently by preprocessing the pattern to skip unnecessary comparisons.
 
 **Example:**
 ```javascript
@@ -321,6 +368,10 @@ function KMPSearch(pattern, text) {
 
 console.log(KMPSearch('abc', 'abcabc'));  // Output: 0
 console.log(KMPSearch('abc', 'aaabcaabc'));  // Output: 3
+
+// Substring search with indexOf
+console.log('abcabc'.indexOf('abc'));  // Output: 0
+console.log('aaabcaabc'.indexOf('abc'));  // Output: 3
 ```
 
 ## **Interview Tips and Tricks**
