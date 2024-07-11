@@ -1,0 +1,165 @@
+class CircularLinkedListNode<T> {
+  data: T
+  next: CircularLinkedListNode<T> | null
+
+  constructor(data: T) {
+    this.data = data
+    this.next = null
+  }
+}
+
+class CircularLinkedList<T> {
+  headNode: CircularLinkedListNode<T> | null
+  length: number
+
+  constructor() {
+    this.headNode = null
+    this.length = 0
+  }
+
+  size = (): number => this.length
+
+  head = (): T | null => (this.headNode ? this.headNode.data : null)
+
+  isEmpty = (): boolean => this.length === 0
+
+  private initiateNodeAndIndex() {
+    return { currentNode: this.headNode, currentIndex: 0 }
+  }
+
+  getElementAt(index: number): CircularLinkedListNode<T> | null {
+    if (index >= 0 && index < this.length) {
+      let { currentNode } = this.initiateNodeAndIndex()
+      for (let i = 0; i < index && currentNode !== null; i++) {
+        currentNode = currentNode.next!
+      }
+      return currentNode
+    }
+    return null
+  }
+
+  addAtFirst(data: T): number {
+    const node = new CircularLinkedListNode(data)
+    if (!this.headNode) {
+      this.headNode = node
+      node.next = this.headNode
+    } else {
+      node.next = this.headNode
+      const lastNode = this.getElementAt(this.length - 1)!
+      lastNode.next = node
+      this.headNode = node
+    }
+    this.length++
+    return this.length
+  }
+
+  add(data: T): number {
+    if (!this.headNode) {
+      return this.addAtFirst(data)
+    }
+    const node = new CircularLinkedListNode(data)
+    const lastNode = this.getElementAt(this.length - 1)!
+    lastNode.next = node
+    node.next = this.headNode
+    this.length++
+    return this.length
+  }
+
+  insertAt(index: number, data: T): number {
+    if (index === 0) return this.addAtFirst(data)
+    if (index === this.length) return this.add(data)
+    if (index < 0 || index > this.length)
+      throw new RangeError(`Index is out of range. Max index is ${this.length}`)
+    const node = new CircularLinkedListNode(data)
+    const previousNode = this.getElementAt(index - 1)!
+    node.next = previousNode.next
+    previousNode.next = node
+    this.length++
+    return this.length
+  }
+
+  indexOf(data: T): number {
+    let { currentNode } = this.initiateNodeAndIndex()
+    let currentIndex = 0
+    while (currentNode) {
+      if (currentNode.data === data) {
+        return currentIndex
+      }
+      currentNode = currentNode.next!
+      currentIndex++
+      if (currentNode === this.headNode) break
+    }
+    return -1
+  }
+
+  remove(): T | null {
+    if (this.isEmpty()) return null
+    const lastNode = this.getElementAt(this.length - 2)!
+    const removedNode = lastNode.next!
+    lastNode.next = this.headNode
+    this.length--
+    return removedNode.data
+  }
+
+  removeFirst(): T | null {
+    if (this.isEmpty()) return null
+    const removedNode = this.headNode!
+    if (this.length === 1) {
+      this.clear()
+      return removedNode.data
+    }
+    const lastNode = this.getElementAt(this.length - 1)!
+    this.headNode = this.headNode!.next!
+    lastNode.next = this.headNode
+    this.length--
+    return removedNode.data
+  }
+
+  removeAt(index: number): T | null {
+    if (index < 0 || index >= this.length) {
+      throw new RangeError('Out of Range index')
+    }
+    if (index === 0) return this.removeFirst()
+    if (index === this.length - 1) return this.remove()
+    const previousNode = this.getElementAt(index - 1)!
+    const currentNode = previousNode.next!
+    previousNode.next = currentNode.next
+    this.length--
+    return currentNode.data
+  }
+
+  removeData(data: T): T | null {
+    const index = this.indexOf(data)
+    if (index === -1) {
+      return null
+    }
+    return this.removeAt(index)
+  }
+
+  printData(output = (value: T) => console.log(value)) {
+    let { currentNode, currentIndex } = this.initiateNodeAndIndex()
+    while (currentNode !== null && currentIndex < this.length) {
+      output(currentNode.data)
+      currentNode = currentNode.next!
+      currentIndex++
+    }
+  }
+
+  get(): T[] {
+    const list: T[] = []
+    let { currentNode, currentIndex } = this.initiateNodeAndIndex()
+    while (currentNode !== null && currentIndex < this.length) {
+      list.push(currentNode.data)
+      currentNode = currentNode.next!
+      currentIndex++
+    }
+    return list
+  }
+
+  clear() {
+    this.headNode = null
+    this.length = 0
+  }
+}
+
+export { CircularLinkedListNode, CircularLinkedList }

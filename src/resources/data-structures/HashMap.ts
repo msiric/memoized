@@ -1,0 +1,130 @@
+class HashMapNode<K, V> {
+  key: K
+  value: V
+  next: HashMapNode<K, V> | null
+
+  constructor(key: K, value: V) {
+    this.key = key
+    this.value = value
+    this.next = null
+  }
+}
+
+class HashMap<K, V> {
+  private buckets: Array<HashMapNode<string, V> | null>
+  private size: number
+  private capacity: number
+
+  constructor(capacity: number = 16) {
+    this.capacity = capacity
+    this.buckets = new Array<HashMapNode<string, V> | null>(capacity).fill(null)
+    this.size = 0
+  }
+
+  private hash(key: string): number {
+    let hash = 0
+    const keyString = key.toString()
+    for (let i = 0; i < keyString.length; i++) {
+      hash = (hash << 5) - hash + keyString.charCodeAt(i)
+      hash |= 0 // Convert to 32bit integer
+    }
+    return Math.abs(hash) % this.capacity
+  }
+
+  put(key: string, value: V): void {
+    const index = this.hash(key)
+    let node = this.buckets[index]
+    if (!node) {
+      this.buckets[index] = new HashMapNode(key, value)
+    } else {
+      while (node) {
+        if (node.key === key) {
+          node.value = value
+          return
+        }
+        if (!node.next) {
+          node.next = new HashMapNode(key, value)
+          break
+        }
+        node = node.next
+      }
+    }
+    this.size++
+  }
+
+  get(key: string): V | null {
+    const index = this.hash(key)
+    let node = this.buckets[index]
+    while (node) {
+      if (node.key === key) {
+        return node.value
+      }
+      node = node.next
+    }
+    return null
+  }
+
+  remove(key: string): V | null {
+    const index = this.hash(key)
+    let node = this.buckets[index]
+    let prevNode: HashMapNode<string, V> | null = null
+
+    while (node) {
+      if (node.key === key) {
+        if (prevNode) {
+          prevNode.next = node.next
+        } else {
+          this.buckets[index] = node.next
+        }
+        this.size--
+        return node.value
+      }
+      prevNode = node
+      node = node.next
+    }
+    return null
+  }
+
+  containsKey(key: string): boolean {
+    return this.get(key) !== null
+  }
+
+  keys(): string[] {
+    const keysArray: string[] = []
+    for (let i = 0; i < this.capacity; i++) {
+      let node = this.buckets[i]
+      while (node) {
+        keysArray.push(node.key)
+        node = node.next
+      }
+    }
+    return keysArray
+  }
+
+  values(): V[] {
+    const valuesArray: V[] = []
+    for (let i = 0; i < this.capacity; i++) {
+      let node = this.buckets[i]
+      while (node) {
+        valuesArray.push(node.value)
+        node = node.next
+      }
+    }
+    return valuesArray
+  }
+
+  getSize(): number {
+    return this.size
+  }
+
+  clear(): void {
+    this.buckets.fill(null)
+    this.size = 0
+  }
+
+  log(): void {
+    console.log(this.buckets)
+  }
+}
+
+export { HashMap }

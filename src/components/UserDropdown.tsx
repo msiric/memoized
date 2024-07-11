@@ -166,9 +166,7 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
           {user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
             user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
               <li>
-                <p className="block w-full px-4 py-2">
-                  Lifetime access &#10024;
-                </p>
+                <p className="block w-full px-4 py-2">Lifetime &#10024;</p>
               </li>
             ) : (
               <li>
