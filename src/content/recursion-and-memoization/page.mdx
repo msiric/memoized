@@ -13,7 +13,28 @@ Recursion is a technique where a function calls itself to solve a problem. Memoi
 - **Recursion:** A process in which a function calls itself as a subroutine.
 - **Memoization:** An optimization technique that involves storing the results of expensive function calls and returning the cached result when the same inputs occur again.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider the Fibonacci sequence. Without memoization, the function recalculates values multiple times:
+```
+fib(5)
+|- fib(4)
+|  |- fib(3)
+|  |  |- fib(2)
+|  |  |  |- fib(1)
+|  |  |  |- fib(0)
+|  |  |- fib(1)
+|  |- fib(2)
+|     |- fib(1)
+|     |- fib(0)
+|- fib(3)
+   |- fib(2)
+   |  |- fib(1)
+   |  |- fib(0)
+   |- fib(1)
+```
+With memoization, previously computed results are reused, reducing redundant calculations.
+
+### **Common Use Cases:**
 - Solving problems with a natural recursive structure (e.g., tree traversals, factorial calculation).
 - Dynamic programming problems (e.g., Fibonacci sequence, knapsack problem).
 - Divide and conquer algorithms (e.g., merge sort, quick sort).
@@ -22,7 +43,7 @@ Recursion is a technique where a function calls itself to solve a problem. Memoi
 
 1. **Base Case:**
    - The condition under which the recursion stops.
-   
+
 2. **Recursive Case:**
    - The part of the function where the function calls itself with modified arguments.
 

@@ -12,7 +12,10 @@ The Subsets technique is an efficient approach to generate all possible subsets 
 **Definition:** 
 The Subsets technique involves generating all possible combinations of a given set of elements. This can be achieved using iterative, recursive, or bit manipulation approaches.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider the set `nums = [1, 2, 3]`. The subsets are `[[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]`.
+
+### **Common Use Cases:**
 - Generating all possible subsets of a given set.
 - Solving problems that require exploring all combinations of a set (e.g., knapsack problems, combination sums).
 - Implementing algorithms that involve choosing or not choosing elements.
@@ -34,13 +37,13 @@ The Subsets technique involves generating all possible combinations of a given s
 
 **Problem:** Given a set of distinct integers, return all possible subsets.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Start with an empty set: [[]].
 2. Iterate through each element in the input set.
 3. For each element, add it to all existing subsets to create new subsets.
 4. Collect and return all subsets.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function subsets(nums) {
     const result = [[]];  // Start with the empty set
@@ -61,12 +64,12 @@ const nums = [1, 2, 3];
 console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Start with the empty set and iteratively build new subsets by adding each element to existing subsets.
 - Use a nested loop to create new subsets for each element.
 - Collect and return all subsets at the end.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to start with the empty set, leading to incomplete subsets.
 - Not handling duplicate elements correctly (if the input set contains duplicates).
 - Ensuring all new subsets are added to the result correctly.
@@ -75,13 +78,13 @@ console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 
 
 **Problem:** Given a set of distinct integers, return all possible subsets using a recursive approach.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Define a recursive function to generate subsets.
 2. For each element, decide to either include it in the subset or not.
 3. Recursively generate subsets with and without the current element.
 4. Collect and return all subsets.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function subsets(nums) {
     const result = [];
@@ -104,12 +107,12 @@ const nums = [1, 2, 3];
 console.log(subsets(nums));  // Output: [[], [1], [1, 2], [1, 2, 3], [1, 3], [2], [2, 3], [3]]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a backtracking approach to generate subsets by exploring both inclusion and exclusion of each element.
 - Start the recursion with an empty path and build subsets incrementally.
 - Collect and return all subsets at the end.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Not handling the base case correctly, leading to incomplete subsets.
 - Forgetting to backtrack by removing the last element from the path.
 - Ensuring all subsets are collected correctly during recursion.
@@ -118,13 +121,13 @@ console.log(subsets(nums));  // Output: [[], [1], [1, 2], [1, 2, 3], [1, 3], [2]
 
 **Problem:** Given a set of distinct integers, return all possible subsets using bit manipulation.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use bit manipulation to represent each subset.
 2. Iterate through all possible binary representations (0 to 2^n - 1).
 3. For each binary representation, use the bits to determine which elements to include in the subset.
 4. Collect and return all subsets.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function subsets(nums) {
     const result = [];
@@ -148,12 +151,12 @@ const nums = [1, 2, 3];
 console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use bit manipulation to represent each subset as a binary number.
 - Iterate through all possible binary representations to generate subsets.
 - Collect and return all subsets at the end.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Incorrectly generating binary representations, leading to incomplete subsets.
 - Not handling the bit manipulation correctly to determine which elements to include.
 - Ensuring all subsets are collected correctly.

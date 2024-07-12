@@ -5,14 +5,25 @@ export const metadata = {
 
 # **Graph DFS (Depth-First Search)**
 
-The Depth-irst Search (DFS) technique is a fundamental algorithm for traversing or searching graph data structures. DFS operates by exploring as far as possible along each branch before backtracking.
+The Depth-First Search (DFS) technique is a fundamental algorithm for traversing or searching graph data structures. DFS operates by exploring as far as possible along each branch before backtracking.
 
 ## **Concept and Use Cases**
 
 **Definition:** 
 DFS is an algorithm for traversing or searching graph data structures. It starts at a source vertex and explores as far as possible along each branch before backtracking.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider the following graph:
+
+```
+  A -- B -- D
+  |    |
+  C -- E -- F
+```
+
+DFS traversal starting from vertex `A` might visit vertices in the following order: `A -> B -> D -> E -> C -> F`.
+
+### **Common Use Cases:**
 - Pathfinding in a maze or puzzle.
 - Detecting cycles in a graph.
 - Topological sorting of a directed acyclic graph (DAG).
@@ -35,13 +46,13 @@ DFS is an algorithm for traversing or searching graph data structures. It starts
 
 **Problem:** Given a graph, determine if it contains any cycles.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a recursive function to perform DFS.
 2. Mark the current vertex as visited.
 3. For each neighbor of the current vertex, recursively visit the neighbor.
 4. If a visited vertex is encountered again, a cycle is detected.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function dfsCycleDetection(graph) {
     let visited = new Set();
@@ -80,12 +91,12 @@ const graph = {
 console.log(dfsCycleDetection(graph));  // Output: true
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a recursion stack (recStack) to track the vertices in the current path.
 - Check for cycles by revisiting vertices in the recursion stack.
 - Ensure to backtrack correctly by removing vertices from the recursion stack.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to check if a vertex has already been visited.
 - Not handling the recursion stack correctly, leading to false positives.
 - Handling disconnected graphs and isolated cycles.
@@ -94,13 +105,13 @@ console.log(dfsCycleDetection(graph));  // Output: true
 
 **Problem:** Given an undirected graph, find all its connected components.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a recursive function to perform DFS.
 2. Mark the current vertex as visited.
 3. For each neighbor of the current vertex, recursively visit the neighbor.
 4. Track visited vertices to ensure all connected components are found.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function findConnectedComponents(graph) {
     let visited = new Set();
@@ -142,12 +153,12 @@ const graph = {
 console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D', 'E', 'F' ], [ 'G', 'H' ] ]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a recursive function to explore vertices.
 - Track visited vertices to avoid revisiting and to identify all components.
 - Ensure to explore all vertices in the graph.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to check for already visited vertices.
 - Not handling disconnected graphs correctly, leading to incomplete components.
 - Ensuring all vertices, even isolated ones, are processed.
@@ -156,13 +167,13 @@ console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D',
 
 **Problem:** Given a directed acyclic graph (DAG), perform a topological sort.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a recursive function to perform DFS.
 2. Mark the current vertex as visited.
 3. For each neighbor of the current vertex, recursively visit the neighbor.
 4. Add the current vertex to the result list after all its neighbors have been visited.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function topologicalSort(graph) {
     let visited = new Set();
@@ -201,12 +212,12 @@ const graph = {
 console.log(topologicalSort(graph));  // Output: [ 'B', 'A', 'D', 'C', 'E', 'F' ]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a recursive function to explore vertices.
 - Add vertices to the result list after all their neighbors have been visited.
 - Ensure the graph is a DAG to perform topological sorting.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to check for already visited vertices.
 - Not handling the order of adding vertices to the result list correctly.
 - Handling graphs with cycles, which are not suitable for topological sorting.
@@ -215,13 +226,13 @@ console.log(topologicalSort(graph));  // Output: [ 'B', 'A', 'D', 'C', 'E', 'F' 
 
 **Problem:** Given a directed graph and two vertices, find all possible paths between the two vertices.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a recursive function to perform DFS.
 2. Track the current path and add vertices to it.
 3. If the target vertex is reached, add the current path to the result.
 4. Backtrack by removing the current vertex from the path.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function findAllPaths(graph, start, end) {
     let result = [];
@@ -255,14 +266,14 @@ const graph = {
 console.log(findAllPaths(graph, 'A', 'E'));  // Output: [ [ 'A', 'B', 'D', 'C', 'E' ], [ 'A', 'C', 'E' ] ]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a recursive function to explore vertices and track the current path.
 - Add paths to the result when the target vertex is reached.
 - Backtrack correctly by removing vertices from the path.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to backtrack correctly, leading to incorrect paths.
 - Not handling graphs with cycles, which can lead to infinite loops.
 - Handling disconnected graphs and ensuring all paths are found.
 
-By mastering the Graph DFS (Depth-First Search) technique, you can efficiently solve a variety of problems involving cycle detection, connected components, topological sorting, and finding paths in graphs. This technique is essential for optimizing time complexity and handling graph-related data structures effectively in both technical interviews and real-world applications.
+By mastering the Graph DFS (Depth-First Search) technique, you can efficiently solve a variety of problems involving cycle detection, connected components, topological sorting, and finding paths in graphs. This technique is essential for optimizing time complexity and handling graph-related data structures effectively in both technical interviews and real-world applications. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.

@@ -12,6 +12,9 @@ The K-way Merge technique is used to efficiently merge multiple sorted arrays (o
 **Definition:**
 K-way Merge involves merging K sorted arrays (or lists) into a single sorted array. A min-heap is commonly used to keep track of the smallest elements from each array, allowing for efficient merging.
 
+### **Visual Representation:**
+Consider the sorted arrays `arr1 = [1, 4, 7]`, `arr2 = [2, 5, 8]`, and `arr3 = [3, 6, 9]`. The merged array is `[1, 2, 3, 4, 5, 6, 7, 8, 9]`.
+
 **Common Use Cases:**
 - Merging K sorted arrays.
 - Implementing external sorting algorithms.
@@ -271,9 +274,7 @@ const list3 = new ListNode(3, new ListNode(6, new ListNode(9)));
 const lists = [list1, list2, list3];
 const mergedList = mergeKLists(lists);
 
-let current = mergedList
-
-;
+let current = mergedList;
 while (current) {
     console.log(current.value);  // Output: 1, 2, 3, 4, 5, 6, 7, 8, 9
     current = current.next;

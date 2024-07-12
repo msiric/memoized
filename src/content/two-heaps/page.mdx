@@ -14,7 +14,10 @@ The Two Heaps technique uses two heaps to divide a data set into two parts:
 - A Max Heap to keep track of the largest elements in the lower half.
 - A Min Heap to keep track of the smallest elements in the upper half.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Imagine you have a stream of numbers, and you need to find the median after each insertion. Using two heaps allows you to maintain the median efficiently by balancing the largest elements of the lower half (Max Heap) and the smallest elements of the upper half (Min Heap).
+
+### **Common Use Cases:**
 - Finding the median of a data stream.
 - Maintaining a dynamic set of data where you need quick access to the largest or smallest elements.
 - Implementing dynamic order statistics.
@@ -36,12 +39,12 @@ The Two Heaps technique uses two heaps to divide a data set into two parts:
 
 **Problem:** Design a data structure that supports adding numbers from a data stream and finding the median of all numbers added so far.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use two heaps: a Max Heap to store the smaller half of the numbers, and a Min Heap to store the larger half.
 2. Balance the heaps such that the difference in size between the two heaps is at most one.
 3. The median is either the root of the Max Heap (if it contains more elements) or the average of the roots of both heaps (if they contain the same number of elements).
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 class MedianFinder {
     constructor() {
@@ -214,12 +217,12 @@ medianFinder.addNum(3);
 console.log(medianFinder.findMedian());  // Output: 2
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Ensure the Max Heap contains the smaller half of the numbers and the Min Heap contains the larger half.
 - Balance the heaps to maintain the size property: the Max Heap can have at most one more element than the Min Heap.
 - Use the heaps to quickly access the median by peeking at the roots.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to balance the heaps after each insertion, leading to incorrect median calculation.
 - Incorrectly managing the heaps, causing the elements to be in the wrong heap.
 - Handling edge cases, such as finding the median when there is only one element.
@@ -228,12 +231,12 @@ console.log(medianFinder.findMedian());  // Output: 2
 
 **Problem:** Implement a data structure that supports adding numbers, removing numbers, and finding the median in O(log n) time.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use two heaps: a Max Heap to store the smaller half of the numbers and a Min Heap to store the larger half.
 2. Maintain the balance of the heaps to ensure efficient median calculation.
 3. Implement methods to add, remove, and find the median of the numbers.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 class DynamicMedian {
     constructor() {
@@ -273,9 +276,7 @@ class DynamicMedian {
 
     findMedian() {
         if (this.maxHeap.size() > this.minHeap.size()) {
-            return
-
- this.maxHeap.peek();
+            return this.maxHeap.peek();
         } else {
             return (this.maxHeap.peek() + this.minHeap.peek()) / 2;
         }
@@ -318,12 +319,12 @@ dynamicMedian.removeNum(2);
 console.log(dynamicMedian.findMedian());  // Output: 2
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Ensure the Max Heap contains the smaller half of the numbers and the Min Heap contains the larger half.
 - Balance the heaps to maintain the size property: the Max Heap can have at most one more element than the Min Heap.
 - Use the heaps to quickly access the median by peeking at the roots.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to balance the heaps after each insertion, leading to incorrect median calculation.
 - Incorrectly managing the heaps, causing the elements to be in the wrong heap.
 - Handling edge cases, such as finding the median when there is only one element.

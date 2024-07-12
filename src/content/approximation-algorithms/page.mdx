@@ -9,14 +9,19 @@ Approximation algorithms are algorithms used for NP-hard problems where finding 
 
 ## **Concept and Use Cases**
 
-**Definition:**
+### **Definition:**
 Approximation algorithms provide solutions to optimization problems that are close to the optimal solution. They are evaluated based on their approximation ratio, which is the ratio between the value of the approximate solution and the value of the optimal solution.
 
-**Common Use Cases:**
+### **Common Use Cases:**
 - Traveling Salesman Problem (TSP)
 - Vertex Cover
 - Set Cover
 - Knapsack Problem
+
+### **Visual Representation:**
+- **Vertex Cover:** Given a graph, select the minimum number of vertices such that each edge is incident to at least one selected vertex.
+- **Set Cover:** Given a universe and a collection of sets, select the minimum number of sets that cover the entire universe.
+- **Traveling Salesman Problem:** Given a set of cities and distances between them, find the shortest possible route that visits each city exactly once and returns to the origin city.
 
 ## **Key Concepts**
 
@@ -31,9 +36,9 @@ Approximation algorithms provide solutions to optimization problems that are clo
 
 ## **Time and Space Complexity**
 
-**Approximation Algorithms:**
-- Time Complexity: Varies based on the specific problem and algorithm used.
-- Space Complexity: Varies based on the specific problem and algorithm used.
+### **Approximation Algorithms:**
+- **Time Complexity:** Varies based on the specific problem and algorithm used.
+- **Space Complexity:** Varies based on the specific problem and algorithm used.
 
 ## **Approximation Algorithms and Methods**
 
@@ -54,18 +59,19 @@ Find a vertex cover of a graph, which is a set of vertices such that every edge 
 ```javascript
 function vertexCover(graph) {
     const cover = new Set();
-    const edges = new Set(graph.edges);
+    const edges = new Set(graph.edges.map(edge => JSON.stringify(edge)));
 
     while (edges.size > 0) {
-        const edge = edges.values().next().value;
+        const edge = JSON.parse([...edges][0]);
         const [u, v] = edge;
 
         cover.add(u);
         cover.add(v);
 
-        for (let [x, y] of edges) {
-            if (x === u || x === v || y === u || y === v) {
-                edges.delete([x, y]);
+        for (let edge of edges) {
+            edge = JSON.parse(edge);
+            if (edge.includes(u) || edge.includes(v)) {
+                edges.delete(JSON.stringify(edge));
             }
         }
     }

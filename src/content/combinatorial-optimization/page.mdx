@@ -18,6 +18,20 @@ Combinatorial optimization problems seek to optimize an objective function by se
 - Network design
 - Facility location
 
+### **Visual Representation:**
+Consider a job scheduling problem with jobs `[{ id: 1, deadline: 2, profit: 100 }, { id: 2, deadline: 1, profit: 19 }, { id: 3, deadline: 2, profit: 27 }, { id: 4, deadline: 1, profit: 25 }, { id: 5, deadline: 3, profit: 15 }]`:
+
+```
+Jobs sorted by profit: [{ id: 1, deadline: 2, profit: 100 }, { id: 3, deadline: 2, profit: 27 }, { id: 4, deadline: 1, profit: 25 }, { id: 2, deadline: 1, profit: 19 }, { id: 5, deadline: 3, profit: 15 }]
+Schedule jobs to maximize profit:
+Iteration 1: Job 1 -> Deadline 2 -> Slot available -> Schedule
+Iteration 2: Job 3 -> Deadline 2 -> Slot available -> Schedule
+Iteration 3: Job 4 -> Deadline 1 -> Slot available -> Schedule
+Iteration 4: Job 2 -> Deadline 1 -> Slot not available
+Iteration 5: Job 5 -> Deadline 3 -> Slot available -> Schedule
+Total Profit: 100 + 27 + 25 + 15 = 167
+```
+
 ## **Key Concepts**
 
 1. **Objective Function:**

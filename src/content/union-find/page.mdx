@@ -18,6 +18,19 @@ Union-Find is a data structure that supports efficient union and find operations
 - Kruskal's Minimum Spanning Tree algorithm.
 - Network connectivity.
 
+### **Visual Representation:**
+
+Consider a set of elements `{0, 1, 2, 3, 4, 5}` and a series of union operations:
+
+```
+Initial sets: {0}, {1}, {2}, {3}, {4}, {5}
+Union(1, 2): {0}, {1, 2}, {3}, {4}, {5}
+Union(2, 3): {0}, {1, 2, 3}, {4}, {5}
+Union(4, 5): {0}, {1, 2, 3}, {4, 5}
+```
+
+After these operations, `find(1)` will return the representative of the set containing `1`, which could be `1` or `2` or `3` depending on the implementation details.
+
 ## **Key Concepts**
 
 1. **Union Operation:**

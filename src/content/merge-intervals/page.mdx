@@ -18,6 +18,9 @@ The Merge Intervals pattern involves sorting intervals and then merging them if 
 - Finding the intersection of intervals.
 - Scheduling problems, such as finding free time slots.
 
+### **Visual Representation:**
+Consider the intervals `[[1, 3], [2, 6], [8, 10], [15, 18]]`. After merging, the intervals will be `[[1, 6], [8, 10], [15, 18]]`.
+
 ## **When to Use**
 - When dealing with a list of intervals and needing to consolidate or find relationships between them.
 - When inserting new intervals into a sorted list of intervals.
@@ -36,12 +39,12 @@ The Merge Intervals pattern involves sorting intervals and then merging them if 
 
 **Problem:** Given a list of intervals, merge all overlapping intervals.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Sort the intervals based on the start time.
 2. Initialize a result array with the first interval.
 3. Iterate through the intervals and merge them if they overlap.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function mergeIntervals(intervals) {
     if (intervals.length < 2) {
@@ -77,12 +80,12 @@ const intervals = [[1, 3], [2, 6], [8, 10], [15, 18]];
 console.log(mergeIntervals(intervals));  // Output: [[1, 6], [8, 10], [15, 18]]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Always sort the intervals before attempting to merge them to ensure they are in a consistent order.
 - Use a two-pointer approach to compare the current interval with the next one to check for overlaps.
 - Keep track of the maximum end time when merging overlapping intervals.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to sort the intervals before merging, leading to incorrect results.
 - Incorrectly updating the current interval, causing missed merges or incorrect intervals.
 - Handling edge cases, such as intervals with the same start or end times.
@@ -91,12 +94,12 @@ console.log(mergeIntervals(intervals));  // Output: [[1, 6], [8, 10], [15, 18]]
 
 **Problem:** Given a list of non-overlapping intervals sorted by their start time, insert a new interval into the list and merge if necessary.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Iterate through the list of intervals and add all intervals that come before the new interval.
 2. Merge all overlapping intervals with the new interval.
 3. Add all remaining intervals after the new interval.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function insertInterval(intervals, newInterval) {
     const merged = [];
@@ -131,12 +134,12 @@ const newInterval = [2, 5];
 console.log(insertInterval(intervals, newInterval));  // Output: [[1, 5], [6, 9]]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a three-step approach: add intervals before, merge overlapping, and add intervals after.
 - Update the new interval's start and end times while merging overlapping intervals.
 - Consider edge cases where the new interval does not overlap with any existing intervals.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to add intervals that come before the new interval.
 - Incorrectly updating the new interval during the merge process.
 - Handling edge cases, such as the new interval starting or ending exactly at the same time as existing intervals.
@@ -145,12 +148,12 @@ console.log(insertInterval(intervals, newInterval));  // Output: [[1, 5], [6, 9]
 
 **Problem:** Given two lists of intervals, find the intersection of these two interval lists. Each list is pairwise disjoint and in sorted order.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use two pointers to iterate through both lists of intervals.
 2. Compare intervals from both lists and find the intersection.
 3. Move the pointer with the interval that ends first to continue finding intersections.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function intervalIntersection(A, B) {
     const intersections = [];
@@ -183,12 +186,12 @@ const B = [[1, 5], [8, 12], [15, 24], [25, 26]];
 console.log(intervalIntersection(A, B));  // Output: [[1, 2], [5, 5], [8, 10], [15, 23], [24, 24], [25, 25]]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use the two-pointer technique to efficiently find intersections.
 - Compare the start and end times of intervals to determine the intersection.
 - Move the pointer with the interval that ends first to continue finding intersections.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Incorrectly comparing interval start and end times, leading to missed intersections.
 - Handling edge cases, such as intervals with no overlap.
 - Ensuring the lists are in sorted order before finding intersections.

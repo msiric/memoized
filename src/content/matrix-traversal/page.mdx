@@ -5,14 +5,26 @@ export const metadata = {
 
 # **Matrix Traversal**
 
-The Islands (Matrix Traversal) technique involves exploring a matrix (grid) to identify and count distinct groups or clusters of connected cells that satisfy certain criteria. The most common application is counting the number of islands in a binary matrix, where islands are groups of '1's connected horizontally, vertically, or diagonally.
+Matrix traversal techniques involve exploring a matrix (grid) to identify and count distinct groups or clusters of connected cells that satisfy certain criteria. The most common application is counting the number of islands in a binary matrix, where islands are groups of '1's connected horizontally, vertically, or diagonally.
 
 ## **Concept and Use Cases**
 
 **Definition:**
 An island is a group of connected '1's in a binary matrix, where connectivity can be defined as horizontal, vertical, or diagonal adjacency. Matrix traversal algorithms, such as Depth-First Search (DFS) or Breadth-First Search (BFS), are used to explore the matrix and identify distinct islands.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider the following binary matrix:
+
+```
+  1 1 0 0 0
+  1 1 0 0 0
+  0 0 1 0 0
+  0 0 0 1 1
+```
+
+In the above matrix, there are three islands.
+
+### **Common Use Cases:**
 - Counting the number of islands in a binary matrix.
 - Identifying connected components in a graph represented as a matrix.
 - Solving problems related to flood fill, image processing, and region marking.
@@ -52,14 +64,14 @@ An island is a group of connected '1's in a binary matrix, where connectivity ca
 
 **Problem:** Given a binary matrix, count the number of islands. An island is surrounded by water (0s) and is formed by connecting adjacent lands (1s) horizontally, vertically, or diagonally.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Iterate through each cell in the matrix.
 2. When a '1' is encountered, it signifies the start of a new island.
 3. Use DFS to mark all connected '1's as visited (change them to '0's or use a visited set).
 4. Increment the island count.
 5. Continue iterating through the matrix to find all islands.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function numIslandsDFS(grid) {
     if (grid.length === 0) return 0;
@@ -109,24 +121,24 @@ const grid = [
 console.log(numIslandsDFS(grid));  // Output: 3
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use DFS to explore all connected cells of an island recursively.
 - Mark cells as visited to avoid counting the same island multiple times.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to mark cells as visited, leading to infinite recursion.
 - Handling edge cases where the matrix is empty or contains no islands.
 
 ## **Counting Islands using BFS**
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Iterate through each cell in the matrix.
 2. When a '1' is encountered, it signifies the start of a new island.
 3. Use BFS to mark all connected '1's as visited (change them to '0's or use a visited set).
 4. Increment the island count.
 5. Continue iterating through the matrix to find all islands.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function numIslandsBFS(grid) {
     if (grid.length === 0) return 0;
@@ -185,11 +197,11 @@ const grid = [
 console.log(numIslandsBFS(grid));  // Output: 3
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use BFS to explore all connected cells of an island iteratively.
 - Utilize a queue to keep track of cells to be explored.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to mark cells as visited, leading to infinite loops.
 - Handling edge cases where the matrix is empty or contains no islands.
 
@@ -197,14 +209,14 @@ console.log(numIslandsBFS(grid));  // Output: 3
 
 **Problem:** Given a binary matrix, find the maximum area of an island. An island is a group of connected '1's, and the area is the number of '1's in the island.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Iterate through each cell in the matrix.
 2. When a '1' is encountered, it signifies the start of a new island.
 3. Use DFS or BFS to calculate the area of the island and mark all connected '1's as visited.
 4. Keep track of the maximum area encountered.
 5. Continue iterating through the matrix to find all islands.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function maxAreaOfIsland(grid) {
     if (grid.length === 0) return 0;
@@ -230,9 +242,7 @@ function maxAreaOfIsland(grid) {
         area += dfs(row + 1, col + 1);
         area += dfs(row - 1, col - 1);
         area += dfs(row + 1, col - 1);
-        area += dfs(row - 
-
-1, col + 1);
+        area += dfs(row - 1, col + 1);
 
         return area;
     }
@@ -259,12 +269,12 @@ const grid = [
 console.log(maxAreaOfIsland(grid));  // Output: 4
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use DFS to explore and calculate the area of each island recursively.
 - Keep track of the maximum area encountered during traversal.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to mark cells as visited, leading to infinite recursion.
 - Handling edge cases where the matrix is empty or contains no islands.
 
-By mastering the Islands (Matrix Traversal) technique, you can efficiently solve a variety of problems involving connected components, region marking, and matrix traversal. This technique is essential for optimizing time complexity and handling matrix-related problems effectively in both technical interviews and real-world applications.
+By mastering matrix traversal techniques, you can efficiently solve a variety of problems involving connected components, region marking, and matrix traversal. This technique is essential for optimizing time complexity and handling matrix-related problems effectively in both technical interviews and real-world applications.

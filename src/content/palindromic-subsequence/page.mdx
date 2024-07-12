@@ -12,7 +12,10 @@ The Palindromic Subsequence technique involves finding the longest subsequence w
 **Definition:**
 A palindromic subsequence is a sequence of characters in a string that forms a palindrome when read both forwards and backwards. The characters of the subsequence do not need to be contiguous in the original string, but they must appear in the same order.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider the string `s = "bbbab"`. The longest palindromic subsequence is `"bbbb"`.
+
+### **Common Use Cases:**
 - Finding the longest palindromic subsequence in a given string.
 - Applications in bioinformatics for DNA sequence analysis.
 - Solving problems related to string manipulations and optimizations.
@@ -48,7 +51,7 @@ A palindromic subsequence is a sequence of characters in a string that forms a p
 
 **Problem:** Given a string, find the length of the longest palindromic subsequence.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Create a 2D array `dp` where `dp[i][j]` represents the length of the longest palindromic subsequence in the substring `s[i...j]`.
 2. Initialize the table such that `dp[i][i] = 1` for all `i`, since a single character is always a palindrome of length 1.
 3. Fill the table in a bottom-up manner. For each substring length `cl` from 2 to n:
@@ -59,7 +62,7 @@ A palindromic subsequence is a sequence of characters in a string that forms a p
      - If `s[i] != s[j]`, set `dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])`.
 4. The result is stored in `dp[0][n - 1]`.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function longestPalindromicSubsequence(s) {
     const n = s.length;
@@ -92,11 +95,11 @@ const s = "bbbab";
 console.log(longestPalindromicSubsequence(s));  // Output: 4 ("bbbb")
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a bottom-up dynamic programming approach to fill the table.
 - Carefully handle the indices to avoid out-of-bounds errors.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to initialize the base cases correctly.
 - Incorrectly updating the table for matching characters.
 - Handling edge cases where the string is empty or contains all unique characters.
@@ -105,12 +108,12 @@ console.log(longestPalindromicSubsequence(s));  // Output: 4 ("bbbb")
 
 **Problem:** Given a string, find the minimum number of deletions required to make it a palindrome.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Calculate the length of the longest palindromic subsequence using the previously described method.
 2. Subtract the length of the longest palindromic subsequence from the total length of the string.
 3. The result is the minimum number of deletions required.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function minDeletionsToMakePalindrome(s) {
     const n = s.length;
@@ -147,11 +150,11 @@ const s = "abcbad";
 console.log(minDeletionsToMakePalindrome(s));  // Output: 2 ("bcb" is the LPS, so remove 'a' and 'd')
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use the length of the longest palindromic subsequence to determine the minimum deletions.
 - Leverage the dynamic programming table to solve related problems efficiently.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to consider both ends of the string when calculating the longest palindromic subsequence.
 - Incorrectly initializing or updating the dynamic programming table.
 

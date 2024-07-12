@@ -12,7 +12,10 @@ The Longest Common Substring technique involves finding the longest substring th
 **Definition:**
 A common substring is a sequence of characters that appears in the same order in both strings. The longest common substring is the longest sequence that appears in both strings.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider the strings `s1 = "abcdxyz"` and `s2 = "xyzabcd"`. The longest common substring is `"abcd"`.
+
+### **Common Use Cases:**
 - Finding the longest common substring in bioinformatics for DNA sequence analysis.
 - Text processing for plagiarism detection.
 - Data comparison in version control systems.
@@ -44,7 +47,7 @@ A common substring is a sequence of characters that appears in the same order in
 
 **Problem:** Given two strings, find the length of the longest common substring.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Create a 2D array `dp` where `dp[i][j]` represents the length of the longest common substring ending at `s1[i-1]` and `s2[j-1]`.
 2. Initialize the table with zeros.
 3. Iterate through both strings, and for each pair of characters `(s1[i-1], s2[j-1])`:
@@ -52,7 +55,7 @@ A common substring is a sequence of characters that appears in the same order in
    - If the characters do not match, set `dp[i][j] = 0`.
 4. Keep track of the maximum value in the `dp` table, which represents the length of the longest common substring.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function longestCommonSubstring(s1, s2) {
     const m = s1.length;
@@ -80,12 +83,12 @@ const s2 = "xyzabcd";
 console.log(longestCommonSubstring(s1, s2));  // Output: 4 ("abcd")
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a dynamic programming table to store the lengths of common substrings ending at each pair of indices.
 - Initialize the table with zeros to handle base cases.
 - Keep track of the maximum value in the table to get the length of the longest common substring.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to initialize the table with zeros.
 - Incorrectly updating the table for matching characters.
 - Handling edge cases where one or both strings are empty.
@@ -94,7 +97,7 @@ console.log(longestCommonSubstring(s1, s2));  // Output: 4 ("abcd")
 
 **Problem:** Given two strings, find the actual longest common substring.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Create a 2D array `dp` where `dp[i][j]` represents the length of the longest common substring ending at `s1[i-1]` and `s2[j-1]`.
 2. Initialize the table with zeros.
 3. Iterate through both strings, and for each pair of characters `(s1[i-1], s2[j-1])`:
@@ -103,7 +106,7 @@ console.log(longestCommonSubstring(s1, s2));  // Output: 4 ("abcd")
 4. Keep track of the maximum value in the `dp` table and its corresponding index.
 5. Use the index to reconstruct the longest common substring.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function findLongestCommonSubstring(s1, s2) {
     const m = s1.length;
@@ -136,11 +139,11 @@ const s2 = "xyzabcd";
 console.log(findLongestCommonSubstring(s1, s2));  // Output: "abcd"
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use the `dp` table to keep track of the lengths of common substrings ending at each pair of indices.
 - Keep track of the maximum value and its corresponding index to reconstruct the longest common substring.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to initialize the table with zeros.
 - Incorrectly updating the table for matching characters.
 - Handling edge cases where one or both strings are empty.

@@ -9,14 +9,19 @@ Network Flow Algorithms are used to find the maximum flow in a flow network. A f
 
 ## **Concept and Use Cases**
 
-**Definition:**
+### **Definition:**
 Network flow problems involve finding the maximum flow from a source vertex to a sink vertex in a flow network. Each edge in the network has a capacity, and the flow through an edge cannot exceed its capacity.
 
-**Common Use Cases:**
+### **Common Use Cases:**
 - Network routing
 - Bipartite matching
 - Circulation with demands
 - Image segmentation
+
+### **Visual Representation:**
+- **Flow Network:** A directed graph where each edge has a capacity and each vertex, except the source and sink, follows flow conservation.
+- **Residual Graph:** A graph showing remaining capacities after considering current flow.
+- **Augmenting Path:** A path from the source to the sink in the residual graph where the flow can be increased.
 
 ## **Key Concepts**
 
@@ -37,11 +42,11 @@ Network flow problems involve finding the maximum flow from a source vertex to a
 
 ## **Time and Space Complexity**
 
-**Time Complexity:**
+### **Time Complexity:**
 - Ford-Fulkerson Method: O(max_flow * E) in the worst case.
 - Edmonds-Karp Algorithm: O(VE^2).
 
-**Space Complexity:**
+### **Space Complexity:**
 - Both algorithms: O(V + E) for storing the graph and residual capacities.
 
 ## **Network Flow Algorithms and Methods**

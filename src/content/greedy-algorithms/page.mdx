@@ -20,7 +20,11 @@ A greedy algorithm is an algorithmic paradigm that builds up a solution piece by
 - **Dijkstra's Algorithm:** Finding the shortest path in a graph with non-negative weights.
 - **Fractional Knapsack Problem:** Maximizing the total value of items that can be carried in a knapsack of fixed capacity.
 
+### **Visual Representation:**
+Imagine you are trying to collect the maximum value of items with a limited capacity backpack. Greedy algorithms will select items based on the highest value-to-weight ratio until the backpack is full.
+
 ## **When to Use**
+
 - When the problem can be broken down into a sequence of choices, and each choice looks best at that moment.
 - When you need an efficient and straightforward solution, and the greedy choice property holds (i.e., a local optimum leads to a global optimum).
 - When the problem exhibits optimal substructure (i.e., an optimal solution to the problem contains optimal solutions to subproblems).
@@ -226,9 +230,7 @@ class MinHeap {
                 }
             }
 
-           
-
- if (swap === null) break;
+            if (swap === null) break;
             [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
             index = swap;
         }

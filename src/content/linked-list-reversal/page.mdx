@@ -17,6 +17,9 @@ In-place reversal of a linked list involves reversing the links between nodes di
 - Reversing a specific part of the linked list.
 - Reversing nodes in k-sized groups.
 
+### **Visual Representation:**
+Consider a linked list: 1 -> 2 -> 3 -> 4 -> 5. After reversing, the linked list will be: 5 -> 4 -> 3 -> 2 -> 1.
+
 ## **When to Use**
 - When you need to reverse the nodes of a linked list in place.
 - When the problem constraints require the reversal to be done without extra memory.
@@ -34,13 +37,13 @@ In-place reversal of a linked list involves reversing the links between nodes di
 
 **Problem:** Given the head of a singly linked list, reverse the list and return its new head.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Initialize three pointers: `previous`, `current`, and `next`.
 2. Iterate through the linked list.
 3. For each node, store the next node, reverse the link, and move the pointers one step forward.
 4. Continue until all nodes are reversed.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 class ListNode {
     constructor(value) {
@@ -78,12 +81,12 @@ while (current !== null) {
 }
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Initialize the `previous` pointer to null to mark the end of the reversed list.
 - Update the `next` pointer before reversing the link to avoid losing the reference to the next node.
 - Move the `previous` and `current` pointers forward simultaneously to maintain the reversal process.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to update the `next` pointer before reversing the link, leading to lost references.
 - Not initializing the `previous` pointer correctly, resulting in incorrect reversal.
 - Handling edge cases, such as an empty list or a list with a single node.
@@ -92,12 +95,12 @@ while (current !== null) {
 
 **Problem:** Given the head of a linked list and two positions `m` and `n`, reverse the nodes of the list from position `m` to `n`.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Traverse the list to find the node at position `m-1`.
 2. Reverse the nodes from `m` to `n` using the in-place reversal technique.
 3. Reconnect the reversed sublist with the rest of the list.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function reverseBetween(head, m, n) {
     if (m === n) return head;
@@ -146,12 +149,12 @@ while (current !== null) {
 }
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Keep track of the node before the start of the sublist (`connection`) and the node at the end of the sublist (`tail`).
 - Reverse the nodes in the specified range using the same in-place reversal technique.
 - Reconnect the reversed sublist with the rest of the list.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Incorrectly updating the `connection` and `tail` pointers, leading to incorrect reconnections.
 - Handling edge cases, such as `m` and `n` being the same, or reversing the entire list.
 - Ensuring the reversal process is confined to the specified range without affecting other nodes.
@@ -160,12 +163,12 @@ while (current !== null) {
 
 **Problem:** Given the head of a linked list, reverse the nodes of the list `k` at a time, and return the modified list. If the number of nodes is not a multiple of `k`, the remaining nodes should remain as they are.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Traverse the list to count the total number of nodes.
 2. Reverse the nodes in groups of `k` using the in-place reversal technique.
 3. Reconnect the reversed groups with the rest of the list.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function reverseKGroup(head, k) {
     if (head === null || k === 1) return head;
@@ -212,12 +215,12 @@ while (current !== null) {
 }
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a dummy node to simplify the reversal process and handle edge cases.
 - Count the total number of nodes to ensure correct group reversal.
 - Reverse the nodes in groups of `k` using the in-place reversal technique and reconnect the groups.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Incorrectly updating the pointers during the group reversal, leading to incorrect results.
 - Handling edge cases, such as the number of nodes not being a multiple of `k`.
 - Ensuring the dummy node is used correctly to simplify the reversal process.

@@ -18,6 +18,22 @@ A Bloom Filter is a bit array of m bits, all initially set to 0, and uses k diff
 - Networking: To filter spam or malicious URLs.
 - Distributed systems: To reduce the number of expensive disk lookups.
 
+### **Visual Representation:**
+
+Consider a Bloom Filter with a bit array of size 10 and 3 hash functions. When adding the element "hello":
+
+1. Hash "hello" with hash functions h1, h2, and h3, which give indices 1, 3, and 7 respectively.
+2. Set the bits at positions 1, 3, and 7 to 1 in the bit array.
+
+Bit Array: [0, 1, 0, 1, 0, 0, 0, 1, 0, 0]
+
+When checking for membership of "world":
+
+1. Hash "world" with hash functions h1, h2, and h3, which give indices 2, 4, and 6 respectively.
+2. Check the bits at positions 2, 4, and 6. If any of these bits are 0, "world" is definitely not in the set.
+
+Bit Array: [0, 1, 0, 1, 0, 0, 0, 1, 0, 0] (Since positions 2 and 4 are 0, "world" is not in the set)
+
 ## **Key Concepts**
 
 1. **Bit Array:**

@@ -9,15 +9,26 @@ Suffix Arrays and Suffix Trees are data structures used for efficient string pro
 
 ## **Concept and Use Cases**
 
-**Definition:**
+### **Definition:**
 - **Suffix Array:** An array of integers representing the starting positions of suffixes of a string, sorted in lexicographical order.
 - **Suffix Tree:** A compressed trie of all the suffixes of a given string.
 
-**Common Use Cases:**
+### **Common Use Cases:**
 - Pattern matching
 - Longest common substring
 - Longest repeated substring
 - String compression
+
+### **Visual Representation:**
+Consider the string "banana":
+- **Suffix Array:** A sorted array of the starting positions of all suffixes.
+  ```
+  String: "banana"
+  Suffixes: ["banana", "anana", "nana", "ana", "na", "a"]
+  Sorted: ["a", "ana", "anana", "banana", "na", "nana"]
+  Suffix Array: [5, 3, 1, 0, 4, 2]
+  ```
+- **Suffix Tree:** A tree representing all suffixes where each path from the root represents a suffix.
 
 ## **Key Concepts**
 

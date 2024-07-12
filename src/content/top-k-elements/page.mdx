@@ -12,7 +12,10 @@ The Top K Elements technique is used to find the top, smallest, or most frequent
 **Definition:**
 The Top K Elements technique involves identifying the top (largest, smallest, or most frequent) 'K' elements in a data set. Heaps (Min Heap or Max Heap) are commonly used to maintain the top 'K' elements efficiently.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider an array `nums = [3, 2, 1, 5, 6, 4]` and `K = 2`. The top 2 largest elements are `6` and `5`.
+
+### **Common Use Cases:**
 - Finding the K largest or smallest elements in an array.
 - Identifying the K most frequent elements in a data set.
 - Solving problems that require selecting the top K elements based on specific criteria.
@@ -34,14 +37,14 @@ The Top K Elements technique involves identifying the top (largest, smallest, or
 
 **Problem:** Given an array of integers, find the K largest elements.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a Min Heap to keep track of the top K largest elements.
 2. Iterate through each element in the array.
 3. If the heap size is less than K, insert the element into the heap.
 4. If the heap size is equal to K, compare the current element with the root of the heap. If the current element is larger, replace the root with the current element and reheapify.
 5. The heap will contain the top K largest elements at the end of the iteration.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 class MinHeap {
     constructor() {
@@ -127,12 +130,12 @@ const k = 2;
 console.log(findKthLargest(nums, k));  // Output: 5
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a Min Heap to keep track of the top K largest elements efficiently.
 - Ensure the heap size does not exceed K by removing the smallest element when necessary.
 - The root of the Min Heap will contain the Kth largest element at the end of the iteration.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to remove the smallest element from the heap when the heap size exceeds K.
 - Incorrectly maintaining the heap property during insertion and extraction.
 - Handling edge cases where the array has fewer than K elements.
@@ -141,7 +144,7 @@ console.log(findKthLargest(nums, k));  // Output: 5
 
 **Problem:** Given an array of integers, find the K most frequent elements.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a hash map to count the frequency of each element in the array.
 2. Use a Min Heap to keep track of the top K most frequent elements.
 3. Iterate through each element in the hash map.
@@ -149,7 +152,7 @@ console.log(findKthLargest(nums, k));  // Output: 5
 5. If the heap size is equal to K, compare the frequency of the current element with the root of the heap. If the current element has a higher frequency, replace the root with the current element and reheapify.
 6. The heap will contain the top K most frequent elements at the end of the iteration.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 class MinHeap {
     constructor() {
@@ -240,12 +243,12 @@ const k = 2;
 console.log(topKFrequent(nums, k));  // Output: [1, 2]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a hash map to count the frequency of each element efficiently.
 - Use a Min Heap to keep track of the top K most frequent elements.
 - The root of the Min Heap will contain the element with the lowest frequency among the top K elements.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to remove the element with the lowest frequency from the heap when the heap size exceeds K.
 - Incorrectly maintaining the heap property during insertion and extraction.
 - Handling edge cases where the array has fewer than K unique elements.

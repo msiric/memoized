@@ -12,7 +12,18 @@ The Breadth-First Search (BFS) technique is a fundamental algorithm for traversi
 **Definition:** 
 BFS is an algorithm for traversing or searching graph data structures. It starts at a source vertex and explores all the neighbor vertices at the present depth prior to moving on to vertices at the next depth level.
 
-**Common Use Cases:**
+### **Visual Representation:**
+Consider the following graph:
+
+```
+  A -- B -- D
+  |    |
+  C -- E -- F
+```
+
+BFS traversal starting from vertex `A` will visit vertices in the following order: `A -> B -> C -> D -> E -> F`.
+
+### **Common Use Cases:**
 - Finding the shortest path in an unweighted graph.
 - Checking connectivity in a graph.
 - Solving puzzles and games (e.g., finding the shortest path in a maze).
@@ -34,13 +45,13 @@ BFS is an algorithm for traversing or searching graph data structures. It starts
 
 **Problem:** Given a graph and a source vertex, return the shortest path from the source to all other vertices.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a queue to keep track of vertices to explore.
 2. Initialize the queue with the source vertex.
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Keep track of distances from the source to each vertex.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function bfsShortestPath(graph, start) {
     let distances = {};
@@ -73,12 +84,12 @@ const graph = {
 console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a queue to keep track of vertices to explore.
 - Keep track of distances from the source to each vertex.
 - Ensure to process all neighbors of the current vertex before moving to the next level.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to check if a vertex has already been visited.
 - Not updating the distances correctly, leading to incorrect results.
 - Handling disconnected graphs, where not all vertices are reachable from the source.
@@ -87,13 +98,13 @@ console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, 
 
 **Problem:** Given an undirected graph, find all its connected components.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a queue to keep track of vertices to explore.
 2. Initialize the queue with an unvisited vertex.
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Track visited vertices to ensure all connected components are found.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function findConnectedComponents(graph) {
     let visited = new Set();
@@ -139,12 +150,12 @@ const graph = {
 console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D', 'E', 'F' ], [ 'G', 'H' ] ]
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a queue to explore vertices level by level.
 - Track visited vertices to avoid revisiting and to identify all components.
 - Ensure to explore all vertices in the graph.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to check for already visited vertices.
 - Not handling disconnected graphs correctly, leading to incomplete components.
 - Ensuring all vertices, even isolated ones, are processed.
@@ -153,13 +164,13 @@ console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D',
 
 **Problem:** Given an undirected graph, determine if it contains any cycles.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a queue to keep track of vertices to explore and their parents.
 2. Initialize the queue with an unvisited vertex.
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Check if a vertex is revisited through a different path.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function containsCycle(graph) {
     let visited = new Set();
@@ -200,12 +211,12 @@ const graph = {
 console.log(containsCycle(graph));  // Output: true
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a queue to explore vertices and track their parents.
 - Check if a vertex is revisited through a different path to detect cycles.
 - Ensure to explore all vertices to cover the entire graph.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to check for already visited vertices.
 - Not tracking the parent vertices correctly, leading to false positives.
 - Handling disconnected graphs and isolated cycles.
@@ -214,13 +225,13 @@ console.log(containsCycle(graph));  // Output: true
 
 **Problem:** Given an unweighted graph and a source vertex, find the shortest path from the source to all other vertices.
 
-**Step-by-Step Solution:**
+### **Step-by-Step Solution:**
 1. Use a queue to keep track of vertices to explore.
 2. Initialize the queue with the source vertex.
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Keep track of distances from the source to each vertex.
 
-**Code Example:**
+### **Code Example:**
 ```javascript
 function bfsShortestPath(graph, start) {
     let distances = {};
@@ -253,14 +264,14 @@ const graph = {
 console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }
 ```
 
-**Tips and Tricks:**
+### **Tips and Tricks:**
 - Use a queue to keep track of vertices to explore.
 - Keep track of distances from the source to each vertex.
 - Ensure to process all neighbors of the current vertex before moving to the next level.
 
-**Frequent Gotchas:**
+### **Frequent Gotchas:**
 - Forgetting to check if a vertex has already been visited.
 - Not updating the distances correctly, leading to incorrect results.
 - Handling disconnected graphs, where not all vertices are reachable from the source.
 
-By mastering the Graph BFS (Breadth-First Search) technique, you can efficiently solve a variety of problems involving shortest paths, connectivity, and cycle detection in graphs. This technique is essential for optimizing time complexity and handling graph-related data structures effectively in both technical interviews and real-world applications.
+By mastering the Graph BFS (Breadth-First Search) technique, you can efficiently solve a variety of problems involving shortest paths, connectivity, and cycle detection in graphs. This technique is essential for optimizing time complexity and handling graph-related data structures effectively in both technical interviews and real-world applications. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.
