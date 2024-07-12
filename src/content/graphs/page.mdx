@@ -64,7 +64,7 @@ class Graph {
     addEdge(vertex1, vertex2) {
         if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
             this.adjacencyList[vertex1].push(vertex2);
-            this.adjacencyList[vertex2].push(vertex1);  // Remove this line for directed graphs
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
         }
     }
 
@@ -88,7 +88,7 @@ class Graph {
 
     addEdge(vertex1, vertex2) {
         this.adjacencyMatrix[vertex1][vertex2] = 1;
-        this.adjacencyMatrix[vertex2][vertex1] = 1;  // Remove this line for directed graphs
+        this.adjacencyMatrix[vertex2][vertex1] = 1;  // Omitted for directed graphs
     }
 
     // Other methods...
@@ -115,7 +115,7 @@ class Graph {
     addEdge(vertex1, vertex2) {
         if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
             this.adjacencyList[vertex1].push(vertex2);
-            this.adjacencyList[vertex2].push(vertex1);  // Remove this line for directed graphs
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
         }
     }
 
@@ -160,7 +160,7 @@ class Graph {
     addEdge(vertex1, vertex2) {
         if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
             this.adjacencyList[vertex1].push(vertex2);
-            this.adjacencyList[vertex2].push(vertex1);  // Remove this line for directed graphs
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
         }
     }
 
@@ -206,7 +206,7 @@ class Graph {
     addEdge(vertex1, vertex2) {
         if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
             this.adjacencyList[vertex1].push(vertex2);
-            this.adjacencyList[vertex2].push(vertex1);  // Remove this line for directed graphs
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
         }
     }
 
@@ -258,46 +258,30 @@ class Graph {
   console.log(graph.adjacencyMatrix);  // Output: [ [ 0, 1, 1 ], [ 1, 0, 0 ], [ 1, 0, 0 ] ]
   ```
 
-- **Detect Cycles in Graphs:**
-  Use DFS with recursion stack or union-find data structure to detect cycles.
+- **Use Weighted Graphs for Representing Costs:**
+  Weighted graphs can represent different costs or distances between vertices, useful for problems like shortest path.
   **Example:**
   ```javascript
-  function hasCycle(graph) {
-      const visited = new Set();
-      const recStack = new Set();
-
-      function dfs(vertex) {
-          if (!visited.has(vertex)) {
-              visited.add(vertex);
-              recStack.add(vertex);
-
-              for (let neighbor of graph[vertex]) {
-                  if (!visited.has(neighbor) && dfs(neighbor)) {
-                      return true;
-                  } else if (recStack.has(neighbor)) {
-                      return true;
-                  }
-              }
-          }
-          recStack.delete(vertex);
-          return false;
+  class WeightedGraph {
+      constructor() {
+          this.adjacencyList = {};
       }
 
-      for (let vertex in graph) {
-          if (dfs(vertex)) {
-              return true;
-          }
+      addVertex(vertex) {
+          if (!this.adjacencyList[vertex]) this.adjacencyList[vertex] = [];
       }
-      return false;
+
+      addEdge(vertex1, vertex2, weight) {
+          this.adjacencyList[vertex1].push({ node: vertex2, weight });
+          this.adjacencyList[vertex2].push({ node: vertex1, weight });
+      }
   }
 
-  let graph = {
-      A: ['B'],
-      B: ['C'],
-      C: ['A']
-  };
-
-  console.log(hasCycle(graph));  // Output: true
+  let graph = new WeightedGraph();
+  graph.addVertex('A');
+  graph.addVertex('B');
+  graph.addEdge('A', 'B', 4);
+  console.log(graph.adjacencyList);  // Output: { A: [ { node: 'B', weight: 4 } ], B: [ { node: 'A', weight: 4 } ] }
   ```
 
 ## **Common Gotchas**
@@ -306,28 +290,30 @@ class Graph {
   Ensure traversal algorithms handle disconnected graphs by iterating through all vertices.
   **Example:**
   ```javascript
-  function dfsAll(graph) {
-      const visited = {};
-      const result = [];
+    function dfsAll(graph) {
+        const visited = {};
+        const result = [];
 
-      for (let vertex in graph) {
-          if (!visited[vertex]) {
-              (function dfs(vertex) {
-                  if (!vertex) return null;
-                  visited[vertex] = true;
-                  result.push(vertex);
+        function dfs(vertex) {
+            if (!vertex) return;
+            visited[vertex] = true;
+            result.push(vertex);
 
-                  graph[vertex].forEach(neighbor => {
-                      if (!visited[neighbor]) {
-                          return dfs(neighbor);
-                      }
-                  });
-              })(vertex);
-          }
-      }
+            graph[vertex].forEach(neighbor => {
+                if (!visited[neighbor]) {
+                    dfs(neighbor);
+                }
+            });
+        }
 
-      return result;
-  }
+        for (const vertex in graph) {
+            if (!visited[vertex]) {
+                dfs(vertex);
+            }
+        }
+
+        return result;
+    }
   ```
 
 - **Bidirectional Edges in Directed Graphs:**
@@ -459,7 +445,7 @@ class Graph {
     addEdge(vertex1, vertex2, weight) {
         if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
             this.adjacencyList[vertex1].push({ node: vertex2, weight });
-            this.adjacencyList[vertex2].push({ node: vertex1, weight });  // Remove this line for directed graphs
+            this.adjacencyList[vertex2].push({ node: vertex1, weight });  // Omitted for directed graphs
         }
     }
 
@@ -556,50 +542,73 @@ console.log(graph.dijkstra('A', 'E'));  // Output: ['A', 'C', 'D', 'F', 'E']
 ```
 
 ## **Graph Algorithms**
+Below are some common graph algorithms you should be familiar with:
 
-### **Cycle Detection in Directed Graphs**
+### **Bipartite Graph Check**
+A bipartite graph check determines if a graph can be colored with two colors such that no two adjacent vertices share the same color.
 
 **Example:**
 ```javascript
-function hasCycle(graph) {
-    const visited = new Set();
-    const recStack = new Set();
+class Graph {
+    constructor() {
+        this.adjacencyList = new Map();
+    }
 
-    function dfs(vertex) {
-        if (!visited.has(vertex)) {
-            visited.add(vertex);
-            recStack.add(vertex);
+    addVertex(vertex) {
+        this.adjacencyList.set(vertex, []);
+    }
 
-            for (let neighbor of graph[vertex]) {
-                if (!visited.has(neighbor) && dfs(neighbor)) {
-                    return true;
-                } else if (recStack.has(neighbor)) {
-                    return true;
+    addEdge(vertex1, vertex2) {
+        this.adjacencyList.get(vertex1).push(vertex2);
+        this.adjacencyList.get(vertex2).push(vertex1);
+    }
+
+    isBipartite() {
+        const colors = new Map(); // Stores colors of vertices
+        const queue = []; // Queue for BFS
+
+        for (let vertex of this.adjacencyList.keys()) {
+            if (!colors.has(vertex)) {
+                colors.set(vertex, 0); // Assign the first color (0) to the vertex
+                queue.push(vertex);
+
+                while (queue.length > 0) {
+                    const current = queue.shift();
+
+                    for (let neighbor of this.adjacencyList.get(current)) {
+                        if (!colors.has(neighbor)) {
+                            // Assign an alternate color to the neighboring vertex
+                            colors.set(neighbor, 1 - colors.get(current));
+                            queue.push(neighbor);
+                        } else if (colors.get(neighbor) === colors.get(current)) {
+                            // If the neighboring vertex has the same color, the graph is not bipartite
+                            return false;
+                        }
+                    }
                 }
             }
         }
-        recStack.delete(vertex);
-        return false;
+        return true;
     }
-
-    for (let vertex in graph) {
-        if (dfs(vertex)) {
-            return true;
-        }
-    }
-    return false;
 }
 
-let graph = {
-    A: ['B'],
-    B: ['C'],
-    C: ['A']
-};
+// Example usage
+const graph = new Graph();
+graph.addVertex('A');
+graph.addVertex('B');
+graph.addVertex('C');
+graph.addVertex('D');
 
-console.log(hasCycle(graph));  // Output: true
+graph.addEdge('A', 'B');
+graph.addEdge('A', 'C');
+graph.addEdge('B', 'D');
+graph.addEdge('C', 'D');
+
+console.log(graph.isBipartite()); // Output: true
 ```
 
 ### **Finding Connected Components**
+Finding connected components identifies all the subgraphs in which any two vertices are connected to each other by paths.
 
 **Example:**
 ```javascript
@@ -617,7 +626,7 @@ class Graph {
     addEdge(vertex1, vertex2) {
         if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
             this.adjacencyList[vertex1].push(vertex2);
-            this.adjacencyList[vertex2].push(vertex1);  // Remove this line for directed graphs
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
         }
     }
 

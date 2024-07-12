@@ -5,6 +5,7 @@ import { Problem } from '@prisma/client'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { ReactNode } from 'react'
+import { FaExternalLinkAlt } from 'react-icons/fa'
 import { NextPage } from './NextPage'
 import { PracticeProblems } from './PracticeProblems'
 
@@ -22,8 +23,15 @@ const CustomLink = ({ href, children, ...rest }: CustomLinkProps) => {
 
   if (isExternal) {
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1"
+        {...rest}
+      >
         {children}
+        <FaExternalLinkAlt size="12" />
       </a>
     )
   }

@@ -10,7 +10,7 @@ Linked Lists are a fundamental data structure used to store collections of eleme
 ## **Concept and Use Cases**
 
 **Definition:**
-A linked list is a linear data structure where each element, known as a node, contains a value and a reference (or link) to the next node in the sequence. The first node is called the head, and the last node points to null, indicating the end of the list.
+A linked list is a linear data structure where each element, known as a node, contains a value and a reference (or link) to the next node in the sequence. The first node is called the head and the last node is called the tail.
 
 **Common Use Cases:**
 - Implementing dynamic data structures like stacks and queues.
@@ -320,12 +320,18 @@ class CircularLinkedList {
 ```
 
 ## **Linked List Algorithms**
+Below are some common linked list algorithms you should be familiar with:
 
 ### **Detecting a Cycle**
+Detecting a cycle in a linked list checks if there is a loop where a node's next pointer points back to a previous node.
 
 **Example:**
 ```javascript
 class LinkedList {
+    constructor() {
+        this.head = null;
+    }
+
     // ... other methods ...
 
     hasCycle() {
@@ -342,9 +348,17 @@ class LinkedList {
 ```
 
 ### **Merging Two Sorted Lists**
+Merging two sorted lists combines them into a single sorted linked list.
 
 **Example:**
 ```javascript
+class Node {
+    constructor(value = 0, next = null) {
+        this.value = value;
+        this.next = next;
+    }
+}
+
 function mergeTwoSortedLists(l1, l2) {
     let dummy = new Node(0);
     let current = dummy;
@@ -363,6 +377,19 @@ function mergeTwoSortedLists(l1, l2) {
     current.next = l1 || l2;
     return dummy.next;
 }
+
+// Example usage:
+let l1 = new Node(1, new Node(3, new Node(5)));
+let l2 = new Node(2, new Node(4, new Node(6)));
+let mergedList = mergeTwoSortedLists(l1, l2);
+
+// Printing the merged list
+let current = mergedList;
+while (current) {
+    console.log(current.value);
+    current = current.next;
+}
+// Output: 1, 2, 3, 4, 5, 6
 ```
 
 ## **Interview Tips and Tricks**

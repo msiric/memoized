@@ -43,14 +43,6 @@ export const userDefinedDataStructures: LessonConfig[] = [
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.hashTables,
   },
   {
-    id: '/heaps',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/heaps`,
-    title: 'Heaps',
-    description: 'Discover heap structures and their use in priority queues.',
-    access: AccessOptions.PREMIUM,
-    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.heaps,
-  },
-  {
     id: '/trees',
     href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/trees`,
     title: 'Trees',
@@ -66,6 +58,14 @@ export const userDefinedDataStructures: LessonConfig[] = [
       'Learn about graph representations and graph traversal methods.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.graphs,
+  },
+  {
+    id: '/heaps',
+    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/heaps`,
+    title: 'Heaps',
+    description: 'Discover heap structures and their use in priority queues.',
+    access: AccessOptions.PREMIUM,
+    problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.heaps,
   },
   {
     id: '/tries',

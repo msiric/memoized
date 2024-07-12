@@ -267,6 +267,10 @@ class MinHeap {
   console.log(heap.heap);  // Output: Min-heapified array
   ```
 
+    <Note>
+        Why is heapifying an array an O(n) operation? An optimized heap construction algorithm leverages the properties of a complete binary tree, reducing the overall number of operations needed. Starting from the last non-leaf node and moving upwards, each node adjustment takes progressively less time, resulting in a linear time complexity, O(n).
+    </Note>
+
 - **Heap Sort:**
   Use heaps to implement an efficient sorting algorithm.
   **Example:**
@@ -392,6 +396,7 @@ class DaryHeap {
 ### **Fibonacci Heaps**
 
 Fibonacci heaps are advanced heap structures that support a variety of heap operations more efficiently than binary heaps in amortized time. They are particularly useful in graph algorithms like Dijkstra's shortest path.
+[Learn more about Fibonacci heaps](https://en.wikipedia.org/wiki/Fibonacci_heap)
 
 ## **Heap Algorithms**
 

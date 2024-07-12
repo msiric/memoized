@@ -278,17 +278,6 @@ console.log(memoizedSlowFunction(5));  // Output: 10 (retrieved from cache)
 
 Using the `Map` object in JavaScript ensures that keys are iterated in the order of insertion, making it more predictable for certain operations.
 
-**Example:**
-```javascript
-let map = new Map();
-map.set('first', 1);
-map.set('second', 2);
-map.set('third', 3);
-for (let [key, value] of map) {
-    console.log(key, value);  // Output: 'first' 1, 'second' 2, 'third' 3
-}
-```
-
 #### **Avoid Collisions**
 
 Choose a good hash function to minimize collisions. A good hash function should distribute keys uniformly across the buckets.
@@ -302,13 +291,6 @@ Resize the hash table when the load factor exceeds a threshold to maintain perfo
 #### **Non-String Keys in `Object`**
 
 When using `Object` for hash tables, remember that keys are automatically converted to strings. This can cause unexpected behavior when using non-string keys.
-
-**Example:**
-```javascript
-let obj = {};
-obj[1] = 'value1';
-console.log(obj['1']);  // Output: 'value1'
-```
 
 #### **Performance with Large Data Sets**
 
@@ -374,6 +356,73 @@ class OpenAddressingHashTable {
         return false;
     }
 }
+```
+
+## **Hash Table Algorithms**
+Below are some common hash table algorithms you should be familiar with:
+
+### **Counting Frequencies**
+Counting frequencies involves determining how often each element appears in an array.
+
+**Example:**
+```javascript
+function countFrequencies(arr) {
+    let frequencyMap = new Map();
+    for (let elem of arr) {
+        frequencyMap.set(elem, (frequencyMap.get(elem) || 0) + 1);
+    }
+    return frequencyMap;
+}
+
+console.log(countFrequencies(['a', 'b', 'a', 'c', 'a', 'b']));  // Output: Map { 'a' => 3, 'b' => 2, 'c' => 1 }
+```
+
+### **Group Anagrams**
+Grouping anagrams involves grouping words that are anagrams of each other.
+
+**Example:**
+```javascript
+function groupAnagrams(words) {
+    let map = new Map();
+    for (let word of words) {
+        let sorted = word.split('').sort().join('');
+        if (!map.has(sorted)) {
+            map.set(sorted, []);
+        }
+        map.get(sorted).push(word);
+    }
+    return Array.from(map.values());
+}
+
+console.log(groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']));  // Output: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]
+```
+
+### **Caching/Memoization**
+Caching or memoization stores the results of expensive function calls to avoid redundant computations.
+
+**Example:**
+```javascript
+function memoize(fn) {
+    let cache = new Map();
+    return function(...args) {
+        let key = JSON.stringify(args);
+        if (cache.has(key)) {
+            return cache.get(key);
+        }
+        let result = fn(...args);
+        cache.set(key, result);
+        return result;
+    };
+}
+
+function slowFunction(num) {
+    for (let i = 0; i <= 1e6; i++) {}  // Simulate slow computation
+    return num * 2;
+}
+
+let memoizedSlowFunction = memoize(slowFunction);
+console.log(memoizedSlowFunction(5));  // Output: 10
+console.log(memoizedSlowFunction(5));  // Output: 10 (retrieved from cache)
 ```
 
 ## **Interview Tips and Tricks**

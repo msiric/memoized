@@ -23,8 +23,6 @@ A tree is a non-linear data structure consisting of nodes connected by edges. Ea
 - **Binary Tree:** Each node has at most two children (left and right).
 - **Binary Search Tree (BST):** A binary tree with the property that the left child is less than the parent and the right child is greater.
 - **Balanced Trees:** Trees that maintain a balanced height to ensure efficient operations (e.g., AVL trees, Red-Black trees).
-- **Heap:** A complete binary tree used to implement priority queues.
-- **Trie:** A tree used to store strings, where each node represents a character.
 
 ## **When to Use**
 - When you need to represent hierarchical data.
@@ -521,67 +519,43 @@ class RedBlackTree {
 }
 ```
 
-### **Tries**
-
-Tries are tree-like data structures used to store strings, where each node represents a character.
-
-**Example:**
-```javascript
-class TrieNode {
-    constructor() {
-        this.children = {};
-        this.isEndOfWord = false;
-    }
-}
-
-class Trie {
-    constructor() {
-        this.root = new TrieNode();
-    }
-
-    insert(word) {
-        let node = this.root;
-        for (let char of word) {
-            if (!node.children[char]) {
-                node.children[char] = new TrieNode();
-            }
-            node = node.children[char];
-        }
-        node.isEndOfWord = true;
-    }
-
-    search(word) {
-        let node = this.root;
-        for (let char of word) {
-            if (!node.children[char]) {
-                return false;
-            }
-            node = node.children[char];
-        }
-        return node.isEndOfWord;
-    }
-
-    startsWith(prefix) {
-        let node = this.root;
-        for (let char of prefix) {
-            if (!node.children[char]) {
-                return false;
-            }
-            node = node.children[char];
-        }
-        return true;
-    }
-}
-```
-
 ## **Tree Algorithms**
+Below are some common tree algorithms you should be familiar with:
 
 ### **Lowest Common Ancestor (LCA)**
+Finding the Lowest Common Ancestor (LCA) identifies the lowest node in a tree that has both given nodes as descendants.
 
 **Example:**
 ```javascript
 class BinarySearchTree {
-    // ... other methods ...
+    constructor() {
+        this.root = null;
+    }
+
+    insert(value) {
+        const newNode = new TreeNode(value);
+        if (!this.root) {
+            this.root = newNode;
+        } else {
+            this.insertNode(this.root, newNode);
+        }
+    }
+
+    insertNode(node, newNode) {
+        if (newNode.value < node.value) {
+            if (!node.left) {
+                node.left = newNode;
+            } else {
+                this.insertNode(node.left, newNode);
+            }
+        } else {
+            if (!node.right) {
+                node.right = newNode;
+            } else {
+                this.insertNode(node.right, newNode);
+            }
+        }
+    }
 
     lowestCommonAncestor(node, p, q) {
         if (node === null) return null;
@@ -596,6 +570,14 @@ class BinarySearchTree {
     }
 }
 
+class TreeNode {
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+    }
+}
+
 let bst = new BinarySearchTree();
 bst.insert(20);
 bst.insert(10);
@@ -605,15 +587,18 @@ bst.insert(15);
 bst.insert(25);
 bst.insert(35);
 
-console.log(bst.lowestCommonAncestor(bst.root, 5, 15));  // Output: 10
+console.log(bst.lowestCommonAncestor(bst.root, 5, 15).value);  // Output: 10
 ```
 
 ### **Serialize and Deserialize a Binary Tree**
+Serializing a binary tree converts it into a string representation, and deserializing converts the string back into the tree structure.
 
 **Example:**
 ```javascript
 class BinaryTree {
-    // ... other methods ...
+    constructor() {
+        this.root = null;
+    }
 
     serialize(root) {
         let result = [];
@@ -647,6 +632,14 @@ class BinaryTree {
         };
 
         return deserializeHelper();
+    }
+}
+
+class TreeNode {
+    constructor(value) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
     }
 }
 

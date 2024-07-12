@@ -211,7 +211,7 @@ class Queue {
 ## **Practical Tips and Tricks**
 
 - **Use Arrays for Simple Queues:**
-  In JavaScript, arrays can be used to implement simple queues because they provide built-in methods like `push`, `shift`, and `length`.
+  In JavaScript, arrays can implement simple queues with methods like `push`, `shift`, and `length`. However, this approach isn't optimal for large queues because `shift` and `unshift` have an O(n) time complexity due to element reindexing. This is usually fine, but always clarify with your interviewer that you understand the performance implications.
   **Example:**
   ```javascript
   let queue = [];
@@ -276,6 +276,67 @@ class Queue {
   ```
 
 ## **Advanced Topics**
+
+### **Implementing a Queue Using a Linked List**
+
+**Example:**
+```javascript
+class Node {
+    constructor(value) {
+        this.value = value;
+        this.next = null;
+    }
+}
+
+class LinkedListQueue {
+    constructor() {
+        this.front = null;
+        this.rear = null;
+        this.size = 0;
+    }
+
+    enqueue(value) {
+        const newNode = new Node(value);
+        if (this.rear) {
+            this.rear.next = newNode;
+        } else {
+            this.front = newNode;
+        }
+        this.rear = newNode;
+        this.size++;
+    }
+
+    dequeue() {
+        if (this.size === 0) return "Underflow";
+        const value = this.front.value;
+        this.front = this.front.next;
+        if (!this.front) {
+            this.rear = null;
+        }
+        this.size--;
+        return value;
+    }
+
+    peek() {
+        if (this.size === 0) return "No elements in Queue";
+        return this.front.value;
+    }
+
+    isEmpty() {
+        return this.size === 0;
+    }
+
+    getSize() {
+        return this.size;
+    }
+
+    clear() {
+        this.front = null;
+        this.rear = null;
+        this.size = 0;
+    }
+}
+```
 
 ### **Circular Queue**
 
@@ -384,8 +445,10 @@ class PriorityQueue {
 ```
 
 ## **Queue Algorithms**
+Below are some common queue algorithms you should be familiar with:
 
 ### **Breadth-First Search (BFS)**
+Breadth-First Search (BFS) explores all the nodes at the present depth level before moving on to the nodes at the next depth level.
 
 **Example:**
 ```javascript
@@ -414,10 +477,11 @@ let graph = {
     F: ['C', 'E']
 };
 
-bfs(graph, 'A');
+bfs(graph, 'A');  // Output: A B C D E F
 ```
 
 ### **Implementing a Cache Using a Queue**
+An LRU (Least Recently Used) cache evicts the least recently accessed item when it reaches its capacity.
 
 **Example:**
 ```javascript
