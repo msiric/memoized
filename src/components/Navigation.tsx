@@ -105,13 +105,13 @@ export const NavPremiumButton = () => {
 
   const content =
     user === undefined ? (
-      <p className="inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border border-lime-600 bg-lime-600 px-3 py-1 text-sm font-medium text-white transition hover:border-lime-500 hover:bg-lime-500 min-[768px]:hidden dark:bg-zinc-900 dark:text-lime-500 dark:hover:bg-lime-900 dark:hover:text-lime-500">
+      <p className="text-md block py-1 text-zinc-600 dark:text-white">
         Loading
       </p>
     ) : user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
       user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
-        <p className="inline-flex w-full w-full items-center justify-center gap-0.5 overflow-hidden rounded-full border border-lime-600 bg-lime-600 px-3 py-1 text-sm font-medium text-white transition hover:border-lime-500 hover:bg-lime-500 min-[768px]:hidden dark:bg-zinc-900 dark:text-lime-500 dark:hover:bg-lime-900 dark:hover:text-lime-500">
-          {currentSubscription}
+        <p className="text-md block py-1 text-zinc-600 dark:text-white">
+          {currentSubscription} &#10024;
         </p>
       ) : (
         <li className="md:hidden">
@@ -119,7 +119,7 @@ export const NavPremiumButton = () => {
             onClick={handleStripePortalRequest}
             disabled={isSubmitting}
             className={clsx(
-              'text-md block py-1 text-zinc-600 transition hover:text-zinc-900 disabled:opacity-50 dark:text-white dark:hover:text-lime-500',
+              "text-md block py-1 text-zinc-600 transition hover:text-zinc-900 dark:text-white dark:hover:text-lime-500",
               isSubmitting && 'cursor-wait',
             )}
           >
