@@ -68,6 +68,9 @@ With memoization, previously computed results are reused, reducing redundant cal
 Calculate the n-th Fibonacci number.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function fib(n) {
     if (n <= 1) return n;
@@ -78,9 +81,24 @@ function fib(n) {
 console.log(fib(10));  // Output: 55
 ```
 
+```typescript
+function fib(n: number): number {
+    if (n <= 1) return n;
+    return fib(n - 1) + fib(n - 2);
+}
+
+// Example usage:
+console.log(fib(10));  // Output: 55
+```
+
+</CodeGroup>
+
 ### **Memoized Fibonacci Sequence**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function fibMemo(n, memo = {}) {
     if (n <= 1) return n;
@@ -93,12 +111,29 @@ function fibMemo(n, memo = {}) {
 console.log(fibMemo(10));  // Output: 55
 ```
 
+```typescript
+function fibMemo(n: number, memo: Record<number, number> = {}): number {
+    if (n <= 1) return n;
+    if (memo[n]) return memo[n];
+    memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);
+    return memo[n];
+}
+
+// Example usage:
+console.log(fibMemo(10));  // Output: 55
+```
+
+</CodeGroup>
+
 ### **Factorial Calculation**
 
 **Problem:**
 Calculate the factorial of a number n.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function factorial(n) {
     if (n === 0) return 1;
@@ -109,9 +144,24 @@ function factorial(n) {
 console.log(factorial(5));  // Output: 120
 ```
 
+```typescript
+function factorial(n: number): number {
+    if (n === 0) return 1;
+    return n * factorial(n - 1);
+}
+
+// Example usage:
+console.log(factorial(5));  // Output: 120
+```
+
+</CodeGroup>
+
 ### **Memoized Factorial Calculation**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function factorialMemo(n, memo = {}) {
     if (n === 0) return 1;
@@ -124,12 +174,29 @@ function factorialMemo(n, memo = {}) {
 console.log(factorialMemo(5));  // Output: 120
 ```
 
+```typescript
+function factorialMemo(n: number, memo: Record<number, number> = {}): number {
+    if (n === 0) return 1;
+    if (memo[n]) return memo[n];
+    memo[n] = n * factorialMemo(n - 1, memo);
+    return memo[n];
+}
+
+// Example usage:
+console.log(factorialMemo(5));  // Output: 120
+```
+
+</CodeGroup>
+
 ### **Longest Common Subsequence**
 
 **Problem:**
 Find the length of the longest common subsequence between two strings.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function lcs(x, y, m, n) {
     if (m === 0 || n === 0) return 0;
@@ -143,9 +210,27 @@ const y = 'GXTXAYB';
 console.log(lcs(x, y, x.length, y.length));  // Output: 4
 ```
 
+```typescript
+function lcs(x: string, y: string, m: number, n: number): number {
+    if (m === 0 || n === 0) return 0;
+    if (x[m - 1] === y[n - 1]) return 1 + lcs(x, y, m - 1, n - 1);
+    return Math.max(lcs(x, y, m, n - 1), lcs(x, y, m - 1, n));
+}
+
+// Example usage:
+const x = 'AGGTAB';
+const y = 'GXTXAYB';
+console.log(lcs(x, y, x.length, y.length));  // Output: 4
+```
+
+</CodeGroup>
+
 ### **Memoized Longest Common Subsequence**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function lcsMemo(x, y, m, n, memo = {}) {
     const key = `${m},${n}`;
@@ -165,12 +250,36 @@ const y = 'GXTXAYB';
 console.log(lcsMemo(x, y, x.length, y.length));  // Output: 4
 ```
 
+```typescript
+function lcsMemo(x: string, y: string, m: number, n: number, memo: Record<string, number> = {}): number {
+    const key = `${m},${n}`;
+    if (memo[key]) return memo[key];
+    if (m === 0 || n === 0) return 0;
+    if (x[m - 1] === y[n - 1]) {
+        memo[key] = 1 + lcsMemo(x, y, m - 1, n - 1, memo);
+    } else {
+        memo[key] = Math.max(lcsMemo(x, y, m, n - 1, memo), lcsMemo(x, y, m - 1, n, memo));
+    }
+    return memo[key];
+}
+
+// Example usage:
+const x = 'AGGTAB';
+const y = 'GXTXAYB';
+console.log(lcsMemo(x, y, x.length, y.length));  // Output: 4
+```
+
+</CodeGroup>
+
 ### **Knapsack Problem**
 
 **Problem:**
 Given weights and values of n items, put these items in a knapsack of capacity W to get the maximum total value in the knapsack.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function knapsack(W, weights, values, n) {
     if (n === 0 || W === 0) return 0;
@@ -189,9 +298,32 @@ const n = values.length;
 console.log(knapsack(W, weights, values, n));  // Output: 220
 ```
 
+```typescript
+function knapsack(W: number, weights: number[], values: number[], n: number): number {
+    if (n === 0 || W === 0) return 0;
+    if (weights[n - 1] > W) return knapsack(W, weights, values, n - 1);
+    return Math.max(
+        values[n - 1] + knapsack(W - weights[n - 1], weights, values, n - 1),
+        knapsack(W, weights, values, n - 1)
+    );
+}
+
+// Example usage:
+const values = [60, 100, 120];
+const weights = [10, 20, 30];
+const W = 50;
+const n = values.length;
+console.log(knapsack(W, weights, values, n));  // Output: 220
+```
+
+</CodeGroup>
+
 ### **Memoized Knapsack Problem**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function knapsackMemo(W, weights, values, n, memo = {}) {
     const key = `${n},${W}`;
@@ -215,6 +347,32 @@ const W = 50;
 const n = values.length;
 console.log(knapsackMemo(W, weights, values, n));  // Output: 220
 ```
+
+```typescript
+function knapsackMemo(W: number, weights: number[], values: number[], n: number, memo: Record<string, number> = {}): number {
+    const key = `${n},${W}`;
+    if (memo[key]) return memo[key];
+    if (n === 0 || W === 0) return 0;
+    if (weights[n - 1] > W) {
+        memo[key] = knapsackMemo(W, weights, values, n - 1, memo);
+    } else {
+        memo[key] = Math.max(
+            values[n - 1] + knapsackMemo(W - weights[n - 1], weights, values, n - 1, memo),
+            knapsackMemo(W, weights, values, n - 1, memo)
+        );
+    }
+    return memo[key];
+}
+
+// Example usage:
+const values = [60, 100, 120];
+const weights = [10, 20, 30];
+const W = 50;
+const n = values.length;
+console.log(knapsackMemo(W, weights, values, n));  // Output: 220
+```
+
+</CodeGroup>
 
 ## **Practical Tips and Tricks**
 
@@ -255,6 +413,8 @@ console.log(knapsackMemo(W, weights, values, n));  // Output: 220
 
 **Example: Bottom-Up Fibonacci**
 
+<CodeGroup>
+
 ```javascript
 function fibBottomUp(n) {
     if (n <= 1) return n;
@@ -269,12 +429,31 @@ function fibBottomUp(n) {
 console.log(fibBottomUp(10));  // Output: 55
 ```
 
+```typescript
+function fibBottomUp(n: number): number {
+    if (n <= 1) return n;
+    const dp = [0, 1];
+    for (let i = 2; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    return dp[n];
+}
+
+// Example usage:
+console.log(fibBottomUp(10));  // Output: 55
+```
+
+</CodeGroup>
+
 ### **Tail Recursion**
 
 **Description:**
 A recursive function is tail-recursive if the recursive call is the last operation in the function. Tail recursion can be optimized by some compilers to avoid stack overflow.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function tailRecFactorial(n, acc = 1) {
     if (n === 0) return acc;
@@ -284,6 +463,18 @@ function tailRecFactorial(n, acc = 1) {
 // Example usage:
 console.log(tailRecFactorial(5));  // Output: 120
 ```
+
+```typescript
+function tailRecFactorial(n: number, acc: number = 1): number {
+    if (n === 0) return acc;
+    return tailRecFactorial(n - 1, n * acc);
+}
+
+// Example usage:
+console.log(tailRecFactorial(5));  // Output: 120
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

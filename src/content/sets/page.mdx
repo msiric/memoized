@@ -39,15 +39,29 @@ A JavaScript `Set` is a mutable collection of unique values, where each value ca
 ### **Creating Sets**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let emptySet = new Set();
 let numberSet = new Set([1, 2, 3, 4, 5]);
-let mixedSet = new Set([1, 'two', {three: 3}, [4, 5]]);
+let mixedSet = new Set([1, 'two', { three: 3 }, [4, 5]]);
 ```
+
+```typescript
+let emptySet: Set<unknown> = new Set();
+let numberSet: Set<number> = new Set([1, 2, 3, 4, 5]);
+let mixedSet: Set<number | string | Record<string, number> | number[]> = new Set([1, 'two', { three: 3 }, [4, 5]]);
+```
+
+</CodeGroup>
 
 ### **Adding and Removing Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let set = new Set();
 set.add(1);
@@ -59,26 +73,63 @@ set.delete(1);
 console.log(set);  // Output: Set { 2 }
 ```
 
+```typescript
+let set: Set<number> = new Set();
+set.add(1);
+set.add(2);
+set.add(2);  // Duplicate, will not be added
+console.log(set);  // Output: Set { 1, 2 }
+
+set.delete(1);
+console.log(set);  // Output: Set { 2 }
+```
+
+</CodeGroup>
+
 ### **Checking for Existence**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let set = new Set([1, 2, 3]);
 console.log(set.has(2));  // Output: true
 console.log(set.has(4));  // Output: false
 ```
 
+```typescript
+let set: Set<number> = new Set([1, 2, 3]);
+console.log(set.has(2));  // Output: true
+console.log(set.has(4));  // Output: false
+```
+
+</CodeGroup>
+
 ### **Getting the Size of a Set**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let set = new Set([1, 2, 3]);
 console.log(set.size);  // Output: 3
 ```
 
+```typescript
+let set: Set<number> = new Set([1, 2, 3]);
+console.log(set.size);  // Output: 3
+```
+
+</CodeGroup>
+
 ### **Iterating Over Sets**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let set = new Set([1, 2, 3]);
 
@@ -91,18 +142,46 @@ set.forEach((value) => {
 });
 ```
 
+```typescript
+let set: Set<number> = new Set([1, 2, 3]);
+
+for (let value of set) {
+    console.log(value);
+}
+
+set.forEach((value: number) => {
+    console.log(value);
+});
+```
+
+</CodeGroup>
+
 ### **Clearing a Set**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let set = new Set([1, 2, 3]);
 set.clear();
 console.log(set.size);  // Output: 0
 ```
 
+```typescript
+let set: Set<number> = new Set([1, 2, 3]);
+set.clear();
+console.log(set.size);  // Output: 0
+```
+
+</CodeGroup>
+
 ### **Converting Sets to Arrays**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let set = new Set([1, 2, 3]);
 let array = Array.from(set);
@@ -112,20 +191,47 @@ let spreadArray = [...set];
 console.log(spreadArray);  // Output: [1, 2, 3]
 ```
 
+```typescript
+let set: Set<number> = new Set([1, 2, 3]);
+let array: number[] = Array.from(set);
+console.log(array);  // Output: [1, 2, 3]
+
+let spreadArray: number[] = [...set];
+console.log(spreadArray);  // Output: [1, 2, 3]
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Removing Duplicates from an Array:**
   Use a set to easily remove duplicates from an array.
+  
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let array = [1, 2, 2, 3, 4, 4, 5];
   let uniqueArray = [...new Set(array)];
   console.log(uniqueArray);  // Output: [1, 2, 3, 4, 5]
   ```
 
+  ```typescript
+  let array: number[] = [1, 2, 2, 3, 4, 4, 5];
+  let uniqueArray: number[] = [...new Set(array)];
+  console.log(uniqueArray);  // Output: [1, 2, 3, 4, 5]
+  ```
+
+  </CodeGroup>
+
 - **Performing Set Operations:**
   Use sets to perform union, intersection, and difference operations.
+  
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let setA = new Set([1, 2, 3]);
   let setB = new Set([3, 4, 5]);
@@ -143,49 +249,122 @@ console.log(spreadArray);  // Output: [1, 2, 3]
   console.log(difference);  // Output: Set { 1, 2 }
   ```
 
+  ```typescript
+  let setA: Set<number> = new Set([1, 2, 3]);
+  let setB: Set<number> = new Set([3, 4, 5]);
+
+  // Union
+  let union: Set<number> = new Set([...setA, ...setB]);
+  console.log(union);  // Output: Set { 1, 2, 3, 4, 5 }
+
+  // Intersection
+  let intersection: Set<number> = new Set([...setA].filter(x => setB.has(x)));
+  console.log(intersection);  // Output: Set { 3 }
+
+  // Difference
+  let difference: Set<number> = new Set([...setA].filter(x => !setB.has(x)));
+  console.log(difference);  // Output: Set { 1, 2 }
+  ```
+
+  </CodeGroup>
+
 - **Using Sets for Fast Lookups:**
   Sets provide efficient O(1) lookups for existence checks.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let set = new Set([1, 2, 3, 4, 5]);
   console.log(set.has(3));  // Output: true
   console.log(set.has(6));  // Output: false
   ```
 
+  ```typescript
+  let set: Set<number> = new Set([1, 2, 3, 4, 5]);
+  console.log(set.has(3));  // Output: true
+  console.log(set.has(6));  // Output: false
+  ```
+
+  </CodeGroup>
+
 ## **Common Gotchas**
 
 - **Sets Are Iterated in Insertion Order:**
   Sets maintain the order of insertion, which can affect the result of iteration.
+  
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let set = new Set([3, 1, 2]);
   console.log([...set]);  // Output: [3, 1, 2]
   ```
 
+  ```typescript
+  let set: Set<number> = new Set([3, 1, 2]);
+  console.log([...set]);  // Output: [3, 1, 2]
+  ```
+
+  </CodeGroup>
+
 - **NaN and Object References:**
   `NaN` is considered equal to `NaN` in sets, and object references are compared by reference, not value.
+  
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let set = new Set();
   set.add(NaN);
   set.add(NaN);
   console.log(set);  // Output: Set { NaN }
 
-  let obj1 = {a: 1};
-  let obj2 = {a: 1};
+  let obj1 = { a: 1 };
+  let obj2 = { a: 1 };
   set.add(obj1);
   set.add(obj2);
   console.log(set);  // Output: Set { NaN, { a: 1 }, { a: 1 } }
   ```
 
+  ```typescript
+  let set: Set<unknown> = new Set();
+  set.add(NaN);
+  set.add(NaN);
+  console.log(set);  // Output: Set { NaN }
+
+  let obj1 = { a: 1 };
+  let obj2 = { a: 1 };
+  set.add(obj1);
+  set.add(obj2);
+  console.log(set);  // Output: Set { NaN, { a: 1 }, { a: 1 } }
+  ```
+
+  </CodeGroup>
+
 - **Set Methods Are Case-Sensitive:**
   Be aware that methods like `add` and `has` are case-sensitive.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let set = new Set();
   set.add('apple');
   console.log(set.has('Apple'));  // Output: false
   ```
+
+  ```typescript
+  let set: Set<string> = new Set();
+  set.add('apple');
+  console.log(set.has('Apple'));  // Output: false
+  ```
+
+  </CodeGroup>
 
 ## **Advanced Topics**
 
@@ -194,6 +373,9 @@ console.log(spreadArray);  // Output: [1, 2, 3]
 WeakSets are similar to sets but only contain objects and are weakly referenced, meaning they do not prevent garbage collection.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let weakSet = new WeakSet();
 let obj = {};
@@ -201,9 +383,21 @@ weakSet.add(obj);
 console.log(weakSet.has(obj));  // Output: true
 ```
 
+```typescript
+let weakSet: WeakSet<object> = new WeakSet();
+let obj: object = {};
+weakSet.add(obj);
+console.log(weakSet.has(obj));  // Output: true
+```
+
+</CodeGroup>
+
 ### **Set Operations Using Utility Functions**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function union(setA, setB) {
     return new Set([...setA, ...setB]);
@@ -225,6 +419,29 @@ console.log(intersection(setA, setB));  // Output: Set { 3 }
 console.log(difference(setA, setB));  // Output: Set { 1, 2 }
 ```
 
+```typescript
+function union<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+    return new Set([...setA, ...setB]);
+}
+
+function intersection<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+    return new Set([...setA].filter(x => setB.has(x)));
+}
+
+function difference<T>(setA: Set<T>, setB: Set<T>): Set<T> {
+    return new Set([...setA].filter(x => !setB.has(x)));
+}
+
+let setA: Set<number> = new Set([1, 2, 3]);
+let setB: Set<number> = new Set([3, 4, 5]);
+
+console.log(union(setA, setB));  // Output: Set { 1, 2, 3, 4, 5 }
+console.log(intersection(setA, setB));  // Output: Set { 3 }
+console.log(difference(setA, setB));  // Output: Set { 1, 2 }
+```
+
+</CodeGroup>
+
 ## **Set Algorithms**
 Below are some common set algorithms you should be familiar with:
 
@@ -232,6 +449,9 @@ Below are some common set algorithms you should be familiar with:
 Finding unique elements in an array involves removing duplicate values.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let array = [1, 2, 2, 3, 4, 4, 5];
 let uniqueSet = new Set(array);
@@ -239,10 +459,22 @@ let uniqueArray = [...uniqueSet];
 console.log(uniqueArray);  // Output: [1, 2, 3, 4, 5]
 ```
 
+```typescript
+let array: number[] = [1, 2, 2, 3, 4, 4, 5];
+let uniqueSet: Set<number> = new Set(array);
+let uniqueArray: number[] = [...uniqueSet];
+console.log(uniqueArray);  // Output: [1, 2, 3, 4, 5]
+```
+
+</CodeGroup>
+
 ### **Counting Unique Elements**
 Counting unique elements determines the number of distinct values in an array.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function countUniqueElements(arr) {
     return new Set(arr).size;
@@ -252,10 +484,24 @@ let array = [1, 2, 2, 3, 4, 4, 5];
 console.log(countUniqueElements(array));  // Output: 5
 ```
 
+```typescript
+function countUniqueElements<T>(arr: T[]): number {
+    return new Set(arr).size;
+}
+
+let array: number[] = [1, 2, 2, 3, 4, 4, 5];
+console.log(countUniqueElements(array));  // Output: 5
+```
+
+</CodeGroup>
+
 ### **Finding Intersection of Multiple Sets**
 Finding the intersection of multiple sets identifies elements common to all sets.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function intersectionOfSets(...sets) {
     return sets.reduce((acc, set) => new Set([...acc].filter(x => set.has(x))));
@@ -267,6 +513,20 @@ let setC = new Set([3, 4, 5]);
 
 console.log(intersectionOfSets(setA, setB, setC));  // Output: Set { 3 }
 ```
+
+```typescript
+function intersectionOfSets<T>(...sets: Set<T>[]): Set<T> {
+    return sets.reduce((acc, set) => new Set([...acc].filter(x => set.has(x))));
+}
+
+let setA: Set<number> = new Set([1, 2, 3]);
+let setB: Set<number> = new Set([2, 3, 4]);
+let setC: Set<number> = new Set([3, 4, 5]);
+
+console.log(intersectionOfSets(setA, setB, setC));  // Output: Set { 3 }
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

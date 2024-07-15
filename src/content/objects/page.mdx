@@ -38,6 +38,9 @@ A JavaScript object is a mutable collection of key-value pairs, where each key (
 ### **Creating Objects**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let emptyObject = {};
 let person = {
@@ -53,9 +56,42 @@ let person = {
 };
 ```
 
+```typescript
+interface Address {
+    street: string;
+    city: string;
+    zip: string;
+}
+
+interface Person {
+    name: string;
+    age: number;
+    isEmployed: boolean;
+    hobbies: string[];
+    address: Address;
+}
+
+let person: Person = {
+    name: 'John',
+    age: 30,
+    isEmployed: true,
+    hobbies: ['reading', 'travelling'],
+    address: {
+        street: '123 Main St',
+        city: 'Anytown',
+        zip: '12345'
+    }
+};
+```
+
+</CodeGroup>
+
 ### **Accessing Properties**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     name: 'John',
@@ -67,9 +103,31 @@ console.log(person.name);  // Output: 'John'
 console.log(person['age']);  // Output: 30
 ```
 
+```typescript
+interface Person {
+    name: string;
+    age: number;
+    isEmployed: boolean;
+}
+
+let person: Person = {
+    name: 'John',
+    age: 30,
+    isEmployed: true
+};
+
+console.log(person.name);  // Output: 'John'
+console.log(person['age']);  // Output: 30
+```
+
+</CodeGroup>
+
 ### **Modifying Properties**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     name: 'John',
@@ -81,9 +139,31 @@ person['isEmployed'] = true;
 console.log(person);  // Output: {name: 'John', age: 31, isEmployed: true}
 ```
 
+```typescript
+interface Person {
+    name: string;
+    age: number;
+    isEmployed?: boolean;
+}
+
+let person: Person = {
+    name: 'John',
+    age: 30
+};
+
+person.age = 31;
+person['isEmployed'] = true;
+console.log(person);  // Output: {name: 'John', age: 31, isEmployed: true}
+```
+
+</CodeGroup>
+
 ### **Adding and Removing Properties**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     name: 'John'
@@ -96,9 +176,31 @@ delete person.age;  // Removing a property
 console.log(person);  // Output: {name: 'John'}
 ```
 
+```typescript
+interface Person {
+    name: string;
+    age?: number;
+}
+
+let person: Person = {
+    name: 'John'
+};
+
+person.age = 30;  // Adding a property
+console.log(person);  // Output: {name: 'John', age: 30}
+
+delete person.age;  // Removing a property
+console.log(person);  // Output: {name: 'John'}
+```
+
+</CodeGroup>
+
 ### **Checking Property Existence**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     name: 'John'
@@ -108,9 +210,28 @@ console.log('name' in person);  // Output: true
 console.log('age' in person);  // Output: false
 ```
 
+```typescript
+interface Person {
+    name: string;
+    age?: number;
+}
+
+let person: Person = {
+    name: 'John'
+};
+
+console.log('name' in person);  // Output: true
+console.log('age' in person);  // Output: false
+```
+
+</CodeGroup>
+
 ### **Iterating Over Properties**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     name: 'John',
@@ -130,9 +251,39 @@ for (let key in person) {
 // isEmployed: true
 ```
 
+```typescript
+interface Person {
+    name: string;
+    age: number;
+    isEmployed: boolean;
+}
+
+let person: Person = {
+    name: 'John',
+    age: 30,
+    isEmployed: true
+};
+
+for (let key in person) {
+    if (person.hasOwnProperty(key)) {
+        console.log(`${key}: ${person[key]}`);
+    }
+}
+
+// Output:
+// name: John
+// age: 30
+// isEmployed: true
+```
+
+</CodeGroup>
+
 ### **Object Methods**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     name: 'John',
@@ -145,9 +296,32 @@ let person = {
 person.greet();  // Output: 'Hello, my name is John'
 ```
 
+```typescript
+interface Person {
+    name: string;
+    age: number;
+    greet: () => void;
+}
+
+let person: Person = {
+    name: 'John',
+    age: 30,
+    greet: function() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+};
+
+person.greet();  // Output: 'Hello, my name is John'
+```
+
+</CodeGroup>
+
 ### **Object Utility Methods**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     name: 'John',
@@ -166,11 +340,41 @@ let personCopy = {...person};
 console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
 ```
 
+```typescript
+interface Person {
+    name: string;
+    age: number;
+    isEmployed: boolean;
+}
+
+let person: Person = {
+    name: 'John',
+    age: 30,
+    isEmployed: true
+};
+
+console.log(Object.keys(person));  // Output: ['name', 'age', 'isEmployed']
+console.log(Object.values(person));  // Output: ['John', 30, true]
+console.log(Object.entries(person));  // Output: [['name', 'John'], ['age', 30], ['isEmployed', true]]
+
+let newPerson = Object.assign({}, person, {age: 31});
+console.log(newPerson);  // Output: {name: 'John', age: 31, isEmployed: true}
+
+let personCopy: Person = {...person};
+console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Using `Object.freeze` to Make Objects Immutable:**
   Prevent modifications to an object.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let person = {name: 'John'};
   Object.freeze(person);
@@ -178,9 +382,27 @@ console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
   console.log(person);  // Output: {name: 'John'}
   ```
 
+  ```typescript
+  interface Person {
+      name: string;
+      age?: number;
+  }
+
+  let person: Person = {name: 'John'};
+  Object.freeze(person);
+  person.age = 30;  // This will not work
+  console.log(person);  // Output: {name: 'John'}
+  ```
+  
+  </CodeGroup>
+
 - **Cloning Objects:**
   Use `Object.assign` or the spread operator to create shallow copies.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let original = {a: 1, b: 2};
   let copy = Object.assign({}, original);
@@ -189,9 +411,28 @@ console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
   console.log(spreadCopy);  // Output: {a: 1, b: 2}
   ```
 
+  ```typescript
+  interface Original {
+      a: number;
+      b: number;
+  }
+
+  let original: Original = {a: 1, b: 2};
+  let copy = Object.assign({}, original);
+  let spreadCopy: Original = {...original};
+  console.log(copy);  // Output: {a: 1, b: 2}
+  console.log(spreadCopy);  // Output: {a: 1, b: 2}
+  ```
+  
+  </CodeGroup>
+
 - **Merging Objects:**
   Combine properties from multiple objects.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let obj1 = {a: 1};
   let obj2 = {b: 2};
@@ -199,9 +440,30 @@ console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
   console.log(merged);  // Output: {a: 1, b: 2}
   ```
 
+  ```typescript
+  interface Obj1 {
+      a: number;
+  }
+
+  interface Obj2 {
+      b: number;
+  }
+
+  let obj1: Obj1 = {a: 1};
+  let obj2: Obj2 = {b: 2};
+  let merged = {...obj1, ...obj2};
+  console.log(merged);  // Output: {a: 1, b: 2}
+  ```
+  
+  </CodeGroup>
+
 - **Nested Object Updates:**
   Use the spread operator for nested object updates.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let person = {
       name: 'John',
@@ -221,11 +483,47 @@ console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
   // Output: {name: 'John', address: {city: 'Newtown', zip: '12345'}}
   ```
 
+  ```typescript
+  interface Address {
+      city: string;
+      zip: string;
+  }
+
+  interface Person {
+      name: string;
+      address: Address;
+  }
+
+  let person: Person = {
+      name: 'John',
+      address: {
+          city: 'Anytown',
+          zip: '12345'
+      }
+  };
+
+  let updatedPerson: Person = {
+      ...person,
+      address: {
+          ...person.address,
+          city: 'Newtown'
+      }
+  };
+  console.log(updatedPerson);
+  // Output: {name: 'John', address: {city: 'Newtown', zip: '12345'}}
+  ```
+  
+  </CodeGroup>
+
 ## **Common Gotchas**
 
 - **Shallow Copy vs. Deep Copy:**
   `Object.assign` and the spread operator create shallow copies, not deep copies.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let original = {a: 1, b: {c: 2}};
   let copy = {...original};
@@ -233,22 +531,66 @@ console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
   console.log(original.b.c);  // Output: 3 (original object is affected)
   ```
 
+  ```typescript
+  interface Original {
+      a: number;
+      b: {
+          c: number;
+      }
+  }
+
+  let original: Original = {a: 1, b: {c: 2}};
+  let copy: Original = {...original};
+  copy.b.c = 3;
+  console.log(original.b.c);  // Output: 3 (original object is affected)
+  ```
+  
+  </CodeGroup>
+
 - **Property Enumeration Order:**
   The order of property enumeration is not guaranteed in older JavaScript engines.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let obj = {b: 1, a: 2};
   console.log(Object.keys(obj));  // Output: ['b', 'a'] (order may vary)
   ```
 
+  ```typescript
+  interface Obj {
+      b: number;
+      a: number;
+  }
+
+  let obj: Obj = {b: 1, a: 2};
+  console.log(Object.keys(obj));  // Output: ['b', 'a'] (order may vary)
+  ```
+  
+  </CodeGroup>
+
 - **Prototype Pollution:**
   Be cautious when merging or extending objects to avoid unintended prototype changes.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let obj = {};
   Object.prototype.newProp = 'polluted';
   console.log(obj.newProp);  // Output: 'polluted' (unintended prototype property)
   ```
+  
+  ```typescript
+  let obj = {} as { newProp?: string} ;
+  (Object.prototype as { newProp?: string }).newProp = 'polluted'
+  console.log(obj.newProp) // Output: 'polluted' (unintended prototype property)
+  ```
+  
+  </CodeGroup>
 
 ## **Advanced Topics**
 
@@ -257,6 +599,9 @@ console.log(personCopy);  // Output: {name: 'John', age: 30, isEmployed: true}
 Objects in JavaScript have a prototype, which is another object from which they inherit properties and methods.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let person = {
     greet: function() {
@@ -269,12 +614,34 @@ john.name = 'John';
 john.greet();  // Output: 'Hello, my name is John'
 ```
 
+```typescript
+interface Person {
+    greet: () => void;
+}
+
+let person: Person = {
+    greet: function() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+};
+
+let john = Object.create(person);
+john.name = 'John';
+john.greet();  // Output: 'Hello, my name is John'
+```
+
+</CodeGroup>
+
 ### **Object-Oriented Programming (OOP)**
 
 JavaScript supports OOP through constructor functions and ES6 classes.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
+
 // Constructor Function
 function Person(name, age) {
     this.name = name;
@@ -304,11 +671,55 @@ let jane = new Person('Jane', 25);
 jane.greet();  // Output: 'Hello, my name is Jane'
 ```
 
+```typescript
+
+// Constructor Function
+class Person {
+    name: string;
+    age: number;
+
+    constructor(name: string, age: number) {
+        this.name = name;
+        this.age = age;
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+}
+
+let john = new Person('John', 30);
+john.greet();  // Output: 'Hello, my name is John'
+
+// ES6 Class
+class Person {
+    name: string;
+    age: number;
+
+    constructor(name: string, age: number) {
+        this.name = name;
+        this.age = age;
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.name}`);
+    }
+}
+
+let jane = new Person('Jane', 25);
+jane.greet();  // Output: 'Hello, my name is Jane'
+```
+
+</CodeGroup>
+
 ### **Symbols**
 
 Symbols are a unique and immutable data type used as property keys.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let sym = Symbol('description');
 let obj = {
@@ -317,11 +728,24 @@ let obj = {
 console.log(obj[sym]);  // Output: 'value'
 ```
 
+```typescript
+let sym = Symbol('description');
+let obj = {
+    [sym]: 'value'
+};
+console.log(obj[sym]);  // Output: 'value'
+```
+
+</CodeGroup>
+
 ### **Private Properties**
 
 Using closures or `#` syntax (private class fields) to create private properties.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Person {
     #name;
@@ -340,6 +764,26 @@ john.greet();  // Output: 'Hello, my name is John'
 // console.log(john.#name);  // SyntaxError: Private field '#name' must be declared in an enclosing class
 ```
 
+```typescript
+class Person {
+    #name: string;
+
+    constructor(name: string) {
+        this.#name = name;
+    }
+
+    greet() {
+        console.log(`Hello, my name is ${this.#name}`);
+    }
+}
+
+let john = new Person('John');
+john.greet();  // Output: 'Hello, my name is John'
+// console.log(john.#name);  // SyntaxError: Private field '#name' must be declared in an enclosing class
+```
+
+</CodeGroup>
+
 ## **Object Algorithms**
 Below are some common object algorithms you should be familiar with:
 
@@ -347,6 +791,9 @@ Below are some common object algorithms you should be familiar with:
 Deep cloning creates a complete copy of an object, including all nested objects and arrays.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function deepClone(obj) {
     if (obj === null || typeof obj !== 'object') return obj;
@@ -368,10 +815,36 @@ copy.b.c = 3;
 console.log(original.b.c);  // Output: 2 (original object is not affected)
 ```
 
+```typescript
+function deepClone<T>(obj: T): T {
+    if (obj === null || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) {
+        return obj.map(item => deepClone(item)) as unknown as T;
+    }
+    let clone = {} as T;
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            (clone)[key] = deepClone((obj)[key]);
+        }
+    }
+    return clone;
+}
+
+let original = {a: 1, b: {c: 2}};
+let copy = deepClone(original);
+copy.b.c = 3;
+console.log(original.b.c);  // Output: 2 (original object is not affected)
+```
+
+</CodeGroup>
+
 ### **Merging Objects Recursively**
 Merging objects recursively combines properties of multiple objects into one, including nested objects.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function mergeDeep(target, source) {
     if (typeof target !== 'object' || typeof source !== 'object') return source;
@@ -388,11 +861,51 @@ function mergeDeep(target, source) {
     return target;
 }
 
-let obj1 = {a: 1, b: {c: 2}};
-let obj2 = {b: {d: 3}};
+let obj1 = { a: 1, b: { c: 2 } };
+let obj2 = { b: { d: 3 } };
 let merged = mergeDeep(obj1, obj2);
-console.log(merged);  // Output: {a: 1, b: {c: 2, d: 3}}
+console.log(merged);  // Output: { a: 1, b: { c: 2, d: 3 } }
 ```
+
+```typescript
+type AnyObject = Record<string, unknown>;
+
+function isObject(item: unknown): item is AnyObject {
+    return item !== null && typeof item === 'object' && !Array.isArray(item);
+}
+
+function mergeDeep<T extends AnyObject, U extends AnyObject>(target: T, source: U): T & U {
+    if (!isObject(target) || !isObject(source)) return source as T & U;
+
+    const output = { ...target } as T & U;
+
+    for (const key in source) {
+        if (source.hasOwnProperty(key)) {
+            if (isObject(source[key])) {
+                if (key in target) {
+                    (output as AnyObject)[key] = mergeDeep(
+                        (target as AnyObject)[key] as AnyObject,
+                        source[key] as AnyObject
+                    );
+                } else {
+                    (output as AnyObject)[key] = source[key];
+                }
+            } else {
+                (output as AnyObject)[key] = source[key];
+            }
+        }
+    }
+    return output;
+}
+
+let obj1 = { a: 1, b: { c: 2 } };
+let obj2 = { b: { d: 3 } };
+
+let merged = mergeDeep(obj1, obj2);
+console.log(merged); // Output: { a: 1, b: { c: 2, d: 3 } }
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

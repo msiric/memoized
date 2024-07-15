@@ -60,6 +60,9 @@ After these operations, `find(1)` will return the representative of the set cont
 ### **Creating a Union-Find Data Structure**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class UnionFind {
     constructor(size) {
@@ -101,9 +104,58 @@ console.log(uf.find(3));  // Output: 3
 console.log(uf.find(4));  // Output: 4
 ```
 
+```typescript
+class UnionFind {
+    parent: number[];
+    rank: number[];
+
+    constructor(size: number) {
+        this.parent = Array(size).fill(0).map((_, index) => index);
+        this.rank = Array(size).fill(0);
+    }
+
+    find(x: number): number {
+        if (this.parent[x] !== x) {
+            this.parent[x] = this.find(this.parent[x]);  // Path compression
+        }
+        return this.parent[x];
+    }
+
+    union(x: number, y: number): void {
+        const rootX = this.find(x);
+        const rootY = this.find(y);
+
+        if (rootX !== rootY) {
+            if (this.rank[rootX] > this.rank[rootY]) {
+                this.parent[rootY] = rootX;
+            } else if (this.rank[rootX] < this.rank[rootY]) {
+                this.parent[rootX] = rootY;
+            } else {
+                this.parent[rootY] = rootX;
+                this.rank[rootX]++;
+            }
+        }
+    }
+}
+
+// Example usage:
+const uf = new UnionFind(10);
+uf.union(1, 2);
+uf.union(2, 3);
+console.log(uf.find(1));  // Output: 3
+console.log(uf.find(2));  // Output: 3
+console.log(uf.find(3));  // Output: 3
+console.log(uf.find(4));  // Output: 4
+```
+
+</CodeGroup>
+
 ### **Union by Rank/Size**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class UnionFindBySize {
     constructor(size) {
@@ -144,9 +196,57 @@ console.log(uf.find(3));  // Output: 3
 console.log(uf.find(4));  // Output: 4
 ```
 
+```typescript
+class UnionFindBySize {
+    parent: number[];
+    size: number[];
+
+    constructor(size: number) {
+        this.parent = Array(size).fill(0).map((_, index) => index);
+        this.size = Array(size).fill(1);
+    }
+
+    find(x: number): number {
+        if (this.parent[x] !== x) {
+            this.parent[x] = this.find(this.parent[x]);  // Path compression
+        }
+        return this.parent[x];
+    }
+
+    union(x: number, y: number): void {
+        const rootX = this.find(x);
+        const rootY = this.find(y);
+
+        if (rootX !== rootY) {
+            if (this.size[rootX] > this.size[rootY]) {
+                this.parent[rootY] = rootX;
+                this.size[rootX] += this.size[rootY];
+            } else {
+                this.parent[rootX] = rootY;
+                this.size[rootY] += this.size[rootX];
+            }
+        }
+    }
+}
+
+// Example usage:
+const uf = new UnionFindBySize(10);
+uf.union(1, 2);
+uf.union(2, 3);
+console.log(uf.find(1));  // Output: 3
+console.log(uf.find(2));  // Output: 3
+console.log(uf.find(3));  // Output: 3
+console.log(uf.find(4));  // Output: 4
+```
+
+</CodeGroup>
+
 ### **Cycle Detection in Graph**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor(vertices) {
@@ -198,6 +298,62 @@ graph.addEdge(0, 2);
 console.log(graph.isCycle());  // Output: true
 ```
 
+```typescript
+class Graph {
+    V: number;
+    edges: [number, number][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.edges = [];
+    }
+
+    addEdge(u: number, v: number): void {
+        this.edges.push([u, v]);
+    }
+
+    find(parent: number[], i: number): number {
+        if (parent[i] === -1) {
+            return i;
+        }
+        return this.find(parent, parent[i]);
+    }
+
+    union(parent: number[], x: number, y: number): void {
+        const xset = this.find(parent, x);
+        const yset = this.find(parent, y);
+        if (xset !== yset) {
+            parent[xset] = yset;
+        }
+    }
+
+    isCycle(): boolean {
+        const parent: number[] = Array(this.V).fill(-1);
+
+        for (let [u, v] of this.edges) {
+            const x = this.find(parent, u);
+            const y = this.find(parent, v);
+
+            if (x === y) {
+                return true;
+            }
+            this.union(parent, x, y);
+        }
+        return false;
+    }
+}
+
+// Example usage:
+const graph = new Graph(3);
+graph.addEdge(0, 1);
+graph.addEdge(1, 2);
+graph.addEdge(0, 2);
+
+console.log(graph.isCycle());  // Output: true
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Path Compression:**
@@ -225,6 +381,9 @@ console.log(graph.isCycle());  // Output: true
 ### **Kruskal's Minimum Spanning Tree Algorithm**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class KruskalMST {
     constructor(vertices) {
@@ -299,12 +458,94 @@ console.log(graph.kruskalMST());
 // Output: [ [ 2, 3, 4 ], [ 0, 3, 5 ], [ 0, 1, 10 ] ]
 ```
 
+```typescript
+class KruskalMST {
+    V: number;
+    edges: [number, number, number][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.edges = [];
+    }
+
+    addEdge(u: number, v: number, w: number): void {
+        this.edges.push([u, v, w]);
+    }
+
+    find(parent: number[], i: number): number {
+        if (parent[i] === i) {
+            return i;
+        }
+        return this.find(parent, parent[i]);
+    }
+
+    union(parent: number[], rank: number[], x: number, y: number): void {
+        const xroot = this.find(parent, x);
+        const yroot = this.find(parent, y);
+
+        if (rank[xroot] < rank[yroot]) {
+            parent[xroot] = yroot;
+        } else if (rank[xroot] > rank[yroot]) {
+            parent[yroot] = xroot;
+        } else {
+            parent[yroot] = xroot;
+            rank[xroot]++;
+        }
+    }
+
+    kruskalMST(): [number, number, number][] {
+        this.edges.sort((a, b) => a[2] - b[2]);
+        const parent: number[] = [];
+        const rank: number[] = [];
+        const result: [number, number, number][] = [];
+
+        for (let i = 0; i < this.V; i++) {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+
+        let e = 0;
+        let i = 0;
+
+        while (e < this.V - 1) {
+            const [u, v, w] = this.edges[i++];
+            const x = this.find(parent, u);
+            const y = this.find(parent, v);
+
+            if (x !== y) {
+                result.push([u, v, w]);
+                this.union(parent, rank, x, y);
+                e++;
+            }
+        }
+
+        return result;
+    }
+}
+
+// Example usage:
+const graph = new KruskalMST(4);
+graph.addEdge(0, 1, 10);
+graph.addEdge(0, 2, 6);
+graph.addEdge(0, 3, 5);
+graph.addEdge(1, 3, 15);
+graph.addEdge(2, 3, 4);
+
+console.log(graph.kruskalMST());
+// Output: [ [ 2, 3, 4 ], [ 0, 3, 5 ], [ 0, 1, 10 ] ]
+```
+
+</CodeGroup>
+
 ### **Dynamic Connectivity**
 
 **Description:**
 Union-Find can be used to solve dynamic connectivity problems, where the goal is to efficiently determine whether two elements are in the same connected component.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class DynamicConnectivity {
     constructor(size) {
@@ -329,6 +570,35 @@ console.log(dc.isConnected(1, 3));  // Output: false
 dc.addConnection(2, 3);
 console.log(dc.isConnected(1, 3));  // Output: true
 ```
+
+```typescript
+class DynamicConnectivity {
+    uf: UnionFind;
+
+    constructor(size: number) {
+        this.uf = new UnionFind(size);
+    }
+
+    addConnection(u: number, v: number): void {
+        this.uf.union(u, v);
+    }
+
+    isConnected(u: number, v: number): boolean {
+        return this.uf.find(u) === this.uf.find(v);
+    }
+}
+
+// Example usage:
+const dc = new DynamicConnectivity(10);
+dc.addConnection(1, 2);
+dc.addConnection(3, 4);
+console.log(dc.isConnected(1, 2));  // Output: true
+console.log(dc.isConnected(1, 3));  // Output: false
+dc.addConnection(2, 3);
+console.log(dc.isConnected(1, 3));  // Output: true
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

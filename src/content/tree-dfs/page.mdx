@@ -71,7 +71,10 @@ For post-order traversal, the output is `[4, 5, 2, 3, 1]`.
 3. While the stack is not empty, process each node and add its right and left children to the stack.
 4. Collect the values of nodes in pre-order.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TreeNode {
     constructor(value) {
@@ -113,6 +116,53 @@ root.left.right = new TreeNode(5);
 console.log(preOrderTraversal(root));  // Output: [1, 2, 4, 5, 3]
 ```
 
+```typescript
+class TreeNode {
+    value: number;
+    left: TreeNode | null;
+    right: TreeNode | null;
+
+    constructor(value: number) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+function preOrderTraversal(root: TreeNode | null): number[] {
+    if (root === null) return [];
+
+    const result: number[] = [];
+    const stack: TreeNode[] = [root];
+
+    while (stack.length > 0) {
+        const currentNode = stack.pop()!;
+        result.push(currentNode.value);
+
+        // Push right child first so that left child is processed first
+        if (currentNode.right !== null) {
+            stack.push(currentNode.right);
+        }
+        if (currentNode.left !== null) {
+            stack.push(currentNode.left);
+        }
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+
+console.log(preOrderTraversal(root));  // Output: [1, 2, 4, 5, 3]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a stack to keep track of nodes for the iterative approach.
 - Push the right child first so that the left child is processed first.
@@ -133,7 +183,10 @@ console.log(preOrderTraversal(root));  // Output: [1, 2, 4, 5, 3]
 3. Process the root node.
 4. Traverse the right subtree.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function inOrderTraversal(root) {
     const result = [];
@@ -168,6 +221,42 @@ root.left.right = new TreeNode(5);
 console.log(inOrderTraversal(root));  // Output: [4, 2, 5, 1, 3]
 ```
 
+```typescript
+function inOrderTraversal(root: TreeNode | null): number[] {
+    const result: number[] = [];
+    const stack: TreeNode[] = [];
+    let current: TreeNode | null = root;
+
+    while (current !== null || stack.length > 0) {
+        // Reach the leftmost node of the current node
+        while (current !== null) {
+            stack.push(current);
+            current = current.left;
+        }
+
+        // Current must be null at this point
+        current = stack.pop()!;
+        result.push(current.value);
+
+        // We have visited the node and its left subtree. Now, it's right subtree's turn
+        current = current.right;
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+
+console.log(inOrderTraversal(root));  // Output: [4, 2, 5, 1, 3]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a stack to keep track of nodes for the iterative approach.
 - Traverse the left subtree first, then process the root node, and finally traverse the right subtree.
@@ -188,7 +277,10 @@ console.log(inOrderTraversal(root));  // Output: [4, 2, 5, 1, 3]
 3. Traverse the right subtree.
 4. Process the root node after traversing both subtrees.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function postOrderTraversal(root) {
     if (root === null) return [];
@@ -231,6 +323,51 @@ root.left.right = new TreeNode(5);
 
 console.log(postOrderTraversal(root));  // Output: [4, 5, 2, 3, 1]
 ```
+
+```typescript
+function postOrderTraversal(root: TreeNode | null): number[] {
+    if (root === null) return [];
+
+    const result: number[] = [];
+    const stack: TreeNode[] = [];
+    let lastVisited: TreeNode | null = null;
+
+    while (root !== null || stack.length > 0) {
+        // Traverse the left subtree
+        while (root !== null) {
+            stack.push(root);
+            root = root.left;
+        }
+
+        // Peek the node from the stack
+        root = stack[stack.length - 1];
+
+        // If the right subtree is not traversed yet, traverse it
+        if (root.right !== null && lastVisited !== root.right) {
+            root = root.right;
+        } else {
+            // Process the root node
+            root = stack.pop()!;
+            result.push(root.value);
+            lastVisited = root;
+            root = null;  // Reset the root to null to backtrack
+        }
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+
+console.log(postOrderTraversal(root));  // Output: [4, 5, 2, 3, 1]
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use a stack to keep track of nodes for the iterative approach.

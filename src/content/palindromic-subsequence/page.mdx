@@ -62,7 +62,10 @@ Consider the string `s = "bbbab"`. The longest palindromic subsequence is `"bbbb
      - If `s[i] != s[j]`, set `dp[i][j] = max(dp[i + 1][j], dp[i][j - 1])`.
 4. The result is stored in `dp[0][n - 1]`.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function longestPalindromicSubsequence(s) {
     const n = s.length;
@@ -95,6 +98,40 @@ const s = "bbbab";
 console.log(longestPalindromicSubsequence(s));  // Output: 4 ("bbbb")
 ```
 
+```typescript
+function longestPalindromicSubsequence(s: string): number {
+    const n = s.length;
+    const dp: number[][] = Array.from({ length: n }, () => Array(n).fill(0));
+
+    // Base case: single letters are palindromes of length 1
+    for (let i = 0; i < n; i++) {
+        dp[i][i] = 1;
+    }
+
+    // Fill the table
+    for (let cl = 2; cl <= n; cl++) {
+        for (let i = 0; i < n - cl + 1; i++) {
+            const j = i + cl - 1;
+            if (s[i] === s[j] && cl === 2) {
+                dp[i][j] = 2;
+            } else if (s[i] === s[j]) {
+                dp[i][j] = dp[i + 1][j - 1] + 2;
+            } else {
+                dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+
+    return dp[0][n - 1];
+}
+
+// Example usage:
+const s = "bbbab";
+console.log(longestPalindromicSubsequence(s));  // Output: 4 ("bbbb")
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a bottom-up dynamic programming approach to fill the table.
 - Carefully handle the indices to avoid out-of-bounds errors.
@@ -113,7 +150,10 @@ console.log(longestPalindromicSubsequence(s));  // Output: 4 ("bbbb")
 2. Subtract the length of the longest palindromic subsequence from the total length of the string.
 3. The result is the minimum number of deletions required.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function minDeletionsToMakePalindrome(s) {
     const n = s.length;
@@ -149,6 +189,44 @@ function minDeletionsToMakePalindrome(s) {
 const s = "abcbad";
 console.log(minDeletionsToMakePalindrome(s));  // Output: 2 ("bcb" is the LPS, so remove 'a' and 'd')
 ```
+
+```typescript
+function minDeletionsToMakePalindrome(s: string): number {
+    const n = s.length;
+
+    function longestPalindromicSubsequence(s: string): number {
+        const dp: number[][] = Array.from({ length: n }, () => Array(n).fill(0));
+
+        for (let i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
+
+        for (let cl = 2; cl <= n; cl++) {
+            for (let i = 0; i < n - cl + 1; i++) {
+                const j = i + cl - 1;
+                if (s[i] === s[j] && cl === 2) {
+                    dp[i][j] = 2;
+                } else if (s[i] === s[j]) {
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                } else {
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+
+        return dp[0][n - 1];
+    }
+
+    const lpsLength = longestPalindromicSubsequence(s);
+    return n - lpsLength;
+}
+
+// Example usage:
+const s = "abcbad";
+console.log(minDeletionsToMakePalindrome(s));  // Output: 2 ("bcb" is the LPS, so remove 'a' and 'd')
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use the length of the longest palindromic subsequence to determine the minimum deletions.

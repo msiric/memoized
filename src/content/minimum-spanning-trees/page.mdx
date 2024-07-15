@@ -58,6 +58,9 @@ The MST would include edges: `A-B`, `C-D`, and either `A-C` or `B-D`, with a tot
 3. Repeat step 2 until there are (V-1) edges in the spanning tree.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class UnionFind {
     constructor(size) {
@@ -134,6 +137,90 @@ console.log(graph.kruskalMST());
 // Output: [ [ 2, 3, 4 ], [ 0, 3, 5 ], [ 0, 1, 10 ] ]
 ```
 
+```typescript
+class UnionFind {
+    parent: number[];
+    rank: number[];
+
+    constructor(size: number) {
+        this.parent = Array(size).fill(0).map((_, index) => index);
+        this.rank = Array(size).fill(0);
+    }
+
+    find(x: number): number {
+        if (this.parent[x] !== x) {
+            this.parent[x] = this.find(this.parent[x]);  // Path compression
+        }
+        return this.parent[x];
+    }
+
+    union(x: number, y: number): void {
+        const rootX = this.find(x);
+        const rootY = this.find(y);
+
+        if (rootX !== rootY) {
+            if (this.rank[rootX] > this.rank[rootY]) {
+                this.parent[rootY] = rootX;
+            } else if (this.rank[rootX] < this.rank[rootY]) {
+                this.parent[rootX] = rootY;
+            } else {
+                this.parent[rootY] = rootX;
+                this.rank[rootX]++;
+            }
+        }
+    }
+}
+
+class KruskalMST {
+    V: number;
+    edges: [number, number, number][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.edges = [];
+    }
+
+    addEdge(u: number, v: number, w: number): void {
+        this.edges.push([u, v, w]);
+    }
+
+    kruskalMST(): [number, number, number][] {
+        this.edges.sort((a, b) => a[2] - b[2]);
+        const uf = new UnionFind(this.V);
+        const result: [number, number, number][] = [];
+        let e = 0;
+        let i = 0;
+
+        while (e < this.V - 1 && i < this.edges.length) {
+            const [u, v, w] = this.edges[i++];
+            const x = uf.find(u);
+            const y = uf.find(v);
+
+            if (x !== y) {
+                result.push([u, v, w]);
+                uf.union(x, y);
+                e++;
+            }
+        }
+
+        return result;
+    }
+}
+
+// Example usage:
+const graph = new KruskalMST(4);
+graph.addEdge(0, 1, 10);
+graph.addEdge(0, 2, 6);
+graph.addEdge(0, 3, 5);
+graph.addEdge(1, 3, 15);
+graph.addEdge(2, 3, 4);
+
+console.log(graph.kruskalMST());
+// Output: [ [ 2, 3, 4 ], [ 0, 3, 5 ], [ 0, 1, 10 ] ]
+```
+
+</CodeGroup>
+
 ### **Prim's Algorithm**
 
 **Steps:**
@@ -142,6 +229,9 @@ console.log(graph.kruskalMST());
 3. Update the key values of all adjacent vertices of the extracted vertex. If the current key value is greater than the new key value, update it.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -270,6 +360,141 @@ console.log(graph.primMST());
 // Output: [ [ 0, 1, 2 ], [ 1, 2, 3 ], [ 0, 3, 6 ], [ 1, 4, 5 ] ]
 ```
 
+```typescript
+class MinHeap {
+    heap: { key: number, value: number }[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    insert(key: number, value: number) {
+        this.heap.push({ key, value });
+        this.bubbleUp();
+    }
+
+    extractMin() {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop();
+
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop();
+        this.bubbleDown();
+        return min;
+    }
+
+    bubbleUp() {
+        let index = this.heap.length - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].key >= this.heap[parentIndex].key) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    bubbleDown() {
+        let index = 0;
+        const length = this.heap.length;
+        const element = this.heap[0];
+
+        while (true) {
+            const leftChildIndex = 2 * index + 1;
+            const rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swapIndex = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.key < element.key) {
+                    swapIndex = leftChildIndex;
+                }
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if (
+                    (swapIndex === null && rightChild.key < element.key) ||
+                    (swapIndex !== null && rightChild.key < leftChild.key)
+                ) {
+                    swapIndex = rightChildIndex;
+                }
+            }
+
+            if (swapIndex === null) break;
+            [this.heap[index], this.heap[swapIndex]] = [this.heap[swapIndex], this.heap[index]];
+            index = swapIndex;
+        }
+    }
+
+    isEmpty() {
+        return this.heap.length === 0;
+    }
+}
+
+class PrimMST {
+    V: number;
+    adj: Map<number, [number, number][]>;
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.adj = new Map();
+    }
+
+    addEdge(u: number, v: number, w: number): void {
+        if (!this.adj.has(u)) this.adj.set(u, []);
+        if (!this.adj.has(v)) this.adj.set(v, []);
+        this.adj.get(u)!.push([v, w]);
+        this.adj.get(v)!.push([u, w]);
+    }
+
+    primMST(): [number, number, number][] {
+        const key = Array(this.V).fill(Infinity);
+        const parent = Array(this.V).fill(-1);
+        const minHeap = new MinHeap();
+        const inMST = Array(this.V).fill(false);
+
+        key[0] = 0;
+        minHeap.insert(0, key[0]);
+
+        while (!minHeap.isEmpty()) {
+            const { value: u } = minHeap.extractMin();
+            inMST[u] = true;
+
+            const neighbors = this.adj.get(u)!;
+            for (let [v, weight] of neighbors) {
+                if (!inMST[v] && key[v] > weight) {
+                    key[v] = weight;
+                    minHeap.insert(key[v], v);
+                    parent[v] = u;
+                }
+            }
+        }
+
+        const result: [number, number, number][] = [];
+        for (let i = 1; i < this.V; i++) {
+            result.push([parent[i], i, key[i]]);
+        }
+        return result;
+    }
+}
+
+// Example usage:
+const graph = new PrimMST(5);
+graph.addEdge(0, 1, 2);
+graph.addEdge(0, 3, 6);
+graph.addEdge(1, 2, 3);
+graph.addEdge(1, 3, 8);
+graph.addEdge(1, 4, 5);
+graph.addEdge(2, 4, 7);
+graph.addEdge(3, 4, 9);
+
+console.log(graph.primMST());
+// Output: [ [ 0, 1, 2 ], [ 1, 2, 3 ], [ 0, 3, 6 ], [ 1, 4, 5 ] ]
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing the Algorithm:**
@@ -300,6 +525,9 @@ console.log(graph.primMST());
 Borůvka's algorithm is another MST algorithm that repeatedly adds the shortest edge from each component to a different component until only one component remains.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BoruvkaMST {
     constructor(vertices) {
@@ -366,6 +594,78 @@ graph.addEdge(2, 3, 4);
 console.log(graph.boruvkaMST());
 // Output: { MSTweight: 19, result: [ [ 0, 3, 5 ], [ 2, 3, 4 ], [ 0, 1, 10 ] ] }
 ```
+
+```typescript
+class BoruvkaMST {
+    V: number;
+    edges: [number, number, number][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.edges = [];
+    }
+
+    addEdge(u: number, v: number, w: number): void {
+        this.edges.push([u, v, w]);
+    }
+
+    boruvkaMST(): { MSTweight: number, result: [number, number, number][] } {
+        const uf = new UnionFind(this.V);
+        const result: [number, number, number][] = [];
+        let numTrees = this.V;
+        let MSTweight = 0;
+
+        while (numTrees > 1) {
+            const cheapest: ([number, number, number] | null)[] = Array(this.V).fill(null);
+
+            for (let [u, v, w] of this.edges) {
+                const set1 = uf.find(u);
+                const set2 = uf.find(v);
+
+                if (set1 !== set2) {
+                    if (cheapest[set1] === null || cheapest[set1][2] > w) {
+                        cheapest[set1] = [u, v, w];
+                    }
+
+                    if (cheapest[set2] === null || cheapest[set2][2] > w) {
+                        cheapest[set2] = [u, v, w];
+                    }
+                }
+            }
+
+            for (let i = 0; i < this.V; i++) {
+                if (cheapest[i] !== null) {
+                    const [u, v, w] = cheapest[i];
+                    const set1 = uf.find(u);
+                    const set2 = uf.find(v);
+
+                    if (set1 !== set2) {
+                        uf.union(set1, set2);
+                        result.push([u, v, w]);
+                        MSTweight += w;
+                        numTrees--;
+                    }
+                }
+            }
+        }
+
+        return { MSTweight, result };
+    }
+}
+
+// Example usage:
+const graph = new BoruvkaMST(4);
+graph.addEdge(0, 1, 10);
+graph.addEdge(0, 2, 6);
+graph.addEdge(0, 3, 5);
+graph.addEdge(1, 3, 15);
+graph.addEdge(2, 3, 4);
+
+console.log(graph.boruvkaMST());
+// Output: { MSTweight: 19, result: [ [ 0, 3, 5 ], [ 2, 3, 4 ], [ 0, 1, 10 ] ] }
+```
+
+</CodeGroup>
 
 ### **Comparison of MST Algorithms**
 

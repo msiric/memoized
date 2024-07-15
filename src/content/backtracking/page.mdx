@@ -51,7 +51,10 @@ Place N queens on an N×N chessboard such that no two queens threaten each other
 2. Recursively attempt to place queens in each row.
 3. Backtrack if placing a queen leads to a conflict.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function solveNQueens(n) {
     let result = [];
@@ -95,6 +98,51 @@ console.log(solveNQueens(4));
 // ]
 ```
 
+```typescript
+function solveNQueens(n: number): string[][] {
+    let result: string[][] = [];
+    let board: string[][] = Array.from({ length: n }, () => Array(n).fill('.'));
+
+    function isSafe(board: string[][], row: number, col: number): boolean {
+        for (let i = 0; i < col; i++) {
+            if (board[row][i] === 'Q') return false;
+        }
+        for (let i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+            if (board[i][j] === 'Q') return false;
+        }
+        for (let i = row, j = col; i < n && j >= 0; i++, j--) {
+            if (board[i][j] === 'Q') return false;
+        }
+        return true;
+    }
+
+    function solve(board: string[][], col: number) {
+        if (col === n) {
+            result.push(board.map(row => row.join('')));
+            return;
+        }
+        for (let i = 0; i < n; i++) {
+            if (isSafe(board, i, col)) {
+                board[i][col] = 'Q';
+                solve(board, col + 1);
+                board[i][col] = '.';
+            }
+        }
+    }
+
+    solve(board, 0);
+    return result;
+}
+
+console.log(solveNQueens(4));
+// Output: [
+//   [".Q..", "...Q", "Q...", "..Q."],
+//   ["..Q.", "Q...", "...Q", ".Q.."]
+// ]
+```
+
+</CodeGroup>
+
 ### **Sudoku Solver**
 
 **Problem:**
@@ -105,7 +153,10 @@ Fill a 9×9 grid so that each row, each column, and each of the nine 3×3 grids 
 2. Recursively attempt to place numbers in empty cells.
 3. Backtrack if placing a number leads to a conflict.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function solveSudoku(board) {
     function isValid(board, row, col, num) {
@@ -157,6 +208,59 @@ solveSudoku(board);
 console.log(board);
 ```
 
+```typescript
+function solveSudoku(board: string[][]): void {
+    function isValid(board: string[][], row: number, col: number, num: string): boolean {
+        for (let x = 0; x < 9; x++) {
+            if (board[row][x] === num || board[x][col] === num ||
+                board[Math.floor(row / 3) * 3 + Math.floor(x / 3)][Math.floor(col / 3) * 3 + x % 3] === num) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function solve(): boolean {
+        for (let row = 0; row < 9; row++) {
+            for (let col = 0; col < 9; col++) {
+                if (board[row][col] === '.') {
+                    for (let num = '1'; num <= '9'; num++) {
+                        if (isValid(board, row, col, num)) {
+                            board[row][col] = num;
+                            if (solve()) {
+                                return true;
+                            }
+                            board[row][col] = '.';
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    solve();
+}
+
+let board: string[][] = [
+    ["5", "3", ".", ".", "7", ".", ".", ".", "."],
+    ["6", ".", ".", "1", "9", "5", ".", ".", "."],
+    [".", "9", "8", ".", ".", ".", ".", "6", "."],
+    ["8", ".", ".", ".", "6", ".", ".", ".", "3"],
+    ["4", ".", ".", "8", ".", "3", ".", ".", "1"],
+    ["7", ".", ".", ".", "2", ".", ".", ".", "6"],
+    [".", "6", ".", ".", ".", ".", "2", "8", "."],
+    [".", ".", ".", "4", "1", "9", ".", ".", "5"],
+    [".", ".", ".", ".", "8", ".", ".", "7", "9"]
+];
+
+solveSudoku(board);
+console.log(board);
+```
+
+</CodeGroup>
+
 ### **Permutations**
 
 **Problem:**
@@ -167,7 +271,10 @@ Generate all permutations of a given array of unique numbers.
 2. Recursively generate permutations for the remaining elements.
 3. Backtrack by swapping elements back to their original positions.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function permute(nums) {
     let result = [];
@@ -199,6 +306,40 @@ console.log(permute([1, 2, 3]));
 // ]
 ```
 
+```typescript
+function permute(nums: number[]): number[][] {
+    let result: number[][] = [];
+
+    function backtrack(start: number) {
+        if (start === nums.length) {
+            result.push([...nums]);
+            return;
+        }
+        for (let i = start; i < nums.length; i++) {
+            [nums[start], nums[i]] = [nums[i], nums[start]];
+            backtrack(start + 1);
+            [nums[start], nums[i]] = [nums[i], nums[start]];
+        }
+    }
+
+    backtrack(0);
+    return result;
+}
+
+console.log(permute([1, 2, 3]));
+// Output: [
+//   [1, 2, 3],
+//   [1, 3, 2],
+//   [2, 1, 3],
+//   [2, 3, 1],
+//   [3, 2, 1],
+//   [3, 1, 2]
+// ]
+```
+
+</CodeGroup>
+
+
 ### **Subset Sum**
 
 **Problem:**
@@ -209,7 +350,10 @@ Find all subsets of a given set that sum up to a target value.
 2. Add elements to the current subset and check if the target sum is reached.
 3. Backtrack by removing the last element from the current subset.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function subsetSum(nums, target) {
     let result = [];
@@ -235,6 +379,34 @@ function subsetSum(nums, target) {
 console.log(subsetSum([2, 3, 6, 7], 7));
 // Output: [[7]]
 ```
+
+```typescript
+function subsetSum(nums: number[], target: number): number[][] {
+    let result: number[][] = [];
+
+    function backtrack(start: number, path: number[], sum: number) {
+        if (sum === target) {
+            result.push([...path]);
+            return;
+        }
+        for (let i = start; i < nums.length; i++) {
+            if (sum + nums[i] <= target) {
+                path.push(nums[i]);
+                backtrack(i + 1, path, sum + nums[i]);
+                path.pop();
+            }
+        }
+    }
+
+    backtrack(0, [], 0);
+    return result;
+}
+
+console.log(subsetSum([2, 3, 6, 7], 7));
+// Output: [[7]]
+```
+
+</CodeGroup>
 
 ## **Practical Tips and Tricks**
 
@@ -270,7 +442,10 @@ Find a path in a graph that visits each vertex exactly once.
 2. Recursively build the path, adding one vertex at a time.
 3. Backtrack if adding a vertex leads to a conflict.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function hamiltonianPath(graph, V) {
     let path = Array(V).fill(-1);
@@ -318,6 +493,55 @@ let graph = [
 hamiltonianPath(graph, 8);
 ```
 
+```typescript
+function hamiltonianPath(graph: number[][], V: number): boolean {
+    let path: number[] = Array(V).fill(-1);
+    path[0] = 0;
+
+    function isSafe(v: number, pos: number): boolean {
+        if (!graph[path[pos - 1]][v]) return false;
+        for (let i = 0; i < pos; i++) {
+            if (path[i] === v) return false;
+        }
+        return true;
+    }
+
+    function solve(pos: number): boolean {
+        if (pos === V) return true;
+        for (let v = 1; v < V; v++) {
+            if (isSafe(v, pos)) {
+                path[pos] = v;
+                if (solve(pos + 1)) return true;
+                path[pos] = -1;
+            }
+        }
+        return false;
+    }
+
+    if (!solve(1)) {
+        console.log('No Hamiltonian Path found');
+        return false;
+    }
+
+    console.log('Hamiltonian Path:', path);
+    return true;
+}
+
+let graph: number[][] = [
+    [0, 1, 1, 1, 0, 0, 0, 0],
+    [1, 0, 1, 0, 1, 0, 0, 0],
+    [1, 1, 0, 1, 1, 1, 0, 0],
+    [1, 0, 1, 0, 0, 1, 0, 0],
+    [0, 1, 1, 0, 0, 1, 1, 0],
+    [0, 0, 1, 1, 1, 0, 1, 1],
+    [0, 0, 0, 0, 1, 1, 0, 1],
+    [0, 0, 0, 0, 0, 1, 1, 0]
+];
+hamiltonianPath(graph, 8);
+```
+
+</CodeGroup>
+
 ### **Word Search in a Grid**
 
 **Problem:**
@@ -328,7 +552,10 @@ Given a 2D board and a word, find if the word exists in the grid. The word can b
 2. Recursively check all neighboring cells to form the word.
 3. Backtrack by unmarking the cell.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function exist(board, word) {
     let rows = board.length;
@@ -370,6 +597,50 @@ console.log(exist(board, 'ABCCED'));  // Output: true
 console.log(exist(board, 'SEE'));     // Output: true
 console.log(exist(board, 'ABCB'));    // Output: false
 ```
+
+```typescript
+function exist(board: string[][], word: string): boolean {
+    let rows: number = board.length;
+    let cols: number = board[0].length;
+
+    function dfs(row: number, col: number, index: number): boolean {
+        if (index === word.length) return true;
+        if (row < 0 || row >= rows || col < 0 || col >= cols || board[row][col] !== word[index]) return false;
+
+        let temp: string = board[row][col];
+        board[row][col] = '#';
+
+        let found: boolean = dfs(row + 1, col, index + 1) ||
+                    dfs(row - 1, col, index + 1) ||
+                    dfs(row, col + 1, index + 1) ||
+                    dfs(row, col - 1, index + 1);
+
+        board[row][col] = temp;
+        return found;
+    }
+
+    for (let row: number = 0; row < rows; row++) {
+        for (let col: number = 0; col < cols; col++) {
+            if (board[row][col] === word[0] && dfs(row, col, 0)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+let board: string[][] = [
+    ['A', 'B', 'C', 'E'],
+    ['S', 'F', 'C', 'S'],
+    ['A', 'D', 'E', 'E']
+];
+console.log(exist(board, 'ABCCED'));  // Output: true
+console.log(exist(board, 'SEE'));     // Output: true
+console.log(exist(board, 'ABCB'));    // Output: false
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

@@ -51,7 +51,10 @@ For level-order traversal, the output is `[[1], [2, 3], [4, 5]]`.
 3. While the queue is not empty, process each node and add its children to the queue.
 4. Collect the values of nodes at each level.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TreeNode {
     constructor(value) {
@@ -101,6 +104,61 @@ root.right.right = new TreeNode(7);
 console.log(levelOrderTraversal(root));  // Output: [[1], [2, 3], [4, 5, 6, 7]]
 ```
 
+```typescript
+class TreeNode {
+    value: number;
+    left: TreeNode | null;
+    right: TreeNode | null;
+
+    constructor(value: number) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+    }
+}
+
+function levelOrderTraversal(root: TreeNode | null): number[][] {
+    if (root === null) return [];
+
+    const result: number[][] = [];
+    const queue: TreeNode[] = [root];
+
+    while (queue.length > 0) {
+        const levelSize = queue.length;
+        const currentLevel: number[] = [];
+
+        for (let i = 0; i < levelSize; i++) {
+            const currentNode = queue.shift()!;
+            currentLevel.push(currentNode.value);
+
+            if (currentNode.left !== null) {
+                queue.push(currentNode.left);
+            }
+            if (currentNode.right !== null) {
+                queue.push(currentNode.right);
+            }
+        }
+
+        result.push(currentLevel);
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+root.right.left = new TreeNode(6);
+root.right.right = new TreeNode(7);
+
+console.log(levelOrderTraversal(root));  // Output: [[1], [2, 3], [4, 5, 6, 7]]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a queue to keep track of nodes at each level.
 - Collect the values of nodes at each level and add them to the result.
@@ -121,7 +179,10 @@ console.log(levelOrderTraversal(root));  // Output: [[1], [2, 3], [4, 5, 6, 7]]
 3. While the queue is not empty, process each node and check if it is a leaf node.
 4. If a leaf node is found, return its depth as the minimum depth.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function minDepth(root) {
     if (root === null) return 0;
@@ -154,6 +215,40 @@ root.left.right = new TreeNode(5);
 console.log(minDepth(root));  // Output: 2
 ```
 
+```typescript
+function minDepth(root: TreeNode | null): number {
+    if (root === null) return 0;
+
+    const queue: { node: TreeNode; depth: number }[] = [{ node: root, depth: 1 }];
+
+    while (queue.length > 0) {
+        const { node, depth } = queue.shift()!;
+
+        if (node.left === null && node.right === null) {
+            return depth;
+        }
+
+        if (node.left !== null) {
+            queue.push({ node: node.left, depth: depth + 1 });
+        }
+        if (node.right !== null) {
+            queue.push({ node: node.right, depth: depth + 1 });
+        }
+    }
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.left = new TreeNode(4);
+root.left.right = new TreeNode(5);
+
+console.log(minDepth(root));  // Output: 2
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a queue to keep track of nodes and their corresponding depths.
 - Return the depth as soon as a leaf node is found to ensure the minimum depth.
@@ -174,7 +269,10 @@ console.log(minDepth(root));  // Output: 2
 3. While the queue is not empty, process each node and find the maximum value at each level.
 4. Collect the maximum values and return them as the result.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function largestValues(root) {
     if (root === null) return [];
@@ -214,6 +312,48 @@ root.right.right = new TreeNode(9);
 
 console.log(largestValues(root));  // Output: [1, 3, 9]
 ```
+
+```typescript
+function largestValues(root: TreeNode | null): number[] {
+    if (root === null) return [];
+
+    const result: number[] = [];
+    const queue: TreeNode[] = [root];
+
+    while (queue.length > 0) {
+        const levelSize = queue.length;
+        let maxValue = -Infinity;
+
+        for (let i = 0; i < levelSize; i++) {
+            const currentNode = queue.shift()!;
+            maxValue = Math.max(maxValue, currentNode.value);
+
+            if (currentNode.left !== null) {
+                queue.push(currentNode.left);
+            }
+            if (currentNode.right !== null) {
+                queue.push(currentNode.right);
+            }
+        }
+
+        result.push(maxValue);
+    }
+
+    return result;
+}
+
+// Example usage:
+const root = new TreeNode(1);
+root.left = new TreeNode(3);
+root.right = new TreeNode(2);
+root.left.left = new TreeNode(5);
+root.left.right = new TreeNode(3);
+root.right.right = new TreeNode(9);
+
+console.log(largestValues(root));  // Output: [1, 3, 9]
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use a queue to keep track of nodes at each level.

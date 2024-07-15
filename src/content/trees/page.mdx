@@ -44,6 +44,9 @@ A tree is a non-linear data structure consisting of nodes connected by edges. Ea
 ### **Creating a Tree**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TreeNode {
     constructor(value) {
@@ -62,9 +65,32 @@ class BinaryTree {
 }
 ```
 
+```typescript
+class TreeNode<T> {
+    value: T;
+    left: TreeNode<T> | null = null;
+    right: TreeNode<T> | null = null;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+class BinaryTree<T> {
+    root: TreeNode<T> | null = null;
+
+    // Methods to be defined...
+}
+```
+
+</CodeGroup>
+
 ### **Inserting Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinarySearchTree {
     constructor() {
@@ -98,9 +124,45 @@ class BinarySearchTree {
 }
 ```
 
+```typescript
+class BinarySearchTree<T> {
+    root: TreeNode<T> | null = null;
+
+    insert(value: T) {
+        const newNode = new TreeNode(value);
+        if (this.root === null) {
+            this.root = newNode;
+        } else {
+            this.insertNode(this.root, newNode);
+        }
+    }
+
+    insertNode(node: TreeNode<T>, newNode: TreeNode<T>) {
+        if (newNode.value < node.value) {
+            if (node.left === null) {
+                node.left = newNode;
+            } else {
+                this.insertNode(node.left, newNode);
+            }
+        } else {
+            if (node.right === null) {
+                node.right = newNode;
+            } else {
+                this.insertNode(node.right, newNode);
+            }
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Searching for Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinarySearchTree {
     // ... other methods ...
@@ -124,9 +186,37 @@ class BinarySearchTree {
 }
 ```
 
+```typescript
+class BinarySearchTree<T> {
+    // ... other methods ...
+
+    search(value: T): boolean {
+        return this.searchNode(this.root, value);
+    }
+
+    searchNode(node: TreeNode<T> | null, value: T): boolean {
+        if (node === null) {
+            return false;
+        }
+        if (value < node.value) {
+            return this.searchNode(node.left, value);
+        } else if (value > node.value) {
+            return this.searchNode(node.right, value);
+        } else {
+            return true;
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **In-Order Traversal**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinarySearchTree {
     // ... other methods ...
@@ -145,9 +235,32 @@ class BinarySearchTree {
 }
 ```
 
+```typescript
+class BinarySearchTree<T> {
+    // ... other methods ...
+
+    inOrder() {
+        this.inOrderTraverse(this.root);
+    }
+
+    inOrderTraverse(node: TreeNode<T> | null) {
+        if (node !== null) {
+            this.inOrderTraverse(node.left);
+            console.log(node.value);
+            this.inOrderTraverse(node.right);
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Pre-Order Traversal**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinarySearchTree {
     // ... other methods ...
@@ -166,9 +279,32 @@ class BinarySearchTree {
 }
 ```
 
+```typescript
+class BinarySearchTree<T> {
+    // ... other methods ...
+
+    preOrder() {
+        this.preOrderTraverse(this.root);
+    }
+
+    preOrderTraverse(node: TreeNode<T> | null) {
+        if (node !== null) {
+            console.log(node.value);
+            this.preOrderTraverse(node.left);
+            this.preOrderTraverse(node.right);
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Post-Order Traversal**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinarySearchTree {
     // ... other methods ...
@@ -187,9 +323,32 @@ class BinarySearchTree {
 }
 ```
 
+```typescript
+class BinarySearchTree<T> {
+    // ... other methods ...
+
+    postOrder() {
+        this.postOrderTraverse(this.root);
+    }
+
+    postOrderTraverse(node: TreeNode<T> | null) {
+        if (node !== null) {
+            this.postOrderTraverse(node.left);
+            this.postOrderTraverse(node.right);
+            console.log(node.value);
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Deleting Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinarySearchTree {
     // ... other methods ...
@@ -233,11 +392,59 @@ class BinarySearchTree {
 }
 ```
 
+```typescript
+class BinarySearchTree<T> {
+    // ... other methods ...
+
+    delete(value: T) {
+        this.root = this.deleteNode(this.root, value);
+    }
+
+    deleteNode(node: TreeNode<T> | null, value: T): TreeNode<T> | null {
+        if (node === null) {
+            return null;
+        }
+        if (value < node.value) {
+            node.left = this.deleteNode(node.left, value);
+        } else if (value > node.value) {
+            node.right = this.deleteNode(node.right, value);
+        } else {
+            // Node with only one child or no child
+            if (node.left === null) {
+                return node.right;
+            } else if (node.right === null) {
+                return node.left;
+            }
+
+            // Node with two children: Get the inorder successor (smallest in the right subtree)
+            node.value = this.minValue(node.right);
+
+            // Delete the inorder successor
+            node.right = this.deleteNode(node.right, node.value);
+        }
+        return node;
+    }
+
+    minValue(node: TreeNode<T>): T {
+        let current = node;
+        while (current.left !== null) {
+            current = current.left;
+        }
+        return current.value;
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Use Recursion for Traversals:**
   Tree traversals are naturally recursive, making recursion a good fit for in-order, pre-order, and post-order traversals.
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   function inOrder(node) {
       if (node !== null) {
@@ -248,9 +455,24 @@ class BinarySearchTree {
   }
   ```
 
+  ```typescript
+  function inOrder<T>(node: TreeNode<T> | null) {
+      if (node !== null) {
+          inOrder(node.left);
+          console.log(node.value);
+          inOrder(node.right);
+      }
+  }
+  ```
+
+  </CodeGroup>
+
 - **Iterative Traversals:**
   Use stacks for iterative in-order, pre-order, and post-order traversals to avoid stack overflow for deep trees.
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   function inOrderIterative(root) {
       let stack = [];
@@ -268,9 +490,31 @@ class BinarySearchTree {
   }
   ```
 
+  ```typescript
+  function inOrderIterative<T>(root: TreeNode<T> | null) {
+      let stack: TreeNode<T>[] = [];
+      let current = root;
+
+      while (current !== null || stack.length > 0) {
+          while (current !== null) {
+              stack.push(current);
+              current = current.left;
+          }
+          current = stack.pop()!;
+          console.log(current.value);
+          current = current.right;
+      }
+  }
+  ```
+
+  </CodeGroup>
+
 - **Balancing Trees:**
   Use self-balancing trees (e.g., AVL trees, Red-Black trees) to ensure O(log n) operations for insertion, deletion, and search.
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   // Example code for AVL tree insertion
   // Details omitted for brevity; focus on the concept of rebalancing
@@ -283,28 +527,195 @@ class BinarySearchTree {
 
       insertNode(node, value) {
           // Standard BST insertion
-          // Then perform AVL balancing steps
+
+          // Update height of the current node
+          node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+
+          // Get the balance factor
+          let balance = this.getBalance(node);
+
+          // Perform rotations to balance the tree
+          // Left Left Case
+          if (balance > 1 && value < node.left.value) {
+              return this.rotateRight(node);
+          }
+
+          // Right Right Case
+          if (balance < -1 && value > node.right.value) {
+              return this.rotateLeft(node);
+          }
+
+          // Left Right Case
+          if (balance > 1 && value > node.left.value) {
+              node.left = this.rotateLeft(node.left);
+              return this.rotateRight(node);
+          }
+
+          // Right Left Case
+          if (balance < -1 && value < node.right.value) {
+              node.right = this.rotateRight(node.right);
+              return this.rotateLeft(node);
+          }
+
+          return node;
       }
 
-      rotateLeft(node) {
-          // Perform left rotation
+      rotateLeft(z) {
+          let y = z.right;
+          let T2 = y.left;
+
+          // Perform rotation
+          y.left = z;
+          z.right = T2;
+
+          // Update heights
+          z.height = Math.max(this.getHeight(z.left), this.getHeight(z.right)) + 1;
+          y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+
+          // Return new root
+          return y;
       }
 
-      rotateRight(node) {
-          // Perform right rotation
+      rotateRight(z) {
+          let y = z.left;
+          let T3 = y.right;
+
+          // Perform rotation
+          y.right = z;
+          z.left = T3;
+
+          // Update heights
+          z.height = Math.max(this.getHeight(z.left), this.getHeight(z.right)) + 1;
+          y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+
+          // Return new root
+          return y;
+      }
+
+      getHeight(node) {
+          if (node === null) return 0;
+          return node.height;
       }
 
       getBalance(node) {
-          // Calculate the balance factor
+          if (node === null) return 0;
+          return this.getHeight(node.left) - this.getHeight(node.right);
       }
   }
   ```
+
+  ```typescript
+  // Example code for AVL tree insertion
+  // Details omitted for brevity; focus on the concept of rebalancing
+  class AVLTree<T> {
+      root: TreeNode<T> | null = null;
+
+      // ... other methods ...
+
+      insert(value: T) {
+          this.root = this.insertNode(this.root, value);
+      }
+
+      insertNode(node: TreeNode<T> | null, value: T): TreeNode<T> | null {
+          if (node === null) {
+              return new TreeNode(value);
+          }
+
+          if (value < node.value) {
+              node.left = this.insertNode(node.left, value);
+          } else if (value > node.value) {
+              node.right = this.insertNode(node.right, value);
+          } else {
+              // Duplicate values are not allowed in BST
+              return node;
+          }
+
+          // Update height of the current node
+          node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+
+          // Get the balance factor
+          const balance = this.getBalance(node);
+
+          // Perform rotations to balance the tree
+          // Left Left Case
+          if (balance > 1 && value < node.left.value) {
+              return this.rotateRight(node);
+          }
+
+          // Right Right Case
+          if (balance < -1 && value > node.right.value) {
+              return this.rotateLeft(node);
+          }
+
+          // Left Right Case
+          if (balance > 1 && value > node.left.value) {
+              node.left = this.rotateLeft(node.left);
+              return this.rotateRight(node);
+          }
+
+          // Right Left Case
+          if (balance < -1 && value < node.right.value) {
+              node.right = this.rotateRight(node.right);
+              return this.rotateLeft(node);
+          }
+
+          return node;
+      }
+
+      rotateLeft(z: TreeNode<T>): TreeNode<T> {
+          const y = z.right!;
+          const T2 = y.left;
+
+          // Perform rotation
+          y.left = z;
+          z.right = T2;
+
+          // Update heights
+          z.height = Math.max(this.getHeight(z.left), this.getHeight(z.right)) + 1;
+          y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+
+          // Return new root
+          return y;
+      }
+
+      rotateRight(z: TreeNode<T>): TreeNode<T> {
+          const y = z.left!;
+          const T3 = y.right;
+
+          // Perform rotation
+          y.right = z;
+          z.left = T3;
+
+          // Update heights
+          z.height = Math.max(this.getHeight(z.left), this.getHeight(z.right)) + 1;
+          y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+
+          // Return new root
+          return y;
+      }
+
+      getHeight(node: TreeNode<T> | null): number {
+          if (node === null) return 0;
+          return node.height;
+      }
+
+      getBalance(node: TreeNode<T> | null): number {
+          if (node === null) return 0;
+          return this.getHeight(node.left) - this.getHeight(node.right);
+      }
+  }
+  ```
+
+  </CodeGroup>
 
 ## **Common Gotchas**
 
 - **Null Checks:**
   Always check for null when traversing or manipulating nodes to avoid runtime errors.
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let current = this.root;
   while (current !== null) {
@@ -313,9 +724,22 @@ class BinarySearchTree {
   }
   ```
 
+  ```typescript
+  let current: TreeNode<T> | null = this.root;
+  while (current !== null) {
+      // Perform operations
+      current = current.left;
+  }
+  ```
+
+  </CodeGroup>
+
 - **Balancing Trees:**
   Ensure balancing is maintained in self-balancing trees to guarantee efficient operations.
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   function balance(node) {
       // Calculate balance factor and perform rotations
@@ -324,6 +748,17 @@ class BinarySearchTree {
       }
   }
   ```
+
+  ```typescript
+  function balance(node: TreeNode<T>) {
+      // Calculate balance factor and perform rotations
+      if (this.getBalance(node) > 1) {
+          // Perform rotations
+      }
+  }
+  ```
+
+  </CodeGroup>
 
 - **Memory Management:**
   Be cautious of memory usage and potential memory leaks, especially in languages with manual memory management. JavaScript manages memory automatically, but be aware of references that might prevent garbage collection.
@@ -335,6 +770,9 @@ class BinarySearchTree {
 AVL trees are self-balancing binary search trees where the difference between heights of left and right subtrees cannot be more than one for all nodes.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class AVLNode {
     constructor(value) {
@@ -435,11 +873,127 @@ class AVLTree {
 }
 ```
 
+```typescript
+class AVLNode<T> {
+    value: T;
+    left: AVLNode<T> | null = null;
+    right: AVLNode<T> | null = null;
+    height: number = 1;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+class AVLTree<T> {
+    root: AVLNode<T> | null = null;
+
+    // Helper methods for AVL rotations, balance factor calculation, etc.
+
+    insert(value: T) {
+        this.root = this.insertNode(this.root, value);
+    }
+
+    insertNode(node: AVLNode<T> | null, value: T): AVLNode<T> | null {
+        if (node === null) {
+            return new AVLNode(value);
+        }
+
+        if (value < node.value) {
+            node.left = this.insertNode(node.left, value);
+        } else if (value > node.value) {
+            node.right = this.insertNode(node.right, value);
+        } else {
+            // Duplicate values are not allowed in BST
+            return node;
+        }
+
+        // Update height of the current node
+        node.height = 1 + Math.max(this.getHeight(node.left), this.getHeight(node.right));
+
+        // Get the balance factor
+        const balance = this.getBalance(node);
+
+        // Perform rotations to balance the tree
+        // Left Left Case
+        if (balance > 1 && value < node.left.value) {
+            return this.rotateRight(node);
+        }
+
+        // Right Right Case
+        if (balance < -1 && value > node.right.value) {
+            return this.rotateLeft(node);
+        }
+
+        // Left Right Case
+        if (balance > 1 && value > node.left.value) {
+            node.left = this.rotateLeft(node.left);
+            return this.rotateRight(node);
+        }
+
+        // Right Left Case
+        if (balance < -1 && value < node.right.value) {
+            node.right = this.rotateRight(node.right);
+            return this.rotateLeft(node);
+        }
+
+        return node;
+    }
+
+    rotateLeft(z: AVLNode<T>): AVLNode<T> {
+        const y = z.right!;
+        const T2 = y.left;
+
+        // Perform rotation
+        y.left = z;
+        z.right = T2;
+
+        // Update heights
+        z.height = Math.max(this.getHeight(z.left), this.getHeight(z.right)) + 1;
+        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+
+        // Return new root
+        return y;
+    }
+
+    rotateRight(z: AVLNode<T>): AVLNode<T> {
+        const y = z.left!;
+        const T3 = y.right;
+
+        // Perform rotation
+        y.right = z;
+        z.left = T3;
+
+        // Update heights
+        z.height = Math.max(this.getHeight(z.left), this.getHeight(z.right)) + 1;
+        y.height = Math.max(this.getHeight(y.left), this.getHeight(y.right)) + 1;
+
+        // Return new root
+        return y;
+    }
+
+    getHeight(node: AVLNode<T> | null): number {
+        if (node === null) return 0;
+        return node.height;
+    }
+
+    getBalance(node: AVLNode<T> | null): number {
+        if (node === null) return 0;
+        return this.getHeight(node.left) - this.getHeight(node.right);
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Red-Black Trees**
 
 Red-Black trees are self-balancing binary search trees with additional properties to ensure balance.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 // Simplified Red-Black Tree example
 
@@ -519,6 +1073,87 @@ class RedBlackTree {
 }
 ```
 
+```typescript
+// Simplified Red-Black Tree example
+
+const RED = true;
+const BLACK = false;
+
+class RedBlackNode<T> {
+    value: T;
+    left: RedBlackNode<T> | null = null;
+    right: RedBlackNode<T> | null = null;
+    color: boolean = RED;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+class RedBlackTree<T> {
+    root: RedBlackNode<T> | null = null;
+
+    insert(value: T) {
+        this.root = this.insertNode(this.root, value);
+        this.root.color = BLACK;
+    }
+
+    insertNode(node: RedBlackNode<T> | null, value: T): RedBlackNode<T> {
+        if (node === null) return new RedBlackNode(value);
+
+        if (value < node.value) {
+            node.left = this.insertNode(node.left, value);
+        } else if (value > node.value) {
+            node.right = this.insertNode(node.right, value);
+        }
+
+        // Fixing violations
+        if (this.isRed(node.right) && !this.isRed(node.left)) {
+            node = this.rotateLeft(node);
+        }
+        if (this.isRed(node.left) && this.isRed(node.left.left)) {
+            node = this.rotateRight(node);
+        }
+        if (this.isRed(node.left) && this.isRed(node.right)) {
+            this.flipColors(node);
+        }
+
+        return node;
+    }
+
+    rotateLeft(node: RedBlackNode<T>): RedBlackNode<T> {
+        let x = node.right!;
+        node.right = x.left;
+        x.left = node;
+        x.color = node.color;
+        node.color = RED;
+        return x;
+    }
+
+    rotateRight(node: RedBlackNode<T>): RedBlackNode<T> {
+        let x = node.left!;
+        node.left = x.right;
+        x.right = node;
+        x.color = node.color;
+        node.color = RED;
+        return x;
+    }
+
+    flipColors(node: RedBlackNode<T>) {
+        node.color = RED;
+        node.left!.color = BLACK;
+        node.right!.color = BLACK;
+    }
+
+    isRed(node: RedBlackNode<T> | null): boolean {
+        if (node === null) return false;
+        return node.color === RED;
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Tree Algorithms**
 Below are some common tree algorithms you should be familiar with:
 
@@ -526,6 +1161,9 @@ Below are some common tree algorithms you should be familiar with:
 Finding the Lowest Common Ancestor (LCA) identifies the lowest node in a tree that has both given nodes as descendants.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinarySearchTree {
     constructor() {
@@ -590,10 +1228,79 @@ bst.insert(35);
 console.log(bst.lowestCommonAncestor(bst.root, 5, 15).value);  // Output: 10
 ```
 
+```typescript
+class BinarySearchTree<T> {
+    root: TreeNode<T> | null = null;
+
+    insert(value: T) {
+        const newNode = new TreeNode(value);
+        if (!this.root) {
+            this.root = newNode;
+        } else {
+            this.insertNode(this.root, newNode);
+        }
+    }
+
+    insertNode(node: TreeNode<T>, newNode: TreeNode<T>) {
+        if (newNode.value < node.value) {
+            if (!node.left) {
+                node.left = newNode;
+            } else {
+                this.insertNode(node.left, newNode);
+            }
+        } else {
+            if (!node.right) {
+                node.right = newNode;
+            } else {
+                this.insertNode(node.right, newNode);
+            }
+        }
+    }
+
+    lowestCommonAncestor(node: TreeNode<T> | null, p: T, q: T): TreeNode<T> | null {
+        if (node === null) return null;
+
+        if (node.value > p && node.value > q) {
+            return this.lowestCommonAncestor(node.left, p, q);
+        }
+        if (node.value < p && node.value < q) {
+            return this.lowestCommonAncestor(node.right, p, q);
+        }
+        return node;
+    }
+}
+
+class TreeNode<T> {
+    value: T;
+    left: TreeNode<T> | null = null;
+    right: TreeNode<T> | null = null;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+let bst = new BinarySearchTree<number>();
+bst.insert(20);
+bst.insert(10);
+bst.insert(30);
+bst.insert(5);
+bst.insert(15);
+bst.insert(25);
+bst.insert(35);
+
+console.log(bst.lowestCommonAncestor(bst.root, 5, 15)?.value);  // Output: 10
+```
+
+</CodeGroup>
+
 ### **Serialize and Deserialize a Binary Tree**
 Serializing a binary tree converts it into a string representation, and deserializing converts the string back into the tree structure.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BinaryTree {
     constructor() {
@@ -656,6 +1363,71 @@ console.log(serialized);  // Output: "1,2,#,#,3,4,#,#,5,#,#"
 let deserialized = bt.deserialize(serialized);
 console.log(deserialized);  // Output: Binary tree structure
 ```
+
+```typescript
+class BinaryTree<T> {
+    root: TreeNode<T> | null = null;
+
+    serialize(root: TreeNode<T> | null): string {
+        let result: string[] = [];
+        this.serializeHelper(root, result);
+        return result.join(',');
+    }
+
+    serializeHelper(node: TreeNode<T> | null, result: string[]): void {
+        if (node === null) {
+            result.push('#');
+            return;
+        }
+        result.push(node.value.toString());
+        this.serializeHelper(node.left, result);
+        this.serializeHelper(node.right, result);
+    }
+
+    deserialize(data: string): TreeNode<T> | null {
+        let values = data.split(',');
+        let index = 0;
+
+        const deserializeHelper = (): TreeNode<T> | null => {
+            if (values[index] === '#') {
+                index++;
+                return null;
+            }
+            let node = new TreeNode(parseInt(values[index++]) as unknown as T);
+            node.left = deserializeHelper();
+            node.right = deserializeHelper();
+            return node;
+        };
+
+        return deserializeHelper();
+    }
+}
+
+class TreeNode<T> {
+    value: T;
+    left: TreeNode<T> | null = null;
+    right: TreeNode<T> | null = null;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+let bt = new BinaryTree<number>();
+bt.root = new TreeNode(1);
+bt.root.left = new TreeNode(2);
+bt.root.right = new TreeNode(3);
+bt.root.right.left = new TreeNode(4);
+bt.root.right.right = new TreeNode(5);
+
+let serialized = bt.serialize(bt.root);
+console.log(serialized);  // Output: "1,2,#,#,3,4,#,#,5,#,#"
+
+let deserialized = bt.deserialize(serialized);
+console.log(deserialized);  // Output: Binary tree structure
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

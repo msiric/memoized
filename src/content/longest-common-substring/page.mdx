@@ -27,7 +27,7 @@ Consider the strings `s1 = "abcdxyz"` and `s2 = "xyzabcd"`. The longest common s
 
 ## **Time and Space Complexity**
 
-**Time Complexity:**
+**Time Complexity:** 
 - O(m * n), where m and n are the lengths of the two strings. This is due to the need to compare all pairs of substrings.
 
 **Space Complexity:**
@@ -55,7 +55,10 @@ Consider the strings `s1 = "abcdxyz"` and `s2 = "xyzabcd"`. The longest common s
    - If the characters do not match, set `dp[i][j] = 0`.
 4. Keep track of the maximum value in the `dp` table, which represents the length of the longest common substring.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function longestCommonSubstring(s1, s2) {
     const m = s1.length;
@@ -83,6 +86,35 @@ const s2 = "xyzabcd";
 console.log(longestCommonSubstring(s1, s2));  // Output: 4 ("abcd")
 ```
 
+```typescript
+function longestCommonSubstring(s1: string, s2: string): number {
+    const m = s1.length;
+    const n = s2.length;
+    const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    let maxLength = 0;
+
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (s1[i - 1] === s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+                maxLength = Math.max(maxLength, dp[i][j]);
+            } else {
+                dp[i][j] = 0;
+            }
+        }
+    }
+
+    return maxLength;
+}
+
+// Example usage:
+const s1 = "abcdxyz";
+const s2 = "xyzabcd";
+console.log(longestCommonSubstring(s1, s2));  // Output: 4 ("abcd")
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a dynamic programming table to store the lengths of common substrings ending at each pair of indices.
 - Initialize the table with zeros to handle base cases.
@@ -106,7 +138,10 @@ console.log(longestCommonSubstring(s1, s2));  // Output: 4 ("abcd")
 4. Keep track of the maximum value in the `dp` table and its corresponding index.
 5. Use the index to reconstruct the longest common substring.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findLongestCommonSubstring(s1, s2) {
     const m = s1.length;
@@ -138,6 +173,40 @@ const s1 = "abcdxyz";
 const s2 = "xyzabcd";
 console.log(findLongestCommonSubstring(s1, s2));  // Output: "abcd"
 ```
+
+```typescript
+function findLongestCommonSubstring(s1: string, s2: string): string {
+    const m = s1.length;
+    const n = s2.length;
+    const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    let maxLength = 0;
+    let endIndex = 0;
+
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (s1[i - 1] === s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+                if (dp[i][j] > maxLength) {
+                    maxLength = dp[i][j];
+                    endIndex = i - 1;
+                }
+            } else {
+                dp[i][j] = 0;
+            }
+        }
+    }
+
+    const longestCommonSubstring = s1.slice(endIndex - maxLength + 1, endIndex + 1);
+    return longestCommonSubstring;
+}
+
+// Example usage:
+const s1 = "abcdxyz";
+const s2 = "xyzabcd";
+console.log(findLongestCommonSubstring(s1, s2));  // Output: "abcd"
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use the `dp` table to keep track of the lengths of common substrings ending at each pair of indices.

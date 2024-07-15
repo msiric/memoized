@@ -71,7 +71,10 @@ In the above matrix, there are three islands.
 4. Increment the island count.
 5. Continue iterating through the matrix to find all islands.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function numIslandsDFS(grid) {
     if (grid.length === 0) return 0;
@@ -121,6 +124,57 @@ const grid = [
 console.log(numIslandsDFS(grid));  // Output: 3
 ```
 
+```typescript
+function numIslandsDFS(grid: string[][]): number {
+    if (grid.length === 0) return 0;
+
+    const rows = grid.length;
+    const cols = grid[0].length;
+    let islandCount = 0;
+
+    function dfs(row: number, col: number): void {
+        if (row < 0 || col < 0 || row >= rows || col >= cols || grid[row][col] === '0') {
+            return;
+        }
+
+        // Mark the cell as visited by changing it to '0'
+        grid[row][col] = '0';
+
+        // Traverse in all 8 directions
+        dfs(row + 1, col);
+        dfs(row - 1, col);
+        dfs(row, col + 1);
+        dfs(row, col - 1);
+        dfs(row + 1, col + 1);
+        dfs(row - 1, col - 1);
+        dfs(row + 1, col - 1);
+        dfs(row - 1, col + 1);
+    }
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (grid[row][col] === '1') {
+                islandCount++;
+                dfs(row, col);
+            }
+        }
+    }
+
+    return islandCount;
+}
+
+// Example usage:
+const grid: string[][] = [
+    ['1', '1', '0', '0', '0'],
+    ['1', '1', '0', '0', '0'],
+    ['0', '0', '1', '0', '0'],
+    ['0', '0', '0', '1', '1']
+];
+console.log(numIslandsDFS(grid));  // Output: 3
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use DFS to explore all connected cells of an island recursively.
 - Mark cells as visited to avoid counting the same island multiple times.
@@ -138,7 +192,10 @@ console.log(numIslandsDFS(grid));  // Output: 3
 4. Increment the island count.
 5. Continue iterating through the matrix to find all islands.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function numIslandsBFS(grid) {
     if (grid.length === 0) return 0;
@@ -197,6 +254,66 @@ const grid = [
 console.log(numIslandsBFS(grid));  // Output: 3
 ```
 
+```typescript
+function numIslandsBFS(grid: string[][]): number {
+    if (grid.length === 0) return 0;
+
+    const rows = grid.length;
+    const cols = grid[0].length;
+    let islandCount = 0;
+
+    function bfs(row: number, col: number): void {
+        const queue: [number, number][] = [[row, col]];
+        grid[row][col] = '0';
+
+        const directions = [
+            [1, 0], [-1, 0], [0, 1], [0, -1], 
+            [1, 1], [-1, -1], [1, -1], [-1, 1]
+        ];
+
+        while (queue.length > 0) {
+            const [currentRow, currentCol] = queue.shift();
+
+            for (const [dr, dc] of directions) {
+                const newRow = currentRow + dr;
+                const newCol = currentCol + dc;
+
+                if (
+                    newRow >= 0 && newRow < rows && 
+                    newCol >= 0 && newCol < cols && 
+                    grid[newRow][newCol] === '1'
+                ) {
+                    queue.push([newRow, newCol]);
+                    grid[newRow][newCol] = '0';
+                }
+            }
+        }
+    }
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (grid[row][col] === '1') {
+                islandCount++;
+                bfs(row, col);
+            }
+        }
+    }
+
+    return islandCount;
+}
+
+// Example usage:
+const grid: string[][] = [
+    ['1', '1', '0', '0', '0'],
+    ['1', '1', '0', '0', '0'],
+    ['0', '0', '1', '0', '0'],
+    ['0', '0', '0', '1', '1']
+];
+console.log(numIslandsBFS(grid));  // Output: 3
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use BFS to explore all connected cells of an island iteratively.
 - Utilize a queue to keep track of cells to be explored.
@@ -216,7 +333,10 @@ console.log(numIslandsBFS(grid));  // Output: 3
 4. Keep track of the maximum area encountered.
 5. Continue iterating through the matrix to find all islands.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function maxAreaOfIsland(grid) {
     if (grid.length === 0) return 0;
@@ -268,6 +388,60 @@ const grid = [
 ];
 console.log(maxAreaOfIsland(grid));  // Output: 4
 ```
+
+```typescript
+function maxAreaOfIsland(grid: string[][]): number {
+    if (grid.length === 0) return 0;
+
+    const rows = grid.length;
+    const cols = grid[0].length;
+    let maxArea = 0;
+
+    function dfs(row: number, col: number): number {
+        if (row < 0 || col < 0 || row >= rows || col >= cols || grid[row][col] === '0') {
+            return 0;
+        }
+
+        // Mark the cell as visited by changing it to '0'
+        grid[row][col] = '0';
+        let area = 1;
+
+        // Traverse in all 8 directions
+        area += dfs(row + 1, col);
+        area += dfs(row - 1, col);
+        area += dfs(row, col + 1);
+        area += dfs(row, col - 1);
+        area += dfs(row + 1, col + 1);
+        area += dfs(row - 1, col - 1);
+        area += dfs(row + 1, col - 1);
+        area += dfs(row - 1, col + 1);
+
+        return area;
+    }
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (grid[row][col] === '1') {
+                const area = dfs(row, col);
+                maxArea = Math.max(maxArea, area);
+            }
+        }
+    }
+
+    return maxArea;
+}
+
+// Example usage:
+const grid: string[][] = [
+    ['1', '1', '0', '0', '0'],
+    ['1', '1', '0', '0', '0'],
+    ['0', '0', '1', '0', '0'],
+    ['0', '0', '0', '1', '1']
+];
+console.log(maxAreaOfIsland(grid));  // Output: 4
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use DFS to explore and calculate the area of each island recursively.

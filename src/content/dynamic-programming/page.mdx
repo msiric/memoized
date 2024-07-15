@@ -84,6 +84,9 @@ You are climbing a staircase. It takes `n` steps to reach the top. Each time you
 **Memoization Approach:**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function climbStairs(n, memo = {}) {
     if (n <= 2) return n;
@@ -95,9 +98,25 @@ function climbStairs(n, memo = {}) {
 console.log(climbStairs(5));  // Output: 8
 ```
 
+```typescript
+function climbStairs(n: number, memo: { [key: number]: number } = {}): number {
+    if (n <= 2) return n;
+    if (memo[n]) return memo[n];
+    memo[n] = climbStairs(n - 1, memo) + climbStairs(n - 2, memo);
+    return memo[n];
+}
+
+console.log(climbStairs(5));  // Output: 8
+```
+
+</CodeGroup>
+
 **Tabulation Approach:**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function climbStairs(n) {
     if (n <= 2) return n;
@@ -111,12 +130,30 @@ function climbStairs(n) {
 console.log(climbStairs(5));  // Output: 8
 ```
 
+```typescript
+function climbStairs(n: number): number {
+    if (n <= 2) return n;
+    let dp: number[] = [0, 1, 2];
+    for (let i = 3; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    return dp[n];
+}
+
+console.log(climbStairs(5));  // Output: 8
+```
+
+</CodeGroup>
+
 ### **Longest Common Subsequence**
 
 **Problem:**
 Find the length of the longest common subsequence between two strings.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function longestCommonSubsequence(s1, s2) {
     let m = s1.length, n = s2.length;
@@ -137,12 +174,37 @@ function longestCommonSubsequence(s1, s2) {
 console.log(longestCommonSubsequence('abcde', 'ace'));  // Output: 3
 ```
 
+```typescript
+function longestCommonSubsequence(s1: string, s2: string): number {
+    let m = s1.length, n = s2.length;
+    let dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (s1[i - 1] === s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1] + 1;
+            } else {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+            }
+        }
+    }
+    return dp[m][n];
+}
+
+console.log(longestCommonSubsequence('abcde', 'ace'));  // Output: 3
+```
+
+</CodeGroup>
+
 ### **Knapsack Problem**
 
 **Problem:**
 Given weights and values of n items, put these items in a knapsack of capacity W to get the maximum total value in the knapsack.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function knapsack(values, weights, W) {
     let n = values.length;
@@ -167,12 +229,41 @@ let W = 50;
 console.log(knapsack(values, weights, W));  // Output: 220
 ```
 
+```typescript
+function knapsack(values: number[], weights: number[], W: number): number {
+    let n = values.length;
+    let dp: number[][] = Array.from({ length: n + 1 }, () => Array(W + 1).fill(0));
+
+    for (let i = 1; i <= n; i++) {
+        for (let w = 0; w <= W; w++) {
+            if (weights[i - 1] <= w) {
+                dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - weights[i - 1]] + values[i - 1]);
+            } else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+    return dp[n][W];
+}
+
+let values: number[] = [60, 100, 120];
+let weights: number[] = [10, 20, 30];
+let W: number = 50;
+
+console.log(knapsack(values, weights, W));  // Output: 220
+```
+
+</CodeGroup>
+
 ### **Edit Distance**
 
 **Problem:**
 Compute the minimum number of operations (insertions, deletions, or substitutions) required to transform one string into another.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function editDistance(s1, s2) {
     let m = s1.length, n = s2.length;
@@ -196,6 +287,32 @@ function editDistance(s1, s2) {
 
 console.log(editDistance('kitten', 'sitting'));  // Output: 3
 ```
+
+```typescript
+function editDistance(s1: string, s2: string): number {
+    let m = s1.length, n = s2.length;
+    let dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+
+    for (let i = 0; i <= m; i++) {
+        for (let j = 0; j <= n; j++) {
+            if (i === 0) {
+                dp[i][j] = j;  // Insert all characters of s2
+            } else if (j === 0) {
+                dp[i][j] = i;  // Remove all characters of s1
+            } else if (s1[i - 1] === s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);  // Insert, Remove, Replace
+            }
+        }
+    }
+    return dp[m][n];
+}
+
+console.log(editDistance('kitten', 'sitting'));  // Output: 3
+```
+
+</CodeGroup>
 
 ## **Practical Tips and Tricks**
 
@@ -231,6 +348,9 @@ console.log(editDistance('kitten', 'sitting'));  // Output: 3
 Find the minimum cost to visit all cities given the costs of traveling between cities, where each city must be visited exactly once (Traveling Salesman Problem).
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function tsp(cost) {
     let n = cost.length;
@@ -266,12 +386,52 @@ let cost = [
 console.log(tsp(cost));  // Output: 80
 ```
 
+```typescript
+function tsp(cost: number[][]): number {
+    let n: number = cost.length;
+    let dp: number[][] = Array.from({ length: 1 << n }, () => Array(n).fill(Infinity));
+    dp[1][0] = 0;
+
+    for (let mask = 1; mask < (1 << n); mask += 2) {
+        for (let u = 1; u < n; u++) {
+            if (mask & (1 << u)) {
+                for (let v = 0; v < n; v++) {
+                    if ((mask & (1 << v)) && cost[v][u] !== Infinity) {
+                        dp[mask][u] = Math.min(dp[mask][u], dp[mask ^ (1 << u)][v] + cost[v][u]);
+                    }
+                }
+            }
+        }
+    }
+
+    let answer: number = Infinity;
+    for (let u = 1; u < n; u++) {
+        answer = Math.min(answer, dp[(1 << n) - 1][u] + cost[u][0]);
+    }
+    return answer;
+}
+
+let cost: number[][] = [
+    [0, 10, 15, 20],
+    [10, 0, 35, 25],
+    [15, 35, 0, 30],
+    [20, 25, 30, 0]
+];
+
+console.log(tsp(cost));  // Output: 80
+```
+
+</CodeGroup>
+
 ### **DP on Trees**
 
 **Problem:**
 Find the maximum sum of values in a binary tree such that no two adjacent nodes are selected.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TreeNode {
     constructor(value = 0, left = null, right = null) {
@@ -306,6 +466,47 @@ root.right.right = new TreeNode(1);
 
 console.log(maxSum(root));  // Output: 7
 ```
+
+```typescript
+class TreeNode {
+    value: number;
+    left: TreeNode | null;
+    right: TreeNode | null;
+
+    constructor(value: number = 0, left: TreeNode | null = null, right: TreeNode | null = null) {
+        this.value = value;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+function maxSum(root: TreeNode | null): number {
+    function dfs(node: TreeNode | null): [number, number] {
+        if (!node) return [0, 0];
+
+        let left: [number, number] = dfs(node.left);
+        let right: [number, number] = dfs(node.right);
+
+        let includeNode: number = node.value + left[1] + right[1];
+        let excludeNode: number = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);
+
+        return [includeNode, excludeNode];
+    }
+
+    let result: [number, number] = dfs(root);
+    return Math.max(result[0], result[1]);
+}
+
+let root: TreeNode = new TreeNode(3);
+root.left = new TreeNode(2);
+root.right = new TreeNode(3);
+root.left.right = new TreeNode(3);
+root.right.right = new TreeNode(1);
+
+console.log(maxSum(root));  // Output: 7
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

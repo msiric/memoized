@@ -40,6 +40,9 @@ A stack is a linear data structure that follows the Last-In-First-Out (LIFO) pri
 ### **Creating a Stack**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Stack {
     constructor() {
@@ -50,9 +53,22 @@ class Stack {
 }
 ```
 
+```typescript
+class Stack<T> {
+    private items: T[] = [];
+
+    // Methods to be defined...
+}
+```
+
+</CodeGroup>
+
 ### **Pushing Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Stack {
     constructor() {
@@ -65,9 +81,24 @@ class Stack {
 }
 ```
 
+```typescript
+class Stack<T> {
+    private items: T[] = [];
+
+    push(element: T): void {
+        this.items.push(element);
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Popping Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Stack {
     constructor() {
@@ -85,9 +116,29 @@ class Stack {
 }
 ```
 
+```typescript
+class Stack<T> {
+    private items: T[] = [];
+
+    push(element: T): void {
+        this.items.push(element);
+    }
+
+    pop(): T | "Underflow" {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.pop() as T;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Peeking the Top Element**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Stack {
     constructor() {
@@ -110,9 +161,34 @@ class Stack {
 }
 ```
 
+```typescript
+class Stack<T> {
+    private items: T[] = [];
+
+    push(element: T): void {
+        this.items.push(element);
+    }
+
+    pop(): T | "Underflow" {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.pop() as T;
+    }
+
+    peek(): T | "No elements in Stack" {
+        if (this.items.length === 0) return "No elements in Stack";
+        return this.items[this.items.length - 1];
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Checking if the Stack is Empty**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Stack {
     constructor() {
@@ -139,9 +215,38 @@ class Stack {
 }
 ```
 
+```typescript
+class Stack<T> {
+    private items: T[] = [];
+
+    push(element: T): void {
+        this.items.push(element);
+    }
+
+    pop(): T | "Underflow" {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.pop() as T;
+    }
+
+    peek(): T | "No elements in Stack" {
+        if (this.items.length === 0) return "No elements in Stack";
+        return this.items[this.items.length - 1];
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Getting the Size of the Stack**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Stack {
     constructor() {
@@ -172,9 +277,42 @@ class Stack {
 }
 ```
 
+```typescript
+class Stack<T> {
+    private items: T[] = [];
+
+    push(element: T): void {
+        this.items.push(element);
+    }
+
+    pop(): T | "Underflow" {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.pop() as T;
+    }
+
+    peek(): T | "No elements in Stack" {
+        if (this.items.length === 0) return "No elements in Stack";
+        return this.items[this.items.length - 1];
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+
+    size(): number {
+        return this.items.length;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Clearing the Stack**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Stack {
     constructor() {
@@ -209,11 +347,49 @@ class Stack {
 }
 ```
 
+```typescript
+class Stack<T> {
+    private items: T[] = [];
+
+    push(element: T): void {
+        this.items.push(element);
+    }
+
+    pop(): T | "Underflow" {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.pop() as T;
+    }
+
+    peek(): T | "No elements in Stack" {
+        if (this.items.length === 0) return "No elements in Stack";
+        return this.items[this.items.length - 1];
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+
+    size(): number {
+        return this.items.length;
+    }
+
+    clear(): void {
+        this.items = [];
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Use Arrays for Simple Stacks:**
   In JavaScript, arrays can be used to implement simple stacks because they provide built-in methods like `push`, `pop`, and `length`.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let stack = [];
   stack.push(1);
@@ -222,18 +398,46 @@ class Stack {
   console.log(stack);  // Output: [1]
   ```
 
+  ```typescript
+  let stack: number[] = [];
+  stack.push(1);
+  stack.push(2);
+  console.log(stack.pop());  // Output: 2
+  console.log(stack);  // Output: [1]
+  ```
+
+  </CodeGroup>
+
 - **Avoid Underflow Errors:**
   Always check if the stack is empty before performing a `pop` operation to avoid underflow errors.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  let stack = new Stack();
   if (!stack.isEmpty()) {
       stack.pop();
   }
   ```
 
+  ```typescript
+  let stack = new Stack<number>();
+  if (!stack.isEmpty()) {
+      stack.pop();
+  }
+  ```
+
+  </CodeGroup>
+
 - **Use Stack for DFS:**
   Implement Depth-First Search (DFS) using a stack to manage the nodes to be visited.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   function dfs(graph, start) {
       let stack = [start];
@@ -252,34 +456,84 @@ class Stack {
   }
   ```
 
+  ```typescript
+  function dfs(graph: Record<number, number[]>, start: number): void {
+      let stack: number[] = [start];
+      let visited = new Set<number>();
+  
+      while (stack.length > 0) {
+          let node = stack.pop()!;
+          if (!visited.has(node)) {
+              visited.add(node);
+              console.log(node);
+              for (let neighbor of graph[node]) {
+                  stack.push(neighbor);
+              }
+          }
+      }
+  }
+  ```
+
+  </CodeGroup>
+
 ## **Common Gotchas**
 
 - **Stack Overflow:**
   Be cautious of stack overflow when using recursion, especially in languages with limited stack size. In JavaScript, this is less of an issue for stack data structures but important in recursion.
+
   **Example:**
+
+  <CodeGroup>  
+
   ```javascript
   function factorial(n) {
       if (n === 0) return 1;
       return n * factorial(n - 1);  // Risk of stack overflow for large n
   }
-  ```
+  ```  
+
+  ```typescript
+  function factorial(n: number): number {
+      if (n === 0) return 1;
+      return n * factorial(n - 1);  // Risk of stack overflow for large n
+  }
+  ```  
+
+  </CodeGroup>
 
 - **Non-Primitive Data Types:**
   When storing non-primitive data types in a stack, be mindful of references and mutations.
+
   **Example:**
+
+  <CodeGroup>
+  
   ```javascript
   let stack = [];
   let obj = {a: 1};
   stack.push(obj);
   obj.a = 2;
-  console.log(stack.peek());  // Output: {a: 2}
+  console.log(stack[stack.length - 1]);  // Output: {a: 2}
   ```
+  
+  ```typescript
+  let stack: {a: number}[] = [];
+  let obj = {a: 1};
+  stack.push(obj);
+  obj.a = 2;
+  console.log(stack[stack.length - 1]);  // Output: {a: 2}
+  ```
+  
+  </CodeGroup>
 
 ## **Advanced Topics**
 
 ### **Implementing a Stack Using a Linked List**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Node {
     constructor(value) {
@@ -329,11 +583,65 @@ class LinkedListStack {
 }
 ```
 
+```typescript
+class Node<T> {
+    value: T;
+    next: Node<T> | null = null;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+class LinkedListStack<T> {
+    private top: Node<T> | null = null;
+    private _size: number = 0;
+
+    push(value: T): void {
+        const newNode = new Node(value);
+        newNode.next = this.top;
+        this.top = newNode;
+        this._size++;
+    }
+
+    pop(): T | "Underflow" {
+        if (this._size === 0) return "Underflow";
+        const value = this.top!.value;
+        this.top = this.top!.next;
+        this._size--;
+        return value;
+    }
+
+    peek(): T | "No elements in Stack" {
+        if (this._size === 0) return "No elements in Stack";
+        return this.top!.value;
+    }
+
+    isEmpty(): boolean {
+        return this._size === 0;
+    }
+
+    size(): number {
+        return this._size;
+    }
+
+    clear(): void {
+        this.top = null;
+        this._size = 0;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Min Stack**
 
 A Min Stack supports push, pop, and retrieving the minimum element in constant time.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinStack {
     constructor() {
@@ -382,6 +690,54 @@ class MinStack {
 }
 ```
 
+```typescript
+class MinStack<T> {
+    private stack: T[] = [];
+    private minStack: T[] = [];
+
+    push(value: T): void {
+        this.stack.push(value);
+        if (this.minStack.length === 0 || value <= this.minStack[this.minStack.length - 1]) {
+            this.minStack.push(value);
+        }
+    }
+
+    pop(): T | "Underflow" {
+        if (this.stack.length === 0) return "Underflow";
+        const value = this.stack.pop() as T;
+        if (value === this.minStack[this.minStack.length - 1]) {
+            this.minStack.pop();
+        }
+        return value;
+    }
+
+    getMin(): T | "No elements in Stack" {
+        if (this.minStack.length === 0) return "No elements in Stack";
+        return this.minStack[this.minStack.length - 1];
+    }
+
+    peek(): T | "No elements in Stack" {
+        if (this.stack.length === 0) return "No elements in Stack";
+        return this.stack[this.stack.length - 1];
+    }
+
+    isEmpty(): boolean {
+        return this.stack.length === 0;
+    }
+
+    size(): number {
+        return this.stack.length;
+    }
+
+    clear(): void {
+        this.stack = [];
+        this.minStack = [];
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Stack Algorithms**
 Below are some common stack algorithms you should be familiar with:
 
@@ -389,6 +745,9 @@ Below are some common stack algorithms you should be familiar with:
 Checking balanced parentheses ensures that every opening parenthesis has a corresponding closing parenthesis and they are properly nested.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function isBalanced(expression) {
     let stack = [];
@@ -407,10 +766,33 @@ console.log(isBalanced("(())"));  // Output: true
 console.log(isBalanced("(()"));   // Output: false
 ```
 
+```typescript
+function isBalanced(expression: string): boolean {
+    let stack: string[] = [];
+    for (let char of expression) {
+        if (char === '(') {
+            stack.push(char);
+        } else if (char === ')') {
+            if (stack.length === 0) return false;
+            stack.pop();
+        }
+    }
+    return stack.length === 0;
+}
+
+console.log(isBalanced("(())"));  // Output: true
+console.log(isBalanced("(()"));   // Output: false
+```
+
+</CodeGroup>
+
 ### **Evaluate Postfix Expression**
 Evaluating a postfix expression computes the value of an expression written in postfix notation using a stack.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function evaluatePostfix(expression) {
     let stack = [];
@@ -442,10 +824,46 @@ function evaluatePostfix(expression) {
 console.log(evaluatePostfix("231*+9-"));  // Output: -4
 ```
 
+```typescript
+function evaluatePostfix(expression: string): number {
+    let stack: number[] = [];
+    for (let char of expression) {
+        if (!isNaN(Number(char))) {
+            stack.push(Number(char));
+        } else {
+            let b = stack.pop()!;
+            let a = stack.pop()!;
+            switch (char) {
+                case '+':
+                    stack.push(a + b);
+                    break;
+                case '-':
+                    stack.push(a - b);
+                    break;
+                case '*':
+                    stack.push(a * b);
+                    break;
+                case '/':
+                    stack.push(a / b);
+                    break;
+            }
+        }
+    }
+    return stack.pop()!;
+}
+
+console.log(evaluatePostfix("231*+9-"));  // Output: -4
+```
+
+</CodeGroup>
+
 ### **Reverse a String Using a Stack**
 Reversing a string using a stack involves pushing all characters onto the stack and then popping them off in reverse order.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function reverseString(str) {
     let stack = [];
@@ -461,6 +879,24 @@ function reverseString(str) {
 
 console.log(reverseString("hello"));  // Output: "olleh"
 ```
+
+```typescript
+function reverseString(str: string): string {
+    let stack: string[] = [];
+    for (let char of str) {
+        stack.push(char);
+    }
+    let reversed = '';
+    while (stack.length > 0) {
+        reversed += stack.pop();
+    }
+    return reversed;
+}
+
+console.log(reverseString("hello"));  // Output: "olleh"
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

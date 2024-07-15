@@ -43,7 +43,10 @@ Consider a linked list: 1 -> 2 -> 3 -> 4 -> 5. After reversing, the linked list 
 3. For each node, store the next node, reverse the link, and move the pointers one step forward.
 4. Continue until all nodes are reversed.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 class ListNode {
     constructor(value) {
@@ -81,6 +84,48 @@ while (current !== null) {
 }
 ```
 
+```typescript
+class ListNode {
+    value: number;
+    next: ListNode | null;
+
+    constructor(value: number) {
+        this.value = value;
+        this.next = null;
+    }
+}
+
+function reverseLinkedList(head: ListNode | null): ListNode | null {
+    let previous: ListNode | null = null;
+    let current: ListNode | null = head;
+
+    while (current !== null) {
+        const next: ListNode | null = current.next;  // Store the next node
+        current.next = previous;    // Reverse the link
+        previous = current;         // Move previous to the current node
+        current = next;             // Move current to the next node
+    }
+
+    return previous;  // New head of the reversed list
+}
+
+// Example usage:
+const head = new ListNode(1);
+head.next = new ListNode(2);
+head.next.next = new ListNode(3);
+head.next.next.next = new ListNode(4);
+head.next.next.next.next = new ListNode(5);
+
+const reversedHead = reverseLinkedList(head);
+let current: ListNode | null = reversedHead;
+while (current !== null) {
+    console.log(current.value);  // Output: 5 4 3 2 1
+    current = current.next;
+}
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Initialize the `previous` pointer to null to mark the end of the reversed list.
 - Update the `next` pointer before reversing the link to avoid losing the reference to the next node.
@@ -100,7 +145,10 @@ while (current !== null) {
 2. Reverse the nodes from `m` to `n` using the in-place reversal technique.
 3. Reconnect the reversed sublist with the rest of the list.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function reverseBetween(head, m, n) {
     if (m === n) return head;
@@ -149,6 +197,56 @@ while (current !== null) {
 }
 ```
 
+```typescript
+function reverseBetween(head: ListNode | null, m: number, n: number): ListNode | null {
+    if (m === n) return head;
+
+    let current: ListNode | null = head, previous: ListNode | null = null;
+    for (let i = 1; i < m; i++) {
+        previous = current;
+        current = current!.next;
+    }
+
+    const connection: ListNode | null = previous;
+    const tail: ListNode | null = current;
+
+    let next: ListNode | null = null;
+    for (let i = 0; i < n - m + 1; i++) {
+        next = current!.next;
+        current!.next = previous;
+        previous = current;
+        current = next;
+    }
+
+    if (connection !== null) {
+        connection.next = previous;
+    } else {
+        head = previous;
+    }
+
+    tail!.next = current;
+
+    return head;
+}
+
+// Example usage:
+const head = new ListNode(1);
+head.next = new ListNode(2);
+head.next.next = new ListNode(3);
+head.next.next.next = new ListNode(4);
+head.next.next.next.next = new ListNode(5);
+
+const m = 2, n = 4;
+const newHead = reverseBetween(head, m, n);
+let current: ListNode | null = newHead;
+while (current !== null) {
+    console.log(current.value);  // Output: 1 4 3 2 5
+    current = current.next;
+}
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Keep track of the node before the start of the sublist (`connection`) and the node at the end of the sublist (`tail`).
 - Reverse the nodes in the specified range using the same in-place reversal technique.
@@ -168,7 +266,10 @@ while (current !== null) {
 2. Reverse the nodes in groups of `k` using the in-place reversal technique.
 3. Reconnect the reversed groups with the rest of the list.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function reverseKGroup(head, k) {
     if (head === null || k === 1) return head;
@@ -214,6 +315,54 @@ while (current !== null) {
     current = current.next;
 }
 ```
+
+```typescript
+function reverseKGroup(head: ListNode | null, k: number): ListNode | null {
+    if (head === null || k === 1) return head;
+
+    let dummy = new ListNode(0);
+    dummy.next = head;
+    let current: ListNode | null = dummy, next: ListNode | null = dummy, previous: ListNode | null = dummy;
+    let count = 0;
+
+    while (current!.next !== null) {
+        current = current!.next;
+        count++;
+    }
+
+    while (count >= k) {
+        current = previous!.next;
+        next = current!.next;
+        for (let i = 1; i < k; i++) {
+            current!.next = next!.next;
+            next!.next = previous!.next;
+            previous!.next = next;
+            next = current!.next;
+        }
+        previous = current;
+        count -= k;
+    }
+
+    return dummy.next;
+}
+
+// Example usage:
+const head = new ListNode(1);
+head.next = new ListNode(2);
+head.next.next = new ListNode(3);
+head.next.next.next = new ListNode(4);
+head.next.next.next.next = new ListNode(5);
+
+const k = 3;
+const newHead = reverseKGroup(head, k);
+let current: ListNode | null = newHead;
+while (current !== null) {
+    console.log(current.value);  // Output: 3 2 1 4 5
+    current = current.next;
+}
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use a dummy node to simplify the reversal process and handle edge cases.

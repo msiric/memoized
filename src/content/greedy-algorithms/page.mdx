@@ -65,7 +65,10 @@ Imagine you are trying to collect the maximum value of items with a limited capa
 3. Iterate through the sorted activities, and for each activity, check if it starts after the last selected activity ends.
 4. If it does, select the activity and update the last selected activity.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function activitySelection(activities) {
     // Sort activities by their end times
@@ -98,6 +101,45 @@ console.log(activitySelection(activities));
 // Output: [ { start: 1, end: 3 }, { start: 3, end: 5 }, { start: 5, end: 7 }, { start: 8, end: 9 } ]
 ```
 
+```typescript
+type Activity = {
+    start: number;
+    end: number;
+};
+
+function activitySelection(activities: Activity[]): Activity[] {
+    // Sort activities by their end times
+    activities.sort((a, b) => a.end - b.end);
+
+    const selectedActivities: Activity[] = [];
+    let lastEndTime = -Infinity;
+
+    for (const activity of activities) {
+        if (activity.start >= lastEndTime) {
+            selectedActivities.push(activity);
+            lastEndTime = activity.end;
+        }
+    }
+
+    return selectedActivities;
+}
+
+// Example usage:
+const activities: Activity[] = [
+    { start: 1, end: 3 },
+    { start: 2, end: 4 },
+    { start: 3, end: 5 },
+    { start: 0, end: 6 },
+    { start: 5, end: 7 },
+    { start: 8, end: 9 },
+    { start: 5, end: 9 }
+];
+console.log(activitySelection(activities));
+// Output: [ { start: 1, end: 3 }, { start: 3, end: 5 }, { start: 5, end: 7 }, { start: 8, end: 9 } ]
+```
+
+</CodeGroup>
+
 **Tips and Tricks:**
 - Sort the activities by their end times to ensure the earliest finish time is chosen.
 - Use a greedy approach by always selecting the next activity that starts after the last selected activity ends.
@@ -118,7 +160,10 @@ console.log(activitySelection(activities));
 5. If the entire item can be added, subtract its weight from the remaining capacity and add its value to the total value.
 6. If only a fraction of the item can be added, add the corresponding fraction of its value to the total value and break the loop.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 function fractionalKnapsack(capacity, items) {
     // Calculate the value-to-weight ratio for each item
@@ -155,6 +200,50 @@ const items = [
 console.log(fractionalKnapsack(capacity, items));  // Output: 240
 ```
 
+```typescript
+type Item = {
+    value: number;
+    weight: number;
+    ratio?: number;
+};
+
+function fractionalKnapsack(capacity: number, items: Item[]): number {
+    // Calculate the value-to-weight ratio for each item
+    items.forEach(item => item.ratio = item.value / item.weight);
+
+    // Sort items by their value-to-weight ratio in descending order
+    items.sort((a, b) => b.ratio! - a.ratio!);
+
+    let totalValue = 0;
+    let remainingCapacity = capacity;
+
+    for (const item of items) {
+        if (remainingCapacity >= item.weight) {
+            // Take the whole item
+            remainingCapacity -= item.weight;
+            totalValue += item.value;
+        } else {
+            // Take a fraction of the item
+            totalValue += item.value * (remainingCapacity / item.weight);
+            break;
+        }
+    }
+
+    return totalValue;
+}
+
+// Example usage:
+const capacity = 50;
+const items: Item[] = [
+    { value: 60, weight: 10 },
+    { value: 100, weight: 20 },
+    { value: 120, weight: 30 }
+];
+console.log(fractionalKnapsack(capacity, items));  // Output: 240
+```
+
+</CodeGroup>
+
 **Tips and Tricks:**
 - Calculate the value-to-weight ratio to determine the most valuable items per unit weight.
 - Sort items by their value-to-weight ratio to ensure the most valuable items are chosen first.
@@ -174,7 +263,10 @@ console.log(fractionalKnapsack(capacity, items));  // Output: 240
 4. If the extracted edge connects to a vertex not already in the MST, add the vertex to the MST and add all its edges to the priority queue.
 5. Repeat the process until all vertices are included in the MST.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -284,6 +376,126 @@ console.log(primMST(graph));
 //     { vertex: 1, weight: 5, to: 4 }
 // ]
 ```
+
+```typescript
+type Edge = {
+    vertex: number;
+    weight: number;
+    to: number;
+};
+
+class MinHeap {
+    private heap: Edge[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    size(): number {
+        return this.heap.length;
+    }
+
+    insert(edge: Edge): void {
+        this.heap.push(edge);
+        this._heapifyUp();
+    }
+
+    extractMin(): Edge {
+        if (this.size() === 1) return this.heap.pop()!;
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this._heapifyDown();
+        return min;
+    }
+
+    private _heapifyUp(): void {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].weight >= this.heap[parentIndex].weight) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    private _heapifyDown(): void {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.weight < element.weight) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild.weight < element.weight) || (swap !== null && rightChild.weight < leftChild.weight)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function primMST(graph: Edge[][]): Edge[] {
+    const mst: Edge[] = [];
+    const minHeap = new MinHeap();
+    const visited = Array(graph.length).fill(false);
+
+    // Start from vertex 0 (or any arbitrary vertex)
+    visited[0] = true;
+    for (const edge of graph[0]) {
+        minHeap.insert(edge);
+    }
+
+    while (minHeap.size() > 0) {
+        const { vertex, weight, to } = minHeap.extractMin();
+
+        if (!visited[to]) {
+            visited[to] = true;
+            mst.push({ vertex, weight, to });
+
+            for (const edge of graph[to]) {
+                if (!visited[edge.to]) {
+                    minHeap.insert(edge);
+                }
+            }
+        }
+    }
+
+    return mst;
+}
+
+// Example usage:
+const graph: Edge[][] = [
+    [{ vertex: 0, to: 1, weight: 2 }, { vertex: 0, to: 3, weight: 6 }],
+    [{ vertex: 1, to: 0, weight: 2 }, { vertex: 1, to: 2, weight: 3 }, { vertex: 1, to: 3, weight: 8 }, { vertex: 1, to: 4, weight: 5 }],
+    [{ vertex: 2, to: 1, weight: 3 }, { vertex: 2, to: 4, weight: 7 }],
+    [{ vertex: 3, to: 0, weight: 6 }, { vertex: 3, to: 1, weight: 8 }, { vertex: 3, to: 4, weight: 9 }],
+    [{ vertex: 4, to: 1, weight: 5 }, { vertex: 4, to: 2, weight: 7 }, { vertex: 4, to: 3, weight: 9 }]
+];
+
+console.log(primMST(graph));
+// Output: 
+// [
+//     { vertex: 0, weight: 2, to: 1 },
+//     { vertex: 1, weight: 3, to: 2 },
+//     { vertex: 0, weight: 6, to: 3 },
+//     { vertex: 1, weight: 5, to: 4 }
+// ]
+```
+
+</CodeGroup>
 
 **Tips and Tricks:**
 - Use a priority queue to efficiently manage the edges with the smallest weights.

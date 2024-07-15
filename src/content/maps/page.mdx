@@ -39,6 +39,9 @@ A JavaScript `Map` is a collection of key-value pairs, where each key can be of 
 ### **Creating Maps**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let emptyMap = new Map();
 let numberMap = new Map([[1, 'one'], [2, 'two'], [3, 'three']]);
@@ -49,9 +52,24 @@ let mixedMap = new Map([
 ]);
 ```
 
+```typescript
+let emptyMap: Map<unknown, unknown> = new Map();
+let numberMap: Map<number, string> = new Map([[1, 'one'], [2, 'two'], [3, 'three']]);
+let mixedMap: Map<unknown, unknown> = new Map([
+    ['stringKey', 'value1'],
+    [42, 'value2'],
+    [{key: 'object'}, 'value3']
+]);
+```
+
+</CodeGroup>
+
 ### **Adding and Removing Entries**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map();
 map.set('name', 'John');
@@ -63,26 +81,63 @@ map.delete('name');
 console.log(map);  // Output: Map { 'age' => 31 }
 ```
 
+```typescript
+let map: Map<string, unknown> = new Map();
+map.set('name', 'John');
+map.set('age', 30);
+map.set('age', 31);  // Updates the value for 'age'
+console.log(map);  // Output: Map { 'name' => 'John', 'age' => 31 }
+
+map.delete('name');
+console.log(map);  // Output: Map { 'age' => 31 }
+```
+
+</CodeGroup>
+
 ### **Checking for Existence**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map([['name', 'John'], ['age', 30]]);
 console.log(map.has('name'));  // Output: true
 console.log(map.has('address'));  // Output: false
 ```
 
+```typescript
+let map: Map<string, unknown> = new Map([['name', 'John'], ['age', 30]]);
+console.log(map.has('name'));  // Output: true
+console.log(map.has('address'));  // Output: false
+```
+
+</CodeGroup>
+
 ### **Getting the Size of a Map**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map([['name', 'John'], ['age', 30]]);
 console.log(map.size);  // Output: 2
 ```
 
+```typescript
+let map: Map<string, unknown> = new Map([['name', 'John'], ['age', 30]]);
+console.log(map.size);  // Output: 2
+```
+
+</CodeGroup>
+
 ### **Iterating Over Maps**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map([['name', 'John'], ['age', 30]]);
 
@@ -95,18 +150,46 @@ map.forEach((value, key) => {
 });
 ```
 
+```typescript
+let map: Map<string, unknown> = new Map([['name', 'John'], ['age', 30]]);
+
+for (let [key, value] of map) {
+    console.log(`${key}: ${value}`);
+}
+
+map.forEach((value, key) => {
+    console.log(`${key}: ${value}`);
+});
+```
+
+</CodeGroup>
+
 ### **Clearing a Map**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map([['name', 'John'], ['age', 30]]);
 map.clear();
 console.log(map.size);  // Output: 0
 ```
 
+```typescript
+let map: Map<string, unknown> = new Map([['name', 'John'], ['age', 30]]);
+map.clear();
+console.log(map.size);  // Output: 0
+```
+
+</CodeGroup>
+
 ### **Converting Maps to Arrays**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map([['name', 'John'], ['age', 30]]);
 let keysArray = Array.from(map.keys());
@@ -118,75 +201,172 @@ console.log(valuesArray);  // Output: ['John', 30]
 console.log(entriesArray);  // Output: [['name', 'John'], ['age', 30]]
 ```
 
+```typescript
+let map: Map<string, unknown> = new Map([['name', 'John'], ['age', 30]]);
+let keysArray: string[] = Array.from(map.keys());
+let valuesArray: unknown[] = Array.from(map.values());
+let entriesArray: [string, unknown][] = Array.from(map.entries());
+
+console.log(keysArray);  // Output: ['name', 'age']
+console.log(valuesArray);  // Output: ['John', 30]
+console.log(entriesArray);  // Output: [['name', 'John'], ['age', 30]]
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Using Maps for Object Metadata:**
   Maps can be used to associate metadata with objects without modifying the objects.
+
   **Example:**
+  
+  <CodeGroup>
+  
   ```javascript
   let obj1 = {id: 1};
   let obj2 = {id: 2};
-
+  
   let metadataMap = new Map();
   metadataMap.set(obj1, {role: 'admin'});
   metadataMap.set(obj2, {role: 'user'});
-
+  
   console.log(metadataMap.get(obj1));  // Output: { role: 'admin' }
   ```
+  
+  ```typescript
+  let obj1 = {id: 1};
+  let obj2 = {id: 2};
+  
+  let metadataMap: Map<object, { role: string }> = new Map();
+  metadataMap.set(obj1, {role: 'admin'});
+  metadataMap.set(obj2, {role: 'user'});
+  
+  console.log(metadataMap.get(obj1));  // Output: { role: 'admin' }
+  ```
+  
+  </CodeGroup>
 
 - **Using Complex Keys:**
   Maps allow for keys that are not limited to strings, such as objects or functions.
+
   **Example:**
+
+  <CodeGroup>
+  
   ```javascript
   let map = new Map();
   let key1 = {};
   let key2 = () => {};
-
+  
   map.set(key1, 'value1');
   map.set(key2, 'value2');
-
+  
   console.log(map.get(key1));  // Output: 'value1'
   console.log(map.get(key2));  // Output: 'value2'
   ```
+  
+  ```typescript
+  let map: Map<object | (() => void), string> = new Map();
+  let key1 = {};
+  let key2 = () => {};
+  
+  map.set(key1, 'value1');
+  map.set(key2, 'value2');
+  
+  console.log(map.get(key1));  // Output: 'value1'
+  console.log(map.get(key2));  // Output: 'value2'
+  ```
+  
+  </CodeGroup>
 
 - **Efficient Lookup Table:**
   Maps provide efficient O(1) lookups, making them suitable for implementing lookup tables.
+
   **Example:**
+  
+  <CodeGroup>
+  
   ```javascript
   let lookup = new Map([['a', 1], ['b', 2], ['c', 3]]);
   console.log(lookup.get('b'));  // Output: 2
   ```
+  
+  ```typescript
+  let lookup: Map<string, number> = new Map([['a', 1], ['b', 2], ['c', 3]]);
+  console.log(lookup.get('b'));  // Output: 2
+  ```
+  
+  </CodeGroup>
 
 ## **Common Gotchas**
 
 - **Using Objects as Keys:**
   When using objects as keys, the same object reference must be used for lookups.
+
   **Example:**
+  
+  <CodeGroup>
+  
   ```javascript
   let map = new Map();
   let obj = {id: 1};
-
+  
   map.set(obj, 'value');
   console.log(map.get({id: 1}));  // Output: undefined (different object reference)
   console.log(map.get(obj));  // Output: 'value'
   ```
+  
+  ```typescript
+  let map: Map<object, string> = new Map();
+  let obj = {id: 1};
+  
+  map.set(obj, 'value');
+  console.log(map.get({id: 1}));  // Output: undefined (different object reference)
+  console.log(map.get(obj));  // Output: 'value'
+  ```
+  
+  </CodeGroup>
 
 - **Order of Insertion:**
   Maps maintain the order of insertion, which can affect iteration and operations.
+
   **Example:**
+  
+  <CodeGroup>
+  
   ```javascript
   let map = new Map([['a', 1], ['b', 2], ['c', 3]]);
   console.log(Array.from(map.keys()));  // Output: ['a', 'b', 'c']
   ```
+  
+  ```typescript
+  let map: Map<string, number> = new Map([['a', 1], ['b', 2], ['c', 3]]);
+  console.log(Array.from(map.keys()));  // Output: ['a', 'b', 'c']
+  ```
+  
+  </CodeGroup>
 
 - **Not Using `clear` Correctly:**
   The `clear` method removes all entries from a map but doesn't return the map itself.
+
   **Example:**
+  
+  <CodeGroup>
+  
   ```javascript
   let map = new Map([['a', 1], ['b', 2]]);
   map.clear();
   console.log(map.size);  // Output: 0
   ```
+  
+  ```typescript
+  let map: Map<string, number> = new Map([['a', 1], ['b', 2]]);
+  map.clear();
+  console.log(map.size);  // Output: 0
+  ```
+  
+  </CodeGroup>
 
 ## **Advanced Topics**
 
@@ -195,6 +375,9 @@ console.log(entriesArray);  // Output: [['name', 'John'], ['age', 30]]
 WeakMaps are similar to maps but only contain object keys and do not prevent garbage collection of keys.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let weakMap = new WeakMap();
 let obj = {};
@@ -205,9 +388,24 @@ console.log(weakMap.get(obj));  // Output: 'value'
 obj = null;  // The entry in the WeakMap will be garbage collected
 ```
 
+```typescript
+let weakMap: WeakMap<object, string> = new WeakMap();
+let obj = {};
+
+weakMap.set(obj, 'value');
+console.log(weakMap.get(obj));  // Output: 'value'
+
+obj = null;  // The entry in the WeakMap will be garbage collected
+```
+
+</CodeGroup>
+
 ### **Map Operations Using Utility Functions**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function mergeMaps(map1, map2) {
     return new Map([...map1, ...map2]);
@@ -231,6 +429,31 @@ console.log(mapKeysToArray(mergedMap));  // Output: ['a', 'b', 'c', 'd']
 console.log(mapValuesToArray(mergedMap));  // Output: [1, 2, 3, 4]
 ```
 
+```typescript
+function mergeMaps<K, V>(map1: Map<K, V>, map2: Map<K, V>): Map<K, V> {
+    return new Map([...map1, ...map2]);
+}
+
+function mapKeysToArray<K, V>(map: Map<K, V>): K[] {
+    return Array.from(map.keys());
+}
+
+function mapValuesToArray<K, V>(map: Map<K, V>): V[] {
+    return Array.from(map.values());
+}
+
+let map1: Map<string, number> = new Map([['a', 1], ['b', 2]]);
+let map2: Map<string, number> = new Map([['c', 3], ['d', 4]]);
+
+let mergedMap: Map<string, number> = mergeMaps(map1, map2);
+console.log(mergedMap);  // Output: Map { 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4 }
+
+console.log(mapKeysToArray(mergedMap));  // Output: ['a', 'b', 'c', 'd']
+console.log(mapValuesToArray(mergedMap));  // Output: [1, 2, 3, 4]
+```
+
+</CodeGroup>
+
 ## **Map Algorithms**
 Below are some common map algorithms you should be familiar with:
 
@@ -238,6 +461,9 @@ Below are some common map algorithms you should be familiar with:
 Counting frequencies involves determining how often each element appears in an array.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function countFrequencies(arr) {
     let frequencyMap = new Map();
@@ -255,10 +481,32 @@ let array = ['a', 'b', 'a', 'c', 'b', 'a'];
 console.log(countFrequencies(array));  // Output: Map { 'a' => 3, 'b' => 2, 'c' => 1 }
 ```
 
+```typescript
+function countFrequencies<T>(arr: T[]): Map<T, number> {
+    let frequencyMap: Map<T, number> = new Map();
+    for (let item of arr) {
+        if (frequencyMap.has(item)) {
+            frequencyMap.set(item, frequencyMap.get(item)! + 1);
+        } else {
+            frequencyMap.set(item, 1);
+        }
+    }
+    return frequencyMap;
+}
+
+let array: string[] = ['a', 'b', 'a', 'c', 'b', 'a'];
+console.log(countFrequencies(array));  // Output: Map { 'a' => 3, 'b' => 2, 'c' => 1 }
+```
+
+</CodeGroup>
+
 ### **Finding Unique Keys**
 Finding unique keys identifies elements that appear exactly once in an array.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findUniqueKeys(arr) {
     let map = new Map();
@@ -278,10 +526,34 @@ let array = ['a', 'b', 'a', 'c', 'b', 'd'];
 console.log(findUniqueKeys(array));  // Output: ['c', 'd']
 ```
 
+```typescript
+function findUniqueKeys<T>(arr: T[]): T[] {
+    let map: Map<T, number> = new Map();
+    for (let item of arr) {
+        map.set(item, (map.get(item) || 0) + 1);
+    }
+    let uniqueKeys: T[] = [];
+    for (let [key, value] of map) {
+        if (value === 1) {
+            uniqueKeys.push(key);
+        }
+    }
+    return uniqueKeys;
+}
+
+let array: string[] = ['a', 'b', 'a', 'c', 'b', 'd'];
+console.log(findUniqueKeys(array));  // Output: ['c', 'd']
+```
+
+</CodeGroup>
+
 ### **Merging Multiple Maps**
 Merging multiple maps combines the key-value pairs of multiple maps into one.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function mergeMultipleMaps(...maps) {
     return maps.reduce((merged, map) => {
@@ -299,6 +571,26 @@ let map3 = new Map([['e', 5], ['f', 6]]);
 let mergedMap = mergeMultipleMaps(map1, map2, map3);
 console.log(mergedMap);  // Output: Map { 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6 }
 ```
+
+```typescript
+function mergeMultipleMaps<K, V>(...maps: Map<K, V>[]): Map<K, V> {
+    return maps.reduce((merged, map) => {
+        for (let [key, value] of map) {
+            merged.set(key, value);
+        }
+        return merged;
+    }, new Map());
+}
+
+let map1: Map<string, number> = new Map([['a', 1], ['b', 2]]);
+let map2: Map<string, number> = new Map([['c', 3], ['d', 4]]);
+let map3: Map<string, number> = new Map([['e', 5], ['f', 6]]);
+
+let mergedMap: Map<string, number> = mergeMultipleMaps(map1, map2, map3);
+console.log(mergedMap);  // Output: Map { 'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5, 'f' => 6 }
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

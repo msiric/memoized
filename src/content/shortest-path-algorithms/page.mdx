@@ -61,6 +61,9 @@ The shortest path from `A` to `D` would include edges: `A-B`, `B-C`, `C-D`, with
 4. Repeat until all vertices are processed.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -180,6 +183,132 @@ console.log(graph.dijkstra(0));
 // Output: [ 0, 8, 6, 5, 3 ]
 ```
 
+```typescript
+class MinHeap {
+    heap: { key: number, value: number }[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    insert(key: number, value: number) {
+        this.heap.push({ key, value });
+        this.bubbleUp();
+    }
+
+    extractMin() {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop()!;
+
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this.bubbleDown();
+        return min;
+    }
+
+    bubbleUp() {
+        let index = this.heap.length - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].key >= this.heap[parentIndex].key) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    bubbleDown() {
+        let index = 0;
+        const length = this.heap.length;
+        const element = this.heap[0];
+
+        while (true) {
+            const leftChildIndex = 2 * index + 1;
+            const rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swapIndex = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.key < element.key) {
+                    swapIndex = leftChildIndex;
+                }
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if (
+                    (swapIndex === null && rightChild.key < element.key) ||
+                    (swapIndex !== null && rightChild.key < leftChild.key)
+                ) {
+                    swapIndex = rightChildIndex;
+                }
+            }
+
+            if (swapIndex === null) break;
+            [this.heap[index], this.heap[swapIndex]] = [this.heap[swapIndex], this.heap[index]];
+            index = swapIndex;
+        }
+    }
+
+    isEmpty() {
+        return this.heap.length === 0;
+    }
+}
+
+class Graph {
+    V: number;
+    adj: Map<number, [number, number][]>;
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.adj = new Map();
+    }
+
+    addEdge(u: number, v: number, w: number) {
+        if (!this.adj.has(u)) this.adj.set(u, []);
+        this.adj.get(u)!.push([v, w]);
+    }
+
+    dijkstra(src: number) {
+        const dist = Array(this.V).fill(Infinity);
+        dist[src] = 0;
+        const minHeap = new MinHeap();
+        minHeap.insert(0, src);
+
+        while (!minHeap.isEmpty()) {
+            const { key: uDist, value: u } = minHeap.extractMin()!;
+
+            if (uDist > dist[u]) continue;
+
+            if (this.adj.has(u)) {
+                for (const [v, weight] of this.adj.get(u)!) {
+                    if (dist[u] + weight < dist[v]) {
+                        dist[v] = dist[u] + weight;
+                        minHeap.insert(dist[v], v);
+                    }
+                }
+            }
+        }
+
+        return dist;
+    }
+}
+
+// Example usage:
+const graph = new Graph(5);
+graph.addEdge(0, 1, 9);
+graph.addEdge(0, 2, 6);
+graph.addEdge(0, 3, 5);
+graph.addEdge(0, 4, 3);
+graph.addEdge(2, 1, 2);
+graph.addEdge(2, 3, 4);
+
+console.log(graph.dijkstra(0));
+// Output: [ 0, 8, 6, 5, 3 ]
+```
+
+</CodeGroup>
+
 ### **Bellman-Ford Algorithm**
 
 **Steps:**
@@ -188,6 +317,9 @@ console.log(graph.dijkstra(0));
 3. Check for negative weight cycles by checking if the distances can be further minimized.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor(vertices) {
@@ -237,6 +369,60 @@ console.log(graph.bellmanFord(0));
 // Output: [ 0, -1, 2, -2, 1 ]
 ```
 
+```typescript
+class Graph {
+    V: number;
+    edges: [number, number, number][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.edges = [];
+    }
+
+    addEdge(u: number, v: number, w: number) {
+        this.edges.push([u, v, w]);
+    }
+
+    bellmanFord(src: number) {
+        const dist = Array(this.V).fill(Infinity);
+        dist[src] = 0;
+
+        for (let i = 1; i < this.V; i++) {
+            for (const [u, v, w] of this.edges) {
+                if (dist[u] !== Infinity && dist[u] + w < dist[v]) {
+                    dist[v] = dist[u] + w;
+                }
+            }
+        }
+
+        for (const [u, v, w] of this.edges) {
+            if (dist[u] !== Infinity && dist[u] + w < dist[v]) {
+                console.log('Graph contains a negative weight cycle');
+                return null;
+            }
+        }
+
+        return dist;
+    }
+}
+
+// Example usage:
+const graph = new Graph(5);
+graph.addEdge(0, 1, -1);
+graph.addEdge(0, 2, 4);
+graph.addEdge(1, 2, 3);
+graph.addEdge(1, 3, 2);
+graph.addEdge(1, 4, 2);
+graph.addEdge(3, 2, 5);
+graph.addEdge(3, 1, 1);
+graph.addEdge(4, 3, -3);
+
+console.log(graph.bellmanFord(0));
+// Output: [ 0, -1, 2, -2, 1 ]
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing the Algorithm:**
@@ -267,6 +453,9 @@ console.log(graph.bellmanFord(0));
 The Floyd-Warshall algorithm is an all-pairs shortest path algorithm that works on both positive and negative edge weights (but no negative weight cycles).
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor(vertices) {
@@ -313,12 +502,66 @@ console.log(graph.floydWarshall());
 // ]
 ```
 
+```typescript
+class Graph {
+    V: number;
+    dist: number[][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.dist = Array.from({ length: vertices }, () => Array(vertices).fill(Infinity));
+
+        for (let i = 0; i < vertices; i++) {
+            this.dist[i][i] = 0;
+        }
+    }
+
+    addEdge(u: number, v: number, w: number) {
+        this.dist[u][v] = w;
+    }
+
+    floydWarshall() {
+        for (let k = 0; k < this.V; k++) {
+            for (let i = 0; i < this.V; i++) {
+                for (let j = 0; j < this.V; j++) {
+                    if (this.dist[i][j] > this.dist[i][k] + this.dist[k][j]) {
+                        this.dist[i][j] = this.dist[i][k] + this.dist[k][j];
+                    }
+                }
+            }
+        }
+        return this.dist;
+    }
+}
+
+// Example usage:
+const graph = new Graph(4);
+graph.addEdge(0, 1, 5);
+graph.addEdge(0, 3, 10);
+graph.addEdge(1, 2, 3);
+graph.addEdge(2, 3, 1);
+
+console.log(graph.floydWarshall());
+// Output: 
+// [
+//   [ 0, 5, 8, 9 ],
+//   [ Infinity, 0, 3, 4 ],
+//   [ Infinity, Infinity, 0, 1 ],
+//   [ Infinity, Infinity, Infinity, 0 ]
+// ]
+```
+
+</CodeGroup>
+
 ### **A* Search Algorithm**
 
 **Description:**
 The A* search algorithm is an extension of Dijkstra's algorithm that uses heuristics to improve performance in finding the shortest path in a weighted graph.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class AStar {
     constructor(vertices) {
@@ -391,6 +634,84 @@ graph.addEdge(3, 4, 3);
 console.log(graph.aStarSearch(0, 4));
 // Output: [ 0, 1, 2, 3, 4 ]
 ```
+
+```typescript
+class AStar {
+    V: number;
+    adj: Map<number, [number, number][]>;
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.adj = new Map();
+    }
+
+    addEdge(u: number, v: number, w: number) {
+        if (!this.adj.has(u)) this.adj.set(u, []);
+        this.adj.get(u)!.push([v, w]);
+    }
+
+    heuristic(node: number, goal: number) {
+        // Example heuristic (Manhattan distance)
+        return Math.abs(node - goal);
+    }
+
+    aStarSearch(start: number, goal: number) {
+        const openSet = new MinHeap();
+        openSet.insert(0, start);
+        const cameFrom = new Map();
+        const gScore = Array(this.V).fill(Infinity);
+        gScore[start] = 0;
+        const fScore = Array(this.V).fill(Infinity);
+        fScore[start] = this.heuristic(start, goal);
+
+        while (!openSet.isEmpty()) {
+            const { key: currentScore, value: current } = openSet.extractMin()!;
+
+            if (current === goal) {
+                return this.reconstructPath(cameFrom, current);
+            }
+
+            if (this.adj.has(current)) {
+                for (const [neighbor, weight] of this.adj.get(current)!) {
+                    const tentativeGScore = gScore[current] + weight;
+
+                    if (tentativeGScore < gScore[neighbor]) {
+                        cameFrom.set(neighbor, current);
+                        gScore[neighbor] = tentativeGScore;
+                        fScore[neighbor] = gScore[neighbor] + this.heuristic(neighbor, goal);
+                        openSet.insert(fScore[neighbor], neighbor);
+                    }
+                }
+            }
+        }
+
+        return [];
+    }
+
+    reconstructPath(cameFrom: Map<number, number>, current: number) {
+        const path = [current];
+        while (cameFrom.has(current)) {
+            current = cameFrom.get(current);
+            path.unshift(current);
+        }
+        return path;
+    }
+}
+
+// Example usage:
+const graph = new AStar(5);
+graph.addEdge(0, 1, 1);
+graph.addEdge(0, 2, 4);
+graph.addEdge(1, 2, 2);
+graph.addEdge(1, 3, 5);
+graph.addEdge(2, 3, 1);
+graph.addEdge(3, 4, 3);
+
+console.log(graph.aStarSearch(0, 4));
+// Output: [ 0, 1, 2, 3, 4 ]
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

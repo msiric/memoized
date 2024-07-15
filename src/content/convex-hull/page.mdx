@@ -82,6 +82,9 @@ Final Hull: [(0, 0), (3, 0), (3, 3), (0, 3)]
 3. Traverse the sorted points and maintain a stack to build the hull.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Point {
     constructor(x, y) {
@@ -131,6 +134,60 @@ const hull = grahamScan(points);
 console.log(hull);  // Output: Convex hull points in order
 ```
 
+```typescript
+class Point {
+    x: number;
+    y: number;
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+function crossProduct(o: Point, a: Point, b: Point): number {
+    return (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+}
+
+function grahamScan(points: Point[]): Point[] {
+    if (points.length < 3) return points;
+
+    // Find the point with the lowest y-coordinate
+    const start = points.reduce((lowest, point) => {
+        if (point.y < lowest.y || (point.y === lowest.y && point.x < lowest.x)) {
+            return point;
+        }
+        return lowest;
+    }, points[0]);
+
+    // Sort points by polar angle with respect to the start point
+    points.sort((a, b) => {
+        const cp = crossProduct(start, a, b);
+        if (cp === 0) {
+            return Math.hypot(start.x - a.x, start.y - a.y) - Math.hypot(start.x - b.x, start.y - b.y);
+        }
+        return cp;
+    });
+
+    const hull: Point[] = [];
+    for (let point of points) {
+        while (hull.length >= 2 && crossProduct(hull[hull.length - 2], hull[hull.length - 1], point) <= 0) {
+            hull.pop();
+        }
+        hull.push(point);
+    }
+
+    return hull;
+}
+
+// Example usage:
+const points: Point[] = [new Point(0, 3), new Point(2, 2), new Point(1, 1), new Point(2, 1), new Point(3, 0), new Point(0, 0), new Point(3, 3)];
+const hull: Point[] = grahamScan(points);
+console.log(hull);  // Output: Convex hull points in order
+```
+
+</CodeGroup>
+
 ### **Jarvis March (Gift Wrapping) Algorithm**
 
 **Steps:**
@@ -139,6 +196,9 @@ console.log(hull);  // Output: Convex hull points in order
 3. Repeat until the hull is completed.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Point {
     constructor(x, y) {
@@ -190,6 +250,62 @@ const hull = jarvisMarch(points);
 console.log(hull);  // Output: Convex hull points in order
 ```
 
+```typescript
+class Point {
+    x: number;
+    y: number;
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+function orientation(p: Point, q: Point, r: Point): number {
+    const val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
+    if (val === 0) return 0; // collinear
+    return val > 0 ? 1 : 2; // clock or counterclock wise
+}
+
+function jarvisMarch(points: Point[]): Point[] {
+    if (points.length < 3) return points;
+
+    const hull: Point[] = [];
+    let l = 0;
+
+    // Find the leftmost point
+    for (let i = 1; i < points.length; i++) {
+        if (points[i].x < points[l].x) {
+            l = i;
+        }
+    }
+
+    let p = l, q;
+    do {
+        hull.push(points[p]);
+
+        q = (p + 1) % points.length;
+        for (let i = 0; i < points.length; i++) {
+            if (orientation(points[p], points[i], points[q]) === 2) {
+                q = i;
+            }
+        }
+
+        p = q;
+
+    } while (p !== l);
+
+    return hull;
+}
+
+// Example usage:
+const points: Point[] = [new Point(0, 3), new Point(2, 2), new Point(1, 1), new Point(2, 1), new Point(3, 0), new Point(0, 0), new Point(3, 3)];
+const hull: Point[] = jarvisMarch(points);
+console.log(hull);  // Output: Convex hull points in order
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing the Algorithm:**
@@ -225,6 +341,9 @@ Chan's algorithm is an optimal O(n log h) algorithm for finding the convex hull 
 A divide-and-conquer approach for finding the convex hull, which recursively divides the set of points into smaller subsets, finds the convex hull for each subset, and then merges the hulls.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function mergeHulls(hull1, hull2) {
     // Implementation of merging two convex hulls
@@ -245,6 +364,30 @@ const points = [new Point(0, 3), new Point(2, 2), new Point(1, 1), new Point(2, 
 const hull = divideAndConquer(points);
 console.log(hull);  // Output: Convex hull points in order
 ```
+
+```typescript
+function mergeHulls(hull1: Point[], hull2: Point[]): Point[] {
+    // Implementation of merging two convex hulls
+    return [];  // Placeholder
+}
+
+function divideAndConquer(points: Point[]): Point[] {
+    if (points.length <= 3) return grahamScan(points);
+
+    const mid = Math.floor(points.length / 2);
+    const leftHull = divideAndConquer(points.slice(0, mid));
+    const rightHull = divideAndConquer(points.slice(mid));
+
+    return mergeHulls(leftHull, rightHull);
+}
+
+// Example usage:
+const points: Point[] = [new Point(0, 3), new Point(2, 2), new Point(1, 1), new Point(2, 1), new Point(3, 0), new Point(0, 0), new Point(3, 3)];
+const hull: Point[] = divideAndConquer(points);
+console.log(hull);  // Output: Convex hull points in order
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

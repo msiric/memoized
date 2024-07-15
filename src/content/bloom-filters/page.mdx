@@ -59,6 +59,9 @@ Bit Array: [0, 1, 0, 1, 0, 0, 0, 1, 0, 0] (Since positions 2 and 4 are 0, "world
 ### **Creating a Bloom Filter**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class BloomFilter {
     constructor(size = 100, hashCount = 3) {
@@ -112,6 +115,65 @@ console.log(bloom.contains("world"));  // Output: true
 console.log(bloom.contains("test"));   // Output: false
 ```
 
+```typescript
+class BloomFilter {
+    size: number;
+    hashCount: number;
+    bitArray: number[];
+
+    constructor(size = 100, hashCount = 3) {
+        this.size = size;
+        this.hashCount = hashCount;
+        this.bitArray = new Array(size).fill(0);
+    }
+
+    _hashes(value: string): number[] {
+        const hashes: number[] = [];
+        for (let i = 0; i < this.hashCount; i++) {
+            const hash = this._hashFunction(value, i);
+            hashes.push(hash % this.size);
+        }
+        return hashes;
+    }
+
+    _hashFunction(value: string, seed: number): number {
+        let hash = 0;
+        for (let i = 0; i < value.length; i++) {
+            hash = (hash * seed + value.charCodeAt(i)) % this.size;
+        }
+        return hash;
+    }
+
+    add(value: string): void {
+        const hashes = this._hashes(value);
+        hashes.forEach(hash => {
+            this.bitArray[hash] = 1;
+        });
+    }
+
+    contains(value: string): boolean {
+        const hashes = this._hashes(value);
+        for (let hash of hashes) {
+            if (this.bitArray[hash] === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+// Example usage:
+const bloom = new BloomFilter(100, 3);
+bloom.add("hello");
+bloom.add("world");
+
+console.log(bloom.contains("hello"));  // Output: true
+console.log(bloom.contains("world"));  // Output: true
+console.log(bloom.contains("test"));   // Output: false
+```
+
+</CodeGroup>
+
 ### **Optimizing Parameters**
 
 **Choosing Size and Hash Count:**
@@ -126,6 +188,9 @@ console.log(bloom.contains("test"));   // Output: false
   ![Optimal Hash Functions Equation](/images/equations/optimal-bloom-filter-hash-function-number.svg)
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function optimalBloomFilterParams(n, p) {
     const m = Math.ceil(-n * Math.log(p) / (Math.log(2) ** 2));
@@ -137,9 +202,25 @@ const { m, k } = optimalBloomFilterParams(100, 0.01);
 console.log(`Optimal size: ${m}, Optimal hash count: ${k}`);
 ```
 
+```typescript
+function optimalBloomFilterParams(n: number, p: number): { m: number, k: number } {
+    const m = Math.ceil(-n * Math.log(p) / (Math.log(2) ** 2));
+    const k = Math.ceil((m / n) * Math.log(2));
+    return { m, k };
+}
+
+const { m, k } = optimalBloomFilterParams(100, 0.01);
+console.log(`Optimal size: ${m}, Optimal hash count: ${k}`);
+```
+
+</CodeGroup>
+
 ### **Handling False Positives**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 const bloom = new BloomFilter(1000, 7);
 bloom.add("apple");
@@ -152,6 +233,21 @@ console.log(bloom.contains("cherry"));   // Output: true
 console.log(bloom.contains("grape"));    // Output: false (correct)
 console.log(bloom.contains("orange"));   // Output: false (false positive possible)
 ```
+
+```typescript
+const bloom = new BloomFilter(1000, 7);
+bloom.add("apple");
+bloom.add("banana");
+bloom.add("cherry");
+
+console.log(bloom.contains("apple"));    // Output: true
+console.log(bloom.contains("banana"));   // Output: true
+console.log(bloom.contains("cherry"));   // Output: true
+console.log(bloom.contains("grape"));    // Output: false (correct)
+console.log(bloom.contains("orange"));   // Output: false (false positive possible)
+```
+
+</CodeGroup>
 
 ## **Practical Tips and Tricks**
 
@@ -183,6 +279,9 @@ console.log(bloom.contains("orange"));   // Output: false (false positive possib
 A variant of the Bloom Filter that allows elements to be removed by using a counter array instead of a bit array.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class CountingBloomFilter {
     constructor(size = 100, hashCount = 3) {
@@ -244,12 +343,82 @@ countingBloom.remove("hello");
 console.log(countingBloom.contains("hello"));  // Output: false
 ```
 
+```typescript
+class CountingBloomFilter {
+    size: number;
+    hashCount: number;
+    counterArray: number[];
+
+    constructor(size = 100, hashCount = 3) {
+        this.size = size;
+        this.hashCount = hashCount;
+        this.counterArray = new Array(size).fill(0);
+    }
+
+    _hashes(value: string): number[] {
+        const hashes: number[] = [];
+        for (let i = 0; i < this.hashCount; i++) {
+            const hash = this._hashFunction(value, i);
+            hashes.push(hash % this.size);
+        }
+        return hashes;
+    }
+
+    _hashFunction(value: string, seed: number): number {
+        let hash = 0;
+        for (let i = 0; i < value.length; i++) {
+            hash = (hash * seed + value.charCodeAt(i)) % this.size;
+        }
+        return hash;
+    }
+
+    add(value: string): void {
+        const hashes = this._hashes(value);
+        hashes.forEach(hash => {
+            this.counterArray[hash]++;
+        });
+    }
+
+    remove(value: string): void {
+        const hashes = this._hashes(value);
+        hashes.forEach(hash => {
+            if (this.counterArray[hash] > 0) {
+                this.counterArray[hash]--;
+            }
+        });
+    }
+
+    contains(value: string): boolean {
+        const hashes = this._hashes(value);
+        for (let hash of hashes) {
+            if (this.counterArray[hash] === 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+// Example usage:
+const countingBloom = new CountingBloomFilter(100, 3);
+countingBloom.add("hello");
+countingBloom.add("world");
+console.log(countingBloom.contains("hello"));  // Output: true
+countingBloom.remove("hello");
+console.log(countingBloom.contains("hello"));  // Output: false
+```
+
+</CodeGroup>
+
 ### **Scalable Bloom Filter**
 
 **Description:**
 A Bloom Filter that can grow in size to accommodate more elements while maintaining a low false positive rate.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class ScalableBloomFilter {
     constructor(initialSize = 100, hashCount = 3, growthFactor = 2, falsePositiveRate = 0.01) {
@@ -291,6 +460,54 @@ console.log(scalableBloom.contains("hello"));  // Output: true
 console.log(scalableBloom.contains("world"));  // Output: true
 console.log(scalableBloom.contains("test"));   // Output: false
 ```
+
+```typescript
+class ScalableBloomFilter {
+    filters: BloomFilter[];
+    growthFactor: number;
+    falsePositiveRate: number;
+
+    constructor(initialSize = 100, hashCount = 3, growthFactor = 2, falsePositiveRate = 0.01) {
+        this.filters = [];
+        this.growthFactor = growthFactor;
+        this.falsePositiveRate = falsePositiveRate;
+        this.addFilter(initialSize, hashCount);
+    }
+
+    addFilter(size: number, hashCount: number): void {
+        this.filters.push(new BloomFilter(size, hashCount));
+    }
+
+    add(value: string): void {
+        const filter = this.filters[this.filters.length - 1];
+        filter.add(value);
+        if (filter.contains(value)) {
+            const newSize = filter.size * this.growthFactor;
+            const newHashCount = Math.ceil((newSize / filter.size) * Math.log(2));
+            this.addFilter(newSize, newHashCount);
+        }
+    }
+
+    contains(value: string): boolean {
+        for (let filter of this.filters) {
+            if (filter.contains(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+// Example usage:
+const scalableBloom = new ScalableBloomFilter();
+scalableBloom.add("hello");
+scalableBloom.add("world");
+console.log(scalableBloom.contains("hello"));  // Output: true
+console.log(scalableBloom.contains("world"));  // Output: true
+console.log(scalableBloom.contains("test"));   // Output: false
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

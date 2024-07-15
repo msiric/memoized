@@ -57,6 +57,9 @@ Total Profit: 100 + 27 + 25 + 15 = 167
 Find the shortest possible route that visits each city exactly once and returns to the origin city.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TSP {
     constructor(distances) {
@@ -104,12 +107,68 @@ const tsp = new TSP(distances);
 console.log(tsp.tsp());  // Output: Shortest tour length
 ```
 
+```typescript
+class TSP {
+    distances: number[][];
+    n: number;
+    dp: number[][];
+
+    constructor(distances: number[][]) {
+        this.distances = distances;
+        this.n = distances.length;
+        this.dp = Array.from({ length: this.n }, () => Array(1 << this.n).fill(Infinity));
+    }
+
+    tsp(): number {
+        this.dp[0][1] = 0;
+
+        for (let mask = 1; mask < (1 << this.n); mask++) {
+            for (let u = 0; u < this.n; u++) {
+                if (mask & (1 << u)) {
+                    for (let v = 0; v < this.n; v++) {
+                        if (!(mask & (1 << v))) {
+                            this.dp[v][mask | (1 << v)] = Math.min(
+                                this.dp[v][mask | (1 << v)],
+                                this.dp[u][mask] + this.distances[u][v]
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        let minTour = Infinity;
+        for (let u = 0; u < this.n; u++) {
+            minTour = Math.min(minTour, this.dp[u][(1 << this.n) - 1] + this.distances[u][0]);
+        }
+
+        return minTour;
+    }
+}
+
+// Example usage:
+const distances: number[][] = [
+    [0, 29, 20, 21],
+    [29, 0, 15, 17],
+    [20, 15, 0, 28],
+    [21, 17, 28, 0]
+];
+
+const tsp = new TSP(distances);
+console.log(tsp.tsp());  // Output: Shortest tour length
+```
+
+</CodeGroup>
+
 ### **Knapsack Problem (Dynamic Programming)**
 
 **Problem:**
 Given weights and values of n items, put these items in a knapsack of capacity W to get the maximum total value in the knapsack.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function knapsack(values, weights, W) {
     const n = values.length;
@@ -135,12 +194,42 @@ const W = 50;
 console.log(knapsack(values, weights, W));  // Output: 220
 ```
 
+```typescript
+function knapsack(values: number[], weights: number[], W: number): number {
+    const n = values.length;
+    const dp = Array.from({ length: n + 1 }, () => Array(W + 1).fill(0));
+
+    for (let i = 1; i <= n; i++) {
+        for (let w = 0; w <= W; w++) {
+            if (weights[i - 1] <= w) {
+                dp[i][w] = Math.max(dp[i - 1][w], dp[i - 1][w - weights[i - 1]] + values[i - 1]);
+            } else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+
+    return dp[n][W];
+}
+
+// Example usage:
+const values: number[] = [60, 100, 120];
+const weights: number[] = [10, 20, 30];
+const W: number = 50;
+console.log(knapsack(values, weights, W));  // Output: 220
+```
+
+</CodeGroup>
+
 ### **Job Scheduling Problem (Greedy Algorithm)**
 
 **Problem:**
 Given a set of jobs where each job has a deadline and a profit, schedule the jobs to maximize the total profit.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function jobScheduling(jobs, maxDeadline) {
     jobs.sort((a, b) => b.profit - a.profit);
@@ -171,12 +260,53 @@ const jobs = [
 console.log(jobScheduling(jobs, 3));  // Output: 142
 ```
 
+```typescript
+interface Job {
+    id: number;
+    deadline: number;
+    profit: number;
+}
+
+function jobScheduling(jobs: Job[], maxDeadline: number): number {
+    jobs.sort((a, b) => b.profit - a.profit);
+    const result = Array(maxDeadline).fill(-1);
+    let totalProfit = 0;
+
+    for (let i = 0; i < jobs.length; i++) {
+        for (let j = Math.min(maxDeadline, jobs[i].deadline) - 1; j >= 0; j--) {
+            if (result[j] === -1) {
+                result[j] = i;
+                totalProfit += jobs[i].profit;
+                break;
+            }
+        }
+    }
+
+    return totalProfit;
+}
+
+// Example usage:
+const jobs: Job[] = [
+    { id: 1, deadline: 2, profit: 100 },
+    { id: 2, deadline: 1, profit: 19 },
+    { id: 3, deadline: 2, profit: 27 },
+    { id: 4, deadline: 1, profit: 25 },
+    { id: 5, deadline: 3, profit: 15 }
+];
+console.log(jobScheduling(jobs, 3));  // Output: 142
+```
+
+</CodeGroup>
+
 ### **Set Cover Problem (Greedy Algorithm)**
 
 **Problem:**
 Find a set cover, which is a collection of sets that covers all elements in the universe.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function setCover(universe, sets) {
     const cover = [];
@@ -214,12 +344,56 @@ const sets = [
 console.log(setCover(universe, sets));  // Output: Approximate set cover, e.g., [ Set { 1, 2, 3 }, Set { 3, 4, 5 } ]
 ```
 
+```typescript
+function setCover(universe: number[], sets: Set<number>[]): Set<number>[] {
+    const cover: Set<number>[] = [];
+    const uncovered = new Set(universe);
+
+    while (uncovered.size > 0) {
+        let bestSet: Set<number> | null = null;
+        let bestSetCovered = 0;
+
+        for (let set of sets) {
+            const covered = new Set([...set].filter(x => uncovered.has(x)));
+            if (covered.size > bestSetCovered) {
+                bestSetCovered = covered.size;
+                bestSet = set;
+            }
+        }
+
+        if (bestSet) {
+            cover.push(bestSet);
+            for (let element of bestSet) {
+                uncovered.delete(element);
+            }
+        }
+    }
+
+    return cover;
+}
+
+// Example usage:
+const universe: number[] = [1, 2, 3, 4, 5];
+const sets: Set<number>[] = [
+    new Set([1, 2, 3]),
+    new Set([2, 4]),
+    new Set([3, 4, 5]),
+    new Set([5])
+];
+console.log(setCover(universe, sets));  // Output: Approximate set cover, e.g., [ Set { 1, 2, 3 }, Set { 3, 4, 5 } ]
+```
+
+</CodeGroup>
+
 ### **Maximum Flow Problem (Ford-Fulkerson Method)**
 
 **Problem:**
 Find the maximum flow from a source to a sink in a flow network.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class FordFulkerson {
     constructor(vertices) {
@@ -296,6 +470,87 @@ graph.addEdge(4, 5, 4);
 console.log(graph.fordFulkerson(0, 5));  // Output: 23
 ```
 
+```typescript
+class FordFulkerson {
+    V: number;
+    graph: [number, number][][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.graph = Array.from({ length: vertices }, () => []);
+    }
+
+    addEdge(u: number, v: number, capacity: number): void {
+        this.graph[u].push([v, capacity]);
+        this.graph[v].push([u, 0]);  // Add reverse edge with 0 capacity
+    }
+
+    bfs(source: number, sink: number, parent: number[]): boolean {
+        const visited = Array(this.V).fill(false);
+        const queue = [source];
+        visited[source] = true;
+
+        while (queue.length > 0) {
+            const u = queue.shift();
+
+            for (const [v, capacity] of this.graph[u]) {
+                if (!visited[v] && capacity > 0) {
+                    parent[v] = u;
+                    if (v === sink) return true;
+                    queue.push(v);
+                    visited[v] = true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    fordFulkerson(source: number, sink: number): number {
+        let maxFlow = 0;
+        const parent = Array(this.V).fill(-1);
+
+        while (this.bfs(source, sink, parent)) {
+            let pathFlow = Infinity;
+            for (let v = sink; v !== source; v = parent[v]) {
+                const u = parent[v];
+                const capacity = this.graph[u].find(([vertex, cap]) => vertex === v)[1];
+                pathFlow = Math.min(pathFlow, capacity);
+            }
+
+            for (let v = sink; v !== source; v = parent[v]) {
+                const u = parent[v];
+                const edge = this.graph[u].find(([vertex, cap]) => vertex === v);
+                edge[1] -= pathFlow;
+                const reverseEdge = this.graph[v].find(([vertex, cap]) => vertex === u);
+                reverseEdge[1] += pathFlow;
+            }
+
+            maxFlow += pathFlow;
+        }
+
+        return maxFlow;
+    }
+}
+
+// Example usage:
+const graph = new FordFulkerson(6);
+graph.addEdge(0, 1, 16);
+graph.addEdge(0, 2, 13);
+graph.addEdge(1, 2, 10);
+graph.addEdge(1, 3, 12);
+graph.addEdge(2, 1, 4);
+graph.addEdge(2, 4, 14);
+graph.addEdge(3, 2, 9);
+graph.addEdge(3, 5, 20);
+graph.addEdge(4, 3, 7);
+graph.addEdge(4, 5, 4);
+
+console.log(graph.fordFulkerson(0, 5));  // Output: 23
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing the Algorithm:**
@@ -329,6 +584,9 @@ console.log(graph.fordFulkerson(0, 5));  // Output: 23
 Branch and bound is a systematic method for solving combinatorial optimization problems. It involves dividing the problem into smaller subproblems (branching) and using bounds to prune subproblems that cannot yield better solutions.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function branchAndBoundKnapsack(values, weights, W) {
     const n = values.length;
@@ -402,12 +660,95 @@ const W = 50;
 console.log(branchAndBoundKnapsack(values, weights, W));  // Output: 220
 ```
 
+```typescript
+class Node {
+    level: number;
+    profit: number;
+    weight: number;
+    bound: number;
+
+    constructor(level: number, profit: number, weight: number) {
+        this.level = level;
+        this.profit = profit;
+        this.weight = weight;
+        this.bound = 0;
+    }
+}
+
+function branchAndBoundKnapsack(values: number[], weights: number[], W: number): number {
+    const n = values.length;
+    let maxProfit = 0;
+
+    function bound(u: Node): number {
+        if (u.weight >= W) return 0;
+        let profitBound = u.profit;
+        let j = u.level + 1;
+        let totWeight = u.weight;
+
+        while (j < n && totWeight + weights[j] <= W) {
+            totWeight += weights[j];
+            profitBound += values[j];
+            j++;
+        }
+
+        if (j < n) {
+            profitBound += (W - totWeight) * (values[j] / weights[j]);
+        }
+
+        return profitBound;
+    }
+
+    const Q: Node[] = [];
+    Q.push(new Node(-1, 0, 0));
+
+    while (Q.length > 0) {
+        const u = Q.pop();
+
+        if (u.level === -1) {
+            const v = new Node(0, 0, 0);
+            v.bound = bound(v);
+            Q.push(v);
+        } else if (u.level !== n - 1) {
+            const v = new Node(u.level + 1, u.profit + values[u.level + 1], u.weight + weights[u.level + 1]);
+
+            if (v.weight <= W && v.profit > maxProfit) {
+                maxProfit = v.profit;
+            }
+
+            v.bound = bound(v);
+            if (v.bound > maxProfit) {
+                Q.push(v);
+            }
+
+            const v2 = new Node(u.level + 1, u.profit, u.weight);
+            v2.bound = bound(v2);
+            if (v2.bound > maxProfit) {
+                Q.push(v2);
+            }
+        }
+    }
+
+    return maxProfit;
+}
+
+// Example usage:
+const values: number[] = [60, 100, 120];
+const weights: number[] = [10, 20, 30];
+const W: number = 50;
+console.log(branchAndBoundKnapsack(values, weights, W));  // Output: 220
+```
+
+</CodeGroup>
+
 ### **Genetic Algorithms**
 
 **Description:**
 Genetic algorithms are a class of optimization algorithms inspired by the process of natural selection. They use techniques such as mutation, crossover, and selection to evolve solutions to optimization problems.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class GeneticAlgorithm {
     constructor(populationSize, mutationRate, crossoverRate, generations) {
@@ -499,6 +840,105 @@ const W = 50;
 const ga = new GeneticAlgorithm(100, 0.01, 0.7, 1000);
 console.log(ga.run(values, weights, W));  // Output: Approximate knapsack solution value
 ```
+
+```typescript
+class GeneticAlgorithm {
+    populationSize: number;
+    mutationRate: number;
+    crossoverRate: number;
+    generations: number;
+
+    constructor(populationSize: number, mutationRate: number, crossoverRate: number, generations: number) {
+        this.populationSize = populationSize;
+        this.mutationRate = mutationRate;
+        this.crossoverRate = crossoverRate;
+        this.generations = generations;
+    }
+
+    initializePopulation(chromosomeLength: number): number[][] {
+        const population = [];
+        for (let i = 0; i < this.populationSize; i++) {
+            const chromosome = Array.from({ length: chromosomeLength }, () => Math.round(Math.random()));
+            population.push(chromosome);
+        }
+        return population;
+    }
+
+    fitness(chromosome: number[], values: number[], weights: number[], W: number): number {
+        let totalValue = 0;
+        let totalWeight = 0;
+        for (let i = 0; i < chromosome.length; i++) {
+            if (chromosome[i] === 1) {
+                totalValue += values[i];
+                totalWeight += weights[i];
+            }
+        }
+        if (totalWeight > W) {
+            return 0;
+        }
+        return totalValue;
+    }
+
+    select(population: number[][], values: number[], weights: number[], W: number): number[] {
+        const fitnesses = population.map(chromosome => this.fitness(chromosome, values, weights, W));
+        const totalFitness = fitnesses.reduce((a, b) => a + b, 0);
+        const randomFitness = Math.random() * totalFitness;
+        let accumulatedFitness = 0;
+
+        for (let i = 0; i < population.length; i++) {
+            accumulatedFitness += fitnesses[i];
+            if (accumulatedFitness >= randomFitness) {
+                return population[i];
+            }
+        }
+        return population[0];
+    }
+
+    crossover(parent1: number[], parent2: number[]): [number[], number[]] {
+        const point = Math.floor(Math.random() * parent1.length);
+        const offspring1 = [...parent1.slice(0, point), ...parent2.slice(point)];
+        const offspring2 = [...parent2.slice(0, point), ...parent1.slice(point)];
+        return [offspring1, offspring2];
+    }
+
+    mutate(chromosome: number[]): number[] {
+        return chromosome.map(gene => (Math.random() < this.mutationRate ? 1 - gene : gene));
+    }
+
+    run(values: number[], weights: number[], W: number): number {
+        const chromosomeLength = values.length;
+        let population = this.initializePopulation(chromosomeLength);
+
+        for (let generation = 0; generation < this.generations; generation++) {
+            const newPopulation = [];
+            while (newPopulation.length < this.populationSize) {
+                const parent1 = this.select(population, values, weights, W);
+                const parent2 = this.select(population, values, weights, W);
+                let [offspring1, offspring2] = this.crossover(parent1, parent2);
+                offspring1 = this.mutate(offspring1);
+                offspring2 = this.mutate(offspring2);
+                newPopulation.push(offspring1, offspring2);
+            }
+            population = newPopulation.slice(0, this.populationSize);
+        }
+
+        const bestChromosome = population.reduce((best, chromosome) => {
+            return this.fitness(chromosome, values, weights, W) > this.fitness(best, values, weights, W) ? chromosome : best;
+        }, population[0]);
+
+        return this.fitness(bestChromosome, values, weights, W);
+    }
+}
+
+// Example usage:
+const values: number[] = [60, 100, 120];
+const weights: number[] = [10, 20, 30];
+const W: number = 50;
+const ga = new GeneticAlgorithm(100, 0.01, 0.7, 1000);
+console.log(ga.run(values, weights, W));  // Output: Approximate knapsack solution value
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

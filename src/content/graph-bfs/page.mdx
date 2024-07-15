@@ -51,7 +51,10 @@ BFS traversal starting from vertex `A` will visit vertices in the following orde
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Keep track of distances from the source to each vertex.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function bfsShortestPath(graph, start) {
     let distances = {};
@@ -84,6 +87,40 @@ const graph = {
 console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }
 ```
 
+```typescript
+function bfsShortestPath(graph: { [key: string]: string[] }, start: string): { [key: string]: number } {
+    let distances: { [key: string]: number } = {};
+    let queue: string[] = [start];
+    distances[start] = 0;
+
+    while (queue.length > 0) {
+        let vertex = queue.shift() as string;
+
+        for (let neighbor of graph[vertex]) {
+            if (!(neighbor in distances)) {
+                distances[neighbor] = distances[vertex] + 1;
+                queue.push(neighbor);
+            }
+        }
+    }
+
+    return distances;
+}
+
+// Example usage:
+const graph = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E']
+};
+console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a queue to keep track of vertices to explore.
 - Keep track of distances from the source to each vertex.
@@ -104,7 +141,10 @@ console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, 
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Track visited vertices to ensure all connected components are found.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findConnectedComponents(graph) {
     let visited = new Set();
@@ -150,6 +190,53 @@ const graph = {
 console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D', 'E', 'F' ], [ 'G', 'H' ] ]
 ```
 
+```typescript
+function findConnectedComponents(graph: { [key: string]: string[] }): string[][] {
+    let visited = new Set<string>();
+    let components: string[][] = [];
+
+    for (let vertex in graph) {
+        if (!visited.has(vertex)) {
+            let component: string[] = [];
+            let queue: string[] = [vertex];
+
+            while (queue.length > 0) {
+                let v = queue.shift() as string;
+                if (!visited.has(v)) {
+                    visited.add(v);
+                    component.push(v);
+
+                    for (let neighbor of graph[v]) {
+                        if (!visited.has(neighbor)) {
+                            queue.push(neighbor);
+                        }
+                    }
+                }
+            }
+
+            components.push(component);
+        }
+    }
+
+    return components;
+}
+
+// Example usage:
+const graph = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E'],
+    G: ['H'],
+    H: ['G']
+};
+console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D', 'E', 'F' ], [ 'G', 'H' ] ]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a queue to explore vertices level by level.
 - Track visited vertices to avoid revisiting and to identify all components.
@@ -170,7 +257,10 @@ console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D',
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Check if a vertex is revisited through a different path.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function containsCycle(graph) {
     let visited = new Set();
@@ -211,6 +301,48 @@ const graph = {
 console.log(containsCycle(graph));  // Output: true
 ```
 
+```typescript
+function containsCycle(graph: { [key: string]: string[] }): boolean {
+    let visited = new Set<string>();
+
+    for (let vertex in graph) {
+        if (!visited.has(vertex)) {
+            let queue: { vertex: string; parent: string | null }[] = [{ vertex, parent: null }];
+
+            while (queue.length > 0) {
+                let { vertex: v, parent } = queue.shift() as { vertex: string; parent: string | null };
+                if (!visited.has(v)) {
+                    visited.add(v);
+
+                    for (let neighbor of graph[v]) {
+                        if (!visited.has(neighbor)) {
+                            queue.push({ vertex: neighbor, parent: v });
+                        } else if (neighbor !== parent) {
+                            return true;  // Cycle detected
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return false;  // No cycle detected
+}
+
+// Example usage:
+const graph = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E']
+};
+console.log(containsCycle(graph));  // Output: true
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a queue to explore vertices and track their parents.
 - Check if a vertex is revisited through a different path to detect cycles.
@@ -231,7 +363,10 @@ console.log(containsCycle(graph));  // Output: true
 3. While the queue is not empty, process each vertex and add its unvisited neighbors to the queue.
 4. Keep track of distances from the source to each vertex.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function bfsShortestPath(graph, start) {
     let distances = {};
@@ -263,6 +398,40 @@ const graph = {
 };
 console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }
 ```
+
+```typescript
+function bfsShortestPath(graph: { [key: string]: string[] }, start: string): { [key: string]: number } {
+    let distances: { [key: string]: number } = {};
+    let queue: string[] = [start];
+    distances[start] = 0;
+
+    while (queue.length > 0) {
+        let vertex = queue.shift() as string;
+
+        for (let neighbor of graph[vertex]) {
+            if (!(neighbor in distances)) {
+                distances[neighbor] = distances[vertex] + 1;
+                queue.push(neighbor);
+            }
+        }
+    }
+
+    return distances;
+}
+
+// Example usage:
+const graph = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E']
+};
+console.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use a queue to keep track of vertices to explore.

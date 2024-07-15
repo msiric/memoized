@@ -43,7 +43,10 @@ Consider the set `nums = [1, 2, 3]`. The subsets are `[[], [1], [2], [1, 2], [3]
 3. For each element, add it to all existing subsets to create new subsets.
 4. Collect and return all subsets.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function subsets(nums) {
     const result = [[]];  // Start with the empty set
@@ -63,6 +66,28 @@ function subsets(nums) {
 const nums = [1, 2, 3];
 console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
 ```
+
+```typescript
+function subsets(nums: number[]): number[][] {
+    const result: number[][] = [[]];  // Start with the empty set
+
+    for (const num of nums) {
+        const newSubsets: number[][] = [];
+        for (const subset of result) {
+            newSubsets.push([...subset, num]);  // Add num to each existing subset
+        }
+        result.push(...newSubsets);  // Add new subsets to the result
+    }
+
+    return result;
+}
+
+// Example usage:
+const nums: number[] = [1, 2, 3];
+console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Start with the empty set and iteratively build new subsets by adding each element to existing subsets.
@@ -84,7 +109,10 @@ console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 
 3. Recursively generate subsets with and without the current element.
 4. Collect and return all subsets.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function subsets(nums) {
     const result = [];
@@ -107,6 +135,30 @@ const nums = [1, 2, 3];
 console.log(subsets(nums));  // Output: [[], [1], [1, 2], [1, 2, 3], [1, 3], [2], [2, 3], [3]]
 ```
 
+```typescript
+function subsets(nums: number[]): number[][] {
+    const result: number[][] = [];
+
+    function backtrack(start: number, path: number[]): void {
+        result.push([...path]);
+        for (let i = start; i < nums.length; i++) {
+            path.push(nums[i]);
+            backtrack(i + 1, path);
+            path.pop();
+        }
+    }
+
+    backtrack(0, []);
+    return result;
+}
+
+// Example usage:
+const nums: number[] = [1, 2, 3];
+console.log(subsets(nums));  // Output: [[], [1], [1, 2], [1, 2, 3], [1, 3], [2], [2, 3], [3]]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a backtracking approach to generate subsets by exploring both inclusion and exclusion of each element.
 - Start the recursion with an empty path and build subsets incrementally.
@@ -127,7 +179,10 @@ console.log(subsets(nums));  // Output: [[], [1], [1, 2], [1, 2, 3], [1, 3], [2]
 3. For each binary representation, use the bits to determine which elements to include in the subset.
 4. Collect and return all subsets.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function subsets(nums) {
     const result = [];
@@ -150,6 +205,31 @@ function subsets(nums) {
 const nums = [1, 2, 3];
 console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
 ```
+
+```typescript
+function subsets(nums: number[]): number[][] {
+    const result: number[][] = [];
+    const n: number = nums.length;
+
+    for (let i = 0; i < (1 << n); i++) {
+        const subset: number[] = [];
+        for (let j = 0; j < n; j++) {
+            if (i & (1 << j)) {
+                subset.push(nums[j]);
+            }
+        }
+        result.push(subset);
+    }
+
+    return result;
+}
+
+// Example usage:
+const nums: number[] = [1, 2, 3];
+console.log(subsets(nums));  // Output: [[], [1], [2], [1, 2], [3], [1, 3], [2, 3], [1, 2, 3]]
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use bit manipulation to represent each subset as a binary number.

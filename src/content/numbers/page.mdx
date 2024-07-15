@@ -38,6 +38,9 @@ A number in JavaScript is an immutable numeric data type used to perform arithme
 ### **Creating Numbers**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let integer = 42;
 let float = 3.14;
@@ -46,9 +49,22 @@ let scientific = 1.23e5;  // 123000
 let hex = 0xff;  // 255
 ```
 
+```typescript
+let integer: number = 42;
+let float: number = 3.14;
+let negative: number = -1;
+let scientific: number = 1.23e5;  // 123000
+let hex: number = 0xff;  // 255
+```
+
+</CodeGroup>
+
 ### **Basic Arithmetic**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let a = 10;
 let b = 3;
@@ -59,9 +75,24 @@ console.log(a / b);  // Output: 3.3333333333333335
 console.log(a % b);  // Output: 1
 ```
 
+```typescript
+let a: number = 10;
+let b: number = 3;
+console.log(a + b);  // Output: 13
+console.log(a - b);  // Output: 7
+console.log(a * b);  // Output: 30
+console.log(a / b);  // Output: 3.3333333333333335
+console.log(a % b);  // Output: 1
+```
+
+</CodeGroup>
+
 ### **Math Object Methods**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 console.log(Math.PI);  // Output: 3.141592653589793
 console.log(Math.E);  // Output: 2.718281828459045
@@ -77,9 +108,29 @@ console.log(Math.max(1, 2, 3));  // Output: 3
 console.log(Math.random());  // Output: Random number between 0 and 1
 ```
 
+```typescript
+console.log(Math.PI);  // Output: 3.141592653589793
+console.log(Math.E);  // Output: 2.718281828459045
+
+console.log(Math.abs(-10));  // Output: 10
+console.log(Math.pow(2, 3));  // Output: 8
+console.log(Math.sqrt(16));  // Output: 4
+console.log(Math.round(4.6));  // Output: 5
+console.log(Math.ceil(4.2));  // Output: 5
+console.log(Math.floor(4.8));  // Output: 4
+console.log(Math.min(1, 2, 3));  // Output: 1
+console.log(Math.max(1, 2, 3));  // Output: 3
+console.log(Math.random());  // Output: Random number between 0 and 1
+```
+
+</CodeGroup>
+
 ### **Special Numeric Values**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 console.log(Infinity);  // Output: Infinity
 console.log(-Infinity);  // Output: -Infinity
@@ -89,9 +140,23 @@ console.log(isFinite(42));  // Output: true
 console.log(isFinite(Infinity));  // Output: false
 ```
 
+```typescript
+console.log(Infinity);  // Output: Infinity
+console.log(-Infinity);  // Output: -Infinity
+console.log(NaN);  // Output: NaN
+console.log(isNaN(NaN));  // Output: true
+console.log(isFinite(42));  // Output: true
+console.log(isFinite(Infinity));  // Output: false
+```
+
+</CodeGroup>
+
 ### **Type Conversion**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let str = '123';
 let num = Number(str);
@@ -105,10 +170,28 @@ let strInt = '123.45';
 let intNum = parseInt(strInt);
 console.log(intNum);  // Output: 123
 ```
+```typescript
+let str: string = '123';
+let num: number = Number(str);
+console.log(num);  // Output: 123
+
+let strFloat: string = '123.45';
+let floatNum: number = parseFloat(strFloat);
+console.log(floatNum);  // Output: 123.45
+
+let strInt: string = '123.45';
+let intNum: number = parseInt(strInt);
+console.log(intNum);  // Output: 123
+```
+
+</CodeGroup>
 
 ### **Number Formatting**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let num = 12345.6789;
 console.log(num.toFixed(2));  // Output: '12345.68'
@@ -117,28 +200,69 @@ console.log(num.toExponential(2));  // Output: '1.23e+4'
 console.log(num.toLocaleString());  // Output: '12,345.679' (varies by locale)
 ```
 
+```typescript
+let num: number = 12345.6789;
+console.log(num.toFixed(2));  // Output: '12345.68'
+console.log(num.toPrecision(5));  // Output: '12346'
+console.log(num.toExponential(2));  // Output: '1.23e+4'
+console.log(num.toLocaleString());  // Output: '12,345.679' (varies by locale)
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Using `Math.round` for Rounding:**
   When you need to round a number to the nearest integer.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  
   let num = 4.5;
   console.log(Math.round(num));  // Output: 5
   ```
 
+  ```typescript
+  
+  let num: number = 4.5;
+  console.log(Math.round(num));  // Output: 5
+  ```
+
+  </CodeGroup>
+
 - **Using `Math.ceil` for Rounding Up:**
   When you need to round a number up to the nearest integer.
+
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  
   let num = 4.1;
   console.log(Math.ceil(num));  // Output: 5
   ```
 
+  ```typescript
+  
+  let num: number = 4.1;
+  console.log(Math.ceil(num));  // Output: 5
+  ```
+
+  </CodeGroup>
+
 - **Using `Math.trunc` for Truncating:**
   When you need to remove the fractional part of a number, effectively rounding towards zero.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  
   let num = 4.9;
   console.log(Math.trunc(num));  // Output: 4
 
@@ -146,10 +270,26 @@ console.log(num.toLocaleString());  // Output: '12,345.679' (varies by locale)
   console.log(Math.trunc(numNegative));  // Output: -4
   ```
 
+  ```typescript
+  
+  let num: number = 4.9;
+  console.log(Math.trunc(num));  // Output: 4
+
+  let numNegative: number = -4.9;
+  console.log(Math.trunc(numNegative));  // Output: -4
+  ```
+
+  </CodeGroup>
+
 - **Generating Random Integers:**
   Use `Math.random` in combination with `Math.floor` to generate random integers within a specific range.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  
   function getRandomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -157,55 +297,144 @@ console.log(num.toLocaleString());  // Output: '12,345.679' (varies by locale)
   console.log(getRandomInt(1, 10));  // Output: Random integer between 1 and 10
   ```
 
+  ```typescript
+  
+  function getRandomInt(min: number, max: number): number {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  console.log(getRandomInt(1, 10));  // Output: Random integer between 1 and 10
+  ```
+
+  </CodeGroup>
+
 - **Precision Issues with Floating-Point Arithmetic:**
   Be aware of precision issues when working with floating-point numbers.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  
   let a = 0.1;
   let b = 0.2;
   console.log(a + b);  // Output: 0.30000000000000004
   ```
 
+  ```typescript
+  
+  let a: number = 0.1;
+  let b: number = 0.2;
+  console.log(a + b);  // Output: 0.30000000000000004
+  ```
+
+  </CodeGroup>
+
 - **Avoiding `parseInt` with Leading Zeros:**
   `parseInt` interprets leading zeros as octal numbers in some cases. Use the radix parameter.
   **Example:**
+  
+  
+  <CodeGroup>
+
   ```javascript
+  
   console.log(parseInt('010'));  // Output: 10 (modern JavaScript)
   console.log(parseInt('010', 10));  // Output: 10 (explicit base 10)
   ```
+
+  ```typescript
+  
+  console.log(parseInt('010'));  // Output: 10 (modern JavaScript)
+  console.log(parseInt('010', 10));  // Output: 10 (explicit base 10)
+  ```
+
+  </CodeGroup>
 
 ## **Common Gotchas**
 
 - **NaN Propagation:**
   Any arithmetic operation with `NaN` results in `NaN`.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  
   let result = NaN + 5;
   console.log(result);  // Output: NaN
   ```
 
+  ```typescript
+  
+  let result: number = NaN + 5;
+  console.log(result);  // Output: NaN
+  ```
+
+  </CodeGroup>
+
 - **Precision Errors:**
   Floating-point arithmetic can lead to precision errors.
+  
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
+  
   console.log(0.1 + 0.2 === 0.3);  // Output: false
   ```
 
+  ```typescript
+  
+  console.log(0.1 + 0.2 === 0.3);  // Output: false
+  ```
+
+  </CodeGroup>
+
 - **Type Coercion:**
   JavaScript implicitly converts types in some cases, which can lead to unexpected results.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
+  
   console.log('5' - 3);  // Output: 2
   console.log('5' + 3);  // Output: '53'
   ```
 
+  ```typescript
+  
+  console.log('5' - 3);  // Output: 2
+  console.log('5' + 3);  // Output: '53'
+  ```
+
+  </CodeGroup>
+
 - **Infinity and Division by Zero:**
   Dividing by zero results in `Infinity` or `-Infinity`.
+  
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
+  
   console.log(1 / 0);  // Output: Infinity
   console.log(-1 / 0);  // Output: -Infinity
   ```
+
+  ```typescript
+  
+  console.log(1 / 0);  // Output: Infinity
+  console.log(-1 / 0);  // Output: -Infinity
+  ```
+
+  </CodeGroup>
 
 ## **Advanced Topics**
 
@@ -214,6 +443,9 @@ console.log(num.toLocaleString());  // Output: '12,345.679' (varies by locale)
 BigInt is a special numeric type that provides support for integers of arbitrary length. It can be used when integers larger than 2^53 - 1 are needed.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let bigInt = 1234567890123456789012345678901234567890n;
 console.log(bigInt);  // Output: 1234567890123456789012345678901234567890n
@@ -225,11 +457,27 @@ let sum = bigInt + anotherBigInt;
 console.log(sum);  // Output: 2469135780246913578024691357802469135780n
 ```
 
+```typescript
+let bigInt: bigint = 1234567890123456789012345678901234567890n;
+console.log(bigInt);  // Output: 1234567890123456789012345678901234567890n
+
+let anotherBigInt: bigint = BigInt('1234567890123456789012345678901234567890');
+console.log(anotherBigInt);  // Output: 1234567890123456789012345678901234567890n
+
+let sum: bigint = bigInt + anotherBigInt;
+console.log(sum);  // Output: 2469135780246913578024691357802469135780n
+```
+
+</CodeGroup>
+
 ### **Binary, Octal, and Hexadecimal Literals**
 
 JavaScript supports binary (`0b`), octal (`0o`), and hexadecimal (`0x`) literals for easier representation of these bases.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let binary = 0b1010;  // 10
 let octal = 0o12;  // 10
@@ -237,11 +485,23 @@ let hex = 0xA;  // 10
 console.log(binary, octal, hex);  // Output: 10 10 10
 ```
 
+```typescript
+let binary: number = 0b1010;  // 10
+let octal: number = 0o12;  // 10
+let hex: number = 0xA;  // 10
+console.log(binary, octal, hex);  // Output: 10 10 10
+```
+
+</CodeGroup>
+
 ### **Number Object Methods**
 
 JavaScript provides several useful methods for the `Number` object.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 console.log(Number.isFinite(123));  // Output: true
 console.log(Number.isNaN(NaN));  // Output: true
@@ -250,14 +510,35 @@ console.log(Number.parseFloat('123.45'));  // Output: 123.45
 console.log(Number.parseInt('123.45'));  // Output: 123
 ```
 
+```typescript
+console.log(Number.isFinite(123));  // Output: true
+console.log(Number.isNaN(NaN));  // Output: true
+console.log(Number.isInteger(123.4));  // Output: false
+console.log(Number.parseFloat('123.45'));  // Output: 123.45
+console.log(Number.parseInt('123.45'));  // Output: 123
+```
+
+</CodeGroup>
+
 ### **Handling Precision with `toFixed` and `toPrecision`**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let num = 123.456;
 console.log(num.toFixed(2));  // Output: '123.46'
 console.log(num.toPrecision(4));  // Output: '123.5'
 ```
+
+```typescript
+let num: number = 123.456;
+console.log(num.toFixed(2));  // Output: '123.46'
+console.log(num.toPrecision(4));  // Output: '123.5'
+```
+
+</CodeGroup>
 
 ## **Number Algorithms**
 Below are some common number algorithms you should be familiar with:
@@ -266,6 +547,9 @@ Below are some common number algorithms you should be familiar with:
 The GCD of two numbers is the largest number that divides both of them without leaving a remainder.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function gcd(a, b) {
     while (b !== 0) {
@@ -279,10 +563,28 @@ function gcd(a, b) {
 console.log(gcd(48, 18));  // Output: 6
 ```
 
+```typescript
+function gcd(a: number, b: number): number {
+    while (b !== 0) {
+        let temp: number = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+console.log(gcd(48, 18));  // Output: 6
+```
+
+</CodeGroup>
+
 ### **Prime Number Check**
 A prime number check determines if a number is a prime, which means it is greater than 1 and has no divisors other than 1 and itself.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function isPrime(num) {
     if (num <= 1) return false;
@@ -300,10 +602,32 @@ console.log(isPrime(11));  // Output: true
 console.log(isPrime(15));  // Output: false
 ```
 
+```typescript
+function isPrime(num: number): boolean {
+    if (num <= 1) return false;
+    if (num <= 3) return true;
+    if (num % 2 === 0 || num % 3 === 0) return false;
+
+    for (let i = 5; i * i <= num; i += 6) {
+        if (num % i === 0 || num % (i + 2) === 0) return false;
+    }
+
+    return true;
+}
+
+console.log(isPrime(11));  // Output: true
+console.log(isPrime(15));  // Output: false
+```
+
+</CodeGroup>
+
 ### **Generating Fibonacci Numbers**
 Generating Fibonacci numbers involves creating a sequence where each number is the sum of the two preceding ones.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function fibonacci(n) {
     if (n <= 1) return n;
@@ -317,10 +641,28 @@ function fibonacci(n) {
 console.log(fibonacci(10));  // Output: 55
 ```
 
+```typescript
+function fibonacci(n: number): number {
+    if (n <= 1) return n;
+    let fib: number[] = [0, 1];
+    for (let i = 2; i <= n; i++) {
+        fib[i] = fib[i - 1] + fib[i - 2];
+    }
+    return fib[n];
+}
+
+console.log(fibonacci(10));  // Output: 55
+```
+
+</CodeGroup>
+
 ### **Factorial Calculation**
 Calculating the factorial of a number involves multiplying the number by all positive integers less than it.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function factorial(n) {
     if (n === 0 || n === 1) return 1;
@@ -329,6 +671,17 @@ function factorial(n) {
 
 console.log(factorial(5));  // Output: 120
 ```
+
+```typescript
+function factorial(n: number): number {
+    if (n === 0 || n === 1) return 1;
+    return n * factorial(n - 1);
+}
+
+console.log(factorial(5));  // Output: 120
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

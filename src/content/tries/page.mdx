@@ -39,6 +39,9 @@ A trie is a tree-like data structure that stores strings in a way that allows fo
 ### **Creating a Trie**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TrieNode {
     constructor() {
@@ -56,9 +59,36 @@ class Trie {
 }
 ```
 
+```typescript
+class TrieNode {
+    children: { [key: string]: TrieNode };
+    isEndOfWord: boolean;
+
+    constructor() {
+        this.children = {};
+        this.isEndOfWord = false;
+    }
+}
+
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    // Methods to be defined...
+}
+```
+
+</CodeGroup>
+
 ### **Inserting Words**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Trie {
     constructor() {
@@ -78,9 +108,35 @@ class Trie {
 }
 ```
 
+```typescript
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word: string): void {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Searching for Words**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Trie {
     constructor() {
@@ -111,9 +167,46 @@ class Trie {
 }
 ```
 
+```typescript
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word: string): void {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word: string): boolean {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Checking for Prefixes**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Trie {
     constructor() {
@@ -155,9 +248,57 @@ class Trie {
 }
 ```
 
+```typescript
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word: string): void {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word: string): boolean {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
+
+    startsWith(prefix: string): boolean {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return true;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Deleting Words**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Trie {
     constructor() {
@@ -198,11 +339,58 @@ class Trie {
 }
 ```
 
+```typescript
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word: string): void {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    delete(word: string): void {
+        const deleteRecursively = (node: TrieNode, word: string, depth: number = 0): boolean => {
+            if (!node) return false;
+
+            if (depth === word.length) {
+                if (!node.isEndOfWord) return false;
+                node.isEndOfWord = false;
+                return Object.keys(node.children).length === 0;
+            }
+
+            const char = word[depth];
+            if (deleteRecursively(node.children[char], word, depth + 1)) {
+                delete node.children[char];
+                return !node.isEndOfWord && Object.keys(node.children).length === 0;
+            }
+            return false;
+        };
+
+        deleteRecursively(this.root, word);
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Use Tries for Fast Prefix-Based Searches:**
   Tries are very efficient for prefix-based searches, making them ideal for autocomplete systems.
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let trie = new Trie();
   trie.insert("apple");
@@ -210,15 +398,36 @@ class Trie {
   console.log(trie.startsWith("app"));  // Output: true
   ```
 
+  ```typescript
+  let trie = new Trie();
+  trie.insert("apple");
+  trie.insert("app");
+  console.log(trie.startsWith("app"));  // Output: true
+  ```
+  
+  </CodeGroup>
+
 - **Handling Non-Alphabetic Characters:**
   Tries can be extended to handle any set of characters, not just alphabetic ones.
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let trie = new Trie();
   trie.insert("12345");
   trie.insert("123");
   console.log(trie.startsWith("12"));  // Output: true
   ```
+
+  ```typescript
+  let trie = new Trie();
+  trie.insert("12345");
+  trie.insert("123");
+  console.log(trie.startsWith("12"));  // Output: true
+  ```
+  
+  </CodeGroup>
 
 - **Memory Usage:**
   Be aware of the memory usage of tries, especially when storing a large number of strings with common prefixes.
@@ -228,15 +437,29 @@ class Trie {
 - **Case Sensitivity:**
   Tries are case-sensitive by default. Ensure consistency in the case of characters being inserted and searched.
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let trie = new Trie();
   trie.insert("Apple");
   console.log(trie.search("apple"));  // Output: false
   ```
 
+  ```typescript
+  let trie = new Trie();
+  trie.insert("Apple");
+  console.log(trie.search("apple"));  // Output: false
+  ```
+  
+  </CodeGroup>
+
 - **Deleting Words:**
   Ensure that deletion only removes the end-of-word marker if other words share the same prefix.
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let trie = new Trie();
   trie.insert("app");
@@ -245,11 +468,24 @@ class Trie {
   console.log(trie.search("apple"));  // Output: true
   ```
 
+  ```typescript
+  let trie = new Trie();
+  trie.insert("app");
+  trie.insert("apple");
+  trie.delete("app");
+  console.log(trie.search("apple"));  // Output: true
+  ```
+  
+  </CodeGroup>
+
 ## **Advanced Topics**
 
 ### **Autocomplete System**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Trie {
     constructor() {
@@ -321,9 +557,87 @@ trie.insert("banana");
 console.log(trie.autocomplete("app"));  // Output: ["app", "apple", "applet"]
 ```
 
+```typescript
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word: string): void {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word: string): boolean {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
+
+    startsWith(prefix: string): boolean {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return true;
+    }
+
+    autocomplete(prefix: string): string[] {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return [];
+            }
+            node = node.children[char];
+        }
+        return this._collectWords(node, prefix);
+    }
+
+    private _collectWords(node: TrieNode, prefix: string): string[] {
+        let words: string[] = [];
+        if (node.isEndOfWord) {
+            words.push(prefix);
+        }
+        for (let char in node.children) {
+            words.push(...this._collectWords(node.children[char], prefix + char));
+        }
+        return words;
+    }
+}
+
+let trie = new Trie();
+trie.insert("apple");
+trie.insert("app");
+trie.insert("applet");
+trie.insert("banana");
+
+console.log(trie.autocomplete("app"));  // Output: ["app", "apple", "applet"]
+```
+
+</CodeGroup>
+
 ### **Trie-Based Search Engine**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TrieNode {
     constructor() {
@@ -394,6 +708,84 @@ console.log(trie.search("apple"));  // Output: Set { 1 }
 console.log(trie.searchWithPrefix("app"));  // Output: Set { 1, 2 }
 ```
 
+```typescript
+class TrieNode {
+    children: { [key: string]: TrieNode };
+    isEndOfWord: boolean;
+    documentIds: Set<number>;
+
+    constructor() {
+        this.children = {};
+        this.isEndOfWord = false;
+        this.documentIds = new Set<number>();
+    }
+}
+
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word: string, documentId: number): void {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+            node.documentIds.add(documentId);
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word: string): Set<number> | null {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return null;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord ? node.documentIds : null;
+    }
+
+    searchWithPrefix(prefix: string): Set<number> {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return new Set();
+            }
+            node = node.children[char];
+        }
+        return this._collectDocumentIds(node);
+    }
+
+    private _collectDocumentIds(node: TrieNode): Set<number> {
+        let documentIds: Set<number> = new Set();
+        if (node.isEndOfWord) {
+            documentIds = new Set<number>([...documentIds, ...node.documentIds]);
+        }
+        for (let char in node.children) {
+            documentIds = new Set<number>([...documentIds, ...this._collectDocumentIds(node.children[char])]);
+        }
+        return documentIds;
+    }
+}
+
+let trie = new Trie();
+trie.insert("apple", 1);
+trie.insert("app", 1);
+trie.insert("applet", 2);
+trie.insert("banana", 3);
+
+console.log(trie.search("apple"));  // Output: Set { 1 }
+console.log(trie.searchWithPrefix("app"));  // Output: Set { 1, 2 }
+```
+
+</CodeGroup>
+
 ## **Trie Algorithms**
 Below are some common trie algorithms you should be familiar with:
 
@@ -401,6 +793,9 @@ Below are some common trie algorithms you should be familiar with:
 Searching for words in a grid involves using a trie to efficiently find and verify words from a list within a 2D board.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TrieNode {
     constructor() {
@@ -503,10 +898,122 @@ let words = ["oath", "pea", "eat", "rain"];
 console.log(findWords(board, words));  // Output: ["oath", "eat"]
 ```
 
+```typescript
+class TrieNode {
+    children: { [key: string]: TrieNode };
+    isEndOfWord: boolean;
+
+    constructor() {
+        this.children = {};
+        this.isEndOfWord = false;
+    }
+}
+
+class Trie {
+    root: TrieNode;
+
+    constructor() {
+        this.root = new TrieNode();
+    }
+
+    insert(word: string): void {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                node.children[char] = new TrieNode();
+            }
+            node = node.children[char];
+        }
+        node.isEndOfWord = true;
+    }
+
+    search(word: string): boolean {
+        let node = this.root;
+        for (let char of word) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return node.isEndOfWord;
+    }
+
+    startsWith(prefix: string): boolean {
+        let node = this.root;
+        for (let char of prefix) {
+            if (!node.children[char]) {
+                return false;
+            }
+            node = node.children[char];
+        }
+        return true;
+    }
+}
+
+function findWords(board: string[][], words: string[]): string[] {
+    let result = new Set<string>();
+    let trie = new Trie();
+    for (let word of words) {
+        trie.insert(word);
+    }
+
+    let rows = board.length;
+    let cols = board[0].length;
+
+    function backtrack(row: number, col: number, node: TrieNode, path: string[]): void {
+        if (node.isEndOfWord) {
+            result.add(path.join(''));
+        }
+
+        if (row < 0 || row >= rows || col < 0 || col >= cols || board[row][col] === '#') {
+            return;
+        }
+
+        let char = board[row][col];
+        if (!node.children[char]) {
+            return;
+        }
+
+        board[row][col] = '#';
+        path.push(char);
+
+        let directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+        for (let [dx, dy] of directions) {
+            backtrack(row + dx, col + dy, node.children[char], path);
+        }
+
+        path.pop();
+        board[row][col] = char;
+    }
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            backtrack(row, col, trie.root, []);
+        }
+    }
+
+    return Array.from(result);
+}
+
+let board: string[][] = [
+    ['o', 'a', 'a', 'n'],
+    ['e', 't', 'a', 'e'],
+    ['i', 'h', 'k', 'r'],
+    ['i', 'f', 'l', 'v']
+];
+let words: string[] = ["oath", "pea", "eat", "rain"];
+console.log(findWords(board, words));  // Output: ["oath", "eat"]
+```
+
+</CodeGroup>
+
 ### **Implementing Ternary Search Trie**
 A ternary search trie is a type of trie where nodes are arranged in a ternary search tree structure, optimizing for space and allowing efficient searches.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class TSTNode {
     constructor(char) {
@@ -580,6 +1087,90 @@ tst.insert("bug");
 console.log(tst.search("cats"));  // Output: true
 console.log(tst.search("bu"));    // Output: false
 ```
+
+```typescript
+class TSTNode {
+    char: string;
+    left: TSTNode | null;
+    middle: TSTNode | null;
+    right: TSTNode | null;
+    isEndOfWord: boolean;
+
+    constructor(char: string) {
+        this.char = char;
+        this.left = null;
+        this.middle = null;
+        this.right = null;
+        this.isEndOfWord = false;
+    }
+}
+
+class TernarySearchTrie {
+    root: TSTNode | null;
+
+    constructor() {
+        this.root = null;
+    }
+
+    insert(word: string): void {
+        this.root = this.insertRec(this.root, word, 0);
+    }
+
+    private insertRec(node: TSTNode | null, word: string, index: number): TSTNode {
+        let char = word[index];
+
+        if (node === null) {
+            node = new TSTNode(char);
+        }
+
+        if (char < node.char) {
+            node.left = this.insertRec(node.left, word, index);
+        } else if (char > node.char) {
+            node.right = this.insertRec(node.right, word, index);
+        } else if (index < word.length - 1) {
+            node.middle = this.insertRec(node.middle, word, index + 1);
+        } else {
+            node.isEndOfWord = true;
+        }
+
+        return node;
+    }
+
+    search(word: string): boolean {
+        let node = this.searchRec(this.root, word, 0);
+        return node !== null && node.isEndOfWord;
+    }
+
+    private searchRec(node: TSTNode | null, word: string, index: number): TSTNode | null {
+        if (node === null) {
+            return null;
+        }
+
+        let char = word[index];
+
+        if (char < node.char) {
+            return this.searchRec(node.left, word, index);
+        } else if (char > node.char) {
+            return this.searchRec(node.right, word, index);
+        } else if (index < word.length - 1) {
+            return this.searchRec(node.middle, word, index + 1);
+        } else {
+            return node;
+        }
+    }
+}
+
+let tst = new TernarySearchTrie();
+tst.insert("cat");
+tst.insert("cats");
+tst.insert("up");
+tst.insert("bug");
+
+console.log(tst.search("cats"));  // Output: true
+console.log(tst.search("bu"));    // Output: false
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

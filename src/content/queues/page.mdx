@@ -39,6 +39,9 @@ A queue is a linear data structure that follows the First-In-First-Out (FIFO) pr
 ### **Creating a Queue**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Queue {
     constructor() {
@@ -49,9 +52,22 @@ class Queue {
 }
 ```
 
+```typescript
+class Queue<T> {
+    private items: T[] = [];
+
+    // Methods to be defined...
+}
+```
+
+</CodeGroup>
+
 ### **Enqueuing Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Queue {
     constructor() {
@@ -64,9 +80,24 @@ class Queue {
 }
 ```
 
+```typescript
+class Queue<T> {
+    private items: T[] = [];
+
+    enqueue(element: T): void {
+        this.items.push(element);
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Dequeuing Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Queue {
     constructor() {
@@ -84,9 +115,29 @@ class Queue {
 }
 ```
 
+```typescript
+class Queue<T> {
+    private items: T[] = [];
+
+    enqueue(element: T): void {
+        this.items.push(element);
+    }
+
+    dequeue(): T | string {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift() as T;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Peeking the Front Element**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Queue {
     constructor() {
@@ -109,9 +160,34 @@ class Queue {
 }
 ```
 
+```typescript
+class Queue<T> {
+    private items: T[] = [];
+
+    enqueue(element: T): void {
+        this.items.push(element);
+    }
+
+    dequeue(): T | string {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift() as T;
+    }
+
+    front(): T | string {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Checking if the Queue is Empty**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Queue {
     constructor() {
@@ -138,9 +214,38 @@ class Queue {
 }
 ```
 
+```typescript
+class Queue<T> {
+    private items: T[] = [];
+
+    enqueue(element: T): void {
+        this.items.push(element);
+    }
+
+    dequeue(): T | string {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift() as T;
+    }
+
+    front(): T | string {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Getting the Size of the Queue**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Queue {
     constructor() {
@@ -171,9 +276,42 @@ class Queue {
 }
 ```
 
+```typescript
+class Queue<T> {
+    private items: T[] = [];
+
+    enqueue(element: T): void {
+        this.items.push(element);
+    }
+
+    dequeue(): T | string {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift() as T;
+    }
+
+    front(): T | string {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+
+    size(): number {
+        return this.items.length;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Clearing the Queue**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Queue {
     constructor() {
@@ -208,11 +346,49 @@ class Queue {
 }
 ```
 
+```typescript
+class Queue<T> {
+    private items: T[] = [];
+
+    enqueue(element: T): void {
+        this.items.push(element);
+    }
+
+    dequeue(): T | string {
+        if (this.isEmpty()) return "Underflow";
+        return this.items.shift() as T;
+    }
+
+    front(): T | string {
+        if (this.isEmpty()) return "No elements in Queue";
+        return this.items[0];
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+
+    size(): number {
+        return this.items.length;
+    }
+
+    clear(): void {
+        this.items = [];
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Use Arrays for Simple Queues:**
   In JavaScript, arrays can implement simple queues with methods like `push`, `shift`, and `length`. However, this approach isn't optimal for large queues because `shift` and `unshift` have an O(n) time complexity due to element reindexing. This is usually fine, but always clarify with your interviewer that you understand the performance implications.
+  
   **Example:**
+
+  <CodeGroup>
+  
   ```javascript
   let queue = [];
   queue.push(1);
@@ -221,18 +397,44 @@ class Queue {
   console.log(queue);  // Output: [2]
   ```
 
+  ```typescript
+  let queue: number[] = [];
+  queue.push(1);
+  queue.push(2);
+  console.log(queue.shift());  // Output: 1
+  console.log(queue);  // Output: [2]
+  ```
+
+  </CodeGroup>
+
 - **Avoid Underflow Errors:**
   Always check if the queue is empty before performing a `dequeue` operation to avoid underflow errors.
+  
   **Example:**
+
+  <CodeGroup>
+  
   ```javascript
   if (!queue.isEmpty()) {
       queue.dequeue();
   }
   ```
 
+  ```typescript
+  if (!queue.isEmpty()) {
+      queue.dequeue();
+  }
+  ```
+
+  </CodeGroup>
+
 - **Use Queue for BFS:**
   Implement Breadth-First Search (BFS) using a queue to manage the nodes to be visited.
+  
   **Example:**
+
+  <CodeGroup>
+  
   ```javascript
   function bfs(graph, start) {
       let queue = [start];
@@ -251,11 +453,35 @@ class Queue {
   }
   ```
 
+  ```typescript
+  function bfs(graph: Record<string, string[]>, start: string): void {
+      let queue: string[] = [start];
+      let visited: Set<string> = new Set();
+
+      while (queue.length > 0) {
+          let node = queue.shift()!;
+          if (!visited.has(node)) {
+              visited.add(node);
+              console.log(node);
+              for (let neighbor of graph[node]) {
+                  queue.push(neighbor);
+              }
+          }
+      }
+  }
+  ```
+
+  </CodeGroup>
+
 ## **Common Gotchas**
 
 - **Queue Underflow:**
   Always check if the queue is empty before performing a dequeue operation to avoid underflow errors.
+  
   **Example:**
+
+  <CodeGroup>
+  
   ```javascript
   if (!queue.isEmpty()) {
       queue.dequeue();
@@ -264,22 +490,49 @@ class Queue {
   }
   ```
 
+  ```typescript
+  if (!queue.isEmpty()) {
+      queue.dequeue();
+  } else {
+      console.log("Queue is empty");
+  }
+  ```
+
+  </CodeGroup>
+
 - **Non-Primitive Data Types:**
   When storing non-primitive data types in a queue, be mindful of references and mutations.
+  
   **Example:**
+
+  <CodeGroup>
+  
   ```javascript
   let queue = [];
   let obj = {a: 1};
   queue.push(obj);
   obj.a = 2;
-  console.log(queue.front());  // Output: {a: 2}
+  console.log(queue[0]);  // Output: {a: 2}
   ```
+
+  ```typescript
+  let queue: Array<{a: number}> = [];
+  let obj = {a: 1};
+  queue.push(obj);
+  obj.a = 2;
+  console.log(queue[0]);  // Output: {a: 2}
+  ```
+
+  </CodeGroup>
 
 ## **Advanced Topics**
 
 ### **Implementing a Queue Using a Linked List**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Node {
     constructor(value) {
@@ -338,11 +591,74 @@ class LinkedListQueue {
 }
 ```
 
+```typescript
+class Node<T> {
+    value: T;
+    next: Node<T> | null = null;
+
+    constructor(value: T) {
+        this.value = value;
+    }
+}
+
+class LinkedListQueue<T> {
+    private front: Node<T> | null = null;
+    private rear: Node<T> | null = null;
+    private size: number = 0;
+
+    enqueue(value: T): void {
+        const newNode = new Node(value);
+        if (this.rear) {
+            this.rear.next = newNode;
+        } else {
+            this.front = newNode;
+        }
+        this.rear = newNode;
+        this.size++;
+    }
+
+    dequeue(): T | string {
+        if (this.size === 0) return "Underflow";
+        const value = this.front!.value;
+        this.front = this.front!.next;
+        if (!this.front) {
+            this.rear = null;
+        }
+        this.size--;
+        return value;
+    }
+
+    peek(): T | string {
+        if (this.size === 0) return "No elements in Queue";
+        return this.front!.value;
+    }
+
+    isEmpty(): boolean {
+        return this.size === 0;
+    }
+
+    getSize(): number {
+        return this.size;
+    }
+
+    clear(): void {
+        this.front = null;
+        this.rear = null;
+        this.size = 0;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Circular Queue**
 
 A circular queue, also known as a ring buffer, efficiently uses the space by wrapping around the end to the beginning.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class CircularQueue {
     constructor(capacity) {
@@ -394,11 +710,70 @@ class CircularQueue {
 }
 ```
 
+```typescript
+class CircularQueue<T> {
+    private items: T[];
+    private capacity: number;
+    private front: number = 0;
+    private rear: number = 0;
+    private size: number = 0;
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.items = new Array<T>(capacity);
+    }
+
+    enqueue(element: T): string | void {
+        if (this.size === this.capacity) return "Overflow";
+        this.items[this.rear] = element;
+        this.rear = (this.rear + 1) % this.capacity;
+        this.size++;
+    }
+
+    dequeue(): T | string {
+        if (this.size === 0) return "Underflow";
+        let element = this.items[this.front];
+        this.front = (this.front + 1) % this.capacity;
+        this.size--;
+        return element;
+    }
+
+    peek(): T | string {
+        if (this.size === 0) return "No elements in Queue";
+        return this.items[this.front];
+    }
+
+    isEmpty(): boolean {
+        return this.size === 0;
+    }
+
+    isFull(): boolean {
+        return this.size === this.capacity;
+    }
+
+    getSize(): number {
+        return this.size;
+    }
+
+    clear(): void {
+        this.items = new Array<T>(this.capacity);
+        this.front = 0;
+        this.rear = 0;
+        this.size = 0;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Priority Queue**
 
 A priority queue is a special type of queue where elements are removed based on priority rather than insertion order.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class PriorityQueue {
     constructor() {
@@ -444,6 +819,56 @@ class PriorityQueue {
 }
 ```
 
+```typescript
+interface PriorityItem<T> {
+    element: T;
+    priority: number;
+}
+
+class PriorityQueue<T> {
+    private items: PriorityItem<T>[] = [];
+
+    enqueue(element: T, priority: number): void {
+        let newItem: PriorityItem<T> = {element, priority};
+        let added = false;
+        for (let i = 0; i < this.items.length; i++) {
+            if (this.items[i].priority > newItem.priority) {
+                this.items.splice(i, 1, newItem);
+                added = true;
+                break;
+            }
+        }
+        if (!added) {
+            this.items.push(newItem);
+        }
+    }
+
+    dequeue(): T | string {
+        if (this.items.length === 0) return "Underflow";
+        return this.items.shift()!.element;
+    }
+
+    peek(): T | string {
+        if (this.items.length === 0) return "No elements in Queue";
+        return this.items[0].element;
+    }
+
+    isEmpty(): boolean {
+        return this.items.length === 0;
+    }
+
+    size(): number {
+        return this.items.length;
+    }
+
+    clear(): void {
+        this.items = [];
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Queue Algorithms**
 Below are some common queue algorithms you should be familiar with:
 
@@ -451,6 +876,9 @@ Below are some common queue algorithms you should be familiar with:
 Breadth-First Search (BFS) explores all the nodes at the present depth level before moving on to the nodes at the next depth level.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function bfs(graph, start) {
     let queue = [start];
@@ -480,10 +908,44 @@ let graph = {
 bfs(graph, 'A');  // Output: A B C D E F
 ```
 
+```typescript
+function bfs(graph: Record<string, string[]>, start: string): void {
+    let queue: string[] = [start];
+    let visited: Set<string> = new Set();
+
+    while (queue.length > 0) {
+        let node = queue.shift()!;
+        if (!visited.has(node)) {
+            visited.add(node);
+            console.log(node);
+            for (let neighbor of graph[node]) {
+                queue.push(neighbor);
+            }
+        }
+    }
+}
+
+let graph: Record<string, string[]> = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E']
+};
+
+bfs(graph, 'A');  // Output: A B C D E F
+```
+
+</CodeGroup>
+
 ### **Implementing a Cache Using a Queue**
 An LRU (Least Recently Used) cache evicts the least recently accessed item when it reaches its capacity.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class LRUCache {
     constructor(capacity) {
@@ -523,6 +985,52 @@ console.log(cache.get(1));  // Output: -1
 console.log(cache.get(3));  // Output: 3
 console.log(cache.get(4));  // Output: 4
 ```
+
+```typescript
+class LRUCache<T> {
+    private capacity: number;
+    private cache: Map<number, T>;
+    private queue: number[];
+
+    constructor(capacity: number) {
+        this.capacity = capacity;
+        this.cache = new Map<number, T>();
+        this.queue = [];
+    }
+
+    get(key: number): T | number {
+        if (!this.cache.has(key)) return -1;
+        let value = this.cache.get(key)!;
+        this.queue = this.queue.filter(k => k !== key);
+        this.queue.push(key);
+        return value;
+    }
+
+    put(key: number, value: T): void {
+        if (this.cache.has(key)) {
+            this.queue = this.queue.filter(k => k !== key);
+        } else if (this.queue.length === this.capacity) {
+            let oldestKey = this.queue.shift()!;
+            this.cache.delete(oldestKey);
+        }
+        this.cache.set(key, value);
+        this.queue.push(key);
+    }
+}
+
+let cache = new LRUCache<number>(2);
+cache.put(1, 1);
+cache.put(2, 2);
+console.log(cache.get(1));  // Output: 1
+cache.put(3, 3);
+console.log(cache.get(2));  // Output: -1
+cache.put(4, 4);
+console.log(cache.get(1));  // Output: -1
+console.log(cache.get(3));  // Output: 3
+console.log(cache.get(4));  // Output: 4
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

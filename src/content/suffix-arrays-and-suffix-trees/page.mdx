@@ -61,6 +61,9 @@ Consider the string "banana":
 3. Store the starting positions of the sorted suffixes.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function buildSuffixArray(s) {
     const n = s.length;
@@ -81,6 +84,28 @@ const s = "banana";
 console.log(buildSuffixArray(s));  // Output: [ 5, 3, 1, 0, 4, 2 ]
 ```
 
+```typescript
+function buildSuffixArray(s: string): number[] {
+    const n: number = s.length;
+    const suffixes: { index: number, suffix: string }[] = [];
+
+    for (let i = 0; i < n; i++) {
+        suffixes.push({ index: i, suffix: s.substring(i) });
+    }
+
+    suffixes.sort((a, b) => a.suffix.localeCompare(b.suffix));
+
+    const suffixArray: number[] = suffixes.map(suffix => suffix.index);
+    return suffixArray;
+}
+
+// Example usage:
+const s: string = "banana";
+console.log(buildSuffixArray(s));  // Output: [ 5, 3, 1, 0, 4, 2 ]
+```
+
+</CodeGroup>
+
 ### **Suffix Tree Construction**
 
 **Steps:**
@@ -88,6 +113,9 @@ console.log(buildSuffixArray(s));  // Output: [ 5, 3, 1, 0, 4, 2 ]
 2. Use active points and extensions to handle the suffix links efficiently.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class SuffixTreeNode {
     constructor() {
@@ -185,6 +213,115 @@ const st = new SuffixTree("banana");
 console.log(st);  // Output: Suffix tree representation
 ```
 
+```typescript
+class SuffixTreeNode {
+    children: Map<string, SuffixTreeNode>;
+    suffixLink: SuffixTreeNode | null;
+    start: number;
+    end: number;
+    suffixIndex: number;
+
+    constructor() {
+        this.children = new Map();
+        this.suffixLink = null;
+        this.start = -1;
+        this.end = -1;
+        this.suffixIndex = -1;
+    }
+}
+
+class SuffixTree {
+    s: string;
+    n: number;
+    root: SuffixTreeNode;
+
+    constructor(s: string) {
+        this.s = s;
+        this.n = s.length;
+        this.root = new SuffixTreeNode();
+        this.buildSuffixTree();
+    }
+
+    buildSuffixTree() {
+        const activeNode = this.root;
+        const activeEdge = -1;
+        const activeLength = 0;
+        const remainingSuffixCount = 0;
+        const leafEnd = -1;
+
+        for (let i = 0; i < this.n; i++) {
+            this.extendSuffixTree(i, activeNode, activeEdge, activeLength, remainingSuffixCount, leafEnd);
+        }
+    }
+
+    extendSuffixTree(pos: number, activeNode: SuffixTreeNode, activeEdge: number, activeLength: number, remainingSuffixCount: number, leafEnd: number) {
+        leafEnd = pos;
+        remainingSuffixCount++;
+        let lastNewNode: SuffixTreeNode | null = null;
+
+        while (remainingSuffixCount > 0) {
+            if (activeLength === 0) activeEdge = pos;
+
+            if (!activeNode.children.has(this.s[activeEdge])) {
+                activeNode.children.set(this.s[activeEdge], new SuffixTreeNode());
+                if (lastNewNode) {
+                    lastNewNode.suffixLink = activeNode;
+                    lastNewNode = null;
+                }
+            } else {
+                const next = activeNode.children.get(this.s[activeEdge])!;
+                const edgeLength = next.end - next.start + 1;
+
+                if (activeLength >= edgeLength) {
+                    activeEdge += edgeLength;
+                    activeLength -= edgeLength;
+                    activeNode = next;
+                    continue;
+                }
+
+                if (this.s[next.start + activeLength] === this.s[pos]) {
+                    if (lastNewNode && activeNode !== this.root) {
+                        lastNewNode.suffixLink = activeNode;
+                        lastNewNode = null;
+                    }
+                    activeLength++;
+                    break;
+                }
+
+                const splitEnd = next.start + activeLength - 1;
+                const split = new SuffixTreeNode();
+                activeNode.children.set(this.s[activeEdge], split);
+                split.children.set(this.s[pos], new SuffixTreeNode());
+
+                next.start += activeLength;
+                split.children.set(this.s[next.start], next);
+
+                if (lastNewNode) {
+                    lastNewNode.suffixLink = split;
+                }
+
+                lastNewNode = split;
+            }
+
+            remainingSuffixCount--;
+
+            if (activeNode === this.root && activeLength > 0) {
+                activeLength--;
+                activeEdge = pos - remainingSuffixCount + 1;
+            } else if (activeNode !== this.root) {
+                activeNode = activeNode.suffixLink!;
+            }
+        }
+    }
+}
+
+// Example usage:
+const st = new SuffixTree("banana");
+console.log(st);  // Output: Suffix tree representation
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing the Data Structure:**
@@ -215,6 +352,9 @@ console.log(st);  // Output: Suffix tree representation
 Find the longest common substring between two strings using a suffix array.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function longestCommonSubstring(s1, s2) {
     const s = s1 + "#" + s2 + "$";
@@ -270,12 +410,72 @@ const s2 = "anana";
 console.log(longestCommonSubstring(s1, s2));  // Output: "anana"
 ```
 
+```typescript
+function longestCommonSubstring(s1: string, s2: string): string {
+    const s = s1 + "#" + s2 + "$";
+    const suffixArray = buildSuffixArray(s);
+    const lcpArray = buildLCPArray(s, suffixArray);
+    let maxLength = 0;
+    let maxIndex = 0;
+
+    for (let i = 1; i < lcpArray.length; i++) {
+        const isSuffixFromS1 = suffixArray[i] < s1.length;
+        const isSuffixFromS2 = suffixArray[i - 1] > s1.length;
+        const isSuffixFromS1Prev = suffixArray[i - 1] < s1.length;
+        const isSuffixFromS2Prev = suffixArray[i] > s1.length;
+
+        if ((isSuffixFromS1 && isSuffixFromS2) || (isSuffixFromS1Prev && isSuffixFromS2Prev)) {
+            if (lcpArray[i] > maxLength) {
+                maxLength = lcpArray[i];
+                maxIndex = suffixArray[i];
+            }
+        }
+    }
+
+    return s.substring(maxIndex, maxIndex + maxLength);
+}
+
+function buildLCPArray(s: string, suffixArray: number[]): number[] {
+    const n: number = s.length;
+    const rank: number[] = Array(n).fill(0);
+    const lcp: number[] = Array(n).fill(0);
+
+    for (let i = 0; i < n; i++) {
+        rank[suffixArray[i]] = i;
+    }
+
+    let h = 0;
+    for (let i = 0; i < n; i++) {
+        if (rank[i] > 0) {
+            const j = suffixArray[rank[i] - 1];
+            while (i + h < n && j + h < n && s[i + h] === s[j + h]) {
+                h++;
+            }
+            lcp[rank[i]] = h;
+            if (h > 0) h--;
+        }
+    }
+
+    return lcp;
+}
+
+// Example usage:
+const s1: string = "banana";
+const s2: string = "anana";
+console.log(longestCommonSubstring(s1, s2));  // Output: "anana"
+```
+
+</CodeGroup>
+
 ### **Longest Repeated Substring**
 
 **Problem:**
 Find the longest repeated substring in a string using a suffix array.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function longestRepeatedSubstring(s) {
     const suffixArray = buildSuffixArray(s);
@@ -297,6 +497,30 @@ function longestRepeatedSubstring(s) {
 const s = "banana";
 console.log(longestRepeatedSubstring(s));  // Output: "ana"
 ```
+
+```typescript
+function longestRepeatedSubstring(s: string): string {
+    const suffixArray = buildSuffixArray(s);
+    const lcpArray = buildLCPArray(s, suffixArray);
+    let maxLength = 0;
+    let maxIndex = 0;
+
+    for (let i = 1; i < lcpArray.length; i++) {
+        if (lcpArray[i] > maxLength) {
+            maxLength = lcpArray[i];
+            maxIndex = suffixArray[i];
+        }
+    }
+
+    return s.substring(maxIndex, maxIndex + maxLength);
+}
+
+// Example usage:
+const s: string = "banana";
+console.log(longestRepeatedSubstring(s));  // Output: "ana"
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

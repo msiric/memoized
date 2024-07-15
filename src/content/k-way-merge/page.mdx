@@ -45,7 +45,10 @@ Consider the sorted arrays `arr1 = [1, 4, 7]`, `arr2 = [2, 5, 8]`, and `arr3 = [
 4. If the extracted element has a next element in the same array, insert the next element into the heap.
 5. Repeat steps 3-4 until the heap is empty.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -145,6 +148,109 @@ const arrays = [
 console.log(mergeKSortedArrays(arrays));  // Output: [1, 2, 3, 4, 5, 6, 7, 8, 9]
 ```
 
+```typescript
+class MinHeap {
+    heap: { value: number; arrayIndex: number; elementIndex: number }[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    size(): number {
+        return this.heap.length;
+    }
+
+    peek(): { value: number; arrayIndex: number; elementIndex: number } | undefined {
+        return this.heap[0];
+    }
+
+    insert(value: { value: number; arrayIndex: number; elementIndex: number }): void {
+        this.heap.push(value);
+        this._heapifyUp();
+    }
+
+    extractMin(): { value: number; arrayIndex: number; elementIndex: number } | undefined {
+        if (this.size() === 1) return this.heap.pop();
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this._heapifyDown();
+        return min;
+    }
+
+    private _heapifyUp(): void {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].value >= this.heap[parentIndex].value) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    private _heapifyDown(): void {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.value < element.value) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild.value < element.value) || (swap !== null && rightChild.value < leftChild.value)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function mergeKSortedArrays(arrays: number[][]): number[] {
+    const minHeap = new MinHeap();
+    const result: number[] = [];
+
+    // Insert the first element of each array into the heap
+    for (let i = 0; i < arrays.length; i++) {
+        if (arrays[i].length > 0) {
+            minHeap.insert({ value: arrays[i][0], arrayIndex: i, elementIndex: 0 });
+        }
+    }
+
+    while (minHeap.size() > 0) {
+        const { value, arrayIndex, elementIndex } = minHeap.extractMin()!;
+        result.push(value);
+
+        // If there is a next element in the same array, insert it into the heap
+        if (elementIndex + 1 < arrays[arrayIndex].length) {
+            minHeap.insert({ value: arrays[arrayIndex][elementIndex + 1], arrayIndex, elementIndex: elementIndex + 1 });
+        }
+    }
+
+    return result;
+}
+
+// Example usage:
+const arrays: number[][] = [
+    [1, 4, 7],
+    [2, 5, 8],
+    [3, 6, 9]
+];
+console.log(mergeKSortedArrays(arrays));  // Output: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+```
+
+</CodeGroup>
+
 **Tips and Tricks:**
 - Use a min-heap to efficiently keep track of the smallest elements from each array.
 - Insert the first element of each array into the heap to initialize it.
@@ -166,7 +272,10 @@ console.log(mergeKSortedArrays(arrays));  // Output: [1, 2, 3, 4, 5, 6, 7, 8, 9]
 4. If the extracted element has a next node, insert the next node into the heap.
 5. Repeat steps 3-4 until the heap is empty.
 
-**Code Example:**
+**Example:**
+
+<CodeGroup>
+
 ```javascript
 class ListNode {
     constructor(value = 0, next = null) {
@@ -280,6 +389,127 @@ while (current) {
     current = current.next;
 }
 ```
+
+```typescript
+class ListNode {
+    value: number;
+    next: ListNode | null;
+
+    constructor(value: number, next: ListNode | null = null) {
+        this.value = value;
+        this.next = next;
+    }
+}
+
+class MinHeap {
+    heap: ListNode[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    size(): number {
+        return this.heap.length;
+    }
+
+    peek(): ListNode | undefined {
+        return this.heap[0];
+    }
+
+    insert(node: ListNode): void {
+        this.heap.push(node);
+        this._heapifyUp();
+    }
+
+    extractMin(): ListNode | undefined {
+        if (this.size() === 1) return this.heap.pop();
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this._heapifyDown();
+        return min;
+    }
+
+    private _heapifyUp(): void {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].value >= this.heap[parentIndex].value) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    private _heapifyDown(): void {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.value < element.value) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild.value < element.value) || (swap !== null && rightChild.value < leftChild.value)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function mergeKLists(lists: ListNode[]): ListNode | null {
+    const minHeap = new MinHeap();
+    const dummy = new ListNode(0);
+    let current = dummy;
+
+    // Insert the head of each linked list into the heap
+    for (const list of lists) {
+        if (list) {
+            minHeap.insert(list);
+        }
+    }
+
+    while (minHeap.size() > 0) {
+        const node = minHeap.extractMin();
+        current.next = node;
+        current = current.next;
+
+        // If there is a next node in the same list, insert it into the heap
+        if (node.next) {
+            minHeap.insert(node.next);
+        }
+    }
+
+    return dummy.next;
+}
+
+// Example usage:
+const list1 = new ListNode(1, new ListNode(4, new ListNode(7)));
+const list2 = new ListNode(2, new ListNode(5, new ListNode(8)));
+const list3 = new ListNode(3, new ListNode(6, new ListNode(9)));
+
+const lists: ListNode[] = [list1, list2, list3];
+const mergedList = mergeKLists(lists);
+
+let current: ListNode | null = mergedList;
+while (current) {
+    console.log(current.value);  // Output: 1, 2, 3, 4, 5, 6, 7, 8, 9
+    current = current.next;
+}
+```
+
+</CodeGroup>
 
 **Tips and Tricks:**
 - Use a min-heap to efficiently keep track of the smallest elements from each linked list.

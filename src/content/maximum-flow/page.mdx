@@ -64,6 +64,9 @@ The maximum flow from `S` to `T` is 12.
 4. The maximum flow is the total flow into the sink.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class FordFulkerson {
     constructor(vertices) {
@@ -140,6 +143,87 @@ graph.addEdge(4, 5, 4);
 console.log(graph.fordFulkerson(0, 5));  // Output: 23
 ```
 
+```typescript
+class FordFulkerson {
+    private V: number;
+    private graph: Array<[number, number][]>;
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.graph = Array.from({ length: vertices }, () => []);
+    }
+
+    addEdge(u: number, v: number, capacity: number): void {
+        this.graph[u].push([v, capacity]);
+        this.graph[v].push([u, 0]);  // Add reverse edge with 0 capacity
+    }
+
+    private bfs(source: number, sink: number, parent: number[]): boolean {
+        const visited = Array(this.V).fill(false);
+        const queue = [source];
+        visited[source] = true;
+
+        while (queue.length > 0) {
+            const u = queue.shift();
+
+            for (const [v, capacity] of this.graph[u]) {
+                if (!visited[v] && capacity > 0) {
+                    parent[v] = u;
+                    if (v === sink) return true;
+                    queue.push(v);
+                    visited[v] = true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    fordFulkerson(source: number, sink: number): number {
+        let maxFlow = 0;
+        const parent = Array(this.V).fill(-1);
+
+        while (this.bfs(source, sink, parent)) {
+            let pathFlow = Infinity;
+            for (let v = sink; v !== source; v = parent[v]) {
+                const u = parent[v];
+                const capacity = this.graph[u].find(([vertex, cap]) => vertex === v)[1];
+                pathFlow = Math.min(pathFlow, capacity);
+            }
+
+            for (let v = sink; v !== source; v = parent[v]) {
+                const u = parent[v];
+                const edge = this.graph[u].find(([vertex, cap]) => vertex === v);
+                edge[1] -= pathFlow;
+                const reverseEdge = this.graph[v].find(([vertex, cap]) => vertex === u);
+                reverseEdge[1] += pathFlow;
+            }
+
+            maxFlow += pathFlow;
+        }
+
+        return maxFlow;
+    }
+}
+
+// Example usage:
+const graph = new FordFulkerson(6);
+graph.addEdge(0, 1, 16);
+graph.addEdge(0, 2, 13);
+graph.addEdge(1, 2, 10);
+graph.addEdge(1, 3, 12);
+graph.addEdge(2, 1, 4);
+graph.addEdge(2, 4, 14);
+graph.addEdge(3, 2, 9);
+graph.addEdge(3, 5, 20);
+graph.addEdge(4, 3, 7);
+graph.addEdge(4, 5, 4);
+
+console.log(graph.fordFulkerson(0, 5));  // Output: 23
+```
+
+</CodeGroup>
+
 ### **Edmonds-Karp Algorithm**
 
 **Steps:**
@@ -150,6 +234,9 @@ console.log(graph.fordFulkerson(0, 5));  // Output: 23
 5. The maximum flow is the total flow into the sink.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class EdmondsKarp {
     constructor(vertices) {
@@ -226,6 +313,87 @@ graph.addEdge(4, 5, 4);
 console.log(graph.edmondsKarp(0, 5));  // Output: 23
 ```
 
+```typescript
+class EdmondsKarp {
+    private V: number;
+    private graph: Array<[number, number][]>;
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.graph = Array.from({ length: vertices }, () => []);
+    }
+
+    addEdge(u: number, v: number, capacity: number): void {
+        this.graph[u].push([v, capacity]);
+        this.graph[v].push([u, 0]);  // Add reverse edge with 0 capacity
+    }
+
+    private bfs(source: number, sink: number, parent: number[]): boolean {
+        const visited = Array(this.V).fill(false);
+        const queue = [source];
+        visited[source] = true;
+
+        while (queue.length > 0) {
+            const u = queue.shift();
+
+            for (const [v, capacity] of this.graph[u]) {
+                if (!visited[v] && capacity > 0) {
+                    parent[v] = u;
+                    if (v === sink) return true;
+                    queue.push(v);
+                    visited[v] = true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    edmondsKarp(source: number, sink: number): number {
+        let maxFlow = 0;
+        const parent = Array(this.V).fill(-1);
+
+        while (this.bfs(source, sink, parent)) {
+            let pathFlow = Infinity;
+            for (let v = sink; v !== source; v = parent[v]) {
+                const u = parent[v];
+                const capacity = this.graph[u].find(([vertex, cap]) => vertex === v)[1];
+                pathFlow = Math.min(pathFlow, capacity);
+            }
+
+            for (let v = sink; v !== source; v = parent[v]) {
+                const u = parent[v];
+                const edge = this.graph[u].find(([vertex, cap]) => vertex === v);
+                edge[1] -= pathFlow;
+                const reverseEdge = this.graph[v].find(([vertex, cap]) => vertex === u);
+                reverseEdge[1] += pathFlow;
+            }
+
+            maxFlow += pathFlow;
+        }
+
+        return maxFlow;
+    }
+}
+
+// Example usage:
+const graph = new EdmondsKarp(6);
+graph.addEdge(0, 1, 16);
+graph.addEdge(0, 2, 13);
+graph.addEdge(1, 2, 10);
+graph.addEdge(1, 3, 12);
+graph.addEdge(2, 1, 4);
+graph.addEdge(2, 4, 14);
+graph.addEdge(3, 2, 9);
+graph.addEdge(3, 5, 20);
+graph.addEdge(4, 3, 7);
+graph.addEdge(4, 5, 4);
+
+console.log(graph.edmondsKarp(0, 5));  // Output: 23
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing the Algorithm:**
@@ -256,6 +424,9 @@ console.log(graph.edmondsKarp(0, 5));  // Output: 23
 Capacity scaling is an optimization of the Ford-Fulkerson method that processes augmenting paths in decreasing order of capacities.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class CapacityScaling {
     constructor(vertices) {
@@ -339,12 +510,103 @@ graph.addEdge(4, 5, 4);
 console.log(graph.capacityScaling(0, 5));  // Output: 23
 ```
 
+```typescript
+class CapacityScaling {
+    private V: number;
+    private graph: Array<[number, number][]>;
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.graph = Array.from({ length: vertices }, () => []);
+    }
+
+    addEdge(u: number, v: number, capacity: number): void {
+        this.graph[u].push([v, capacity]);
+        this.graph[v].push([u, 0]);  // Add reverse edge with 0 capacity
+    }
+
+    private bfs(source: number, sink: number, parent: number[], minCapacity: number): boolean {
+        const visited = Array(this.V).fill(false);
+        const queue = [source];
+        visited[source] = true;
+
+        while (queue.length > 0) {
+            const u = queue.shift();
+
+            for (const [v, capacity] of this.graph[u]) {
+                if (!visited[v] && capacity >= minCapacity) {
+                    parent[v] = u;
+                    if (v === sink) return true;
+                    queue.push(v);
+                    visited[v] = true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    capacityScaling(source: number, sink: number): number {
+        let maxFlow = 0;
+        const parent = Array(this.V).fill(-1);
+        let maxCapacity = Math.max(...this.graph.flat().map(([_, capacity]) => capacity));
+
+        let scale = 1;
+        while (scale <= maxCapacity) scale *= 2;
+
+        while (scale > 0) {
+            while (this.bfs(source, sink, parent, scale)) {
+                let pathFlow = Infinity;
+                for (let v = sink; v !== source; v = parent[v]) {
+                    const u = parent[v];
+                    const capacity = this.graph[u].find(([vertex, cap]) => vertex === v)[1];
+                    pathFlow = Math.min(pathFlow, capacity);
+                }
+
+                for (let v = sink; v !== source; v = parent[v]) {
+                    const u = parent[v];
+                    const edge = this.graph[u].find(([vertex, cap]) => vertex === v);
+                    edge[1] -= pathFlow;
+                    const reverseEdge = this.graph[v].find(([vertex, cap]) => vertex === u);
+                    reverseEdge[1] += pathFlow;
+                }
+
+                maxFlow += pathFlow;
+            }
+            scale = Math.floor(scale / 2);
+        }
+
+        return maxFlow;
+    }
+}
+
+// Example usage:
+const graph = new CapacityScaling(6);
+graph.addEdge(0, 1, 16);
+graph.addEdge(0, 2, 13);
+graph.addEdge(1, 2, 10);
+graph.addEdge(1, 3, 12);
+graph.addEdge(2, 1, 4);
+graph.addEdge(2, 4, 14);
+graph.addEdge(3, 2, 9);
+graph.addEdge(3, 5, 20);
+graph.addEdge(4, 3, 7);
+graph.addEdge(4, 5, 4);
+
+console.log(graph.capacityScaling(0, 5));  // Output: 23
+```
+
+</CodeGroup>
+
 ### **Dinic's Algorithm**
 
 **Description:**
 Dinic's algorithm is a highly efficient algorithm for computing maximum flow in a flow network, with a time complexity of O(V^2 E).
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Dinic {
     constructor(vertices) {
@@ -425,6 +687,93 @@ graph.addEdge(4, 5, 4);
 
 console.log(graph.dinic(0, 5));  // Output: 23
 ```
+
+```typescript
+class Dinic {
+    private V: number;
+    private graph: Array<[number, number, number][]>;
+    private level: number[];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.graph = Array.from({ length: vertices }, () => []);
+        this.level = Array(vertices).fill(-1);
+    }
+
+    addEdge(u: number, v: number, capacity: number): void {
+        this.graph[u].push([v, capacity, this.graph[v].length]);
+        this.graph[v].push([u, 0, this.graph[u].length - 1]);
+    }
+
+    private bfs(source: number, sink: number): boolean {
+        this.level.fill(-1);
+        this.level[source] = 0;
+        const queue = [source];
+
+        while (queue.length > 0) {
+            const u = queue.shift();
+
+            for (const [v, capacity] of this.graph[u]) {
+                if (this.level[v] === -1 && capacity > 0) {
+                    this.level[v] = this.level[u] + 1;
+                    queue.push(v);
+                }
+            }
+        }
+
+        return this.level[sink] !== -1;
+    }
+
+    private dfs(u: number, sink: number, flow: number): number {
+        if (u === sink) return flow;
+
+        for (let i = 0; i < this.graph[u].length; i++) {
+            const [v, capacity, rev] = this.graph[u][i];
+
+            if (this.level[v] === this.level[u] + 1 && capacity > 0) {
+                const minFlow = this.dfs(v, sink, Math.min(flow, capacity));
+                if (minFlow > 0) {
+                    this.graph[u][i][1] -= minFlow;
+                    this.graph[v][rev][1] += minFlow;
+                    return minFlow;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    dinic(source: number, sink: number): number {
+        let maxFlow = 0;
+
+        while (this.bfs(source, sink)) {
+            let flow;
+            while ((flow = this.dfs(source, sink, Infinity)) > 0) {
+                maxFlow += flow;
+            }
+        }
+
+        return maxFlow;
+    }
+}
+
+// Example usage:
+const graph = new Dinic(6);
+graph.addEdge(0, 1, 16);
+graph.addEdge(0, 2, 13);
+graph.addEdge(1, 2, 10);
+graph.addEdge(1, 3, 12);
+graph.addEdge(2, 1, 4);
+graph.addEdge(2, 4, 14);
+graph.addEdge(3, 2, 9);
+graph.addEdge(3, 5, 20);
+graph.addEdge(4, 3, 7);
+graph.addEdge(4, 5, 4);
+
+console.log(graph.dinic(0, 5));  // Output: 23
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

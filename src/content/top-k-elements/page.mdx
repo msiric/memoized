@@ -44,7 +44,10 @@ Consider an array `nums = [3, 2, 1, 5, 6, 4]` and `K = 2`. The top 2 largest ele
 4. If the heap size is equal to K, compare the current element with the root of the heap. If the current element is larger, replace the root with the current element and reheapify.
 5. The heap will contain the top K largest elements at the end of the iteration.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -130,6 +133,95 @@ const k = 2;
 console.log(findKthLargest(nums, k));  // Output: 5
 ```
 
+```typescript
+class MinHeap {
+    private heap: number[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    size(): number {
+        return this.heap.length;
+    }
+
+    peek(): number {
+        return this.heap[0];
+    }
+
+    insert(value: number): void {
+        this.heap.push(value);
+        this._heapifyUp();
+    }
+
+    extractMin(): number {
+        if (this.size() === 1) return this.heap.pop()!;
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this._heapifyDown();
+        return min;
+    }
+
+    private _heapifyUp(): void {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index] >= this.heap[parentIndex]) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    private _heapifyDown(): void {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild < element) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild < element) || (swap !== null && rightChild < leftChild)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function findKthLargest(nums: number[], k: number): number {
+    const minHeap = new MinHeap();
+
+    for (const num of nums) {
+        minHeap.insert(num);
+        if (minHeap.size() > k) {
+            minHeap.extractMin();
+        }
+    }
+
+    return minHeap.peek();
+}
+
+// Example usage:
+const nums = [3, 2, 1, 5, 6, 4];
+const k = 2;
+console.log(findKthLargest(nums, k));  // Output: 5
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a Min Heap to keep track of the top K largest elements efficiently.
 - Ensure the heap size does not exceed K by removing the smallest element when necessary.
@@ -152,7 +244,10 @@ console.log(findKthLargest(nums, k));  // Output: 5
 5. If the heap size is equal to K, compare the frequency of the current element with the root of the heap. If the current element has a higher frequency, replace the root with the current element and reheapify.
 6. The heap will contain the top K most frequent elements at the end of the iteration.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -242,6 +337,100 @@ const nums = [1, 1, 1, 2, 2, 3];
 const k = 2;
 console.log(topKFrequent(nums, k));  // Output: [1, 2]
 ```
+
+```typescript
+class MinHeap {
+    private heap: { num: number, freq: number }[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    size(): number {
+        return this.heap.length;
+    }
+
+    peek(): { num: number, freq: number } {
+        return this.heap[0];
+    }
+
+    insert(value: { num: number, freq: number }): void {
+        this.heap.push(value);
+        this._heapifyUp();
+    }
+
+    extractMin(): { num: number, freq: number } {
+        if (this.size() === 1) return this.heap.pop()!;
+        const min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this._heapifyDown();
+        return min;
+    }
+
+    private _heapifyUp(): void {
+        let index = this.size() - 1;
+        while (index > 0) {
+            const parentIndex = Math.floor((index - 1) / 2);
+            if (this.heap[index].freq >= this.heap[parentIndex].freq) break;
+            [this.heap[index], this.heap[parentIndex]] = [this.heap[parentIndex], this.heap[index]];
+            index = parentIndex;
+        }
+    }
+
+    private _heapifyDown(): void {
+        let index = 0;
+        const length = this.size();
+        const element = this.heap[0];
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let leftChild, rightChild;
+            let swap = null;
+
+            if (leftChildIndex < length) {
+                leftChild = this.heap[leftChildIndex];
+                if (leftChild.freq < element.freq) swap = leftChildIndex;
+            }
+
+            if (rightChildIndex < length) {
+                rightChild = this.heap[rightChildIndex];
+                if ((swap === null && rightChild.freq < element.freq) || (swap !== null && rightChild.freq < leftChild.freq)) {
+                    swap = rightChildIndex;
+                }
+            }
+
+            if (swap === null) break;
+            [this.heap[index], this.heap[swap]] = [this.heap[swap], this.heap[index]];
+            index = swap;
+        }
+    }
+}
+
+function topKFrequent(nums: number[], k: number): number[] {
+    const frequencyMap = new Map<number, number>();
+    for (const num of nums) {
+        frequencyMap.set(num, (frequencyMap.get(num) || 0) + 1);
+    }
+
+    const minHeap = new MinHeap();
+
+    for (const [num, freq] of frequencyMap) {
+        minHeap.insert({ num, freq });
+        if (minHeap.size() > k) {
+            minHeap.extractMin();
+        }
+    }
+
+    return minHeap.heap.map(entry => entry.num);
+}
+
+// Example usage:
+const nums = [1, 1, 1, 2, 2, 3];
+const k = 2;
+console.log(topKFrequent(nums, k));  // Output: [1, 2]
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use a hash map to count the frequency of each element efficiently.

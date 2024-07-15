@@ -56,6 +56,9 @@ Find a vertex cover of a graph, which is a set of vertices such that every edge 
 3. The resulting set is a 2-approximation of the minimum vertex cover.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function vertexCover(graph) {
     const cover = new Set();
@@ -94,6 +97,51 @@ const graph = {
 console.log(vertexCover(graph));  // Output: Set containing a vertex cover, e.g., {0, 1, 3}
 ```
 
+```typescript
+type Edge = [number, number]
+type Graph = {
+  edges: Edge[]
+}
+
+function vertexCover(graph: Graph): Set<number> {
+  const cover = new Set<number>()
+  const edges = new Set<string>(graph.edges.map((edge) => JSON.stringify(edge)))
+
+  while (edges.size > 0) {
+    const edge: Edge = JSON.parse([...edges][0])
+    const [u, v] = edge
+
+    cover.add(u)
+    cover.add(v)
+
+    for (let edgeStr of edges) {
+      const edge = JSON.parse(edgeStr) as Edge
+      if (edge.includes(u) || edge.includes(v)) {
+        edges.delete(edgeStr)
+      }
+    }
+  }
+
+  return cover
+}
+
+// Example usage:
+const graph: Graph = {
+  edges: [
+    [0, 1],
+    [0, 2],
+    [1, 2],
+    [1, 3],
+    [2, 3],
+    [3, 4],
+  ],
+}
+
+console.log(vertexCover(graph)) // Output: Set containing a vertex cover, e.g., {0, 1, 3}
+```
+
+</CodeGroup>
+
 ### **Greedy Algorithm for Set Cover**
 
 **Problem:**
@@ -108,6 +156,9 @@ Find a set cover, which is a collection of sets that covers all elements in the 
 3. The resulting set is an approximation of the minimum set cover.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function setCover(universe, sets) {
     const cover = [];
@@ -146,7 +197,51 @@ const sets = [
 console.log(setCover(universe, sets));  // Output: Approximate set cover, e.g., [ Set { 1, 2, 3 }, Set { 3, 4, 5 } ]
 ```
 
-### **2-Approximation Algorithm for Metric Traveling Salesman Problem (TSP)**
+```typescript
+function setCover(universe: number[], sets: Set<number>[]): Set<number>[] {
+    const cover: Set<number>[] = [];
+    const uncovered = new Set<number>(universe);
+
+    while (uncovered.size > 0) {
+        let bestSet: Set<number> | null = null;
+        let bestSetCovered = 0;
+
+        for (let set of sets) {
+            const covered = new Set([...set].filter(x => uncovered.has(x)));
+            if (covered.size > bestSetCovered) {
+                bestSetCovered = covered.size;
+                bestSet = set;
+            }
+        }
+
+        if (bestSet) {
+            cover.push(bestSet);
+            for (let element of bestSet) {
+                uncovered.delete(element);
+            }
+        } else {
+            break;
+        }
+    }
+
+    return cover;
+}
+
+// Example usage:
+const universe: number[] = [1, 2, 3, 4, 5];
+const sets: Set<number>[] = [
+    new Set([1, 2, 3]),
+    new Set([2, 4]),
+    new Set([3, 4, 5]),
+    new Set([5])
+];
+
+console.log(setCover(universe, sets));  // Output: Approximate set cover, e.g., [ Set { 1, 2, 3 }, Set { 3, 4, 5 } ]
+```
+
+</CodeGroup>
+
+### **Approximation Algorithm for Metric Traveling Salesman Problem (TSP)**
 
 **Problem:**
 Find the shortest possible route that visits each city exactly once and returns to the origin city.
@@ -158,6 +253,9 @@ Find the shortest possible route that visits each city exactly once and returns 
 4. The resulting tour is a 2-approximation of the optimal TSP solution.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor(vertices) {
@@ -259,6 +357,112 @@ graph.addEdge(2, 3, 30);
 console.log(graph.metricTSP());  // Output: Approximate TSP tour, e.g., [0, 1, 2, 3, 0]
 ```
 
+```typescript
+class Graph {
+    V: number;
+    edges: [number, number, number][];
+
+    constructor(vertices: number) {
+        this.V = vertices;
+        this.edges = [];
+    }
+
+    addEdge(u: number, v: number, w: number): void {
+        this.edges.push([u, v, w]);
+    }
+
+    findMST(): [number, number, number][] {
+        const parent: number[] = [];
+        const rank: number[] = [];
+        const result: [number, number, number][] = [];
+        let i = 0;
+        let e = 0;
+
+        this.edges.sort((a, b) => a[2] - b[2]);
+
+        for (let node = 0; node < this.V; ++node) {
+            parent[node] = node;
+            rank[node] = 0;
+        }
+
+        while (e < this.V - 1) {
+            const [u, v, w] = this.edges[i++];
+            const x = this.find(parent, u);
+            const y = this.find(parent, v);
+
+            if (x !== y) {
+                result.push([u, v, w]);
+                e++;
+                this.union(parent, rank, x, y);
+            }
+        }
+
+        return result;
+    }
+
+    find(parent: number[], i: number): number {
+        if (parent[i] === i) return i;
+        return parent[i] = this.find(parent, parent[i]);
+    }
+
+    union(parent: number[], rank: number[], x: number, y: number): void {
+        const xroot = this.find(parent, x);
+        const yroot = this.find(parent, y);
+
+        if (rank[xroot] < rank[yroot]) {
+            parent[xroot] = yroot;
+        } else if (rank[xroot] > rank[yroot]) {
+            parent[yroot] = xroot;
+        } else {
+            parent[yroot] = xroot;
+            rank[xroot]++;
+        }
+    }
+
+    preorderTraversal(start: number, adjList: [number, number][][], visited: boolean[], result: number[]): void {
+        visited[start] = true;
+        result.push(start);
+
+        for (let [neighbor] of adjList[start]) {
+            if (!visited[neighbor]) {
+                this.preorderTraversal(neighbor, adjList, visited, result);
+            }
+        }
+    }
+
+    metricTSP(): number[] {
+        const mst = this.findMST();
+        const adjList: [number, number][][] = Array.from({ length: this.V }, () => []);
+
+        for (let [u, v, w] of mst) {
+            adjList[u].push([v, w]);
+            adjList[v].push([u, w]);
+        }
+
+        const visited: boolean[] = Array(this.V).fill(false);
+        const result: number[] = [];
+
+        this.preorderTraversal(0, adjList, visited, result);
+        result.push(0); // Return to the starting point
+
+        return result;
+    }
+}
+
+// Example usage:
+const graph = new Graph(4);
+graph.addEdge(0, 1, 10);
+graph.addEdge(0, 2, 15);
+graph.addEdge(0, 3, 20);
+graph.addEdge(1, 2, 35);
+graph.addEdge(1, 3, 25);
+graph.addEdge(2, 3, 30);
+
+console.log(graph.metricTSP());  // Output: Approximate TSP tour, e.g., [0, 1, 2, 3, 0]
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing the Algorithm:**
@@ -294,6 +498,9 @@ A PTAS is an algorithmic framework that provides solutions within a factor of (1
 An FPTAS is a PTAS that runs in polynomial time with respect to both the input size and 1/ε.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function knapsackFPTAS(values, weights, W, ε) {
     const n = values.length;
@@ -324,6 +531,39 @@ const W = 50;
 const ε = 0.1;
 console.log(knapsackFPTAS(values, weights, W, ε));  // Output: Approximate knapsack solution value
 ```
+
+```typescript
+function knapsackFPTAS(values: number[], weights: number[], W: number, ε: number): number {
+    const n = values.length;
+    const K = Math.max(...values);
+    const scale = ε * K / n;
+    const scaledValues = values.map(v => Math.floor(v / scale));
+
+    return knapsack(scaledValues, weights, W);
+}
+
+function knapsack(values: number[], weights: number[], W: number): number {
+    const n = values.length;
+    const dp = Array.from({ length: W + 1 }, () => 0);
+
+    for (let i = 0; i < n; i++) {
+        for (let w = W; w >= weights[i]; w--) {
+            dp[w] = Math.max(dp[w], dp[w - weights[i]] + values[i]);
+        }
+    }
+
+    return dp[W];
+}
+
+// Example usage:
+const values: number[] = [60, 100, 120];
+const weights: number[] = [10, 20, 30];
+const W: number = 50;
+const ε: number = 0.1;
+console.log(knapsackFPTAS(values, weights, W, ε));  // Output: Approximate knapsack solution value
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

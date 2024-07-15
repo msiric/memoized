@@ -52,7 +52,10 @@ DFS traversal starting from vertex `A` might visit vertices in the following ord
 3. For each neighbor of the current vertex, recursively visit the neighbor.
 4. If a visited vertex is encountered again, a cycle is detected.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function dfsCycleDetection(graph) {
     let visited = new Set();
@@ -91,6 +94,46 @@ const graph = {
 console.log(dfsCycleDetection(graph));  // Output: true
 ```
 
+```typescript
+function dfsCycleDetection(graph: { [key: string]: string[] }): boolean {
+    let visited = new Set<string>();
+    let recStack = new Set<string>();
+
+    function dfs(vertex: string): boolean {
+        if (recStack.has(vertex)) return true;
+        if (visited.has(vertex)) return false;
+
+        visited.add(vertex);
+        recStack.add(vertex);
+
+        for (let neighbor of graph[vertex]) {
+            if (dfs(neighbor)) return true;
+        }
+
+        recStack.delete(vertex);
+        return false;
+    }
+
+    for (let vertex in graph) {
+        if (dfs(vertex)) return true;
+    }
+
+    return false;
+}
+
+// Example usage:
+const graph = {
+    A: ['B', 'C'],
+    B: ['D'],
+    C: ['E'],
+    D: ['C'],
+    E: []
+};
+console.log(dfsCycleDetection(graph));  // Output: true
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a recursion stack (recStack) to track the vertices in the current path.
 - Check for cycles by revisiting vertices in the recursion stack.
@@ -111,7 +154,10 @@ console.log(dfsCycleDetection(graph));  // Output: true
 3. For each neighbor of the current vertex, recursively visit the neighbor.
 4. Track visited vertices to ensure all connected components are found.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findConnectedComponents(graph) {
     let visited = new Set();
@@ -153,6 +199,49 @@ const graph = {
 console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D', 'E', 'F' ], [ 'G', 'H' ] ]
 ```
 
+```typescript
+function findConnectedComponents(graph: { [key: string]: string[] }): string[][] {
+    let visited = new Set<string>();
+    let components: string[][] = [];
+
+    function dfs(vertex: string, component: string[]) {
+        visited.add(vertex);
+        component.push(vertex);
+
+        for (let neighbor of graph[vertex]) {
+            if (!visited.has(neighbor)) {
+                dfs(neighbor, component);
+            }
+        }
+    }
+
+    for (let vertex in graph) {
+        if (!visited.has(vertex)) {
+            let component: string[] = [];
+            dfs(vertex, component);
+            components.push(component);
+        }
+    }
+
+    return components;
+}
+
+// Example usage:
+const graph = {
+    A: ['B', 'C'],
+    B: ['A', 'D', 'E'],
+    C: ['A', 'F'],
+    D: ['B'],
+    E: ['B', 'F'],
+    F: ['C', 'E'],
+    G: ['H'],
+    H: ['G']
+};
+console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D', 'E', 'F' ], [ 'G', 'H' ] ]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a recursive function to explore vertices.
 - Track visited vertices to avoid revisiting and to identify all components.
@@ -173,7 +262,10 @@ console.log(findConnectedComponents(graph));  // Output: [ [ 'A', 'B', 'C', 'D',
 3. For each neighbor of the current vertex, recursively visit the neighbor.
 4. Add the current vertex to the result list after all its neighbors have been visited.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function topologicalSort(graph) {
     let visited = new Set();
@@ -212,6 +304,46 @@ const graph = {
 console.log(topologicalSort(graph));  // Output: [ 'B', 'A', 'D', 'C', 'E', 'F' ]
 ```
 
+```typescript
+function topologicalSort(graph: { [key: string]: string[] }): string[] {
+    let visited = new Set<string>();
+    let stack: string[] = [];
+
+    function dfs(vertex: string) {
+        visited.add(vertex);
+
+        for (let neighbor of graph[vertex]) {
+            if (!visited.has(neighbor)) {
+                dfs(neighbor);
+            }
+        }
+
+        stack.push(vertex);
+    }
+
+    for (let vertex in graph) {
+        if (!visited.has(vertex)) {
+            dfs(vertex);
+        }
+    }
+
+    return stack.reverse();
+}
+
+// Example usage:
+const graph = {
+    A: ['C'],
+    B: ['C', 'D'],
+    C: ['E'],
+    D: ['F'],
+    E: ['F'],
+    F: []
+};
+console.log(topologicalSort(graph));  // Output: [ 'B', 'A', 'D', 'C', 'E', 'F' ]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Use a recursive function to explore vertices.
 - Add vertices to the result list after all their neighbors have been visited.
@@ -232,7 +364,10 @@ console.log(topologicalSort(graph));  // Output: [ 'B', 'A', 'D', 'C', 'E', 'F' 
 3. If the target vertex is reached, add the current path to the result.
 4. Backtrack by removing the current vertex from the path.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findAllPaths(graph, start, end) {
     let result = [];
@@ -265,6 +400,41 @@ const graph = {
 };
 console.log(findAllPaths(graph, 'A', 'E'));  // Output: [ [ 'A', 'B', 'D', 'C', 'E' ], [ 'A', 'C', 'E' ] ]
 ```
+
+```typescript
+function findAllPaths(graph: { [key: string]: string[] }, start: string, end: string): string[][] {
+    let result: string[][] = [];
+
+    function dfs(current: string, path: string[]) {
+        path.push(current);
+
+        if (current === end) {
+            result.push([...path]);
+        } else {
+            for (let neighbor of graph[current]) {
+                dfs(neighbor, path);
+            }
+        }
+
+        path.pop();
+    }
+
+    dfs(start, []);
+    return result;
+}
+
+// Example usage:
+const graph = {
+    A: ['B', 'C'],
+    B: ['D'],
+    C: ['E'],
+    D: ['C'],
+    E: []
+};
+console.log(findAllPaths(graph, 'A', 'E'));  // Output: [ [ 'A', 'B', 'D', 'C', 'E' ], [ 'A', 'C', 'E' ] ]
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Use a recursive function to explore vertices and track the current path.

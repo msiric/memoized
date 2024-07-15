@@ -57,6 +57,9 @@ Blocks:         [6, 15, 24]  (each block sum)
 4. For updates, update the element and recompute the sum of the affected block.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class SqrtDecomposition {
     constructor(arr) {
@@ -113,6 +116,69 @@ sd.update(2, 10);
 console.log(sd.query(1, 7));  // Output: 42 (updated sum of elements from index 1 to 7)
 ```
 
+```typescript
+class SqrtDecomposition {
+    private arr: number[];
+    private blocks: number[];
+    private blockSize: number;
+    private n: number;
+
+    constructor(arr: number[]) {
+        this.arr = arr;
+        this.n = arr.length;
+        this.blockSize = Math.ceil(Math.sqrt(this.n));
+        this.blocks = Array(Math.ceil(this.n / this.blockSize)).fill(0);
+
+        this.preprocess();
+    }
+
+    private preprocess() {
+        for (let i = 0; i < this.n; i++) {
+            this.blocks[Math.floor(i / this.blockSize)] += this.arr[i];
+        }
+    }
+
+    update(index: number, value: number) {
+        const blockIndex = Math.floor(index / this.blockSize);
+        this.blocks[blockIndex] += value - this.arr[index];
+        this.arr[index] = value;
+    }
+
+    query(l: number, r: number): number {
+        let sum = 0;
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                sum += this.arr[i];
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                sum += this.arr[i];
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                sum += this.blocks[i];
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                sum += this.arr[i];
+            }
+        }
+
+        return sum;
+    }
+}
+
+// Example usage:
+const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const sd = new SqrtDecomposition(arr);
+console.log(sd.query(1, 7));  // Output: 35 (sum of elements from index 1 to 7)
+sd.update(2, 10);
+console.log(sd.query(1, 7));  // Output: 42 (updated sum of elements from index 1 to 7)
+```
+
+</CodeGroup>
+
 ## **Range Minimum Query with Updates**
 
 **Steps:**
@@ -122,6 +188,9 @@ console.log(sd.query(1, 7));  // Output: 42 (updated sum of elements from index 
 4. For updates, update the element and recompute the minimum of the affected block.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class SqrtDecompositionMin {
     constructor(arr) {
@@ -187,6 +256,78 @@ sdMin.update(2, 0);
 console.log(sdMin.query(1, 7));  // Output: 0 (updated minimum of elements from index 1 to 7)
 ```
 
+```typescript
+class SqrtDecompositionMin {
+    private arr: number[];
+    private blocks: number[];
+    private blockSize: number;
+    private n: number;
+
+    constructor(arr: number[]) {
+        this.arr = arr;
+        this.n = arr.length;
+        this.blockSize = Math.ceil(Math.sqrt(this.n));
+        this.blocks = Array(Math.ceil(this.n / this.blockSize)).fill(Infinity);
+
+        this.preprocess();
+    }
+
+    private preprocess() {
+        for (let i = 0; i < this.n; i++) {
+            this.blocks[Math.floor(i / this.blockSize)] = Math.min(this.blocks[Math.floor(i / this.blockSize)], this.arr[i]);
+        }
+    }
+
+    update(index: number, value: number) {
+        const blockIndex = Math.floor(index / this.blockSize);
+        this.arr[index] = value;
+
+        let blockMin = Infinity;
+        const start = blockIndex * this.blockSize;
+        const end = Math.min((blockIndex + 1) * this.blockSize, this.n);
+
+        for (let i = start; i < end; i++) {
+            blockMin = Math.min(blockMin, this.arr[i]);
+        }
+
+        this.blocks[blockIndex] = blockMin;
+    }
+
+    query(l: number, r: number): number {
+        let minVal = Infinity;
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                minVal = Math.min(minVal, this.arr[i]);
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                minVal = Math.min(minVal, this.arr[i]);
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                minVal = Math.min(minVal, this.blocks[i]);
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                minVal = Math.min(minVal, this.arr[i]);
+            }
+        }
+
+        return minVal;
+    }
+}
+
+// Example usage:
+const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const sdMin = new SqrtDecompositionMin(arr);
+console.log(sdMin.query(1, 7));  // Output: 2 (minimum of elements from index 1 to 7)
+sdMin.update(2, 0);
+console.log(sdMin.query(1, 7));  // Output: 0 (updated minimum of elements from index 1 to 7)
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Choosing Block Size:**
@@ -217,6 +358,9 @@ console.log(sdMin.query(1, 7));  // Output: 0 (updated minimum of elements from 
 Lazy propagation is an optimization technique that defers updates to blocks until necessary, reducing the time complexity of range updates.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class SqrtDecompositionLazy {
     constructor(arr) {
@@ -291,6 +435,89 @@ console.log(sdLazy.queryRange(1, 7));  // Output: 35 (sum of elements from index
 sdLazy.updateRange(2, 5, 3);
 console.log(sdLazy.queryRange(1, 7));  // Output: 50 (updated sum of elements from index 1 to 7)
 ```
+
+```typescript
+class SqrtDecompositionLazy {
+    private arr: number[];
+    private blocks: number[];
+    private lazy: number[];
+    private blockSize: number;
+    private n: number;
+
+    constructor(arr: number[]) {
+        this.arr = arr;
+        this.n = arr.length;
+        this.blockSize = Math.ceil(Math.sqrt(this.n));
+        this.blocks = Array(Math.ceil(this.n / this.blockSize)).fill(0);
+        this.lazy = Array(Math.ceil(this.n / this.blockSize)).fill(0);
+
+        this.preprocess();
+    }
+
+    private preprocess() {
+        for (let i = 0; i < this.n; i++) {
+            this.blocks[Math.floor(i / this.blockSize)] += this.arr[i];
+        }
+    }
+
+    updateRange(l: number, r: number, value: number) {
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                this.arr[i] += value;
+                this.blocks[startBlock] += value;
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                this.arr[i] += value;
+                this.blocks[startBlock] += value;
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                this.lazy[i] += value;
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                this.arr[i] += value;
+                this.blocks[endBlock] += value;
+            }
+        }
+    }
+
+    queryRange(l: number, r: number): number {
+        let sum = 0;
+        const startBlock = Math.floor(l / this.blockSize);
+        const endBlock = Math.floor(r / this.blockSize);
+
+        if (startBlock === endBlock) {
+            for (let i = l; i <= r; i++) {
+                sum += this.arr[i] + this.lazy[startBlock];
+            }
+        } else {
+            for (let i = l; i < (startBlock + 1) * this.blockSize; i++) {
+                sum += this.arr[i] + this.lazy[startBlock];
+            }
+            for (let i = startBlock + 1; i < endBlock; i++) {
+                sum += this.blocks[i] + this.lazy[i] * this.blockSize;
+            }
+            for (let i = endBlock * this.blockSize; i <= r; i++) {
+                sum += this.arr[i] + this.lazy[endBlock];
+            }
+        }
+
+        return sum;
+    }
+}
+
+// Example usage:
+const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const sdLazy = new SqrtDecompositionLazy(arr);
+console.log(sdLazy.queryRange(1, 7));  // Output: 35 (sum of elements from index 1 to 7)
+sdLazy.updateRange(2, 5, 3);
+console.log(sdLazy.queryRange(1, 7));  // Output: 50 (updated sum of elements from index 1 to 7)
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

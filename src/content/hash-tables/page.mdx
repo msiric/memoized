@@ -44,47 +44,104 @@ A hash table is a data structure that maps keys to values using a hash function 
 In JavaScript, a hash table can be created using the `Map` object:
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map();
 ```
 
+```typescript
+let map = new Map<string, string>();
+```
+
+</CodeGroup>
+
 ### **Inserting Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 map.set('key1', 'value1');
 map.set('key2', 'value2');
 ```
 
+```typescript
+map.set('key1', 'value1');
+map.set('key2', 'value2');
+```
+
+</CodeGroup>
+
 ### **Deleting Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 map.delete('key1');
 ```
 
+```typescript
+map.delete('key1');
+```
+
+</CodeGroup>
+
 ### **Checking for Existence**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 console.log(map.has('key2'));  // Output: true
 ```
 
+```typescript
+console.log(map.has('key2'));  // Output: true
+```
+
+</CodeGroup>
+
 ### **Retrieving Values**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 console.log(map.get('key2'));  // Output: 'value2'
 ```
 
+```typescript
+console.log(map.get('key2'));  // Output: 'value2'
+```
+
+</CodeGroup>
+
 ## **Iterating Over Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 map.forEach((value, key) => {
     console.log(key, value);
 });
 ```
+
+```typescript
+map.forEach((value, key) => {
+    console.log(key, value);
+});
+```
+
+</CodeGroup>
 
 ### **Handling Collisions**
 
@@ -100,6 +157,9 @@ Collisions occur when two keys hash to the same index. There are several strateg
 Unlike objects, `Map` maintains the insertion order of keys, making it more predictable when iterating over its elements.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let map = new Map();
 map.set('b', 1);
@@ -110,11 +170,26 @@ for (let [key, value] of map) {
 }
 ```
 
+```typescript
+let map = new Map<string, number>();
+map.set('b', 1);
+map.set('a', 2);
+map.set('c', 3);
+for (let [key, value] of map) {
+    console.log(key, value);  // Output: 'b' 1, 'a' 2, 'c' 3
+}
+```
+
+</CodeGroup>
+
 ### **Use `Object` for Simplicity**
 
 For simple key-value pair storage, `Object` can be used. However, it does not maintain the order of insertion and can have prototype-related issues.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let obj = {};
 obj['key1'] = 'value1';
@@ -122,16 +197,36 @@ obj['key2'] = 'value2';
 console.log(obj['key1']);  // Output: 'value1'
 ```
 
+```typescript
+let obj: { [key: string]: string } = {};
+obj['key1'] = 'value1';
+obj['key2'] = 'value2';
+console.log(obj['key1']);  // Output: 'value1'
+```
+
+</CodeGroup>
+
 ### **Handling Non-String Keys**
 
 In `Object`, keys are automatically converted to strings. This can lead to unexpected behavior when using non-string keys.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let obj = {};
 obj[1] = 'value1';
 console.log(obj['1']);  // Output: 'value1'
 ```
+
+```typescript
+let obj: { [key: string]: string } = {};
+obj[1] = 'value1';
+console.log(obj['1']);  // Output: 'value1'
+```
+
+</CodeGroup>
 
 ### **Performance with Large Data Sets**
 
@@ -144,6 +239,9 @@ While hash tables provide \(O(1)\) average-case complexity, their performance ca
 In cases where the default hash function is not suitable, custom hash functions can be implemented to better distribute keys and reduce collisions.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class CustomHashTable {
     constructor(size = 53) {
@@ -183,6 +281,46 @@ class CustomHashTable {
 }
 ```
 
+```typescript
+class RehashingHashTable<T> extends CustomHashTable<T> {
+    loadFactor: number;
+    size: number;
+    count: number;
+
+    constructor(size = 53) {
+        super(size);
+        this.loadFactor = 0.75;
+        this.size = size;
+        this.count = 0;
+    }
+
+    set(key: string, value: T): void {
+        super.set(key, value);
+        this.count++;
+        if (this.count / this.size > this.loadFactor) {
+            this.rehash();
+        }
+    }
+
+    rehash(): void {
+        let oldKeyMap = this.keyMap;
+        this.size *= 2;
+        this.keyMap = new Array(this.size);
+        this.count = 0;
+
+        for (let bucket of oldKeyMap) {
+            if (bucket) {
+                for (let [key, value] of bucket) {
+                    this.set(key, value);
+                }
+            }
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Hash Table Algorithms**
 
 #### **Rehashing**
@@ -190,6 +328,9 @@ class CustomHashTable {
 Rehashing is the process of resizing the hash table and redistributing the keys. This is typically done when the load factor exceeds a certain threshold.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class RehashingHashTable extends CustomHashTable {
     constructor(size = 53) {
@@ -224,6 +365,46 @@ class RehashingHashTable extends CustomHashTable {
 }
 ```
 
+```typescript
+class RehashingHashTable<T> extends CustomHashTable<T> {
+    loadFactor: number;
+    size: number;
+    count: number;
+
+    constructor(size = 53) {
+        super(size);
+        this.loadFactor = 0.75;
+        this.size = size;
+        this.count = 0;
+    }
+
+    set(key: string, value: T): void {
+        super.set(key, value);
+        this.count++;
+        if (this.count / this.size > this.loadFactor) {
+            this.rehash();
+        }
+    }
+
+    rehash(): void {
+        let oldKeyMap = this.keyMap;
+        this.size *= 2;
+        this.keyMap = new Array(this.size);
+        this.count = 0;
+
+        for (let bucket of oldKeyMap) {
+            if (bucket) {
+                for (let [key, value] of bucket) {
+                    this.set(key, value);
+                }
+            }
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Use Cases for Custom Hash Tables**
 
 #### **Counting Elements**
@@ -231,6 +412,9 @@ class RehashingHashTable extends CustomHashTable {
 Hash tables are often used for counting the frequency of elements in a dataset.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function countElements(arr) {
     let map = new Map();
@@ -243,11 +427,28 @@ function countElements(arr) {
 console.log(countElements(['a', 'b', 'a', 'c', 'a', 'b']));  // Output: Map { 'a' => 3, 'b' => 2, 'c' => 1 }
 ```
 
+```typescript
+function countElements(arr: string[]): Map<string, number> {
+    let map = new Map<string, number>();
+    for (let elem of arr) {
+        map.set(elem, (map.get(elem) || 0) + 1);
+    }
+    return map;
+}
+
+console.log(countElements(['a', 'b', 'a', 'c', 'a', 'b']));  // Output: Map { 'a' => 3, 'b' => 2, 'c' => 1 }
+```
+
+</CodeGroup>
+
 #### **Caching/Memoization**
 
 Hash tables can be used to store the results of expensive function calls to avoid redundant computations.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function memoize(fn) {
     let cache = new Map();
@@ -271,6 +472,33 @@ let memoizedSlowFunction = memoize(slowFunction);
 console.log(memoizedSlowFunction(5));  // Output: 10
 console.log(memoizedSlowFunction(5));  // Output: 10 (retrieved from cache)
 ```
+
+```typescript
+function memoize<T extends (...args: Parameters<T>) => ReturnType<T>>(fn: T): T {
+    const cache = new Map<string, ReturnType<T>>();
+
+    return function(...args: Parameters<T>): ReturnType<T> {
+        const key = JSON.stringify(args);
+        if (cache.has(key)) {
+            return cache.get(key) as ReturnType<T>;
+        }
+        const result = fn(...args);
+        cache.set(key, result);
+        return result;
+    } as T
+}
+
+function slowFunction(num: number): number {
+    for (let i = 0; i <= 1e6; i++) {}  // Simulate slow computation
+    return num * 2;
+}
+
+let memoizedSlowFunction = memoize(slowFunction);
+console.log(memoizedSlowFunction(5));  // Output: 10
+console.log(memoizedSlowFunction(5));  // Output: 10 (retrieved from cache)
+```
+
+</CodeGroup>
 
 ### **Practical Tips and Tricks**
 
@@ -307,6 +535,9 @@ Even with a good hash function, collisions can still occur. Ensure your collisio
 Open addressing is a collision resolution method that finds an open slot within the array when a collision occurs.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class OpenAddressingHashTable {
     constructor(size = 53) {
@@ -358,6 +589,62 @@ class OpenAddressingHashTable {
 }
 ```
 
+```typescript
+class OpenAddressingHashTable<T> {
+  keyMap: Array<[string, T] | null>;
+  size: number;
+
+  constructor(size = 53) {
+      this.keyMap = new Array(size).fill(null);
+      this.size = size;
+  }
+
+  _hash(key: string): number {
+      let total = 0;
+      let PRIME_NUMBER = 31;
+      for (let i = 0; i < Math.min(key.length, 100); i++) {
+          let char = key[i];
+          let value = char.charCodeAt(0) - 96;
+          total = (total * PRIME_NUMBER + value) % this.keyMap.length;
+      }
+      return total;
+  }
+
+  set(key: string, value: T): void {
+      let index = this._hash(key);
+      while (this.keyMap[index]) {
+          index = (index + 1) % this.size;
+      }
+      this.keyMap[index] = [key, value];
+  }
+
+  get(key: string): T | undefined {
+      let index = this._hash(key);
+      while (this.keyMap[index]) {
+          if (this.keyMap[index]?.[0] === key) {
+              return this.keyMap[index]?.[1];
+          }
+          index = (index + 1) % this.size;
+      }
+      return undefined;
+  }
+
+  delete(key: string): boolean {
+      let index = this._hash(key);
+      while (this.keyMap[index]) {
+          if (this.keyMap[index]?.[0] === key) {
+              this.keyMap[index] = null;
+              return true;
+          }
+          index = (index + 1) % this.size;
+      }
+      return false;
+  }
+}
+```
+
+</CodeGroup>
+
 ## **Hash Table Algorithms**
 Below are some common hash table algorithms you should be familiar with:
 
@@ -365,6 +652,9 @@ Below are some common hash table algorithms you should be familiar with:
 Counting frequencies involves determining how often each element appears in an array.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function countFrequencies(arr) {
     let frequencyMap = new Map();
@@ -377,10 +667,27 @@ function countFrequencies(arr) {
 console.log(countFrequencies(['a', 'b', 'a', 'c', 'a', 'b']));  // Output: Map { 'a' => 3, 'b' => 2, 'c' => 1 }
 ```
 
+```typescript
+function countFrequencies(arr: string[]): Map<string, number> {
+    let frequencyMap = new Map<string, number>();
+    for (let elem of arr) {
+        frequencyMap.set(elem, (frequencyMap.get(elem) || 0) + 1);
+    }
+    return frequencyMap;
+}
+
+console.log(countFrequencies(['a', 'b', 'a', 'c', 'a', 'b']));  // Output: Map { 'a' => 3, 'b' => 2, 'c' => 1 }
+```
+
+</CodeGroup>
+
 ### **Group Anagrams**
 Grouping anagrams involves grouping words that are anagrams of each other.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function groupAnagrams(words) {
     let map = new Map();
@@ -397,33 +704,23 @@ function groupAnagrams(words) {
 console.log(groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']));  // Output: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]
 ```
 
-### **Caching/Memoization**
-Caching or memoization stores the results of expensive function calls to avoid redundant computations.
-
-**Example:**
-```javascript
-function memoize(fn) {
-    let cache = new Map();
-    return function(...args) {
-        let key = JSON.stringify(args);
-        if (cache.has(key)) {
-            return cache.get(key);
+```typescript
+function groupAnagrams(words: string[]): string[][] {
+    let map = new Map<string, string[]>();
+    for (let word of words) {
+        let sorted = word.split('').sort().join('');
+        if (!map.has(sorted)) {
+            map.set(sorted, []);
         }
-        let result = fn(...args);
-        cache.set(key, result);
-        return result;
-    };
+        map.get(sorted)!.push(word);
+    }
+    return Array.from(map.values());
 }
 
-function slowFunction(num) {
-    for (let i = 0; i <= 1e6; i++) {}  // Simulate slow computation
-    return num * 2;
-}
-
-let memoizedSlowFunction = memoize(slowFunction);
-console.log(memoizedSlowFunction(5));  // Output: 10
-console.log(memoizedSlowFunction(5));  // Output: 10 (retrieved from cache)
+console.log(groupAnagrams(['eat', 'tea', 'tan', 'ate', 'nat', 'bat']));  // Output: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]
 ```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

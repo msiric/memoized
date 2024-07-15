@@ -49,6 +49,9 @@ A graph is a collection of nodes (vertices) connected by edges. Graphs can be di
 ### **Adjacency List**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -72,9 +75,39 @@ class Graph {
 }
 ```
 
+```typescript
+class Graph {
+    adjacencyList: { [key: string]: string[] };
+
+    constructor() {
+        this.adjacencyList = {};
+    }
+
+    addVertex(vertex: string) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+
+    addEdge(vertex1: string, vertex2: string) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1].push(vertex2);
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
+        }
+    }
+
+    // Other methods...
+}
+```
+
+</CodeGroup>
+
 ### **Adjacency Matrix**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor(size) {
@@ -95,11 +128,39 @@ class Graph {
 }
 ```
 
+```typescript
+class Graph {
+    size: number;
+    adjacencyMatrix: number[][];
+
+    constructor(size: number) {
+        this.size = size;
+        this.adjacencyMatrix = Array.from({ length: size }, () => Array(size).fill(0));
+    }
+
+    addVertex(vertex: number) {
+        // Optional: Ensure vertex is within bounds
+    }
+
+    addEdge(vertex1: number, vertex2: number) {
+        this.adjacencyMatrix[vertex1][vertex2] = 1;
+        this.adjacencyMatrix[vertex2][vertex1] = 1;  // Omitted for directed graphs
+    }
+
+    // Other methods...
+}
+```
+
+</CodeGroup>
+
 ## **Graph Operations and Methods**
 
 ### **Adding and Removing Vertices and Edges**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -140,11 +201,58 @@ class Graph {
 }
 ```
 
+```typescript
+class Graph {
+    adjacencyList: { [key: string]: string[] };
+
+    constructor() {
+        this.adjacencyList = {};
+    }
+
+    addVertex(vertex: string) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+
+    addEdge(vertex1: string, vertex2: string) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1].push(vertex2);
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
+        }
+    }
+
+    removeEdge(vertex1: string, vertex2: string) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1] = this.adjacencyList[vertex1].filter(v => v !== vertex2);
+            this.adjacencyList[vertex2] = this.adjacencyList[vertex2].filter(v => v !== vertex1);
+        }
+    }
+
+    removeVertex(vertex: string) {
+        if (this.adjacencyList[vertex]) {
+            while (this.adjacencyList[vertex].length) {
+                const adjacentVertex = this.adjacencyList[vertex].pop();
+                this.removeEdge(vertex, adjacentVertex);
+            }
+            delete this.adjacencyList[vertex];
+        }
+    }
+
+    // Other methods...
+}
+```
+
+</CodeGroup>
+
 ### **Graph Traversal**
 
 **Depth-First Search (DFS):**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -188,9 +296,59 @@ class Graph {
 }
 ```
 
+```typescript
+class Graph {
+    adjacencyList: { [key: string]: string[] };
+
+    constructor() {
+        this.adjacencyList = {};
+    }
+
+    addVertex(vertex: string) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+
+    addEdge(vertex1: string, vertex2: string) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1].push(vertex2);
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
+        }
+    }
+
+    dfs(start: string): string[] {
+        const result: string[] = [];
+        const visited: { [key: string]: boolean } = {};
+        const adjacencyList = this.adjacencyList;
+
+        (function dfsRecursive(vertex: string) {
+            if (!vertex) return null;
+            visited[vertex] = true;
+            result.push(vertex);
+
+            adjacencyList[vertex].forEach(neighbor => {
+                if (!visited[neighbor]) {
+                    return dfsRecursive(neighbor);
+                }
+            });
+        })(start);
+
+        return result;
+    }
+
+    // Other methods...
+}
+```
+
+</CodeGroup>
+
 **Breadth-First Search (BFS):**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -235,6 +393,54 @@ class Graph {
 }
 ```
 
+```typescript
+class Graph {
+    adjacencyList: { [key: string]: string[] };
+
+    constructor() {
+        this.adjacencyList = {};
+    }
+
+    addVertex(vertex: string) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+
+    addEdge(vertex1: string, vertex2: string) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1].push(vertex2);
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
+        }
+    }
+
+    bfs(start: string): string[] {
+        const queue: string[] = [start];
+        const result: string[] = [];
+        const visited: { [key: string]: boolean } = {};
+        visited[start] = true;
+
+        while (queue.length) {
+            const vertex = queue.shift()!;
+            result.push(vertex);
+
+            this.adjacencyList[vertex].forEach(neighbor => {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    queue.push(neighbor);
+                }
+            });
+        }
+
+        return result;
+    }
+
+    // Other methods...
+}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Use Adjacency List for Sparse Graphs:**
@@ -248,10 +454,25 @@ class Graph {
   console.log(graph.adjacencyList);  // Output: { A: ['B'], B: ['A'] }
   ```
 
+  ```typescript
+  let graph = new Graph();
+  graph.addVertex('A');
+  graph.addVertex('B');
+  graph.addEdge('A', 'B');
+  console.log(graph.adjacencyList);  // Output: { A: ['B'], B: ['A'] }
+  ```
+
 - **Use Adjacency Matrix for Dense Graphs:**
   Adjacency matrices are more efficient for dense graphs and can quickly check if an edge exists.
   **Example:**
   ```javascript
+  let graph = new Graph(3);
+  graph.addEdge(0, 1);
+  graph.addEdge(0, 2);
+  console.log(graph.adjacencyMatrix);  // Output: [ [ 0, 1, 1 ], [ 1, 0, 0 ], [ 1, 0, 0 ] ]
+  ```
+
+  ```typescript
   let graph = new Graph(3);
   graph.addEdge(0, 1);
   graph.addEdge(0, 2);
@@ -284,41 +505,97 @@ class Graph {
   console.log(graph.adjacencyList);  // Output: { A: [ { node: 'B', weight: 4 } ], B: [ { node: 'A', weight: 4 } ] }
   ```
 
+  ```typescript
+  class WeightedGraph {
+      adjacencyList: { [key: string]: { node: string, weight: number }[] };
+
+      constructor() {
+          this.adjacencyList = {};
+      }
+
+      addVertex(vertex: string) {
+          if (!this.adjacencyList[vertex]) this.adjacencyList[vertex] = [];
+      }
+
+      addEdge(vertex1: string, vertex2: string, weight: number) {
+          this.adjacencyList[vertex1].push({ node: vertex2, weight });
+          this.adjacencyList[vertex2].push({ node: vertex1, weight });
+      }
+  }
+
+  let graph = new WeightedGraph();
+  graph.addVertex('A');
+  graph.addVertex('B');
+  graph.addEdge('A', 'B', 4);
+  console.log(graph.adjacencyList);  // Output: { A: [ { node: 'B', weight: 4 } ], B: [ { node: 'A', weight: 4 } ] }
+  ```
+
 ## **Common Gotchas**
 
 - **Disconnected Graphs:**
   Ensure traversal algorithms handle disconnected graphs by iterating through all vertices.
+  
   **Example:**
+
   ```javascript
-    function dfsAll(graph) {
-        const visited = {};
-        const result = [];
+  function dfsAll(graph) {
+      const visited = {};
+      const result = [];
 
-        function dfs(vertex) {
-            if (!vertex) return;
-            visited[vertex] = true;
-            result.push(vertex);
+      function dfs(vertex) {
+          if (!vertex) return;
+          visited[vertex] = true;
+          result.push(vertex);
 
-            graph[vertex].forEach(neighbor => {
-                if (!visited[neighbor]) {
-                    dfs(neighbor);
-                }
-            });
-        }
+          graph[vertex].forEach(neighbor => {
+              if (!visited[neighbor]) {
+                  dfs(neighbor);
+              }
+          });
+      }
 
-        for (const vertex in graph) {
-            if (!visited[vertex]) {
-                dfs(vertex);
-            }
-        }
+      for (const vertex in graph) {
+          if (!visited[vertex]) {
+              dfs(vertex);
+          }
+      }
 
-        return result;
-    }
+      return result;
+  }
+  ```
+
+  ```typescript
+  function dfsAll(graph: { [key: string]: string[] }): string[] {
+      const visited: { [key: string]: boolean } = {};
+      const result: string[] = [];
+
+      function dfs(vertex: string) {
+          if (!vertex) return;
+          visited[vertex] = true;
+          result.push(vertex);
+
+          graph[vertex].forEach(neighbor => {
+              if (!visited[neighbor]) {
+                  dfs(neighbor);
+              }
+          });
+      }
+
+      for (const vertex in graph) {
+          if (!visited[vertex]) {
+              dfs(vertex);
+          }
+      }
+
+      return result;
+  }
   ```
 
 - **Bidirectional Edges in Directed Graphs:**
   Be cautious when adding edges to directed graphs to ensure the correct direction.
+  
   **Example:**
+
   ```javascript
   function addDirectedEdge(graph, vertex1, vertex2) {
       if (!graph[vertex1]) graph[vertex1] = [];
@@ -326,15 +603,55 @@ class Graph {
   }
   ```
 
+  ```typescript
+  function addDirectedEdge(graph: { [key: string]: string[] }, vertex1: string, vertex2: string) {
+      if (!graph[vertex1]) graph[vertex1] = [];
+      graph[vertex1].push(vertex2);
+  }
+  ```
+
 - **Cycle Detection:**
   Ensure cycle detection algorithms properly handle directed vs. undirected graphs.
+  
   **Example:**
+
   ```javascript
   function detectCycleDirected(graph) {
       const visited = new Set();
       const recStack = new Set();
 
       function dfs(vertex) {
+          if (!visited.has(vertex)) {
+              visited.add(vertex);
+              recStack.add(vertex);
+
+              for (let neighbor of graph[vertex]) {
+                  if (!visited.has(neighbor) && dfs(neighbor)) {
+                      return true;
+                  } else if (recStack.has(neighbor)) {
+                      return true;
+                  }
+              }
+          }
+          recStack.delete(vertex);
+          return false;
+      }
+
+      for (let vertex in graph) {
+          if (dfs(vertex)) {
+              return true;
+          }
+      }
+      return false;
+  }
+  ```
+
+  ```typescript
+  function detectCycleDirected(graph: { [key: string]: string[] }): boolean {
+      const visited = new Set<string>();
+      const recStack = new Set<string>();
+
+      function dfs(vertex: string): boolean {
           if (!visited.has(vertex)) {
               visited.add(vertex);
               recStack.add(vertex);
@@ -367,6 +684,9 @@ class Graph {
 Topological sorting is used to order vertices in a Directed Acyclic Graph (DAG).
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -425,11 +745,76 @@ graph.addEdge('D', 'C');
 console.log(graph.topologicalSort());  // Output: [ 'F', 'E', 'A', 'B', 'D', 'C' ]
 ```
 
+```typescript
+class Graph {
+    adjacencyList: { [key: string]: string[] };
+
+    constructor() {
+        this.adjacencyList = {};
+    }
+
+    addVertex(vertex: string) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+
+    addEdge(vertex1: string, vertex2: string) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1].push(vertex2);
+        }
+    }
+
+    topologicalSort(): string[] {
+        const stack: string[] = [];
+        const visited: { [key: string]: boolean } = {};
+
+        const dfs = (vertex: string) => {
+            visited[vertex] = true;
+            this.adjacencyList[vertex].forEach(neighbor => {
+                if (!visited[neighbor]) {
+                    dfs(neighbor);
+                }
+            });
+            stack.push(vertex);
+        };
+
+        for (let vertex in this.adjacencyList) {
+            if (!visited[vertex]) {
+                dfs(vertex);
+            }
+        }
+
+        return stack.reverse();
+    }
+}
+
+let graph = new Graph();
+graph.addVertex('A');
+graph.addVertex('B');
+graph.addVertex('C');
+graph.addVertex('D');
+graph.addVertex('E');
+graph.addVertex('F');
+graph.addEdge('A', 'D');
+graph.addEdge('F', 'B');
+graph.addEdge('B', 'D');
+graph.addEdge('F', 'A');
+graph.addEdge('D', 'C');
+
+console.log(graph.topologicalSort());  // Output: [ 'F', 'E', 'A', 'B', 'D', 'C' ]
+```
+
+</CodeGroup>
+
 ### **Shortest Path Algorithms**
 
 **Dijkstra's Algorithm:**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -541,6 +926,123 @@ graph.addEdge('E', 'F', 1);
 console.log(graph.dijkstra('A', 'E'));  // Output: ['A', 'C', 'D', 'F', 'E']
 ```
 
+```typescript
+class Graph {
+    adjacencyList: { [key: string]: { node: string, weight: number }[] };
+
+    constructor() {
+        this.adjacencyList = {};
+    }
+
+    addVertex(vertex: string) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+
+    addEdge(vertex1: string, vertex2: string, weight: number) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1].push({ node: vertex2, weight });
+            this.adjacencyList[vertex2].push({ node: vertex1, weight });  // Omitted for directed graphs
+        }
+    }
+
+    dijkstra(start: string, end: string): string[] {
+        const distances: { [key: string]: number } = {};
+        const priorityQueue = new PriorityQueue();
+        const previous: { [key: string]: string | null } = {};
+        const path: string[] = []; // to return at end
+        let smallest: string;
+
+        // build up initial state
+        for (let vertex in this.adjacencyList) {
+            if (vertex === start) {
+                distances[vertex] = 0;
+                priorityQueue.enqueue(vertex, 0);
+            } else {
+                distances[vertex] = Infinity;
+                priorityQueue.enqueue(vertex, Infinity);
+            }
+            previous[vertex] = null;
+        }
+
+        // as long as there is something to visit
+        while (priorityQueue.values.length) {
+            smallest = priorityQueue.dequeue().val;
+            if (smallest === end) {
+                // WE ARE DONE
+                // BUILD UP PATH TO RETURN AT END
+                while (previous[smallest]) {
+                    path.push(smallest);
+                    smallest = previous[smallest];
+                }
+                break;
+            }
+            if (smallest || distances[smallest] !== Infinity) {
+                for (let neighbor in this.adjacencyList[smallest]) {
+                    // find neighboring node
+                    let nextNode = this.adjacencyList[smallest][neighbor];
+                    // calculate new distance to neighboring node
+                    let candidate = distances[smallest] + nextNode.weight;
+                    let nextNeighbor = nextNode.node;
+                    if (candidate < distances[nextNeighbor]) {
+                        // updating new smallest distance to neighbor
+                        distances[nextNeighbor] = candidate;
+                        // updating previous - How we got to neighbor
+                        previous[nextNeighbor] = smallest;
+                        // enqueue in priority queue with new priority
+                        priorityQueue.enqueue(nextNeighbor, candidate);
+                    }
+                }
+            }
+        }
+        return path.concat(smallest).reverse();
+    }
+}
+
+class PriorityQueue {
+    values: { val: string, priority: number }[];
+
+    constructor() {
+        this.values = [];
+    }
+
+    enqueue(val: string, priority: number) {
+        this.values.push({ val, priority });
+        this.sort();
+    }
+
+    dequeue() {
+        return this.values.shift()!;
+    }
+
+    sort() {
+        this.values.sort((a, b) => a.priority - b.priority);
+    }
+}
+
+let graph = new Graph();
+graph.addVertex('A');
+graph.addVertex('B');
+graph.addVertex('C');
+graph.addVertex('D');
+graph.addVertex('E');
+graph.addVertex('F');
+
+graph.addEdge('A', 'B', 4);
+graph.addEdge('A', 'C', 2);
+graph.addEdge('B', 'E', 3);
+graph.addEdge('C', 'D', 2);
+graph.addEdge('C', 'F', 4);
+graph.addEdge('D', 'E', 3);
+graph.addEdge('D', 'F', 1);
+graph.addEdge('E', 'F', 1);
+
+console.log(graph.dijkstra('A', 'E'));  // Output: ['A', 'C', 'D', 'F', 'E']
+```
+
+</CodeGroup>
+
 ## **Graph Algorithms**
 Below are some common graph algorithms you should be familiar with:
 
@@ -548,6 +1050,9 @@ Below are some common graph algorithms you should be familiar with:
 A bipartite graph check determines if a graph can be colored with two colors such that no two adjacent vertices share the same color.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -607,10 +1112,76 @@ graph.addEdge('C', 'D');
 console.log(graph.isBipartite()); // Output: true
 ```
 
+```typescript
+class Graph {
+    adjacencyList: Map<string, string[]>;
+
+    constructor() {
+        this.adjacencyList = new Map<string, string[]>();
+    }
+
+    addVertex(vertex: string) {
+        this.adjacencyList.set(vertex, []);
+    }
+
+    addEdge(vertex1: string, vertex2: string) {
+        this.adjacencyList.get(vertex1)!.push(vertex2);
+        this.adjacencyList.get(vertex2)!.push(vertex1);
+    }
+
+    isBipartite(): boolean {
+        const colors = new Map<string, number>(); // Stores colors of vertices
+        const queue: string[] = []; // Queue for BFS
+
+        for (let vertex of this.adjacencyList.keys()) {
+            if (!colors.has(vertex)) {
+                colors.set(vertex, 0); // Assign the first color (0) to the vertex
+                queue.push(vertex);
+
+                while (queue.length > 0) {
+                    const current = queue.shift()!;
+
+                    for (let neighbor of this.adjacencyList.get(current)!) {
+                        if (!colors.has(neighbor)) {
+                            // Assign an alternate color to the neighboring vertex
+                            colors.set(neighbor, 1 - colors.get(current)!);
+                            queue.push(neighbor);
+                        } else if (colors.get(neighbor) === colors.get(current)) {
+                            // If the neighboring vertex has the same color, the graph is not bipartite
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+}
+
+// Example usage
+const graph = new Graph();
+graph.addVertex('A');
+graph.addVertex('B');
+graph.addVertex('C');
+graph.addVertex('D');
+
+graph.addEdge('A', 'B');
+graph.addEdge('A', 'C');
+graph.addEdge('B', 'D');
+graph.addEdge('C', 'D');
+
+console.log(graph.isBipartite()); // Output: true
+```
+
+</CodeGroup>
+
 ### **Finding Connected Components**
 Finding connected components identifies all the subgraphs in which any two vertices are connected to each other by paths.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Graph {
     constructor() {
@@ -670,6 +1241,70 @@ graph.addEdge('D', 'E');
 
 console.log(graph.findConnectedComponents());  // Output: [['A', 'B', 'C'], ['D', 'E']]
 ```
+
+```typescript
+class Graph {
+    adjacencyList: { [key: string]: string[] };
+
+    constructor() {
+        this.adjacencyList = {};
+    }
+
+    addVertex(vertex: string) {
+        if (!this.adjacencyList[vertex]) {
+            this.adjacencyList[vertex] = [];
+        }
+    }
+
+    addEdge(vertex1: string, vertex2: string) {
+        if (this.adjacencyList[vertex1] && this.adjacencyList[vertex2]) {
+            this.adjacencyList[vertex1].push(vertex2);
+            this.adjacencyList[vertex2].push(vertex1);  // Omitted for directed graphs
+        }
+    }
+
+    findConnectedComponents(): string[][] {
+        const visited = new Set<string>();
+        const components: string[][] = [];
+
+        const dfs = (vertex: string, component: string[]) => {
+            visited.add(vertex);
+            component.push(vertex);
+
+            this.adjacencyList[vertex].forEach(neighbor => {
+                if (!visited.has(neighbor)) {
+                    dfs(neighbor, component);
+                }
+            });
+        };
+
+        for (let vertex in this.adjacencyList) {
+            if (!visited.has(vertex)) {
+                const component: string[] = [];
+                dfs(vertex, component);
+                components.push(component);
+            }
+        }
+
+        return components;
+    }
+}
+
+let graph = new Graph();
+graph.addVertex('A');
+graph.addVertex('B');
+graph.addVertex('C');
+graph.addVertex('D');
+graph.addVertex('E');
+
+graph.addEdge('A', 'B');
+graph.addEdge('A', 'C');
+graph.addEdge('D', 'E');
+
+console.log(graph.findConnectedComponents());  // Output: [['A', 'B', 'C'], ['D', 'E']]
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

@@ -42,7 +42,10 @@ Consider an array `[3, 1, 5, 4, 2]`. After applying Cyclic Sort, the array will 
 2. For each element, if it is not at its correct index, swap it with the element at its correct index.
 3. Continue this process until all elements are in their correct positions.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function cyclicSort(arr) {
     let i = 0;
@@ -64,6 +67,29 @@ const arr = [3, 1, 5, 4, 2];
 console.log(cyclicSort(arr));  // Output: [1, 2, 3, 4, 5]
 ```
 
+```typescript
+function cyclicSort(arr: number[]): number[] {
+    let i = 0;
+
+    while (i < arr.length) {
+        const correctIndex = arr[i] - 1;
+        if (arr[i] !== arr[correctIndex]) {
+            [arr[i], arr[correctIndex]] = [arr[correctIndex], arr[i]];  // Swap elements
+        } else {
+            i++;
+        }
+    }
+
+    return arr;
+}
+
+// Example usage:
+const arr: number[] = [3, 1, 5, 4, 2];
+console.log(cyclicSort(arr));  // Output: [1, 2, 3, 4, 5]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Ensure the correct index calculation is accurate to avoid infinite loops.
 - Use a while loop instead of a for loop to handle swaps effectively without skipping elements.
@@ -83,7 +109,10 @@ console.log(cyclicSort(arr));  // Output: [1, 2, 3, 4, 5]
 2. Iterate through the sorted array and identify indices where the numbers are not correct.
 3. The missing numbers correspond to the indices where the values are incorrect.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findMissingNumbers(arr) {
     let i = 0;
@@ -112,6 +141,36 @@ const arr = [3, 7, 1, 2, 8, 4, 5];
 console.log(findMissingNumbers(arr));  // Output: [6]
 ```
 
+```typescript
+function findMissingNumbers(arr: number[]): number[] {
+    let i = 0;
+
+    while (i < arr.length) {
+        const correctIndex = arr[i] - 1;
+        if (arr[i] > 0 && arr[i] <= arr.length && arr[i] !== arr[correctIndex]) {
+            [arr[i], arr[correctIndex]] = [arr[correctIndex], arr[i]];  // Swap elements
+        } else {
+            i++;
+        }
+    }
+
+    const missingNumbers: number[] = [];
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] !== i + 1) {
+            missingNumbers.push(i + 1);
+        }
+    }
+
+    return missingNumbers;
+}
+
+// Example usage:
+const arr: number[] = [3, 7, 1, 2, 8, 4, 5];
+console.log(findMissingNumbers(arr));  // Output: [6]
+```
+
+</CodeGroup>
+
 ### **Tips and Tricks:**
 - Ensure the array contains numbers in the range from 1 to n with possible missing numbers.
 - Use a while loop to handle swaps effectively without skipping elements.
@@ -131,7 +190,10 @@ console.log(findMissingNumbers(arr));  // Output: [6]
 2. Iterate through the sorted array and identify indices where the numbers are not correct.
 3. The duplicate numbers correspond to the values that are out of place.
 
-### **Code Example:**
+### **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findDuplicateNumbers(arr) {
     let i = 0;
@@ -159,6 +221,36 @@ function findDuplicateNumbers(arr) {
 const arr = [3, 1, 3, 4, 2];
 console.log(findDuplicateNumbers(arr));  // Output: [3]
 ```
+
+```typescript
+function findDuplicateNumbers(arr: number[]): number[] {
+    let i = 0;
+
+    while (i < arr.length) {
+        const correctIndex = arr[i] - 1;
+        if (arr[i] !== arr[correctIndex]) {
+            [arr[i], arr[correctIndex]] = [arr[correctIndex], arr[i]];  // Swap elements
+        } else {
+            i++;
+        }
+    }
+
+    const duplicates: number[] = [];
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] !== i + 1) {
+            duplicates.push(arr[i]);
+        }
+    }
+
+    return duplicates;
+}
+
+// Example usage:
+const arr: number[] = [3, 1, 3, 4, 2];
+console.log(findDuplicateNumbers(arr));  // Output: [3]
+```
+
+</CodeGroup>
 
 ### **Tips and Tricks:**
 - Ensure the array contains numbers in the range from 1 to n with possible duplicates.

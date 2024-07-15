@@ -45,6 +45,9 @@ A linked list is a linear data structure where each element, known as a node, co
 ### **Creating a Linked List**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Node {
     constructor(value) {
@@ -63,9 +66,38 @@ class LinkedList {
 }
 ```
 
+```typescript
+class Node {
+    value: number;
+    next: Node | null;
+
+    constructor(value: number) {
+        this.value = value;
+        this.next = null;
+    }
+}
+
+class LinkedList {
+    head: Node | null;
+    size: number;
+
+    constructor() {
+        this.head = null;
+        this.size = 0;
+    }
+
+    // Methods to be defined...
+}
+```
+
+</CodeGroup>
+
 ### **Inserting Elements**
 
 **At the Beginning:**
+
+<CodeGroup>
+
 ```javascript
 class LinkedList {
     // ... other methods ...
@@ -83,7 +115,29 @@ class LinkedList {
 }
 ```
 
+```typescript
+class LinkedList {
+    // ... other methods ...
+
+    insertAtBeginning(value: number) {
+        const newNode = new Node(value);
+        if (!this.head) {
+            this.head = newNode;
+        } else {
+            newNode.next = this.head;
+            this.head = newNode;
+        }
+        this.size++;
+    }
+}
+```
+
+</CodeGroup>
+
 **At the End:**
+
+<CodeGroup>
+
 ```javascript
 class LinkedList {
     // ... other methods ...
@@ -104,9 +158,34 @@ class LinkedList {
 }
 ```
 
+```typescript
+class LinkedList {
+    // ... other methods ...
+
+    insertAtEnd(value: number) {
+        const newNode = new Node(value);
+        if (!this.head) {
+            this.head = newNode;
+        } else {
+            let current = this.head;
+            while (current.next) {
+                current = current.next;
+            }
+            current.next = newNode;
+        }
+        this.size++;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Deleting Elements**
 
 **From the Beginning:**
+
+<CodeGroup>
+
 ```javascript
 class LinkedList {
     // ... other methods ...
@@ -121,7 +200,26 @@ class LinkedList {
 }
 ```
 
+```typescript
+class LinkedList {
+    // ... other methods ...
+
+    deleteFromBeginning() {
+        if (!this.head) return null;
+        const value = this.head.value;
+        this.head = this.head.next;
+        this.size--;
+        return value;
+    }
+}
+```
+
+</CodeGroup>
+
 **From the End:**
+
+<CodeGroup>
+
 ```javascript
 class LinkedList {
     // ... other methods ...
@@ -146,9 +244,38 @@ class LinkedList {
 }
 ```
 
+```typescript
+class LinkedList {
+    // ... other methods ...
+
+    deleteFromEnd() {
+        if (!this.head) return null;
+        if (!this.head.next) {
+            const value = this.head.value;
+            this.head = null;
+            this.size--;
+            return value;
+        }
+        let current = this.head;
+        while (current.next!.next) {
+            current = current.next;
+        }
+        const value = current.next!.value;
+        current.next = null;
+        this.size--;
+        return value;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Searching for Elements**
 
 **By Value:**
+
+<CodeGroup>
+
 ```javascript
 class LinkedList {
     // ... other methods ...
@@ -164,9 +291,29 @@ class LinkedList {
 }
 ```
 
+```typescript
+class LinkedList {
+    // ... other methods ...
+
+    search(value: number): boolean {
+        let current = this.head;
+        while (current) {
+            if (current.value === value) return true;
+            current = current.next;
+        }
+        return false;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Traversing the List**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class LinkedList {
     // ... other methods ...
@@ -181,11 +328,30 @@ class LinkedList {
 }
 ```
 
+```typescript
+class LinkedList {
+    // ... other methods ...
+
+    traverse() {
+        let current = this.head;
+        while (current) {
+            console.log(current.value);
+            current = current.next;
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Use Sentinel Nodes:**
   Using a dummy head node can simplify insertions and deletions by avoiding special cases for an empty list or single element list.
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   class LinkedList {
       constructor() {
@@ -207,9 +373,37 @@ class LinkedList {
   }
   ```
 
+  ```typescript
+  class LinkedList {
+      head: Node;
+      size: number;
+
+      constructor() {
+          this.head = new Node(null);  // Dummy node
+          this.size = 0;
+      }
+
+      insertAtEnd(value: number) {
+          const newNode = new Node(value);
+          let current = this.head;
+          while (current.next) {
+              current = current.next;
+          }
+          current.next = newNode;
+          this.size++;
+      }
+
+      // Other methods...
+  }
+  ```
+  </CodeGroup>
+
 - **Reverse a Linked List:**
   Reversing a linked list is a common interview question.
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   class LinkedList {
       // ... other methods ...
@@ -228,6 +422,25 @@ class LinkedList {
   }
   ```
 
+  ```typescript
+  class LinkedList {
+      // ... other methods ...
+
+      reverse() {
+          let prev: Node | null = null;
+          let current: Node | null = this.head;
+          while (current) {
+              let next: Node | null = current.next;
+              current.next = prev;
+              prev = current;
+              current = next;
+          }
+          this.head = prev;
+      }
+  }
+  ```
+  </CodeGroup>
+
 ## **Common Gotchas**
 
 - **Null Checks:**
@@ -235,6 +448,14 @@ class LinkedList {
   **Example:**
   ```javascript
   let current = this.head;
+  while (current && current.next) {
+      // Perform operations
+      current = current.next;
+  }
+  ```
+
+  ```typescript
+  let current: Node | null = this.head;
   while (current && current.next) {
       // Perform operations
       current = current.next;
@@ -254,6 +475,9 @@ class LinkedList {
 Doubly linked lists have nodes that point to both the next and previous nodes, allowing for more efficient insertions and deletions from both ends.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class DoublyNode {
     constructor(value) {
@@ -287,11 +511,57 @@ class DoublyLinkedList {
 }
 ```
 
+```typescript
+class DoublyNode {
+    value: number;
+    next: DoublyNode | null;
+    prev: DoublyNode | null;
+
+    constructor(value: number) {
+        this.value = value;
+        this.next = null;
+        this.prev = null;
+    }
+}
+
+class DoublyLinkedList {
+    head: DoublyNode | null;
+    tail: DoublyNode | null;
+    size: number;
+
+    constructor() {
+        this.head = null;
+        this.tail = null;
+        this.size = 0;
+    }
+
+    insertAtEnd(value: number) {
+        const newNode = new DoublyNode(value);
+        if (!this.head) {
+            this.head = newNode;
+            this.tail = newNode;
+        } else {
+            this.tail.next = newNode;
+            newNode.prev = this.tail;
+            this.tail = newNode;
+        }
+        this.size++;
+    }
+
+    // Other methods...
+}
+```
+
+</CodeGroup>
+
 ### **Circular Linked Lists**
 
 Circular linked lists have the last node pointing back to the head, forming a circle. They are useful in scenarios where the list needs to be traversed repeatedly.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class CircularLinkedList {
     constructor() {
@@ -319,6 +589,38 @@ class CircularLinkedList {
 }
 ```
 
+```typescript
+class CircularLinkedList {
+    head: Node | null;
+    size: number;
+
+    constructor() {
+        this.head = null;
+        this.size = 0;
+    }
+
+    insertAtEnd(value: number) {
+        const newNode = new Node(value);
+        if (!this.head) {
+            this.head = newNode;
+            newNode.next = this.head;
+        } else {
+            let current = this.head;
+            while (current.next !== this.head) {
+                current = current.next;
+            }
+            current.next = newNode;
+            newNode.next = this.head;
+        }
+        this.size++;
+    }
+
+    // Other methods...
+}
+```
+
+</CodeGroup>
+
 ## **Linked List Algorithms**
 Below are some common linked list algorithms you should be familiar with:
 
@@ -326,6 +628,9 @@ Below are some common linked list algorithms you should be familiar with:
 Detecting a cycle in a linked list checks if there is a loop where a node's next pointer points back to a previous node.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class LinkedList {
     constructor() {
@@ -347,10 +652,38 @@ class LinkedList {
 }
 ```
 
+```typescript
+class LinkedList {
+    head: Node | null;
+
+    constructor() {
+        this.head = null;
+    }
+
+    // ... other methods ...
+
+    hasCycle(): boolean {
+        let slow: Node | null = this.head;
+        let fast: Node | null = this.head;
+        while (fast && fast.next) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow === fast) return true;
+        }
+        return false;
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Merging Two Sorted Lists**
 Merging two sorted lists combines them into a single sorted linked list.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class Node {
     constructor(value = 0, next = null) {
@@ -391,6 +724,52 @@ while (current) {
 }
 // Output: 1, 2, 3, 4, 5, 6
 ```
+
+```typescript
+class Node {
+    value: number;
+    next: Node | null;
+
+    constructor(value: number, next: Node | null = null) {
+        this.value = value;
+        this.next = next;
+    }
+}
+
+function mergeTwoSortedLists(l1: Node | null, l2: Node | null): Node | null {
+    let dummy = new Node(0);
+    let current = dummy;
+
+    while (l1 && l2) {
+        if (l1.value < l2.value) {
+            current.next = l1;
+            l1 = l1.next;
+        } else {
+            current.next = l2;
+            l2 = l2.next;
+        }
+        current = current.next;
+    }
+
+    current.next = l1 || l2;
+    return dummy.next;
+}
+
+// Example usage:
+let l1 = new Node(1, new Node(3, new Node(5)));
+let l2 = new Node(2, new Node(4, new Node(6)));
+let mergedList = mergeTwoSortedLists(l1, l2);
+
+// Printing the merged list
+let current: Node | null = mergedList;
+while (current) {
+    console.log(current.value);
+    current = current.next;
+}
+// Output: 1, 2, 3, 4, 5, 6
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

@@ -44,6 +44,9 @@ A heap is a complete binary tree where each node is either greater than or equal
 ### **Creating a Heap**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -54,9 +57,26 @@ class MinHeap {
 }
 ```
 
+```typescript
+class MinHeap {
+    heap: number[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    // Methods to be defined...
+}
+```
+
+</CodeGroup>
+
 ### **Inserting Elements**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -85,9 +105,44 @@ class MinHeap {
 }
 ```
 
+```typescript
+class MinHeap {
+    heap: number[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    insert(element: number): void {
+        this.heap.push(element);
+        this.heapifyUp();
+    }
+
+    heapifyUp(): void {
+        let index = this.heap.length - 1;
+        while (index > 0) {
+            let element = this.heap[index];
+            let parentIndex = Math.floor((index - 1) / 2);
+            let parent = this.heap[parentIndex];
+
+            if (parent <= element) break;
+
+            this.heap[index] = parent;
+            this.heap[parentIndex] = element;
+            index = parentIndex;
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Extracting the Minimum/Maximum Element**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -149,9 +204,77 @@ class MinHeap {
 }
 ```
 
+```typescript
+class MinHeap {
+    heap: number[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    insert(element: number): void {
+        this.heap.push(element);
+        this.heapifyUp();
+    }
+
+    heapifyUp(): void {
+        let index = this.heap.length - 1;
+        while (index > 0) {
+            let element = this.heap[index];
+            let parentIndex = Math.floor((index - 1) / 2);
+            let parent = this.heap[parentIndex];
+
+            if (parent <= element) break;
+
+            this.heap[index] = parent;
+            this.heap[parentIndex] = element;
+            index = parentIndex;
+        }
+    }
+
+    extractMin(): number | null {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop()!;
+        let min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this.heapifyDown();
+        return min;
+    }
+
+    heapifyDown(): void {
+        let index = 0;
+        let length = this.heap.length;
+
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let smallest = index;
+
+            if (leftChildIndex < length && this.heap[leftChildIndex] < this.heap[smallest]) {
+                smallest = leftChildIndex;
+            }
+
+            if (rightChildIndex < length && this.heap[rightChildIndex] < this.heap[smallest]) {
+                smallest = rightChildIndex;
+            }
+
+            if (smallest === index) break;
+
+            [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+            index = smallest;
+        }
+    }
+}
+```
+
+</CodeGroup>
+
 ### **Peeking the Minimum/Maximum Element**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class MinHeap {
     constructor() {
@@ -217,111 +340,288 @@ class MinHeap {
 }
 ```
 
+```typescript
+class MinHeap {
+    heap: number[];
+
+    constructor() {
+        this.heap = [];
+    }
+
+    insert(element: number): void {
+        this.heap.push(element);
+        this.heapifyUp();
+    }
+
+    heapifyUp(): void {
+        let index = this.heap.length - 1;
+        while (index > 0) {
+            let element = this.heap[index];
+            let parentIndex = Math.floor((index - 1) / 2);
+            let parent = this.heap[parentIndex];
+
+            if (parent <= element) break;
+
+            this.heap[index] = parent;
+            this.heap[parentIndex] = element;
+            index = parentIndex;
+        }
+    }
+
+    extractMin(): number | null {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop()!;
+        let min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this.heapifyDown();
+        return min;
+    }
+
+    heapifyDown(): void {
+        let index = 0;
+        let length = this.heap.length;
+
+        while (true) {
+            let leftChildIndex = 2 * index + 1;
+            let rightChildIndex = 2 * index + 2;
+            let smallest = index;
+
+            if (leftChildIndex < length && this.heap[leftChildIndex] < this.heap[smallest]) {
+                smallest = leftChildIndex;
+            }
+
+            if (rightChildIndex < length && this.heap[rightChildIndex] < this.heap[smallest]) {
+                smallest = rightChildIndex;
+            }
+
+            if (smallest === index) break;
+
+            [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+            index = smallest;
+        }
+    }
+
+    peek(): number | null {
+        return this.heap.length > 0 ? this.heap[0] : null;
+    }
+}
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
-- **Use Heaps for Priority Queues:**
-  Heaps are the ideal data structure for implementing priority queues where you need efficient access to the highest (or lowest) priority element.
-  **Example:**
-  ```javascript
-  class PriorityQueue {
-      constructor() {
-          this.heap = new MinHeap();
-      }
+### **Use Heaps for Priority Queues:**
+Heaps are the ideal data structure for implementing priority queues where you need efficient access to the highest (or lowest) priority element.
 
-      enqueue(element) {
-          this.heap.insert(element);
-      }
+**Example:**
 
-      dequeue() {
-          return this.heap.extractMin();
-      }
+<CodeGroup>
 
-      peek() {
-          return this.heap.peek();
-      }
+```javascript
+class PriorityQueue {
+    constructor() {
+        this.heap = new MinHeap();
+    }
 
-      isEmpty() {
-          return this.heap.size() === 0;
-      }
+    enqueue(element) {
+        this.heap.insert(element);
+    }
 
-      size() {
-          return this.heap.size();
-      }
-  }
-  ```
+    dequeue() {
+        return this.heap.extractMin();
+    }
 
-- **Heapify an Array:**
-  You can convert an array into a heap in O(n) time by heapifying it.
-  **Example:**
-  ```javascript
-  function heapify(array) {
-      let heap = new MinHeap();
-      for (let element of array) {
-          heap.insert(element);
-      }
-      return heap;
-  }
+    peek() {
+        return this.heap.peek();
+    }
 
-  let array = [4, 10, 3, 5, 1];
-  let heap = heapify(array);
-  console.log(heap.heap);  // Output: Min-heapified array
-  ```
+    isEmpty() {
+        return this.heap.size() === 0;
+    }
 
-    <Note>
-        Why is heapifying an array an O(n) operation? An optimized heap construction algorithm leverages the properties of a complete binary tree, reducing the overall number of operations needed. Starting from the last non-leaf node and moving upwards, each node adjustment takes progressively less time, resulting in a linear time complexity, O(n).
-    </Note>
+    size() {
+        return this.heap.size();
+    }
+}
+```
 
-- **Heap Sort:**
-  Use heaps to implement an efficient sorting algorithm.
-  **Example:**
-  ```javascript
-  function heapSort(array) {
-      let heap = heapify(array);
-      let sortedArray = [];
-      while (!heap.isEmpty()) {
-          sortedArray.push(heap.extractMin());
-      }
-      return sortedArray;
-  }
+```typescript
+class PriorityQueue {
+    heap: MinHeap;
 
-  let array = [4, 10, 3, 5, 1];
-  let sortedArray = heapSort(array);
-  console.log(sortedArray);  // Output: [1, 3, 4, 5, 10]
-  ```
+    constructor() {
+        this.heap = new MinHeap();
+    }
+
+    enqueue(element: number): void {
+        this.heap.insert(element);
+    }
+
+    dequeue(): number | null {
+        return this.heap.extractMin();
+    }
+
+    peek(): number | null {
+        return this.heap.peek();
+    }
+
+    isEmpty(): boolean {
+        return this.heap.size() === 0;
+    }
+
+    size(): number {
+        return this.heap.size();
+    }
+}
+```
+
+</CodeGroup>
+
+### **Heapify an Array:**
+You can convert an array into a heap in O(n) time by heapifying it.
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+function heapify(array) {
+    let heap = new MinHeap();
+    for (let element of array) {
+        heap.insert(element);
+    }
+    return heap;
+}
+
+let array = [4, 10, 3, 5, 1];
+let heap = heapify(array);
+console.log(heap.heap);  // Output: Min-heapified array
+```
+
+```typescript
+function heapify(array: number[]): MinHeap {
+    let heap = new MinHeap();
+    for (let element of array) {
+        heap.insert(element);
+    }
+    return heap;
+}
+
+let array = [4, 10, 3, 5, 1];
+let heap = heapify(array);
+console.log(heap.heap);  // Output: Min-heapified array
+```
+
+</CodeGroup>
+
+### **Heap Sort:**
+Use heaps to implement an efficient sorting algorithm.
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+function heapSort(array) {
+    let heap = heapify(array);
+    let sortedArray = [];
+    while (!heap.isEmpty()) {
+        sortedArray.push(heap.extractMin());
+    }
+    return sortedArray;
+}
+
+let array = [4, 10, 3, 5, 1];
+let sortedArray = heapSort(array);
+console.log(sortedArray);  // Output: [1, 3, 4, 5, 10]
+```
+
+```typescript
+function heapSort(array: number[]): number[] {
+    let heap = heapify(array);
+    let sortedArray: number[] = [];
+    while (!heap.isEmpty()) {
+        sortedArray.push(heap.extractMin()!);
+    }
+    return sortedArray;
+}
+
+let array = [4, 10, 3, 5, 1];
+let sortedArray = heapSort(array);
+console.log(sortedArray);  // Output: [1, 3, 4, 5, 10]
+```
+
+</CodeGroup>
 
 ## **Common Gotchas**
 
-- **Heap Property Violations:**
-  Ensure that the heap property is maintained after every insertion and deletion to avoid incorrect behavior.
-  **Example:**
-  ```javascript
-  if (this.heap[parentIndex] > this.heap[index]) {
-      // Maintain heap property
-  }
-  ```
+### **Heap Property Violations:**
+Ensure that the heap property is maintained after every insertion and deletion to avoid incorrect behavior.
 
-- **Index Calculations:**
-  Be careful with index calculations, especially when working with the left and right child indices.
-  **Example:**
-  ```javascript
-  let leftChildIndex = 2 * index + 1;
-  let rightChildIndex = 2 * index + 2;
-  ```
+**Example:**
 
-- **Heap Size Management:**
-  Always check the size of the heap before performing operations to avoid underflow errors.
-  **Example:**
-  ```javascript
-  if (this.heap.length === 0) return null;
-  ```
+<CodeGroup>
+
+```javascript
+if (this.heap[parentIndex] > this.heap[index]) {
+    // Maintain heap property
+}
+```
+
+```typescript
+if (this.heap[parentIndex] > this.heap[index]) {
+    // Maintain heap property
+}
+```
+
+</CodeGroup>
+
+### **Index Calculations:**
+Be careful with index calculations, especially when working with the left and right child indices.
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+let leftChildIndex = 2 * index + 1;
+let rightChildIndex = 2 * index + 2;
+```
+
+```typescript
+let leftChildIndex = 2 * index + 1;
+let rightChildIndex = 2 * index + 2;
+```
+
+</CodeGroup>
+
+### **Heap Size Management:**
+Always check the size of the heap before performing operations to avoid underflow errors.
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+if (this.heap.length === 0) return null;
+```
+
+```typescript
+if (this.heap.length === 0) return null;
+```
+
+</CodeGroup>
 
 ## **Advanced Topics**
 
 ### **D-ary Heaps**
-
 A D-ary heap is a generalization of a binary heap where each node has D children. This can reduce the height of the heap and improve some operations.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class DaryHeap {
     constructor(d) {
@@ -393,16 +693,90 @@ class DaryHeap {
 }
 ```
 
-### **Fibonacci Heaps**
+```typescript
+class DaryHeap {
+    heap: number[];
+    d: number;
 
-Fibonacci heaps are advanced heap structures that support a variety of heap operations more efficiently than binary heaps in amortized time. They are particularly useful in graph algorithms like Dijkstra's shortest path.
-[Learn more about Fibonacci heaps](https://en.wikipedia.org/wiki/Fibonacci_heap)
+    constructor(d: number) {
+        this.heap = [];
+        this.d = d;
+    }
+
+    parentIndex(index: number): number {
+        return Math.floor((index - 1) / this.d);
+    }
+
+    childIndices(index: number): number[] {
+        let children: number[] = [];
+        for (let i = 1; i <= this.d; i++) {
+            children.push(this.d * index + i);
+        }
+        return children;
+    }
+
+    insert(element: number): void {
+        this.heap.push(element);
+        this.heapifyUp();
+    }
+
+    heapifyUp(): void {
+        let index = this.heap.length - 1;
+        while (index > 0) {
+            let element = this.heap[index];
+            let parentIndex = this.parentIndex(index);
+            let parent = this.heap[parentIndex];
+
+            if (parent <= element) break;
+
+            this.heap[index] = parent;
+            this.heap[parentIndex] = element;
+            index = parentIndex;
+        }
+    }
+
+    extractMin(): number | null {
+        if (this.heap.length === 0) return null;
+        if (this.heap.length === 1) return this.heap.pop()!;
+        let min = this.heap[0];
+        this.heap[0] = this.heap.pop()!;
+        this.heapifyDown();
+        return min;
+    }
+
+    heapifyDown(): void {
+        let index = 0;
+        let length = this.heap.length;
+
+        while (true) {
+            let smallest = index;
+            let children = this.childIndices(index);
+
+            for (let childIndex of children) {
+                if (childIndex < length && this.heap[childIndex] < this.heap[smallest]) {
+                    smallest = childIndex;
+                }
+            }
+
+            if (smallest === index) break;
+
+            [this.heap[index], this.heap[smallest]] = [this.heap[smallest], this.heap[index]];
+            index = smallest;
+        }
+    }
+}
+```
+
+</CodeGroup>
 
 ## **Heap Algorithms**
 
 ### **Kth Largest Element**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function findKthLargest(nums, k) {
     let minHeap = new MinHeap();
@@ -422,9 +796,33 @@ let k = 2;
 console.log(findKthLargest(nums, k));  // Output: 5
 ```
 
+```typescript
+function findKthLargest(nums: number[], k: number): number | null {
+    let minHeap = new MinHeap();
+
+    for (let num of nums) {
+        minHeap.insert(num);
+        if (minHeap.size() > k) {
+            minHeap.extractMin();
+        }
+    }
+
+    return minHeap.peek();
+}
+
+let nums = [3, 2, 1, 5, 6, 4];
+let k = 2;
+console.log(findKthLargest(nums, k));  // Output: 5
+```
+
+</CodeGroup>
+
 ### **Merge K Sorted Lists**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 class ListNode {
     constructor(val, next = null) {
@@ -466,6 +864,53 @@ while (mergedList) {
     mergedList = mergedList.next;
 }
 ```
+
+```typescript
+class ListNode {
+    val: number;
+    next: ListNode | null;
+
+    constructor(val: number, next: ListNode | null = null) {
+        this.val = val;
+        this.next = next;
+    }
+}
+
+function mergeKLists(lists: ListNode[]): ListNode | null {
+    let minHeap = new MinHeap();
+    for (let list of lists) {
+        if (list) minHeap.insert(list);
+    }
+
+    let dummy = new ListNode(0);
+    let current = dummy;
+
+    while (!minHeap.isEmpty()) {
+        let node = minHeap.extractMin();
+        current.next = node;
+        current = current.next;
+        if (node.next) {
+            minHeap.insert(node.next);
+        }
+    }
+
+    return dummy.next;
+}
+
+let lists: ListNode[] = [
+    new ListNode(1, new ListNode(4, new ListNode(5))),
+    new ListNode(1, new ListNode(3, new ListNode(4))),
+    new ListNode(2, new ListNode(6))
+];
+
+let mergedList = mergeKLists(lists);
+while (mergedList) {
+    console.log(mergedList.val);  // Output: 1, 1, 2, 3, 4, 4, 5, 6
+    mergedList = mergedList.next;
+}
+```
+
+</CodeGroup>
 
 ## **Interview Tips and Tricks**
 

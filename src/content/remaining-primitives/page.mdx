@@ -19,10 +19,20 @@ JavaScript primitives are the most basic data types in the language. They are im
 - Initializing variables that will hold objects.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let emptyObject = null;
 console.log(emptyObject);  // Output: null
 ```
+
+```typescript
+let emptyObject: object | null = null;
+console.log(emptyObject);  // Output: null
+```
+
+</CodeGroup>
 
 ### **Undefined**
 
@@ -34,6 +44,9 @@ console.log(emptyObject);  // Output: null
 - Handling optional function parameters.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let uninitialized;
 console.log(uninitialized);  // Output: undefined
@@ -49,6 +62,23 @@ function greet(name) {
 greet();  // Output: Hello, stranger!
 ```
 
+```typescript
+let uninitialized: number | undefined;
+console.log(uninitialized);  // Output: undefined
+
+function greet(name?: string) {
+    if (name === undefined) {
+        console.log("Hello, stranger!");
+    } else {
+        console.log(`Hello, ${name}!`);
+    }
+}
+
+greet();  // Output: Hello, stranger!
+```
+
+</CodeGroup>
+
 ### **Symbol**
 
 **Definition:**
@@ -59,6 +89,9 @@ greet();  // Output: Hello, stranger!
 - Defining constants representing unique values.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let symbol1 = Symbol('description');
 let symbol2 = Symbol('description');
@@ -74,6 +107,23 @@ console.log(obj[symbol1]);  // Output: value1
 console.log(obj[symbol2]);  // Output: value2
 ```
 
+```typescript
+let symbol1: symbol = Symbol('description');
+let symbol2: symbol = Symbol('description');
+
+console.log(symbol1 === symbol2);  // Output: false
+
+let obj: { [key: symbol]: string } = {
+    [symbol1]: 'value1',
+    [symbol2]: 'value2'
+};
+
+console.log(obj[symbol1]);  // Output: value1
+console.log(obj[symbol2]);  // Output: value2
+```
+
+</CodeGroup>
+
 ### **Boolean**
 
 **Definition:**
@@ -84,6 +134,9 @@ console.log(obj[symbol2]);  // Output: value2
 - Representing binary states (e.g., on/off, yes/no).
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let isLoggedIn = true;
 if (isLoggedIn) {
@@ -100,6 +153,24 @@ if (hasAccess) {
 }
 ```
 
+```typescript
+let isLoggedIn: boolean = true;
+if (isLoggedIn) {
+    console.log('User is logged in.');
+} else {
+    console.log('User is not logged in.');
+}
+
+let hasAccess: boolean = false;
+if (hasAccess) {
+    console.log('Access granted.');
+} else {
+    console.log('Access denied.');
+}
+```
+
+</CodeGroup>
+
 ### **BigInt**
 
 **Definition:**
@@ -110,6 +181,9 @@ if (hasAccess) {
 - Handling high-precision arithmetic.
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let bigInt1 = BigInt(9007199254740991);
 let bigInt2 = BigInt('9007199254740992');
@@ -119,28 +193,65 @@ console.log(bigInt1 + bigInt2);  // Output: 18014398509481983n
 console.log(bigInt3 * 2n);  // Output: 18014398509481986n
 ```
 
+```typescript
+let bigInt1: bigint = BigInt(9007199254740991);
+let bigInt2: bigint = BigInt('9007199254740992');
+let bigInt3: bigint = 9007199254740993n;  // Using the 'n' suffix
+
+console.log(bigInt1 + bigInt2);  // Output: 18014398509481983n
+console.log(bigInt3 * 2n);  // Output: 18014398509481986n
+```
+
+</CodeGroup>
+
 ## **Practical Tips and Tricks**
 
 - **Distinguishing Between Null and Undefined:**
   Use `null` to represent the intentional absence of a value and `undefined` for uninitialized variables.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let user = null;  // No user data available
   let score;  // Variable declared but not initialized
   ```
 
+  ```typescript
+  let user: object | null = null;  // No user data available
+  let score: number | undefined;  // Variable declared but not initialized
+  ```
+
+  </CodeGroup>
+
 - **Using Symbols for Unique Object Keys:**
   Use `Symbol` to create unique property keys in objects, avoiding name collisions.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let obj = {};
   let uniqueKey = Symbol('unique');
   obj[uniqueKey] = 'value';
   ```
 
+  ```typescript
+  let obj: { [key: symbol]: string } = {};
+  let uniqueKey: symbol = Symbol('unique');
+  obj[uniqueKey] = 'value';
+  ```
+
+  </CodeGroup>
+
 - **Boolean Type Coercion:**
   JavaScript will coerce values to `true` or `false` in boolean contexts. Be cautious with falsy values (`0`, `''`, `null`, `undefined`, `NaN`, and `false`).
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   if ('') {
       console.log('This will not execute');
@@ -151,9 +262,25 @@ console.log(bigInt3 * 2n);  // Output: 18014398509481986n
   }
   ```
 
+  ```typescript
+  if ('') {
+      console.log('This will not execute');
+  }
+
+  if (0) {
+      console.log('This will not execute');
+  }
+  ```
+
+  </CodeGroup>
+
 - **Handling BigInt Arithmetic:**
   Be aware that `BigInt` cannot be mixed with `Number` types in operations directly.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let bigInt = 1234567890123456789012345678901234567890n;
   let num = 10;
@@ -161,19 +288,43 @@ console.log(bigInt3 * 2n);  // Output: 18014398509481986n
   console.log(bigInt + BigInt(num));  // Output: 1234567890123456789012345678901234567900n
   ```
 
+  ```typescript
+  let bigInt: bigint = 1234567890123456789012345678901234567890n;
+  let num: number = 10;
+  // console.log(bigInt + num);  // TypeError: Cannot mix BigInt and other types
+  console.log(bigInt + BigInt(num));  // Output: 1234567890123456789012345678901234567900n
+  ```
+
+  </CodeGroup>
+
 ## **Common Gotchas**
 
 - **Comparing Null and Undefined:**
   `null` and `undefined` are equal using loose equality (`==`) but not strict equality (`===`).
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   console.log(null == undefined);  // Output: true
   console.log(null === undefined);  // Output: false
   ```
 
+  ```typescript
+  console.log(null == undefined);  // Output: true
+  console.log(null === undefined);  // Output: false
+  ```
+
+  </CodeGroup>
+
 - **Boolean Type Coercion Pitfalls:**
   Be cautious with automatic type coercion to `boolean` in conditions.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let obj = {};
   if (obj.nonExistentProperty) {
@@ -181,9 +332,22 @@ console.log(bigInt3 * 2n);  // Output: 18014398509481986n
   }
   ```
 
+  ```typescript
+  let obj: { [key: string]: unknown } = {};
+  if (obj.nonExistentProperty) {
+      console.log('This will not execute');
+  }
+  ```
+
+  </CodeGroup>
+
 - **Using Symbols in JSON:**
   Symbols are not included in JSON.stringify() output.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let obj = {
       [Symbol('key')]: 'value'
@@ -191,9 +355,22 @@ console.log(bigInt3 * 2n);  // Output: 18014398509481986n
   console.log(JSON.stringify(obj));  // Output: {}
   ```
 
+  ```typescript
+  let obj: { [key: symbol]: string } = {
+      [Symbol('key')]: 'value'
+  };
+  console.log(JSON.stringify(obj));  // Output: {}
+  ```
+
+  </CodeGroup>
+
 - **Operations with BigInt:**
   Operations with `BigInt` must be handled carefully to avoid mixing types.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let bigInt = 123n;
   let num = 10;
@@ -201,11 +378,23 @@ console.log(bigInt3 * 2n);  // Output: 18014398509481986n
   console.log(bigInt + BigInt(num));  // Correct usage
   ```
 
+  ```typescript
+  let bigInt: bigint = 123n;
+  let num: number = 10;
+  // console.log(bigInt + num);  // TypeError
+  console.log(bigInt + BigInt(num));  // Correct usage
+  ```
+
+  </CodeGroup>
+
 ## **Advanced Topics**
 
 ### **Symbol.for() and Symbol.keyFor()**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 let globalSymbol1 = Symbol.for('global');
 let globalSymbol2 = Symbol.for('global');
@@ -216,9 +405,24 @@ let symbolKey = Symbol.keyFor(globalSymbol1);
 console.log(symbolKey);  // Output: 'global'
 ```
 
+```typescript
+let globalSymbol1: symbol = Symbol.for('global');
+let globalSymbol2: symbol = Symbol.for('global');
+
+console.log(globalSymbol1 === globalSymbol2);  // Output: true
+
+let symbolKey: string | undefined = Symbol.keyFor(globalSymbol1);
+console.log(symbolKey);  // Output: 'global'
+```
+
+</CodeGroup>
+
 ### **Using BigInt for Large Number Calculations**
 
 **Example:**
+
+<CodeGroup>
+
 ```javascript
 function factorial(n) {
     if (n === 0n || n === 1n) return 1n;
@@ -229,51 +433,120 @@ console.log(factorial(20n));  // Output: 2432902008176640000n
 console.log(factorial(100n)); // Output: 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000n
 ```
 
+```typescript
+function factorial(n: bigint): bigint {
+    if (n === 0n || n === 1n) return 1n;
+    return n * factorial(n - 1n);
+}
+
+console.log(factorial(20n));  // Output: 2432902008176640000n
+console.log(factorial(100n)); // Output: 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000n
+```
+
+</CodeGroup>
+
 ## **Interview Tips and Tricks**
 
 - **Know When to Use Null and Undefined:**
   Use `null` for intentional absence of a value and `undefined` for uninitialized variables.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let user = null;
   let score;
   ```
 
+  ```typescript
+  let user: object | null = null;
+  let score: number | undefined;
+  ```
+
+  </CodeGroup>
+
 - **Understand Symbol Use Cases:**
   Use `Symbol` to create unique and non-colliding property keys.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let uniqueId = Symbol('id');
   ```
 
+  ```typescript
+  let uniqueId: symbol = Symbol('id');
+  ```
+
+  </CodeGroup>
+
 - **Boolean Logic:**
   Understand truthy and falsy values in JavaScript.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   if (null) console.log('false');
   if ('') console.log('false');
   ```
 
+  ```typescript
+  if (null) console.log('false');
+  if ('') console.log('false');
+  ```
+
+  </CodeGroup>
+
 - **BigInt Precision:**
   Use `BigInt` for high-precision integer arithmetic beyond `Number.MAX_SAFE_INTEGER`.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let bigNumber = 1234567890123456789012345678901234567890n;
   ```
+
+  ```typescript
+  let bigNumber: bigint = 1234567890123456789012345678901234567890n;
+  ```
+
+  </CodeGroup>
 
 ## **Common Mistakes**
 
 - **Mixing Null and Undefined:**
   Understand the difference between `null` and `undefined` and use them appropriately.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let value = null;  // Intentional absence
   let uninitialized;  // Variable not assigned
   ```
 
+  ```typescript
+  let value: object | null = null;  // Intentional absence
+  let uninitialized: number | undefined;  // Variable not assigned
+  ```
+
+  </CodeGroup>
+
 - **Incorrect Boolean Comparisons:**
   Be cautious with comparisons involving `null` and `undefined`.
+  
   **Example:**
+  
+  <CodeGroup>
+
   ```javascript
   let value = null;
   if (value == undefined) {
@@ -281,22 +554,55 @@ console.log(factorial(100n)); // Output: 933262154439441526816992388562667004907
   }
   ```
 
+  ```typescript
+  let value: object | null = null;
+  if (value == undefined) {
+      console.log('Value is null or undefined');
+  }
+  ```
+
+  </CodeGroup>
+
 - **Symbol Usage:**
   Remember that symbols are not included in JSON serialization.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let obj = { [Symbol('key')]: 'value' };
   console.log(JSON.stringify(obj));  // Output: {}
   ```
 
+  ```typescript
+  let obj: { [key: symbol]: string } = { [Symbol('key')]: 'value' };
+  console.log(JSON.stringify(obj));  // Output: {}
+  ```
+
+  </CodeGroup>
+
 - **Mixing BigInt with Number:**
   Avoid mixing `BigInt` and `Number` types directly in operations.
+  
   **Example:**
+
+  <CodeGroup>
+
   ```javascript
   let bigInt = 123n;
   let num = 10;
   // console.log(bigInt + num);  // TypeError
   console.log(bigInt + BigInt(num));  // Correct usage
   ```
+
+  ```typescript
+  let bigInt: bigint = 123n;
+  let num: number = 10;
+  // console.log(bigInt + num);  // TypeError
+  console.log(bigInt + BigInt(num));  // Correct usage
+  ```
+
+  </CodeGroup>
 
 By mastering these JavaScript primitives and understanding their intricacies, you will be well-equipped to handle a variety of interview questions and real-world problems. Regular practice and a solid grasp of advanced topics will deepen your understanding and improve your problem-solving skills.
