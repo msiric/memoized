@@ -767,7 +767,7 @@ export default async function Home() {
       <section
         id="faqs"
         aria-labelledby="faqs-title"
-        className="py-20 sm:py-32"
+        className="py-20 lg:py-32"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
@@ -906,8 +906,50 @@ export default async function Home() {
       </section>
 
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
+        <div className="flex min-w-0 max-w-2xl flex-auto flex-row items-center px-4 py-16 lg:max-w-none xl:px-16">
+          <article className="flex w-full flex-col items-center md:flex-row">
+            <div
+              className="relative w-full max-w-[400px] flex-shrink-0"
+              style={{ aspectRatio: '1578 / 1700' }}
+            >
+              <Image
+                alt="Practice problems"
+                src="/images/covers/practice-problems.png"
+                className="absolute inset-0 h-full w-full rounded-3xl"
+                fill
+                sizes="100vw"
+                style={{
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+            <div className="ml-8">
+              <h2 className="mb-4 text-2xl font-bold">Practice Problems</h2>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                Access over 150 diverse practice problems on our /problems
+                route. Each problem is categorized by topic and aligned with the
+                lessons, ensuring targeted and effective practice.
+              </p>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                Problems range from beginner to advanced levels, helping you
+                build and strengthen your skills progressively.
+              </p>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                Regular practice reinforces concepts, improves problem-solving
+                skills, and boosts your confidence for technical interviews.
+              </p>
+              <p className="text-lg text-zinc-500 dark:text-zinc-300">
+                Start practicing and master data structures and algorithms to
+                elevate your coding skills and ace your technical interviews.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
         <div className="flex min-w-0 max-w-2xl flex-auto flex-row-reverse items-center px-4 py-16 lg:max-w-none xl:px-16">
-          <article className="flex w-full flex-row-reverse items-center">
+          <article className="flex w-full flex-col items-center md:flex-row-reverse">
             <div
               className="relative w-full max-w-[400px] flex-shrink-0"
               style={{ aspectRatio: '1398 / 1604' }}
