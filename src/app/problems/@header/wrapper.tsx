@@ -47,5 +47,5 @@ export function Wrapper({
     allProblems,
   ])
 
-  return <Header fullWidth={true} fullCurriculum={fullCurriculum} />
+  return <Header showCourse fullWidth fullCurriculum={fullCurriculum} />
 }

@@ -17,13 +17,17 @@ import { AuthButton } from './AuthButton'
 import { PremiumButton } from './PremiumButton'
 
 export type HeaderProps = {
+  showCourse?: boolean
   fullWidth?: boolean
   fullCurriculum?: Curriculum[]
   className?: string
 }
 
 export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
-  function Header({ fullWidth, fullCurriculum, className }, ref) {
+  function Header(
+    { showCourse = false, fullWidth, fullCurriculum, className },
+    ref,
+  ) {
     const { isOpen: mobileNavIsOpen } = useMobileNavigationStore()
     const isInsideMobileNavigation = useIsInsideMobileNavigation()
 
@@ -76,12 +80,21 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
           <nav className="hidden md:block">
             <ul role="list" className="flex items-center gap-8">
               <li>
-                <Link
-                  href="/problems"
-                  className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                >
-                  Problems
-                </Link>
+                {showCourse ? (
+                  <Link
+                    href="/course"
+                    className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                  >
+                    Course
+                  </Link>
+                ) : (
+                  <Link
+                    href="/problems"
+                    className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                  >
+                    Problems
+                  </Link>
+                )}
               </li>
               <PremiumButton />
             </ul>
