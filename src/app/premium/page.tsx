@@ -29,14 +29,30 @@ export default async function Premium() {
 
   return (
     <section className="bg-white dark:bg-zinc-900">
-      <div className="mx-6 mt-4 flex">
-        <Link href="/" aria-label="Home">
-          <Logo className="h-6" />
-        </Link>
+      <div className="xs:flex-row mx-6 mt-4 flex flex-col items-center justify-between gap-4">
+        <div>
+          <Link href="/" aria-label="Home">
+            <Logo className="h-6" />
+          </Link>
+        </div>
+        <div className="flex gap-8">
+          <Link
+            href="/course"
+            className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+          >
+            Course
+          </Link>
+          <Link
+            href="/problems"
+            className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+          >
+            Problems
+          </Link>
+        </div>
       </div>
-      <div className="mx-auto mt-6 max-w-screen-xl px-4 py-8 lg:px-6 lg:py-16">
+      <div className="xs:py-8 mx-auto mt-6 max-w-screen-xl px-4 py-4 md:py-16 lg:px-6">
         <div className="mx-auto mb-8 max-w-screen-md text-center lg:mb-12">
-          <h2 className="mb-4 text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+          <h2 className="xs:text-3xl mb-4 text-2xl font-extrabold tracking-tight text-zinc-900 md:text-4xl dark:text-white">
             The ultimate JavaScript platform for mastering coding interviews.
           </h2>
           <p className="mb-5 font-light text-zinc-500 sm:text-xl dark:text-zinc-400">

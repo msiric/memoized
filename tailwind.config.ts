@@ -7,6 +7,14 @@ export default {
   content: ['./src/**/*.{js,mjs,jsx,ts,tsx,mdx}'],
   darkMode: 'selector',
   theme: {
+    screens: {
+      xs: '420px',
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
+    },
     fontSize: {
       '2xs': ['0.75rem', { lineHeight: '1.25rem' }],
       xs: ['0.8125rem', { lineHeight: '1.5rem' }],
