@@ -29,7 +29,7 @@ import { RiJavascriptLine } from 'react-icons/ri'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
 import { codeToHtml } from 'shiki-v1'
 
-const EXTENSION = 'ts'
+const EXTENSION = 'js'
 
 const codeSnippets = [
   {
@@ -206,8 +206,8 @@ export default async function Home() {
       </header>
       <div className="overflow-hidden bg-zinc-900 dark:-mb-32 dark:mt-[-4.75rem] dark:pb-32 dark:pt-[4.75rem]">
         <div className="py-16 sm:px-2 lg:relative lg:px-0 lg:py-20">
-          <div className="mx-auto grid max-w-2xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:max-w-8xl lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
-            <div className="relative z-10 md:text-center lg:text-left">
+          <div className="mx-auto grid max-w-3xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:max-w-8xl lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
+            <div className="relative z-10 text-center lg:text-left">
               <div className="relative">
                 <p className="font-display inline bg-gradient-to-r from-indigo-200 via-lime-400 to-indigo-200 bg-clip-text text-5xl tracking-tight text-transparent">
                   Master Technical Interviews the JavaScript Way
@@ -217,7 +217,7 @@ export default async function Home() {
                   coding interviews with confidence. Tailored specifically for
                   JavaScript and TypeScript engineers.
                 </p>
-                <div className="mt-8 flex gap-4 md:justify-center lg:justify-start">
+                <div className="mt-8 flex justify-center gap-4 lg:justify-start">
                   <Link
                     className="rounded-full bg-lime-300 px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-lime-200 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300/50 active:bg-lime-500"
                     href="/course"
@@ -438,11 +438,11 @@ export default async function Home() {
         </div>
       </div>
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-32">
-        <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
+        <div className="min-w-0 max-w-3xl flex-auto px-4 lg:max-w-none lg:py-16 xl:px-16">
           <article>
-            <section aria-label={`Why ${APP_NAME}?`} className="py-20 sm:py-32">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="mx-auto max-w-2xl sm:text-center">
+            <section aria-label={`Why ${APP_NAME}?`} className="py-10 sm:py-20">
+              <div className="mx-auto max-w-7xl lg:px-8">
+                <div className="mx-auto max-w-3xl text-center">
                   <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
                     Why {APP_NAME}?
                   </h2>
@@ -453,7 +453,7 @@ export default async function Home() {
                 </div>
                 <ul
                   role="list"
-                  className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 text-sm sm:mt-20 sm:grid-cols-2 md:gap-y-10 lg:max-w-none lg:grid-cols-3"
+                  className="mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-6 text-sm sm:mt-20 sm:grid-cols-2 md:gap-y-10 lg:max-w-none lg:grid-cols-3"
                 >
                   <li className="rounded-2xl border border-zinc-200 p-8">
                     <MdInsights size="32px" />
@@ -531,13 +531,13 @@ export default async function Home() {
             <section
               id="introduction"
               aria-label="Introduction"
-              className="pb-16 pt-20 sm:pb-20 md:pt-36 lg:py-32"
+              className="py-16 sm:pb-20 lg:py-24"
             >
-              <div className="mx-auto px-4 text-lg tracking-tight text-zinc-700 sm:px-6 md:max-w-2xl md:px-4 lg:max-w-4xl lg:px-12 dark:text-zinc-400">
-                <p className="font-display text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
+              <div className="mx-auto text-lg tracking-tight text-zinc-700 md:max-w-3xl lg:max-w-4xl lg:px-12 dark:text-zinc-400">
+                <p className="font-display text-left text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
                   A Unique Approach to Interview Preparation
                 </p>
-                <p className="mt-4 text-zinc-500 dark:text-zinc-300">
+                <p className="mt-4 text-left text-zinc-500 dark:text-zinc-300">
                   Tired of interview prep courses that dive into data structures
                   before you’ve mastered the language? Frustrated with lessons
                   on algorithms that don’t explain their purpose, usage, or how
@@ -623,7 +623,7 @@ export default async function Home() {
                     </span>
                   </li>
                 </ul>
-                <p className="mt-8 text-zinc-500 dark:text-zinc-300">
+                <p className="mt-8 text-left text-zinc-500 dark:text-zinc-300">
                   Join {APP_NAME} and start your journey to becoming a
                   JavaScript expert. Master data structures, algorithms, and
                   interview techniques to land your dream job. With a focus on
@@ -634,10 +634,10 @@ export default async function Home() {
               </div>
             </section>
 
-            <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
-              <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
+            <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center">
+              <div className="min-w-0 max-w-3xl flex-auto py-8 lg:max-w-none lg:py-16">
                 <article>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 grid-cols-1 gap-12 sm:grid-cols-2 md:gap-4 lg:grid-cols-4">
                     <OverlayedImage
                       src="/images/covers/strings-practical-tips.png"
                       title="Practical Tips"
@@ -663,7 +663,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <header className="mx-auto max-w-2xl sm:text-center">
+            <header className="mx-auto max-w-3xl pb-8 pt-16 text-center sm:pb-12">
               <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
                 Content overview
               </h2>
@@ -672,7 +672,7 @@ export default async function Home() {
                 structures, algorithms, and practical insights
               </p>
             </header>
-            <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none px-4 dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 sm:px-6 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
+            <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
               <div className="not-prose my-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
                 {completeCurriculum[0].sections.map((section) => (
                   <div
@@ -704,7 +704,7 @@ export default async function Home() {
         </div>
       </div>
       <div className="relative flex w-full flex-auto justify-center bg-zinc-800 sm:px-2 lg:px-8 xl:px-12">
-        <div className="min-w-0 max-w-2xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
+        <div className="min-w-0 max-w-3xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
           <article>
             <header className="mb-9 space-y-1">
               <h2 className="font-display text-center text-4xl text-white">
@@ -764,13 +764,97 @@ export default async function Home() {
         </div>
       </div>
 
+      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center pt-20 sm:px-2 lg:px-8 lg:pt-32 xl:px-12">
+        <div className="flex min-w-0 max-w-3xl flex-auto flex-row items-center px-4 lg:max-w-none xl:px-16">
+          <article className="flex w-full flex-col items-center gap-16 md:flex-row md:gap-8">
+            <div
+              className="relative w-full max-w-[400px] flex-shrink-0 rounded-2xl"
+              style={{ aspectRatio: '1578 / 1700' }}
+            >
+              <Image
+                alt="Practice problems"
+                src="/images/covers/practice-problems.png"
+                className="absolute inset-0 h-full w-full rounded-3xl"
+                fill
+                sizes="100vw"
+                style={{
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+            <div>
+              <h2 className="mb-4 text-2xl font-bold">Practice Problems</h2>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                Access over 150 diverse practice problems on our /problems
+                route. Each problem is categorized by topic and aligned with the
+                lessons, ensuring targeted and effective practice.
+              </p>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                Problems range from beginner to advanced levels, helping you
+                build and strengthen your skills progressively.
+              </p>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                Regular practice reinforces concepts, improves problem-solving
+                skills, and boosts your confidence for technical interviews.
+              </p>
+              <p className="text-lg text-zinc-500 dark:text-zinc-300">
+                Start practicing and master data structures and algorithms to
+                elevate your coding skills and ace your technical interviews.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
+        <div className="flex min-w-0 max-w-3xl flex-auto flex-row-reverse items-center px-4 py-16 lg:max-w-none xl:px-16">
+          <article className="flex w-full flex-col items-center gap-16 md:flex-row-reverse md:gap-8">
+            <div
+              className="relative w-full max-w-[400px] flex-shrink-0 rounded-2xl"
+              style={{ aspectRatio: '1398 / 1604' }}
+            >
+              <Image
+                alt="User progress"
+                src="/images/covers/user-progress.png"
+                className="absolute inset-0 h-full w-full rounded-3xl"
+                fill
+                sizes="100vw"
+                style={{
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+            <div>
+              <h2 className="mb-4 text-2xl font-bold">Track Your Progress</h2>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                {APP_NAME} tracks your progress as you complete lessons, helping
+                you see your achievements and identify areas for improvement.
+              </p>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                Stay motivated by visualizing your learning journey and
+                achieving your goals more efficiently.
+              </p>
+              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
+                New content is added regularly, giving you access to the latest
+                resources and tools for success in technical interviews.
+              </p>
+              <p className="text-lg text-zinc-500 dark:text-zinc-300">
+                By tracking your progress and engaging with new content, you can
+                systematically build and reinforce your skills, making steady
+                improvements along the way.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+
       <section
         id="faqs"
         aria-labelledby="faqs-title"
-        className="py-20 lg:py-32"
+        className="py-12 lg:py-16"
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl lg:mx-0">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:px-16">
+          <div className="mx-auto max-w-3xl lg:mx-0">
             <h2
               id="faqs-title"
               className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white"
@@ -790,7 +874,7 @@ export default async function Home() {
           </div>
           <ul
             role="list"
-            className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:max-w-none lg:grid-cols-3"
+            className="mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-8 sm:mt-20 lg:max-w-none lg:grid-cols-3"
           >
             <li>
               <ul role="list" className="space-y-10">
@@ -905,90 +989,6 @@ export default async function Home() {
         </div>
       </section>
 
-      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
-        <div className="flex min-w-0 max-w-2xl flex-auto flex-row items-center px-4 py-16 lg:max-w-none xl:px-16">
-          <article className="flex w-full flex-col items-center md:flex-row">
-            <div
-              className="relative w-full max-w-[400px] flex-shrink-0"
-              style={{ aspectRatio: '1578 / 1700' }}
-            >
-              <Image
-                alt="Practice problems"
-                src="/images/covers/practice-problems.png"
-                className="absolute inset-0 h-full w-full rounded-3xl"
-                fill
-                sizes="100vw"
-                style={{
-                  objectFit: 'contain',
-                }}
-              />
-            </div>
-            <div className="ml-8">
-              <h2 className="mb-4 text-2xl font-bold">Practice Problems</h2>
-              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                Access over 150 diverse practice problems on our /problems
-                route. Each problem is categorized by topic and aligned with the
-                lessons, ensuring targeted and effective practice.
-              </p>
-              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                Problems range from beginner to advanced levels, helping you
-                build and strengthen your skills progressively.
-              </p>
-              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                Regular practice reinforces concepts, improves problem-solving
-                skills, and boosts your confidence for technical interviews.
-              </p>
-              <p className="text-lg text-zinc-500 dark:text-zinc-300">
-                Start practicing and master data structures and algorithms to
-                elevate your coding skills and ace your technical interviews.
-              </p>
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
-        <div className="flex min-w-0 max-w-2xl flex-auto flex-row-reverse items-center px-4 py-16 lg:max-w-none xl:px-16">
-          <article className="flex w-full flex-col items-center md:flex-row-reverse">
-            <div
-              className="relative w-full max-w-[400px] flex-shrink-0"
-              style={{ aspectRatio: '1398 / 1604' }}
-            >
-              <Image
-                alt="User progress"
-                src="/images/covers/user-progress.png"
-                className="absolute inset-0 h-full w-full rounded-3xl"
-                fill
-                sizes="100vw"
-                style={{
-                  objectFit: 'contain',
-                }}
-              />
-            </div>
-            <div className="mr-8">
-              <h2 className="mb-4 text-2xl font-bold">Track Your Progress</h2>
-              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                {APP_NAME} tracks your progress as you complete lessons, helping
-                you see your achievements and identify areas for improvement.
-              </p>
-              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                Stay motivated by visualizing your learning journey and
-                achieving your goals more efficiently.
-              </p>
-              <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                New content is added regularly, giving you access to the latest
-                resources and tools for success in technical interviews.
-              </p>
-              <p className="text-lg text-zinc-500 dark:text-zinc-300">
-                By tracking your progress and engaging with new content, you can
-                systematically build and reinforce your skills, making steady
-                improvements along the way.
-              </p>
-            </div>
-          </article>
-        </div>
-      </div>
-
       <section
         aria-labelledby="author-section"
         className="relative scroll-mt-14 pb-3 pt-8 sm:scroll-mt-32 sm:pb-16 sm:pt-10 lg:pt-16"
@@ -1010,9 +1010,9 @@ export default async function Home() {
             <rect width="100%" height="100%" fill="url(#:S6:)" />
           </svg>
         </div>
-        <div className="relative mx-auto max-w-5xl pt-16 sm:px-6">
+        <div className="relative mx-auto max-w-5xl px-4 pt-16 sm:px-6 md:px-12">
           <div className="sm:rounded-6xl rounded-3xl bg-zinc-800 pt-px">
-            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
+            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:ml-[36px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:ml-0 lg:mr-20 lg:h-72 lg:w-72">
               <Image
                 alt="Author picture"
                 loading="lazy"
@@ -1029,9 +1029,9 @@ export default async function Home() {
                 }}
               />
             </div>
-            <div className="px-4 py-10 sm:px-10 sm:py-16 md:py-20 lg:px-20 lg:py-32">
+            <div className="px-4 py-10 sm:px-10 sm:py-16 md:py-20 lg:px-16 lg:py-32">
               <p className="font-display mt-8 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
-                Hello, I’m Mario, the creator of{' '}
+                Hello, I’m Mario, creator of{' '}
                 <span className="text-lime-500">{APP_NAME}</span>.
               </p>
               <p className="mt-4 text-lg tracking-tight text-zinc-300">
