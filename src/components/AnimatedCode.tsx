@@ -90,10 +90,14 @@ export const AnimatedCode = ({
                 highlighter={highlighter}
                 code={code}
                 options={{ duration: 800, stagger: 0.3 }}
+                className="text-xs sm:text-sm"
               />
             </>
           ) : (
-            <div dangerouslySetInnerHTML={{ __html: initialSnippet }} />
+            <div
+              className="text-xs sm:text-sm"
+              dangerouslySetInnerHTML={{ __html: initialSnippet }}
+            />
           )}
         </div>
       </div>

@@ -192,7 +192,7 @@ export default async function Home() {
             <Logo className="h-7" />
           </a>
         </div>
-        <div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
+        <div className="relative flex basis-0 justify-end gap-4 sm:gap-8 md:flex-grow">
           <a className="group" aria-label="GitHub" href="https://github.com">
             <svg
               aria-hidden="true"
@@ -420,17 +420,19 @@ export default async function Home() {
                   </g>
                 </svg>
               </div>
-              <div className="relative">
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10 blur-lg" />
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10" />
-                <div className="relative rounded-2xl bg-[#18181b] ring-1 ring-white/10 backdrop-blur">
-                  <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-lime-300/0 via-lime-300/70 to-lime-300/0" />
-                  <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-lime-400/0 via-lime-400 to-lime-400/0" />
-                  <AnimatedCode
-                    initialTab={codeSnippets[0].tab}
-                    initialSnippet={initialSnippet}
-                    codeSnippets={codeSnippets}
-                  />
+              <div className="min-h-[586px] xs:min-h-full">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10 blur-lg" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10" />
+                  <div className="relative min-h-[586px] rounded-2xl bg-[#18181b] ring-1 ring-white/10 backdrop-blur xs:min-h-full">
+                    <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-lime-300/0 via-lime-300/70 to-lime-300/0" />
+                    <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-lime-400/0 via-lime-400 to-lime-400/0" />
+                    <AnimatedCode
+                      initialTab={codeSnippets[0].tab}
+                      initialSnippet={initialSnippet}
+                      codeSnippets={codeSnippets}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -453,7 +455,7 @@ export default async function Home() {
                 </div>
                 <ul
                   role="list"
-                  className="mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-6 text-sm sm:mt-20 sm:grid-cols-2 md:gap-y-10 lg:max-w-none lg:grid-cols-3"
+                  className="mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-4 text-sm sm:mt-20 sm:grid-cols-2 md:gap-y-10 lg:max-w-none lg:grid-cols-3"
                 >
                   <li className="rounded-2xl border border-zinc-200 p-8">
                     <MdInsights size="32px" />
@@ -637,7 +639,7 @@ export default async function Home() {
             <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center">
               <div className="min-w-0 max-w-3xl flex-auto py-10 lg:max-w-none lg:py-20">
                 <article>
-                  <div className="grid grid-cols-1 grid-cols-1 gap-12 sm:grid-cols-2 md:gap-4 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <OverlayedImage
                       src="/images/covers/strings-practical-tips.png"
                       title="Practical Tips"
@@ -673,7 +675,7 @@ export default async function Home() {
               </p>
             </header>
             <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
-              <div className="not-prose my-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="not-prose my-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {completeCurriculum[0].sections.map((section) => (
                   <div
                     key={section.title}
@@ -766,7 +768,7 @@ export default async function Home() {
 
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center pt-14 sm:px-2 lg:px-8 lg:pt-32 xl:px-12">
         <div className="flex min-w-0 max-w-3xl flex-auto flex-row items-center px-4 lg:max-w-none xl:px-16">
-          <article className="flex w-full flex-col items-center gap-16 md:flex-row md:gap-8">
+          <article className="flex w-full flex-col items-center gap-4 md:flex-row md:gap-8">
             <div
               className="relative w-full max-w-[400px] flex-shrink-0 rounded-2xl"
               style={{ aspectRatio: '1578 / 1700' }}
@@ -808,7 +810,7 @@ export default async function Home() {
 
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
         <div className="flex min-w-0 max-w-3xl flex-auto flex-row-reverse items-center px-4 py-8 md:py-16 lg:max-w-none xl:px-16">
-          <article className="flex w-full flex-col items-center gap-16 md:flex-row-reverse md:gap-8">
+          <article className="flex w-full flex-col items-center gap-6 md:flex-row-reverse md:gap-8">
             <div
               className="relative w-full max-w-[400px] flex-shrink-0 rounded-2xl"
               style={{ aspectRatio: '1398 / 1604' }}

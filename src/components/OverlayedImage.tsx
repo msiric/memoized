@@ -17,7 +17,7 @@ export const OverlayedImage = ({
   alt,
   description,
 }: OverlayedImageProps) => (
-  <article className="relative isolate m-auto flex w-full max-w-md flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200">
+  <article className="relative isolate m-auto my-0 flex w-full max-w-md flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200">
     <div className="relative w-full" style={{ aspectRatio: '1705 / 1608' }}>
       <Image
         src={src}
