@@ -35,10 +35,7 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
       openModal()
     }
 
-    const { errorRedirect, sessionUrl } = await createCheckout(
-      price,
-      currentPath ?? '',
-    )
+    const { errorRedirect, sessionUrl } = await createCheckout(price)
 
     if (errorRedirect) {
       setPriceIdLoading(undefined)

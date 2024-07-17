@@ -1,6 +1,7 @@
 'use server'
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { PREMIUM_QUERY_PARAM } from '@/constants'
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { createOrRetrieveCustomer } from '@/services/stripe'
@@ -17,7 +18,7 @@ type CheckoutResponse = {
 
 export async function createCheckout(
   price: Stripe.Price,
-  redirectPath: string = '/course',
+  redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true`,
 ): Promise<CheckoutResponse> {
   try {
     const session = await getServerSession(authOptions)

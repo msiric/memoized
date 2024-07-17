@@ -30,3 +30,5 @@ export const STRIPE_PRICES = {
 }
 
 export const STRIPE_PRICE_IDS = Object.values(STRIPE_PRICES).map((item) => item)
+
+export const PREMIUM_QUERY_PARAM = 'upgradedToPremium'
