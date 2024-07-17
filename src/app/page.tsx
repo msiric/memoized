@@ -204,15 +204,15 @@ export default async function Home() {
           </a>
         </div>
       </header>
-      <div className="overflow-hidden bg-zinc-900 dark:-mb-32 dark:mt-[-4.75rem] dark:pb-32 dark:pt-[8rem]">
+      <div className="overflow-hidden bg-zinc-900 dark:-mb-32 dark:mt-[-4.75rem] dark:pb-32 dark:pt-[4rem] md:dark:pt-[8rem]">
         <div className="py-16 sm:px-2 lg:relative lg:px-0 lg:py-20">
           <div className="mx-auto grid max-w-3xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:max-w-8xl lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
             <div className="relative z-10 text-center lg:text-left">
               <div className="relative">
-                <p className="font-display inline bg-gradient-to-r from-indigo-200 via-lime-400 to-indigo-200 bg-clip-text text-5xl tracking-tight text-transparent">
+                <p className="font-display inline bg-gradient-to-r from-indigo-200 via-lime-400 to-indigo-200 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent xs:text-4xl md:text-5xl">
                   Master Technical Interviews the JavaScript Way
                 </p>
-                <p className="mt-3 text-2xl tracking-tight text-zinc-300">
+                <p className="mt-3 text-lg tracking-tight text-zinc-300 xs:text-xl md:text-2xl">
                   Unlock in-depth knowledge and practical skills to ace your
                   coding interviews with confidence. Tailored specifically for
                   JavaScript and TypeScript engineers.
@@ -440,7 +440,7 @@ export default async function Home() {
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-32">
         <div className="min-w-0 max-w-3xl flex-auto px-4 lg:max-w-none lg:py-16 xl:px-16">
           <article>
-            <section aria-label={`Why ${APP_NAME}?`} className="py-10 sm:py-20">
+            <section aria-label={`Why ${APP_NAME}?`} className="py-10 lg:py-20">
               <div className="mx-auto max-w-7xl lg:px-8">
                 <div className="mx-auto max-w-3xl text-center">
                   <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
@@ -531,10 +531,10 @@ export default async function Home() {
             <section
               id="introduction"
               aria-label="Introduction"
-              className="py-16 sm:pb-20 lg:py-24"
+              className="py-8 sm:pb-20 md:py-16 lg:py-20"
             >
               <div className="mx-auto text-lg tracking-tight text-zinc-700 md:max-w-3xl lg:max-w-4xl lg:px-12 dark:text-zinc-400">
-                <p className="font-display text-left text-4xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                <p className="font-display text-left text-2xl font-bold tracking-tight text-zinc-900 xs:text-3xl md:text-4xl dark:text-white">
                   A Unique Approach to Interview Preparation
                 </p>
                 <p className="mt-4 text-left text-zinc-500 dark:text-zinc-300">
@@ -635,7 +635,7 @@ export default async function Home() {
             </section>
 
             <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center">
-              <div className="min-w-0 max-w-3xl flex-auto py-8 lg:max-w-none lg:py-16">
+              <div className="min-w-0 max-w-3xl flex-auto py-10 lg:max-w-none lg:py-20">
                 <article>
                   <div className="grid grid-cols-1 grid-cols-1 gap-12 sm:grid-cols-2 md:gap-4 lg:grid-cols-4">
                     <OverlayedImage
@@ -663,7 +663,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <header className="mx-auto max-w-3xl pb-8 pt-16 text-center sm:pb-12">
+            <header className="mx-auto max-w-3xl pb-8 pt-8 text-center sm:pb-12 sm:pt-12">
               <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
                 Content overview
               </h2>
@@ -707,7 +707,7 @@ export default async function Home() {
         <div className="min-w-0 max-w-3xl flex-auto px-4 py-16 lg:max-w-none xl:px-16">
           <article>
             <header className="mb-9 space-y-1">
-              <h2 className="font-display text-center text-4xl text-white">
+              <h2 className="font-display text-center text-2xl text-white xs:text-3xl md:text-4xl">
                 Leading Tech Companies Use Algorithmic Interviews
               </h2>
             </header>
@@ -764,7 +764,7 @@ export default async function Home() {
         </div>
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center pt-20 sm:px-2 lg:px-8 lg:pt-32 xl:px-12">
+      <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center pt-14 sm:px-2 lg:px-8 lg:pt-32 xl:px-12">
         <div className="flex min-w-0 max-w-3xl flex-auto flex-row items-center px-4 lg:max-w-none xl:px-16">
           <article className="flex w-full flex-col items-center gap-16 md:flex-row md:gap-8">
             <div
@@ -807,7 +807,7 @@ export default async function Home() {
       </div>
 
       <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-12">
-        <div className="flex min-w-0 max-w-3xl flex-auto flex-row-reverse items-center px-4 py-16 lg:max-w-none xl:px-16">
+        <div className="flex min-w-0 max-w-3xl flex-auto flex-row-reverse items-center px-4 py-8 md:py-16 lg:max-w-none xl:px-16">
           <article className="flex w-full flex-col items-center gap-16 md:flex-row-reverse md:gap-8">
             <div
               className="relative w-full max-w-[400px] flex-shrink-0 rounded-2xl"
@@ -1012,7 +1012,7 @@ export default async function Home() {
         </div>
         <div className="relative mx-auto max-w-5xl px-4 pt-16 sm:px-6 md:px-12">
           <div className="sm:rounded-6xl rounded-3xl bg-zinc-800 pt-px">
-            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:ml-[36px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:ml-0 lg:mr-20 lg:h-72 lg:w-72">
+            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:ml-[36px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
               <Image
                 alt="Author picture"
                 loading="lazy"
@@ -1030,7 +1030,7 @@ export default async function Home() {
               />
             </div>
             <div className="px-4 py-10 sm:px-10 sm:py-16 md:py-20 lg:px-16 lg:py-32">
-              <p className="font-display mt-8 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
+              <p className="font-display text-3xl font-extrabold tracking-tight text-white xs:text-3xl xs:text-4xl md:mt-8 md:text-5xl">
                 Hello, I’m Mario, creator of{' '}
                 <span className="text-lime-500">{APP_NAME}</span>.
               </p>
