@@ -4,15 +4,18 @@ import { markProblem } from '@/actions/markProblem'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { ProblemRow, ProblemStatus } from '@/types'
+import { CustomError, handleError } from '@/utils/error'
 import {
   ProblemFilter,
   capitalizeFirstLetter,
   filterAndSortProblems,
 } from '@/utils/helpers'
+import { CustomResponse, handleResponse } from '@/utils/response'
 import { Lesson, ProblemDifficulty } from '@prisma/client'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { enqueueSnackbar } from 'notistack'
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6'
 import { Select } from './Select'
@@ -178,26 +181,26 @@ export const ProblemList = ({
     setProblems(updatedProblems)
   }
 
-  async function onCheckboxChange(
+  const onCheckboxChange = async (
     event: ChangeEvent<HTMLInputElement>,
     problemId: string,
-  ) {
+  ) => {
     if (!session) {
       return openModal()
     }
     const currentlyCompleted = event.currentTarget.checked
 
     try {
-      await markProblem({ problemId, completed: currentlyCompleted })
+      const response = await markProblem({
+        problemId,
+        completed: currentlyCompleted,
+      })
+      if (!response.success) return handleError(response, enqueueSnackbar)
+      handleResponse(response as CustomResponse, enqueueSnackbar)
       toggleCompletedProblem(problemId)
       toggleCompletion(problemId)
-      console.log(
-        `Problem ${problemId} marked as ${
-          currentlyCompleted ? 'completed' : 'not completed'
-        }`,
-      )
     } catch (error) {
-      console.error('Error:', error)
+      handleError(error as CustomError, enqueueSnackbar)
     }
   }
 

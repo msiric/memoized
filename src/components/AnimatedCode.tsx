@@ -28,7 +28,7 @@ export const AnimatedCode = ({
   const [flip, setFlip] = useState(false)
 
   useEffect(() => {
-    async function initializeHighlighter() {
+    const initializeHighlighter = async () => {
       const highlighter = await getHighlighter({
         themes: ['nord'],
         langs: ['javascript', 'typescript'],

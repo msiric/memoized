@@ -1,9 +1,13 @@
 import { stripe } from '@/lib/stripe'
-import { UserWithSubscriptionsAndProgress } from '@/services/user'
-import { ProblemRow, ProblemStatus } from '@/types'
+import {
+  ProblemRow,
+  ProblemStatus,
+  UserWithSubscriptionsAndProgress,
+} from '@/types'
 import {
   AccessOptions,
   ProblemDifficulty,
+  Subscription,
   SubscriptionPlan,
   SubscriptionStatus,
 } from '@prisma/client'
@@ -224,5 +228,20 @@ export const getStatusFromStripeStatus = (
       return SubscriptionStatus.EXPIRED
     default:
       return SubscriptionStatus.EXPIRED
+  }
+}
+
+export const checkSubscriptionStatus = (
+  subscription: Subscription,
+): SubscriptionStatus | 'UNKNOWN' => {
+  const now = new Date()
+  if (subscription.status === 'ACTIVE') {
+    return 'ACTIVE'
+  } else if (subscription.status === 'CANCELED') {
+    return 'CANCELED'
+  } else if (subscription.endDate && new Date(subscription.endDate) <= now) {
+    return 'EXPIRED'
+  } else {
+    return 'UNKNOWN'
   }
 }

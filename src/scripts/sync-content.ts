@@ -1,35 +1,29 @@
 import { CONTENT_FOLDER } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
+import {
+  upsertCourse,
+  upsertLesson,
+  upsertProblem,
+  upsertSection,
+} from '@/services/lesson'
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
 
-const prisma = new PrismaClient()
-
-async function syncContent() {
+const syncContent = async () => {
   const contentDir = path.join(process.cwd(), `src/${CONTENT_FOLDER}`)
 
   for (const [courseOrder, course] of completeCurriculum.entries()) {
     const { title: courseTitle, description: courseDescription } = course
     const courseSlug = slugify(courseTitle, { lower: true })
 
-    const courseRecord = await prisma.course.upsert({
-      where: { slug: courseSlug },
-      update: {
-        title: courseTitle,
-        description: courseDescription,
-        order: courseOrder,
-        href: '',
-      },
-      create: {
-        title: courseTitle,
-        description: courseDescription,
-        order: courseOrder,
-        slug: courseSlug,
-        href: '',
-      },
-    })
+    const courseRecord = await upsertCourse(
+      courseSlug,
+      courseTitle,
+      courseDescription,
+      courseOrder,
+    )
 
     for (const [sectionOrder, section] of course.sections.entries()) {
       const {
@@ -49,26 +43,15 @@ async function syncContent() {
 
       const sectionContent = fs.readFileSync(sectionPath, 'utf-8')
 
-      const sectionRecord = await prisma.section.upsert({
-        where: { slug: sectionSlug },
-        update: {
-          title: sectionTitle,
-          description: sectionDescription,
-          body: sectionContent,
-          order: sectionOrder,
-          href: sectionHref,
-          courseId: courseRecord.id,
-        },
-        create: {
-          title: sectionTitle,
-          description: sectionDescription,
-          body: sectionContent,
-          slug: sectionSlug,
-          order: sectionOrder,
-          href: sectionHref,
-          courseId: courseRecord.id,
-        },
-      })
+      const sectionRecord = await upsertSection(
+        sectionSlug,
+        sectionTitle,
+        sectionDescription,
+        sectionContent,
+        sectionOrder,
+        sectionHref,
+        courseRecord.id,
+      )
 
       for (const [lessonOrder, lesson] of courseLessons.entries()) {
         const {
@@ -88,46 +71,24 @@ async function syncContent() {
 
         const lessonContent = fs.readFileSync(lessonPath, 'utf-8')
 
-        const practiceProblems = lesson.problems
+        const lessonRecord = await upsertLesson(
+          lessonSlug,
+          lessonTitle,
+          lessonDescription,
+          lessonContent,
+          lessonOrder,
+          lessonAccess,
+          lessonHref,
+          sectionRecord.id,
+        )
 
-        const lessonRecord = await prisma.lesson.upsert({
-          where: { slug: lessonSlug },
-          update: {
-            title: lessonTitle,
-            description: lessonDescription,
-            order: lessonOrder,
-            body: lessonContent,
-            access: lessonAccess,
-            href: lessonHref,
-            sectionId: sectionRecord.id,
-          },
-          create: {
-            title: lessonTitle,
-            description: lessonDescription,
-            order: lessonOrder,
-            slug: lessonSlug,
-            body: lessonContent,
-            access: lessonAccess,
-            href: lessonHref,
-            sectionId: sectionRecord.id,
-          },
-        })
-
-        for (const problem of practiceProblems) {
-          await prisma.problem.upsert({
-            where: { href: problem.href },
-            update: {
-              title: problem.title,
-              lessonId: lessonRecord.id,
-              difficulty: problem.difficulty,
-            },
-            create: {
-              title: problem.title,
-              href: problem.href,
-              lessonId: lessonRecord.id,
-              difficulty: problem.difficulty,
-            },
-          })
+        for (const problem of lesson.problems) {
+          await upsertProblem(
+            problem.href,
+            problem.title,
+            lessonRecord.id,
+            problem.difficulty,
+          )
         }
 
         console.log(`Synced: ${lessonTitle}`)

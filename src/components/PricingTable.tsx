@@ -2,21 +2,26 @@
 
 import { createCheckout } from '@/actions/createCheckout'
 import { useAuthStore } from '@/contexts/auth'
-import { UserWithSubscriptionsAndProgress } from '@/services/user'
+import {
+  StripePriceWithProduct,
+  UserWithSubscriptionsAndProgress,
+} from '@/types'
+import { CustomError, handleError } from '@/utils/error'
+import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionStatus } from '@prisma/client'
 import { useSession } from 'next-auth/react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import Stripe from 'stripe'
 
 export type PricingTableProps = {
-  prices: (Stripe.Price & { product: Stripe.Product })[]
+  prices: StripePriceWithProduct[]
   user: UserWithSubscriptionsAndProgress | null
 }
 
 export const PricingTable = ({ prices, user }: PricingTableProps) => {
   const router = useRouter()
-  const currentPath = usePathname()
   const { data: session } = useSession()
   const [priceIdLoading, setPriceIdLoading] = useState<string>()
 
@@ -28,28 +33,33 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
   const currentActiveSubscription = user?.customer?.subscriptions[0]
 
   const handleStripeCheckout = async (price: Stripe.Price) => {
-    setPriceIdLoading(price.id)
+    try {
+      setPriceIdLoading(price.id)
 
-    if (!session?.userId) {
+      if (!session?.userId) {
+        setPriceIdLoading(undefined)
+        openModal()
+      }
+
+      const response = await createCheckout(price)
+      if (!response.success) return handleError(response, enqueueSnackbar)
+      handleResponse(response as CustomResponse, enqueueSnackbar)
+
+      const { sessionUrl } = response as unknown as {
+        sessionUrl: string
+      }
+
+      if (!sessionUrl) {
+        setPriceIdLoading(undefined)
+        return
+      }
+
+      router.push(sessionUrl)
+
       setPriceIdLoading(undefined)
-      openModal()
+    } catch (error) {
+      handleError(error as CustomError, enqueueSnackbar)
     }
-
-    const { errorRedirect, sessionUrl } = await createCheckout(price)
-
-    if (errorRedirect) {
-      setPriceIdLoading(undefined)
-      return router.push(errorRedirect)
-    }
-
-    if (!sessionUrl) {
-      setPriceIdLoading(undefined)
-      return
-    }
-
-    router.push(sessionUrl)
-
-    setPriceIdLoading(undefined)
   }
 
   return (

@@ -5,6 +5,37 @@ import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemDifficulty } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 
+export type MarkProblemArgs = {
+  userId: string
+  problemId: string
+  completed: boolean
+}
+
+export const markProblemProgress = async ({
+  userId,
+  problemId,
+  completed,
+}: MarkProblemArgs) => {
+  return prisma.userProblemProgress.upsert({
+    where: {
+      userId_problemId: {
+        userId,
+        problemId,
+      },
+    },
+    update: {
+      completed,
+      completedAt: new Date(),
+    },
+    create: {
+      userId,
+      problemId,
+      completed,
+      completedAt: new Date(),
+    },
+  })
+}
+
 export interface ProblemFilter {
   difficulty?: ProblemDifficulty
   status?: ProblemStatus
@@ -14,7 +45,7 @@ export interface ProblemFilter {
   sortOrder?: 'asc' | 'desc'
 }
 
-export async function getProblems(filter: ProblemFilter = {}) {
+export const getProblems = async (filter: ProblemFilter = {}) => {
   const session = await getServerSession(authOptions)
 
   const { difficulty, status, lesson, search, sortColumn, sortOrder } = filter

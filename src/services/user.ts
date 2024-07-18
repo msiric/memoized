@@ -1,11 +1,9 @@
 import prisma from '@/lib/prisma'
-import { Curriculum, SubscriptionStatus } from '@/types'
-import { Prisma, Subscription, SubscriptionPlan } from '@prisma/client'
+import { Curriculum } from '@/types'
+import { ServiceError } from '@/utils/error'
+import { checkSubscriptionStatus } from '@/utils/helpers'
 
-export async function getUserWithSubscriptions(
-  userId: string,
-  throwEarly = true,
-) {
+export const getUserWithSubscriptions = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
@@ -20,8 +18,8 @@ export async function getUserWithSubscriptions(
     },
   })
 
-  if (!user && throwEarly) {
-    throw new Error('User not found')
+  if (!user) {
+    throw new ServiceError('Failed to retrieve user details')
   }
 
   const currentSubscription =
@@ -44,33 +42,7 @@ export async function getUserWithSubscriptions(
   }
 }
 
-export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
-  include: {
-    customer: {
-      include: {
-        subscriptions: {
-          orderBy: { startDate: 'desc' }
-          take: 1
-        }
-      }
-    }
-    lessonProgress: {
-      where: {
-        completed: true
-      }
-      select: {
-        lessonId: true
-        completed: true
-      }
-    }
-  }
-}> & {
-  currentSubscriptionPlan: SubscriptionPlan | null
-  currentSubscriptionStatus: SubscriptionStatus | null
-  currentLessonProgress: number
-}
-
-export async function getUserProgressWithLessons(userId?: string) {
+export const getUserProgressWithLessons = async (userId?: string) => {
   const user = userId
     ? await prisma.user.findUnique({
         where: { id: userId },
@@ -212,15 +184,17 @@ export async function getUserProgressWithLessons(userId?: string) {
     id: item.id,
   }))
 
-  const completedLessons = user?.lessonProgress.filter((p) => p.completed)
-    .length
+  const completedLessons = user?.lessonProgress.filter(
+    (p) => p.completed,
+  ).length
   const currentLessonProgress =
     allLessons?.length > 0
       ? (completedLessons ?? 0 / allLessons.length) * 100
       : 0
 
-  const completedProblems = user?.problemProgress.filter((p) => p.completed)
-    .length
+  const completedProblems = user?.problemProgress.filter(
+    (p) => p.completed,
+  ).length
   const currentProblemProgress =
     allProblems?.length > 0
       ? (completedProblems ?? 0 / allProblems.length) * 100
@@ -242,17 +216,14 @@ export async function getUserProgressWithLessons(userId?: string) {
   }
 }
 
-function checkSubscriptionStatus(
-  subscription: Subscription,
-): SubscriptionStatus {
-  const now = new Date()
-  if (subscription.status === 'ACTIVE') {
-    return 'ACTIVE'
-  } else if (subscription.status === 'CANCELED') {
-    return 'CANCELED'
-  } else if (subscription.endDate && new Date(subscription.endDate) <= now) {
-    return 'EXPIRED'
-  } else {
-    return 'UNKNOWN'
+export const getUserById = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  })
+
+  if (!user) {
+    throw new ServiceError('Failed to retrieve user details')
   }
+
+  return user
 }

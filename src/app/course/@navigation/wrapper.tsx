@@ -3,8 +3,12 @@
 import { Navigation } from '@/components/Navigation'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
-import { UserWithSubscriptionsAndProgress } from '@/services/user'
-import { Curriculum, LessonConfig, ProblemConfig } from '@/types'
+import {
+  Curriculum,
+  LessonConfig,
+  ProblemConfig,
+  UserWithSubscriptionsAndProgress,
+} from '@/types'
 import { useEffect } from 'react'
 
 export type LayoutProps = {

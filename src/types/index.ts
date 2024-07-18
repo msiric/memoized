@@ -1,4 +1,10 @@
-import { AccessOptions, ProblemDifficulty } from '@prisma/client'
+import {
+  AccessOptions,
+  Prisma,
+  ProblemDifficulty,
+  SubscriptionPlan,
+} from '@prisma/client'
+import Stripe from 'stripe'
 
 export type AuthProvider = 'google' | 'github'
 
@@ -62,3 +68,33 @@ export type ProblemRow = {
 }
 
 export type ProblemStatus = 'TODO' | 'COMPLETED'
+
+export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
+  include: {
+    customer: {
+      include: {
+        subscriptions: {
+          orderBy: { startDate: 'desc' }
+          take: 1
+        }
+      }
+    }
+    lessonProgress: {
+      where: {
+        completed: true
+      }
+      select: {
+        lessonId: true
+        completed: true
+      }
+    }
+  }
+}> & {
+  currentSubscriptionPlan: SubscriptionPlan | null
+  currentSubscriptionStatus: SubscriptionStatus | null
+  currentLessonProgress: number
+}
+
+export type StripePriceWithProduct = Stripe.Price & {
+  product: Stripe.Product
+}

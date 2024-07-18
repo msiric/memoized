@@ -1,9 +1,11 @@
 'use client'
 
 import { SignIn } from '@/components/SignIn'
+import { SnackbarNotification } from '@/components/SnackbarNotification'
 import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider, useTheme } from 'next-themes'
-import { useEffect } from 'react'
+import { SnackbarProvider } from 'notistack'
+import React, { useEffect } from 'react'
 
 function ThemeWatcher() {
   const { resolvedTheme, setTheme } = useTheme()
@@ -33,9 +35,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <ThemeProvider attribute="class" disableTransitionOnChange>
-        <ThemeWatcher />
-        {children}
-        <SignIn />
+        <SnackbarProvider
+          maxSnack={3}
+          autoHideDuration={3000}
+          preventDuplicate={true}
+          Components={{
+            success: SnackbarNotification,
+            error: SnackbarNotification,
+          }}
+        >
+          <ThemeWatcher />
+          {children}
+          <SignIn />
+        </SnackbarProvider>
       </ThemeProvider>
     </SessionProvider>
   )

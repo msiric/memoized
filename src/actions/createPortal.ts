@@ -1,28 +1,33 @@
 'use server'
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import prisma from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
-import { createOrRetrieveCustomer } from '@/services/stripe'
-import { getURL } from '@/utils/helpers'
+import {
+  createBillingPortalSession,
+  createOrRetrieveCustomer,
+} from '@/services/stripe'
+import { getUserById } from '@/services/user'
+import { createCustomError } from '@/utils/error'
+import { createCustomResponse } from '@/utils/response'
 import { getServerSession } from 'next-auth'
 
-export async function createPortal(currentPath: string) {
+export async function createPortal() {
   try {
     const session = await getServerSession(authOptions)
 
     if (!session || !session.user) {
-      console.error('Could not get user session.')
-      throw new Error('Could not get user session.')
+      return createCustomError({
+        message: 'Failed to retrieve user session',
+        showSnackbar: true,
+      })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.userId ?? '' },
-    })
+    const user = await getUserById(session.userId ?? '')
 
     if (!user) {
-      console.error('Could not fetch user details.')
-      throw new Error('Could not fetch user details.')
+      return createCustomError({
+        message: 'Failed to retrieve user details',
+        showSnackbar: true,
+      })
     }
 
     let customer: string
@@ -32,49 +37,41 @@ export async function createPortal(currentPath: string) {
         userEmail: user.email,
       })
     } catch (err) {
-      console.error(err)
-      throw new Error('Unable to access customer record.')
+      return createCustomError({
+        message: 'Failed to retrieve customer details',
+        showSnackbar: true,
+      })
     }
 
     if (!customer) {
-      throw new Error('Could not get customer.')
+      return createCustomError({
+        message: 'Failed to retrieve customer details',
+        showSnackbar: true,
+      })
     }
 
     try {
-      const { url } = await stripe.billingPortal.sessions.create({
-        customer,
-        return_url: getURL('/course'),
-      })
+      const { url } = await createBillingPortalSession(customer)
+
       if (!url) {
-        throw new Error('Could not create billing portal')
+        return createCustomError({
+          message: 'Failed to create billing portal',
+          showSnackbar: true,
+        })
       }
-      return url
+      return createCustomResponse({
+        url,
+      })
     } catch (err) {
-      console.error(err)
-      throw new Error('Could not create billing portal')
+      return createCustomError({
+        message: 'Failed to create billing portal',
+        showSnackbar: true,
+      })
     }
   } catch (error) {
-    const errorDetails =
-      'Please try again later or contact a system administrator.'
-    if (error instanceof Error) {
-      console.error(error)
-      return getErrorRedirect(currentPath, error.message, errorDetails)
-    } else {
-      return getErrorRedirect(
-        currentPath,
-        'An unknown error occurred.',
-        errorDetails,
-      )
-    }
+    return createCustomError({
+      message: 'Failed to create billing portal',
+      showSnackbar: true,
+    })
   }
-}
-
-function getErrorRedirect(
-  redirectPath: string,
-  errorMessage: string,
-  errorDetails: string,
-): string {
-  return `${redirectPath}?error=${encodeURIComponent(
-    errorMessage,
-  )}&details=${encodeURIComponent(errorDetails)}`
 }

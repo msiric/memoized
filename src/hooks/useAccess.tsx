@@ -1,6 +1,6 @@
 'use client'
 
-import { UserWithSubscriptionsAndProgress } from '@/services/user'
+import { UserWithSubscriptionsAndProgress } from '@/types'
 import { userHasAccess } from '@/utils/helpers'
 import { AccessOptions } from '@prisma/client'
 

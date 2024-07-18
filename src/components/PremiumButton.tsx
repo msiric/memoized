@@ -2,16 +2,18 @@
 
 import { createPortal } from '@/actions/createPortal'
 import { useAuthStore } from '@/contexts/auth'
+import { CustomError, handleError } from '@/utils/error'
 import { capitalizeFirstLetter } from '@/utils/helpers'
+import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 
 export const PremiumButton = () => {
   const router = useRouter()
-  const currentPath = usePathname()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -22,10 +24,17 @@ export const PremiumButton = () => {
   )
 
   const handleStripePortalRequest = async () => {
-    setIsSubmitting(true)
-    const redirectUrl = await createPortal(currentPath ?? '')
-    setIsSubmitting(false)
-    return router.push(redirectUrl)
+    try {
+      setIsSubmitting(true)
+      const response = await createPortal()
+      if (!response.success) return handleError(response, enqueueSnackbar)
+      handleResponse(response as CustomResponse, enqueueSnackbar)
+      return router.push((response as unknown as { url: string }).url)
+    } catch (error) {
+      handleError(error as CustomError, enqueueSnackbar)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const content =

@@ -23,6 +23,9 @@ import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
+import { handleError, CustomError } from '@/utils/error'
+import { handleResponse, CustomResponse } from '@/utils/response'
+import { enqueueSnackbar } from 'notistack'
 
 function useInitialValue<T>(value: T, condition = true) {
   const initialValue = useRef(value).current
@@ -86,7 +89,6 @@ function SectionLink({
 
 export const NavPremiumButton = () => {
   const router = useRouter()
-  const currentPath = usePathname()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -97,10 +99,17 @@ export const NavPremiumButton = () => {
   )
 
   const handleStripePortalRequest = async () => {
-    setIsSubmitting(true)
-    const redirectUrl = await createPortal(currentPath ?? '')
-    setIsSubmitting(false)
-    return router.push(redirectUrl)
+    try {
+      setIsSubmitting(true)
+      const response = await createPortal()
+      if (!response.success) return handleError(response, enqueueSnackbar)
+      handleResponse(response as CustomResponse, enqueueSnackbar)
+      return router.push((response as unknown as { url: string }).url)
+    } catch (error) {
+      handleError(error as CustomError, enqueueSnackbar)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const content =
@@ -119,7 +128,7 @@ export const NavPremiumButton = () => {
             onClick={handleStripePortalRequest}
             disabled={isSubmitting}
             className={clsx(
-              "text-md block py-1 text-zinc-600 transition hover:text-zinc-900 dark:text-white dark:hover:text-lime-500",
+              'text-md block py-1 text-zinc-600 transition hover:text-zinc-900 dark:text-white dark:hover:text-lime-500',
               isSubmitting && 'cursor-wait',
             )}
           >

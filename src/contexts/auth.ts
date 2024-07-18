@@ -1,4 +1,4 @@
-import { UserWithSubscriptionsAndProgress } from '@/services/user'
+import { UserWithSubscriptionsAndProgress } from '@/types'
 import { create } from 'zustand'
 
 interface AuthStore {

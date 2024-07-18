@@ -1,18 +1,16 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { PremiumCTA } from '@/components/PremiumCTA'
 import { CONTENT_FOLDER } from '@/constants'
-import prisma from '@/lib/prisma'
-import {
-  UserWithSubscriptionsAndProgress,
-  getUserWithSubscriptions,
-} from '@/services/user'
+import { getLessonBySlug } from '@/services/lesson'
+import { getUserWithSubscriptions } from '@/services/user'
+import { UserWithSubscriptionsAndProgress } from '@/types'
 import { userHasAccess } from '@/utils/helpers'
 import { Problem } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 import { JSXElementConstructor } from 'react'
-// import readingTime from 'reading-time'
+// import readingTime from 'reading-time';
 
 export default async function Lesson({
   params,
@@ -22,10 +20,7 @@ export default async function Lesson({
   const session = await getServerSession(authOptions)
 
   const [lesson, user] = await Promise.all([
-    prisma.lesson.findUnique({
-      where: { slug: params.lessonSlug },
-      include: { problems: true },
-    }),
+    getLessonBySlug(params.lessonSlug),
     session && getUserWithSubscriptions(session.userId),
   ])
 
@@ -33,7 +28,7 @@ export default async function Lesson({
     notFound()
   }
 
-  // const stats = readingTime(lesson.body)
+  // const stats = readingTime(lesson.body);
 
   const hasAccess = userHasAccess(
     user as UserWithSubscriptionsAndProgress | null,

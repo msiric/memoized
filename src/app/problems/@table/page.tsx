@@ -1,7 +1,7 @@
 import { ProblemList } from '@/components/ProblemList'
 import { ProblemDifficulty } from '@prisma/client'
 import { ProblemStatus } from '@/types'
-import { getProblems } from '@/services/problems'
+import { getProblems } from '@/services/problem'
 
 const ProblemsPage = async ({
   searchParams,

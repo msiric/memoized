@@ -1,6 +1,6 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { CONTENT_FOLDER } from '@/constants'
-import prisma from '@/lib/prisma'
+import { getSectionBySlug } from '@/services/lesson'
 import { getUserWithSubscriptions } from '@/services/user'
 import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
@@ -15,7 +15,7 @@ export default async function Section({
   const session = await getServerSession(authOptions)
 
   const [section, user] = await Promise.all([
-    prisma.section.findUnique({ where: { slug: params.sectionSlug } }),
+    getSectionBySlug(params.sectionSlug),
     session && getUserWithSubscriptions(session.userId),
   ])
 

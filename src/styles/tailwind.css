@@ -24,3 +24,25 @@
   background: transparent !important;
   white-space: pre-wrap !important;
 }
+
+.notistack-MuiContent {
+  @apply p-4 rounded-md shadow-md;
+}
+
+.notistack-MuiContent-success {
+  background-color: #3f3f46 !important;
+  color: white !important;
+}
+
+.notistack-MuiContent-success svg > path {
+  fill: #84cc16 !important;
+}
+
+.notistack-MuiContent-error {
+  background-color: #3f3f46 !important;
+  color: white !important;
+}
+
+.notistack-MuiContent-error svg > path {
+  fill: #991b1b !important;
+}

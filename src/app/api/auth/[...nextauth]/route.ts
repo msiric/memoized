@@ -1,5 +1,8 @@
-import prisma from '@/lib/prisma'
-import { stripe } from '@/lib/stripe'
+import {
+  createUserWithAccount,
+  findAccount,
+  findAccountWithUserByProviderAccountId,
+} from '@/services/account'
 import { AuthProvider } from '@/types'
 import NextAuth, { AuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
@@ -46,45 +49,26 @@ export const authOptions: AuthOptions = {
 
       if (!email || !providerAccountId || !provider) return false
 
-      const existingAccount = await prisma.account.findUnique({
-        where: {
-          provider_providerAccountId: {
-            provider,
-            providerAccountId,
-          },
-        },
-        include: {
-          user: true,
-        },
-      })
+      const existingAccount = await findAccount(provider, providerAccountId)
 
       if (existingAccount) {
         return true
       }
 
       // Create new user and account with Stripe customer ID
-      const newUser = await prisma.user.create({
-        data: {
-          email,
-          name: user.name,
-          image: user.image,
-          accounts: {
-            create: {
-              provider,
-              providerAccountId,
-            },
-          },
-        },
-      })
+      const newUser = await createUserWithAccount(
+        email,
+        user.name ?? null,
+        user.image ?? null,
+        provider,
+        providerAccountId,
+      )
 
       return newUser ? true : false
     },
     async jwt({ user, token }) {
       if (user) {
-        const account = await prisma.account.findUnique({
-          where: { providerAccountId: user.id },
-          include: { user: { include: { customer: true } } },
-        })
+        const account = await findAccountWithUserByProviderAccountId(user.id)
 
         if (account) {
           token.uid = account.id

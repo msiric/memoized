@@ -2,10 +2,8 @@ import { Logo } from '@/components/Logo'
 import { PricingTable } from '@/components/PricingTable'
 import { STRIPE_PRICE_IDS } from '@/constants'
 import { stripe } from '@/lib/stripe'
-import {
-  UserWithSubscriptionsAndProgress,
-  getUserWithSubscriptions,
-} from '@/services/user'
+import { getUserWithSubscriptions } from '@/services/user'
+import { UserWithSubscriptionsAndProgress } from '@/types'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import Stripe from 'stripe'
@@ -14,7 +12,7 @@ import { authOptions } from '../api/auth/[...nextauth]/route'
 export default async function Premium() {
   const session = await getServerSession(authOptions)
 
-  const user = await getUserWithSubscriptions(session?.userId ?? '', false)
+  const user = session && (await getUserWithSubscriptions(session?.userId))
 
   const prices = await Promise.all(
     STRIPE_PRICE_IDS.map((id) =>

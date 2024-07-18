@@ -4,8 +4,11 @@ import { markLesson } from '@/actions/markLesson'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { usePages } from '@/hooks/usePages'
+import { CustomError, handleError } from '@/utils/error'
+import { CustomResponse, handleResponse } from '@/utils/response'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
+import { enqueueSnackbar } from 'notistack'
 
 export enum LessonCompleted {
   'YES' = 'YES',
@@ -50,19 +53,18 @@ export function LessonStatus({ lessonId }: LessonStatusProps) {
   )
   const isCompleted = completedLessons.has(lessonId)
 
-  async function handleToggle(completed: boolean) {
+  const handleToggle = async (completed: boolean) => {
     if (!session) {
       return openModal()
     }
 
     try {
-      await markLesson({ lessonId, completed })
+      const response = await markLesson({ lessonId, completed })
+      if (!response.success) return handleError(response, enqueueSnackbar)
+      handleResponse(response as CustomResponse, enqueueSnackbar)
       toggleCompletedLesson(lessonId)
-      console.log(
-        `Lesson marked as ${completed ? 'completed' : 'not completed'}`,
-      )
     } catch (error) {
-      console.error('Error:', error)
+      handleError(error as CustomError, enqueueSnackbar)
     }
   }
 

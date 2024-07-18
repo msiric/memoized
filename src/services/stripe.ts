@@ -1,5 +1,8 @@
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { ServiceError } from '@/utils/error'
+import { getURL } from '@/utils/helpers'
+import Stripe from 'stripe'
 
 // const upsertProductRecord = async (product: Stripe.Product) => {
 //   const productData = {
@@ -90,12 +93,20 @@ const upsertCustomerToDatabase = async (
 }
 
 const createCustomerInStripe = async (userId: string, userEmail: string) => {
-  const customerData = { metadata: { databaseUUID: userId }, email: userEmail }
-  const newCustomer = await stripe.customers.create(customerData)
+  try {
+    const customerData = {
+      metadata: { databaseUUID: userId },
+      email: userEmail,
+    }
+    const newCustomer = await stripe.customers.create(customerData)
 
-  if (!newCustomer) throw new Error('Stripe customer creation failed.')
+    if (!newCustomer)
+      throw new ServiceError('Failed to create customer in Stripe')
 
-  return newCustomer.id
+    return newCustomer.id
+  } catch (error) {
+    throw new ServiceError('Failed to create customer in Stripe')
+  }
 }
 
 export const createOrRetrieveCustomer = async ({
@@ -105,51 +116,93 @@ export const createOrRetrieveCustomer = async ({
   userId: string
   userEmail: string
 }) => {
-  const existingCustomer = await prisma.customer.findUnique({
-    where: { userId },
-  })
+  try {
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { userId },
+    })
 
-  let stripeCustomerId: string | undefined
+    let stripeCustomerId: string | undefined
 
-  if (existingCustomer?.stripeCustomerId) {
-    const existingStripeCustomer = await stripe.customers.retrieve(
-      existingCustomer.stripeCustomerId,
-    )
-    stripeCustomerId = existingStripeCustomer.id
-  } else {
-    const stripeCustomers = await stripe.customers.list({ email: userEmail })
-    stripeCustomerId =
-      stripeCustomers.data.length > 0 ? stripeCustomers.data[0].id : undefined
-  }
-
-  const stripeIdToInsert = stripeCustomerId
-    ? stripeCustomerId
-    : await createCustomerInStripe(userId, userEmail)
-
-  if (existingCustomer && stripeCustomerId) {
-    if (existingCustomer.stripeCustomerId !== stripeCustomerId) {
-      await prisma.customer.update({
-        where: { userId },
-        data: { stripeCustomerId },
-      })
-
-      console.warn(
-        `Database customer record mismatched Stripe ID. Database record updated.`,
+    if (existingCustomer?.stripeCustomerId) {
+      const existingStripeCustomer = await stripe.customers.retrieve(
+        existingCustomer.stripeCustomerId,
       )
+      stripeCustomerId = existingStripeCustomer.id
+    } else {
+      const stripeCustomers = await stripe.customers.list({ email: userEmail })
+      stripeCustomerId =
+        stripeCustomers.data.length > 0 ? stripeCustomers.data[0].id : undefined
     }
-    return stripeCustomerId
-  } else {
-    console.warn(
-      `Database customer record was missing. A new record was created.`,
-    )
-    const upsertedCustomer = await upsertCustomerToDatabase(
-      userId,
-      stripeIdToInsert,
-    )
 
-    if (!upsertedCustomer)
-      throw new Error('Database customer record creation failed.')
+    const stripeIdToInsert = stripeCustomerId
+      ? stripeCustomerId
+      : await createCustomerInStripe(userId, userEmail)
 
-    return upsertedCustomer
+    if (existingCustomer && stripeCustomerId) {
+      if (existingCustomer.stripeCustomerId !== stripeCustomerId) {
+        await prisma.customer.update({
+          where: { userId },
+          data: { stripeCustomerId },
+        })
+      }
+      return stripeCustomerId
+    } else {
+      const upsertedCustomer = await upsertCustomerToDatabase(
+        userId,
+        stripeIdToInsert,
+      )
+
+      if (!upsertedCustomer)
+        throw new ServiceError('Failed to create customer in Stripe')
+
+      return upsertedCustomer
+    }
+  } catch (error) {
+    throw new ServiceError('Failed to retrieve or create customer')
   }
+}
+
+export const createStripeSession = async (
+  price: Stripe.Price,
+  customer: string,
+  redirectPath: string,
+) => {
+  let params: Stripe.Checkout.SessionCreateParams = {
+    allow_promotion_codes: true,
+    billing_address_collection: 'required',
+    customer,
+    client_reference_id: customer,
+    customer_update: {
+      address: 'auto',
+    },
+    line_items: [
+      {
+        price: price.id,
+        quantity: 1,
+      },
+    ],
+    cancel_url: getURL(),
+    success_url: getURL(redirectPath),
+  }
+
+  if (price.type === 'recurring') {
+    params = {
+      ...params,
+      mode: 'subscription',
+    }
+  } else if (price.type === 'one_time') {
+    params = {
+      ...params,
+      mode: 'payment',
+    }
+  }
+
+  return stripe.checkout.sessions.create(params)
+}
+
+export const createBillingPortalSession = async (customer: string) => {
+  return stripe.billingPortal.sessions.create({
+    customer,
+    return_url: getURL('/course'),
+  })
 }

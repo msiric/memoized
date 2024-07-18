@@ -4,11 +4,14 @@ import { createPortal } from '@/actions/createPortal'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useSignOut } from '@/hooks/useSignOut'
+import { CustomError, handleError } from '@/utils/error'
 import { getInitials } from '@/utils/helpers'
+import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
+import { enqueueSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './Button'
 
@@ -43,10 +46,17 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
   const userInitials = getInitials(user?.name ?? '')
 
   const handleStripePortalRequest = async () => {
-    setIsSubmitting(true)
-    const redirectUrl = await createPortal(currentPath ?? '')
-    setIsSubmitting(false)
-    return router.push(redirectUrl)
+    try {
+      setIsSubmitting(true)
+      const response = await createPortal()
+      if (!response.success) return handleError(response, enqueueSnackbar)
+      handleResponse(response as CustomResponse, enqueueSnackbar)
+      return router.push((response as unknown as { url: string }).url)
+    } catch (error) {
+      handleError(error as CustomError, enqueueSnackbar)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   useEffect(() => {
