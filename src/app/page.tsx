@@ -1014,7 +1014,7 @@ export default async function Home() {
         </div>
         <div className="relative mx-auto max-w-5xl px-4 pt-16 sm:px-6 md:px-12">
           <div className="sm:rounded-6xl rounded-3xl bg-zinc-800 pt-px">
-            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:ml-[36px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
+            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:ml-[96px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
               <Image
                 alt="Author picture"
                 loading="lazy"
