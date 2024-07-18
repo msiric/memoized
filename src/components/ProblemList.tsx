@@ -368,7 +368,14 @@ export const ProblemList = ({
                   className="border-b bg-white last:border-b-0 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-600"
                 >
                   <td className="whitespace-nowrap px-6 py-4 font-medium text-zinc-900 dark:text-white">
-                    {problem.title}
+                    <a
+                      href={problem.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lime-500 hover:underline"
+                    >
+                      {problem.title}
+                    </a>
                   </td>
                   <td className="px-6 py-4 text-center">
                     {capitalizeFirstLetter(problem.difficulty)}
