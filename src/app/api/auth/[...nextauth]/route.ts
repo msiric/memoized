@@ -4,6 +4,7 @@ import {
   findAccountWithUserByProviderAccountId,
 } from '@/services/account'
 import { AuthProvider } from '@/types'
+import * as Sentry from '@sentry/nextjs'
 import NextAuth, { AuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
@@ -52,6 +53,7 @@ export const authOptions: AuthOptions = {
       const existingAccount = await findAccount(provider, providerAccountId)
 
       if (existingAccount) {
+        Sentry.setUser({ id: existingAccount.userId })
         return true
       }
 
@@ -64,13 +66,20 @@ export const authOptions: AuthOptions = {
         providerAccountId,
       )
 
-      return newUser ? true : false
+      if (newUser) {
+        Sentry.setUser({ id: newUser.id })
+        return true
+      }
+
+      return false
     },
     async jwt({ user, token }) {
       if (user) {
         const account = await findAccountWithUserByProviderAccountId(user.id)
 
         if (account) {
+          Sentry.setUser({ id: account.user.id })
+
           token.uid = account.id
           token.providerAccountId = account.providerAccountId
           token.stripeCustomerId = account.user.customer?.stripeCustomerId ?? ''
