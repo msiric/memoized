@@ -55,7 +55,37 @@ describe('Stripe Webhook Handler', () => {
     })
   }
 
-  // Existing tests...
+  it('should handle customer.subscription.created event', async () => {
+    const mockSubscription = { id: 'sub_123' }
+    mockRequest = createMockRequest(
+      'customer.subscription.created',
+      mockSubscription,
+    )
+
+    const response = await POST(mockRequest)
+
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
+      subscriptionId: 'sub_123',
+      updateAction: false,
+    })
+  })
+
+  it('should handle customer.subscription.updated event', async () => {
+    const mockSubscription = { id: 'sub_123' }
+    mockRequest = createMockRequest(
+      'customer.subscription.updated',
+      mockSubscription,
+    )
+
+    const response = await POST(mockRequest)
+
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
+      subscriptionId: 'sub_123',
+      updateAction: true,
+    })
+  })
 
   it('should handle customer.subscription.deleted event', async () => {
     const mockSubscription = { id: 'sub_123' }
@@ -70,6 +100,47 @@ describe('Stripe Webhook Handler', () => {
     expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
       subscriptionId: 'sub_123',
       updateAction: true,
+    })
+  })
+
+  it('should handle checkout.session.completed event for subscription', async () => {
+    const mockCheckoutSession = {
+      id: 'cs_123',
+      subscription: 'sub_123',
+      mode: 'subscription',
+      client_reference_id: 'cus_123',
+    }
+    mockRequest = createMockRequest(
+      'checkout.session.completed',
+      mockCheckoutSession,
+    )
+
+    const response = await POST(mockRequest)
+
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
+      subscriptionId: 'sub_123',
+      customerId: 'cus_123',
+    })
+  })
+
+  it('should handle checkout.session.completed event for one-time payment', async () => {
+    const mockCheckoutSession = {
+      id: 'cs_123',
+      mode: 'payment',
+      client_reference_id: 'cus_123',
+    }
+    mockRequest = createMockRequest(
+      'checkout.session.completed',
+      mockCheckoutSession,
+    )
+
+    const response = await POST(mockRequest)
+
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.createLifetimeAccess).toHaveBeenCalledWith({
+      sessionId: 'cs_123',
+      customerId: 'cus_123',
     })
   })
 
@@ -169,6 +240,24 @@ describe('Stripe Webhook Handler', () => {
     })
   })
 
+  it('should handle updateSubscriptionDetails throwing an error', async () => {
+    const mockSubscription = { id: 'sub_123' }
+    mockRequest = createMockRequest(
+      'customer.subscription.created',
+      mockSubscription,
+    )
+
+    mockFn(subscriptionService.updateSubscriptionDetails).mockRejectedValueOnce(
+      new Error('Database error'),
+    )
+
+    const response = await POST(mockRequest)
+
+    expect(response?.status).toBe(400)
+    expect(await response?.text()).toBe(
+      'Webhook handler failed. View your Next.js function logs.',
+    )
+  })
   it('should handle createLifetimeAccess throwing an error', async () => {
     const mockCheckoutSession = {
       id: 'cs_123',
