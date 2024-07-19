@@ -8,4 +8,5 @@ const buildEslintCommand = (filenames) =>
 module.exports = {
   '*.{js,jsx,ts,tsx}': [buildEslintCommand],
   '*.{ts,tsx}': () => 'tsc --noEmit',
+  '**/*': () => 'yarn run test:check',
 }

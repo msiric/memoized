@@ -13,7 +13,8 @@
     "generate": "npx prisma generate",
     "sync": "tsx src/scripts/sync-content.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
-    "test": "vitest"
+    "test": "vitest",
+    "test:check": "vitest run"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
