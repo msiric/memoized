@@ -12,43 +12,60 @@ import Stripe from 'stripe'
 export const handleFailedRecurringSubscription = async (
   subscriptionId?: string | Stripe.Subscription | null,
 ) => {
-  const subscription = await stripe.subscriptions.retrieve(
-    subscriptionId?.toString() ?? '',
-    {
-      expand: ['default_payment_method'],
-    },
-  )
-  await stripe.subscriptions.cancel(subscription.id)
-  console.log(`Successfully canceled Stripe subscription: ${subscription.id}`)
-
-  if (subscription.latest_invoice) {
-    const invoice = await stripe.invoices.retrieve(
-      subscription.latest_invoice as string,
+  try {
+    const subscription = await stripe.subscriptions.retrieve(
+      subscriptionId?.toString() ?? '',
+      {
+        expand: ['default_payment_method'],
+      },
     )
-    if (invoice.payment_intent) {
+
+    if (!subscription) {
+      throw new ServiceError(`Failed to retrieve failed recurring subscription`)
+    }
+
+    await stripe.subscriptions.cancel(subscription.id)
+    console.log(`Successfully canceled Stripe subscription: ${subscription.id}`)
+
+    if (subscription.latest_invoice) {
+      const invoice = await stripe.invoices.retrieve(
+        subscription.latest_invoice as string,
+      )
+      if (invoice.payment_intent) {
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          invoice.payment_intent as string,
+        )
+        if (paymentIntent.status === 'succeeded') {
+          await stripe.refunds.create({ payment_intent: paymentIntent.id })
+          console.log(
+            `Successfully refunded payment intent: ${paymentIntent.id}`,
+          )
+        }
+      }
+    }
+  } catch (err) {
+    console.log('test errrrr', err)
+    throw new ServiceError(`Failed to handle failed recurring subscription`)
+  }
+}
+
+export const handleFailedOneTimePayment = async (sessionId?: string | null) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
+      expand: ['line_items'],
+    })
+    if (session.payment_intent) {
       const paymentIntent = await stripe.paymentIntents.retrieve(
-        invoice.payment_intent as string,
+        session.payment_intent as string,
       )
       if (paymentIntent.status === 'succeeded') {
         await stripe.refunds.create({ payment_intent: paymentIntent.id })
         console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
       }
     }
-  }
-}
-
-export const handleFailedOneTimePayment = async (sessionId?: string | null) => {
-  const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
-    expand: ['line_items'],
-  })
-  if (session.payment_intent) {
-    const paymentIntent = await stripe.paymentIntents.retrieve(
-      session.payment_intent as string,
-    )
-    if (paymentIntent.status === 'succeeded') {
-      await stripe.refunds.create({ payment_intent: paymentIntent.id })
-      console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
-    }
+  } catch (err) {
+    console.log('Error caught in handleFailedOneTimePayment:', err)
+    throw new ServiceError(`Failed to handle failed one-time payment`)
   }
 }
 
@@ -197,7 +214,7 @@ export const createLifetimeAccess = async ({
       create: subscriptionData,
     })
   } catch (err) {
-    console.log(err)
+    console.log('Error caught in createLifetimeAccess:', err)
     await handleFailedOneTimePayment(sessionId)
     throw new ServiceError(`Failed to create subscription`)
   }

@@ -167,42 +167,53 @@ export const createStripeSession = async (
   customer: string,
   redirectPath: string,
 ) => {
-  let params: Stripe.Checkout.SessionCreateParams = {
-    allow_promotion_codes: true,
-    billing_address_collection: 'required',
-    customer,
-    client_reference_id: customer,
-    customer_update: {
-      address: 'auto',
-    },
-    line_items: [
-      {
-        price: price.id,
-        quantity: 1,
+  try {
+    let params: Stripe.Checkout.SessionCreateParams = {
+      allow_promotion_codes: true,
+      billing_address_collection: 'required',
+      customer,
+      client_reference_id: customer,
+      customer_update: {
+        address: 'auto',
       },
-    ],
-    cancel_url: getURL(),
-    success_url: getURL(redirectPath),
-  }
-
-  if (price.type === 'recurring') {
-    params = {
-      ...params,
-      mode: 'subscription',
+      line_items: [
+        {
+          price: price.id,
+          quantity: 1,
+        },
+      ],
+      cancel_url: getURL(),
+      success_url: getURL(redirectPath),
     }
-  } else if (price.type === 'one_time') {
-    params = {
-      ...params,
-      mode: 'payment',
-    }
-  }
 
-  return stripe.checkout.sessions.create(params)
+    if (price.type === 'recurring') {
+      params = {
+        ...params,
+        mode: 'subscription',
+      }
+    } else if (price.type === 'one_time') {
+      params = {
+        ...params,
+        mode: 'payment',
+      }
+    }
+
+    const checkoutSession = await stripe.checkout.sessions.create(params)
+    return checkoutSession
+  } catch (error) {
+    throw new ServiceError('Failed to create Stripe checkout session')
+  }
 }
 
 export const createBillingPortalSession = async (customer: string) => {
-  return stripe.billingPortal.sessions.create({
-    customer,
-    return_url: getURL('/course'),
-  })
+  try {
+    const billingSession = await stripe.billingPortal.sessions.create({
+      customer,
+      return_url: getURL('/course'),
+    })
+    return billingSession
+  } catch (error) {
+    console.log('test errrrrrr', error)
+    throw new ServiceError('Failed to create Stripe billing portal link')
+  }
 }
