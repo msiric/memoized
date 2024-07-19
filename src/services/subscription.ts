@@ -44,7 +44,6 @@ export const handleFailedRecurringSubscription = async (
       }
     }
   } catch (err) {
-    console.log('test errrrr', err)
     throw new ServiceError(`Failed to handle failed recurring subscription`)
   }
 }

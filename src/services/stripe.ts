@@ -213,7 +213,6 @@ export const createBillingPortalSession = async (customer: string) => {
     })
     return billingSession
   } catch (error) {
-    console.log('test errrrrrr', error)
     throw new ServiceError('Failed to create Stripe billing portal link')
   }
 }
