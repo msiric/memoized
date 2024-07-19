@@ -1,18 +1,29 @@
+import * as Sentry from '@sentry/nextjs'
 import { SnackbarProvider } from 'notistack'
 
-export type CustomError = {
-  success: boolean
+export type CustomErrorArgs = {
   message: string
   status?: number
   showSnackbar?: boolean
+  error?: ServiceError | null | unknown
 }
 
 export function createCustomError({
   message = 'Internal server error',
   status = 500,
   showSnackbar = false,
-}): CustomError {
+  error = null,
+}: CustomErrorArgs) {
+  Sentry.captureException(error ?? message)
+
   return { success: false, message, status, showSnackbar }
+}
+
+export type CustomError = {
+  success: boolean
+  message: string
+  status?: number
+  showSnackbar?: boolean
 }
 
 export function handleError(
@@ -33,5 +44,6 @@ export class ServiceError extends Error {
   ) {
     super(message)
     this.name = 'ServiceError'
+    Sentry.captureException(this)
   }
 }

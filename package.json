@@ -24,6 +24,7 @@
     "@mdx-js/react": "^3.0.0",
     "@next/mdx": "^14.0.4",
     "@prisma/client": "^5.14.0",
+    "@sentry/nextjs": "^8",
     "@sindresorhus/slugify": "^2.1.1",
     "@tailwindcss/typography": "^0.5.10",
     "@types/mdx": "^2.0.8",
@@ -67,7 +68,7 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.45.1",
+    "@playwright/test": "^1.45.2",
     "@testing-library/react": "^16.0.0",
     "@types/glob": "^8.1.0",
     "@types/uuid": "^9.0.8",

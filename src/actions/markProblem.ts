@@ -23,6 +23,7 @@ export async function markProblem({ problemId, completed }: MarkProblemArgs) {
         message: 'Failed to retrieve user session',
         showSnackbar: true,
       })
+
     if (!problemId)
       return createCustomError({
         message: 'Failed to retrieve practice problem',
@@ -45,6 +46,7 @@ export async function markProblem({ problemId, completed }: MarkProblemArgs) {
     return createCustomError({
       message: 'Failed to update practice problem status',
       showSnackbar: true,
+      error,
     })
   }
 }

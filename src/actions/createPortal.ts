@@ -30,18 +30,10 @@ export async function createPortal() {
       })
     }
 
-    let customer: string
-    try {
-      customer = await createOrRetrieveCustomer({
-        userId: user.id,
-        userEmail: user.email,
-      })
-    } catch (err) {
-      return createCustomError({
-        message: 'Failed to retrieve customer details',
-        showSnackbar: true,
-      })
-    }
+    const customer = await createOrRetrieveCustomer({
+      userId: user.id,
+      userEmail: user.email,
+    })
 
     if (!customer) {
       return createCustomError({
@@ -50,28 +42,22 @@ export async function createPortal() {
       })
     }
 
-    try {
-      const { url } = await createBillingPortalSession(customer)
+    const { url } = await createBillingPortalSession(customer)
 
-      if (!url) {
-        return createCustomError({
-          message: 'Failed to create billing portal',
-          showSnackbar: true,
-        })
-      }
-      return createCustomResponse({
-        url,
-      })
-    } catch (err) {
+    if (!url) {
       return createCustomError({
         message: 'Failed to create billing portal',
         showSnackbar: true,
       })
     }
+    return createCustomResponse({
+      url,
+    })
   } catch (error) {
     return createCustomError({
       message: 'Failed to create billing portal',
       showSnackbar: true,
+      error,
     })
   }
 }

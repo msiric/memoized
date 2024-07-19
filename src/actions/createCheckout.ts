@@ -70,11 +70,13 @@ export async function createCheckout(
       return createCustomError({
         message: error.message,
         showSnackbar: error.showSnackbar,
+        error,
       })
     } else {
       return createCustomError({
         message: 'Failed to create checkout session',
         showSnackbar: true,
+        error,
       })
     }
   }

@@ -23,6 +23,7 @@ export async function markLesson({ lessonId, completed }: MarkLessonArgs) {
         message: 'Failed to retrieve user session',
         showSnackbar: true,
       })
+
     if (!lessonId)
       return createCustomError({
         message: 'Failed to retrieve lesson',
@@ -45,6 +46,7 @@ export async function markLesson({ lessonId, completed }: MarkLessonArgs) {
     return createCustomError({
       message: 'Failed to update lesson status',
       showSnackbar: true,
+      error,
     })
   }
 }
