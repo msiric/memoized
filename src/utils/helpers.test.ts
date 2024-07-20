@@ -1,0 +1,456 @@
+import * as stripeModule from '@/lib/stripe'
+import { ProblemRow, UserWithSubscriptionsAndProgress } from '@/types'
+import {
+  capitalizeFirstLetter,
+  checkSubscriptionStatus,
+  fetchPricesFromStripe,
+  filterAndSortProblems,
+  getInitials,
+  getPlanFromStripePlan,
+  getStatusFromStripeStatus,
+  getURL,
+  remToPx,
+  toDateTime,
+  userHasAccess,
+} from '@/utils/helpers'
+import {
+  AccessOptions,
+  ProblemDifficulty,
+  SubscriptionPlan,
+  SubscriptionStatus,
+} from '@prisma/client'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/lib/stripe', () => ({
+  stripe: {
+    prices: {
+      list: vi.fn(),
+    },
+  },
+}))
+
+describe('Helper functions', () => {
+  describe('remToPx', () => {
+    const originalWindow = global.window
+
+    beforeEach(() => {
+      global.window = {
+        // @ts-ignore
+        getComputedStyle: () => ({
+          fontSize: '16px',
+        }),
+      }
+    })
+
+    afterEach(() => {
+      global.window = originalWindow
+    })
+
+    it('should convert rem to pixels', () => {
+      expect(remToPx(1)).toBe(16)
+      expect(remToPx(2)).toBe(32)
+    })
+
+    it('should handle fractional rem values', () => {
+      expect(remToPx(0.5)).toBe(8)
+      expect(remToPx(1.5)).toBe(24)
+    })
+  })
+
+  describe('toDateTime', () => {
+    it('should convert seconds to Date object', () => {
+      const date = toDateTime(1609459200) // 2021-01-01 00:00:00 UTC
+      expect(date).toBeInstanceOf(Date)
+      expect(date.getUTCFullYear()).toBe(2021)
+      expect(date.getUTCMonth()).toBe(0)
+      expect(date.getUTCDate()).toBe(1)
+    })
+  })
+
+  describe('userHasAccess', () => {
+    it('should return true for free access', () => {
+      expect(userHasAccess(null, AccessOptions.FREE)).toBe(true)
+    })
+
+    it('should return true for premium user with active subscription', () => {
+      const user = { currentSubscriptionStatus: SubscriptionStatus.ACTIVE }
+      expect(
+        userHasAccess(
+          user as UserWithSubscriptionsAndProgress,
+          AccessOptions.PREMIUM,
+        ),
+      ).toBe(true)
+    })
+
+    it('should return false for premium access without active subscription', () => {
+      const user = { currentSubscriptionStatus: SubscriptionStatus.EXPIRED }
+      expect(
+        userHasAccess(
+          user as UserWithSubscriptionsAndProgress,
+          AccessOptions.PREMIUM,
+        ),
+      ).toBe(false)
+    })
+
+    it('should return true when user is undefined', () => {
+      expect(userHasAccess(undefined, AccessOptions.PREMIUM)).toBe(true)
+    })
+
+    it('should return true when access is undefined', () => {
+      const user = { currentSubscriptionStatus: SubscriptionStatus.EXPIRED }
+      expect(
+        userHasAccess(user as UserWithSubscriptionsAndProgress, undefined),
+      ).toBe(true)
+    })
+  })
+
+  describe('capitalizeFirstLetter', () => {
+    it('should capitalize the first letter of a string', () => {
+      expect(capitalizeFirstLetter('hello')).toBe('Hello')
+    })
+
+    it('should return an empty string for empty input', () => {
+      expect(capitalizeFirstLetter('')).toBe('')
+    })
+
+    it('should handle already capitalized strings', () => {
+      expect(capitalizeFirstLetter('Hello')).toBe('Hello')
+    })
+
+    it('should lowercase the rest of the string', () => {
+      expect(capitalizeFirstLetter('hELLO')).toBe('Hello')
+    })
+
+    it('should handle single character input', () => {
+      expect(capitalizeFirstLetter('a')).toBe('A')
+    })
+  })
+
+  describe('getInitials', () => {
+    it('should return initials for a simple name', () => {
+      expect(getInitials('John Doe')).toBe('JD')
+    })
+
+    it('should handle hyphenated names', () => {
+      expect(getInitials('Mary-Jane Watson')).toBe('MJW')
+    })
+
+    it('should return an empty string for empty input', () => {
+      expect(getInitials('')).toBe('')
+    })
+
+    it('should handle multiple spaces', () => {
+      expect(getInitials('John  Doe')).toBe('JD')
+    })
+
+    it('should handle leading and trailing spaces', () => {
+      expect(getInitials('  John Doe  ')).toBe('JD')
+    })
+
+    it('should handle single name', () => {
+      expect(getInitials('Madonna')).toBe('M')
+    })
+
+    it('should handle multiple hyphenated names', () => {
+      expect(getInitials('Jean-Claude Van Damme')).toBe('JCVD')
+    })
+  })
+
+  describe('filterAndSortProblems', () => {
+    const mockProblems = [
+      {
+        title: 'Easy Problem',
+        difficulty: ProblemDifficulty.EASY,
+        lesson: { slug: 'lesson-1', title: 'Lesson 1' },
+        problemProgress: [],
+      },
+      {
+        title: 'Hard Problem',
+        difficulty: ProblemDifficulty.HARD,
+        lesson: { slug: 'lesson-2', title: 'Lesson 2' },
+        problemProgress: [{ completed: true }],
+      },
+      {
+        title: 'Medium Problem',
+        difficulty: ProblemDifficulty.MEDIUM,
+        lesson: { slug: 'lesson-1', title: 'Lesson 1' },
+        problemProgress: [],
+      },
+    ]
+
+    it('should filter by difficulty', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        difficulty: ProblemDifficulty.EASY,
+      })
+      expect(result).toHaveLength(1)
+      expect(result[0].title).toBe('Easy Problem')
+    })
+
+    it('should filter by status', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        status: 'COMPLETED',
+      })
+      expect(result).toHaveLength(1)
+      expect(result[0].title).toBe('Hard Problem')
+    })
+
+    it('should filter by lesson', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        lesson: 'lesson-1',
+      })
+      expect(result).toHaveLength(2)
+    })
+
+    it('should sort by title ascending', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        sortColumn: 'title',
+        sortOrder: 'asc',
+      })
+      expect(result[0].title).toBe('Easy Problem')
+      expect(result[2].title).toBe('Medium Problem')
+    })
+
+    it('should sort by title descending', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        sortColumn: 'title',
+        sortOrder: 'desc',
+      })
+      expect(result[0].title).toBe('Medium Problem')
+      expect(result[2].title).toBe('Easy Problem')
+    })
+
+    it('should sort by difficulty ascending', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        sortColumn: 'difficulty',
+        sortOrder: 'asc',
+      })
+      expect(result[0].difficulty).toBe(ProblemDifficulty.EASY)
+      expect(result[2].difficulty).toBe(ProblemDifficulty.HARD)
+    })
+
+    it('should sort by difficulty descending', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        sortColumn: 'difficulty',
+        sortOrder: 'desc',
+      })
+      expect(result[0].difficulty).toBe(ProblemDifficulty.HARD)
+      expect(result[2].difficulty).toBe(ProblemDifficulty.EASY)
+    })
+
+    it('should sort by lesson ascending', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        sortColumn: 'lesson',
+        sortOrder: 'asc',
+      })
+      expect(result[0].lesson.title).toBe('Lesson 1')
+      expect(result[2].lesson.title).toBe('Lesson 2')
+    })
+
+    it('should sort by lesson descending', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        sortColumn: 'lesson',
+        sortOrder: 'desc',
+      })
+      expect(result[0].lesson.title).toBe('Lesson 2')
+      expect(result[2].lesson.title).toBe('Lesson 1')
+    })
+
+    it('should filter by search term', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        search: 'medium',
+      })
+      expect(result).toHaveLength(1)
+      expect(result[0].title).toBe('Medium Problem')
+    })
+
+    it('should apply multiple filters', () => {
+      const result = filterAndSortProblems(mockProblems as ProblemRow[], {
+        difficulty: ProblemDifficulty.EASY,
+        lesson: 'lesson-1',
+      })
+      expect(result).toHaveLength(1)
+      expect(result[0].title).toBe('Easy Problem')
+    })
+  })
+
+  describe('getURL', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      vi.resetModules()
+      process.env = { ...originalEnv }
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+    })
+
+    it('should use NEXT_PUBLIC_SITE_URL if set', () => {
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com'
+      expect(getURL()).toBe('https://example.com')
+    })
+
+    it('should use NEXT_PUBLIC_VERCEL_URL if NEXT_PUBLIC_SITE_URL is not set', () => {
+      process.env.NEXT_PUBLIC_VERCEL_URL = 'example-app.vercel.app'
+      expect(getURL()).toBe('https://example-app.vercel.app')
+    })
+
+    it('should default to localhost if no environment variables are set', () => {
+      expect(getURL()).toBe('http://localhost:3000')
+    })
+
+    it('should append path correctly', () => {
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com'
+      expect(getURL('api/auth')).toBe('https://example.com/api/auth')
+    })
+
+    it('should handle trailing slashes correctly', () => {
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com/'
+      expect(getURL('/api/auth')).toBe('https://example.com/api/auth')
+    })
+  })
+
+  describe('fetchPricesFromStripe', () => {
+    it('should fetch prices from Stripe', async () => {
+      const mockPrices = { data: [{ id: 'price_1', nickname: 'Monthly' }] }
+      vi.spyOn(stripeModule.stripe.prices, 'list').mockResolvedValue(
+        mockPrices as any,
+      )
+
+      const result = await fetchPricesFromStripe()
+      expect(result).toEqual({ price_1: mockPrices.data[0] })
+    })
+  })
+
+  describe('getPlanFromStripePlan', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'log').mockImplementation(() => {})
+    })
+
+    it('should return MONTHLY for Monthly nickname', async () => {
+      vi.spyOn(stripeModule.stripe.prices, 'list').mockResolvedValue({
+        data: [{ id: 'price_1', nickname: 'Monthly' }],
+      } as any)
+      const result = await getPlanFromStripePlan('price_1')
+      expect(result).toBe(SubscriptionPlan.MONTHLY)
+    })
+
+    it('should return YEARLY for Yearly nickname', async () => {
+      vi.spyOn(stripeModule.stripe.prices, 'list').mockResolvedValue({
+        data: [{ id: 'price_2', nickname: 'Yearly' }],
+      } as any)
+      const result = await getPlanFromStripePlan('price_2')
+      expect(result).toBe(SubscriptionPlan.YEARLY)
+    })
+
+    it('should return LIFETIME for Lifetime nickname', async () => {
+      vi.spyOn(stripeModule.stripe.prices, 'list').mockResolvedValue({
+        data: [{ id: 'price_3', nickname: 'Lifetime' }],
+      } as any)
+      const result = await getPlanFromStripePlan('price_3')
+      expect(result).toBe(SubscriptionPlan.LIFETIME)
+    })
+
+    it('should return undefined for unknown nickname', async () => {
+      vi.spyOn(stripeModule.stripe.prices, 'list').mockResolvedValue({
+        data: [{ id: 'price_4', nickname: 'Unknown' }],
+      } as any)
+      const result = await getPlanFromStripePlan('price_4')
+      expect(result).toBeUndefined()
+    })
+
+    it('should return undefined for unknown price ID', async () => {
+      vi.spyOn(stripeModule.stripe.prices, 'list').mockResolvedValue({
+        data: [],
+      } as any)
+      const result = await getPlanFromStripePlan('unknown_price')
+      expect(result).toBeUndefined()
+    })
+  })
+
+  describe('getStatusFromStripeStatus', () => {
+    it('should return ACTIVE for active status', () => {
+      expect(getStatusFromStripeStatus('active')).toBe(
+        SubscriptionStatus.ACTIVE,
+      )
+    })
+
+    it('should return CANCELED for canceled status', () => {
+      expect(getStatusFromStripeStatus('canceled')).toBe(
+        SubscriptionStatus.CANCELED,
+      )
+    })
+
+    it('should return EXPIRED for incomplete status', () => {
+      expect(getStatusFromStripeStatus('incomplete')).toBe(
+        SubscriptionStatus.EXPIRED,
+      )
+    })
+
+    it('should return EXPIRED for incomplete_expired status', () => {
+      expect(getStatusFromStripeStatus('incomplete_expired')).toBe(
+        SubscriptionStatus.EXPIRED,
+      )
+    })
+
+    it('should return EXPIRED for past_due status', () => {
+      expect(getStatusFromStripeStatus('past_due')).toBe(
+        SubscriptionStatus.EXPIRED,
+      )
+    })
+
+    it('should return EXPIRED for unpaid status', () => {
+      expect(getStatusFromStripeStatus('unpaid')).toBe(
+        SubscriptionStatus.EXPIRED,
+      )
+    })
+
+    it('should return EXPIRED for unknown status', () => {
+      // @ts-ignore - Testing with an invalid status
+      expect(getStatusFromStripeStatus('unknown')).toBe(
+        SubscriptionStatus.EXPIRED,
+      )
+    })
+  })
+
+  describe('checkSubscriptionStatus', () => {
+    it('should return ACTIVE for active subscription', () => {
+      const subscription = { status: SubscriptionStatus.ACTIVE }
+      expect(checkSubscriptionStatus(subscription as any)).toBe('ACTIVE')
+    })
+
+    it('should return CANCELED for canceled subscription', () => {
+      const subscription = { status: SubscriptionStatus.CANCELED }
+      expect(checkSubscriptionStatus(subscription as any)).toBe('CANCELED')
+    })
+
+    it('should return EXPIRED for expired subscription', () => {
+      const subscription = {
+        status: SubscriptionStatus.ACTIVE,
+        endDate: new Date(Date.now() - 1000).toISOString(), // 1 second ago
+      }
+      expect(checkSubscriptionStatus(subscription as any)).toBe('EXPIRED')
+    })
+
+    it('should return UNKNOWN for unexpected status', () => {
+      const subscription = { status: 'UNEXPECTED' as SubscriptionStatus }
+      expect(checkSubscriptionStatus(subscription as any)).toBe('UNKNOWN')
+    })
+
+    it('should return ACTIVE for active subscription with future end date', () => {
+      const subscription = {
+        status: SubscriptionStatus.ACTIVE,
+        endDate: new Date(Date.now() + 1000000).toISOString(), // Far in the future
+      }
+      expect(checkSubscriptionStatus(subscription as any)).toBe('ACTIVE')
+    })
+
+    it('should return ACTIVE for active subscription without end date', () => {
+      const subscription = {
+        status: SubscriptionStatus.ACTIVE,
+        endDate: null,
+      }
+      expect(checkSubscriptionStatus(subscription as any)).toBe('ACTIVE')
+    })
+  })
+})

@@ -13,8 +13,8 @@ import {
 } from '@prisma/client'
 import Stripe from 'stripe'
 
-let cachedPrices: Record<string, Stripe.Price> | null = null
-let lastFetchTime = 0
+const cachedPrices: Record<string, Stripe.Price> | null = null
+const lastFetchTime = 0
 
 const CACHE_DURATION = 1000 * 60 * 60 // 1 hour
 
@@ -184,19 +184,10 @@ export const fetchPricesFromStripe = async () => {
   )
 }
 
-export const getCachedPrices = async () => {
-  const now = Date.now()
-  if (!cachedPrices || now - lastFetchTime > CACHE_DURATION) {
-    cachedPrices = await fetchPricesFromStripe()
-    lastFetchTime = now
-  }
-  return cachedPrices
-}
-
 export const getPlanFromStripePlan = async (
   priceId: string,
 ): Promise<SubscriptionPlan | void> => {
-  const prices = await getCachedPrices()
+  const prices = await fetchPricesFromStripe()
   const price = prices[priceId]
 
   if (!price) return console.log(`Unknown price ID`)
@@ -236,11 +227,12 @@ export const checkSubscriptionStatus = (
 ): SubscriptionStatus | 'UNKNOWN' => {
   const now = new Date()
   if (subscription.status === 'ACTIVE') {
+    if (subscription.endDate && new Date(subscription.endDate) <= now) {
+      return 'EXPIRED'
+    }
     return 'ACTIVE'
   } else if (subscription.status === 'CANCELED') {
     return 'CANCELED'
-  } else if (subscription.endDate && new Date(subscription.endDate) <= now) {
-    return 'EXPIRED'
   } else {
     return 'UNKNOWN'
   }
