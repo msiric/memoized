@@ -2,12 +2,10 @@
 
 import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
-import { PremiumModal } from '@/components/PremiumModal'
 import { SectionProvider, type Section } from '@/components/SectionProvider'
-import { PREMIUM_QUERY_PARAM } from '@/constants'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 
 export type CourseProvidersProps = {
@@ -24,9 +22,6 @@ export const CourseProviders = ({
   section,
 }: CourseProvidersProps) => {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const upgradedToPremium = searchParams?.get(PREMIUM_QUERY_PARAM) === 'true'
-
   const formattedPathname = `/${pathname?.split('/')?.at(-1) ?? ''}`
 
   return (
@@ -50,7 +45,6 @@ export const CourseProviders = ({
           <main className="flex-auto">{section}</main>
           <Footer />
         </div>
-        {upgradedToPremium && <PremiumModal />}
       </div>
     </SectionProvider>
   )

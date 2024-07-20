@@ -1,9 +1,16 @@
 'use client'
 
 import { PREMIUM_QUERY_PARAM } from '@/constants'
+import clsx from 'clsx'
 import { MouseEvent, useState } from 'react'
+import { MdOutlineCheck } from 'react-icons/md'
+import { RxCross2 } from 'react-icons/rx'
 
-export const PremiumModal = () => {
+export type PremiumModalProps = {
+  upgradedSuccessfully: boolean
+}
+
+export const PremiumModal = ({ upgradedSuccessfully }: PremiumModalProps) => {
   const [isOpen, setIsOpen] = useState(true)
   const closeModal = () => {
     setIsOpen(false)
@@ -47,94 +54,119 @@ export const PremiumModal = () => {
             </svg>
             <span className="sr-only">Close modal</span>
           </button>
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-lime-600 p-2 dark:bg-lime-600">
-            <svg
-              aria-hidden="true"
-              className="h-8 w-8 text-white dark:text-white"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
-            <span className="sr-only">Success</span>
+          <div
+            className={clsx(
+              'mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full p-2',
+              upgradedSuccessfully ? 'bg-lime-600' : 'bg-red-600',
+            )}
+          >
+            {upgradedSuccessfully ? (
+              <MdOutlineCheck size="30" />
+            ) : (
+              <RxCross2 size="30" />
+            )}
+            <span className="sr-only">
+              {upgradedSuccessfully ? 'Success' : 'Error'}
+            </span>
           </div>
           <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
-            Upgrade Successful!
+            {upgradedSuccessfully ? 'Upgrade Successful' : 'Upgrade Failed'}
           </h2>
           <p className="mb-6 text-gray-600 dark:text-gray-300">
-            Thank you for upgrading to premium! You now have access to all
-            premium content and features. Enjoy your learning journey with
-            unlimited access.
+            {upgradedSuccessfully ? (
+              <>
+                <p>
+                  Thank you for upgrading to premium! You now have access to all
+                  premium content and features.
+                </p>
+                <p className="mt-2">
+                  Enjoy your learning journey with unlimited access.
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  There was a problem upgrading your account to premium and your
+                  payment has been refunded.
+                </p>
+                <p className="mt-2">
+                  If you have any questions or concerns, please reach out to
+                  support.
+                </p>
+              </>
+            )}
           </p>
-          <ul role="list" className="mb-6 space-y-3">
-            <li className="flex items-start">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 32 32"
-                className="h-8 w-8 flex-none fill-lime-500"
-              >
-                <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
-              </svg>
-              <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                <p className="text-md font-medium text-gray-600 dark:text-white">
-                  Built-In Data Structures
-                </p>
-              </div>
-            </li>
-            <li className="flex items-start">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 32 32"
-                className="h-8 w-8 flex-none fill-lime-500"
-              >
-                <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
-              </svg>
-              <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                <p className="text-md font-medium text-gray-600 dark:text-white">
-                  User-Defined Data Structures
-                </p>
-              </div>
-            </li>
-            <li className="flex items-start">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 32 32"
-                className="h-8 w-8 flex-none fill-lime-500"
-              >
-                <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
-              </svg>
-              <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                <p className="text-md font-medium text-gray-600 dark:text-white">
-                  Common Techniques
-                </p>
-              </div>
-            </li>
-            <li className="flex items-start">
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 32 32"
-                className="h-8 w-8 flex-none fill-lime-500"
-              >
-                <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
-              </svg>
-              <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                <p className="text-md font-medium text-gray-600 dark:text-white">
-                  Advanced Topics
-                </p>
-              </div>
-            </li>
-          </ul>
+          {upgradedSuccessfully && (
+            <ul role="list" className="mb-6 space-y-3">
+              <li className="flex items-start">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 32 32"
+                  className="h-8 w-8 flex-none fill-lime-500"
+                >
+                  <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                </svg>
+                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
+                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                    Built-In Data Structures
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 32 32"
+                  className="h-8 w-8 flex-none fill-lime-500"
+                >
+                  <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                </svg>
+                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
+                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                    User-Defined Data Structures
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 32 32"
+                  className="h-8 w-8 flex-none fill-lime-500"
+                >
+                  <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                </svg>
+                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
+                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                    Common Techniques
+                  </p>
+                </div>
+              </li>
+              <li className="flex items-start">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 32 32"
+                  className="h-8 w-8 flex-none fill-lime-500"
+                >
+                  <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
+                </svg>
+                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
+                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                    Advanced Topics
+                  </p>
+                </div>
+              </li>
+            </ul>
+          )}
           <div className="flex justify-center space-x-4">
             <button
               onClick={closeModal}
-              className="rounded-lg bg-lime-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-lime-700 focus:outline-none focus:ring-4 focus:ring-lime-300 dark:focus:ring-lime-900"
+              className={clsx(
+                'rounded-lg px-4 py-2 text-center text-sm font-medium text-white focus:outline-none focus:ring-4',
+                upgradedSuccessfully
+                  ? 'bg-lime-600 hover:bg-lime-700 focus:ring-lime-300 dark:focus:ring-lime-900'
+                  : 'bg-red-600 hover:bg-red-700 focus:ring-red-300 dark:focus:ring-red-900',
+              )}
             >
-              Start learning
+              {upgradedSuccessfully ? 'Start learning' : 'Close modal'}
             </button>
           </div>
         </div>
