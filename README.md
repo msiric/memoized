@@ -1,46 +1,61 @@
-# Protocol
+# Memoized
 
-Protocol is a [Tailwind UI](https://tailwindui.com) site template built using [Tailwind CSS](https://tailwindcss.com) and [Next.js](https://nextjs.org).
+## Architecture Overview
 
-## Getting started
+This project is a Next.js application with a PostgreSQL database hosted on Neon. It uses Prisma as an ORM and is deployed to Vercel.
 
-To get started with this template, first install the npm dependencies:
+### Key Components:
 
-```bash
-npm install
-```
+1. **Frontend**: Next.js
+2. **Database**: PostgreSQL (hosted on Neon)
+3. **ORM**: Prisma
+4. **Deployment Platform**: Vercel
+5. **CI/CD**: GitHub Actions
 
-Next, run the development server:
+## Deployment Process
 
-```bash
-npm run dev
-```
+The deployment process is automated using GitHub Actions and involves the following steps:
 
-Finally, open [http://localhost:3000](http://localhost:3000) in your browser to view the website.
+1. **Code Push**: Pushing to the main branch triggers the deployment workflow.
 
-## Customizing
+2. **GitHub Actions Workflow**:
 
-You can start editing this template by modifying the files in the `/src` folder. The site will auto-update as you edit these files.
+   - Installs dependencies
+   - Runs tests and type checks
+   - Generates Prisma client
+   - Runs database migrations
+   - Syncs content (seeds the database)
+   - Deploys to Vercel
 
-## Global search
+3. **Database Updates**: Prisma handles database migrations and seeding.
 
-This template includes a global search that's powered by the [FlexSearch](https://github.com/nextapps-de/flexsearch) library. It's available by clicking the search input or by using the `⌘K` shortcut.
+4. **Vercel Deployment**: The application is deployed to Vercel after all checks and updates are successful.
 
-This feature requires no configuration, and works out of the box by automatically scanning your documentation pages to build its index. You can adjust the search parameters by editing the `/src/mdx/search.mjs` file.
+## Local Development
 
-## License
+1. Clone the repository
+2. Install dependencies: `yarn install`
+3. Set up environment variables (see `.env.example`)
+4. Run database migrations: `yarn migrate:dev`
+5. Start the development server: `yarn dev`
 
-This site template is a commercial product and is licensed under the [Tailwind UI license](https://tailwindui.com/license).
+## Important Scripts
 
-## Learn more
+- `yarn dev`: Start development server
+- `yarn build`: Build the application
+- `yarn start`: Start production server
+- `yarn migrate`: Run database migrations
+- `yarn sync`: Sync content (seed database)
+- `yarn test`: Run tests
 
-To learn more about the technologies used in this site template, see the following resources:
+## Deployment Configuration
 
-- [Tailwind CSS](https://tailwindcss.com/docs) - the official Tailwind CSS documentation
-- [Next.js](https://nextjs.org/docs) - the official Next.js documentation
-- [Headless UI](https://headlessui.dev) - the official Headless UI documentation
-- [Framer Motion](https://www.framer.com/docs/) - the official Framer Motion documentation
-- [MDX](https://mdxjs.com/) - the official MDX documentation
-- [Algolia Autocomplete](https://www.algolia.com/doc/ui-libraries/autocomplete/introduction/what-is-autocomplete/) - the official Algolia Autocomplete documentation
-- [FlexSearch](https://github.com/nextapps-de/flexsearch) - the official FlexSearch documentation
-- [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction) - the official Zustand documentation
+- Vercel auto-deployments are disabled.
+- All deployments are triggered via GitHub Actions.
+- Ensure all necessary secrets are set in GitHub repository settings.
+
+## Database Management
+
+- Database hosted on Neon
+- Migrations are run automatically during deployment
+- Content syncing (seeding) is part of the deployment process
