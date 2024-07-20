@@ -1,5 +1,6 @@
 import { Providers } from '@/app/providers'
 import '@/styles/tailwind.css'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { type Metadata } from 'next'
 import NextTopLoader from 'nextjs-toploader'
 
@@ -44,6 +45,7 @@ export default async function RootLayout({
         <NextTopLoader color="#84cc16" showSpinner={false} />
         <Providers>
           <div className="w-full">{children}</div>
+          <SpeedInsights />
         </Providers>
         <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
       </body>
