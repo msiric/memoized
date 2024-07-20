@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/Button'
 import { HeroPattern } from '@/components/HeroPattern'
+import { isProduction } from '@/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
 
@@ -13,7 +14,9 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    Sentry.captureException(error)
+    if (isProduction()) {
+      Sentry.captureException(error)
+    }
   }, [error])
 
   return (

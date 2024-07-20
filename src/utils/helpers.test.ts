@@ -286,27 +286,66 @@ describe('Helper functions', () => {
     })
 
     it('should use NEXT_PUBLIC_SITE_URL if set', () => {
-      process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com'
-      expect(getURL()).toBe('https://example.com')
+      const env = {
+        NODE_ENV: 'development',
+        NEXT_PUBLIC_SITE_URL: 'https://example.com',
+      }
+      expect(getURL('', env as NodeJS.ProcessEnv)).toBe('https://example.com')
     })
 
     it('should use NEXT_PUBLIC_VERCEL_URL if NEXT_PUBLIC_SITE_URL is not set', () => {
-      process.env.NEXT_PUBLIC_VERCEL_URL = 'example-app.vercel.app'
-      expect(getURL()).toBe('https://example-app.vercel.app')
+      const env = {
+        NODE_ENV: 'development',
+        NEXT_PUBLIC_VERCEL_URL: 'example-app.vercel.app',
+      }
+      expect(getURL('', env as NodeJS.ProcessEnv)).toBe(
+        'https://example-app.vercel.app',
+      )
     })
 
     it('should default to localhost if no environment variables are set', () => {
-      expect(getURL()).toBe('http://localhost:3000')
+      const env = {}
+      expect(getURL('', env as NodeJS.ProcessEnv)).toBe('http://localhost:3000')
     })
 
     it('should append path correctly', () => {
-      process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com'
-      expect(getURL('api/auth')).toBe('https://example.com/api/auth')
+      const env = {
+        NODE_ENV: 'development',
+        NEXT_PUBLIC_SITE_URL: 'https://example.com',
+      }
+      expect(getURL('api/auth', env as NodeJS.ProcessEnv)).toBe(
+        'https://example.com/api/auth',
+      )
     })
 
     it('should handle trailing slashes correctly', () => {
-      process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com/'
-      expect(getURL('/api/auth')).toBe('https://example.com/api/auth')
+      const env = {
+        NODE_ENV: 'development',
+        NEXT_PUBLIC_SITE_URL: 'https://example.com/',
+      }
+      expect(getURL('/api/auth', env as NodeJS.ProcessEnv)).toBe(
+        'https://example.com/api/auth',
+      )
+    })
+
+    it('should use production URL when NODE_ENV is production', () => {
+      const env = {
+        NODE_ENV: 'production',
+        NEXT_PUBLIC_SITE_URL: 'https://production.example.com',
+      }
+      expect(getURL('', env as NodeJS.ProcessEnv)).toBe(
+        'https://production.example.com',
+      )
+    })
+
+    it('should add https:// to NEXT_PUBLIC_VERCEL_URL if not present', () => {
+      const env = {
+        NODE_ENV: 'development',
+        NEXT_PUBLIC_VERCEL_URL: 'example-app.vercel.app',
+      }
+      expect(getURL('', env as NodeJS.ProcessEnv)).toBe(
+        'https://example-app.vercel.app',
+      )
     })
   })
 
@@ -414,6 +453,14 @@ describe('Helper functions', () => {
   })
 
   describe('checkSubscriptionStatus', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
     it('should return ACTIVE for active subscription', () => {
       const subscription = { status: SubscriptionStatus.ACTIVE }
       expect(checkSubscriptionStatus(subscription as any)).toBe('ACTIVE')
@@ -425,9 +472,10 @@ describe('Helper functions', () => {
     })
 
     it('should return EXPIRED for expired subscription', () => {
+      vi.setSystemTime(new Date('2023-07-21T12:00:00Z'))
       const subscription = {
         status: SubscriptionStatus.ACTIVE,
-        endDate: new Date(Date.now() - 1000).toISOString(), // 1 second ago
+        endDate: '2023-07-21T11:59:59Z',
       }
       expect(checkSubscriptionStatus(subscription as any)).toBe('EXPIRED')
     })
@@ -438,9 +486,10 @@ describe('Helper functions', () => {
     })
 
     it('should return ACTIVE for active subscription with future end date', () => {
+      vi.setSystemTime(new Date('2023-07-21T12:00:00Z'))
       const subscription = {
         status: SubscriptionStatus.ACTIVE,
-        endDate: new Date(Date.now() + 1000000).toISOString(), // Far in the future
+        endDate: '2023-07-21T12:00:01Z',
       }
       expect(checkSubscriptionStatus(subscription as any)).toBe('ACTIVE')
     })
@@ -451,6 +500,47 @@ describe('Helper functions', () => {
         endDate: null,
       }
       expect(checkSubscriptionStatus(subscription as any)).toBe('ACTIVE')
+    })
+
+    it('should correctly handle expiration across different timezones', () => {
+      // Set the current time to 2023-07-21 12:00:00 UTC
+      vi.setSystemTime(new Date('2023-07-21T12:00:00Z'))
+
+      // Test with subscription end date 1 hour before current time
+      const subscriptionJustExpired = {
+        status: SubscriptionStatus.ACTIVE,
+        endDate: '2023-07-21T11:00:00Z',
+      }
+      expect(checkSubscriptionStatus(subscriptionJustExpired as any)).toBe(
+        'EXPIRED',
+      )
+
+      // Test with subscription end date 1 hour after current time
+      const subscriptionNotYetExpired = {
+        status: SubscriptionStatus.ACTIVE,
+        endDate: '2023-07-21T13:00:00Z',
+      }
+      expect(checkSubscriptionStatus(subscriptionNotYetExpired as any)).toBe(
+        'ACTIVE',
+      )
+
+      // Test with subscription end date exactly at current time
+      const subscriptionExpiringNow = {
+        status: SubscriptionStatus.ACTIVE,
+        endDate: '2023-07-21T12:00:00Z',
+      }
+      expect(checkSubscriptionStatus(subscriptionExpiringNow as any)).toBe(
+        'EXPIRED',
+      )
+
+      // Test with different timezone (e.g., PST)
+      const subscriptionInDifferentTimezone = {
+        status: SubscriptionStatus.ACTIVE,
+        endDate: '2023-07-21T05:00:00-07:00', // 12:00 UTC
+      }
+      expect(
+        checkSubscriptionStatus(subscriptionInDifferentTimezone as any),
+      ).toBe('EXPIRED')
     })
   })
 })

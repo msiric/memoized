@@ -3,6 +3,7 @@
 import { HeroPattern } from '@/components/HeroPattern'
 import { useEffect } from 'react'
 import * as Sentry from '@sentry/nextjs'
+import { isProduction } from '@/utils/helpers'
 
 export default function GlobalError({
   error,
@@ -12,7 +13,9 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    Sentry.captureException(error)
+    if (isProduction()) {
+      Sentry.captureException(error)
+    }
   }, [error])
 
   return (

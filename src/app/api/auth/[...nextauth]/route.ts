@@ -4,6 +4,7 @@ import {
   findAccountWithUserByProviderAccountId,
 } from '@/services/account'
 import { AuthProvider } from '@/types'
+import { isProduction } from '@/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
 import NextAuth, { AuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
@@ -53,7 +54,9 @@ export const authOptions: AuthOptions = {
       const existingAccount = await findAccount(provider, providerAccountId)
 
       if (existingAccount) {
-        Sentry.setUser({ id: existingAccount.userId })
+        if (isProduction()) {
+          Sentry.setUser({ id: existingAccount.userId })
+        }
         return true
       }
 
@@ -67,7 +70,9 @@ export const authOptions: AuthOptions = {
       )
 
       if (newUser) {
-        Sentry.setUser({ id: newUser.id })
+        if (isProduction()) {
+          Sentry.setUser({ id: newUser.id })
+        }
         return true
       }
 
@@ -78,7 +83,9 @@ export const authOptions: AuthOptions = {
         const account = await findAccountWithUserByProviderAccountId(user.id)
 
         if (account) {
-          Sentry.setUser({ id: account.user.id })
+          if (isProduction()) {
+            Sentry.setUser({ id: account.user.id })
+          }
 
           token.uid = account.id
           token.providerAccountId = account.providerAccountId

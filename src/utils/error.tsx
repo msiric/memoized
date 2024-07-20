@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs'
 import { SnackbarProvider } from 'notistack'
+import { isProduction } from './helpers'
 
 export type CustomErrorArgs = {
   message: string
@@ -14,7 +15,9 @@ export function createCustomError({
   showSnackbar = false,
   error = null,
 }: CustomErrorArgs) {
-  Sentry.captureException(error ?? message)
+  if (isProduction()) {
+    Sentry.captureException(error ?? message)
+  }
 
   return { success: false, message, status, showSnackbar }
 }
@@ -44,6 +47,8 @@ export class ServiceError extends Error {
   ) {
     super(message)
     this.name = 'ServiceError'
-    Sentry.captureException(this)
+    if (isProduction()) {
+      Sentry.captureException(this)
+    }
   }
 }

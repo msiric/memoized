@@ -3,8 +3,9 @@ import {
   createLifetimeAccess,
   updateSubscriptionDetails,
 } from '@/services/subscription'
-import Stripe from 'stripe'
+import { isProduction } from '@/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
+import Stripe from 'stripe'
 
 const relevantEvents = new Set([
   'checkout.session.completed',
@@ -66,7 +67,9 @@ export async function POST(req: Request) {
       }
     } catch (error) {
       console.log(error)
-      Sentry.captureException(error)
+      if (isProduction()) {
+        Sentry.captureException(error)
+      }
       return new Response(
         'Webhook handler failed. View your Next.js function logs.',
         {

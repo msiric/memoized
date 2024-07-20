@@ -2,11 +2,12 @@ import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { ServiceError } from '@/utils/error'
 import {
+  formatDate,
   getPlanFromStripePlan,
   getStatusFromStripeStatus,
-  toDateTime,
 } from '@/utils/helpers'
 import { SubscriptionStatus } from '@prisma/client'
+import { format } from 'date-fns'
 import Stripe from 'stripe'
 
 export const handleFailedRecurringSubscription = async (
@@ -123,24 +124,16 @@ export const updateSubscriptionDetails = async ({
       plan: subscriptionPlan,
       priceId: subscription.items.data[0].price.id,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      cancelAt: subscription.cancel_at
-        ? toDateTime(subscription.cancel_at).toISOString()
-        : null,
-      canceledAt: subscription.canceled_at
-        ? toDateTime(subscription.canceled_at).toISOString()
-        : null,
-      currentPeriodStart: toDateTime(
+      cancelAt: formatDate(subscription.cancel_at),
+      canceledAt: formatDate(subscription.canceled_at),
+      currentPeriodStart: formatDate(
         subscription.current_period_start,
-      ).toISOString(),
-      currentPeriodEnd: toDateTime(
-        subscription.current_period_end,
-      ).toISOString(),
-      startDate: toDateTime(subscription.created).toISOString(),
-      endDate: subscription.ended_at
-        ? toDateTime(subscription.ended_at).toISOString()
-        : null,
-      createdAt: toDateTime(subscription.created).toISOString(),
-      updatedAt: new Date().toISOString(),
+      ) as string,
+      currentPeriodEnd: formatDate(subscription.current_period_end),
+      startDate: formatDate(subscription.created) as string,
+      endDate: formatDate(subscription.ended_at),
+      createdAt: formatDate(subscription.created) as string,
+      updatedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
     }
 
     await prisma.subscription.upsert({
@@ -199,12 +192,12 @@ export const createLifetimeAccess = async ({
       cancelAtPeriodEnd: false,
       cancelAt: null,
       canceledAt: null,
-      currentPeriodStart: toDateTime(session.created).toISOString(),
+      currentPeriodStart: formatDate(session.created) as string,
       currentPeriodEnd: null,
-      startDate: toDateTime(session.created).toISOString(),
+      startDate: formatDate(session.created) as string,
       endDate: null,
-      createdAt: toDateTime(session.created).toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: formatDate(session.created) as string,
+      updatedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
     }
 
     await prisma.subscription.upsert({
