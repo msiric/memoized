@@ -10,29 +10,27 @@ import NextAuth, { AuthOptions } from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
 import GoogleProvider from 'next-auth/providers/google'
 
-const GITHUB_ID = process.env.GITHUB_ID
-const GITHUB_SECRET = process.env.GITHUB_SECRET
+const GITHUB_ID = process.env.AUTH_GITHUB_ID ?? ''
+const GITHUB_SECRET = process.env.AUTH_GITHUB_SECRET ?? ''
 
-const GOOGLE_ID = process.env.GOOGLE_ID
-const GOOGLE_SECRET = process.env.GOOGLE_SECRET
+const GOOGLE_ID = process.env.AUTH_GOOGLE_ID ?? ''
+const GOOGLE_SECRET = process.env.AUTH_GOOGLE_SECRET ?? ''
 
 export const authOptions: AuthOptions = {
   providers: [
     GithubProvider({
-      clientId: GITHUB_ID ?? 'Ov23liRdhFixfTbBNcdB',
-      clientSecret: GITHUB_SECRET ?? 'aae4076d67dd68ecf7af29f8e4098a5678b0889a',
+      clientId: GITHUB_ID,
+      clientSecret: GITHUB_SECRET,
     }),
     GoogleProvider({
-      clientId:
-        GOOGLE_ID ??
-        '458470353587-avnf4vl5q33i0fgoo5hvs1epe7d0feoq.apps.googleusercontent.com',
-      clientSecret: GOOGLE_SECRET ?? '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',
+      clientId: GOOGLE_ID,
+      clientSecret: GOOGLE_SECRET,
     }),
   ],
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET as string,
+  secret: process.env.NEXTAUTH_SECRET ?? '',
   callbacks: {
     async session({ session, token }) {
       if (session?.user) {
