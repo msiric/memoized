@@ -1,7 +1,6 @@
 'use client'
 
 import { useContentStore } from '@/contexts/progress'
-import { type Result } from '@/mdx/search.mjs'
 import {
   createAutocomplete,
   type AutocompleteApi,
@@ -26,7 +25,7 @@ import Highlighter from 'react-highlight-words'
 type EmptyObject = Record<string, never>
 
 type Autocomplete = AutocompleteApi<
-  Result,
+  any,
   React.SyntheticEvent,
   React.MouseEvent,
   React.KeyboardEvent
@@ -36,7 +35,7 @@ function useAutocomplete({ close }: { close: () => void }) {
   const id = useId()
   const router = useRouter()
   const [autocompleteState, setAutocompleteState] = useState<
-    AutocompleteState<Result> | EmptyObject
+    AutocompleteState<any> | EmptyObject
   >({})
 
   function navigate({ itemUrl }: { itemUrl?: string }) {
@@ -56,7 +55,7 @@ function useAutocomplete({ close }: { close: () => void }) {
 
   const [autocomplete] = useState<Autocomplete>(() =>
     createAutocomplete<
-      Result,
+      any,
       React.SyntheticEvent,
       React.MouseEvent,
       React.KeyboardEvent
@@ -74,20 +73,7 @@ function useAutocomplete({ close }: { close: () => void }) {
         navigate,
       },
       getSources({ query }) {
-        return import('@/mdx/search.mjs').then(({ search }) => {
-          return [
-            {
-              sourceId: 'documentation',
-              getItems() {
-                return search(query, { limit: 5 })
-              },
-              getItemUrl({ item }) {
-                return item.url
-              },
-              onSelect: navigate,
-            },
-          ]
-        })
+        return []
       },
     }),
   )
@@ -166,10 +152,10 @@ function SearchResult({
   collection,
   query,
 }: {
-  result: Result
+  result: any
   resultIndex: number
   autocomplete: Autocomplete
-  collection: AutocompleteCollection<Result>
+  collection: AutocompleteCollection<any>
   query: string
 }) {
   const id = useId()
@@ -236,7 +222,7 @@ function SearchResults({
 }: {
   autocomplete: Autocomplete
   query: string
-  collection: AutocompleteCollection<Result>
+  collection: AutocompleteCollection<any>
 }) {
   if (collection.items.length === 0) {
     return (
@@ -273,7 +259,7 @@ const SearchInput = forwardRef<
   React.ElementRef<'input'>,
   {
     autocomplete: Autocomplete
-    autocompleteState: AutocompleteState<Result> | EmptyObject
+    autocompleteState: AutocompleteState<any> | EmptyObject
     onClose: () => void
   }
 >(function SearchInput({ autocomplete, autocompleteState, onClose }, inputRef) {

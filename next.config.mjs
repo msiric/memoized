@@ -3,7 +3,6 @@ import { withSentryConfig } from '@sentry/nextjs'
 import { recmaPlugins } from './src/mdx/recma.mjs'
 import { rehypePlugins } from './src/mdx/rehype.mjs'
 import { remarkPlugins } from './src/mdx/remark.mjs'
-import withSearch from './src/mdx/search.mjs'
 
 const withMDX = nextMDX({
   options: {
@@ -31,12 +30,16 @@ const nextConfig = {
   },
 }
 
-export default withSentryConfig(withSearch(withMDX(nextConfig)), {
+export default withSentryConfig(withMDX(nextConfig), {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
   org: 'memoized',
   project: 'memoized_nextjs',
+
+  sourcemaps: {
+    disable: true,
+  },
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
