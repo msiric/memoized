@@ -82,8 +82,28 @@ describe('Helper functions', () => {
       ).toBe(true)
     })
 
-    it('should return false for premium access without active subscription', () => {
+    it('should return false for premium access with expired subscription', () => {
       const user = { currentSubscriptionStatus: SubscriptionStatus.EXPIRED }
+      expect(
+        userHasAccess(
+          user as UserWithSubscriptionsAndProgress,
+          AccessOptions.PREMIUM,
+        ),
+      ).toBe(false)
+    })
+
+    it('should return false for premium access with cancelled subscription', () => {
+      const user = { currentSubscriptionStatus: SubscriptionStatus.CANCELED }
+      expect(
+        userHasAccess(
+          user as UserWithSubscriptionsAndProgress,
+          AccessOptions.PREMIUM,
+        ),
+      ).toBe(false)
+    })
+
+    it('should return false for premium access without active subscription', () => {
+      const user = { currentSubscriptionStatus: null }
       expect(
         userHasAccess(
           user as UserWithSubscriptionsAndProgress,
