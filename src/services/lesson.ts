@@ -38,8 +38,7 @@ export const getSectionBySlug = async (sectionSlug: string) => {
   })
 
   if (!section) {
-    // handled by the router (notFound())
-    throw new ServiceError('Section not found')
+    return null
   }
 
   return section
@@ -52,8 +51,7 @@ export const getLessonBySlug = async (lessonSlug: string) => {
   })
 
   if (!lesson) {
-    // handled by the router (notFound())
-    throw new ServiceError('Lesson not found')
+    return null
   }
 
   return lesson

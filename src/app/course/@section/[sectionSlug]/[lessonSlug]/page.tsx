@@ -25,7 +25,7 @@ export default async function Lesson({
   ])
 
   if (!lesson) {
-    notFound()
+    return notFound()
   }
 
   // const stats = readingTime(lesson.body);

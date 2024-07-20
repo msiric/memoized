@@ -11,7 +11,7 @@ import { JSXElementConstructor } from 'react'
 export default async function Course({
   searchParams,
 }: {
-  searchParams: { [PREMIUM_QUERY_PARAM]: string }
+  searchParams: { [PREMIUM_QUERY_PARAM]?: string }
 }) {
   const session = await getServerSession(authOptions)
 

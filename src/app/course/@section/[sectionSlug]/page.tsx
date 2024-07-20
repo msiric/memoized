@@ -20,7 +20,7 @@ export default async function Section({
   ])
 
   if (!section) {
-    notFound()
+    return notFound()
   }
 
   const Page = dynamic(

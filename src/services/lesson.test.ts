@@ -98,9 +98,9 @@ describe('Prisma Services', () => {
     it('should throw error if section is not found', async () => {
       ;(prisma.section.findUnique as Mock).mockResolvedValue(null)
 
-      await expect(getSectionBySlug('invalid-slug')).rejects.toThrow(
-        ServiceError,
-      )
+      const section = await getSectionBySlug('invalid-slug')
+      expect(section).toEqual(null)
+
       expect(prisma.section.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
       })
@@ -123,9 +123,9 @@ describe('Prisma Services', () => {
     it('should throw error if lesson is not found', async () => {
       ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
 
-      await expect(getLessonBySlug('invalid-slug')).rejects.toThrow(
-        ServiceError,
-      )
+      const lesson = await getLessonBySlug('invalid-slug')
+      expect(lesson).toEqual(null)
+
       expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
         include: { problems: true },
