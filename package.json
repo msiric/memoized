@@ -9,12 +9,15 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "migrate": "npx prisma migrate dev",
-    "generate": "npx prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "migrate": "prisma migrate",
+    "generate": "prisma generate",
     "sync": "tsx src/scripts/sync-content.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
     "test": "vitest",
-    "test:check": "vitest run"
+    "test:check": "vitest run",
+    "prebuild": "yarn run migrate",
+    "postinstall": "yarn run generate"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
@@ -48,6 +51,7 @@
     "next-themes": "^0.2.1",
     "nextjs-toploader": "^1.6.12",
     "notistack": "^3.0.1",
+    "prisma": "^5.17.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-highlight-words": "^0.20.0",
