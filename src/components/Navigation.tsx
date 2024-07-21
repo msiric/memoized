@@ -8,7 +8,9 @@ import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useAccess } from '@/hooks/useAccess'
 import { Curriculum, LessonResult, SectionResult } from '@/types'
+import { CustomError, handleError } from '@/utils/error'
 import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
+import { CustomResponse, handleResponse } from '@/utils/response'
 import {
   AccessOptions,
   SubscriptionPlan,
@@ -18,14 +20,12 @@ import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { enqueueSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
 import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
-import { handleError, CustomError } from '@/utils/error'
-import { handleResponse, CustomResponse } from '@/utils/response'
-import { enqueueSnackbar } from 'notistack'
 
 function useInitialValue<T>(value: T, condition = true) {
   const initialValue = useRef(value).current
@@ -114,14 +114,18 @@ export const NavPremiumButton = () => {
 
   const content =
     user === undefined ? (
-      <p className="text-md block py-1 text-zinc-600 dark:text-white">
-        Loading
-      </p>
+      <li>
+        <p className="text-md block py-1 text-zinc-600 dark:text-white">
+          Loading
+        </p>
+      </li>
     ) : user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
       user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
-        <p className="text-md block py-1 text-zinc-600 dark:text-white">
-          {currentSubscription} &#10024;
-        </p>
+        <li>
+          <p className="text-md block py-1 text-zinc-600 dark:text-white">
+            {currentSubscription} &#10024;
+          </p>
+        </li>
       ) : (
         <li className="md:hidden">
           <button
@@ -147,7 +151,7 @@ export const NavPremiumButton = () => {
       </li>
     )
 
-  return <li>{content}</li>
+  return content
 }
 
 function TopLevelNavItem({

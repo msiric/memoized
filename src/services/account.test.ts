@@ -6,7 +6,7 @@ import {
 } from '@/services/account'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
 
-// Mocking the Prisma client
+// Mock external dependencies
 vi.mock('@/lib/prisma', () => {
   const actualPrisma = vi.importActual('@/lib/prisma')
   return {
@@ -21,6 +21,7 @@ vi.mock('@/lib/prisma', () => {
     },
   }
 })
+vi.mock('@/lib/resend')
 
 describe('Prisma Services', () => {
   afterEach(() => {

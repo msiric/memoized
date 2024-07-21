@@ -63,7 +63,7 @@ const TopBanner: React.FC<TopBannerProps> = ({
   if (!isVisible) return null
 
   return (
-    <div className="z-5 relative isolate z-10 flex items-center gap-x-2 overflow-hidden bg-gray-50 bg-opacity-35 px-6 py-2.5 before:flex-1 sm:gap-x-6 sm:px-3.5">
+    <div className="z-5 relative isolate z-10 flex items-center gap-x-2 overflow-hidden bg-gray-50 bg-opacity-15 px-6 py-2.5 before:flex-1 sm:gap-x-6 sm:px-3.5">
       <div
         aria-hidden="true"
         className="absolute left-[max(-7rem,calc(50%-52rem))] top-1/2 -z-10 -translate-y-1/2 transform-gpu blur-2xl"

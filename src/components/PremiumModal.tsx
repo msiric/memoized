@@ -72,7 +72,7 @@ export const PremiumModal = ({ upgradedSuccessfully }: PremiumModalProps) => {
           <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
             {upgradedSuccessfully ? 'Upgrade Successful' : 'Upgrade Failed'}
           </h2>
-          <p className="mb-6 text-gray-600 dark:text-gray-300">
+          <div className="mb-6 text-gray-600 dark:text-gray-300">
             {upgradedSuccessfully ? (
               <>
                 <p>
@@ -95,7 +95,7 @@ export const PremiumModal = ({ upgradedSuccessfully }: PremiumModalProps) => {
                 </p>
               </>
             )}
-          </p>
+          </div>
           {upgradedSuccessfully && (
             <ul role="list" className="mb-6 space-y-3">
               <li className="flex items-start">

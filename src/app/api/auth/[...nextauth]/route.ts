@@ -1,3 +1,4 @@
+import { sendEmail } from '@/lib/resend'
 import {
   createUserWithAccount,
   findAccount,
@@ -70,6 +71,7 @@ export const authOptions: AuthOptions = {
       if (newUser) {
         if (isProduction()) {
           Sentry.setUser({ id: newUser.id })
+          await sendEmail({ to: newUser.email, type: 'welcome', user: newUser })
         }
         return true
       }

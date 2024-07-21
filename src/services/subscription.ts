@@ -1,10 +1,12 @@
 import prisma from '@/lib/prisma'
+import { sendEmail } from '@/lib/resend'
 import { stripe } from '@/lib/stripe'
 import { ServiceError } from '@/utils/error'
 import {
   formatDate,
   getPlanFromStripePlan,
   getStatusFromStripeStatus,
+  isProduction,
 } from '@/utils/helpers'
 import { SubscriptionStatus } from '@prisma/client'
 import { format } from 'date-fns'
@@ -28,22 +30,26 @@ export const handleFailedRecurringSubscription = async (
     await stripe.subscriptions.cancel(subscription.id)
     console.log(`Successfully canceled Stripe subscription: ${subscription.id}`)
 
-    if (subscription.latest_invoice) {
+    if (subscription?.latest_invoice) {
       const invoice = await stripe.invoices.retrieve(
         subscription.latest_invoice as string,
       )
-      if (invoice.payment_intent) {
+      if (invoice?.payment_intent) {
         const paymentIntent = await stripe.paymentIntents.retrieve(
           invoice.payment_intent as string,
         )
-        if (paymentIntent.status === 'succeeded') {
+        if (paymentIntent?.status === 'succeeded') {
           await stripe.refunds.create({ payment_intent: paymentIntent.id })
           console.log(
             `Successfully refunded payment intent: ${paymentIntent.id}`,
           )
+          return
         }
       }
     }
+    console.log(
+      `Failed to refund payment intent with subscription id: ${subscriptionId}`,
+    )
   } catch (err) {
     throw new ServiceError(`Failed to handle failed recurring subscription`)
   }
@@ -54,15 +60,17 @@ export const handleFailedOneTimePayment = async (sessionId?: string | null) => {
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
       expand: ['line_items'],
     })
-    if (session.payment_intent) {
+    if (session?.payment_intent) {
       const paymentIntent = await stripe.paymentIntents.retrieve(
         session.payment_intent as string,
       )
-      if (paymentIntent.status === 'succeeded') {
+      if (paymentIntent?.status === 'succeeded') {
         await stripe.refunds.create({ payment_intent: paymentIntent.id })
         console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
+        return
       }
     }
+    console.log(`Failed to refund payment intent with session id: ${sessionId}`)
   } catch (err) {
     console.log('Error caught in handleFailedOneTimePayment:', err)
     throw new ServiceError(`Failed to handle failed one-time payment`)
@@ -84,7 +92,7 @@ export const updateSubscriptionDetails = async ({
     const recurringSubscription = updateAction
       ? await prisma.subscription.findUnique({
           where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
-          include: { customer: true },
+          include: { customer: { include: { user: true } } },
         })
       : null
 
@@ -92,9 +100,10 @@ export const updateSubscriptionDetails = async ({
       ? recurringSubscription?.customer
       : await prisma.customer.findUnique({
           where: { stripeCustomerId: customerId ?? '' },
+          include: { user: true },
         })
 
-    if (!customer)
+    if (!customer?.user?.name || !customer?.user?.email)
       return console.log(`Customer lookup failed: No customer found`)
 
     const subscription = await stripe.subscriptions.retrieve(
@@ -141,6 +150,14 @@ export const updateSubscriptionDetails = async ({
       update: subscriptionData,
       create: subscriptionData,
     })
+
+    if (isProduction() && !updateAction) {
+      await sendEmail({
+        to: customer.user.email,
+        type: 'subscription',
+        user: customer.user,
+      })
+    }
   } catch (err) {
     console.log(err)
     await handleFailedRecurringSubscription(subscriptionId)
@@ -160,9 +177,10 @@ export const createLifetimeAccess = async ({
   try {
     const customer = await prisma.customer.findUnique({
       where: { stripeCustomerId: customerId ?? '' },
+      include: { user: true },
     })
 
-    if (!customer)
+    if (!customer?.user?.name || !customer?.user?.email)
       return console.log(`Customer lookup failed: No customer found`)
 
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
@@ -205,9 +223,17 @@ export const createLifetimeAccess = async ({
       update: subscriptionData,
       create: subscriptionData,
     })
+
+    if (isProduction()) {
+      await sendEmail({
+        to: customer.user.email,
+        type: 'purchase',
+        user: customer.user,
+      })
+    }
   } catch (err) {
     console.log('Error caught in createLifetimeAccess:', err)
     await handleFailedOneTimePayment(sessionId)
-    throw new ServiceError(`Failed to create subscription`)
+    throw new ServiceError(`Failed to create lifetime access`)
   }
 }

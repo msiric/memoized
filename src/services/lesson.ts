@@ -1,5 +1,4 @@
 import prisma from '@/lib/prisma'
-import { ServiceError } from '@/utils/error'
 
 export type MarkLessonArgs = {
   userId: string

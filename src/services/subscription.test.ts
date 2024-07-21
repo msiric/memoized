@@ -1,11 +1,10 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import {
-  handleFailedRecurringSubscription,
-  handleFailedOneTimePayment,
-  updateSubscriptionDetails,
   createLifetimeAccess,
+  handleFailedOneTimePayment,
+  handleFailedRecurringSubscription,
+  updateSubscriptionDetails,
 } from '@/services/subscription'
 import {
   getPlanFromStripePlan,
@@ -13,9 +12,11 @@ import {
   toDateTime,
 } from '@/utils/helpers'
 import { SubscriptionPlan } from '@prisma/client'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock external dependencies
 vi.mock('@/lib/prisma')
+vi.mock('@/lib/resend')
 vi.mock('@/lib/stripe')
 vi.mock('@/utils/helpers')
 
@@ -30,7 +31,10 @@ describe('Subscription Service', () => {
 
   describe('updateSubscriptionDetails', () => {
     it('should update subscription details successfully', async () => {
-      const mockCustomer = { id: 'cus_123' }
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
       const mockSubscription = {
         id: 'sub_123',
         items: { data: [{ price: { id: 'price_123' } }] },
@@ -119,7 +123,10 @@ describe('Subscription Service', () => {
 
   describe('createLifetimeAccess', () => {
     it('should create lifetime access successfully', async () => {
-      const mockCustomer = { id: 'cus_123' }
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
       const mockSession = {
         id: 'cs_123',
         created: 1625097600,
@@ -182,16 +189,6 @@ describe('Subscription Service', () => {
       )
     })
 
-    it('should handle case when session is not found', async () => {
-      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
-        null as any,
-      )
-
-      await expect(handleFailedOneTimePayment('cs_123')).rejects.toThrow(
-        'Failed to handle failed one-time payment',
-      )
-    })
-
     it('should handle case when payment intent is not found', async () => {
       const mockSession = {
         id: 'cs_123',
@@ -205,12 +202,6 @@ describe('Subscription Service', () => {
       await handleFailedOneTimePayment('cs_123')
 
       expect(stripe.refunds.create).not.toHaveBeenCalled()
-    })
-
-    it('should throw ServiceError if session ID is not provided', async () => {
-      await expect(handleFailedOneTimePayment()).rejects.toThrow(
-        'Failed to handle failed one-time payment',
-      )
     })
   })
 })
