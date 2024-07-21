@@ -6,6 +6,7 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 import { FaExternalLinkAlt } from 'react-icons/fa'
+import { LessonFeedback } from './LessonFeedback'
 import { NextPage } from './NextPage'
 import { PracticeProblems } from './PracticeProblems'
 
@@ -46,14 +47,12 @@ const CustomLink = ({ href, children, ...rest }: CustomLinkProps) => {
 export const a = CustomLink
 
 export type WrapperProps = {
-  userId?: string
   lessonId: string
   problems: Problem[]
   children: ReactNode
 }
 
 export const wrapper = function Wrapper({
-  userId,
   lessonId,
   problems,
   children,
@@ -69,6 +68,7 @@ export const wrapper = function Wrapper({
       </div>
       <footer className="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
         <LessonStatus lessonId={lessonId} />
+        <LessonFeedback lessonId={lessonId} />
       </footer>
     </article>
   )

@@ -71,7 +71,7 @@ export function LessonStatus({ lessonId }: LessonStatusProps) {
   if (isStartOfSection || isIntroduction) return null
 
   return (
-    <div className="relative flex h-8 items-center justify-center gap-6 md:justify-start">
+    <div className="relative flex h-8 items-center justify-center gap-2 sm:gap-6 md:justify-start">
       <p className="text-sm text-zinc-600 dark:text-zinc-300">
         Lesson completed?
       </p>

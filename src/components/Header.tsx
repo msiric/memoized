@@ -41,7 +41,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
         ref={ref}
         className={clsx(
           className,
-          'fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-12 px-4 transition sm:px-6 lg:z-30 lg:px-8',
+          'fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-6 px-4 transition sm:px-6 md:gap-12 lg:z-30 lg:px-8',
           fullWidth ? '' : 'lg:left-72 xl:left-80',
           !isInsideMobileNavigation && 'backdrop-blur-sm dark:backdrop-blur',
           isInsideMobileNavigation
@@ -57,7 +57,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
       >
         {fullWidth && (
           <Link href="/" aria-label="Home">
-            <Logo className="h-6" />
+            <Logo className="h-5 xs:h-6" />
           </Link>
         )}
         <div
@@ -72,7 +72,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
           <div className="flex items-center gap-5 lg:hidden">
             <MobileNavigation fullCurriculum={fullCurriculum} />
             <Link href="/" aria-label="Home">
-              <Logo className="h-6" />
+              <Logo className="h-5 xs:h-6" />
             </Link>
           </div>
         )}

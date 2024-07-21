@@ -1,4 +1,5 @@
 import { AnimatedCode } from '@/components/AnimatedCode'
+import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
 import { OverlayedImage } from '@/components/OverlayedImage'
 import TopBanner from '@/components/TopBanner'
@@ -8,6 +9,7 @@ import { SECTION_ICONS } from '@/constants/icons'
 import { getActiveBanners } from '@/services/banner'
 import Image from 'next/image'
 import Link from 'next/link'
+import { BiSupport } from 'react-icons/bi'
 import { BsNvidia } from 'react-icons/bs'
 import {
   FaAirbnb,
@@ -1087,11 +1089,19 @@ export default async function Home() {
                   <FaGithub size="40px" />
                   <span className="ml-4">Follow on GitHub</span>
                 </a>
+                <a
+                  className="ml-8 inline-flex items-center text-base font-medium tracking-tight text-white"
+                  href="mailto:support@memoized.io"
+                >
+                  <BiSupport size="40px" />
+                  <span className="ml-4">React out for support</span>
+                </a>
               </p>
             </div>
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   )
 }
