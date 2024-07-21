@@ -1,0 +1,174 @@
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { getActiveBanners } from '@/services/banner'
+import prisma from '@/lib/prisma'
+import { Banner } from '@prisma/client'
+
+// Mock the Prisma client
+vi.mock('@/lib/prisma', () => ({
+  default: {
+    banner: {
+      findMany: vi.fn(),
+    },
+  },
+}))
+
+describe('getActiveBanners', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
+    vi.useRealTimers()
+  })
+
+  it('should return active banners within the date range', async () => {
+    const mockDate = new Date('2023-06-15T12:00:00Z')
+    vi.useFakeTimers()
+    vi.setSystemTime(mockDate)
+
+    const mockBanners: Banner[] = [
+      {
+        id: '1',
+        title: 'Banner 1',
+        message: 'Content 1',
+        isActive: true,
+        startDate: new Date('2023-06-01T00:00:00Z'),
+        endDate: new Date('2023-06-30T23:59:59Z'),
+        priority: 2,
+        type: 'INFO',
+        linkText: 'Check it out',
+        linkUrl: '',
+      },
+      {
+        id: '2',
+        title: 'Banner 2',
+        message: 'Content 2',
+        isActive: true,
+        startDate: new Date('2023-06-10T00:00:00Z'),
+        endDate: new Date('2023-06-20T23:59:59Z'),
+        priority: 1,
+        type: 'INFO',
+        linkText: 'Check it out',
+        linkUrl: '',
+      },
+      {
+        id: '3',
+        title: 'Banner 3',
+        message: 'Content 3',
+        isActive: true,
+        startDate: new Date('2023-07-01T00:00:00Z'),
+        endDate: new Date('2023-07-31T23:59:59Z'),
+        priority: 3,
+        type: 'INFO',
+        linkText: 'Check it out',
+        linkUrl: '',
+      },
+    ]
+
+    vi.mocked(prisma.banner.findMany).mockResolvedValue(mockBanners)
+
+    const activeBanners = await getActiveBanners()
+
+    expect(activeBanners).toHaveLength(2)
+    expect(activeBanners[0].id).toBe('1') // Higher priority
+    expect(activeBanners[1].id).toBe('2') // Lower priority
+    expect(prisma.banner.findMany).toHaveBeenCalledWith({
+      where: { isActive: true },
+    })
+  })
+
+  it('should handle string dates correctly', async () => {
+    const mockDate = new Date('2023-06-15T12:00:00Z')
+    vi.useFakeTimers()
+    vi.setSystemTime(mockDate)
+
+    const mockBanners: Banner[] = [
+      {
+        id: '1',
+        title: 'Banner 1',
+        message: 'Content 1',
+        isActive: true,
+        startDate: '2023-06-01T00:00:00Z' as unknown as Date,
+        endDate: '2023-06-30T23:59:59Z' as unknown as Date,
+        priority: 1,
+        type: 'INFO',
+        linkText: 'Check it out',
+        linkUrl: '',
+      },
+    ]
+
+    vi.mocked(prisma.banner.findMany).mockResolvedValue(mockBanners)
+
+    const activeBanners = await getActiveBanners()
+
+    expect(activeBanners).toHaveLength(1)
+    expect(activeBanners[0].id).toBe('1')
+  })
+
+  it('should return an empty array when no active banners are found', async () => {
+    vi.mocked(prisma.banner.findMany).mockResolvedValue([])
+
+    const activeBanners = await getActiveBanners()
+
+    expect(activeBanners).toEqual([])
+  })
+
+  it('should handle errors and return an empty array', async () => {
+    vi.mocked(prisma.banner.findMany).mockRejectedValue(
+      new Error('Database error'),
+    )
+
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+
+    const activeBanners = await getActiveBanners()
+
+    expect(activeBanners).toEqual([])
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to fetch banners:',
+      expect.any(Error),
+    )
+
+    consoleErrorSpy.mockRestore()
+  })
+
+  it('should not return banners when startDate or endDate are outside the current date', async () => {
+    const mockDate = new Date('2023-06-15T12:00:00Z')
+    vi.useFakeTimers()
+    vi.setSystemTime(mockDate)
+
+    const mockBanners: Banner[] = [
+      {
+        id: '1',
+        title: 'Past Banner',
+        message: 'Content 1',
+        isActive: true,
+        startDate: new Date('2023-05-01T00:00:00Z'),
+        endDate: new Date('2023-06-01T23:59:59Z'),
+        priority: 1,
+        type: 'INFO',
+        linkText: 'Check it out',
+        linkUrl: '',
+      },
+      {
+        id: '2',
+        title: 'Future Banner',
+        message: 'Content 2',
+        isActive: true,
+        startDate: new Date('2023-07-01T00:00:00Z'),
+        endDate: new Date('2023-07-31T23:59:59Z'),
+        priority: 2,
+        type: 'INFO',
+        linkText: 'Check it out',
+        linkUrl: '',
+      },
+    ]
+
+    vi.mocked(prisma.banner.findMany).mockResolvedValue(mockBanners)
+
+    const activeBanners = await getActiveBanners()
+
+    expect(activeBanners).toHaveLength(0)
+    expect(prisma.banner.findMany).toHaveBeenCalledWith({
+      where: { isActive: true },
+    })
+  })
+})

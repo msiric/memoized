@@ -1,9 +1,11 @@
 import { AnimatedCode } from '@/components/AnimatedCode'
 import { Logo } from '@/components/Logo'
 import { OverlayedImage } from '@/components/OverlayedImage'
+import TopBanner from '@/components/TopBanner'
 import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
+import { getActiveBanners } from '@/services/banner'
 import Image from 'next/image'
 import Link from 'next/link'
 import { BsNvidia } from 'react-icons/bs'
@@ -179,13 +181,29 @@ const codeSnippets = [
 ]
 
 export default async function Home() {
-  const initialSnippet = await codeToHtml(codeSnippets[0]?.code, {
-    lang: 'ts',
-    theme: 'nord',
-  })
+  const [activeBanners, initialSnippet] = await Promise.all([
+    getActiveBanners(),
+    codeToHtml(codeSnippets[0]?.code, {
+      lang: 'ts',
+      theme: 'nord',
+    }),
+  ])
 
   return (
     <div className="flex w-full flex-col">
+      {activeBanners.map((banner) => (
+        <TopBanner
+          key={banner.id}
+          title={banner.title}
+          message={banner.message}
+          type={banner.type}
+          link={
+            banner.linkUrl
+              ? { text: banner.linkText!, url: banner.linkUrl }
+              : undefined
+          }
+        />
+      ))}
       <header className="sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-zinc-900/5 transition duration-500 sm:px-6 lg:px-8 dark:bg-zinc-900/95 dark:shadow-none dark:backdrop-blur dark:[@supports(backdrop-filter:blur(0))]:bg-zinc-900/75">
         <div className="relative flex flex-grow basis-0 items-center">
           <a aria-label="Home page" href="/">
@@ -234,7 +252,7 @@ export default async function Home() {
               </div>
             </div>
             <div className="relative lg:static xl:pl-10">
-              <div className="absolute inset-x-[-50vw] -bottom-48 -top-32 [mask-image:linear-gradient(transparent,white,white)] lg:-bottom-32 lg:-top-32 lg:left-[calc(50%+14rem)] lg:right-0 lg:[mask-image:none] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:dark:[mask-image:linear-gradient(white,white,transparent)]">
+              <div className="absolute inset-x-[-50vw] -bottom-48 -top-24 [mask-image:linear-gradient(transparent,white,white)] lg:-bottom-32 lg:-top-24 lg:left-[calc(50%+14rem)] lg:right-0 lg:[mask-image:none] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:dark:[mask-image:linear-gradient(white,white,transparent)]">
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 668 1069"

@@ -30,6 +30,12 @@ enum ProblemDifficulty {
   HARD
 }
 
+enum BannerType {
+  INFO
+  WARNING
+  SUCCESS
+}
+
 model User {
   id              String                @id @default(uuid())
   name            String?
@@ -164,4 +170,17 @@ model UserProblemProgress {
   problem     Problem  @relation(fields: [problemId], references: [id])
 
   @@unique([userId, problemId])
+}
+
+model Banner {
+  id        String     @id @default(uuid())
+  title     String
+  message   String
+  type      BannerType
+  linkText  String?
+  linkUrl   String?
+  isActive  Boolean    @default(true)
+  startDate DateTime
+  endDate   DateTime
+  priority  Int        @default(0)
 }
