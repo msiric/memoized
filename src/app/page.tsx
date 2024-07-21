@@ -211,7 +211,13 @@ export default async function Home() {
           </a>
         </div>
         <div className="relative flex basis-0 justify-end gap-4 sm:gap-8 md:flex-grow">
-          <a className="group" aria-label="GitHub" href="https://github.com">
+          <a
+            className="group"
+            aria-label="GitHub"
+            href="https://github.com/msiric"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <svg
               aria-hidden="true"
               viewBox="0 0 16 16"
@@ -527,10 +533,9 @@ export default async function Home() {
                       Interactive Learning
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
-                      Engage with hands-on exercises, quizzes, and real-world
-                      coding challenges to reinforce your learning. Ensures that
-                      you not only understand the concepts but can also apply
-                      them in practical scenarios.
+                      Engage with real-world coding challenges to reinforce your
+                      learning. Ensures that you not only understand the
+                      concepts but can also apply them in practical scenarios.
                     </p>
                   </li>
                   <li className="rounded-2xl border border-zinc-200 p-8">
@@ -926,9 +931,8 @@ export default async function Home() {
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     Each lesson begins with foundational concepts and gradually
-                    moves to more complex topics. Lessons are designed to be
-                    interactive, with hands-on exercises and real-world coding
-                    challenges.
+                    moves to more complex topics. Lessons contain real-world
+                    coding challenges from popular programming platforms.
                   </p>
                 </li>
               </ul>
@@ -988,9 +992,9 @@ export default async function Home() {
                     Is there any interactive content?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Yes, each lesson includes hands-on exercises, quizzes, and
-                    real-world coding challenges to reinforce your learning and
-                    ensure you can apply the concepts in practical scenarios.
+                    Yes, each lesson includes real-world coding challenges to
+                    reinforce your learning and ensure you can apply the
+                    concepts in practical scenarios.
                   </p>
                 </li>
                 <li>
