@@ -1,5 +1,6 @@
 import { stripe } from '@/lib/stripe'
 import {
+  ActiveCoupon,
   ProblemRow,
   ProblemStatus,
   UserWithSubscriptionsAndProgress,
@@ -28,6 +29,14 @@ export interface ProblemFilter {
   sortColumn?: string
   sortOrder?: 'asc' | 'desc'
 }
+
+export const formatter = new Intl.NumberFormat('sfb', {
+  style: 'currency',
+  currency: 'EUR',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+  trailingZeroDisplay: 'stripIfInteger',
+} as Intl.NumberFormatOptions)
 
 export const isServer = typeof window === 'undefined'
 
@@ -243,4 +252,20 @@ export const isProduction = (): boolean => {
 export const formatDate = (timestamp: number | null): string | null => {
   if (timestamp === null) return null
   return format(fromUnixTime(timestamp), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx")
+}
+
+export const calculateDiscountedPrice = (
+  price: number,
+  coupon: ActiveCoupon,
+) => {
+  if (coupon.percentOff) {
+    return price * (1 - coupon.percentOff / 100)
+  } else if (coupon.amountOff) {
+    return Math.max(0, price - coupon.amountOff)
+  }
+  return price
+}
+
+export const formatPrice = (value: number) => {
+  return formatter.format(value)
 }

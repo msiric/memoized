@@ -96,6 +96,19 @@ export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
   currentLessonProgress: number
 }
 
-export type StripePriceWithProduct = Stripe.Price & {
-  product: Stripe.Product
+export type ActiveCoupon = {
+  id: string
+  name: string
+  percentOff: number | null
+  amountOff: number | null
 }
+
+export type ProductWithCoupon = Stripe.Product & {
+  appliedCoupon: ActiveCoupon | null
+}
+
+export type PriceWithCoupon = Stripe.Price & {
+  product: ProductWithCoupon
+}
+
+export type StripePriceWithProduct = PriceWithCoupon

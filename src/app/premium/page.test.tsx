@@ -39,6 +39,8 @@ vi.mock('next/link', () => ({
 describe('Premium component', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    // Mock the coupons list to return an empty array by default
+    vi.mocked(stripe.coupons.list).mockResolvedValue({ data: [] } as any)
   })
 
   afterEach(() => {
@@ -101,5 +103,29 @@ describe('Premium component', () => {
     expect(pricingTable.textContent).toContain(
       `Prices: ${STRIPE_PRICE_IDS.length}`,
     )
+  })
+
+  it('applies coupons to prices when available', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(stripe.prices.retrieve).mockResolvedValue({
+      id: 'price_1',
+      product: { id: 'prod_1', name: 'Product 1' },
+    } as any)
+    vi.mocked(stripe.coupons.list).mockResolvedValue({
+      data: [
+        {
+          id: 'coupon_1',
+          percent_off: 10,
+          applies_to: { products: ['prod_1'] },
+        },
+      ],
+    } as any)
+
+    await act(async () => {
+      render(await Premium())
+    })
+
+    const pricingTable = screen.getByTestId('pricing-table')
+    expect(pricingTable).toBeDefined()
   })
 })

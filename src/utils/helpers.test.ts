@@ -1,10 +1,17 @@
 import * as stripeModule from '@/lib/stripe'
-import { ProblemRow, UserWithSubscriptionsAndProgress } from '@/types'
 import {
+  ActiveCoupon,
+  ProblemRow,
+  UserWithSubscriptionsAndProgress,
+} from '@/types'
+import {
+  calculateDiscountedPrice,
   capitalizeFirstLetter,
   checkSubscriptionStatus,
   fetchPricesFromStripe,
   filterAndSortProblems,
+  formatPrice,
+  formatter,
   getInitials,
   getPlanFromStripePlan,
   getStatusFromStripeStatus,
@@ -561,6 +568,83 @@ describe('Helper functions', () => {
       expect(
         checkSubscriptionStatus(subscriptionInDifferentTimezone as any),
       ).toBe('EXPIRED')
+    })
+  })
+})
+
+describe('Price formatting and discounting', () => {
+  describe('formatter', () => {
+    it('should format numbers as EUR currency', () => {
+      expect(formatter.format(10)).toBe('€10')
+      expect(formatter.format(10.5)).toBe('€10.50')
+      expect(formatter.format(10.99)).toBe('€10.99')
+    })
+
+    it('should handle large numbers', () => {
+      expect(formatter.format(1000000)).toBe('€1,000,000')
+    })
+
+    it('should strip trailing zeros for whole numbers', () => {
+      expect(formatter.format(10.0)).toBe('€10')
+    })
+  })
+
+  describe('calculateDiscountedPrice', () => {
+    it('should apply percentage discount correctly', () => {
+      const price = 100
+      const coupon = { percentOff: 10 }
+      expect(calculateDiscountedPrice(price, coupon as ActiveCoupon)).toBe(90)
+    })
+
+    it('should apply amount discount correctly', () => {
+      const price = 100
+      const coupon = { amountOff: 15 }
+      expect(calculateDiscountedPrice(price, coupon as ActiveCoupon)).toBe(85)
+    })
+
+    it('should not allow negative prices after discount', () => {
+      const price = 10
+      const coupon = { amountOff: 15 }
+      expect(calculateDiscountedPrice(price, coupon as ActiveCoupon)).toBe(0)
+    })
+
+    it('should return original price if no discount is applicable', () => {
+      const price = 100
+      const coupon = {}
+      expect(calculateDiscountedPrice(price, coupon as ActiveCoupon)).toBe(100)
+    })
+
+    it('should handle fractional percentages', () => {
+      const price = 100
+      const coupon = { percentOff: 33.33 }
+      expect(
+        calculateDiscountedPrice(price, coupon as ActiveCoupon),
+      ).toBeCloseTo(66.67, 2)
+    })
+  })
+
+  describe('formatPrice', () => {
+    it('should format prices correctly', () => {
+      expect(formatPrice(10)).toBe('€10')
+      expect(formatPrice(10.5)).toBe('€10.50')
+      expect(formatPrice(10.99)).toBe('€10.99')
+    })
+
+    it('should handle large prices', () => {
+      expect(formatPrice(1000000)).toBe('€1,000,000')
+    })
+
+    it('should strip trailing zeros for whole number prices', () => {
+      expect(formatPrice(10.0)).toBe('€10')
+    })
+
+    it('should handle fractional cents', () => {
+      expect(formatPrice(10.999)).toBe('€11')
+      expect(formatPrice(10.001)).toBe('€10')
+    })
+
+    it('should handle negative prices', () => {
+      expect(formatPrice(-10.5)).toBe('-€10.50')
     })
   })
 })
