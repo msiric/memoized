@@ -1,7 +1,9 @@
 import { Logo } from '@/components/Logo'
 import { PricingTable } from '@/components/PricingTable'
+import TopBanner from '@/components/TopBanner'
 import { STRIPE_PRICE_IDS } from '@/constants'
 import { stripe } from '@/lib/stripe'
+import { getActiveBanners } from '@/services/banner'
 import { getUserWithSubscriptions } from '@/services/user'
 import {
   StripePriceWithProduct,
@@ -16,7 +18,8 @@ export default async function Premium() {
   const session = await getServerSession(authOptions)
   const user = session && (await getUserWithSubscriptions(session?.userId))
 
-  const [coupons, prices] = await Promise.all([
+  const [banners, coupons, prices] = await Promise.all([
+    getActiveBanners(),
     stripe.coupons.list({ expand: ['data.applies_to'] }),
     Promise.all(
       STRIPE_PRICE_IDS.map((id) =>
@@ -49,6 +52,20 @@ export default async function Premium() {
 
   return (
     <section className="bg-white dark:bg-zinc-900">
+      {banners.map((banner) => (
+        <TopBanner
+          key={banner.id}
+          title={banner.title}
+          message={banner.message}
+          type={banner.type}
+          link={
+            banner.linkUrl
+              ? { text: banner.linkText!, url: banner.linkUrl }
+              : undefined
+          }
+          showButton={false}
+        />
+      ))}
       <div className="mx-6 mt-4 flex flex-col items-center justify-between gap-4 xs:flex-row">
         <div>
           <Link href="/" aria-label="Home">

@@ -5,6 +5,7 @@ import {
   createOrRetrieveCustomer,
   createStripeSession,
 } from '@/services/stripe'
+import { PriceWithCoupon } from '@/types'
 import { ServiceError } from '@/utils/error'
 import { getURL } from '@/utils/helpers'
 import Stripe from 'stripe'
@@ -101,7 +102,11 @@ describe('Customer Service', () => {
       } as any)
       vi.mocked(getURL).mockReturnValue('http://localhost:3000')
 
-      const result = await createStripeSession(mockPrice, 'cus_123', '/success')
+      const result = await createStripeSession(
+        mockPrice as PriceWithCoupon,
+        'cus_123',
+        '/success',
+      )
 
       expect(result).toEqual({ id: 'cs_123' })
       expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(
@@ -120,7 +125,11 @@ describe('Customer Service', () => {
       } as any)
       vi.mocked(getURL).mockReturnValue('http://localhost:3000')
 
-      const result = await createStripeSession(mockPrice, 'cus_123', '/success')
+      const result = await createStripeSession(
+        mockPrice as PriceWithCoupon,
+        'cus_123',
+        '/success',
+      )
 
       expect(result).toEqual({ id: 'cs_123' })
       expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(
@@ -139,7 +148,11 @@ describe('Customer Service', () => {
       )
 
       await expect(
-        createStripeSession(mockPrice, 'cus_123', '/success'),
+        createStripeSession(
+          mockPrice as PriceWithCoupon,
+          'cus_123',
+          '/success',
+        ),
       ).rejects.toThrow(
         new ServiceError('Failed to create Stripe checkout session'),
       )

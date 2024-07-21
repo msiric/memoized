@@ -7,14 +7,14 @@ import {
   createStripeSession,
 } from '@/services/stripe'
 import { getUserWithSubscriptions } from '@/services/user'
+import { StripePriceWithProduct } from '@/types'
 import { ServiceError, createCustomError } from '@/utils/error'
 import { createCustomResponse } from '@/utils/response'
 import { SubscriptionStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth'
-import Stripe from 'stripe'
 
 export async function createCheckout(
-  price: Stripe.Price,
+  price: StripePriceWithProduct,
   redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true`,
 ) {
   try {
@@ -36,7 +36,7 @@ export async function createCheckout(
       })
     }
 
-    if (user.customer?.subscriptions[0].status === SubscriptionStatus.ACTIVE) {
+    if (user.customer?.subscriptions[0]?.status === SubscriptionStatus.ACTIVE) {
       return createCustomError({
         message: 'Subscription already active',
         showSnackbar: true,

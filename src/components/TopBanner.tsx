@@ -16,6 +16,7 @@ interface TopBannerProps {
     text: string
     url: string
   }
+  showButton?: boolean
 }
 
 const TopBanner: React.FC<TopBannerProps> = ({
@@ -23,6 +24,7 @@ const TopBanner: React.FC<TopBannerProps> = ({
   message,
   type,
   link,
+  showButton = true,
 }) => {
   const [isVisible, setIsVisible] = useState(true)
 
@@ -101,14 +103,14 @@ const TopBanner: React.FC<TopBannerProps> = ({
             <span className="block md:inline">{message}</span>
           </p>
         </div>
-        {link && (
+        {showButton && link ? (
           <Link
             href={link.url}
             className="mt-2 flex-none rounded-full bg-gray-900 px-3.5 py-1 text-sm font-semibold text-white shadow-sm hover:bg-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900 md:mt-0"
           >
             {link.text} <span aria-hidden="true">&rarr;</span>
           </Link>
-        )}
+        ) : null}
       </div>
       <div className="flex flex-1 justify-end">
         <button

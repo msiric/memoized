@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { StripePriceWithProduct } from '@/types'
 import { ServiceError } from '@/utils/error'
 import { getURL } from '@/utils/helpers'
 import Stripe from 'stripe'
@@ -163,13 +164,12 @@ export const createOrRetrieveCustomer = async ({
 }
 
 export const createStripeSession = async (
-  price: Stripe.Price,
+  price: StripePriceWithProduct,
   customer: string,
   redirectPath: string,
 ) => {
   try {
     let params: Stripe.Checkout.SessionCreateParams = {
-      allow_promotion_codes: true,
       billing_address_collection: 'required',
       customer,
       client_reference_id: customer,
@@ -182,6 +182,13 @@ export const createStripeSession = async (
           quantity: 1,
         },
       ],
+      ...(price?.product?.appliedCoupon?.id && {
+        discounts: [
+          {
+            coupon: price.product.appliedCoupon?.id,
+          },
+        ],
+      }),
       cancel_url: getURL(),
       success_url: getURL(redirectPath),
     }

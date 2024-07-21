@@ -14,7 +14,6 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
-import Stripe from 'stripe'
 
 export type PricingTableProps = {
   prices: StripePriceWithProduct[]
@@ -33,7 +32,7 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
 
   const currentActiveSubscription = user?.customer?.subscriptions[0]
 
-  const handleStripeCheckout = async (price: Stripe.Price) => {
+  const handleStripeCheckout = async (price: StripePriceWithProduct) => {
     try {
       setPriceIdLoading(price.id)
 
