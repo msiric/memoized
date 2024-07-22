@@ -59,7 +59,7 @@ const SubscriptionEmail = (name: string | null) => {
               <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="text-align:center">
                 <tbody>
                   <tr>
-                    <td><a href="https://www.memoized.io/course" style="line-height:100%;text-decoration:none;display:block;max-width:100%;background-color:#84cc16;border-radius:15px;color:#fff;font-size:16px;text-align:center;padding:12px 12px 12px 12px" target="_blank"><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%;mso-text-raise:18" hidden>&nbsp;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Explore premium content</span><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%" hidden>&nbsp;</i><![endif]--></span></a></td>
+                    <td><a href="https://discord.gg/BECQFfS3" style="line-height:100%;text-decoration:none;display:block;max-width:100%;background-color:#84cc16;border-radius:15px;color:#fff;font-size:16px;text-align:center;padding:12px 12px 12px 12px" target="_blank"><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%;mso-text-raise:18" hidden>&nbsp;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Join private Discord</span><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%" hidden>&nbsp;</i><![endif]--></span></a></td>
                   </tr>
                 </tbody>
               </table>
@@ -101,7 +101,7 @@ const PurchaseEmail = (name: string | null) => {
               <table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="text-align:center">
                 <tbody>
                   <tr>
-                    <td><a href="https://www.memoized.io/lifetime-access" style="line-height:100%;text-decoration:none;display:block;max-width:100%;background-color:#84cc16;border-radius:15px;color:#fff;font-size:16px;text-align:center;padding:12px 12px 12px 12px" target="_blank"><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%;mso-text-raise:18" hidden>&nbsp;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Start Your Lifetime Journey</span><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%" hidden>&nbsp;</i><![endif]--></span></a></td>
+                    <td><a href="https://discord.gg/BECQFfS3" style="line-height:100%;text-decoration:none;display:block;max-width:100%;background-color:#84cc16;border-radius:15px;color:#fff;font-size:16px;text-align:center;padding:12px 12px 12px 12px" target="_blank"><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%;mso-text-raise:18" hidden>&nbsp;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Join private Discord</span><span><!--[if mso]><i style="letter-spacing: 12px;mso-font-width:-100%" hidden>&nbsp;</i><![endif]--></span></a></td>
                   </tr>
                 </tbody>
               </table>
