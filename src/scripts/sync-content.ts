@@ -15,7 +15,7 @@ import slugify from 'slugify'
 
 const ACTIVE_BANNERS = [
   {
-    title: 'Memoized launch',
+    title: 'Memoized beta launch',
     message: 'Monthly subscription 50% off',
     type: BannerType.INFO,
     linkText: 'Check it out',

@@ -891,7 +891,7 @@ export default async function Home() {
             <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
               If you have any other questions, feel free to{' '}
               <a
-                href="mailto:info@example.com"
+                href="mailto:support@memoized.io"
                 className="text-zinc-900 underline dark:text-white"
               >
                 reach out to me
