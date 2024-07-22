@@ -189,7 +189,7 @@ export const createStripeSession = async (
           },
         ],
       }),
-      cancel_url: getURL(),
+      cancel_url: getURL('/course'),
       success_url: getURL(redirectPath),
     }
 

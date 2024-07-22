@@ -64,7 +64,7 @@ describe('Premium component', () => {
 
     const heading = screen.getByRole('heading', { level: 2 })
     expect(heading.textContent).toContain(
-      'The ultimate JavaScript platform for mastering coding interviews.',
+      'The ultimate JavaScript platform for mastering coding interviews',
     )
   })
 

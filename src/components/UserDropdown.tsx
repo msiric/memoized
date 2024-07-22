@@ -17,7 +17,6 @@ import { Button } from './Button'
 
 export const UserDropdown = ({ isMobile = false, ...props }) => {
   const router = useRouter()
-  const currentPath = usePathname()
 
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -34,6 +33,9 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
 
   const formattedLessonProgress = `${currentLessonProgress.toFixed(2)}%`
   const formattedProblemProgress = `${currentProblemProgress.toFixed(2)}%`
+
+  const isPremiumUser =
+    user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
 
   const handleClick = () => {
     signOut()
@@ -131,7 +133,9 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
           'w-50 absolute right-2 top-[64px] z-10 divide-y divide-zinc-300 divide-zinc-600 rounded-lg bg-zinc-900 shadow dark:bg-zinc-700',
           open ? '' : 'hidden',
           isMobile
-            ? '!-top-[230px] bottom-10 left-0 block w-full bg-zinc-100 min-[416px]:hidden'
+            ? isPremiumUser
+              ? '!-top-[270px] bottom-10 left-0 block w-full bg-zinc-100 min-[416px]:hidden'
+              : '!-top-[230px] bottom-10 left-0 block w-full bg-zinc-100 min-[416px]:hidden'
             : 'max-w-[300px]',
         )}
       >
