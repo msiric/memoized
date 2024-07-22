@@ -3,7 +3,9 @@ import { ServiceError } from '@/utils/error'
 import { User } from '@prisma/client'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_TOKEN)
+const RESEND_TOKEN = process.env.RESEND_TOKEN ?? ''
+
+const resend = new Resend(RESEND_TOKEN)
 
 const WelcomeEmail = (name: string | null) => {
   return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
