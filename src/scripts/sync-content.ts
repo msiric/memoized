@@ -1,15 +1,31 @@
 import { CONTENT_FOLDER } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import prisma from '@/lib/prisma'
+import { upsertBanner } from '@/services/banner'
 import {
   upsertCourse,
   upsertLesson,
   upsertProblem,
   upsertSection,
 } from '@/services/lesson'
+import { BannerType } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
+
+const ACTIVE_BANNERS = [
+  {
+    title: 'Memoized launch',
+    message: 'Monthly subscription 50% off',
+    type: BannerType.INFO,
+    linkText: 'Check it out',
+    linkUrl: '/premium',
+    isActive: true,
+    startDate: new Date(),
+    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    priority: 1,
+  },
+]
 
 const syncContent = async () => {
   const contentDir = path.join(process.cwd(), `src/${CONTENT_FOLDER}`)
@@ -94,6 +110,11 @@ const syncContent = async () => {
         console.log(`Synced: ${lessonTitle}`)
       }
     }
+  }
+
+  for (const banner of ACTIVE_BANNERS) {
+    await upsertBanner(banner)
+    console.log(`Synced Banner: ${banner.title}`)
   }
 
   await prisma.$disconnect()

@@ -1,13 +1,14 @@
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { getActiveBanners } from '@/services/banner'
 import prisma from '@/lib/prisma'
-import { Banner } from '@prisma/client'
+import { getActiveBanners, upsertBanner } from '@/services/banner'
+import { Banner, BannerType } from '@prisma/client'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 // Mock the Prisma client
 vi.mock('@/lib/prisma', () => ({
   default: {
     banner: {
       findMany: vi.fn(),
+      upsert: vi.fn(),
     },
   },
 }))
@@ -170,5 +171,109 @@ describe('getActiveBanners', () => {
     expect(prisma.banner.findMany).toHaveBeenCalledWith({
       where: { isActive: true },
     })
+  })
+})
+
+describe('upsertBanner', () => {
+  it('should create a new banner when id is not provided', async () => {
+    const newBanner: Banner = {
+      id: 'new-id',
+      title: 'New Banner',
+      message: 'New Content',
+      type: BannerType.INFO,
+      linkText: 'Click here',
+      linkUrl: '/new',
+      isActive: true,
+      startDate: new Date('2023-07-01T00:00:00Z'),
+      endDate: new Date('2023-07-31T23:59:59Z'),
+      priority: 1,
+    }
+
+    vi.mocked(prisma.banner.upsert).mockResolvedValue(newBanner)
+
+    const result = await upsertBanner({
+      title: 'New Banner',
+      message: 'New Content',
+      type: BannerType.INFO,
+      linkText: 'Click here',
+      linkUrl: '/new',
+      isActive: true,
+      startDate: new Date('2023-07-01T00:00:00Z'),
+      endDate: new Date('2023-07-31T23:59:59Z'),
+      priority: 1,
+    })
+
+    expect(result).toEqual(newBanner)
+    expect(prisma.banner.upsert).toHaveBeenCalledWith({
+      where: { id: '' },
+      update: expect.any(Object),
+      create: expect.any(Object),
+    })
+  })
+
+  it('should update an existing banner when id is provided', async () => {
+    const existingBanner: Banner = {
+      id: 'existing-id',
+      title: 'Existing Banner',
+      message: 'Updated Content',
+      type: BannerType.WARNING,
+      linkText: 'New link',
+      linkUrl: '/updated',
+      isActive: false,
+      startDate: new Date('2023-08-01T00:00:00Z'),
+      endDate: new Date('2023-08-31T23:59:59Z'),
+      priority: 2,
+    }
+
+    vi.mocked(prisma.banner.upsert).mockResolvedValue(existingBanner)
+
+    const result = await upsertBanner({
+      id: 'existing-id',
+      title: 'Existing Banner',
+      message: 'Updated Content',
+      type: BannerType.WARNING,
+      linkText: 'New link',
+      linkUrl: '/updated',
+      isActive: false,
+      startDate: new Date('2023-08-01T00:00:00Z'),
+      endDate: new Date('2023-08-31T23:59:59Z'),
+      priority: 2,
+    })
+
+    expect(result).toEqual(existingBanner)
+    expect(prisma.banner.upsert).toHaveBeenCalledWith({
+      where: { id: 'existing-id' },
+      update: expect.any(Object),
+      create: expect.any(Object),
+    })
+  })
+
+  it('should handle errors during upsert operation', async () => {
+    vi.mocked(prisma.banner.upsert).mockRejectedValue(
+      new Error('Failed to upsert banner'),
+    )
+
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {})
+
+    await expect(
+      upsertBanner({
+        title: 'Error Banner',
+        message: 'Error Content',
+        type: BannerType.INFO,
+        isActive: true,
+        startDate: new Date(),
+        endDate: new Date(),
+        priority: 1,
+      }),
+    ).rejects.toThrow('Failed to upsert banner')
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to upsert banner:',
+      expect.any(Error),
+    )
+
+    consoleErrorSpy.mockRestore()
   })
 })
