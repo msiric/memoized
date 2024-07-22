@@ -1,3 +1,4 @@
+import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
 import { PricingTable } from '@/components/PricingTable'
 import TopBanner from '@/components/TopBanner'
@@ -102,6 +103,7 @@ export default async function Premium() {
           user={user as UserWithSubscriptionsAndProgress | null}
         />
       </div>
+      <Footer />
     </section>
   )
 }

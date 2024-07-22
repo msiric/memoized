@@ -59,7 +59,7 @@ describe('Premium component', () => {
     })
 
     expect(screen.getByTestId('logo')).toBeDefined()
-    expect(screen.getAllByTestId('next-link')).toHaveLength(3) // Logo, Course, Problems links
+    expect(screen.getAllByTestId('next-link')).toHaveLength(8) // Logo, Course, Problems links, Footer links
     expect(screen.getByTestId('pricing-table')).toBeDefined()
 
     const heading = screen.getByRole('heading', { level: 2 })
@@ -83,7 +83,7 @@ describe('Premium component', () => {
     })
 
     expect(screen.getByTestId('logo')).toBeDefined()
-    expect(screen.getAllByTestId('next-link')).toHaveLength(3) // Logo, Course, Problems links
+    expect(screen.getAllByTestId('next-link')).toHaveLength(8) // Logo, Course, Problems links, Footer links
     const pricingTable = screen.getByTestId('pricing-table')
     expect(pricingTable).toBeDefined()
     expect(pricingTable.textContent).toContain('Logged In')

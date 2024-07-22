@@ -1,5 +1,6 @@
 'use client'
 
+import useIsCourseRoute from '@/hooks/useIsCourseRoute'
 import { usePages } from '@/hooks/usePages'
 import { MdOutlineFeedback } from 'react-icons/md'
 
@@ -9,8 +10,9 @@ export type LessonFeedbackProps = {
 
 export function LessonFeedback({ lessonId }: LessonFeedbackProps) {
   const { isStartOfSection, isIntroduction } = usePages()
+  const isCourse = useIsCourseRoute()
 
-  if (isStartOfSection || isIntroduction) return null
+  if (isStartOfSection || isIntroduction || !isCourse) return null
 
   return (
     <div className="relative my-6 flex h-8 flex-wrap items-center justify-center gap-2 sm:gap-6 md:justify-start">

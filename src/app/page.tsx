@@ -9,7 +9,6 @@ import { SECTION_ICONS } from '@/constants/icons'
 import { getActiveBanners } from '@/services/banner'
 import Image from 'next/image'
 import Link from 'next/link'
-import { BiSupport } from 'react-icons/bi'
 import { BsNvidia } from 'react-icons/bs'
 import {
   FaAirbnb,
@@ -26,6 +25,7 @@ import { FaMeta } from 'react-icons/fa6'
 import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
 import {
   MdInsights,
+  MdOutlineAlternateEmail,
   MdOutlineTipsAndUpdates,
   MdOutlineTouchApp,
 } from 'react-icons/md'
@@ -223,7 +223,7 @@ export default async function Home() {
             <svg
               aria-hidden="true"
               viewBox="0 0 16 16"
-              className="h-6 w-6 fill-zinc-400 group-hover:fill-zinc-500 dark:group-hover:fill-zinc-300"
+              className="h-6 w-6 fill-zinc-900 group-hover:fill-zinc-500 dark:fill-zinc-200 dark:group-hover:fill-zinc-300"
             >
               <path d="M8 0C3.58 0 0 3.58 0 8C0 11.54 2.29 14.53 5.47 15.59C5.87 15.66 6.02 15.42 6.02 15.21C6.02 15.02 6.01 14.39 6.01 13.72C4 14.09 3.48 13.23 3.32 12.78C3.23 12.55 2.84 11.84 2.5 11.65C2.22 11.5 1.82 11.13 2.49 11.12C3.12 11.11 3.57 11.7 3.72 11.94C4.44 13.15 5.59 12.81 6.05 12.6C6.12 12.08 6.33 11.73 6.56 11.53C4.78 11.33 2.92 10.64 2.92 7.58C2.92 6.71 3.23 5.99 3.74 5.43C3.66 5.23 3.38 4.41 3.82 3.31C3.82 3.31 4.49 3.1 6.02 4.13C6.66 3.95 7.34 3.86 8.02 3.86C8.7 3.86 9.38 3.95 10.02 4.13C11.55 3.09 12.22 3.31 12.22 3.31C12.66 4.41 12.38 5.23 12.3 5.43C12.81 5.99 13.12 6.7 13.12 7.58C13.12 10.65 11.25 11.33 9.47 11.53C9.76 11.78 10.01 12.26 10.01 13.01C10.01 14.08 10 14.94 10 15.21C10 15.42 10.15 15.67 10.55 15.59C13.71 14.53 16 11.53 16 8C16 3.58 12.42 0 8 0Z" />
             </svg>
@@ -796,7 +796,7 @@ export default async function Home() {
           <article className="flex w-full flex-col items-center gap-4 md:flex-row md:gap-8">
             <div
               className="relative w-full max-w-[400px] flex-shrink-0 rounded-2xl"
-              style={{ aspectRatio: '1578 / 1700' }}
+              style={{ aspectRatio: '1210 / 1250' }}
             >
               <Image
                 alt="Practice problems"
@@ -838,7 +838,7 @@ export default async function Home() {
           <article className="flex w-full flex-col items-center gap-6 md:flex-row-reverse md:gap-8">
             <div
               className="relative w-full max-w-[400px] flex-shrink-0 rounded-2xl"
-              style={{ aspectRatio: '1398 / 1604' }}
+              style={{ aspectRatio: '1302 / 1696' }}
             >
               <Image
                 alt="User progress"
@@ -1019,24 +1019,7 @@ export default async function Home() {
         aria-labelledby="author-section"
         className="relative scroll-mt-14 pb-3 pt-8 sm:scroll-mt-32 sm:pb-16 sm:pt-10 lg:pt-16"
       >
-        <div className="absolute inset-x-0 bottom-0 top-1/2 text-zinc-900/10 [mask-image:linear-gradient(transparent,white)]">
-          <svg aria-hidden="true" className="absolute inset-0 h-full w-full">
-            <defs>
-              <pattern
-                id=":S6:"
-                width={128}
-                height={128}
-                patternUnits="userSpaceOnUse"
-                x="50%"
-                y="100%"
-              >
-                <path d="M0 128V.5H128" fill="none" stroke="currentColor" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#:S6:)" />
-          </svg>
-        </div>
-        <div className="relative mx-auto max-w-5xl px-4 pt-16 sm:px-6 md:px-12">
+        <div className="relative mx-auto max-w-5xl px-4 pb-8 pt-16 sm:px-6 md:px-12">
           <div className="sm:rounded-6xl rounded-3xl bg-zinc-800 pt-px">
             <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:ml-[96px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
               <Image
@@ -1079,7 +1062,7 @@ export default async function Home() {
                 JavaScript and TypeScript, and let‘s work together to achieve
                 your career goals.
               </p>
-              <p className="mt-8">
+              <p className="mt-8 flex flex-wrap items-center gap-8">
                 <a
                   className="inline-flex items-center text-base font-medium tracking-tight text-white"
                   href="https://github.com/msiric"
@@ -1087,14 +1070,14 @@ export default async function Home() {
                   rel="noopener noreferrer"
                 >
                   <FaGithub size="40px" />
-                  <span className="ml-4">Follow on GitHub</span>
+                  <span className="ml-4">GitHub</span>
                 </a>
                 <a
-                  className="ml-8 inline-flex items-center text-base font-medium tracking-tight text-white"
+                  className="inline-flex items-center text-base font-medium tracking-tight text-white"
                   href="mailto:support@memoized.io"
                 >
-                  <BiSupport size="40px" />
-                  <span className="ml-4">React out for support</span>
+                  <MdOutlineAlternateEmail size="40px" />
+                  <span className="ml-4">Contact</span>
                 </a>
               </p>
             </div>

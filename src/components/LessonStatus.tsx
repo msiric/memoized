@@ -3,6 +3,7 @@
 import { markLesson } from '@/actions/markLesson'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
+import useIsCourseRoute from '@/hooks/useIsCourseRoute'
 import { usePages } from '@/hooks/usePages'
 import { CustomError, handleError } from '@/utils/error'
 import { CustomResponse, handleResponse } from '@/utils/response'
@@ -45,6 +46,7 @@ export type LessonStatusProps = {
 export function LessonStatus({ lessonId }: LessonStatusProps) {
   const { data: session } = useSession()
   const { isStartOfSection, isIntroduction } = usePages()
+  const isCourse = useIsCourseRoute()
 
   const openModal = useAuthStore((state) => state.openModal)
   const completedLessons = useContentStore((state) => state.completedLessons)
@@ -68,7 +70,7 @@ export function LessonStatus({ lessonId }: LessonStatusProps) {
     }
   }
 
-  if (isStartOfSection || isIntroduction) return null
+  if (isStartOfSection || isIntroduction || !isCourse) return null
 
   return (
     <div className="relative flex h-8 items-center justify-center gap-2 sm:gap-6 md:justify-start">

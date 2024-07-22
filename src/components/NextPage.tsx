@@ -1,9 +1,13 @@
 'use client'
 
+import useIsCourseRoute from '@/hooks/useIsCourseRoute'
 import { usePages } from '@/hooks/usePages'
 
 export function NextPage() {
   const { nextPage, nextSection, isEndOfSection, isEndOfCourse } = usePages()
+  const isCourse = useIsCourseRoute()
+
+  if (!isCourse) return null
 
   if (isEndOfCourse)
     return (

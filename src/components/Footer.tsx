@@ -6,6 +6,7 @@ import { Button } from '@/components/Button'
 import { useAuthStore } from '@/contexts/auth'
 import { useAccess } from '@/hooks/useAccess'
 import { usePages } from '@/hooks/usePages'
+import clsx from 'clsx'
 
 function PageLink({
   label,
@@ -112,27 +113,63 @@ function SocialLink({
 function SmallPrint() {
   return (
     <div className="flex flex-col items-center justify-between gap-5 border-t border-zinc-900/5 pt-8 sm:flex-row dark:border-white/5">
-      <p className="text-xs text-zinc-600 dark:text-zinc-400">
-        &copy; Copyright {new Date().getFullYear()}. All rights reserved.
-      </p>
-      <div className="flex gap-4">
-        <SocialLink href="#" icon={XIcon}>
-          Follow on X
-        </SocialLink>
-        <SocialLink href="#" icon={GitHubIcon}>
-          Follow on GitHub
-        </SocialLink>
-        <SocialLink href="#" icon={DiscordIcon}>
-          Join the Discord server
-        </SocialLink>
+      <div>
+        <p className="text-center text-xs text-zinc-600 sm:text-left dark:text-zinc-400">
+          Contact:{' '}
+          <a
+            className="text-zinc-900 dark:text-white"
+            href="mailto:support@memoized.io"
+          >
+            support@memoized.io
+          </a>
+        </p>
+        <p className="text-center text-xs text-zinc-600 sm:text-left dark:text-zinc-400">
+          &copy; Copyright {new Date().getFullYear()}. All rights reserved.
+        </p>
+      </div>
+      <div className="flex flex-col">
+        <div className="flex gap-4">
+          <SocialLink href="#" icon={XIcon}>
+            Follow on X
+          </SocialLink>
+          <SocialLink href="#" icon={GitHubIcon}>
+            Follow on GitHub
+          </SocialLink>
+          <SocialLink href="#" icon={DiscordIcon}>
+            Join the Discord server
+          </SocialLink>
+        </div>
+        <div className="flex gap-4">
+          <Link
+            className="text-xs text-zinc-600 dark:text-zinc-400"
+            href="/privacy"
+          >
+            Privacy
+          </Link>
+          <Link
+            className="text-xs text-zinc-600 dark:text-zinc-400"
+            href="/terms"
+          >
+            Terms
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
 
-export function Footer() {
+export type FooterProps = {
+  fullWidth?: boolean
+}
+
+export function Footer({ fullWidth = true }: FooterProps) {
   return (
-    <footer className="mx-auto w-full max-w-2xl space-y-10 pb-8 lg:max-w-5xl">
+    <footer
+      className={clsx(
+        'mx-auto w-full space-y-10 pb-8',
+        fullWidth ? 'sm:px-6 lg:px-8' : 'max-w-2xl lg:max-w-5xl',
+      )}
+    >
       <PageNavigation />
       <SmallPrint />
     </footer>
