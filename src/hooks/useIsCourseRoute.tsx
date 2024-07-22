@@ -2,9 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 
-function useIsCourseRoute(): boolean {
+export const useIsCourseRoute = (): boolean => {
   const pathname = usePathname()
   return pathname.startsWith('/course')
 }
-
-export default useIsCourseRoute

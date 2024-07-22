@@ -1,13 +1,10 @@
 'use client'
 
+import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
-import {
-  createAutocomplete,
-  type AutocompleteApi,
-  type AutocompleteCollection,
-  type AutocompleteState,
-} from '@algolia/autocomplete-core'
+import { useDebounce } from '@/hooks/useDebounce'
 import { Dialog, Transition } from '@headlessui/react'
+import { SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -22,21 +19,43 @@ import {
 } from 'react'
 import Highlighter from 'react-highlight-words'
 
-type EmptyObject = Record<string, never>
-
-type Autocomplete = AutocompleteApi<
-  any,
-  React.SyntheticEvent,
-  React.MouseEvent,
-  React.KeyboardEvent
->
-
-function useAutocomplete({ close }: { close: () => void }) {
-  const id = useId()
+function useSearch({ close }: { close: () => void }) {
   const router = useRouter()
-  const [autocompleteState, setAutocompleteState] = useState<
-    AutocompleteState<any> | EmptyObject
-  >({})
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasInitiatedSearch, setHasInitiatedSearch] = useState(false)
+
+  const debouncedQuery = useDebounce(query, 300) // 300ms delay
+
+  // Set loading to true and mark search as initiated when query changes
+  useEffect(() => {
+    if (query) {
+      setIsLoading(true)
+      setHasInitiatedSearch(true)
+    } else {
+      setHasInitiatedSearch(false)
+      setResults([])
+    }
+  }, [query])
+
+  // Perform the search when debouncedQuery changes
+  useEffect(() => {
+    if (debouncedQuery) {
+      fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setResults(data.hits || [])
+          setIsLoading(false)
+        })
+        .catch((error) => {
+          console.error('Search error:', error)
+          setIsLoading(false)
+        })
+    } else if (hasInitiatedSearch) {
+      setIsLoading(false)
+    }
+  }, [debouncedQuery, hasInitiatedSearch])
 
   function navigate({ itemUrl }: { itemUrl?: string }) {
     if (!itemUrl) {
@@ -53,32 +72,7 @@ function useAutocomplete({ close }: { close: () => void }) {
     }
   }
 
-  const [autocomplete] = useState<Autocomplete>(() =>
-    createAutocomplete<
-      any,
-      React.SyntheticEvent,
-      React.MouseEvent,
-      React.KeyboardEvent
-    >({
-      id,
-      placeholder: 'Find something...',
-      defaultActiveItemId: 0,
-      onStateChange({ state }) {
-        setAutocompleteState(state)
-      },
-      shouldPanelOpen({ state }) {
-        return state.query !== ''
-      },
-      navigator: {
-        navigate,
-      },
-      getSources({ query }) {
-        return []
-      },
-    }),
-  )
-
-  return { autocomplete, autocompleteState }
+  return { query, setQuery, results, isLoading, hasInitiatedSearch, navigate }
 }
 
 function SearchIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -148,15 +142,13 @@ function HighlightQuery({ text, query }: { text: string; query: string }) {
 function SearchResult({
   result,
   resultIndex,
-  autocomplete,
-  collection,
   query,
+  navigate,
 }: {
   result: any
   resultIndex: number
-  autocomplete: Autocomplete
-  collection: AutocompleteCollection<any>
   query: string
+  navigate: (props: { itemUrl?: string }) => void
 }) {
   const id = useId()
   const fullCurriculum = useContentStore((state) => state.fullCurriculum)
@@ -164,28 +156,25 @@ function SearchResult({
   const courseSections = fullCurriculum[0]?.sections ?? []
 
   const sectionTitle = courseSections.find((section) =>
-    section.lessons.find((lesson) => lesson.href === result.url.split('#')[0]),
+    section.lessons.find((lesson) => lesson.href === result.href.split('#')[0]),
   )?.title
-  const hierarchy = [sectionTitle, result.pageTitle].filter(
+  const hierarchy = [sectionTitle, result.description].filter(
     (x): x is string => typeof x === 'string',
   )
 
   return (
     <li
       className={clsx(
-        'group block cursor-default px-4 py-3 aria-selected:bg-zinc-50 dark:aria-selected:bg-zinc-800/50',
+        'group block cursor-pointer px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
         resultIndex > 0 && 'border-t border-zinc-100 dark:border-zinc-800',
       )}
       aria-labelledby={`${id}-hierarchy ${id}-title`}
-      {...autocomplete.getItemProps({
-        item: result,
-        source: collection.source,
-      })}
+      onClick={() => navigate({ itemUrl: result.href })}
     >
       <div
         id={`${id}-title`}
         aria-hidden="true"
-        className="text-sm font-medium text-zinc-900 group-aria-selected:text-lime-500 dark:text-white"
+        className="text-sm font-medium text-zinc-900 group-hover:text-lime-500 dark:text-white"
       >
         <HighlightQuery text={result.title} query={query} />
       </div>
@@ -216,55 +205,68 @@ function SearchResult({
 }
 
 function SearchResults({
-  autocomplete,
+  results,
   query,
-  collection,
+  navigate,
+  isLoading,
+  hasInitiatedSearch,
 }: {
-  autocomplete: Autocomplete
+  results: any[]
   query: string
-  collection: AutocompleteCollection<any>
+  navigate: (props: { itemUrl?: string }) => void
+  isLoading: boolean
+  hasInitiatedSearch: boolean
 }) {
-  if (collection.items.length === 0) {
-    return (
-      <div className="p-6 text-center">
-        <NoResultsIcon className="mx-auto h-5 w-5 stroke-zinc-900 dark:stroke-zinc-600" />
-        <p className="mt-2 text-xs text-zinc-700 dark:text-zinc-400">
-          Nothing found for{' '}
-          <strong className="break-words font-semibold text-zinc-900 dark:text-white">
-            &lsquo;{query}&rsquo;
-          </strong>
-          . Please try again.
-        </p>
-      </div>
-    )
+  if (!hasInitiatedSearch) {
+    return null
   }
 
   return (
-    <ul {...autocomplete.getListProps()}>
-      {collection.items.map((result, resultIndex) => (
-        <SearchResult
-          key={result.url}
-          result={result}
-          resultIndex={resultIndex}
-          autocomplete={autocomplete}
-          collection={collection}
-          query={query}
-        />
-      ))}
-    </ul>
+    <div>
+      {isLoading ? (
+        <div className="p-6 text-center">
+          <LoadingIcon className="mx-auto h-5 w-5 animate-spin stroke-zinc-200 text-zinc-900 dark:stroke-zinc-800 dark:text-lime-400" />
+          <p className="mt-2 text-xs text-zinc-700 dark:text-zinc-400">
+            Searching...
+          </p>
+        </div>
+      ) : results.length === 0 ? (
+        <div className="p-6 text-center">
+          <NoResultsIcon className="mx-auto h-5 w-5 stroke-zinc-900 dark:stroke-zinc-600" />
+          <p className="mt-2 text-xs text-zinc-700 dark:text-zinc-400">
+            Nothing found for{' '}
+            <strong className="break-words font-semibold text-zinc-900 dark:text-white">
+              &lsquo;{query}&rsquo;
+            </strong>
+            . Please try again.
+          </p>
+        </div>
+      ) : (
+        <ul>
+          {results.map((result, resultIndex) => (
+            <SearchResult
+              key={result.id}
+              result={result}
+              resultIndex={resultIndex}
+              query={query}
+              navigate={navigate}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 
 const SearchInput = forwardRef<
   React.ElementRef<'input'>,
   {
-    autocomplete: Autocomplete
-    autocompleteState: AutocompleteState<any> | EmptyObject
+    query: string
+    setQuery: (query: string) => void
+    isLoading: boolean
     onClose: () => void
   }
->(function SearchInput({ autocomplete, autocompleteState, onClose }, inputRef) {
-  const inputProps = autocomplete.getInputProps({ inputElement: null })
-
+>(function SearchInput({ query, setQuery, isLoading, onClose }, inputRef) {
   return (
     <div className="group relative flex h-12">
       <SearchIcon className="pointer-events-none absolute left-3 top-0 h-full w-5 stroke-zinc-500" />
@@ -272,28 +274,21 @@ const SearchInput = forwardRef<
         ref={inputRef}
         className={clsx(
           'flex-auto appearance-none bg-transparent pl-10 text-zinc-900 outline-none placeholder:text-zinc-500 focus:w-full focus:flex-none sm:text-sm dark:text-white [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden',
-          autocompleteState.status === 'stalled' ? 'pr-11' : 'pr-4',
+          isLoading ? 'pr-11' : 'pr-4',
         )}
-        {...inputProps}
+        placeholder="Find something..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
         onKeyDown={(event) => {
-          if (
-            event.key === 'Escape' &&
-            !autocompleteState.isOpen &&
-            autocompleteState.query === ''
-          ) {
-            // In Safari, closing the dialog with the escape key can sometimes cause the scroll position to jump to the
-            // bottom of the page. This is a workaround for that until we can figure out a proper fix in Headless UI.
+          if (event.key === 'Escape' && !query) {
             if (document.activeElement instanceof HTMLElement) {
               document.activeElement.blur()
             }
-
             onClose()
-          } else {
-            inputProps.onKeyDown(event)
           }
         }}
       />
-      {autocompleteState.status === 'stalled' && (
+      {isLoading && (
         <div className="absolute inset-y-0 right-3 flex items-center">
           <LoadingIcon className="h-5 w-5 animate-spin stroke-zinc-200 text-zinc-900 dark:stroke-zinc-800 dark:text-lime-400" />
         </div>
@@ -311,14 +306,20 @@ function SearchDialog({
   setOpen: (open: boolean) => void
   className?: string
 }) {
+  const user = useAuthStore((state) => state.user)
+
+  const isPremiumUser =
+    user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
+
   const formRef = useRef<React.ElementRef<'form'>>(null)
   const panelRef = useRef<React.ElementRef<'div'>>(null)
   const inputRef = useRef<React.ElementRef<typeof SearchInput>>(null)
-  const { autocomplete, autocompleteState } = useAutocomplete({
-    close() {
-      setOpen(false)
-    },
-  })
+  const { query, setQuery, results, isLoading, navigate, hasInitiatedSearch } =
+    useSearch({
+      close() {
+        setOpen(false)
+      },
+    })
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -346,11 +347,7 @@ function SearchDialog({
   }, [open, setOpen])
 
   return (
-    <Transition.Root
-      show={open}
-      as={Fragment}
-      afterLeave={() => autocomplete.setQuery('')}
-    >
+    <Transition.Root show={open} as={Fragment} afterLeave={() => setQuery('')}>
       <Dialog
         onClose={setOpen}
         className={clsx('fixed inset-0 z-50', className)}
@@ -378,29 +375,38 @@ function SearchDialog({
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel className="mx-auto transform-gpu overflow-hidden rounded-lg bg-zinc-50 shadow-xl ring-1 ring-zinc-900/7.5 sm:max-w-xl dark:bg-zinc-900 dark:ring-zinc-800">
-              <div {...autocomplete.getRootProps({})}>
-                <form
-                  ref={formRef}
-                  {...autocomplete.getFormProps({
-                    inputElement: inputRef.current,
-                  })}
-                >
+              <div>
+                <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
                   <SearchInput
                     ref={inputRef}
-                    autocomplete={autocomplete}
-                    autocompleteState={autocompleteState}
+                    query={query}
+                    setQuery={setQuery}
+                    isLoading={isLoading}
                     onClose={() => setOpen(false)}
                   />
                   <div
                     ref={panelRef}
                     className="border-t border-zinc-200 bg-white empty:hidden dark:border-zinc-100/5 dark:bg-white/2.5"
-                    {...autocomplete.getPanelProps({})}
                   >
-                    {autocompleteState.isOpen && (
+                    {!isPremiumUser && (
+                      <div className="bg-zinc-50 px-4 py-2 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                        Free users can only search free content.{' '}
+                        <a
+                          href="/premium"
+                          className="text-lime-600 hover:text-lime-500 dark:text-lime-400 dark:hover:text-lime-300"
+                        >
+                          Upgrade for full access
+                        </a>
+                        .
+                      </div>
+                    )}
+                    {query && (
                       <SearchResults
-                        autocomplete={autocomplete}
-                        query={autocompleteState.query}
-                        collection={autocompleteState.collections[0]}
+                        results={results}
+                        query={query}
+                        navigate={navigate}
+                        isLoading={isLoading}
+                        hasInitiatedSearch={hasInitiatedSearch}
                       />
                     )}
                   </div>

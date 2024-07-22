@@ -1,6 +1,6 @@
 'use client'
 
-import useIsCourseRoute from '@/hooks/useIsCourseRoute'
+import { useIsCourseRoute } from '@/hooks/useIsCourseRoute'
 import { usePages } from '@/hooks/usePages'
 import { MdOutlineFeedback } from 'react-icons/md'
 

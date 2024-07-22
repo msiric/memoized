@@ -3,7 +3,7 @@
 import { markLesson } from '@/actions/markLesson'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
-import useIsCourseRoute from '@/hooks/useIsCourseRoute'
+import { useIsCourseRoute } from '@/hooks/useIsCourseRoute'
 import { usePages } from '@/hooks/usePages'
 import { CustomError, handleError } from '@/utils/error'
 import { CustomResponse, handleResponse } from '@/utils/response'

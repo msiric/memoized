@@ -36,6 +36,13 @@ jobs:
         run: yarn sync
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    
+      - name: Index MeiliSearch
+        run: yarn index
+        env:
+          MEILISEARCH_HOST: ${{ secrets.MEILISEARCH_HOST }}
+          MEILISEARCH_API_KEY: ${{ secrets.MEILI_MASTER_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
