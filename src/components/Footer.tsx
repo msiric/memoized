@@ -128,15 +128,12 @@ function SmallPrint() {
         </p>
       </div>
       <div className="flex flex-col">
-        <div className="flex gap-4">
-          <SocialLink href="#" icon={XIcon}>
+        <div className="flex justify-center gap-4">
+          <SocialLink href="https://x.com/memoized_dot_io" icon={XIcon}>
             Follow on X
           </SocialLink>
-          <SocialLink href="#" icon={GitHubIcon}>
+          <SocialLink href="https://github.com/msiric" icon={GitHubIcon}>
             Follow on GitHub
-          </SocialLink>
-          <SocialLink href="#" icon={DiscordIcon}>
-            Join the Discord server
           </SocialLink>
         </div>
         <div className="flex gap-4">
