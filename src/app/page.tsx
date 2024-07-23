@@ -2,6 +2,7 @@ import { AnimatedCode } from '@/components/AnimatedCode'
 import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
 import { OverlayedImage } from '@/components/OverlayedImage'
+import { ThemeToggle } from '@/components/ThemeToggle'
 import TopBanner from '@/components/TopBanner'
 import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
@@ -212,7 +213,8 @@ export default async function Home() {
             <Logo className="h-7" />
           </a>
         </div>
-        <div className="relative flex basis-0 justify-end gap-4 sm:gap-8 md:flex-grow">
+        <div className="relative flex basis-0 items-center justify-end gap-4 sm:gap-8 md:flex-grow">
+          <ThemeToggle />
           <a
             className="group"
             aria-label="GitHub"
@@ -230,7 +232,7 @@ export default async function Home() {
           </a>
         </div>
       </header>
-      <div className="overflow-hidden bg-zinc-900 dark:-mb-32 dark:mt-[-4.75rem] dark:pb-32 dark:pt-[4rem] md:dark:pt-[8rem]">
+      <div className="overflow-hidden bg-zinc-900">
         <div className="py-16 sm:px-2 lg:relative lg:px-0 lg:py-20">
           <div className="mx-auto grid max-w-3xl grid-cols-1 items-center gap-x-8 gap-y-16 px-4 lg:max-w-8xl lg:grid-cols-2 lg:px-8 xl:gap-x-16 xl:px-12">
             <div className="relative z-10 text-center lg:text-left">
@@ -708,11 +710,13 @@ export default async function Home() {
                   >
                     <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
                     <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center">
-                      {
-                        SECTION_ICONS[
-                          section.icon as keyof typeof SECTION_ICONS
-                        ]
-                      }
+                      <div className="rounded-full bg-zinc-800 p-4">
+                        {
+                          SECTION_ICONS[
+                            section.icon as keyof typeof SECTION_ICONS
+                          ]
+                        }
+                      </div>
                       <h2 className="font-display mt-4 text-base text-zinc-900 dark:text-white">
                         <a href={section.href}>
                           <span className="absolute -inset-px rounded-xl" />

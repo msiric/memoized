@@ -1,25 +1,19 @@
-import { TbQuotes } from 'react-icons/tb'
-import { GoNumber } from 'react-icons/go'
-import { MdDataArray } from 'react-icons/md'
-import { MdDataObject } from 'react-icons/md'
-import { MdDataset } from 'react-icons/md'
-import { RiMindMap } from 'react-icons/ri'
-import { RxSwitch } from 'react-icons/rx'
-
-import { TbBrandCitymapper } from 'react-icons/tb'
-import { RiStackFill } from 'react-icons/ri'
-import { HiMiniQueueList } from 'react-icons/hi2'
 import { CiViewTable } from 'react-icons/ci'
 import { GiBallPyramid } from 'react-icons/gi'
-import { TbBinaryTree } from 'react-icons/tb'
-import { PiGraph } from 'react-icons/pi'
+import { GoNumber } from 'react-icons/go'
+import { HiMiniQueueList } from 'react-icons/hi2'
 import { LiaSitemapSolid } from 'react-icons/lia'
+import { MdDataArray, MdDataObject, MdDataset } from 'react-icons/md'
+import { PiGraph } from 'react-icons/pi'
+import { RiMindMap, RiStackFill } from 'react-icons/ri'
+import { RxSwitch } from 'react-icons/rx'
+import { TbBinaryTree, TbBrandCitymapper, TbQuotes } from 'react-icons/tb'
 
 export const SECTION_ICONS = {
   builtInDataStructuresIcon: (
     <svg
       viewBox="0 0 24 24"
-      className="h-[75px] w-[75px] sm:h-[100px] sm:w-[100px]"
+      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -49,7 +43,7 @@ export const SECTION_ICONS = {
       viewBox="0 0 1024 1024"
       width="50"
       height="50"
-      className="h-[75px] w-[75px] sm:h-[100px] sm:w-[100px]"
+      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       stroke="none"
@@ -74,7 +68,7 @@ export const SECTION_ICONS = {
       viewBox="0 0 24 24"
       width="50"
       height="50"
-      className="h-[75px] w-[75px] sm:h-[100px] sm:w-[100px]"
+      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -99,7 +93,7 @@ export const SECTION_ICONS = {
       viewBox="0 0 256 256"
       width="50"
       height="50"
-      className="h-[75px] w-[75px] sm:h-[100px] sm:w-[100px]"
+      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
