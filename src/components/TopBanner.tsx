@@ -48,22 +48,40 @@ const TopBanner: React.FC<TopBannerProps> = ({
   const getIcon = () => {
     switch (type) {
       case 'INFO':
-        return <LuBellRing className="mr-2 text-white" size="20px" />
+        return (
+          <LuBellRing
+            className="mr-2 text-zinc-900 dark:text-white"
+            size="20px"
+          />
+        )
       case 'WARNING':
-        return <CiWarning className="mr-2 text-white" size="20px" />
+        return (
+          <CiWarning
+            className="mr-2 text-zinc-900 dark:text-white"
+            size="20px"
+          />
+        )
       case 'SUCCESS':
         return (
-          <IoCheckmarkCircleOutline className="mr-2 text-white" size="20px" />
+          <IoCheckmarkCircleOutline
+            className="mr-2 text-zinc-900 dark:text-white"
+            size="20px"
+          />
         )
       default:
-        return <TfiAnnouncement className="mr-2 text-white" size="20px" />
+        return (
+          <TfiAnnouncement
+            className="mr-2 text-zinc-900 dark:text-white"
+            size="20px"
+          />
+        )
     }
   }
 
   if (!isVisible) return null
 
   return (
-    <div className="z-5 relative isolate z-10 flex items-center gap-x-2 overflow-hidden bg-gray-50 bg-opacity-15 px-6 py-2.5 before:flex-1 sm:gap-x-6 sm:px-3.5">
+    <div className="z-5 relative isolate z-10 flex items-center gap-x-2 overflow-hidden border-b border-solid border-b-zinc-400 bg-gray-50 bg-opacity-15 px-6 py-2.5 before:flex-1 sm:gap-x-6 sm:px-3.5 dark:border-b-zinc-900">
       <div
         aria-hidden="true"
         className="absolute left-[max(-7rem,calc(50%-52rem))] top-1/2 -z-10 -translate-y-1/2 transform-gpu blur-2xl"
@@ -91,7 +109,7 @@ const TopBanner: React.FC<TopBannerProps> = ({
       <div className="flex flex-col items-center gap-y-2 md:flex-row md:items-center md:justify-center md:gap-x-4">
         <div className="flex items-center">
           <div className="mr-2 hidden md:block">{getIcon()}</div>
-          <p className="md:text-md text-center text-sm leading-6 text-white md:text-left">
+          <p className="md:text-md text-center text-sm leading-6 text-zinc-900 md:text-left dark:text-white">
             <strong className="block font-semibold md:inline">{title}</strong>
             <svg
               viewBox="0 0 2 2"
@@ -120,7 +138,7 @@ const TopBanner: React.FC<TopBannerProps> = ({
         >
           <span className="sr-only">Dismiss</span>
           <svg
-            className="h-5 w-5 text-white"
+            className="h-5 w-5 text-zinc-900 dark:text-white"
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"

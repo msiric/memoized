@@ -93,7 +93,7 @@ export default async function Premium() {
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-zinc-900 xs:text-3xl md:text-4xl dark:text-white">
             The ultimate JavaScript platform for mastering coding interviews
           </h2>
-          <p className="mb-5 font-light text-zinc-500 sm:text-xl dark:text-zinc-400">
+          <p className="mb-5 font-light text-zinc-600 sm:text-xl dark:text-zinc-400">
             Invest in your future, enhance your skills and land your dream job
             with confidence
           </p>

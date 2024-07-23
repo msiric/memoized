@@ -76,16 +76,16 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
             return (
               <div
                 key={price.id}
-                className="mx-auto flex max-w-lg flex-col justify-between rounded-lg border border-zinc-100 bg-white p-6 text-center text-zinc-900 shadow xl:p-8 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
+                className="mx-auto flex max-w-lg flex-col justify-between rounded-lg border border-zinc-400 bg-white p-6 text-center text-zinc-900 shadow xl:p-8 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
               >
                 <div>
                   <h3 className="mb-4 text-2xl font-semibold">
                     {price.product.name}
                   </h3>
-                  <p className="font-light text-zinc-500 sm:text-lg dark:text-zinc-400">
+                  <p className="font-light text-zinc-600 sm:text-lg dark:text-zinc-400">
                     {price.product.description}
                   </p>
-                  <div className="my-8 flex flex-col items-baseline justify-center">
+                  <div className="my-8 flex flex-col items-center justify-center">
                     <div className="flex items-start">
                       {coupon && (
                         <span className="mr-2 text-2xl text-zinc-500 line-through dark:text-zinc-400">
@@ -97,7 +97,7 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
                       </span>
                     </div>
                     <div className="mt-2 flex items-center">
-                      <span className="text-zinc-500 dark:text-zinc-400">
+                      <span className="text-zinc-600 dark:text-zinc-400">
                         {price.recurring
                           ? `/${price.recurring.interval}`
                           : 'one-time'}

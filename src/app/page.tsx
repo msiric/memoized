@@ -483,7 +483,7 @@ export default async function Home() {
                   role="list"
                   className="mx-auto mt-16 grid max-w-3xl grid-cols-1 gap-4 text-sm sm:mt-20 sm:grid-cols-2 md:gap-y-10 lg:max-w-none lg:grid-cols-3"
                 >
-                  <li className="rounded-2xl border border-zinc-200 p-8">
+                  <li className="rounded-2xl border border-zinc-400 p-8">
                     <MdInsights size="32px" />
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Depth and Practical Insights
@@ -495,7 +495,7 @@ export default async function Home() {
                       topic.
                     </p>
                   </li>
-                  <li className="rounded-2xl border border-zinc-200 p-8">
+                  <li className="rounded-2xl border border-zinc-400 p-8">
                     <RiJavascriptLine size="32px" />
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Focus on JavaScript
@@ -507,7 +507,7 @@ export default async function Home() {
                       relevant and easier to apply.
                     </p>
                   </li>
-                  <li className="rounded-2xl border border-zinc-200 p-8">
+                  <li className="rounded-2xl border border-zinc-400 p-8">
                     <FaBookOpen size="32px" />
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Interview-Ready
@@ -518,7 +518,7 @@ export default async function Home() {
                       well-prepared to tackle any challenge.
                     </p>
                   </li>
-                  <li className="rounded-2xl border border-zinc-200 p-8">
+                  <li className="rounded-2xl border border-zinc-400 p-8">
                     <MdOutlineTipsAndUpdates size="32px" />
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Expert Tips and Tricks
@@ -529,7 +529,7 @@ export default async function Home() {
                       Covers common gotchas to help you avoid pitfalls.
                     </p>
                   </li>
-                  <li className="rounded-2xl border border-zinc-200 p-8">
+                  <li className="rounded-2xl border border-zinc-400 p-8">
                     <MdOutlineTouchApp size="32px" />
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Interactive Learning
@@ -540,7 +540,7 @@ export default async function Home() {
                       concepts but can also apply them in practical scenarios.
                     </p>
                   </li>
-                  <li className="rounded-2xl border border-zinc-200 p-8">
+                  <li className="rounded-2xl border border-zinc-400 p-8">
                     <LiaChalkboardTeacherSolid size="32px" />
                     <h3 className="mt-6 font-semibold text-zinc-900 dark:text-white">
                       Advanced Topics
@@ -1021,7 +1021,7 @@ export default async function Home() {
       >
         <div className="relative mx-auto max-w-5xl px-4 pb-8 pt-16 sm:px-6 md:px-12">
           <div className="sm:rounded-6xl rounded-3xl bg-zinc-800 pt-px">
-            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-200 md:float-right md:ml-[96px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
+            <div className="relative mx-auto -mt-16 h-44 w-44 overflow-hidden rounded-full bg-zinc-400 md:float-right md:ml-[96px] md:h-64 md:w-64 md:[shape-outside:circle(40%)] lg:mr-20 lg:h-72 lg:w-72">
               <Image
                 alt="Author picture"
                 loading="lazy"

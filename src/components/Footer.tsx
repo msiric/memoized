@@ -122,7 +122,7 @@ function SocialLink({
 
 function SmallPrint() {
   return (
-    <div className="flex flex-col items-center justify-between gap-5 border-t border-zinc-900/5 pt-8 sm:flex-row dark:border-white/5">
+    <div className="flex flex-col items-center justify-between gap-5 border-t border-zinc-200 pt-8 sm:flex-row dark:border-white/5">
       <div>
         <p className="text-center text-xs text-zinc-600 sm:text-left dark:text-zinc-400">
           Contact:{' '}

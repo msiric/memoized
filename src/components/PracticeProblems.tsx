@@ -85,7 +85,7 @@ export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
                   href={problem.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-lime-500 hover:underline"
+                  className="font-bold text-lime-500 hover:underline"
                 >
                   {problem.title}
                 </a>
@@ -100,7 +100,7 @@ export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
                 <input
                   type="checkbox"
                   checked={completedProblems.has(problem.id)}
-                  className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500 focus:accent-lime-600"
+                  className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500"
                   onChange={(event) => onCheckboxChange(event, problem.id)}
                 />
                 <span className="text-sm text-zinc-600 dark:text-zinc-300">

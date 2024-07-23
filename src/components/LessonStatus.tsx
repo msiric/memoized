@@ -30,7 +30,7 @@ const MarkButton = ({ checked, onClick, children }: MarkButtonProps) => {
       className={clsx(
         'px-3 text-sm font-medium transition',
         checked
-          ? 'bg-lime-600 text-white hover:bg-lime-500 dark:bg-lime-600 dark:text-white dark:hover:bg-lime-500'
+          ? 'bg-lime-500 text-zinc-900 hover:bg-lime-600 dark:bg-lime-500 dark:hover:bg-lime-600'
           : 'text-zinc-600 hover:bg-zinc-900/2.5 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white',
       )}
     >
@@ -77,7 +77,7 @@ export function LessonStatus({ lessonId }: LessonStatusProps) {
       <p className="text-sm text-zinc-600 dark:text-zinc-300">
         Lesson completed?
       </p>
-      <div className="group grid h-8 grid-cols-[1fr,1px,1fr] overflow-hidden rounded-full border border-zinc-900/10 dark:border-white/10">
+      <div className="group grid h-8 grid-cols-[1fr,1px,1fr] overflow-hidden rounded-full border border-zinc-200 dark:border-white/10">
         <MarkButton checked={isCompleted} onClick={() => handleToggle(true)}>
           Yes
         </MarkButton>

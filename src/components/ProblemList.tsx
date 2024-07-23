@@ -320,14 +320,14 @@ export const ProblemList = ({
         </div>
         <button
           onClick={handleResetFilters}
-          className="mt-2 w-full min-w-[100px] rounded text-sm text-white lg:mt-0 lg:w-auto"
+          className="mt-2 w-full min-w-[100px] rounded text-sm text-zinc-900 lg:mt-0 lg:w-auto dark:text-white"
         >
           Reset Filters
         </button>
       </div>
-      <div className="relative mx-auto max-w-[1024px] overflow-x-auto shadow-md">
+      <div className="relative mx-auto max-w-[1024px] overflow-x-auto rounded-lg border border-zinc-300 shadow-lg dark:border-zinc-600">
         <table className="w-full overflow-hidden rounded-lg text-left text-sm text-zinc-500 rtl:text-right dark:text-zinc-400">
-          <thead className="bg-zinc-50 text-xs uppercase text-zinc-700 dark:bg-zinc-700 dark:text-zinc-400">
+          <thead className="border-b border-zinc-300 bg-zinc-50 text-xs uppercase text-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-400">
             <tr>
               {TABLE_COLUMNS.map((column, index) => (
                 <th key={column.key} scope="col" className={clsx('px-6 py-3')}>
@@ -365,7 +365,7 @@ export const ProblemList = ({
               problems.map((problem) => (
                 <tr
                   key={problem.id}
-                  className="border-b bg-white last:border-b-0 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-600"
+                  className="border-b border-zinc-300 bg-white last:border-b-0 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:bg-zinc-600"
                 >
                   <td className="whitespace-nowrap px-6 py-4 font-medium text-zinc-900 dark:text-white">
                     <a
@@ -390,7 +390,7 @@ export const ProblemList = ({
                         (progress) => progress.completed,
                       )}
                       onChange={(event) => onCheckboxChange(event, problem.id)}
-                      className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500 focus:accent-lime-600"
+                      className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500"
                     />
                   </td>
                 </tr>
