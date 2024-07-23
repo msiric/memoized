@@ -2,6 +2,13 @@ import { meiliSearch } from '@/lib/meili'
 import prisma from '@/lib/prisma'
 
 const indexLessons = async () => {
+  try {
+    await meiliSearch.deleteIndex('lessons')
+    console.log('Existing index deleted')
+  } catch (error) {
+    console.log('No existing index to delete, or deletion failed')
+  }
+
   const lessons = await prisma.lesson.findMany({
     include: { section: true },
   })

@@ -1,12 +1,17 @@
 import { stripe } from '@/lib/stripe'
 import {
   ActiveCoupon,
+  Curriculum,
+  EnrichedLesson,
+  EnrichedUser,
   ProblemRow,
   ProblemStatus,
   UserWithSubscriptionsAndProgress,
 } from '@/types'
 import {
   AccessOptions,
+  Lesson,
+  Problem,
   ProblemDifficulty,
   Subscription,
   SubscriptionPlan,
@@ -268,4 +273,106 @@ export const calculateDiscountedPrice = (
 
 export const formatPrice = (value: number) => {
   return formatter.format(value)
+}
+
+export const sortCurriculum = (
+  curriculum?: Curriculum[],
+): Curriculum[] | undefined => {
+  return curriculum
+    ?.slice()
+    .sort((a, b) => a.order - b.order)
+    .map((course) => ({
+      ...course,
+      sections: course.sections
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((section) => ({
+          ...section,
+          lessons: section.lessons.slice().sort((a, b) => a.order - b.order),
+        })),
+    }))
+}
+
+export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
+  return allLessons.reduce<Curriculum[]>((acc, lesson) => {
+    const {
+      id: courseId,
+      slug: courseSlug,
+      title: courseTitle,
+      order: courseOrder,
+      description: courseDescription,
+    } = lesson.section.course
+    const {
+      id: sectionId,
+      slug: sectionSlug,
+      title: sectionTitle,
+      order: sectionOrder,
+      description: sectionDescription,
+      href: sectionHref,
+    } = lesson.section
+    const {
+      id: lessonId,
+      slug: lessonSlug,
+      title: lessonTitle,
+      order: lessonOrder,
+      description: lessonDescription,
+      access: lessonAccess,
+      href: lessonHref,
+    } = lesson
+
+    let course = acc.find((course) => course.id === courseId)
+    if (!course) {
+      course = {
+        id: courseId,
+        slug: courseSlug,
+        title: courseTitle,
+        description: courseDescription,
+        order: courseOrder,
+        sections: [],
+      }
+      acc.push(course)
+    }
+
+    let section = course.sections.find((sec) => sec.id === sectionId)
+    if (!section) {
+      section = {
+        id: sectionId,
+        slug: sectionSlug,
+        title: sectionTitle,
+        description: sectionDescription,
+        order: sectionOrder,
+        href: sectionHref,
+        lessons: [],
+      }
+      course.sections.push(section)
+    }
+
+    section.lessons.push({
+      id: lessonId,
+      slug: lessonSlug,
+      title: lessonTitle,
+      href: lessonHref,
+      description: lessonDescription,
+      access: lessonAccess,
+      order: lessonOrder,
+    })
+
+    return acc
+  }, [])
+}
+
+export const calculateProgress = (
+  user: EnrichedUser,
+  allLessons: Lesson[],
+  allProblems: Problem[],
+) => {
+  const completedLessons = user?.lessonProgress.length
+  const currentLessonProgress =
+    allLessons.length > 0 ? (completedLessons / allLessons.length) * 100 : 0
+
+  const completedProblems = user?.problemProgress.length
+  const currentProblemProgress =
+    allProblems.length > 0 ? (completedProblems / allProblems.length) * 100 : 0
+
+  return { currentLessonProgress, currentProblemProgress }
 }

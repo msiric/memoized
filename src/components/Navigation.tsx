@@ -421,17 +421,6 @@ export type NavigationProps = {
 } & React.ComponentPropsWithoutRef<'nav'>
 
 export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
-  const sortedContent = fullCurriculum?.map((course) => ({
-    ...course,
-    sections: course.sections
-      .slice()
-      .sort((a, b) => a.order - b.order)
-      .map((section) => ({
-        ...section,
-        lessons: section.lessons.slice().sort((a, b) => a.order - b.order),
-      })),
-  }))
-
   return (
     <nav {...props}>
       <ul role="list">
@@ -439,8 +428,8 @@ export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
           <TopLevelNavItem href="/problems">Problems</TopLevelNavItem>
           <NavPremiumButton />
         </div>
-        {sortedContent?.map((course) =>
-          course.sections.map((section, index) => (
+        {fullCurriculum?.map((course) =>
+          course.sections.map((section) => (
             <NavigationGroup key={section.title} section={section} />
           )),
         )}

@@ -70,7 +70,18 @@ export type ProblemRow = {
 
 export type ProblemStatus = 'TODO' | 'COMPLETED'
 
-export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
+export type EnrichedLesson = Prisma.LessonGetPayload<{
+  include: {
+    section: {
+      include: {
+        course: true
+      }
+    }
+  }
+  orderBy: { order: 'asc' }
+}>
+
+export type EnrichedUser = Prisma.UserGetPayload<{
   include: {
     customer: {
       include: {
@@ -89,11 +100,23 @@ export type UserWithSubscriptionsAndProgress = Prisma.UserGetPayload<{
         completed: true
       }
     }
+    problemProgress: {
+      where: {
+        completed: true
+      }
+      select: {
+        problemId: true
+        completed: true
+      }
+    }
   }
-}> & {
+}>
+
+export type UserWithSubscriptionsAndProgress = EnrichedUser & {
   currentSubscriptionPlan: SubscriptionPlan | null
   currentSubscriptionStatus: SubscriptionStatus | null
   currentLessonProgress: number
+  currentProblemProgress: number
 }
 
 export type ActiveCoupon = {

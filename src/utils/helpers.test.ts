@@ -1,11 +1,16 @@
 import * as stripeModule from '@/lib/stripe'
 import {
   ActiveCoupon,
+  Curriculum,
+  EnrichedLesson,
+  EnrichedUser,
   ProblemRow,
   UserWithSubscriptionsAndProgress,
 } from '@/types'
 import {
+  buildCurriculum,
   calculateDiscountedPrice,
+  calculateProgress,
   capitalizeFirstLetter,
   checkSubscriptionStatus,
   fetchPricesFromStripe,
@@ -17,11 +22,14 @@ import {
   getStatusFromStripeStatus,
   getURL,
   remToPx,
+  sortCurriculum,
   toDateTime,
   userHasAccess,
 } from '@/utils/helpers'
 import {
   AccessOptions,
+  Lesson,
+  Problem,
   ProblemDifficulty,
   SubscriptionPlan,
   SubscriptionStatus,
@@ -646,5 +654,143 @@ describe('Price formatting and discounting', () => {
     it('should handle negative prices', () => {
       expect(formatPrice(-10.5)).toBe('-€10.50')
     })
+  })
+})
+
+describe('sortCurriculum', () => {
+  it('should sort curriculum correctly', () => {
+    const curriculum = [
+      {
+        id: '1',
+        order: 2,
+        sections: [
+          {
+            id: '1',
+            order: 2,
+            lessons: [
+              { id: '1', order: 2 },
+              { id: '2', order: 1 },
+            ],
+          },
+          { id: '2', order: 1, lessons: [{ id: '3', order: 1 }] },
+        ],
+      },
+      {
+        id: '2',
+        order: 1,
+        sections: [{ id: '3', order: 1, lessons: [{ id: '4', order: 1 }] }],
+      },
+    ]
+
+    const sorted = sortCurriculum(curriculum as Curriculum[])
+
+    expect(sorted![0].id).toBe('2')
+    expect(sorted![1].id).toBe('1')
+    expect(sorted![1].sections[0].id).toBe('2')
+    expect(sorted![1].sections[1].id).toBe('1')
+    expect(sorted![1].sections[1].lessons[0].id).toBe('2')
+    expect(sorted![1].sections[1].lessons[1].id).toBe('1')
+  })
+
+  it('should return undefined if input is undefined', () => {
+    expect(sortCurriculum(undefined)).toBeUndefined()
+  })
+})
+
+describe('buildCurriculum', () => {
+  it('should build curriculum correctly from lessons', () => {
+    const lessons = [
+      {
+        id: '1',
+        slug: 'lesson-1',
+        title: 'Lesson 1',
+        order: 1,
+        description: 'Description 1',
+        access: AccessOptions.FREE,
+        href: '/lesson-1',
+        section: {
+          id: '1',
+          slug: 'section-1',
+          title: 'Section 1',
+          order: 1,
+          description: 'Section Description 1',
+          href: '/section-1',
+          course: {
+            id: '1',
+            slug: 'course-1',
+            title: 'Course 1',
+            order: 1,
+            description: 'Course Description 1',
+          },
+        },
+      },
+      {
+        id: '2',
+        slug: 'lesson-2',
+        title: 'Lesson 2',
+        order: 2,
+        description: 'Description 2',
+        access: AccessOptions.PREMIUM,
+        href: '/lesson-2',
+        section: {
+          id: '1',
+          slug: 'section-1',
+          title: 'Section 1',
+          order: 1,
+          description: 'Section Description 1',
+          href: '/section-1',
+          course: {
+            id: '1',
+            slug: 'course-1',
+            title: 'Course 1',
+            order: 1,
+            description: 'Course Description 1',
+          },
+        },
+      },
+    ] as EnrichedLesson[]
+
+    const curriculum = buildCurriculum(lessons)
+
+    expect(curriculum).toHaveLength(1)
+    expect(curriculum[0].sections).toHaveLength(1)
+    expect(curriculum[0].sections[0].lessons).toHaveLength(2)
+    expect(curriculum[0].sections[0].lessons[0].id).toBe('1')
+    expect(curriculum[0].sections[0].lessons[1].id).toBe('2')
+  })
+})
+
+describe('calculateProgress', () => {
+  it('should calculate progress correctly', () => {
+    const user = {
+      lessonProgress: [{ lessonId: '1' }, { lessonId: '2' }],
+      problemProgress: [{ problemId: '1' }],
+    } as EnrichedUser
+
+    const allLessons = [
+      { id: '1' },
+      { id: '2' },
+      { id: '3' },
+      { id: '4' },
+    ] as Lesson[]
+
+    const allProblems = [{ id: '1' }, { id: '2' }, { id: '3' }] as Problem[]
+
+    const progress = calculateProgress(user, allLessons, allProblems)
+
+    expect(progress.currentLessonProgress).toBe(50)
+    expect(progress.currentProblemProgress).toBeCloseTo(33.33, 2)
+  })
+
+  it('should handle zero lessons and problems', () => {
+    const user = {
+      lessonProgress: [],
+      problemProgress: [],
+    } as unknown as EnrichedUser
+
+    const progress = calculateProgress(user, [], [])
+
+    expect(progress.currentLessonProgress).toBe(0)
+    expect(progress.currentProblemProgress).toBe(0)
   })
 })

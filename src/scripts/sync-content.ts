@@ -1,7 +1,6 @@
 import { CONTENT_FOLDER } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import prisma from '@/lib/prisma'
-import { upsertBanner } from '@/services/banner'
 import {
   upsertCourse,
   upsertLesson,
@@ -113,8 +112,18 @@ const syncContent = async () => {
   }
 
   for (const banner of ACTIVE_BANNERS) {
-    await upsertBanner(banner)
-    console.log(`Synced Banner: ${banner.title}`)
+    const existingBanner = await prisma.banner.findUnique({
+      where: { title: banner.title },
+    })
+
+    if (!existingBanner) {
+      await prisma.banner.create({
+        data: banner,
+      })
+      console.log(`Created new Banner: ${banner.title}`)
+    } else {
+      console.log(`Banner already exists: ${banner.title}`)
+    }
   }
 
   await prisma.$disconnect()

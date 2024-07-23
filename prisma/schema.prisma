@@ -174,7 +174,7 @@ model UserProblemProgress {
 
 model Banner {
   id        String     @id @default(uuid())
-  title     String
+  title     String     @unique
   message   String
   type      BannerType
   linkText  String?
