@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Highlighter, getSingletonHighlighter } from 'shiki'
 import { ShikiMagicMove } from 'shiki-magic-move/react'
-import { Highlighter, getHighlighter } from 'shiki-v1'
 
 import clsx from 'clsx'
 import 'shiki-magic-move/dist/style.css'
@@ -29,9 +29,9 @@ export const AnimatedCode = ({
 
   useEffect(() => {
     const initializeHighlighter = async () => {
-      const highlighter = await getHighlighter({
+      const highlighter = await getSingletonHighlighter({
         themes: ['nord'],
-        langs: ['javascript', 'typescript'],
+        langs: ['javascript', 'typescript', 'jsx', 'tsx'],
       })
       setHighlighter(highlighter)
     }

@@ -20,13 +20,18 @@
 @tailwind components;
 @tailwind utilities;
 
-.shiki-magic-move-container, .shiki.nord {
+.shiki.github-dark {
   background: transparent !important;
-  white-space: pre-wrap !important;
+}
+
+.shiki-magic-move-container,
+.shiki.nord {
+  background: transparent !important;
+  overflow-x: auto !important;
 }
 
 .notistack-MuiContent {
-  @apply p-4 rounded-md shadow-md;
+  @apply rounded-md p-4 shadow-md;
 }
 
 .notistack-MuiContent-success {

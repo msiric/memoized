@@ -2,7 +2,7 @@ import { slugifyWithCounter } from '@sindresorhus/slugify'
 import * as acorn from 'acorn'
 import { toString } from 'mdast-util-to-string'
 import { mdxAnnotations } from 'mdx-annotations'
-import shiki from 'shiki'
+import { getSingletonHighlighter } from 'shiki'
 import { visit } from 'unist-util-visit'
 
 function rehypeParseCodeBlocks() {
@@ -18,12 +18,12 @@ function rehypeParseCodeBlocks() {
   }
 }
 
-let highlighter
-
 function rehypeShiki() {
   return async (tree) => {
-    highlighter =
-      highlighter ?? (await shiki.getHighlighter({ theme: 'css-variables' }))
+    const highlighter = await getSingletonHighlighter({
+      themes: ['github-dark'],
+      langs: ['javascript', 'typescript', 'jsx', 'tsx'],
+    })
 
     visit(tree, 'element', (node) => {
       if (node.tagName === 'pre' && node.children[0]?.tagName === 'code') {
@@ -33,12 +33,9 @@ function rehypeShiki() {
         node.properties.code = textNode.value
 
         if (node.properties.language) {
-          const tokens = highlighter.codeToThemedTokens(
-            textNode.value,
-            node.properties.language,
-          )
-
-          textNode.value = shiki.renderToHtml(tokens, {
+          textNode.value = highlighter.codeToHtml(textNode.value, {
+            lang: node.properties.language,
+            theme: 'github-dark',
             elements: {
               pre: ({ children }) => children,
               code: ({ children }) => children,

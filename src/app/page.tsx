@@ -32,7 +32,7 @@ import {
 } from 'react-icons/md'
 import { RiJavascriptLine } from 'react-icons/ri'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
-import { codeToHtml } from 'shiki-v1'
+import { codeToHtml } from 'shiki'
 
 const EXTENSION = 'js'
 
@@ -448,11 +448,11 @@ export default async function Home() {
                   </g>
                 </svg>
               </div>
-              <div className="min-h-[586px] xs:min-h-full">
+              <div className="min-h-full">
                 <div className="relative">
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10 blur-lg" />
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-lime-300 via-lime-300/70 to-lime-300 opacity-10" />
-                  <div className="relative min-h-[586px] rounded-2xl bg-[#18181b] ring-1 ring-white/10 backdrop-blur xs:min-h-full">
+                  <div className="relative min-h-full rounded-2xl bg-zinc-900 ring-1 ring-white/10 backdrop-blur">
                     <div className="absolute -top-px left-20 right-11 h-px bg-gradient-to-r from-lime-300/0 via-lime-300/70 to-lime-300/0" />
                     <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-lime-400/0 via-lime-400 to-lime-400/0" />
                     <AnimatedCode
