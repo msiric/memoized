@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { sendEmail } from '@/lib/resend'
 import { stripe } from '@/lib/stripe'
 import {
   createLifetimeAccess,
@@ -7,11 +8,12 @@ import {
   updateSubscriptionDetails,
 } from '@/services/subscription'
 import {
+  formatDate,
   getPlanFromStripePlan,
   getStatusFromStripeStatus,
-  toDateTime,
+  isProduction,
 } from '@/utils/helpers'
-import { SubscriptionPlan } from '@prisma/client'
+import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock external dependencies
@@ -41,9 +43,12 @@ describe('Subscription Service', () => {
         status: 'active',
         metadata: {},
         cancel_at_period_end: false,
+        cancel_at: null,
+        canceled_at: null,
         current_period_start: 1625097600,
         current_period_end: 1627776000,
         created: 1625097600,
+        ended_at: null,
       }
 
       vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
@@ -54,14 +59,16 @@ describe('Subscription Service', () => {
       )
       vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({} as any)
 
-      // Mock the helper functions
       vi.mocked(getPlanFromStripePlan).mockResolvedValue(
         SubscriptionPlan.LIFETIME,
       )
-      vi.mocked(getStatusFromStripeStatus).mockReturnValue('ACTIVE')
-      vi.mocked(toDateTime).mockImplementation(
-        (timestamp) => new Date(timestamp * 1000),
+      vi.mocked(getStatusFromStripeStatus).mockReturnValue(
+        SubscriptionStatus.ACTIVE,
       )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+      vi.mocked(isProduction).mockReturnValue(false)
 
       await updateSubscriptionDetails({
         customerId: 'cus_123',
@@ -69,6 +76,82 @@ describe('Subscription Service', () => {
       })
 
       expect(prisma.subscription.upsert).toHaveBeenCalled()
+      expect(sendEmail).not.toHaveBeenCalled()
+    })
+
+    it('should throw an error when user already has an active subscription', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockExistingSubscription = {
+        id: 'sub_existing',
+        status: SubscriptionStatus.ACTIVE,
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        mockExistingSubscription as any,
+      )
+
+      await expect(
+        updateSubscriptionDetails({
+          customerId: 'cus_123',
+          subscriptionId: 'sub_new',
+        }),
+      ).rejects.toThrow('User already has an active subscription')
+    })
+
+    it('should send email in production environment', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSubscription = {
+        id: 'sub_123',
+        items: { data: [{ price: { id: 'price_123' } }] },
+        status: 'active',
+        metadata: {},
+        cancel_at_period_end: false,
+        cancel_at: null,
+        canceled_at: null,
+        current_period_start: 1625097600,
+        current_period_end: 1627776000,
+        created: 1625097600,
+        ended_at: null,
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(
+        mockSubscription as any,
+      )
+      vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({} as any)
+
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.LIFETIME,
+      )
+      vi.mocked(getStatusFromStripeStatus).mockReturnValue(
+        SubscriptionStatus.ACTIVE,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+      vi.mocked(isProduction).mockReturnValue(true)
+
+      await updateSubscriptionDetails({
+        customerId: 'cus_123',
+        subscriptionId: 'sub_123',
+      })
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        to: 'test@mail.com',
+        type: 'subscription',
+        user: { email: 'test@mail.com', name: 'Test' },
+      })
     })
   })
 
@@ -117,7 +200,7 @@ describe('Subscription Service', () => {
 
       await expect(
         handleFailedRecurringSubscription('sub_123'),
-      ).rejects.toThrow('Failed to handle failed recurring subscription')
+      ).rejects.toThrow('Failed to retrieve failed recurring subscription')
     })
   })
 
@@ -142,17 +225,77 @@ describe('Subscription Service', () => {
       )
       vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({} as any)
 
-      // Mock the helper functions
       vi.mocked(getPlanFromStripePlan).mockResolvedValue(
         SubscriptionPlan.LIFETIME,
       )
-      vi.mocked(toDateTime).mockImplementation(
-        (timestamp) => new Date(timestamp * 1000),
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
       )
+      vi.mocked(isProduction).mockReturnValue(false)
 
       await createLifetimeAccess({ sessionId: 'cs_123', customerId: 'cus_123' })
 
       expect(prisma.subscription.upsert).toHaveBeenCalled()
+      expect(sendEmail).not.toHaveBeenCalled()
+    })
+
+    it('should throw an error when user already has an active subscription', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockExistingSubscription = {
+        id: 'sub_existing',
+        status: SubscriptionStatus.ACTIVE,
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        mockExistingSubscription as any,
+      )
+
+      await expect(
+        createLifetimeAccess({ sessionId: 'cs_123', customerId: 'cus_123' }),
+      ).rejects.toThrow('User already has an active subscription')
+    })
+
+    it('should send email in production environment', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSession = {
+        id: 'cs_123',
+        created: 1625097600,
+        metadata: {},
+        line_items: { data: [{ price: { id: 'price_123' } }] },
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+      vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({} as any)
+
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.LIFETIME,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+      vi.mocked(isProduction).mockReturnValue(true)
+
+      await createLifetimeAccess({ sessionId: 'cs_123', customerId: 'cus_123' })
+
+      expect(sendEmail).toHaveBeenCalledWith({
+        to: 'test@mail.com',
+        type: 'purchase',
+        user: { email: 'test@mail.com', name: 'Test' },
+      })
     })
   })
 
@@ -199,9 +342,31 @@ describe('Subscription Service', () => {
         mockSession as any,
       )
 
-      await handleFailedOneTimePayment('cs_123')
+      await expect(handleFailedOneTimePayment('cs_123')).rejects.toThrow(
+        'Session does not have a payment intent',
+      )
+    })
 
-      expect(stripe.refunds.create).not.toHaveBeenCalled()
+    it('should handle case when payment intent status is not succeeded', async () => {
+      const mockSession = {
+        id: 'cs_123',
+        payment_intent: 'pi_123',
+      }
+      const mockPaymentIntent = {
+        id: 'pi_123',
+        status: 'requires_payment_method',
+      }
+
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+      vi.spyOn(stripe.paymentIntents, 'retrieve').mockResolvedValue(
+        mockPaymentIntent as any,
+      )
+
+      await expect(handleFailedOneTimePayment('cs_123')).rejects.toThrow(
+        'Payment intent status is not succeeded: requires_payment_method',
+      )
     })
   })
 })

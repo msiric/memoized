@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { sendEmail } from '@/lib/resend'
 import { stripe } from '@/lib/stripe'
-import { ServiceError } from '@/utils/error'
+import { ServiceError, getErrorMessage } from '@/utils/error'
 import {
   formatDate,
   getPlanFromStripePlan,
@@ -30,27 +30,37 @@ export const handleFailedRecurringSubscription = async (
     await stripe.subscriptions.cancel(subscription.id)
     console.log(`Successfully canceled Stripe subscription: ${subscription.id}`)
 
-    if (subscription?.latest_invoice) {
-      const invoice = await stripe.invoices.retrieve(
-        subscription.latest_invoice as string,
+    if (!subscription?.latest_invoice)
+      throw new ServiceError(
+        `No latest invoice found for subscription id: ${subscriptionId}`,
       )
-      if (invoice?.payment_intent) {
-        const paymentIntent = await stripe.paymentIntents.retrieve(
-          invoice.payment_intent as string,
-        )
-        if (paymentIntent?.status === 'succeeded') {
-          await stripe.refunds.create({ payment_intent: paymentIntent.id })
-          console.log(
-            `Successfully refunded payment intent: ${paymentIntent.id}`,
-          )
-          return
-        }
-      }
-    }
-    console.log(
-      `Failed to refund payment intent with subscription id: ${subscriptionId}`,
+
+    const invoice = await stripe.invoices.retrieve(
+      subscription.latest_invoice as string,
     )
+
+    if (!invoice?.payment_intent)
+      throw new ServiceError(
+        `Failed to retrieve payment intent for invoice: ${subscription.latest_invoice}`,
+      )
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(
+      invoice.payment_intent as string,
+    )
+
+    if (paymentIntent?.status !== 'succeeded')
+      throw new ServiceError(
+        `Failed to refund payment intent with subscription id: ${subscriptionId}`,
+      )
+
+    await stripe.refunds.create({ payment_intent: paymentIntent.id })
+    console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
+    return
   } catch (err) {
+    if (err instanceof ServiceError) {
+      throw err
+    }
+    console.error(err)
     throw new ServiceError(`Failed to handle failed recurring subscription`)
   }
 }
@@ -60,19 +70,35 @@ export const handleFailedOneTimePayment = async (sessionId?: string | null) => {
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
       expand: ['line_items'],
     })
-    if (session?.payment_intent) {
-      const paymentIntent = await stripe.paymentIntents.retrieve(
-        session.payment_intent as string,
-      )
-      if (paymentIntent?.status === 'succeeded') {
-        await stripe.refunds.create({ payment_intent: paymentIntent.id })
-        console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
-        return
-      }
+
+    if (!session) {
+      throw new ServiceError(`Failed to retrieve session`)
     }
-    console.log(`Failed to refund payment intent with session id: ${sessionId}`)
+
+    if (!session?.payment_intent)
+      throw new ServiceError(`Session does not have a payment intent`)
+
+    const paymentIntent = await stripe.paymentIntents.retrieve(
+      session.payment_intent as string,
+    )
+
+    if (!paymentIntent) {
+      throw new ServiceError(`Failed to retrieve payment intent`)
+    }
+
+    if (paymentIntent.status !== 'succeeded')
+      throw new ServiceError(
+        `Payment intent status is not succeeded: ${paymentIntent.status}`,
+      )
+
+    await stripe.refunds.create({ payment_intent: paymentIntent.id })
+    console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
+    return
   } catch (err) {
-    console.log('Error caught in handleFailedOneTimePayment:', err)
+    console.error('Error caught in handleFailedOneTimePayment:', err)
+    if (err instanceof ServiceError) {
+      throw err
+    }
     throw new ServiceError(`Failed to handle failed one-time payment`)
   }
 }
@@ -104,7 +130,21 @@ export const updateSubscriptionDetails = async ({
         })
 
     if (!customer?.user?.name || !customer?.user?.email)
-      return console.log(`Customer lookup failed: No customer found`)
+      throw new ServiceError(`Failed to retrieve customer details`)
+
+    const existingActiveSubscription = await prisma.subscription.findFirst({
+      where: {
+        customerId: customer.id,
+        status: SubscriptionStatus.ACTIVE,
+        NOT: {
+          stripeSubscriptionId: subscriptionId?.toString() ?? '',
+        },
+      },
+    })
+
+    if (existingActiveSubscription && !updateAction) {
+      throw new ServiceError(`User already has an active subscription`)
+    }
 
     const subscription = await stripe.subscriptions.retrieve(
       subscriptionId?.toString() ?? '',
@@ -114,14 +154,14 @@ export const updateSubscriptionDetails = async ({
     )
 
     if (!subscription)
-      return console.log(`Subscription lookup failed: No subscription found`)
+      throw new ServiceError(`Failed to retrieve subscription details`)
 
     const subscriptionPlan = await getPlanFromStripePlan(
       subscription.items.data[0].price.id,
     )
 
     if (!subscriptionPlan)
-      return console.log(`Subscription plan unknown: No plan found`)
+      throw new ServiceError(`Failed to determine subscription plan`)
 
     const subscriptionStatus = getStatusFromStripeStatus(subscription.status)
 
@@ -158,10 +198,26 @@ export const updateSubscriptionDetails = async ({
         user: customer.user,
       })
     }
-  } catch (err) {
-    console.log(err)
-    await handleFailedRecurringSubscription(subscriptionId)
-    throw new ServiceError(`Failed to upsert subscription`)
+  } catch (err: unknown) {
+    console.error('Error in updateSubscriptionDetails:', err)
+
+    try {
+      await handleFailedRecurringSubscription(subscriptionId)
+    } catch (refundErr: unknown) {
+      console.error('Error while handling failed subscription:', refundErr)
+
+      throw new ServiceError(
+        `Failed to update subscription and handle failure: ${getErrorMessage(err)}. ` +
+          `Refund error: ${getErrorMessage(refundErr)}`,
+      )
+    }
+
+    if (err instanceof ServiceError) {
+      throw err
+    }
+    throw new ServiceError(
+      `Failed to update subscription: ${getErrorMessage(err)}`,
+    )
   }
 }
 
@@ -181,7 +237,18 @@ export const createLifetimeAccess = async ({
     })
 
     if (!customer?.user?.name || !customer?.user?.email)
-      return console.log(`Customer lookup failed: No customer found`)
+      throw new ServiceError(`Failed to retrieve customer details`)
+
+    const existingSubscription = await prisma.subscription.findFirst({
+      where: {
+        customerId: customer.id,
+        status: SubscriptionStatus.ACTIVE,
+      },
+    })
+
+    if (existingSubscription) {
+      throw new ServiceError(`User already has an active subscription`)
+    }
 
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
       expand: ['line_items'],
@@ -189,14 +256,14 @@ export const createLifetimeAccess = async ({
     const lineItems = session?.line_items
 
     if (!lineItems)
-      return console.log(`Subscription lookup failed: No subscription found`)
+      throw new ServiceError(`Failed to retrieve subscription details`)
 
     const subscriptionPlan = await getPlanFromStripePlan(
       lineItems.data[0].price?.id ?? '',
     )
 
     if (!subscriptionPlan)
-      return console.log(`Subscription plan unknown: No plan found`)
+      throw new ServiceError(`Failed to determine subscription plan`)
 
     const subscriptionStatus = SubscriptionStatus.ACTIVE
 
@@ -231,9 +298,25 @@ export const createLifetimeAccess = async ({
         user: customer.user,
       })
     }
-  } catch (err) {
-    console.log('Error caught in createLifetimeAccess:', err)
-    await handleFailedOneTimePayment(sessionId)
-    throw new ServiceError(`Failed to create lifetime access`)
+  } catch (err: unknown) {
+    console.error('Error in createLifetimeAccess:', err)
+
+    try {
+      await handleFailedOneTimePayment(sessionId)
+    } catch (refundErr: unknown) {
+      console.error('Error while handling failed payment:', refundErr)
+
+      throw new ServiceError(
+        `Failed to create lifetime access and handle failure: ${getErrorMessage(err)}. ` +
+          `Refund error: ${getErrorMessage(refundErr)}`,
+      )
+    }
+
+    if (err instanceof ServiceError) {
+      throw err
+    }
+    throw new ServiceError(
+      `Failed to create lifetime access: ${getErrorMessage(err)}`,
+    )
   }
 }
