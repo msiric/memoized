@@ -26,13 +26,15 @@ jobs:
       - name: Run type check
         run: yarn typecheck
       
-      - name: Generate Prisma client
-        run: yarn generate
-      
       - name: Run database migrations
         run: yarn migrate
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}      
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Generate Prisma client
+        run: yarn generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }} 
           
       - name: Seed content
         run: yarn sync
