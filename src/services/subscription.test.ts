@@ -71,7 +71,7 @@ describe('Subscription Service', () => {
       vi.mocked(isProduction).mockReturnValue(false)
 
       await updateSubscriptionDetails({
-        customerId: 'cus_123',
+        stripeCustomer: 'cus_123',
         subscriptionId: 'sub_123',
       })
 
@@ -98,7 +98,7 @@ describe('Subscription Service', () => {
 
       await expect(
         updateSubscriptionDetails({
-          customerId: 'cus_123',
+          stripeCustomer: 'cus_123',
           subscriptionId: 'sub_new',
         }),
       ).rejects.toThrow('User already has an active subscription')
@@ -143,7 +143,7 @@ describe('Subscription Service', () => {
       vi.mocked(isProduction).mockReturnValue(true)
 
       await updateSubscriptionDetails({
-        customerId: 'cus_123',
+        stripeCustomer: 'cus_123',
         subscriptionId: 'sub_123',
       })
 
@@ -233,7 +233,10 @@ describe('Subscription Service', () => {
       )
       vi.mocked(isProduction).mockReturnValue(false)
 
-      await createLifetimeAccess({ sessionId: 'cs_123', customerId: 'cus_123' })
+      await createLifetimeAccess({
+        sessionId: 'cs_123',
+        stripeCustomer: 'cus_123',
+      })
 
       expect(prisma.subscription.upsert).toHaveBeenCalled()
       expect(sendEmail).not.toHaveBeenCalled()
@@ -257,7 +260,10 @@ describe('Subscription Service', () => {
       )
 
       await expect(
-        createLifetimeAccess({ sessionId: 'cs_123', customerId: 'cus_123' }),
+        createLifetimeAccess({
+          sessionId: 'cs_123',
+          stripeCustomer: 'cus_123',
+        }),
       ).rejects.toThrow('User already has an active subscription')
     })
 
@@ -289,7 +295,10 @@ describe('Subscription Service', () => {
       )
       vi.mocked(isProduction).mockReturnValue(true)
 
-      await createLifetimeAccess({ sessionId: 'cs_123', customerId: 'cus_123' })
+      await createLifetimeAccess({
+        sessionId: 'cs_123',
+        stripeCustomer: 'cus_123',
+      })
 
       expect(sendEmail).toHaveBeenCalledWith({
         to: 'test@mail.com',

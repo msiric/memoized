@@ -104,17 +104,22 @@ export const handleFailedOneTimePayment = async (sessionId?: string | null) => {
 }
 
 type SubscriptionManagerArgs = {
+  stripeCustomer?: string | Stripe.Customer | Stripe.DeletedCustomer | null
   subscriptionId?: string | Stripe.Subscription | null
-  customerId?: string | null
   updateAction?: boolean
 }
 
 export const updateSubscriptionDetails = async ({
+  stripeCustomer,
   subscriptionId,
-  customerId,
   updateAction = false,
 }: SubscriptionManagerArgs) => {
   try {
+    const customerId =
+      typeof stripeCustomer === 'string'
+        ? stripeCustomer
+        : (stripeCustomer?.id ?? '')
+
     const recurringSubscription = updateAction
       ? await prisma.subscription.findUnique({
           where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
@@ -222,17 +227,19 @@ export const updateSubscriptionDetails = async ({
 }
 
 type OneTimePurchaseManagerArgs = {
+  stripeCustomer?: string | null
   sessionId?: string | null
-  customerId?: string | null
 }
 
 export const createLifetimeAccess = async ({
+  stripeCustomer,
   sessionId,
-  customerId,
 }: OneTimePurchaseManagerArgs) => {
   try {
+    const customerId = stripeCustomer ?? ''
+
     const customer = await prisma.customer.findUnique({
-      where: { stripeCustomerId: customerId ?? '' },
+      where: { stripeCustomerId: customerId },
       include: { user: true },
     })
 

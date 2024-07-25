@@ -120,7 +120,7 @@ describe('Stripe Webhook Handler', () => {
     expect(response?.status).toBe(200)
     expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
       subscriptionId: 'sub_123',
-      customerId: 'cus_123',
+      stripeCustomer: 'cus_123',
     })
   })
 
@@ -140,7 +140,7 @@ describe('Stripe Webhook Handler', () => {
     expect(response?.status).toBe(200)
     expect(subscriptionService.createLifetimeAccess).toHaveBeenCalledWith({
       sessionId: 'cs_123',
-      customerId: 'cus_123',
+      stripeCustomer: 'cus_123',
     })
   })
 
@@ -216,7 +216,7 @@ describe('Stripe Webhook Handler', () => {
     expect(response?.status).toBe(200)
     expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
       subscriptionId: undefined,
-      customerId: 'cus_123',
+      stripeCustomer: 'cus_123',
     })
   })
 
@@ -236,7 +236,7 @@ describe('Stripe Webhook Handler', () => {
     expect(response?.status).toBe(200)
     expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
       subscriptionId: 'sub_123',
-      customerId: undefined,
+      stripeCustomer: undefined,
     })
   })
 

@@ -44,8 +44,12 @@ export async function POST(req: Request) {
         case 'customer.subscription.deleted': {
           const subscription = event.data.object as Stripe.Subscription
           const updateAction = event.type !== 'customer.subscription.created'
-          const { id: subscriptionId } = subscription
-          await updateSubscriptionDetails({ subscriptionId, updateAction })
+          const { id: subscriptionId, customer: stripeCustomer } = subscription
+          await updateSubscriptionDetails({
+            stripeCustomer,
+            subscriptionId,
+            updateAction,
+          })
           break
         }
         case 'checkout.session.completed': {
@@ -53,12 +57,12 @@ export async function POST(req: Request) {
           const {
             subscription: subscriptionId,
             id: sessionId,
-            client_reference_id: customerId,
+            client_reference_id: stripeCustomer,
           } = checkoutSession
           if (checkoutSession.mode === 'subscription') {
-            await updateSubscriptionDetails({ subscriptionId, customerId })
+            await updateSubscriptionDetails({ subscriptionId, stripeCustomer })
           } else if (checkoutSession.mode === 'payment') {
-            await createLifetimeAccess({ sessionId, customerId })
+            await createLifetimeAccess({ sessionId, stripeCustomer })
           }
           break
         }
