@@ -127,11 +127,7 @@ export type ActiveCoupon = {
 }
 
 export type ProductWithCoupon = Stripe.Product & {
-  appliedCoupon: ActiveCoupon | null
+  default_price: Stripe.Price & {
+    appliedCoupon?: ActiveCoupon | null
+  }
 }
-
-export type PriceWithCoupon = Stripe.Price & {
-  product: ProductWithCoupon
-}
-
-export type StripePriceWithProduct = PriceWithCoupon

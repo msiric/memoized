@@ -5,10 +5,9 @@ import {
   createOrRetrieveCustomer,
   createStripeSession,
 } from '@/services/stripe'
-import { PriceWithCoupon } from '@/types'
+import { ProductWithCoupon } from '@/types'
 import { ServiceError } from '@/utils/error'
 import { getURL } from '@/utils/helpers'
-import Stripe from 'stripe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock external dependencies
@@ -96,14 +95,19 @@ describe('Customer Service', () => {
 
   describe('createStripeSession', () => {
     it('should create a recurring session', async () => {
-      const mockPrice = { id: 'price_123', type: 'recurring' } as Stripe.Price
+      const mockProduct = {
+        default_price: {
+          id: 'price_123',
+          type: 'recurring',
+        } as unknown as ProductWithCoupon,
+      }
       vi.spyOn(stripe.checkout.sessions, 'create').mockResolvedValue({
         id: 'cs_123',
       } as any)
       vi.mocked(getURL).mockReturnValue('http://localhost:3000')
 
       const result = await createStripeSession(
-        mockPrice as PriceWithCoupon,
+        mockProduct as unknown as ProductWithCoupon,
         'cus_123',
         '/success',
       )
@@ -119,14 +123,19 @@ describe('Customer Service', () => {
     })
 
     it('should create a one-time payment session', async () => {
-      const mockPrice = { id: 'price_123', type: 'one_time' } as Stripe.Price
+      const mockProduct = {
+        default_price: {
+          id: 'price_123',
+          type: 'one_time',
+        } as unknown as ProductWithCoupon,
+      }
       vi.spyOn(stripe.checkout.sessions, 'create').mockResolvedValue({
         id: 'cs_123',
       } as any)
       vi.mocked(getURL).mockReturnValue('http://localhost:3000')
 
       const result = await createStripeSession(
-        mockPrice as PriceWithCoupon,
+        mockProduct as unknown as ProductWithCoupon,
         'cus_123',
         '/success',
       )
@@ -142,14 +151,19 @@ describe('Customer Service', () => {
     })
 
     it('should throw ServiceError if session creation fails', async () => {
-      const mockPrice = { id: 'price_123', type: 'recurring' } as Stripe.Price
+      const mockProduct = {
+        default_price: {
+          id: 'price_123',
+          type: 'recurring',
+        } as unknown as ProductWithCoupon,
+      }
       vi.spyOn(stripe.checkout.sessions, 'create').mockRejectedValue(
         new Error('Stripe error'),
       )
 
       await expect(
         createStripeSession(
-          mockPrice as PriceWithCoupon,
+          mockProduct as unknown as ProductWithCoupon,
           'cus_123',
           '/success',
         ),

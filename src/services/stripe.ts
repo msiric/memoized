@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
-import { StripePriceWithProduct } from '@/types'
+import { ProductWithCoupon } from '@/types'
 import { ServiceError } from '@/utils/error'
 import { getURL } from '@/utils/helpers'
 import Stripe from 'stripe'
@@ -164,7 +164,7 @@ export const createOrRetrieveCustomer = async ({
 }
 
 export const createStripeSession = async (
-  price: StripePriceWithProduct,
+  product: ProductWithCoupon,
   customer: string,
   redirectPath: string,
 ) => {
@@ -178,14 +178,14 @@ export const createStripeSession = async (
       },
       line_items: [
         {
-          price: price.id,
+          price: product.default_price?.id,
           quantity: 1,
         },
       ],
-      ...(price?.product?.appliedCoupon?.id && {
+      ...(product?.default_price?.appliedCoupon?.id && {
         discounts: [
           {
-            coupon: price.product.appliedCoupon?.id,
+            coupon: product.default_price.appliedCoupon?.id,
           },
         ],
       }),
@@ -193,12 +193,12 @@ export const createStripeSession = async (
       success_url: getURL(redirectPath),
     }
 
-    if (price.type === 'recurring') {
+    if (product.default_price.type === 'recurring') {
       params = {
         ...params,
         mode: 'subscription',
       }
-    } else if (price.type === 'one_time') {
+    } else if (product.default_price.type === 'one_time') {
       params = {
         ...params,
         mode: 'payment',
@@ -222,4 +222,19 @@ export const createBillingPortalSession = async (customer: string) => {
   } catch (error) {
     throw new ServiceError('Failed to create Stripe billing portal link')
   }
+}
+
+export const getActiveCoupons = async () => {
+  const coupons = await stripe.coupons.list({ expand: ['data.applies_to'] })
+
+  return coupons.data
+}
+
+export const getActiveProducts = async () => {
+  const products = await stripe.products.list({
+    active: true,
+    expand: ['data.default_price'],
+  })
+
+  return products.data
 }

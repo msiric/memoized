@@ -2,14 +2,10 @@ import { Footer } from '@/components/Footer'
 import { MinimalHeader } from '@/components/MinimalHeader'
 import { PricingTable } from '@/components/PricingTable'
 import TopBanner from '@/components/TopBanner'
-import { STRIPE_PRICE_IDS } from '@/constants'
-import { stripe } from '@/lib/stripe'
 import { getActiveBanners } from '@/services/banner'
+import { getActiveCoupons, getActiveProducts } from '@/services/stripe'
 import { getUserWithSubscriptions } from '@/services/user'
-import {
-  StripePriceWithProduct,
-  UserWithSubscriptionsAndProgress,
-} from '@/types'
+import { ProductWithCoupon, UserWithSubscriptionsAndProgress } from '@/types'
 import { getServerSession } from 'next-auth'
 import Stripe from 'stripe'
 import { authOptions } from '../api/auth/[...nextauth]/route'
@@ -18,26 +14,22 @@ export default async function Premium() {
   const session = await getServerSession(authOptions)
   const user = session && (await getUserWithSubscriptions(session?.userId))
 
-  const [banners, coupons, prices] = await Promise.all([
+  const [banners, coupons, products] = await Promise.all([
     getActiveBanners(),
-    stripe.coupons.list({ expand: ['data.applies_to'] }),
-    Promise.all(
-      STRIPE_PRICE_IDS.map((id) =>
-        stripe.prices.retrieve(id, { expand: ['product'] }),
-      ),
-    ),
+    getActiveCoupons(),
+    getActiveProducts(),
   ])
 
-  const pricesWithCoupons = prices.map((price) => {
-    const product = price.product as Stripe.Product
-    const appliedCoupon = coupons.data.find((coupon) =>
+  const productsWithCoupons = products.map((product) => {
+    const price = product.default_price as Stripe.Price
+    const appliedCoupon = coupons.find((coupon) =>
       coupon.applies_to?.products?.includes(product.id),
     )
 
     return {
-      ...price,
-      product: {
-        ...product,
+      ...product,
+      default_price: {
+        ...price,
         appliedCoupon: appliedCoupon
           ? {
               id: appliedCoupon.id,
@@ -78,7 +70,7 @@ export default async function Premium() {
           </p>
         </div>
         <PricingTable
-          prices={pricesWithCoupons as StripePriceWithProduct[]}
+          products={productsWithCoupons as ProductWithCoupon[]}
           user={user as UserWithSubscriptionsAndProgress | null}
         />
       </div>

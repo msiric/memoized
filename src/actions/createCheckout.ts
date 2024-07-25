@@ -7,14 +7,14 @@ import {
   createStripeSession,
 } from '@/services/stripe'
 import { getUserWithSubscriptions } from '@/services/user'
-import { StripePriceWithProduct } from '@/types'
+import { ProductWithCoupon } from '@/types'
 import { ServiceError, createCustomError } from '@/utils/error'
 import { createCustomResponse } from '@/utils/response'
 import { SubscriptionStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 
 export async function createCheckout(
-  price: StripePriceWithProduct,
+  product: ProductWithCoupon,
   redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true`,
 ) {
   try {
@@ -49,7 +49,7 @@ export async function createCheckout(
     })
 
     const stripeSession = await createStripeSession(
-      price,
+      product,
       customer,
       redirectPath,
     )

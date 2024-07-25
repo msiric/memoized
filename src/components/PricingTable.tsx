@@ -2,10 +2,7 @@
 
 import { createCheckout } from '@/actions/createCheckout'
 import { useAuthStore } from '@/contexts/auth'
-import {
-  StripePriceWithProduct,
-  UserWithSubscriptionsAndProgress,
-} from '@/types'
+import { ProductWithCoupon, UserWithSubscriptionsAndProgress } from '@/types'
 import { CustomError, handleError } from '@/utils/error'
 import { calculateDiscountedPrice, formatPrice } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
@@ -14,16 +11,17 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
+import Stripe from 'stripe'
 
 export type PricingTableProps = {
-  prices: StripePriceWithProduct[]
+  products: ProductWithCoupon[]
   user: UserWithSubscriptionsAndProgress | null
 }
 
-export const PricingTable = ({ prices, user }: PricingTableProps) => {
+export const PricingTable = ({ products, user }: PricingTableProps) => {
   const router = useRouter()
   const { data: session } = useSession()
-  const [priceIdLoading, setPriceIdLoading] = useState<string>()
+  const [productIdLoading, setProductIdLoading] = useState<string>()
 
   const openModal = useAuthStore((state) => state.openModal)
 
@@ -32,16 +30,21 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
 
   const currentActiveSubscription = user?.customer?.subscriptions[0]
 
-  const handleStripeCheckout = async (price: StripePriceWithProduct) => {
+  const sortedProducts = products.sort(
+    (a, b) =>
+      (a.default_price?.unit_amount ?? 0) - (b.default_price?.unit_amount ?? 0),
+  )
+
+  const handleStripeCheckout = async (product: ProductWithCoupon) => {
     try {
-      setPriceIdLoading(price.id)
+      setProductIdLoading(product.id)
 
       if (!session?.userId) {
-        setPriceIdLoading(undefined)
+        setProductIdLoading(undefined)
         openModal()
       }
 
-      const response = await createCheckout(price)
+      const response = await createCheckout(product)
       if (!response.success) return handleError(response, enqueueSnackbar)
       handleResponse(response as CustomResponse, enqueueSnackbar)
 
@@ -50,13 +53,13 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
       }
 
       if (!sessionUrl) {
-        setPriceIdLoading(undefined)
+        setProductIdLoading(undefined)
         return
       }
 
       router.push(sessionUrl)
 
-      setPriceIdLoading(undefined)
+      setProductIdLoading(undefined)
     } catch (error) {
       handleError(error as CustomError, enqueueSnackbar)
     }
@@ -66,24 +69,26 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
     <section className="bg-white dark:bg-zinc-900">
       <div className="mx-auto max-w-screen-xl lg:px-6">
         <div className="space-y-8 sm:gap-6 lg:grid lg:grid-cols-3 lg:space-y-0 xl:gap-10">
-          {prices.map((price) => {
+          {sortedProducts.map((product) => {
+            const price = product.default_price as Stripe.Price
+            const features = product.marketing_features
             const originalPrice = (price.unit_amount ?? 0) / 100
-            const coupon = price.product.appliedCoupon
+            const coupon = product?.default_price?.appliedCoupon
             const discountedPrice = coupon
               ? calculateDiscountedPrice(originalPrice, coupon)
               : originalPrice
 
             return (
               <div
-                key={price.id}
+                key={product.id}
                 className="mx-auto flex max-w-lg flex-col justify-between rounded-lg border border-zinc-400 bg-white p-6 text-center text-zinc-900 shadow xl:p-8 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
               >
                 <div>
                   <h3 className="mb-4 text-2xl font-semibold">
-                    {price.product.name}
+                    {product.name}
                   </h3>
                   <p className="font-light text-zinc-600 sm:text-lg dark:text-zinc-400">
-                    {price.product.description}
+                    {product.description}
                   </p>
                   <div className="my-8 flex flex-col items-center justify-center">
                     <div className="flex items-start">
@@ -114,7 +119,7 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
                     </div>
                   </div>
                   <ul role="list" className="mb-8 space-y-4 text-left">
-                    {price.product.marketing_features?.map((feature, index) => (
+                    {features?.map((feature, index) => (
                       <li key={index} className="flex items-center space-x-3">
                         <svg
                           className="h-5 w-5 flex-shrink-0 text-lime-500 dark:text-lime-400"
@@ -136,9 +141,9 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
                 <div>
                   {session ? (
                     <button
-                      onClick={() => handleStripeCheckout(price)}
+                      onClick={() => handleStripeCheckout(product)}
                       disabled={
-                        hasActiveSubscription || priceIdLoading === price.id
+                        hasActiveSubscription || productIdLoading === product.id
                       }
                       className="rounded-lg bg-lime-600 px-5 py-2.5 text-center text-sm font-medium text-white enabled:hover:bg-lime-700 enabled:focus:ring-4 enabled:focus:ring-lime-200 disabled:opacity-50 dark:text-white enabled:dark:focus:ring-lime-900"
                     >
@@ -150,7 +155,7 @@ export const PricingTable = ({ prices, user }: PricingTableProps) => {
                           : price.type === 'one_time'
                             ? 'Purchase'
                             : 'Subscribe'
-                        : priceIdLoading === price.id
+                        : productIdLoading === product.id
                           ? 'Processing...'
                           : price.type === 'one_time'
                             ? 'Purchase'
