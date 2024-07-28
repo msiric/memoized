@@ -6,6 +6,7 @@ import {
   calculateProgress,
   checkSubscriptionStatus,
   sortCurriculum,
+  sortProblemList,
 } from '@/utils/helpers'
 
 export const getUserById = async (userId: string) => {
@@ -99,7 +100,18 @@ export const getLessonsAndProblems = async () => {
   return { allLessons, allProblems }
 }
 
-export const getUserProgressWithLessons = async (userId?: string) => {
+export const getLessonsWithProblems = async () => {
+  const allLessons = await prisma.lesson.findMany({
+    include: {
+      section: true,
+      problems: true,
+    },
+    orderBy: { order: 'asc' },
+  })
+  return { allLessons }
+}
+
+export const getUserProgressWithCurriculum = async (userId?: string) => {
   const user = userId ? await getUserWithSubscriptionDetails(userId) : null
   const { allLessons, allProblems } = await getLessonsAndProblems()
 
@@ -129,6 +141,51 @@ export const getUserProgressWithLessons = async (userId?: string) => {
   return {
     user: enrichedUser,
     curriculum: sortedContent,
+    lessons,
+    problems,
+  }
+}
+
+export const getUserProgressWithProblems = async (userId?: string) => {
+  const user = userId ? await getUserWithSubscriptionDetails(userId) : null
+  const { allLessons } = await getLessonsWithProblems()
+
+  const sortedContent = sortProblemList(allLessons)
+
+  const problemList = sortedContent?.map(({ body, ...lesson }) => ({
+    ...lesson,
+  }))
+
+  const lessons = sortedContent?.map(
+    ({ id, href, title, description, access }) => ({
+      id,
+      href,
+      title,
+      description,
+      access,
+    }),
+  )
+
+  const problems = sortedContent?.flatMap((lesson) =>
+    lesson.problems.map(({ id, title, href, difficulty }) => ({
+      id,
+      title,
+      href,
+      difficulty,
+    })),
+  )
+
+  const progress = user
+    ? calculateProgress(user, lessons ?? [], problems ?? [])
+    : null
+
+  const enrichedUser = (
+    user ? { ...user, ...progress } : null
+  ) as UserWithSubscriptionsAndProgress
+
+  return {
+    user: enrichedUser,
+    problemList,
     lessons,
     problems,
   }

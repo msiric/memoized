@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/Header'
 import { Navigation } from '@/components/Navigation'
-import { Curriculum } from '@/types'
+import { NavigationContent } from '@/types'
 import { Dialog, Transition } from '@headlessui/react'
 import { motion } from 'framer-motion'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -47,13 +47,13 @@ function XIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 const IsInsideMobileNavigationContext = createContext(false)
 
 export type MobileNavigationDialogProps = {
-  fullCurriculum?: Curriculum[]
+  navigation?: NavigationContent
   isOpen: boolean
   close: () => void
 }
 
 function MobileNavigationDialog({
-  fullCurriculum,
+  navigation,
   isOpen,
   close,
 }: MobileNavigationDialogProps) {
@@ -68,7 +68,7 @@ function MobileNavigationDialog({
     }
   }, [pathname, searchParams, close, initialPathname, initialSearchParams])
 
-  function onClickDialog(event: React.MouseEvent<HTMLDivElement>) {
+  const onClickDialog = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!(event.target instanceof HTMLElement)) {
       return
     }
@@ -129,7 +129,7 @@ function MobileNavigationDialog({
               layoutScroll
               className="fixed bottom-0 left-0 top-14 w-full overflow-y-auto bg-white px-4 pb-4 shadow-lg shadow-zinc-900/10 ring-1 ring-zinc-900/7.5 min-[416px]:max-w-sm sm:px-6 dark:bg-zinc-900 dark:ring-zinc-800"
             >
-              <Navigation fullCurriculum={fullCurriculum} />
+              <Navigation navigation={navigation} />
             </motion.div>
           </Transition.Child>
         </Dialog.Panel>
@@ -155,10 +155,10 @@ export const useMobileNavigationStore = create<{
 }))
 
 export type MobileNavigationProps = {
-  fullCurriculum?: Curriculum[]
+  navigation?: NavigationContent
 }
 
-export function MobileNavigation({ fullCurriculum }: MobileNavigationProps) {
+export function MobileNavigation({ navigation }: MobileNavigationProps) {
   const isInsideMobileNavigation = useIsInsideMobileNavigation()
   const { isOpen, toggle, close } = useMobileNavigationStore()
   const ToggleIcon = isOpen ? XIcon : MenuIcon
@@ -176,7 +176,7 @@ export function MobileNavigation({ fullCurriculum }: MobileNavigationProps) {
       {!isInsideMobileNavigation && (
         <Suspense fallback={null}>
           <MobileNavigationDialog
-            fullCurriculum={fullCurriculum}
+            navigation={navigation}
             isOpen={isOpen}
             close={close}
           />

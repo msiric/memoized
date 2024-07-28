@@ -8,7 +8,8 @@ import {
 } from '@/components/MobileNavigation'
 import { MobileSearch, Search } from '@/components/Search'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { Curriculum } from '@/types'
+import { useNavigationLinks } from '@/hooks/useNavigationLinks'
+import { NavigationContent } from '@/types'
 import clsx from 'clsx'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
@@ -17,17 +18,13 @@ import { AuthButton } from './AuthButton'
 import { PremiumButton } from './PremiumButton'
 
 export type HeaderProps = {
-  showCourse?: boolean
+  navigation?: NavigationContent
   fullWidth?: boolean
-  fullCurriculum?: Curriculum[]
   className?: string
 }
 
 export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
-  function Header(
-    { showCourse = false, fullWidth, fullCurriculum, className },
-    ref,
-  ) {
+  function Header({ navigation, fullWidth, className }, ref) {
     const { isOpen: mobileNavIsOpen } = useMobileNavigationStore()
     const isInsideMobileNavigation = useIsInsideMobileNavigation()
 
@@ -35,6 +32,8 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
 
     const bgOpacityLight = useTransform(scrollY, [0, 72], [0.5, 0.9])
     const bgOpacityDark = useTransform(scrollY, [0, 72], [0.2, 0.8])
+
+    const navigationLinks = useNavigationLinks()
 
     return (
       <motion.div
@@ -70,7 +69,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
         <Search />
         {!fullWidth && (
           <div className="flex items-center gap-5 lg:hidden">
-            <MobileNavigation fullCurriculum={fullCurriculum} />
+            <MobileNavigation navigation={navigation} />
             <Link href="/" aria-label="Home">
               <Logo className="h-5 xs:h-6" />
             </Link>
@@ -80,21 +79,15 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
           <nav className="hidden md:block">
             <ul role="list" className="flex items-center gap-8">
               <li>
-                {showCourse ? (
+                {navigationLinks.map((link) => (
                   <Link
-                    href="/course"
+                    key={link.href}
+                    href={link.href}
                     className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                   >
-                    Course
+                    {link.title}
                   </Link>
-                ) : (
-                  <Link
-                    href="/problems"
-                    className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-                  >
-                    Problems
-                  </Link>
-                )}
+                ))}
               </li>
               <PremiumButton />
             </ul>

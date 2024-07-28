@@ -7,7 +7,8 @@ import { Tag } from '@/components/Tag'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useAccess } from '@/hooks/useAccess'
-import { Curriculum, LessonResult, SectionResult } from '@/types'
+import { useNavigationLinks } from '@/hooks/useNavigationLinks'
+import { NavigationContent, NavigationLink, NavigationSection } from '@/types'
 import { CustomError, handleError } from '@/utils/error'
 import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
@@ -33,23 +34,23 @@ function useInitialValue<T>(value: T, condition = true) {
 }
 
 function SectionLink({
-  id,
   href,
   active = false,
-  lessons = [],
+  links = [],
+  completedKey = 'completedLessons',
   children,
 }: {
-  id: string
   href: string
   active?: boolean
-  lessons?: LessonResult[]
+  links?: NavigationLink[]
+  completedKey?: 'completedLessons' | 'completedProblems'
   children: React.ReactNode
 }) {
   const pathname = usePathname()
 
-  const completedLessons = useContentStore((state) => state.completedLessons)
+  const completedItems = useContentStore((state) => state[completedKey])
 
-  const isCompleted = lessons.every((lesson) => completedLessons.has(lesson.id))
+  const isCompleted = links.every((link) => completedItems.has(link.id))
 
   const sectionRef = useRef<HTMLAnchorElement | null>(null)
 
@@ -181,7 +182,7 @@ function NavLink({
   access,
   active = false,
   isAnchorLink = false,
-  onRef,
+  completedKey = 'completedLessons',
 }: {
   id: string
   href: string
@@ -190,26 +191,26 @@ function NavLink({
   access?: AccessOptions
   active?: boolean
   isAnchorLink?: boolean
-  onRef?: (ref: HTMLAnchorElement | null) => void
+  completedKey?: 'completedLessons' | 'completedProblems'
 }) {
   const pathname = usePathname()
 
   const userData = useAuthStore((state) => state.user)
-  const completedLessons = useContentStore((state) => state.completedLessons)
+  const completedItems = useContentStore((state) => state[completedKey])
 
-  const isCompleted = Array.from(completedLessons).some(
-    (lesson) => lesson === id,
-  )
+  const isCompleted = Array.from(completedItems).some((item) => item === id)
 
   const hasAccess = useAccess(userData, access)
 
-  const lessonRef = useRef<HTMLAnchorElement | null>(null)
+  const linkRef = useRef<HTMLAnchorElement | null>(null)
+
+  const isExternal = /^https?:\/\/|^\/\//i.test(href)
 
   useEffect(() => {
-    if (active && lessonRef.current) {
+    if (active && linkRef.current) {
       setTimeout(
         () =>
-          lessonRef.current?.scrollIntoView({
+          linkRef.current?.scrollIntoView({
             behavior: 'smooth',
             block: 'center',
           }),
@@ -221,6 +222,7 @@ function NavLink({
   return (
     <Link
       href={href}
+      {...(isExternal && { target: '_blank' })}
       aria-current={active ? 'page' : undefined}
       className={clsx(
         'flex items-center justify-between gap-2 py-1 text-sm transition',
@@ -231,7 +233,7 @@ function NavLink({
           : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white',
         active && !isCompleted && 'text-zinc-900 dark:text-white',
       )}
-      ref={lessonRef}
+      ref={linkRef}
     >
       <span className="truncate">{children}</span>
       {tag && (
@@ -255,7 +257,7 @@ function VisibleSectionHighlight({
   section,
   pathname,
 }: {
-  section: SectionResult
+  section: NavigationSection
   pathname: string
 }) {
   const [sections, visibleSections] = useInitialValue(
@@ -278,8 +280,7 @@ function VisibleSectionHighlight({
     ? Math.max(1, visibleSections.length) * itemHeight
     : itemHeight
   const top =
-    section.lessons.findIndex((lesson) => lesson.href === pathname) *
-      itemHeight +
+    section.links.findIndex((link) => link.href === pathname) * itemHeight +
     firstVisibleSectionIndex * itemHeight
 
   return (
@@ -298,13 +299,13 @@ function ActivePageMarker({
   section,
   pathname,
 }: {
-  section: SectionResult
+  section: NavigationSection
   pathname: string
 }) {
   const itemHeight = remToPx(2)
   const offset = remToPx(0.25)
-  const activePageIndex = section.lessons.findIndex(
-    (lesson) => lesson.href === pathname,
+  const activePageIndex = section.links.findIndex(
+    (link) => link.href === pathname,
   )
   const top = offset + activePageIndex * itemHeight
 
@@ -324,7 +325,7 @@ function NavigationGroup({
   section,
   className,
 }: {
-  section: SectionResult
+  section: NavigationSection
   className?: string
 }) {
   // If this is the mobile navigation then we always render the initial
@@ -336,17 +337,14 @@ function NavigationGroup({
     isInsideMobileNavigation,
   )
 
-  const isActiveGroup = section.lessons.some(
-    (lesson) => lesson.href === pathname,
-  )
+  const isActiveGroup = section.links.some((link) => link.href === pathname)
 
   return (
     <li className={clsx('relative mt-6', className)}>
       <SectionLink
-        id={section.id}
         href={section.href}
         active={section.href === pathname}
-        lessons={section.lessons}
+        links={section.links}
       >
         {section.title}
       </SectionLink>
@@ -369,18 +367,18 @@ function NavigationGroup({
           )}
         </AnimatePresence>
         <ul role="list" className="border-l border-transparent">
-          {section.lessons.map((lesson) => (
-            <motion.li key={lesson.href} layout="position" className="relative">
+          {section.links.map((link) => (
+            <motion.li key={link.href} layout="position" className="relative">
               <NavLink
-                id={lesson.id}
-                href={lesson.href}
-                active={lesson.href === pathname}
-                access={lesson.access}
+                id={link.id}
+                href={link.href}
+                active={link.href === pathname}
+                access={link.access}
               >
-                {lesson.title}
+                {link.title}
               </NavLink>
               <AnimatePresence mode="popLayout" initial={false}>
-                {lesson.href === pathname && sections.length > 0 && (
+                {link.href === pathname && sections.length > 0 && (
                   <motion.ul
                     role="list"
                     initial={{ opacity: 0 }}
@@ -396,8 +394,8 @@ function NavigationGroup({
                     {sections.map((section) => (
                       <li key={section.id}>
                         <NavLink
-                          id={`${lesson.id}_${section.id}`}
-                          href={`${lesson.href}#${section.id}`}
+                          id={`${link.id}_${section.id}`}
+                          href={`${link.href}#${section.id}`}
                           tag={section.tag}
                           isAnchorLink
                         >
@@ -417,22 +415,26 @@ function NavigationGroup({
 }
 
 export type NavigationProps = {
-  fullCurriculum?: Curriculum[]
+  navigation?: NavigationContent
 } & React.ComponentPropsWithoutRef<'nav'>
 
-export function Navigation({ fullCurriculum, ...props }: NavigationProps) {
+export function Navigation({ navigation, ...props }: NavigationProps) {
+  const navigationLinks = useNavigationLinks()
+
   return (
     <nav {...props}>
       <ul role="list">
         <div className="mt-6 flex flex-col gap-2 md:hidden">
-          <TopLevelNavItem href="/problems">Problems</TopLevelNavItem>
+          {navigationLinks.map((link) => (
+            <TopLevelNavItem key={link.href} href={link.href}>
+              {link.title}
+            </TopLevelNavItem>
+          ))}
           <NavPremiumButton />
         </div>
-        {fullCurriculum?.map((course) =>
-          course.sections.map((section) => (
-            <NavigationGroup key={section.title} section={section} />
-          )),
-        )}
+        {navigation?.sections.map((section) => (
+          <NavigationGroup key={section.title} section={section} />
+        ))}
         <div className="sticky bottom-0 z-10 flex flex-col justify-between gap-2">
           <li className="bottom-0 z-10 flex justify-between gap-2">
             <AuthButton

@@ -1,6 +1,6 @@
 'use client'
 
-import { Header } from '@/components/Header'
+import { Navigation } from '@/components/Navigation'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import {
@@ -14,8 +14,6 @@ import { useEffect } from 'react'
 
 export type LayoutProps = {
   userData?: UserWithSubscriptionsAndProgress | null
-  completedLessons?: string[]
-  completedProblems?: string[]
   problemList?: LessonWithProblems[]
   allLessons?: LessonConfig[]
   allProblems?: ProblemConfig[]
@@ -23,8 +21,6 @@ export type LayoutProps = {
 
 export function Wrapper({
   userData,
-  completedLessons,
-  completedProblems,
   problemList,
   allLessons,
   allProblems,
@@ -35,23 +31,11 @@ export function Wrapper({
   const navigation = problemListToNavigation(problemList)
 
   useEffect(() => {
-    updateContent(
-      completedLessons,
-      completedProblems,
-      undefined,
-      allLessons,
-      allProblems,
-    )
+    updateContent(undefined, undefined, undefined, allLessons, allProblems)
     setUser(userData ?? null)
-  }, [
-    completedLessons,
-    updateContent,
-    allLessons,
-    setUser,
-    userData,
-    completedProblems,
-    allProblems,
-  ])
+  }, [updateContent, allLessons, setUser, userData, allProblems])
 
-  return <Header navigation={navigation} />
+  return (
+    <Navigation navigation={navigation} className="hidden lg:mt-10 lg:block" />
+  )
 }

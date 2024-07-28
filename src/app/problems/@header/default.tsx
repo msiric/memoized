@@ -1,13 +1,13 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getUserProgressWithLessons } from '@/services/user'
-import { Curriculum, LessonConfig, ProblemConfig } from '@/types'
+import { getUserProgressWithProblems } from '@/services/user'
+import { LessonConfig, LessonWithProblems, ProblemConfig } from '@/types'
 import { getServerSession } from 'next-auth'
 import { Wrapper } from './wrapper'
 
 export default async function Header() {
   const session = await getServerSession(authOptions)
 
-  const data = await getUserProgressWithLessons(session?.userId)
+  const data = await getUserProgressWithProblems(session?.userId)
 
   return (
     <Wrapper
@@ -16,7 +16,7 @@ export default async function Header() {
       completedProblems={data?.user?.problemProgress.map(
         (item) => item.problemId,
       )}
-      fullCurriculum={data?.curriculum as Curriculum[]}
+      problemList={data?.problemList as LessonWithProblems[]}
       allLessons={data?.lessons as LessonConfig[]}
       allProblems={data?.problems as ProblemConfig[]}
     />

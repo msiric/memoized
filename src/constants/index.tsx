@@ -1,3 +1,5 @@
+import { ProblemDifficulty } from '@prisma/client'
+
 export const APP_NAME = 'Memoized'
 
 export const COURSE_PREFIX = '/course'
@@ -11,3 +13,9 @@ export const ADVANCED_TOPICS_PREFIX = '/advanced-topics'
 export const CONTENT_FOLDER = 'content'
 
 export const PREMIUM_QUERY_PARAM = 'upgradedToPremium'
+
+export const DIFFICULTY_ORDER = {
+  [ProblemDifficulty.EASY]: 1,
+  [ProblemDifficulty.MEDIUM]: 2,
+  [ProblemDifficulty.HARD]: 3,
+}

@@ -1,20 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import prisma from '@/lib/prisma'
+import {
+  getLessonsAndProblems,
+  getLessonsWithProblems,
+  getUserById,
+  getUserProgressWithCurriculum,
+  getUserProgressWithProblems,
+  getUserWithSubscriptionDetails,
+  getUserWithSubscriptions,
+} from '@/services/user'
+import { LessonWithProblems } from '@/types'
 import { ServiceError } from '@/utils/error'
 import {
-  checkSubscriptionStatus,
   buildCurriculum,
   calculateProgress,
+  checkSubscriptionStatus,
   sortCurriculum,
+  sortProblemList,
 } from '@/utils/helpers'
 import {
-  getUserWithSubscriptions,
-  getUserProgressWithLessons,
-  getUserById,
-  getUserWithSubscriptionDetails,
-  getLessonsAndProblems,
-} from '@/services/user'
-import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
+  ProblemDifficulty,
+  SubscriptionPlan,
+  SubscriptionStatus,
+} from '@prisma/client'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock external dependencies
 vi.mock('@/lib/prisma')
@@ -151,7 +159,7 @@ describe('User Service', () => {
     })
   })
 
-  describe('getUserProgressWithLessons', () => {
+  describe('getUserProgressWithCurriculum', () => {
     it('should return user progress with curriculum', async () => {
       const mockUser = {
         id: 'user1',
@@ -214,7 +222,7 @@ describe('User Service', () => {
         currentProblemProgress: 100,
       })
 
-      const result = await getUserProgressWithLessons('user1')
+      const result = await getUserProgressWithCurriculum('user1')
 
       expect(result).toHaveProperty('user')
       expect(result).toHaveProperty('curriculum')
@@ -230,12 +238,155 @@ describe('User Service', () => {
       vi.mocked(buildCurriculum).mockReturnValue([])
       vi.mocked(sortCurriculum).mockReturnValue([])
 
-      const result = await getUserProgressWithLessons()
+      const result = await getUserProgressWithCurriculum()
 
       expect(result.user).toBeNull()
       expect(result).toHaveProperty('curriculum')
       expect(result).toHaveProperty('lessons')
       expect(result).toHaveProperty('problems')
+    })
+  })
+
+  describe('getLessonsWithProblems', () => {
+    it('should return all lessons with their problems', async () => {
+      const mockLessons = [
+        {
+          id: 'lesson1',
+          title: 'Lesson 1',
+          order: 1,
+          section: { id: 'section1', title: 'Section 1' },
+          problems: [
+            {
+              id: 'problem1',
+              title: 'Problem 1',
+              difficulty: ProblemDifficulty.EASY,
+            },
+            {
+              id: 'problem2',
+              title: 'Problem 2',
+              difficulty: ProblemDifficulty.MEDIUM,
+            },
+          ],
+        },
+      ]
+
+      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
+
+      const result = await getLessonsWithProblems()
+
+      expect(result).toEqual({ allLessons: mockLessons })
+      expect(prisma.lesson.findMany).toHaveBeenCalledWith({
+        include: {
+          section: true,
+          problems: true,
+        },
+        orderBy: { order: 'asc' },
+      })
+    })
+  })
+
+  describe('getUserProgressWithProblems', () => {
+    it('should return user progress with problems when userId is provided', async () => {
+      const mockUser = {
+        id: 'user1',
+        name: 'Test User',
+        customer: {
+          subscriptions: [
+            {
+              id: 'sub1',
+              plan: SubscriptionPlan.LIFETIME,
+              startDate: new Date(),
+              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
+          ],
+        },
+        lessonProgress: [{ lessonId: 'lesson1', completed: true }],
+        problemProgress: [{ problemId: 'problem1', completed: true }],
+      }
+
+      const mockLessons = [
+        {
+          id: 'lesson1',
+          href: '/lesson-1',
+          title: 'Lesson 1',
+          description: 'Lesson 1 description',
+          access: 'FREE',
+          problems: [
+            {
+              id: 'problem1',
+              title: 'Problem 1',
+              href: '/problem-1',
+              difficulty: ProblemDifficulty.EASY,
+            },
+            {
+              id: 'problem2',
+              title: 'Problem 2',
+              href: '/problem-2',
+              difficulty: ProblemDifficulty.MEDIUM,
+            },
+          ],
+        },
+      ]
+
+      vi.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser as any)
+      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
+      vi.mocked(checkSubscriptionStatus).mockReturnValue(
+        SubscriptionStatus.ACTIVE,
+      )
+      vi.mocked(sortProblemList).mockReturnValue(
+        mockLessons as LessonWithProblems[],
+      )
+      vi.mocked(calculateProgress).mockReturnValue({
+        currentLessonProgress: 100,
+        currentProblemProgress: 50,
+      })
+
+      const result = await getUserProgressWithProblems('user1')
+
+      expect(result).toHaveProperty('user')
+      expect(result).toHaveProperty('problemList')
+      expect(result).toHaveProperty('lessons')
+      expect(result).toHaveProperty('problems')
+      expect(result.user?.currentLessonProgress).toBe(100)
+      expect(result.user?.currentProblemProgress).toBe(50)
+      expect(result.problemList).toHaveLength(1)
+      expect(result.lessons).toHaveLength(1)
+      expect(result.problems).toHaveLength(2)
+    })
+
+    it('should return null user and problem data when userId is not provided', async () => {
+      const mockLessons = [
+        {
+          id: 'lesson1',
+          href: '/lesson-1',
+          title: 'Lesson 1',
+          description: 'Lesson 1 description',
+          access: 'FREE',
+          problems: [
+            {
+              id: 'problem1',
+              title: 'Problem 1',
+              href: '/problem-1',
+              difficulty: ProblemDifficulty.EASY,
+            },
+          ],
+        },
+      ]
+
+      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
+      vi.mocked(sortProblemList).mockReturnValue(
+        mockLessons as LessonWithProblems[],
+      )
+
+      const result = await getUserProgressWithProblems()
+
+      expect(result.user).toBeNull()
+      expect(result).toHaveProperty('problemList')
+      expect(result).toHaveProperty('lessons')
+      expect(result).toHaveProperty('problems')
+      expect(result.problemList).toHaveLength(1)
+      expect(result.lessons).toHaveLength(1)
+      expect(result.problems).toHaveLength(1)
     })
   })
 })

@@ -1,17 +1,18 @@
+import { DIFFICULTY_ORDER } from '@/constants'
 import { stripe } from '@/lib/stripe'
 import {
   ActiveCoupon,
   Curriculum,
   EnrichedLesson,
   EnrichedUser,
+  LessonWithProblems,
+  NavigationContent,
   ProblemRow,
   ProblemStatus,
   UserWithSubscriptionsAndProgress,
 } from '@/types'
 import {
   AccessOptions,
-  Lesson,
-  Problem,
   ProblemDifficulty,
   Subscription,
   SubscriptionPlan,
@@ -19,12 +20,6 @@ import {
 } from '@prisma/client'
 import { format, fromUnixTime, isBefore, parseISO } from 'date-fns'
 import Stripe from 'stripe'
-
-const DIFFICULTY_ORDER = {
-  EASY: 1,
-  MEDIUM: 2,
-  HARD: 3,
-}
 
 export interface ProblemFilter {
   difficulty?: ProblemDifficulty
@@ -293,6 +288,23 @@ export const sortCurriculum = (
     }))
 }
 
+export const sortProblemList = (
+  problemList?: LessonWithProblems[],
+): LessonWithProblems[] | undefined => {
+  return problemList
+    ?.slice()
+    .sort((a, b) => a.section.order - b.section.order)
+    .map((list) => ({
+      ...list,
+      problems: list.problems
+        .slice()
+        .sort(
+          (a, b) =>
+            DIFFICULTY_ORDER[a.difficulty] - DIFFICULTY_ORDER[b.difficulty],
+        ),
+    }))
+}
+
 export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
   return allLessons.reduce<Curriculum[]>((acc, lesson) => {
     const {
@@ -361,10 +373,10 @@ export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
   }, [])
 }
 
-export const calculateProgress = (
+export const calculateProgress = <T, S>(
   user: EnrichedUser,
-  allLessons: Lesson[],
-  allProblems: Problem[],
+  allLessons: T[],
+  allProblems: S[],
 ) => {
   const completedLessons = user?.lessonProgress.length
   const currentLessonProgress =
@@ -375,4 +387,67 @@ export const calculateProgress = (
     allProblems.length > 0 ? (completedProblems / allProblems.length) * 100 : 0
 
   return { currentLessonProgress, currentProblemProgress }
+}
+
+export const curriculumToNavigation = (
+  curriculum?: Curriculum,
+): NavigationContent | undefined => {
+  if (!curriculum) return undefined
+
+  return {
+    id: curriculum.id,
+    slug: curriculum.slug,
+    title: curriculum.title,
+    description: curriculum.description,
+    order: curriculum.order,
+    sections: curriculum.sections.map((section) => ({
+      id: section.id,
+      slug: section.slug,
+      title: section.title,
+      href: section.href,
+      description: section.description,
+      order: section.order,
+      links: section.lessons.map((lesson) => ({
+        id: lesson.id,
+        slug: lesson.slug,
+        title: lesson.title,
+        href: lesson.href,
+        description: lesson.description,
+        order: lesson.order,
+        access: lesson.access,
+      })),
+      access: section.access,
+    })),
+  }
+}
+
+export const problemListToNavigation = (
+  problemList?: LessonWithProblems[],
+): NavigationContent | undefined => {
+  if (!problemList) return undefined
+
+  return {
+    id: 'problem-navigation',
+    slug: 'problem-navigation',
+    title: 'Problem Navigation',
+    description: 'Navigation structure for lessons and problems',
+    order: 0,
+    sections: problemList.map((lesson) => ({
+      id: lesson.id,
+      slug: lesson.slug,
+      title: lesson.title,
+      href: lesson.href,
+      description: lesson.description,
+      order: lesson.order,
+      links: lesson.problems.map((problem, index) => ({
+        id: problem.id,
+        slug: problem.href.split('/').pop() || `problem-${index}`,
+        title: problem.title,
+        href: problem.href,
+        description: null,
+        order: index + 1,
+      })),
+      access: lesson.access,
+    })),
+  }
 }

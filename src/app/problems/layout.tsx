@@ -12,12 +12,16 @@ export const metadata: Metadata = {
 
 export type ProblemLayoutProps = {
   header: ReactNode
+  navigation: ReactNode
   table: ReactNode
 }
 
 export default async function ProblemLayout({
   header,
+  navigation,
   table,
 }: ProblemLayoutProps) {
-  return <ProblemProviders header={header} table={table} />
+  return (
+    <ProblemProviders header={header} navigation={navigation} table={table} />
+  )
 }

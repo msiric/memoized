@@ -9,6 +9,7 @@ import {
   ProblemConfig,
   UserWithSubscriptionsAndProgress,
 } from '@/types'
+import { curriculumToNavigation } from '@/utils/helpers'
 import { useEffect } from 'react'
 
 export type LayoutProps = {
@@ -31,6 +32,8 @@ export function Wrapper({
   const setUser = useAuthStore((state) => state.setUser)
   const updateContent = useContentStore((state) => state.updateContent)
 
+  const navigation = curriculumToNavigation(fullCurriculum?.[0])
+
   useEffect(() => {
     updateContent(
       completedLessons,
@@ -51,5 +54,5 @@ export function Wrapper({
     allProblems,
   ])
 
-  return <Header fullCurriculum={fullCurriculum} />
+  return <Header navigation={navigation} />
 }

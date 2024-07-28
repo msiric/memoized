@@ -31,6 +31,16 @@ export type LessonResult = {
   access: AccessOptions
 }
 
+export type NavigationLink = {
+  id: string
+  slug: string
+  title: string
+  href: string
+  description: string | null
+  order?: number
+  access?: AccessOptions
+}
+
 export type SectionResult = {
   id: string
   slug: string
@@ -42,6 +52,17 @@ export type SectionResult = {
   access?: AccessOptions
 }
 
+export type NavigationSection = {
+  id: string
+  slug: string
+  title: string
+  href: string
+  description: string | null
+  order: number
+  links: NavigationLink[]
+  access?: AccessOptions
+}
+
 export type Curriculum = {
   id: string
   slug: string
@@ -49,6 +70,15 @@ export type Curriculum = {
   description: string | null
   order: number
   sections: SectionResult[]
+}
+
+export type NavigationContent = {
+  id: string
+  slug: string
+  title: string
+  description: string | null
+  order: number
+  sections: NavigationSection[]
 }
 
 export type SubscriptionStatus = 'ACTIVE' | 'CANCELED' | 'EXPIRED' | 'UNKNOWN'
@@ -110,6 +140,14 @@ export type EnrichedUser = Prisma.UserGetPayload<{
       }
     }
   }
+}>
+
+export type LessonWithProblems = Prisma.LessonGetPayload<{
+  include: {
+    problems: true
+    section: true
+  }
+  orderBy: { order: 'asc' }
 }>
 
 export type UserWithSubscriptionsAndProgress = EnrichedUser & {
