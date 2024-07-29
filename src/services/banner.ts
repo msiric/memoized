@@ -10,6 +10,18 @@ export const getActiveBanners = async () => {
       where: {
         isActive: true,
       },
+      select: {
+        id: true,
+        startDate: true,
+        endDate: true,
+        priority: true,
+        title: true,
+        message: true,
+        linkText: true,
+        linkUrl: true,
+        isActive: true,
+        type: true,
+      },
     })
 
     const activeBanners = banners.filter((banner) => {

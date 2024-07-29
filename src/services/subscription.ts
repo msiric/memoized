@@ -123,7 +123,7 @@ export const updateSubscriptionDetails = async ({
     const recurringSubscription = updateAction
       ? await prisma.subscription.findUnique({
           where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
-          include: { customer: { include: { user: true } } },
+          select: { customer: { select: { id: true, user: true } } },
         })
       : null
 
@@ -131,7 +131,7 @@ export const updateSubscriptionDetails = async ({
       ? recurringSubscription?.customer
       : await prisma.customer.findUnique({
           where: { stripeCustomerId: customerId ?? '' },
-          include: { user: true },
+          select: { id: true, user: true },
         })
 
     if (!customer?.user?.name || !customer?.user?.email)
@@ -145,9 +145,10 @@ export const updateSubscriptionDetails = async ({
           stripeSubscriptionId: subscriptionId?.toString() ?? '',
         },
       },
+      select: { id: true },
     })
 
-    if (existingActiveSubscription && !updateAction) {
+    if (existingActiveSubscription?.id && !updateAction) {
       throw new ServiceError(`User already has an active subscription`)
     }
 
@@ -200,7 +201,7 @@ export const updateSubscriptionDetails = async ({
       await sendEmail({
         to: customer.user.email,
         type: 'subscription',
-        user: customer.user,
+        name: customer.user.name,
       })
     }
   } catch (err: unknown) {
@@ -240,7 +241,7 @@ export const createLifetimeAccess = async ({
 
     const customer = await prisma.customer.findUnique({
       where: { stripeCustomerId: customerId },
-      include: { user: true },
+      select: { id: true, user: { select: { name: true, email: true } } },
     })
 
     if (!customer?.user?.name || !customer?.user?.email)
@@ -251,9 +252,10 @@ export const createLifetimeAccess = async ({
         customerId: customer.id,
         status: SubscriptionStatus.ACTIVE,
       },
+      select: { id: true },
     })
 
-    if (existingSubscription) {
+    if (existingSubscription?.id) {
       throw new ServiceError(`User already has an active subscription`)
     }
 
@@ -302,7 +304,7 @@ export const createLifetimeAccess = async ({
       await sendEmail({
         to: customer.user.email,
         type: 'purchase',
-        user: customer.user,
+        name: customer.user.name,
       })
     }
   } catch (err: unknown) {

@@ -52,7 +52,11 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
 
   const [problems, lessons] = await Promise.all([
     prisma.problem.findMany({
-      include: {
+      select: {
+        id: true,
+        title: true,
+        href: true,
+        difficulty: true,
         lesson: {
           select: {
             title: true,

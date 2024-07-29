@@ -8,8 +8,13 @@ export const findAccount = (provider: string, providerAccountId: string) => {
         providerAccountId,
       },
     },
-    include: {
-      user: true,
+    select: {
+      userId: true,
+      user: {
+        select: {
+          id: true,
+        },
+      },
     },
   })
 }
@@ -41,6 +46,20 @@ export const findAccountWithUserByProviderAccountId = (
 ) => {
   return prisma.account.findUnique({
     where: { providerAccountId },
-    include: { user: { include: { customer: true } } },
+    select: {
+      id: true,
+      providerAccountId: true,
+      provider: true,
+      user: {
+        select: {
+          id: true,
+          customer: {
+            select: {
+              stripeCustomerId: true,
+            },
+          },
+        },
+      },
+    },
   })
 }

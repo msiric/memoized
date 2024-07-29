@@ -10,7 +10,15 @@ const indexLessons = async () => {
   }
 
   const lessons = await prisma.lesson.findMany({
-    include: { section: true },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      body: true,
+      access: true,
+      slug: true,
+      section: { select: { title: true, slug: true } },
+    },
   })
 
   const documentsToIndex = lessons.map((lesson) => ({

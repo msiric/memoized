@@ -120,6 +120,7 @@ export const createOrRetrieveCustomer = async ({
   try {
     const existingCustomer = await prisma.customer.findUnique({
       where: { userId },
+      select: { stripeCustomerId: true },
     })
 
     let stripeCustomerId: string | undefined

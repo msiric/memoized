@@ -71,7 +71,11 @@ export const authOptions: AuthOptions = {
       if (newUser) {
         if (isProduction()) {
           Sentry.setUser({ id: newUser.id })
-          await sendEmail({ to: newUser.email, type: 'welcome', user: newUser })
+          await sendEmail({
+            name: newUser.name ?? '',
+            to: newUser.email,
+            type: 'welcome',
+          })
         }
         return true
       }

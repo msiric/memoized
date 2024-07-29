@@ -31,10 +31,8 @@ describe('Prisma Services', () => {
   describe('findAccount', () => {
     it('should find an account by provider and providerAccountId', async () => {
       const mockAccount = {
-        id: '1',
-        provider: 'github',
-        providerAccountId: '123',
-        user: { id: '1', email: 'test@example.com' },
+        userId: '1',
+        user: { id: '1' },
       }
       ;(prisma.account.findUnique as Mock).mockResolvedValue(mockAccount)
 
@@ -47,8 +45,13 @@ describe('Prisma Services', () => {
             providerAccountId: '123',
           },
         },
-        include: {
-          user: true,
+        select: {
+          userId: true,
+          user: {
+            select: {
+              id: true,
+            },
+          },
         },
       })
     })
@@ -65,8 +68,13 @@ describe('Prisma Services', () => {
             providerAccountId: '123',
           },
         },
-        include: {
-          user: true,
+        select: {
+          userId: true,
+          user: {
+            select: {
+              id: true,
+            },
+          },
         },
       })
     })
@@ -112,10 +120,12 @@ describe('Prisma Services', () => {
       const mockAccount = {
         id: '1',
         providerAccountId: '123',
+        provider: 'github',
         user: {
           id: '1',
-          email: 'test@example.com',
-          customer: {},
+          customer: {
+            stripeCustomerId: 'cus_123',
+          },
         },
       }
       ;(prisma.account.findUnique as Mock).mockResolvedValue(mockAccount)
@@ -124,7 +134,21 @@ describe('Prisma Services', () => {
       expect(account).toEqual(mockAccount)
       expect(prisma.account.findUnique).toHaveBeenCalledWith({
         where: { providerAccountId: '123' },
-        include: { user: { include: { customer: true } } },
+        select: {
+          id: true,
+          providerAccountId: true,
+          provider: true,
+          user: {
+            select: {
+              id: true,
+              customer: {
+                select: {
+                  stripeCustomerId: true,
+                },
+              },
+            },
+          },
+        },
       })
     })
 
@@ -135,7 +159,21 @@ describe('Prisma Services', () => {
       expect(account).toBeNull()
       expect(prisma.account.findUnique).toHaveBeenCalledWith({
         where: { providerAccountId: '123' },
-        include: { user: { include: { customer: true } } },
+        select: {
+          id: true,
+          providerAccountId: true,
+          provider: true,
+          user: {
+            select: {
+              id: true,
+              customer: {
+                select: {
+                  stripeCustomerId: true,
+                },
+              },
+            },
+          },
+        },
       })
     })
   })

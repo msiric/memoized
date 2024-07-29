@@ -1,9 +1,9 @@
 // pages/api/search.ts or app/api/search/route.ts
-import { NextResponse } from 'next/server'
+import { meiliSearch } from '@/lib/meili'
 import { getServerSession } from 'next-auth/next'
+import { NextResponse } from 'next/server'
 import prisma from '../../../lib/prisma' // adjust the import path as needed
 import { authOptions } from '../auth/[...nextauth]/route'
-import { meiliSearch } from '@/lib/meili'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -24,7 +24,9 @@ export async function GET(request: Request) {
   if (session?.user?.email) {
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      include: { customer: { include: { subscriptions: true } } },
+      select: {
+        customer: { select: { subscriptions: { select: { status: true } } } },
+      },
     })
     isPremiumUser =
       user?.customer?.subscriptions.some((sub) => sub.status === 'ACTIVE') ??

@@ -36,9 +36,13 @@ export const getUserWithSubscriptions = async (userId: string) => {
 export const getUserWithSubscriptionDetails = async (userId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
       customer: {
-        include: {
+        select: {
           subscriptions: {
             orderBy: { startDate: 'desc' },
             take: 1,
@@ -86,25 +90,68 @@ export const getUserWithSubscriptionDetails = async (userId: string) => {
 export const getLessonsAndProblems = async () => {
   const [allLessons, allProblems] = await Promise.all([
     prisma.lesson.findMany({
-      include: {
+      select: {
+        id: true,
+        title: true,
+        href: true,
+        description: true,
+        access: true,
+        order: true,
+        slug: true,
         section: {
-          include: {
-            course: true,
+          select: {
+            id: true,
+            title: true,
+            href: true,
+            body: true,
+            order: true,
+            slug: true,
+            description: true,
+            course: {
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                slug: true,
+                order: true,
+                href: true,
+              },
+            },
           },
         },
       },
       orderBy: { order: 'asc' },
     }),
-    prisma.problem.findMany(),
+    prisma.problem.findMany({
+      select: { id: true, title: true, difficulty: true, href: true },
+    }),
   ])
   return { allLessons, allProblems }
 }
 
 export const getLessonsWithProblems = async () => {
   const allLessons = await prisma.lesson.findMany({
-    include: {
-      section: true,
-      problems: true,
+    select: {
+      id: true,
+      title: true,
+      href: true,
+      description: true,
+      access: true,
+      slug: true,
+      order: true,
+      section: {
+        select: {
+          order: true,
+        },
+      },
+      problems: {
+        select: {
+          id: true,
+          title: true,
+          href: true,
+          difficulty: true,
+        },
+      },
     },
     orderBy: { order: 'asc' },
   })
@@ -152,10 +199,6 @@ export const getUserProgressWithProblems = async (userId?: string) => {
 
   const sortedContent = sortProblemList(allLessons)
 
-  const problemList = sortedContent?.map(({ body, ...lesson }) => ({
-    ...lesson,
-  }))
-
   const lessons = sortedContent?.map(
     ({ id, href, title, description, access }) => ({
       id,
@@ -185,7 +228,7 @@ export const getUserProgressWithProblems = async (userId?: string) => {
 
   return {
     user: enrichedUser,
-    problemList,
+    problemList: sortedContent,
     lessons,
     problems,
   }

@@ -101,10 +101,33 @@ export type ProblemRow = {
 export type ProblemStatus = 'TODO' | 'COMPLETED'
 
 export type EnrichedLesson = Prisma.LessonGetPayload<{
-  include: {
+  select: {
+    id: true
+    title: true
+    href: true
+    description: true
+    access: true
+    order: true
+    slug: true
     section: {
-      include: {
-        course: true
+      select: {
+        id: true
+        title: true
+        href: true
+        body: true
+        order: true
+        slug: true
+        description: true
+        course: {
+          select: {
+            id: true
+            title: true
+            description: true
+            slug: true
+            order: true
+            href: true
+          }
+        }
       }
     }
   }
@@ -112,9 +135,13 @@ export type EnrichedLesson = Prisma.LessonGetPayload<{
 }>
 
 export type EnrichedUser = Prisma.UserGetPayload<{
-  include: {
+  select: {
+    id: true
+    name: true
+    email: true
+    image: true
     customer: {
-      include: {
+      select: {
         subscriptions: {
           orderBy: { startDate: 'desc' }
           take: 1
@@ -143,9 +170,27 @@ export type EnrichedUser = Prisma.UserGetPayload<{
 }>
 
 export type LessonWithProblems = Prisma.LessonGetPayload<{
-  include: {
-    problems: true
-    section: true
+  select: {
+    id: true
+    title: true
+    href: true
+    description: true
+    access: true
+    slug: true
+    order: true
+    section: {
+      select: {
+        order: true
+      }
+    }
+    problems: {
+      select: {
+        id: true
+        title: true
+        href: true
+        difficulty: true
+      }
+    }
   }
   orderBy: { order: 'asc' }
 }>

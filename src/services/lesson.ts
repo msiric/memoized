@@ -34,6 +34,7 @@ export const markLessonProgress = async ({
 export const getSectionBySlug = async (sectionSlug: string) => {
   const section = await prisma.section.findUnique({
     where: { slug: sectionSlug },
+    select: { id: true },
   })
 
   if (!section) {
@@ -46,7 +47,7 @@ export const getSectionBySlug = async (sectionSlug: string) => {
 export const getLessonBySlug = async (lessonSlug: string) => {
   const lesson = await prisma.lesson.findUnique({
     where: { slug: lessonSlug },
-    include: { problems: true },
+    select: { id: true, problems: true, title: true, access: true },
   })
 
   if (!lesson) {

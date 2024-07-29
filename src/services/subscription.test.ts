@@ -150,8 +150,56 @@ describe('Subscription Service', () => {
       expect(sendEmail).toHaveBeenCalledWith({
         to: 'test@mail.com',
         type: 'subscription',
-        user: { email: 'test@mail.com', name: 'Test' },
+        name: 'Test',
       })
+    })
+
+    it('should update existing subscription when updateAction is true', async () => {
+      const mockSubscription = {
+        customer: {
+          id: 'cus_123',
+          user: { email: 'test@mail.com', name: 'Test' },
+        },
+      }
+      const mockStripeSubscription = {
+        id: 'sub_123',
+        items: { data: [{ price: { id: 'price_123' } }] },
+        status: 'active',
+        metadata: {},
+        cancel_at_period_end: false,
+        cancel_at: null,
+        canceled_at: null,
+        current_period_start: 1625097600,
+        current_period_end: 1627776000,
+        created: 1625097600,
+        ended_at: null,
+      }
+
+      vi.spyOn(prisma.subscription, 'findUnique').mockResolvedValue(
+        mockSubscription as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(
+        mockStripeSubscription as any,
+      )
+      vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({} as any)
+
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.LIFETIME,
+      )
+      vi.mocked(getStatusFromStripeStatus).mockReturnValue(
+        SubscriptionStatus.ACTIVE,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+
+      await updateSubscriptionDetails({
+        subscriptionId: 'sub_123',
+        updateAction: true,
+      })
+
+      expect(prisma.subscription.upsert).toHaveBeenCalled()
+      expect(sendEmail).not.toHaveBeenCalled()
     })
   })
 
@@ -303,7 +351,7 @@ describe('Subscription Service', () => {
       expect(sendEmail).toHaveBeenCalledWith({
         to: 'test@mail.com',
         type: 'purchase',
-        user: { email: 'test@mail.com', name: 'Test' },
+        name: 'Test',
       })
     })
   })
@@ -375,6 +423,16 @@ describe('Subscription Service', () => {
 
       await expect(handleFailedOneTimePayment('cs_123')).rejects.toThrow(
         'Payment intent status is not succeeded: requires_payment_method',
+      )
+    })
+
+    it('should throw ServiceError when session is not found', async () => {
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        null as any,
+      )
+
+      await expect(handleFailedOneTimePayment('cs_123')).rejects.toThrow(
+        'Failed to retrieve session',
       )
     })
   })

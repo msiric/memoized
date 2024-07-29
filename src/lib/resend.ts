@@ -1,6 +1,5 @@
 import { APP_NAME } from '@/constants'
 import { ServiceError } from '@/utils/error'
-import { User } from '@prisma/client'
 import { Resend } from 'resend'
 
 const RESEND_TOKEN = process.env.RESEND_TOKEN ?? ''
@@ -148,18 +147,18 @@ export type SendEmailArgs = {
   from?: string
   to: string
   type: 'welcome' | 'subscription' | 'purchase'
-  user: User
+  name: string
 }
 
 export async function sendEmail({
   from = 'info@memoized.io',
   to,
   type,
-  user,
+  name,
 }: SendEmailArgs) {
   const { subject, renderContent } = emailTypeToContent[type]
 
-  const html = renderContent(user.name)
+  const html = renderContent(name)
 
   try {
     await resend.emails.send({

@@ -8,7 +8,6 @@ import {
   upsertProblem,
   upsertSection,
 } from '@/services/lesson'
-import { ServiceError } from '@/utils/error'
 import { AccessOptions, ProblemDifficulty } from '@prisma/client'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -85,50 +84,58 @@ describe('Prisma Services', () => {
 
   describe('getSectionBySlug', () => {
     it('should return section by slug', async () => {
-      const mockSection = { id: '1', slug: 'section-slug' }
+      const mockSection = { id: '1' }
       ;(prisma.section.findUnique as Mock).mockResolvedValue(mockSection)
 
       const section = await getSectionBySlug('section-slug')
       expect(section).toEqual(mockSection)
       expect(prisma.section.findUnique).toHaveBeenCalledWith({
         where: { slug: 'section-slug' },
+        select: { id: true },
       })
     })
 
-    it('should throw error if section is not found', async () => {
+    it('should return null if section is not found', async () => {
       ;(prisma.section.findUnique as Mock).mockResolvedValue(null)
 
       const section = await getSectionBySlug('invalid-slug')
-      expect(section).toEqual(null)
+      expect(section).toBeNull()
 
       expect(prisma.section.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
+        select: { id: true },
       })
     })
   })
 
   describe('getLessonBySlug', () => {
     it('should return lesson by slug', async () => {
-      const mockLesson = { id: '1', slug: 'lesson-slug', problems: [] }
+      const mockLesson = {
+        id: '1',
+        slug: 'lesson-slug',
+        problems: [],
+        title: 'Lesson Title',
+        access: AccessOptions.FREE,
+      }
       ;(prisma.lesson.findUnique as Mock).mockResolvedValue(mockLesson)
 
       const lesson = await getLessonBySlug('lesson-slug')
       expect(lesson).toEqual(mockLesson)
       expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
         where: { slug: 'lesson-slug' },
-        include: { problems: true },
+        select: { id: true, problems: true, title: true, access: true },
       })
     })
 
-    it('should throw error if lesson is not found', async () => {
+    it('should return null if lesson is not found', async () => {
       ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
 
       const lesson = await getLessonBySlug('invalid-slug')
-      expect(lesson).toEqual(null)
+      expect(lesson).toBeNull()
 
       expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
-        include: { problems: true },
+        select: { id: true, problems: true, title: true, access: true },
       })
     })
   })

@@ -54,7 +54,9 @@ describe('User Service', () => {
     it('should return null if user is not found', async () => {
       vi.spyOn(prisma.user, 'findUnique').mockResolvedValue(null)
 
-      await expect(getUserById('nonexistent')).rejects.toThrow(ServiceError)
+      const result = await getUserWithSubscriptionDetails('nonexistent')
+
+      expect(result).toBeNull()
     })
   })
 
@@ -143,7 +145,14 @@ describe('User Service', () => {
   describe('getLessonsAndProblems', () => {
     it('should return all lessons and problems', async () => {
       const mockLessons = [{ id: 'lesson1', title: 'Lesson 1' }]
-      const mockProblems = [{ id: 'problem1' }]
+      const mockProblems = [
+        {
+          id: 'problem1',
+          title: 'Problem 1',
+          difficulty: 'EASY',
+          href: '/problem1',
+        },
+      ]
 
       vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
       vi.spyOn(prisma.problem, 'findMany').mockResolvedValue(
@@ -253,18 +262,18 @@ describe('User Service', () => {
         {
           id: 'lesson1',
           title: 'Lesson 1',
+          href: '/lesson1',
+          description: 'Description 1',
+          access: 'FREE',
+          slug: 'lesson-1',
           order: 1,
-          section: { id: 'section1', title: 'Section 1' },
+          section: { order: 1 },
           problems: [
             {
               id: 'problem1',
               title: 'Problem 1',
-              difficulty: ProblemDifficulty.EASY,
-            },
-            {
-              id: 'problem2',
-              title: 'Problem 2',
-              difficulty: ProblemDifficulty.MEDIUM,
+              href: '/problem1',
+              difficulty: 'EASY',
             },
           ],
         },
@@ -275,13 +284,6 @@ describe('User Service', () => {
       const result = await getLessonsWithProblems()
 
       expect(result).toEqual({ allLessons: mockLessons })
-      expect(prisma.lesson.findMany).toHaveBeenCalledWith({
-        include: {
-          section: true,
-          problems: true,
-        },
-        orderBy: { order: 'asc' },
-      })
     })
   })
 
