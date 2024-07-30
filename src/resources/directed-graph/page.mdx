@@ -1,0 +1,227 @@
+export const metadata = {
+  title: 'Comprehensive Guide to JavaScript and TypeScript Directed Graph Implementation',
+  description: 'Learn about Directed Graphs, a fundamental graph structure, and understand their implementation in JavaScript and TypeScript.',
+}
+
+# **Directed Graph in JavaScript and TypeScript**
+
+A Directed Graph, or digraph, is a graph in which edges have directions. This means that each edge has a start vertex and an end vertex, and the edges do not simply connect two vertices bidirectionally.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A Directed Graph is a set of nodes connected by edges, where the edges have a direction associated with them. This is represented as pairs (u, v) where u is the start vertex and v is the end vertex.
+
+**Common Use Cases:**
+- Representing dependencies in tasks (e.g., task scheduling).
+- Modeling network routing.
+- Representing state transitions in state machines.
+
+## **When to Use**
+- When you need to model relationships with a clear direction.
+- For applications requiring traversal algorithms such as BFS or DFS.
+- When implementing algorithms that work specifically with directed graphs, such as finding strongly connected components or detecting cycles.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Insertion: O(1) for adding vertices, O(1) for adding edges.
+- Deletion: O(V + E) for removing vertices, O(E) for removing edges.
+- Traversal (BFS/DFS): O(V + E)
+
+**Space Complexity:**
+- O(V + E) for storing vertices and edges.
+
+## **Directed Graph Implementation in JavaScript and TypeScript**
+
+<CodeGroup>
+
+```js
+class DirectedGraph {
+  constructor() {
+    this.adjacencyList = new Map()
+  }
+
+  addVertex(vertex) {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, new Set())
+    }
+  }
+
+  addEdge(vertex1, vertex2) {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1).add(vertex2)
+  }
+
+  removeEdge(vertex1, vertex2) {
+    this.adjacencyList.get(vertex1)?.delete(vertex2)
+  }
+
+  removeVertex(vertex) {
+    if (this.adjacencyList.has(vertex)) {
+      this.adjacencyList.delete(vertex)
+      for (const neighbors of this.adjacencyList.values()) {
+        neighbors.delete(vertex)
+      }
+    }
+  }
+
+  hasEdge(vertex1, vertex2) {
+    return this.adjacencyList.get(vertex1)?.has(vertex2) ?? false
+  }
+
+  getVertices() {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex) {
+    return Array.from(this.adjacencyList.get(vertex) ?? [])
+  }
+
+  bfs(startVertex) {
+    const visited = new Set()
+    const queue = [startVertex]
+    const result = []
+
+    while (queue.length > 0) {
+      const vertex = queue.shift()
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        queue.push(
+          ...this.getNeighbors(vertex).filter(
+            neighbor => !visited.has(neighbor)
+          )
+        )
+      }
+    }
+
+    return result
+  }
+
+  dfs(startVertex) {
+    const visited = new Set()
+    const stack = [startVertex]
+    const result = []
+
+    while (stack.length > 0) {
+      const vertex = stack.pop()
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        stack.push(
+          ...this.getNeighbors(vertex).filter(
+            neighbor => !visited.has(neighbor)
+          )
+        )
+      }
+    }
+
+    return result
+  }
+}
+
+export { DirectedGraph }
+```
+
+```ts
+class DirectedGraph<T> {
+  private adjacencyList: Map<T, Set<T>>
+
+  constructor() {
+    this.adjacencyList = new Map<T, Set<T>>()
+  }
+
+  addVertex(vertex: T): void {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, new Set<T>())
+    }
+  }
+
+  addEdge(vertex1: T, vertex2: T): void {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1)!.add(vertex2)
+  }
+
+  removeEdge(vertex1: T, vertex2: T): void {
+    this.adjacencyList.get(vertex1)?.delete(vertex2)
+  }
+
+  removeVertex(vertex: T): void {
+    if (this.adjacencyList.has(vertex)) {
+      this.adjacencyList.delete(vertex)
+      for (const neighbors of this.adjacencyList.values()) {
+        neighbors.delete(vertex)
+      }
+    }
+  }
+
+  hasEdge(vertex1: T, vertex2: T): boolean {
+    return this.adjacencyList.get(vertex1)?.has(vertex2) ?? false
+  }
+
+  getVertices(): T[] {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex: T): T[] {
+    return Array.from(this.adjacencyList.get(vertex) ?? [])
+  }
+
+  bfs(startVertex: T): T[] {
+    const visited = new Set<T>()
+    const queue: T[] = [startVertex]
+    const result: T[] = []
+
+    while (queue.length > 0) {
+      const vertex = queue.shift()!
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        queue.push(
+          ...this.getNeighbors(vertex).filter(
+            (neighbor) => !visited.has(neighbor),
+          ),
+        )
+      }
+    }
+
+    return result
+  }
+
+  dfs(startVertex: T): T[] {
+    const visited = new Set<T>()
+    const stack: T[] = [startVertex]
+    const result: T[] = []
+
+    while (stack.length > 0) {
+      const vertex = stack.pop()!
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        stack.push(
+          ...this.getNeighbors(vertex).filter(
+            (neighbor) => !visited.has(neighbor),
+          ),
+        )
+      }
+    }
+
+    return result
+  }
+}
+
+export { DirectedGraph }
+```
+
+</CodeGroup>

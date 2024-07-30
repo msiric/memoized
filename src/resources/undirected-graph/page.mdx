@@ -1,0 +1,233 @@
+export const metadata = {
+  title: 'Comprehensive Guide to JavaScript and TypeScript Undirected Graph Implementation',
+  description: 'Learn about Undirected Graphs, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+}
+
+# **Undirected Graph in JavaScript and TypeScript**
+
+An Undirected Graph is a data structure that consists of a set of vertices (nodes) connected by edges, where each edge connects two vertices bidirectionally. It is commonly used to represent networks and relationships.
+
+## **Concept and Use Cases**
+
+**Definition:**
+An Undirected Graph is a collection of nodes where each node is connected to other nodes via edges that have no direction.
+
+**Common Use Cases:**
+- Social networks.
+- Network topology.
+- Graph-based algorithms like finding shortest paths.
+
+## **When to Use**
+- When modeling bidirectional relationships.
+- For network topology and social networks.
+- When implementing graph-based algorithms.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Add Vertex: O(1)
+- Add Edge: O(1)
+- Remove Vertex: O(V + E) where V is the number of vertices and E is the number of edges.
+- Remove Edge: O(1)
+- Search: O(V + E)
+
+**Space Complexity:**
+- O(V + E) for storing V vertices and E edges.
+
+## **Undirected Graph Implementation in JavaScript and TypeScript**
+
+<CodeGroup>
+
+```js
+class UndirectedGraph {
+  constructor() {
+    this.adjacencyList = new Map()
+  }
+
+  addVertex(vertex) {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, new Set())
+    }
+  }
+
+  addEdge(vertex1, vertex2) {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1).add(vertex2)
+    this.adjacencyList.get(vertex2).add(vertex1)
+  }
+
+  removeEdge(vertex1, vertex2) {
+    this.adjacencyList.get(vertex1)?.delete(vertex2)
+    this.adjacencyList.get(vertex2)?.delete(vertex1)
+  }
+
+  removeVertex(vertex) {
+    if (this.adjacencyList.has(vertex)) {
+      for (const neighbor of this.adjacencyList.get(vertex)) {
+        this.adjacencyList.get(neighbor).delete(vertex)
+      }
+      this.adjacencyList.delete(vertex)
+    }
+  }
+
+  hasEdge(vertex1, vertex2) {
+    return this.adjacencyList.get(vertex1)?.has(vertex2) ?? false
+  }
+
+  getVertices() {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex) {
+    return Array.from(this.adjacencyList.get(vertex) ?? [])
+  }
+
+  bfs(startVertex) {
+    const visited = new Set()
+    const queue = [startVertex]
+    const result = []
+
+    while (queue.length > 0) {
+      const vertex = queue.shift()
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        queue.push(
+          ...this.getNeighbors(vertex).filter(
+            neighbor => !visited.has(neighbor)
+          )
+        )
+      }
+    }
+
+    return result
+  }
+
+  dfs(startVertex) {
+    const visited = new Set()
+    const stack = [startVertex]
+    const result = []
+
+    while (stack.length > 0) {
+      const vertex = stack.pop()
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        stack.push(
+          ...this.getNeighbors(vertex).filter(
+            neighbor => !visited.has(neighbor)
+          )
+        )
+      }
+    }
+
+    return result
+  }
+}
+
+export { UndirectedGraph }
+```
+
+```ts
+class UndirectedGraph<T> {
+  private adjacencyList: Map<T, Set<T>>
+
+  constructor() {
+    this.adjacencyList = new Map<T, Set<T>>()
+  }
+
+  addVertex(vertex: T): void {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, new Set<T>())
+    }
+  }
+
+  addEdge(vertex1: T, vertex2: T): void {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1)!.add(vertex2)
+    this.adjacencyList.get(vertex2)!.add(vertex1)
+  }
+
+  removeEdge(vertex1: T, vertex2: T): void {
+    this.adjacencyList.get(vertex1)?.delete(vertex2)
+    this.adjacencyList.get(vertex2)?.delete(vertex1)
+  }
+
+  removeVertex(vertex: T): void {
+    if (this.adjacencyList.has(vertex)) {
+      for (const neighbor of this.adjacencyList.get(vertex)!) {
+        this.adjacencyList.get(neighbor)!.delete(vertex)
+      }
+      this.adjacencyList.delete(vertex)
+    }
+  }
+
+  hasEdge(vertex1: T, vertex2: T): boolean {
+    return this.adjacencyList.get(vertex1)?.has(vertex2) ?? false
+  }
+
+  getVertices(): T[] {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex: T): T[] {
+    return Array.from(this.adjacencyList.get(vertex) ?? [])
+  }
+
+  bfs(startVertex: T): T[] {
+    const visited = new Set<T>()
+    const queue: T[] = [startVertex]
+    const result: T[] = []
+
+    while (queue.length > 0) {
+      const vertex = queue.shift()!
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        queue.push(
+          ...this.getNeighbors(vertex).filter(
+            (neighbor) => !visited.has(neighbor),
+          ),
+        )
+      }
+    }
+
+    return result
+  }
+
+  dfs(startVertex: T): T[] {
+    const visited = new Set<T>()
+    const stack: T[] = [startVertex]
+    const result: T[] = []
+
+    while (stack.length > 0) {
+      const vertex = stack.pop()!
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        stack.push(
+          ...this.getNeighbors(vertex).filter(
+            (neighbor) => !visited.has(neighbor),
+          ),
+        )
+      }
+    }
+
+    return result
+  }
+}
+
+export { UndirectedGraph }
+```
+
+</CodeGroup>

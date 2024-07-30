@@ -1,0 +1,167 @@
+export const metadata = {
+  title: 'Comprehensive Guide to JavaScript and TypeScript Stack Implementation',
+  description: 'Learn about Stacks, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+}
+
+# **Stack in JavaScript and TypeScript**
+
+A Stack is a linear data structure that follows the Last In First Out (LIFO) principle, where elements are added and removed from the same end. It is commonly used in various applications such as expression evaluation, backtracking algorithms, and function call management.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A Stack is a collection of elements with two principal operations: push (adding an element to the top) and pop (removing the top element).
+
+**Common Use Cases:**
+- Expression evaluation (e.g., parsing mathematical expressions).
+- Backtracking algorithms (e.g., solving mazes, puzzles).
+- Managing function calls in recursion.
+
+## **When to Use**
+- When you need a LIFO structure for your operations.
+- For applications that require backtracking.
+- When managing nested function calls in algorithms.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Push: O(1)
+- Pop: O(1)
+- Peek: O(1)
+
+**Space Complexity:**
+- O(n) for storing n elements.
+
+## **Stack Implementation in JavaScript and TypeScript**
+
+<CodeGroup>
+
+```js
+class ListNode {
+  constructor(data) {
+    this.data = data
+    this.next = null
+  }
+}
+
+class Stack {
+  constructor() {
+    this.head = null
+    this.length = 0
+  }
+
+  push(element) {
+    const newNode = new ListNode(element)
+    newNode.next = this.head
+    this.head = newNode
+    this.length++
+  }
+
+  pop() {
+    if (this.head === null) return null
+    const poppedNode = this.head
+    this.head = this.head.next
+    this.length--
+    return poppedNode.data
+  }
+
+  peek() {
+    if (this.head === null) return null
+    return this.head.data
+  }
+
+  isEmpty() {
+    return this.length === 0
+  }
+
+  size() {
+    return this.length
+  }
+
+  clear() {
+    this.head = null
+    this.length = 0
+  }
+
+  log() {
+    const elements = []
+    let currentNode = this.head
+    while (currentNode) {
+      elements.push(currentNode.data)
+      currentNode = currentNode.next
+    }
+    console.log(elements)
+  }
+}
+
+export { Stack }
+```
+
+```ts
+class ListNode<T> {
+  data: T
+  next: ListNode<T> | null
+
+  constructor(data: T) {
+    this.data = data
+    this.next = null
+  }
+}
+
+class Stack<T> {
+  private head: ListNode<T> | null
+  private length: number
+
+  constructor() {
+    this.head = null
+    this.length = 0
+  }
+
+  push(element: T): void {
+    const newNode = new ListNode(element)
+    newNode.next = this.head
+    this.head = newNode
+    this.length++
+  }
+
+  pop(): T | null {
+    if (this.head === null) return null
+    const poppedNode = this.head
+    this.head = this.head.next
+    this.length--
+    return poppedNode.data
+  }
+
+  peek(): T | null {
+    if (this.head === null) return null
+    return this.head.data
+  }
+
+  isEmpty(): boolean {
+    return this.length === 0
+  }
+
+  size(): number {
+    return this.length
+  }
+
+  clear(): void {
+    this.head = null
+    this.length = 0
+  }
+
+  log(): void {
+    const elements: T[] = []
+    let currentNode = this.head
+    while (currentNode) {
+      elements.push(currentNode.data)
+      currentNode = currentNode.next
+    }
+    console.log(elements)
+  }
+}
+
+export { Stack }
+```
+
+</CodeGroup>

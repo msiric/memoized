@@ -1,0 +1,209 @@
+export const metadata = {
+  title: 'Comprehensive Guide to JavaScript and TypeScript Cyclic Graph Implementation',
+  description: 'Learn about Cyclic Graphs, a fundamental graph structure, and understand their implementation in JavaScript and TypeScript.',
+}
+
+# **Cyclic Graph in JavaScript and TypeScript**
+
+A Cyclic Graph is a graph that contains at least one cycle, meaning there is a path that starts from a vertex and ends back at the same vertex. This structure is common in many real-world applications such as network routing, dependency resolution, and more.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A Cyclic Graph is a graph that contains one or more cycles. A cycle is a path that starts and ends at the same vertex with no other repetitions of vertices and edges.
+
+**Common Use Cases:**
+- Network routing.
+- Dependency resolution in software packages.
+- Modeling real-world systems with feedback loops.
+
+## **When to Use**
+- When representing structures with circular dependencies.
+- When needing to detect and manage cycles in graphs.
+- For applications requiring traversal and cycle detection in graphs.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Insertion: O(1) for adding vertices, O(1) for adding edges.
+- Deletion: O(V + E) for removing vertices, O(E) for removing edges.
+- Cycle Detection: O(V + E)
+
+**Space Complexity:**
+- O(V + E) for storing vertices and edges.
+
+## **Cyclic Graph Implementation in JavaScript and TypeScript**
+
+<CodeGroup>
+
+```js
+class CyclicGraph {
+  constructor() {
+    this.adjacencyList = new Map()
+  }
+
+  addVertex(vertex) {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, [])
+    }
+  }
+
+  addEdge(vertex1, vertex2) {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1).push(vertex2)
+  }
+
+  removeEdge(vertex1, vertex2) {
+    if (this.adjacencyList.has(vertex1)) {
+      this.adjacencyList.set(
+        vertex1,
+        this.adjacencyList.get(vertex1).filter(v => v !== vertex2)
+      )
+    }
+  }
+
+  removeVertex(vertex) {
+    if (this.adjacencyList.has(vertex)) {
+      this.adjacencyList.delete(vertex)
+      for (const neighbors of this.adjacencyList.values()) {
+        const index = neighbors.indexOf(vertex)
+        if (index > -1) {
+          neighbors.splice(index, 1)
+        }
+      }
+    }
+  }
+
+  getVertices() {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex) {
+    return this.adjacencyList.get(vertex) || []
+  }
+
+  hasCycle() {
+    const visited = new Set()
+    const recStack = new Set()
+
+    const dfs = vertex => {
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        recStack.add(vertex)
+
+        for (const neighbor of this.getNeighbors(vertex)) {
+          if (!visited.has(neighbor) && dfs(neighbor)) {
+            return true
+          } else if (recStack.has(neighbor)) {
+            return true
+          }
+        }
+      }
+      recStack.delete(vertex)
+      return false
+    }
+
+    for (const vertex of this.adjacencyList.keys()) {
+      if (dfs(vertex)) {
+        return true
+      }
+    }
+    return false
+  }
+}
+
+export { CyclicGraph }
+```
+
+```ts
+class CyclicGraph<T> {
+  private adjacencyList: Map<T, T[]>
+
+  constructor() {
+    this.adjacencyList = new Map<T, T[]>()
+  }
+
+  addVertex(vertex: T): void {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, [])
+    }
+  }
+
+  addEdge(vertex1: T, vertex2: T): void {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1)!.push(vertex2)
+  }
+
+  removeEdge(vertex1: T, vertex2: T): void {
+    if (this.adjacencyList.has(vertex1)) {
+      this.adjacencyList.set(
+        vertex1,
+        this.adjacencyList.get(vertex1)!.filter((v) => v !== vertex2),
+      )
+    }
+  }
+
+  removeVertex(vertex: T): void {
+    if (this.adjacencyList.has(vertex)) {
+      this.adjacencyList.delete(vertex)
+      for (const neighbors of this.adjacencyList.values()) {
+        const index = neighbors.indexOf(vertex)
+        if (index > -1) {
+          neighbors.splice(index, 1)
+        }
+      }
+    }
+  }
+
+  getVertices(): T[] {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex: T): T[] {
+    return this.adjacencyList.get(vertex) || []
+  }
+
+  hasCycle(): boolean {
+    const visited = new Set<T>()
+    const recStack = new Set<T>()
+
+    const dfs = (vertex: T): boolean => {
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        recStack.add(vertex)
+
+        for (const neighbor of this.getNeighbors(vertex)) {
+          if (!visited.has(neighbor) && dfs(neighbor)) {
+            return true
+          } else if (recStack.has(neighbor)) {
+            return true
+          }
+        }
+      }
+      recStack.delete(vertex)
+      return false
+    }
+
+    for (const vertex of this.adjacencyList.keys()) {
+      if (dfs(vertex)) {
+        return true
+      }
+    }
+    return false
+  }
+}
+
+export { CyclicGraph }
+```
+
+</CodeGroup>

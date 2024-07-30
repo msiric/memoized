@@ -1,0 +1,264 @@
+export const metadata = {
+  title: 'Comprehensive Guide to JavaScript and TypeScript Priority Queue Implementation',
+  description: 'Learn about Priority Queues, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+}
+
+# **Priority Queue in JavaScript and TypeScript**
+
+A Priority Queue is a type of queue in which each element is associated with a priority. Elements are dequeued in order of their priority, rather than their insertion order.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A Priority Queue is a data structure that allows elements to be inserted with a priority and ensures that the element with the highest priority is dequeued first.
+
+**Common Use Cases:**
+- Task scheduling in operating systems.
+- Dijkstra’s algorithm for shortest path.
+- Managing events in simulations.
+
+## **When to Use**
+- When you need to manage tasks with different priorities.
+- For algorithms that require efficient access to the highest or lowest priority element.
+- When implementing simulations or schedulers.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Insertion: O(log n)
+- Deletion (dequeue): O(log n)
+- Peek: O(1)
+
+**Space Complexity:**
+- O(n) for storing n elements.
+
+## **Priority Queue Implementation in JavaScript and TypeScript**
+
+<CodeGroup>
+
+```js
+class PriorityQueue {
+  constructor() {
+    this.heap = []
+    this.orderCounter = 0
+  }
+
+  getParentIndex(index) {
+    return Math.floor((index - 1) / 2)
+  }
+
+  getLeftChildIndex(index) {
+    return 2 * index + 1
+  }
+
+  getRightChildIndex(index) {
+    return 2 * index + 2
+  }
+
+  swap(index1, index2) {
+    ;[this.heap[index1], this.heap[index2]] = [
+      this.heap[index2],
+      this.heap[index1]
+    ]
+  }
+
+  bubbleUp(index) {
+    let currentIndex = index
+    while (currentIndex > 0) {
+      const parentIndex = this.getParentIndex(currentIndex)
+      if (
+        this.heap[currentIndex].priority < this.heap[parentIndex].priority ||
+        (this.heap[currentIndex].priority === this.heap[parentIndex].priority &&
+          this.heap[currentIndex].order < this.heap[parentIndex].order)
+      ) {
+        this.swap(currentIndex, parentIndex)
+        currentIndex = parentIndex
+      } else {
+        break
+      }
+    }
+  }
+
+  bubbleDown(index) {
+    let currentIndex = index
+    const length = this.heap.length
+    while (true) {
+      const leftChildIndex = this.getLeftChildIndex(currentIndex)
+      const rightChildIndex = this.getRightChildIndex(currentIndex)
+      let smallest = currentIndex
+
+      if (
+        leftChildIndex < length &&
+        (this.heap[leftChildIndex].priority < this.heap[smallest].priority ||
+          (this.heap[leftChildIndex].priority ===
+            this.heap[smallest].priority &&
+            this.heap[leftChildIndex].order < this.heap[smallest].order))
+      ) {
+        smallest = leftChildIndex
+      }
+
+      if (
+        rightChildIndex < length &&
+        (this.heap[rightChildIndex].priority < this.heap[smallest].priority ||
+          (this.heap[rightChildIndex].priority ===
+            this.heap[smallest].priority &&
+            this.heap[rightChildIndex].order < this.heap[smallest].order))
+      ) {
+        smallest = rightChildIndex
+      }
+
+      if (smallest !== currentIndex) {
+        this.swap(currentIndex, smallest)
+        currentIndex = smallest
+      } else {
+        break
+      }
+    }
+  }
+
+  enqueue(element, priority) {
+    const node = { element, priority, order: this.orderCounter++ }
+    this.heap.push(node)
+    this.bubbleUp(this.heap.length - 1)
+  }
+
+  dequeue() {
+    if (this.isEmpty()) return null
+    if (this.heap.length === 1) return this.heap.pop().element
+    const root = this.heap[0]
+    this.heap[0] = this.heap.pop()
+    this.bubbleDown(0)
+    return root.element
+  }
+
+  peek() {
+    return this.isEmpty() ? null : this.heap[0].element
+  }
+
+  size() {
+    return this.heap.length
+  }
+
+  isEmpty() {
+    return this.heap.length === 0
+  }
+}
+
+export { PriorityQueue }
+```
+
+```ts
+class PriorityQueue<T> {
+  private heap: { element: T; priority: number; order: number }[]
+  private orderCounter: number
+
+  constructor() {
+    this.heap = []
+    this.orderCounter = 0
+  }
+
+  private getParentIndex(index: number): number {
+    return Math.floor((index - 1) / 2)
+  }
+
+  private getLeftChildIndex(index: number): number {
+    return 2 * index + 1
+  }
+
+  private getRightChildIndex(index: number): number {
+    return 2 * index + 2
+  }
+
+  private swap(index1: number, index2: number) {
+    ;[this.heap[index1], this.heap[index2]] = [
+      this.heap[index2],
+      this.heap[index1],
+    ]
+  }
+
+  private bubbleUp(index: number) {
+    let currentIndex = index
+    while (currentIndex > 0) {
+      const parentIndex = this.getParentIndex(currentIndex)
+      if (
+        this.heap[currentIndex].priority < this.heap[parentIndex].priority ||
+        (this.heap[currentIndex].priority === this.heap[parentIndex].priority &&
+          this.heap[currentIndex].order < this.heap[parentIndex].order)
+      ) {
+        this.swap(currentIndex, parentIndex)
+        currentIndex = parentIndex
+      } else {
+        break
+      }
+    }
+  }
+
+  private bubbleDown(index: number) {
+    let currentIndex = index
+    const length = this.heap.length
+    while (true) {
+      const leftChildIndex = this.getLeftChildIndex(currentIndex)
+      const rightChildIndex = this.getRightChildIndex(currentIndex)
+      let smallest = currentIndex
+
+      if (
+        leftChildIndex < length &&
+        (this.heap[leftChildIndex].priority < this.heap[smallest].priority ||
+          (this.heap[leftChildIndex].priority ===
+            this.heap[smallest].priority &&
+            this.heap[leftChildIndex].order < this.heap[smallest].order))
+      ) {
+        smallest = leftChildIndex
+      }
+
+      if (
+        rightChildIndex < length &&
+        (this.heap[rightChildIndex].priority < this.heap[smallest].priority ||
+          (this.heap[rightChildIndex].priority ===
+            this.heap[smallest].priority &&
+            this.heap[rightChildIndex].order < this.heap[smallest].order))
+      ) {
+        smallest = rightChildIndex
+      }
+
+      if (smallest !== currentIndex) {
+        this.swap(currentIndex, smallest)
+        currentIndex = smallest
+      } else {
+        break
+      }
+    }
+  }
+
+  enqueue(element: T, priority: number) {
+    const node = { element, priority, order: this.orderCounter++ }
+    this.heap.push(node)
+    this.bubbleUp(this.heap.length - 1)
+  }
+
+  dequeue(): T | null {
+    if (this.isEmpty()) return null
+    if (this.heap.length === 1) return this.heap.pop()!.element
+    const root = this.heap[0]
+    this.heap[0] = this.heap.pop()!
+    this.bubbleDown(0)
+    return root.element
+  }
+
+  peek(): T | null {
+    return this.isEmpty() ? null : this.heap[0].element
+  }
+
+  size(): number {
+    return this.heap.length
+  }
+
+  isEmpty(): boolean {
+    return this.heap.length === 0
+  }
+}
+
+export { PriorityQueue }
+```
+
+</CodeGroup>

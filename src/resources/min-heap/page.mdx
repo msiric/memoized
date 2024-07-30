@@ -1,0 +1,295 @@
+export const metadata = {
+  title: 'Comprehensive Guide to JavaScript and TypeScript Min Heap Implementation',
+  description: 'Learn about Min Heaps, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+}
+
+# **Min Heap in JavaScript and TypeScript**
+
+A Min Heap is a complete binary tree where the value of each node is less than or equal to the values of its children. This property makes it useful for implementing priority queues where the smallest element should always be accessible.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A Min Heap is a binary tree where each parent node has a value less than or equal to the values of its children, ensuring that the smallest value is always at the root.
+
+**Common Use Cases:**
+- Implementing priority queues.
+- Sorting algorithms like Heap Sort.
+- Finding the k smallest elements in a dataset.
+
+## **When to Use**
+- When you need quick access to the smallest element.
+- For applications requiring a priority queue.
+- When implementing efficient sorting algorithms.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Insertion: O(log n)
+- Deletion: O(log n)
+- Peek: O(1)
+
+**Space Complexity:**
+- O(n) for storing n elements.
+
+## **Min Heap Implementation in JavaScript and TypeScript**
+
+<CodeGroup>
+
+```js
+class MinHeap {
+  constructor() {
+    this.heap = []
+  }
+
+  getLeftChildIndex(parentIndex) {
+    return 2 * parentIndex + 1
+  }
+
+  getRightChildIndex(parentIndex) {
+    return 2 * parentIndex + 2
+  }
+
+  getParentIndex(childIndex) {
+    return Math.floor((childIndex - 1) / 2)
+  }
+
+  hasLeftChild(index) {
+    return this.getLeftChildIndex(index) < this.heap.length
+  }
+
+  hasRightChild(index) {
+    return this.getRightChildIndex(index) < this.heap.length
+  }
+
+  hasParent(index) {
+    return this.getParentIndex(index) >= 0
+  }
+
+  leftChild(index) {
+    return this.heap[this.getLeftChildIndex(index)]
+  }
+
+  rightChild(index) {
+    return this.heap[this.getRightChildIndex(index)]
+  }
+
+  parent(index) {
+    return this.heap[this.getParentIndex(index)]
+  }
+
+  swap(indexOne, indexTwo) {
+    ;[this.heap[indexOne], this.heap[indexTwo]] = [
+      this.heap[indexTwo],
+      this.heap[indexOne]
+    ]
+  }
+
+  peek() {
+    if (this.heap.length === 0) {
+      return null
+    }
+    return this.heap[0]
+  }
+
+  extractMin() {
+    if (this.heap.length === 0) {
+      return null
+    }
+    if (this.heap.length === 1) {
+      return this.heap.pop()
+    }
+
+    const root = this.heap[0]
+    this.heap[0] = this.heap.pop()
+    this.heapifyDown()
+    return root
+  }
+
+  insert(element) {
+    this.heap.push(element)
+    this.heapifyUp()
+  }
+
+  heapifyUp() {
+    let index = this.heap.length - 1
+
+    while (this.hasParent(index) && this.parent(index) > this.heap[index]) {
+      this.swap(this.getParentIndex(index), index)
+      index = this.getParentIndex(index)
+    }
+  }
+
+  heapifyDown() {
+    let index = 0
+
+    while (this.hasLeftChild(index)) {
+      let smallerChildIndex = this.getLeftChildIndex(index)
+
+      if (
+        this.hasRightChild(index) &&
+        this.rightChild(index) < this.leftChild(index)
+      ) {
+        smallerChildIndex = this.getRightChildIndex(index)
+      }
+
+      if (this.heap[index] < this.heap[smallerChildIndex]) {
+        break
+      } else {
+        this.swap(index, smallerChildIndex)
+      }
+
+      index = smallerChildIndex
+    }
+  }
+
+  size() {
+    return this.heap.length
+  }
+
+  isEmpty() {
+    return this.heap.length === 0
+  }
+
+  clear() {
+    this.heap = []
+  }
+
+  log() {
+    console.log(this.heap)
+  }
+}
+
+export { MinHeap }
+```
+
+```ts
+class MinHeap<T> {
+  private heap: T[]
+
+  constructor() {
+    this.heap = []
+  }
+
+  private getLeftChildIndex(parentIndex: number): number {
+    return 2 * parentIndex + 1
+  }
+
+  private getRightChildIndex(parentIndex: number): number {
+    return 2 * parentIndex + 2
+  }
+
+  private getParentIndex(childIndex: number): number {
+    return Math.floor((childIndex - 1) / 2)
+  }
+
+  private hasLeftChild(index: number): boolean {
+    return this.getLeftChildIndex(index) < this.heap.length
+  }
+
+  private hasRightChild(index: number): boolean {
+    return this.getRightChildIndex(index) < this.heap.length
+  }
+
+  private hasParent(index: number): boolean {
+    return this.getParentIndex(index) >= 0
+  }
+
+  private leftChild(index: number): T {
+    return this.heap[this.getLeftChildIndex(index)]
+  }
+
+  private rightChild(index: number): T {
+    return this.heap[this.getRightChildIndex(index)]
+  }
+
+  private parent(index: number): T {
+    return this.heap[this.getParentIndex(index)]
+  }
+
+  private swap(indexOne: number, indexTwo: number): void {
+    ;[this.heap[indexOne], this.heap[indexTwo]] = [
+      this.heap[indexTwo],
+      this.heap[indexOne],
+    ]
+  }
+
+  public peek(): T | null {
+    if (this.heap.length === 0) {
+      return null
+    }
+    return this.heap[0]
+  }
+
+  public extractMin(): T | null {
+    if (this.heap.length === 0) {
+      return null
+    }
+    if (this.heap.length === 1) {
+      return this.heap.pop()!
+    }
+
+    const root = this.heap[0]
+    this.heap[0] = this.heap.pop()!
+    this.heapifyDown()
+    return root
+  }
+
+  public insert(element: T): void {
+    this.heap.push(element)
+    this.heapifyUp()
+  }
+
+  private heapifyUp(): void {
+    let index = this.heap.length - 1
+
+    while (this.hasParent(index) && this.parent(index) > this.heap[index]) {
+      this.swap(this.getParentIndex(index), index)
+      index = this.getParentIndex(index)
+    }
+  }
+
+  private heapifyDown(): void {
+    let index = 0
+
+    while (this.hasLeftChild(index)) {
+      let smallerChildIndex = this.getLeftChildIndex(index)
+
+      if (
+        this.hasRightChild(index) &&
+        this.rightChild(index) < this.leftChild(index)
+      ) {
+        smallerChildIndex = this.getRightChildIndex(index)
+      }
+
+      if (this.heap[index] < this.heap[smallerChildIndex]) {
+        break
+      } else {
+        this.swap(index, smallerChildIndex)
+      }
+
+      index = smallerChildIndex
+    }
+  }
+
+  public size(): number {
+    return this.heap.length
+  }
+
+  public isEmpty(): boolean {
+    return this.heap.length === 0
+  }
+
+  public clear(): void {
+    this.heap = []
+  }
+
+  public log(): void {
+    console.log(this.heap)
+  }
+}
+
+export { MinHeap }
+```
+
+</CodeGroup>

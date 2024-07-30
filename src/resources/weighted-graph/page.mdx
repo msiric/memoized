@@ -1,0 +1,153 @@
+export const metadata = {
+  title: 'Comprehensive Guide to JavaScript and TypeScript Weighted Graph Implementation',
+  description: 'Learn about Weighted Graphs, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+}
+
+# **Weighted Graph in JavaScript and TypeScript**
+
+A Weighted Graph is a type of graph in which each edge has an associated numerical value, called a weight. This data structure is essential for applications where different paths have different costs or lengths.
+
+## **Concept and Use Cases**
+
+**Definition:**
+A Weighted Graph is a collection of vertices connected by edges, each of which has a numerical weight.
+
+**Common Use Cases:**
+- Finding the shortest path in navigation systems.
+- Network routing algorithms.
+- Optimizing resource allocation.
+
+## **When to Use**
+- When you need to model relationships with different weights or costs.
+- For applications like navigation, network routing, and resource optimization.
+- When implementing algorithms like Dijkstra's or Prim's for shortest paths or minimum spanning trees.
+
+## **Time and Space Complexity**
+
+**Time Complexity:**
+- Add Vertex: O(1)
+- Add Edge: O(1)
+- Remove Vertex: O(V + E) where V is the number of vertices and E is the number of edges.
+- Remove Edge: O(1)
+- Search: O(V + E)
+
+**Space Complexity:**
+- O(V + E) for storing V vertices and E edges with weights.
+
+## **Weighted Graph Implementation in JavaScript and TypeScript**
+
+<CodeGroup>
+
+```js
+class WeightedGraph {
+  constructor() {
+    this.adjacencyList = new Map()
+  }
+
+  addVertex(vertex) {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, new Map())
+    }
+  }
+
+  addEdge(vertex1, vertex2, weight) {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1).set(vertex2, weight)
+    this.adjacencyList.get(vertex2).set(vertex1, weight) // For undirected graph
+  }
+
+  removeEdge(vertex1, vertex2) {
+    this.adjacencyList.get(vertex1)?.delete(vertex2)
+    this.adjacencyList.get(vertex2)?.delete(vertex1)
+  }
+
+  removeVertex(vertex) {
+    if (this.adjacencyList.has(vertex)) {
+      this.adjacencyList.delete(vertex)
+      for (const neighbors of this.adjacencyList.values()) {
+        neighbors.delete(vertex)
+      }
+    }
+  }
+
+  getVertices() {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex) {
+    return Array.from(
+      this.adjacencyList.get(vertex) ?? []
+    ).map(([neighbor, weight]) => [neighbor, weight])
+  }
+
+  getEdgeWeight(vertex1, vertex2) {
+    return this.adjacencyList.get(vertex1)?.get(vertex2)
+  }
+}
+
+export { WeightedGraph }
+```
+
+```ts
+class WeightedGraph<T> {
+  private adjacencyList: Map<T, Map<T, number>>
+
+  constructor() {
+    this.adjacencyList = new Map<T, Map<T, number>>()
+  }
+
+  addVertex(vertex: T): void {
+    if (!this.adjacencyList.has(vertex)) {
+      this.adjacencyList.set(vertex, new Map<T, number>())
+    }
+  }
+
+  addEdge(vertex1: T, vertex2: T, weight: number): void {
+    if (!this.adjacencyList.has(vertex1)) {
+      this.addVertex(vertex1)
+    }
+    if (!this.adjacencyList.has(vertex2)) {
+      this.addVertex(vertex2)
+    }
+    this.adjacencyList.get(vertex1)!.set(vertex2, weight)
+    this.adjacencyList.get(vertex2)!.set(vertex1, weight) // For undirected graph
+  }
+
+  removeEdge(vertex1: T, vertex2: T): void {
+    this.adjacencyList.get(vertex1)?.delete(vertex2)
+    this.adjacencyList.get(vertex2)?.delete(vertex1)
+  }
+
+  removeVertex(vertex: T): void {
+    if (this.adjacencyList.has(vertex)) {
+      this.adjacencyList.delete(vertex)
+      for (const neighbors of this.adjacencyList.values()) {
+        neighbors.delete(vertex)
+      }
+    }
+  }
+
+  getVertices(): T[] {
+    return Array.from(this.adjacencyList.keys())
+  }
+
+  getNeighbors(vertex: T): [T, number][] {
+    return Array.from(this.adjacencyList.get(vertex) ?? []).map(
+      ([neighbor, weight]) => [neighbor, weight],
+    )
+  }
+
+  getEdgeWeight(vertex1: T, vertex2: T): number | undefined {
+    return this.adjacencyList.get(vertex1)?.get(vertex2)
+  }
+}
+
+export { WeightedGraph }
+```
+
+</CodeGroup>
