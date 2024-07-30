@@ -1,6 +1,9 @@
 import prisma from '@/lib/prisma'
 import {
   getLessonBySlug,
+  getLessonsAndProblems,
+  getLessonsAndProblemsCounts,
+  getLessonsWithProblems,
   getSectionBySlug,
   markLessonProgress,
   upsertCourse,
@@ -26,13 +29,17 @@ vi.mock('@/lib/prisma', () => {
       },
       lesson: {
         findUnique: vi.fn(),
+        findMany: vi.fn(),
         upsert: vi.fn(),
+        count: vi.fn(),
       },
       course: {
         upsert: vi.fn(),
       },
       problem: {
         upsert: vi.fn(),
+        findMany: vi.fn(),
+        count: vi.fn(),
       },
     },
   }
@@ -284,6 +291,126 @@ describe('Prisma Services', () => {
           difficulty: ProblemDifficulty.MEDIUM,
         },
       })
+    })
+  })
+
+  describe('getLessonsAndProblems', () => {
+    it('should return all lessons and problems', async () => {
+      const mockLessons = [
+        {
+          id: 'lesson1',
+          title: 'Lesson 1',
+          href: '/lesson1',
+          description: 'Description 1',
+          access: AccessOptions.FREE,
+          order: 1,
+          slug: 'lesson-1',
+          section: {
+            id: 'section1',
+            title: 'Section 1',
+            href: '/section1',
+            body: 'Section body',
+            order: 1,
+            slug: 'section-1',
+            description: 'Section description',
+            course: {
+              id: 'course1',
+              title: 'Course 1',
+              description: 'Course description',
+              slug: 'course-1',
+              order: 1,
+              href: '/course1',
+            },
+          },
+        },
+      ]
+      const mockProblems = [
+        {
+          id: 'problem1',
+          title: 'Problem 1',
+          difficulty: ProblemDifficulty.EASY,
+          href: '/problem1',
+        },
+      ]
+
+      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
+      vi.spyOn(prisma.problem, 'findMany').mockResolvedValue(
+        mockProblems as any,
+      )
+
+      const result = await getLessonsAndProblems()
+
+      expect(result).toEqual({
+        allLessons: mockLessons,
+        allProblems: mockProblems,
+      })
+      expect(prisma.lesson.findMany).toHaveBeenCalledWith({
+        select: expect.objectContaining({
+          section: expect.objectContaining({
+            select: expect.objectContaining({
+              course: expect.any(Object),
+            }),
+          }),
+        }),
+        orderBy: { order: 'asc' },
+      })
+      expect(prisma.problem.findMany).toHaveBeenCalledWith({
+        select: { id: true, title: true, difficulty: true, href: true },
+      })
+    })
+  })
+
+  describe('getLessonsWithProblems', () => {
+    it('should return all lessons with their problems', async () => {
+      const mockLessons = [
+        {
+          id: 'lesson1',
+          title: 'Lesson 1',
+          href: '/lesson1',
+          description: 'Description 1',
+          access: AccessOptions.FREE,
+          slug: 'lesson-1',
+          order: 1,
+          section: { order: 1 },
+          problems: [
+            {
+              id: 'problem1',
+              title: 'Problem 1',
+              href: '/problem1',
+              difficulty: ProblemDifficulty.EASY,
+            },
+          ],
+        },
+      ]
+
+      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
+
+      const result = await getLessonsWithProblems()
+
+      expect(result).toEqual({ allLessons: mockLessons })
+      expect(prisma.lesson.findMany).toHaveBeenCalledWith({
+        select: expect.objectContaining({
+          section: expect.objectContaining({
+            select: expect.objectContaining({
+              order: true,
+            }),
+          }),
+        }),
+        orderBy: { order: 'asc' },
+      })
+    })
+  })
+
+  describe('getLessonsAndProblemsCounts', () => {
+    it('should return lesson and problem counts', async () => {
+      vi.spyOn(prisma.lesson, 'count').mockResolvedValue(10)
+      vi.spyOn(prisma.problem, 'count').mockResolvedValue(50)
+
+      const result = await getLessonsAndProblemsCounts()
+
+      expect(result).toEqual({ lessonCount: 10, problemCount: 50 })
+      expect(prisma.lesson.count).toHaveBeenCalled()
+      expect(prisma.problem.count).toHaveBeenCalled()
     })
   })
 })

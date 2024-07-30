@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { AccessOptions, ProblemDifficulty } from '@prisma/client'
 
 export type MarkLessonArgs = {
   userId: string
@@ -56,8 +57,6 @@ export const getLessonBySlug = async (lessonSlug: string) => {
 
   return lesson
 }
-
-import { AccessOptions, ProblemDifficulty } from '@prisma/client'
 
 export const upsertCourse = async (
   courseSlug: string,
@@ -168,4 +167,83 @@ export const upsertProblem = async (
       difficulty: problemDifficulty,
     },
   })
+}
+
+export const getLessonsAndProblems = async () => {
+  const [allLessons, allProblems] = await Promise.all([
+    prisma.lesson.findMany({
+      select: {
+        id: true,
+        title: true,
+        href: true,
+        description: true,
+        access: true,
+        order: true,
+        slug: true,
+        section: {
+          select: {
+            id: true,
+            title: true,
+            href: true,
+            body: true,
+            order: true,
+            slug: true,
+            description: true,
+            course: {
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                slug: true,
+                order: true,
+                href: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { order: 'asc' },
+    }),
+    prisma.problem.findMany({
+      select: { id: true, title: true, difficulty: true, href: true },
+    }),
+  ])
+  return { allLessons, allProblems }
+}
+
+export const getLessonsAndProblemsCounts = async () => {
+  const [lessonCount, problemCount] = await Promise.all([
+    prisma.lesson.count(),
+    prisma.problem.count(),
+  ])
+  return { lessonCount, problemCount }
+}
+
+export const getLessonsWithProblems = async () => {
+  const allLessons = await prisma.lesson.findMany({
+    select: {
+      id: true,
+      title: true,
+      href: true,
+      description: true,
+      access: true,
+      slug: true,
+      order: true,
+      section: {
+        select: {
+          order: true,
+        },
+      },
+      problems: {
+        select: {
+          id: true,
+          title: true,
+          href: true,
+          difficulty: true,
+        },
+      },
+    },
+    orderBy: { order: 'asc' },
+  })
+  return { allLessons }
 }

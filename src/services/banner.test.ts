@@ -64,7 +64,7 @@ describe('getActiveBanners', () => {
       },
     ]
 
-    vi.mocked(prisma.banner.findMany).mockResolvedValue(mockBanners)
+    vi.mocked(prisma.banner.findMany).mockResolvedValue(mockBanners as Banner[])
 
     const activeBanners = await getActiveBanners()
 
@@ -108,7 +108,7 @@ describe('getActiveBanners', () => {
       },
     ]
 
-    vi.mocked(prisma.banner.findMany).mockResolvedValue(mockBanners)
+    vi.mocked(prisma.banner.findMany).mockResolvedValue(mockBanners as Banner[])
 
     const activeBanners = await getActiveBanners()
 
@@ -121,7 +121,7 @@ describe('getActiveBanners', () => {
 
 describe('upsertBanner', () => {
   it('should create a new banner when id is not provided', async () => {
-    const newBanner: Banner = {
+    const newBanner = {
       id: 'new-id',
       title: 'New Banner',
       message: 'New Content',
@@ -134,7 +134,7 @@ describe('upsertBanner', () => {
       priority: 1,
     }
 
-    vi.mocked(prisma.banner.upsert).mockResolvedValue(newBanner)
+    vi.mocked(prisma.banner.upsert).mockResolvedValue(newBanner as Banner)
 
     const result = await upsertBanner({
       title: 'New Banner',
@@ -157,7 +157,7 @@ describe('upsertBanner', () => {
   })
 
   it('should update an existing banner when id is provided', async () => {
-    const existingBanner: Banner = {
+    const existingBanner = {
       id: 'existing-id',
       title: 'Existing Banner',
       message: 'Updated Content',
@@ -170,7 +170,7 @@ describe('upsertBanner', () => {
       priority: 2,
     }
 
-    vi.mocked(prisma.banner.upsert).mockResolvedValue(existingBanner)
+    vi.mocked(prisma.banner.upsert).mockResolvedValue(existingBanner as Banner)
 
     const result = await upsertBanner({
       id: 'existing-id',

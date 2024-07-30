@@ -8,7 +8,12 @@ import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useAccess } from '@/hooks/useAccess'
 import { useNavigationLinks } from '@/hooks/useNavigationLinks'
-import { NavigationContent, NavigationLink, NavigationSection } from '@/types'
+import {
+  CompletedKey,
+  NavigationContent,
+  NavigationLink,
+  NavigationSection,
+} from '@/types'
 import { CustomError, handleError } from '@/utils/error'
 import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
@@ -43,14 +48,15 @@ function SectionLink({
   href: string
   active?: boolean
   links?: NavigationLink[]
-  completedKey?: 'completedLessons' | 'completedProblems'
+  completedKey?: CompletedKey
   children: React.ReactNode
 }) {
   const pathname = usePathname()
 
   const completedItems = useContentStore((state) => state[completedKey])
 
-  const isCompleted = links.every((link) => completedItems.has(link.id))
+  const isCompleted =
+    links.length && links.every((link) => completedItems.has(link.id))
 
   const sectionRef = useRef<HTMLAnchorElement | null>(null)
 
@@ -191,7 +197,7 @@ function NavLink({
   access?: AccessOptions
   active?: boolean
   isAnchorLink?: boolean
-  completedKey?: 'completedLessons' | 'completedProblems'
+  completedKey?: CompletedKey
 }) {
   const pathname = usePathname()
 
@@ -280,7 +286,8 @@ function VisibleSectionHighlight({
     ? Math.max(1, visibleSections.length) * itemHeight
     : itemHeight
   const top =
-    section.links.findIndex((link) => link.href === pathname) * itemHeight +
+    (section.links?.findIndex((link) => link.href === pathname) ?? -1) *
+      itemHeight +
     firstVisibleSectionIndex * itemHeight
 
   return (
@@ -304,9 +311,8 @@ function ActivePageMarker({
 }) {
   const itemHeight = remToPx(2)
   const offset = remToPx(0.25)
-  const activePageIndex = section.links.findIndex(
-    (link) => link.href === pathname,
-  )
+  const activePageIndex =
+    section.links?.findIndex((link) => link.href === pathname) ?? -1
   const top = offset + activePageIndex * itemHeight
 
   return (
@@ -337,10 +343,17 @@ function NavigationGroup({
     isInsideMobileNavigation,
   )
 
-  const isActiveGroup = section.links.some((link) => link.href === pathname)
+  const isActiveGroup = section.links?.some((link) => link.href === pathname)
 
   return (
-    <li className={clsx('relative mt-6', className)}>
+    <li
+      className={clsx(
+        section.links?.length || section.order === 0
+          ? 'relative mt-6'
+          : 'relative mt-4',
+        className,
+      )}
+    >
       <SectionLink
         href={section.href}
         active={section.href === pathname}
@@ -367,7 +380,7 @@ function NavigationGroup({
           )}
         </AnimatePresence>
         <ul role="list" className="border-l border-transparent">
-          {section.links.map((link) => (
+          {section.links?.map((link) => (
             <motion.li key={link.href} layout="position" className="relative">
               <NavLink
                 id={link.id}

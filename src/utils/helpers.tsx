@@ -4,6 +4,7 @@ import {
   ActiveCoupon,
   Curriculum,
   EnrichedLesson,
+  EnrichedResource,
   EnrichedUser,
   LessonWithProblems,
   NavigationContent,
@@ -14,6 +15,7 @@ import {
 import {
   AccessOptions,
   ProblemDifficulty,
+  Resource,
   Subscription,
   SubscriptionPlan,
   SubscriptionStatus,
@@ -305,6 +307,12 @@ export const sortProblemList = (
     }))
 }
 
+export const sortResources = (
+  resources?: EnrichedResource[],
+): EnrichedResource[] | undefined => {
+  return resources?.slice().sort((a, b) => a.order - b.order)
+}
+
 export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
   return allLessons.reduce<Curriculum[]>((acc, lesson) => {
     const {
@@ -375,16 +383,20 @@ export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
 
 export const calculateProgress = <T, S>(
   user: EnrichedUser,
-  allLessons: T[],
-  allProblems: S[],
+  allLessons: T[] | number,
+  allProblems: S[] | number,
 ) => {
+  const lessonCount = Array.isArray(allLessons) ? allLessons.length : allLessons
+  const problemCount = Array.isArray(allProblems)
+    ? allProblems.length
+    : allProblems
   const completedLessons = user?.lessonProgress.length
   const currentLessonProgress =
-    allLessons.length > 0 ? (completedLessons / allLessons.length) * 100 : 0
+    lessonCount > 0 ? (completedLessons / lessonCount) * 100 : 0
 
   const completedProblems = user?.problemProgress.length
   const currentProblemProgress =
-    allProblems.length > 0 ? (completedProblems / allProblems.length) * 100 : 0
+    problemCount > 0 ? (completedProblems / problemCount) * 100 : 0
 
   return { currentLessonProgress, currentProblemProgress }
 }
@@ -448,6 +460,28 @@ export const problemListToNavigation = (
         order: index + 1,
       })),
       access: lesson.access,
+    })),
+  }
+}
+
+export const resourcesToNavigation = (
+  resources?: Resource[],
+): NavigationContent | undefined => {
+  if (!resources) return undefined
+
+  return {
+    id: 'prep-resources',
+    slug: 'prep-resources',
+    title: 'Resources Navigation',
+    description: 'Navigation structure for resources',
+    order: 0,
+    sections: resources.map((resource) => ({
+      id: resource.id,
+      slug: resource.slug,
+      title: resource.title,
+      href: resource.href,
+      description: resource.description,
+      order: resource.order,
     })),
   }
 }

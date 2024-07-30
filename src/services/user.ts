@@ -7,7 +7,14 @@ import {
   checkSubscriptionStatus,
   sortCurriculum,
   sortProblemList,
+  sortResources,
 } from '@/utils/helpers'
+import {
+  getLessonsAndProblems,
+  getLessonsAndProblemsCounts,
+  getLessonsWithProblems,
+} from './lesson'
+import { getResources } from './resource'
 
 export const getUserById = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -87,77 +94,6 @@ export const getUserWithSubscriptionDetails = async (userId: string) => {
   }
 }
 
-export const getLessonsAndProblems = async () => {
-  const [allLessons, allProblems] = await Promise.all([
-    prisma.lesson.findMany({
-      select: {
-        id: true,
-        title: true,
-        href: true,
-        description: true,
-        access: true,
-        order: true,
-        slug: true,
-        section: {
-          select: {
-            id: true,
-            title: true,
-            href: true,
-            body: true,
-            order: true,
-            slug: true,
-            description: true,
-            course: {
-              select: {
-                id: true,
-                title: true,
-                description: true,
-                slug: true,
-                order: true,
-                href: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: { order: 'asc' },
-    }),
-    prisma.problem.findMany({
-      select: { id: true, title: true, difficulty: true, href: true },
-    }),
-  ])
-  return { allLessons, allProblems }
-}
-
-export const getLessonsWithProblems = async () => {
-  const allLessons = await prisma.lesson.findMany({
-    select: {
-      id: true,
-      title: true,
-      href: true,
-      description: true,
-      access: true,
-      slug: true,
-      order: true,
-      section: {
-        select: {
-          order: true,
-        },
-      },
-      problems: {
-        select: {
-          id: true,
-          title: true,
-          href: true,
-          difficulty: true,
-        },
-      },
-    },
-    orderBy: { order: 'asc' },
-  })
-  return { allLessons }
-}
-
 export const getUserProgressWithCurriculum = async (userId?: string) => {
   const user = userId ? await getUserWithSubscriptionDetails(userId) : null
   const { allLessons, allProblems } = await getLessonsAndProblems()
@@ -190,6 +126,29 @@ export const getUserProgressWithCurriculum = async (userId?: string) => {
     curriculum: sortedContent,
     lessons,
     problems,
+  }
+}
+
+export const getUserProgressWithResources = async (userId?: string) => {
+  const user = userId ? await getUserWithSubscriptionDetails(userId) : null
+  const [{ allResources }, { lessonCount, problemCount }] = await Promise.all([
+    getResources(),
+    getLessonsAndProblemsCounts(),
+  ])
+
+  const sortedContent = sortResources(allResources)
+
+  const progress = user
+    ? calculateProgress(user, lessonCount, problemCount)
+    : null
+
+  const enrichedUser = (
+    user ? { ...user, ...progress } : null
+  ) as UserWithSubscriptionsAndProgress
+
+  return {
+    user: enrichedUser,
+    resources: sortedContent,
   }
 }
 

@@ -78,17 +78,16 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
         <div className="flex items-center gap-5">
           <nav className="hidden md:block">
             <ul role="list" className="flex items-center gap-8">
-              <li>
-                {navigationLinks.map((link) => (
+              {navigationLinks.map((link) => (
+                <li key={link.href}>
                   <Link
-                    key={link.href}
                     href={link.href}
                     className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                   >
                     {link.title}
                   </Link>
-                ))}
-              </li>
+                </li>
+              ))}
               <PremiumButton />
             </ul>
           </nav>

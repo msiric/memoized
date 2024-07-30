@@ -59,7 +59,7 @@ export type NavigationSection = {
   href: string
   description: string | null
   order: number
-  links: NavigationLink[]
+  links?: NavigationLink[]
   access?: AccessOptions
 }
 
@@ -169,6 +169,18 @@ export type EnrichedUser = Prisma.UserGetPayload<{
   }
 }>
 
+export type EnrichedResource = Prisma.ResourceGetPayload<{
+  select: {
+    id: true
+    title: true
+    href: true
+    description: true
+    order: true
+    slug: true
+  }
+  orderBy: { order: 'asc' }
+}>
+
 export type LessonWithProblems = Prisma.LessonGetPayload<{
   select: {
     id: true
@@ -214,3 +226,5 @@ export type ProductWithCoupon = Stripe.Product & {
     appliedCoupon?: ActiveCoupon | null
   }
 }
+
+export type CompletedKey = 'completedLessons' | 'completedProblems'

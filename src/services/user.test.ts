@@ -1,14 +1,13 @@
 import prisma from '@/lib/prisma'
 import {
-  getLessonsAndProblems,
-  getLessonsWithProblems,
   getUserById,
   getUserProgressWithCurriculum,
   getUserProgressWithProblems,
+  getUserProgressWithResources,
   getUserWithSubscriptionDetails,
   getUserWithSubscriptions,
 } from '@/services/user'
-import { LessonWithProblems } from '@/types'
+import { EnrichedResource, LessonWithProblems } from '@/types'
 import { ServiceError } from '@/utils/error'
 import {
   buildCurriculum,
@@ -16,6 +15,7 @@ import {
   checkSubscriptionStatus,
   sortCurriculum,
   sortProblemList,
+  sortResources,
 } from '@/utils/helpers'
 import {
   ProblemDifficulty,
@@ -51,12 +51,10 @@ describe('User Service', () => {
       expect(result).toEqual(mockUser)
     })
 
-    it('should return null if user is not found', async () => {
+    it('should throw ServiceError when user is not found', async () => {
       vi.spyOn(prisma.user, 'findUnique').mockResolvedValue(null)
 
-      const result = await getUserWithSubscriptionDetails('nonexistent')
-
-      expect(result).toBeNull()
+      await expect(getUserById('nonexistent')).rejects.toThrow(ServiceError)
     })
   })
 
@@ -142,34 +140,8 @@ describe('User Service', () => {
     })
   })
 
-  describe('getLessonsAndProblems', () => {
-    it('should return all lessons and problems', async () => {
-      const mockLessons = [{ id: 'lesson1', title: 'Lesson 1' }]
-      const mockProblems = [
-        {
-          id: 'problem1',
-          title: 'Problem 1',
-          difficulty: 'EASY',
-          href: '/problem1',
-        },
-      ]
-
-      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
-      vi.spyOn(prisma.problem, 'findMany').mockResolvedValue(
-        mockProblems as any,
-      )
-
-      const result = await getLessonsAndProblems()
-
-      expect(result).toEqual({
-        allLessons: mockLessons,
-        allProblems: mockProblems,
-      })
-    })
-  })
-
   describe('getUserProgressWithCurriculum', () => {
-    it('should return user progress with curriculum', async () => {
+    it('should return user progress with curriculum when userId is provided', async () => {
       const mockUser = {
         id: 'user1',
         name: 'Test User',
@@ -241,9 +213,25 @@ describe('User Service', () => {
       expect(result.user?.currentProblemProgress).toBe(100)
     })
 
-    it('should return null user if userId is not provided', async () => {
-      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue([])
-      vi.spyOn(prisma.problem, 'findMany').mockResolvedValue([])
+    it('should return null user and curriculum data when userId is not provided', async () => {
+      const mockLessons = [
+        {
+          id: 'lesson1',
+          slug: 'lesson-1',
+          title: 'Lesson 1',
+          order: 1,
+          description: 'Description',
+          access: 'free',
+          href: '/lesson-1',
+        },
+      ]
+
+      const mockProblems = [{ id: 'problem1' }]
+
+      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
+      vi.spyOn(prisma.problem, 'findMany').mockResolvedValue(
+        mockProblems as any,
+      )
       vi.mocked(buildCurriculum).mockReturnValue([])
       vi.mocked(sortCurriculum).mockReturnValue([])
 
@@ -253,37 +241,6 @@ describe('User Service', () => {
       expect(result).toHaveProperty('curriculum')
       expect(result).toHaveProperty('lessons')
       expect(result).toHaveProperty('problems')
-    })
-  })
-
-  describe('getLessonsWithProblems', () => {
-    it('should return all lessons with their problems', async () => {
-      const mockLessons = [
-        {
-          id: 'lesson1',
-          title: 'Lesson 1',
-          href: '/lesson1',
-          description: 'Description 1',
-          access: 'FREE',
-          slug: 'lesson-1',
-          order: 1,
-          section: { order: 1 },
-          problems: [
-            {
-              id: 'problem1',
-              title: 'Problem 1',
-              href: '/problem1',
-              difficulty: 'EASY',
-            },
-          ],
-        },
-      ]
-
-      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
-
-      const result = await getLessonsWithProblems()
-
-      expect(result).toEqual({ allLessons: mockLessons })
     })
   })
 
@@ -389,6 +346,74 @@ describe('User Service', () => {
       expect(result.problemList).toHaveLength(1)
       expect(result.lessons).toHaveLength(1)
       expect(result.problems).toHaveLength(1)
+    })
+  })
+
+  describe('getUserProgressWithResources', () => {
+    it('should return user progress with resources when userId is provided', async () => {
+      const mockUser = {
+        id: 'user1',
+        name: 'Test User',
+        customer: {
+          subscriptions: [
+            {
+              id: 'sub1',
+              plan: SubscriptionPlan.LIFETIME,
+              startDate: new Date(),
+              endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            },
+          ],
+        },
+        lessonProgress: [{ lessonId: 'lesson1', completed: true }],
+        problemProgress: [{ problemId: 'problem1', completed: true }],
+      }
+
+      const mockResources = [
+        { id: 'resource1', title: 'Resource 1', href: '/resource-1' },
+        { id: 'resource2', title: 'Resource 2', href: '/resource-2' },
+      ]
+
+      vi.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser as any)
+      vi.spyOn(prisma.resource, 'findMany').mockResolvedValue(
+        mockResources as any,
+      )
+      vi.mocked(checkSubscriptionStatus).mockReturnValue(
+        SubscriptionStatus.ACTIVE,
+      )
+      vi.mocked(sortResources).mockReturnValue(
+        mockResources as EnrichedResource[],
+      )
+      vi.mocked(calculateProgress).mockReturnValue({
+        currentLessonProgress: 100,
+        currentProblemProgress: 100,
+      })
+
+      const result = await getUserProgressWithResources('user1')
+
+      expect(result).toHaveProperty('user')
+      expect(result).toHaveProperty('resources')
+      expect(result.user?.currentLessonProgress).toBe(100)
+      expect(result.user?.currentProblemProgress).toBe(100)
+      expect(result.resources).toHaveLength(2)
+    })
+
+    it('should return null user and resources when userId is not provided', async () => {
+      const mockResources = [
+        { id: 'resource1', title: 'Resource 1', href: '/resource-1' },
+      ]
+
+      vi.spyOn(prisma.resource, 'findMany').mockResolvedValue(
+        mockResources as any,
+      )
+      vi.mocked(sortResources).mockReturnValue(
+        mockResources as EnrichedResource[],
+      )
+
+      const result = await getUserProgressWithResources()
+
+      expect(result.user).toBeNull()
+      expect(result).toHaveProperty('resources')
+      expect(result.resources).toHaveLength(1)
     })
   })
 })

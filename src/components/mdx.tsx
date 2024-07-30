@@ -44,7 +44,24 @@ const CustomLink = ({ href, children, ...rest }: CustomLinkProps) => {
   )
 }
 
+const _ResourceLink = ({ href, children, ...rest }: CustomLinkProps) => {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="m-0 inline-flex items-center gap-1"
+      {...rest}
+    >
+      {children}
+      <FaExternalLinkAlt size="12" />
+    </a>
+  )
+}
+
 export const a = CustomLink
+
+export const ResourceLink = _ResourceLink
 
 export type WrapperProps = {
   lessonId: string

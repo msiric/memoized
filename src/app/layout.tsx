@@ -41,6 +41,11 @@ export default async function RootLayout({
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="theme-color" content="#ffffff" />
+        <script
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id="8573b390-8d88-4b52-b4b1-63ff2a5df61d"
+        ></script>
       </head>
       <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
         <NextTopLoader color="#84cc16" showSpinner={false} />
