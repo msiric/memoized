@@ -494,6 +494,7 @@ export const resourcesToNavigation = (
         href: resource.href,
         description: null,
         order: resource.order,
+        access: resource.access,
       })),
       access: lesson.access,
     })),
