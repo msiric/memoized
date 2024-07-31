@@ -1,9 +1,10 @@
 import prisma from '@/lib/prisma'
+import { AccessOptions } from '@prisma/client'
 
 export const getResourceBySlug = async (resourceSlug: string) => {
   const resource = await prisma.resource.findUnique({
     where: { slug: resourceSlug },
-    select: { id: true, title: true },
+    select: { id: true, title: true, access: true },
   })
 
   if (!resource) {
@@ -20,6 +21,7 @@ export const upsertResource = async (
   resourceContent: string,
   resourceOrder: number,
   resourceHref: string,
+  lessonAccess: AccessOptions,
   lessonId: string,
 ) => {
   return prisma.resource.upsert({
@@ -30,6 +32,7 @@ export const upsertResource = async (
       order: resourceOrder,
       body: resourceContent,
       href: resourceHref,
+      access: lessonAccess,
       lessonId: lessonId,
     },
     create: {
@@ -39,6 +42,7 @@ export const upsertResource = async (
       slug: resourceSlug,
       body: resourceContent,
       href: resourceHref,
+      access: lessonAccess,
       lessonId: lessonId,
     },
   })
@@ -53,6 +57,7 @@ export const getResources = async () => {
       description: true,
       order: true,
       slug: true,
+      access: true,
     },
     orderBy: { order: 'asc' },
   })

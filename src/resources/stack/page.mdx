@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Stack Implementation',
-  description: 'Learn about Stacks, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Stack Implementation',
+  description:
+    'Learn about Stacks, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Stack in JavaScript and TypeScript**
@@ -65,7 +67,7 @@ class Stack {
 
   pop() {
     if (this.head === null) {
-      throw new Error("Stack is empty")
+      throw new Error('Stack is empty')
     }
     const poppedNode = this.head
     this.head = this.head.next
@@ -75,7 +77,7 @@ class Stack {
 
   peek() {
     if (this.head === null) {
-      throw new Error("Stack is empty")
+      throw new Error('Stack is empty')
     }
     return this.head.data
   }
@@ -103,7 +105,6 @@ class Stack {
     console.log(elements)
   }
 
-  // Iterator for the stack
   *iterator() {
     let currentNode = this.head
     while (currentNode) {
@@ -193,7 +194,6 @@ class Stack<T> {
     console.log(elements)
   }
 
-  // Iterator for the stack
   *iterator() {
     let currentNode = this.head
     while (currentNode) {

@@ -274,6 +274,7 @@ export const getLessonsWithResourcesAndProblems = async () => {
           title: true,
           href: true,
           order: true,
+          access: true,
         },
       },
       problems: {

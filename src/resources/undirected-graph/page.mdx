@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Undirected Graph Implementation',
-  description: 'Learn about Undirected Graphs, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Undirected Graph Implementation',
+  description:
+    'Learn about Undirected Graphs, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Undirected Graph in JavaScript and TypeScript**
@@ -99,8 +101,8 @@ class UndirectedGraph {
         result.push(vertex)
         queue.push(
           ...this.getNeighbors(vertex).filter(
-            neighbor => !visited.has(neighbor)
-          )
+            (neighbor) => !visited.has(neighbor),
+          ),
         )
       }
     }
@@ -120,8 +122,8 @@ class UndirectedGraph {
         result.push(vertex)
         stack.push(
           ...this.getNeighbors(vertex).filter(
-            neighbor => !visited.has(neighbor)
-          )
+            (neighbor) => !visited.has(neighbor),
+          ),
         )
       }
     }
@@ -129,7 +131,6 @@ class UndirectedGraph {
     return result
   }
 
-  // Cycle detection
   hasCycle() {
     const visited = new Set()
 
@@ -160,7 +161,6 @@ class UndirectedGraph {
     return false
   }
 
-  // Clear the graph
   clear() {
     this.adjacencyList.clear()
   }
@@ -262,7 +262,6 @@ class UndirectedGraph<T> {
     return result
   }
 
-  // Cycle detection
   hasCycle(): boolean {
     const visited = new Set<T>()
 
@@ -293,7 +292,6 @@ class UndirectedGraph<T> {
     return false
   }
 
-  // Clear the graph
   clear(): void {
     this.adjacencyList.clear()
   }

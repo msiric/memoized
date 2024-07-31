@@ -4,6 +4,7 @@ import {
   getResources,
   upsertResource,
 } from '@/services/resource'
+import { AccessOptions } from '@prisma/client'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
 
 // Mocking the Prisma client
@@ -33,6 +34,7 @@ describe('Prisma Services', () => {
         slug: 'resource-slug',
         problems: [],
         title: 'Resource Title',
+        access: AccessOptions.FREE,
       }
       ;(prisma.resource.findUnique as Mock).mockResolvedValue(mockResource)
 
@@ -40,7 +42,7 @@ describe('Prisma Services', () => {
       expect(resource).toEqual(mockResource)
       expect(prisma.resource.findUnique).toHaveBeenCalledWith({
         where: { slug: 'resource-slug' },
-        select: { id: true, title: true },
+        select: { id: true, title: true, access: true },
       })
     })
 
@@ -52,7 +54,7 @@ describe('Prisma Services', () => {
 
       expect(prisma.resource.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
-        select: { id: true, title: true },
+        select: { id: true, title: true, access: true },
       })
     })
   })
@@ -63,6 +65,7 @@ describe('Prisma Services', () => {
         id: '1',
         slug: 'resource-slug',
         title: 'Resource Title',
+        access: AccessOptions.FREE,
       }
       ;(prisma.resource.upsert as Mock).mockResolvedValue(mockResource)
 
@@ -73,6 +76,7 @@ describe('Prisma Services', () => {
         'Resource Content',
         1,
         'resource-href',
+        AccessOptions.FREE,
         '1',
       )
       expect(resource).toEqual(mockResource)
@@ -84,6 +88,7 @@ describe('Prisma Services', () => {
           order: 1,
           body: 'Resource Content',
           href: 'resource-href',
+          access: AccessOptions.FREE,
           lessonId: '1',
         },
         create: {
@@ -93,6 +98,7 @@ describe('Prisma Services', () => {
           slug: 'resource-slug',
           body: 'Resource Content',
           href: 'resource-href',
+          access: AccessOptions.FREE,
           lessonId: '1',
         },
       })
@@ -109,6 +115,7 @@ describe('Prisma Services', () => {
           description: 'Description 1',
           order: 1,
           slug: 'resource-1',
+          access: AccessOptions.FREE,
         },
         {
           id: '2',
@@ -117,6 +124,7 @@ describe('Prisma Services', () => {
           description: 'Description 2',
           order: 2,
           slug: 'resource-2',
+          access: AccessOptions.FREE,
         },
       ]
 
@@ -135,6 +143,7 @@ describe('Prisma Services', () => {
           description: true,
           order: true,
           slug: true,
+          access: true,
         },
         orderBy: { order: 'asc' },
       })

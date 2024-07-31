@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Queue Implementation',
-  description: 'Learn about Queues, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Queue Implementation',
+  description:
+    'Learn about Queues, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Queue in JavaScript and TypeScript**
@@ -70,7 +72,7 @@ class Queue {
 
   dequeue() {
     if (this.head === null) {
-      throw new Error("Queue is empty")
+      throw new Error('Queue is empty')
     }
     const dequeuedNode = this.head
     this.head = this.head.next
@@ -83,7 +85,7 @@ class Queue {
 
   peek() {
     if (this.head === null) {
-      throw new Error("Queue is empty")
+      throw new Error('Queue is empty')
     }
     return this.head.data
   }
@@ -112,7 +114,6 @@ class Queue {
     console.log(elements)
   }
 
-  // Iterator for the queue
   *iterator() {
     let currentNode = this.head
     while (currentNode) {
@@ -212,7 +213,6 @@ class Queue<T> {
     console.log(elements)
   }
 
-  // Iterator for the queue
   *iterator() {
     let currentNode = this.head
     while (currentNode) {

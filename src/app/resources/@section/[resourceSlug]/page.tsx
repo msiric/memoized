@@ -1,5 +1,11 @@
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { PremiumCTA } from '@/components/PremiumCTA'
 import { RESOURCES_FOLDER } from '@/constants'
 import { getResourceBySlug } from '@/services/resource'
+import { getUserWithSubscriptions } from '@/services/user'
+import { UserWithSubscriptionsAndProgress } from '@/types'
+import { userHasAccess } from '@/utils/helpers'
+import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
 import { notFound } from 'next/navigation'
 // import readingTime from 'reading-time';
@@ -9,10 +15,26 @@ export default async function Lesson({
 }: {
   params: { resourceSlug: string }
 }) {
-  const resource = await getResourceBySlug(params.resourceSlug)
+  const session = await getServerSession(authOptions)
+
+  const [resource, user] = await Promise.all([
+    getResourceBySlug(params.resourceSlug),
+    session && getUserWithSubscriptions(session.userId),
+  ])
 
   if (!resource) {
     return notFound()
+  }
+
+  // const stats = readingTime(lesson.body);
+
+  const hasAccess = userHasAccess(
+    user as UserWithSubscriptionsAndProgress | null,
+    resource.access,
+  )
+
+  if (!hasAccess) {
+    return <PremiumCTA heading={resource.title} />
   }
 
   const Page = dynamic(

@@ -221,15 +221,15 @@ class BinarySearchTree<T> {
 class BinarySearchTree {
     // ... other methods ...
 
-    inOrder() {
-        this.inOrderTraverse(this.root);
+    inorder() {
+        this.inorderTraverse(this.root);
     }
 
-    inOrderTraverse(node) {
+    inorderTraverse(node) {
         if (node !== null) {
-            this.inOrderTraverse(node.left);
+            this.inorderTraverse(node.left);
             console.log(node.value);
-            this.inOrderTraverse(node.right);
+            this.inorderTraverse(node.right);
         }
     }
 }
@@ -239,15 +239,15 @@ class BinarySearchTree {
 class BinarySearchTree<T> {
     // ... other methods ...
 
-    inOrder() {
-        this.inOrderTraverse(this.root);
+    inorder() {
+        this.inorderTraverse(this.root);
     }
 
-    inOrderTraverse(node: TreeNode<T> | null) {
+    inorderTraverse(node: TreeNode<T> | null) {
         if (node !== null) {
-            this.inOrderTraverse(node.left);
+            this.inorderTraverse(node.left);
             console.log(node.value);
-            this.inOrderTraverse(node.right);
+            this.inorderTraverse(node.right);
         }
     }
 }
@@ -265,15 +265,15 @@ class BinarySearchTree<T> {
 class BinarySearchTree {
     // ... other methods ...
 
-    preOrder() {
-        this.preOrderTraverse(this.root);
+    preorder() {
+        this.preorderTraverse(this.root);
     }
 
-    preOrderTraverse(node) {
+    preorderTraverse(node) {
         if (node !== null) {
             console.log(node.value);
-            this.preOrderTraverse(node.left);
-            this.preOrderTraverse(node.right);
+            this.preorderTraverse(node.left);
+            this.preorderTraverse(node.right);
         }
     }
 }
@@ -283,15 +283,15 @@ class BinarySearchTree {
 class BinarySearchTree<T> {
     // ... other methods ...
 
-    preOrder() {
-        this.preOrderTraverse(this.root);
+    preorder() {
+        this.preorderTraverse(this.root);
     }
 
-    preOrderTraverse(node: TreeNode<T> | null) {
+    preorderTraverse(node: TreeNode<T> | null) {
         if (node !== null) {
             console.log(node.value);
-            this.preOrderTraverse(node.left);
-            this.preOrderTraverse(node.right);
+            this.preorderTraverse(node.left);
+            this.preorderTraverse(node.right);
         }
     }
 }
@@ -309,14 +309,14 @@ class BinarySearchTree<T> {
 class BinarySearchTree {
     // ... other methods ...
 
-    postOrder() {
-        this.postOrderTraverse(this.root);
+    postorder() {
+        this.postorderTraverse(this.root);
     }
 
-    postOrderTraverse(node) {
+    postorderTraverse(node) {
         if (node !== null) {
-            this.postOrderTraverse(node.left);
-            this.postOrderTraverse(node.right);
+            this.postorderTraverse(node.left);
+            this.postorderTraverse(node.right);
             console.log(node.value);
         }
     }
@@ -327,14 +327,14 @@ class BinarySearchTree {
 class BinarySearchTree<T> {
     // ... other methods ...
 
-    postOrder() {
-        this.postOrderTraverse(this.root);
+    postorder() {
+        this.postorderTraverse(this.root);
     }
 
-    postOrderTraverse(node: TreeNode<T> | null) {
+    postorderTraverse(node: TreeNode<T> | null) {
         if (node !== null) {
-            this.postOrderTraverse(node.left);
-            this.postOrderTraverse(node.right);
+            this.postorderTraverse(node.left);
+            this.postorderTraverse(node.right);
             console.log(node.value);
         }
     }
@@ -446,21 +446,21 @@ class BinarySearchTree<T> {
   <CodeGroup>
 
   ```javascript
-  function inOrder(node) {
+  function inorder(node) {
       if (node !== null) {
-          inOrder(node.left);
+          inorder(node.left);
           console.log(node.value);
-          inOrder(node.right);
+          inorder(node.right);
       }
   }
   ```
 
   ```typescript
-  function inOrder<T>(node: TreeNode<T> | null) {
+  function inorder<T>(node: TreeNode<T> | null) {
       if (node !== null) {
-          inOrder(node.left);
+          inorder(node.left);
           console.log(node.value);
-          inOrder(node.right);
+          inorder(node.right);
       }
   }
   ```
@@ -474,7 +474,7 @@ class BinarySearchTree<T> {
   <CodeGroup>
 
   ```javascript
-  function inOrderIterative(root) {
+  function inorderIterative(root) {
       let stack = [];
       let current = root;
 
@@ -491,7 +491,7 @@ class BinarySearchTree<T> {
   ```
 
   ```typescript
-  function inOrderIterative<T>(root: TreeNode<T> | null) {
+  function inorderIterative<T>(root: TreeNode<T> | null) {
       let stack: TreeNode<T>[] = [];
       let current = root;
 

@@ -1,6 +1,7 @@
 export const metadata = {
   title: 'Comprehensive Guide to JavaScript and TypeScript Trie Implementation',
-  description: 'Learn about Tries, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  description:
+    'Learn about Tries, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Trie in JavaScript and TypeScript**
@@ -30,7 +31,7 @@ A Trie, also known as a prefix tree, is a type of search tree used to store asso
 - Search: O(m) where m is the length of the key.
 
 **Space Complexity:**
-- O(n * m) where n is the number of keys and m is the average key length.
+- O(n \* m) where n is the number of keys and m is the average key length.
 
 ## **Trie Implementation in JavaScript and TypeScript**
 
@@ -51,7 +52,6 @@ class Trie {
     this.root = new TrieNode(null, null)
   }
 
-  // Recursively finds the occurrence of all words in a given node
   static findAllWords(root, word, output) {
     if (root === null) return
     if (root.count > 0) {
@@ -63,8 +63,8 @@ class Trie {
   }
 
   insert(word) {
-    if (typeof word !== "string") return
-    if (word === "") {
+    if (typeof word !== 'string') return
+    if (word === '') {
       this.root.count += 1
       return
     }
@@ -79,7 +79,7 @@ class Trie {
   }
 
   findPrefix(prefix) {
-    if (typeof prefix !== "string") return null
+    if (typeof prefix !== 'string') return null
     let node = this.root
     for (const char of prefix.toLowerCase()) {
       if (!node.children[char]) return null
@@ -89,8 +89,8 @@ class Trie {
   }
 
   remove(word, count = 1) {
-    if (typeof word !== "string" || count <= 0) return
-    if (word === "") {
+    if (typeof word !== 'string' || count <= 0) return
+    if (word === '') {
       this.root.count = Math.max(0, this.root.count - count)
       return
     }
@@ -129,14 +129,12 @@ class Trie {
     return node ? node.count : 0
   }
 
-  // Serialize the Trie to a JSON string
   serialize() {
     return JSON.stringify(this.root, (key, value) =>
-      key === "parent" ? undefined : value
+      key === 'parent' ? undefined : value,
     )
   }
 
-  // Deserialize a JSON string to a Trie
   static deserialize(data) {
     const trie = new Trie()
     trie.root = JSON.parse(data)
@@ -144,7 +142,6 @@ class Trie {
     return trie
   }
 
-  // Helper method to relink parent nodes after deserialization
   relinkParents(node) {
     for (const childKey in node.children) {
       node.children[childKey].parent = node
@@ -152,10 +149,9 @@ class Trie {
     }
   }
 
-  // Get all words stored in the Trie
   getAllWords() {
     const output = []
-    Trie.findAllWords(this.root, "", output)
+    Trie.findAllWords(this.root, '', output)
     return output.sort((a, b) => a.word.localeCompare(b.word))
   }
 }
@@ -185,7 +181,6 @@ class Trie {
     this.root = new TrieNode(null, null)
   }
 
-  // Recursively finds the occurrence of all words in a given node
   static findAllWords(
     root: TrieNode,
     word: string,
@@ -267,14 +262,12 @@ class Trie {
     return node ? node.count : 0
   }
 
-  // Serialize the Trie to a JSON string
   serialize(): string {
     return JSON.stringify(this.root, (key, value) =>
       key === 'parent' ? undefined : value,
     )
   }
 
-  // Deserialize a JSON string to a Trie
   static deserialize(data: string): Trie {
     const trie = new Trie()
     trie.root = JSON.parse(data)
@@ -282,7 +275,6 @@ class Trie {
     return trie
   }
 
-  // Helper method to relink parent nodes after deserialization
   private relinkParents(node: TrieNode) {
     for (const childKey in node.children) {
       node.children[childKey].parent = node
@@ -290,7 +282,6 @@ class Trie {
     }
   }
 
-  // Get all words stored in the Trie
   getAllWords(): Array<{ word: string; count: number }> {
     const output: Array<{ word: string; count: number }> = []
     Trie.findAllWords(this.root, '', output)

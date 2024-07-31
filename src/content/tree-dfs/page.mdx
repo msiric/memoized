@@ -84,7 +84,7 @@ class TreeNode {
     }
 }
 
-function preOrderTraversal(root) {
+function preorderTraversal(root) {
     if (root === null) return [];
 
     const result = [];
@@ -113,7 +113,7 @@ root.right = new TreeNode(3);
 root.left.left = new TreeNode(4);
 root.left.right = new TreeNode(5);
 
-console.log(preOrderTraversal(root));  // Output: [1, 2, 4, 5, 3]
+console.log(preorderTraversal(root));  // Output: [1, 2, 4, 5, 3]
 ```
 
 ```typescript
@@ -129,7 +129,7 @@ class TreeNode {
     }
 }
 
-function preOrderTraversal(root: TreeNode | null): number[] {
+function preorderTraversal(root: TreeNode | null): number[] {
     if (root === null) return [];
 
     const result: number[] = [];
@@ -158,7 +158,7 @@ root.right = new TreeNode(3);
 root.left.left = new TreeNode(4);
 root.left.right = new TreeNode(5);
 
-console.log(preOrderTraversal(root));  // Output: [1, 2, 4, 5, 3]
+console.log(preorderTraversal(root));  // Output: [1, 2, 4, 5, 3]
 ```
 
 </CodeGroup>
@@ -188,7 +188,7 @@ console.log(preOrderTraversal(root));  // Output: [1, 2, 4, 5, 3]
 <CodeGroup>
 
 ```javascript
-function inOrderTraversal(root) {
+function inorderTraversal(root) {
     const result = [];
     const stack = [];
     let current = root;
@@ -218,11 +218,11 @@ root.right = new TreeNode(3);
 root.left.left = new TreeNode(4);
 root.left.right = new TreeNode(5);
 
-console.log(inOrderTraversal(root));  // Output: [4, 2, 5, 1, 3]
+console.log(inorderTraversal(root));  // Output: [4, 2, 5, 1, 3]
 ```
 
 ```typescript
-function inOrderTraversal(root: TreeNode | null): number[] {
+function inorderTraversal(root: TreeNode | null): number[] {
     const result: number[] = [];
     const stack: TreeNode[] = [];
     let current: TreeNode | null = root;
@@ -252,7 +252,7 @@ root.right = new TreeNode(3);
 root.left.left = new TreeNode(4);
 root.left.right = new TreeNode(5);
 
-console.log(inOrderTraversal(root));  // Output: [4, 2, 5, 1, 3]
+console.log(inorderTraversal(root));  // Output: [4, 2, 5, 1, 3]
 ```
 
 </CodeGroup>
@@ -282,7 +282,7 @@ console.log(inOrderTraversal(root));  // Output: [4, 2, 5, 1, 3]
 <CodeGroup>
 
 ```javascript
-function postOrderTraversal(root) {
+function postorderTraversal(root) {
     if (root === null) return [];
 
     const result = [];
@@ -321,11 +321,11 @@ root.right = new TreeNode(3);
 root.left.left = new TreeNode(4);
 root.left.right = new TreeNode(5);
 
-console.log(postOrderTraversal(root));  // Output: [4, 5, 2, 3, 1]
+console.log(postorderTraversal(root));  // Output: [4, 5, 2, 3, 1]
 ```
 
 ```typescript
-function postOrderTraversal(root: TreeNode | null): number[] {
+function postorderTraversal(root: TreeNode | null): number[] {
     if (root === null) return [];
 
     const result: number[] = [];
@@ -364,7 +364,7 @@ root.right = new TreeNode(3);
 root.left.left = new TreeNode(4);
 root.left.right = new TreeNode(5);
 
-console.log(postOrderTraversal(root));  // Output: [4, 5, 2, 3, 1]
+console.log(postorderTraversal(root));  // Output: [4, 5, 2, 3, 1]
 ```
 
 </CodeGroup>

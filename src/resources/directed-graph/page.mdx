@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Directed Graph Implementation',
-  description: 'Learn about Directed Graphs, a fundamental graph structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Directed Graph Implementation',
+  description:
+    'Learn about Directed Graphs, a fundamental graph structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Directed Graph in JavaScript and TypeScript**
@@ -95,8 +97,8 @@ class DirectedGraph {
         result.push(vertex)
         queue.push(
           ...this.getNeighbors(vertex).filter(
-            neighbor => !visited.has(neighbor)
-          )
+            (neighbor) => !visited.has(neighbor),
+          ),
         )
       }
     }
@@ -116,8 +118,8 @@ class DirectedGraph {
         result.push(vertex)
         stack.push(
           ...this.getNeighbors(vertex).filter(
-            neighbor => !visited.has(neighbor)
-          )
+            (neighbor) => !visited.has(neighbor),
+          ),
         )
       }
     }
@@ -125,12 +127,11 @@ class DirectedGraph {
     return result
   }
 
-  // Cycle detection
   hasCycle() {
     const visited = new Set()
     const recStack = new Set()
 
-    const dfs = vertex => {
+    const dfs = (vertex) => {
       if (!visited.has(vertex)) {
         visited.add(vertex)
         recStack.add(vertex)
@@ -155,12 +156,11 @@ class DirectedGraph {
     return false
   }
 
-  // Topological sort
   topologicalSort() {
     const visited = new Set()
     const stack = []
 
-    const dfs = vertex => {
+    const dfs = (vertex) => {
       visited.add(vertex)
       for (const neighbor of this.getNeighbors(vertex)) {
         if (!visited.has(neighbor)) {
@@ -179,7 +179,6 @@ class DirectedGraph {
     return stack.reverse()
   }
 
-  // Clear the graph
   clear() {
     this.adjacencyList.clear()
   }
@@ -279,7 +278,6 @@ class DirectedGraph<T> {
     return result
   }
 
-  // Cycle detection
   hasCycle(): boolean {
     const visited = new Set<T>()
     const recStack = new Set<T>()
@@ -309,7 +307,6 @@ class DirectedGraph<T> {
     return false
   }
 
-  // Topological sort
   topologicalSort(): T[] {
     const visited = new Set<T>()
     const stack: T[] = []
@@ -333,7 +330,6 @@ class DirectedGraph<T> {
     return stack.reverse()
   }
 
-  // Clear the graph
   clear(): void {
     this.adjacencyList.clear()
   }

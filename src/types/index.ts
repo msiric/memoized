@@ -228,6 +228,7 @@ export type LessonWithResourcesAndProblems = Prisma.LessonGetPayload<{
         title: true
         href: true
         order: true
+        access: true
       }
     }
     problems: {

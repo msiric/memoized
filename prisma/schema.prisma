@@ -192,15 +192,16 @@ model Banner {
 }
 
 model Resource {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   order       Int
   href        String
   title       String
   description String?
-  slug        String   @unique
+  slug        String        @unique
   body        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  access      AccessOptions @default(FREE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
   lessonId    String?
-  lesson      Lesson?  @relation(fields: [lessonId], references: [id])
+  lesson      Lesson?       @relation(fields: [lessonId], references: [id])
 }

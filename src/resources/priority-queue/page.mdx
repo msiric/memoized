@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Priority Queue Implementation',
-  description: 'Learn about Priority Queues, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Priority Queue Implementation',
+  description:
+    'Learn about Priority Queues, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Priority Queue in JavaScript and TypeScript**
@@ -58,7 +60,7 @@ class PriorityQueue {
   swap(index1, index2) {
     ;[this.heap[index1], this.heap[index2]] = [
       this.heap[index2],
-      this.heap[index1]
+      this.heap[index1],
     ]
   }
 
@@ -124,7 +126,7 @@ class PriorityQueue {
 
   dequeue() {
     if (this.isEmpty()) {
-      throw new Error("PriorityQueue is empty")
+      throw new Error('PriorityQueue is empty')
     }
     if (this.heap.length === 1) {
       return this.heap.pop().element
@@ -137,7 +139,7 @@ class PriorityQueue {
 
   peek() {
     if (this.isEmpty()) {
-      throw new Error("PriorityQueue is empty")
+      throw new Error('PriorityQueue is empty')
     }
     return this.heap[0].element
   }
@@ -155,10 +157,9 @@ class PriorityQueue {
     this.orderCounter = 0
   }
 
-  // Iterator for the priority queue
   *iterator() {
     const sortedHeap = [...this.heap].sort(
-      (a, b) => a.priority - b.priority || a.order - b.order
+      (a, b) => a.priority - b.priority || a.order - b.order,
     )
     for (const { element } of sortedHeap) {
       yield element
@@ -295,7 +296,6 @@ class PriorityQueue<T> {
     this.orderCounter = 0
   }
 
-  // Iterator for the priority queue
   *iterator() {
     const sortedHeap = [...this.heap].sort(
       (a, b) => a.priority - b.priority || a.order - b.order,

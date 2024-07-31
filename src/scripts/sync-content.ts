@@ -139,6 +139,7 @@ const syncContent = async () => {
               resourceContent,
               resourceOrder,
               resourceHref,
+              lessonAccess,
               lessonRecord.id,
             )
           }

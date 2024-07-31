@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Binary Tree Implementation',
-  description: 'Learn about Binary Trees, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Binary Tree Implementation',
+  description:
+    'Learn about Binary Trees, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Binary Tree in JavaScript and TypeScript**
@@ -50,7 +52,6 @@ class BinaryTree {
     this.root = null
   }
 
-  // Insert a node in the binary tree
   insert(data) {
     const newNode = new TreeNode(data)
     if (this.root === null) {
@@ -76,7 +77,6 @@ class BinaryTree {
     }
   }
 
-  // In-order traversal
   inorderTraversal(node, result = []) {
     if (node !== null) {
       this.inorderTraversal(node.left, result)
@@ -86,7 +86,6 @@ class BinaryTree {
     return result
   }
 
-  // Pre-order traversal
   preorderTraversal(node, result = []) {
     if (node !== null) {
       result.push(node.data)
@@ -96,7 +95,6 @@ class BinaryTree {
     return result
   }
 
-  // Post-order traversal
   postorderTraversal(node, result = []) {
     if (node !== null) {
       this.postorderTraversal(node.left, result)
@@ -106,7 +104,6 @@ class BinaryTree {
     return result
   }
 
-  // Breadth-first traversal
   breadthFirstTraversal() {
     const result = []
     const queue = []
@@ -125,7 +122,6 @@ class BinaryTree {
     return result
   }
 
-  // Search for a node in the binary tree
   search(node, data) {
     if (node === null) {
       return null
@@ -139,7 +135,6 @@ class BinaryTree {
     }
   }
 
-  // Remove a node from the binary tree
   remove(data) {
     this.root = this.removeNode(this.root, data)
   }
@@ -174,7 +169,6 @@ class BinaryTree {
     }
   }
 
-  // Find the minimum node in a tree/subtree
   findMinNode(node) {
     if (node.left === null) {
       return node
@@ -183,7 +177,6 @@ class BinaryTree {
     }
   }
 
-  // Find the maximum value in the tree
   findMax() {
     if (this.root === null) {
       return null
@@ -195,7 +188,6 @@ class BinaryTree {
     return node.data
   }
 
-  // Find the minimum value in the tree
   findMin() {
     if (this.root === null) {
       return null
@@ -207,7 +199,6 @@ class BinaryTree {
     return node.data
   }
 
-  // Calculate the height of the tree
   height(node = this.root) {
     if (node === null) {
       return -1
@@ -217,7 +208,6 @@ class BinaryTree {
     return Math.max(leftHeight, rightHeight) + 1
   }
 
-  // Clear the tree
   clear() {
     this.root = null
   }
@@ -246,7 +236,6 @@ class BinaryTree<T> {
     this.root = null
   }
 
-  // Insert a node in the binary tree
   insert(data: T) {
     const newNode = new TreeNode(data)
     if (this.root === null) {
@@ -272,7 +261,6 @@ class BinaryTree<T> {
     }
   }
 
-  // In-order traversal
   inorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       this.inorderTraversal(node.left, result)
@@ -282,7 +270,6 @@ class BinaryTree<T> {
     return result
   }
 
-  // Pre-order traversal
   preorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       result.push(node.data)
@@ -292,7 +279,6 @@ class BinaryTree<T> {
     return result
   }
 
-  // Post-order traversal
   postorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       this.postorderTraversal(node.left, result)
@@ -302,7 +288,6 @@ class BinaryTree<T> {
     return result
   }
 
-  // Breadth-first traversal
   breadthFirstTraversal(): T[] {
     const result: T[] = []
     const queue: Array<TreeNode<T> | null> = []
@@ -321,7 +306,6 @@ class BinaryTree<T> {
     return result
   }
 
-  // Search for a node in the binary tree
   search(node: TreeNode<T> | null, data: T): TreeNode<T> | null {
     if (node === null) {
       return null
@@ -335,7 +319,6 @@ class BinaryTree<T> {
     }
   }
 
-  // Remove a node from the binary tree
   remove(data: T) {
     this.root = this.removeNode(this.root, data)
   }
@@ -370,7 +353,6 @@ class BinaryTree<T> {
     }
   }
 
-  // Find the minimum node in a tree/subtree
   private findMinNode(node: TreeNode<T>): TreeNode<T> | null {
     if (node.left === null) {
       return node
@@ -379,7 +361,6 @@ class BinaryTree<T> {
     }
   }
 
-  // Find the maximum value in the tree
   findMax(): T | null {
     if (this.root === null) {
       return null
@@ -391,7 +372,6 @@ class BinaryTree<T> {
     return node.data
   }
 
-  // Find the minimum value in the tree
   findMin(): T | null {
     if (this.root === null) {
       return null
@@ -403,7 +383,6 @@ class BinaryTree<T> {
     return node.data
   }
 
-  // Calculate the height of the tree
   height(node: TreeNode<T> | null = this.root): number {
     if (node === null) {
       return -1
@@ -413,7 +392,6 @@ class BinaryTree<T> {
     return Math.max(leftHeight, rightHeight) + 1
   }
 
-  // Clear the tree
   clear() {
     this.root = null
   }

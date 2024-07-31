@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Hash Map Implementation',
-  description: 'Learn about Hash Maps, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Hash Map Implementation',
+  description:
+    'Learn about Hash Maps, a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Hash Map in JavaScript and TypeScript**
@@ -66,7 +68,7 @@ class HashMap {
   resize() {
     const newCapacity = this.capacity * 2
     const newBuckets = new Array(newCapacity).fill(null)
-    this.buckets.forEach(node => {
+    this.buckets.forEach((node) => {
       while (node) {
         const newIndex = this.hash(node.key) % newCapacity
         const newNode = new HashMapNode(node.key, node.value)
@@ -177,7 +179,6 @@ class HashMap {
     console.log(this.buckets)
   }
 
-  // Iterator for the hash map
   *iterator() {
     for (let i = 0; i < this.capacity; i++) {
       let node = this.buckets[i]
@@ -348,7 +349,6 @@ class HashMap<K extends string | number | symbol, V> {
     console.log(this.buckets)
   }
 
-  // Iterator for the hash map
   *iterator() {
     for (let i = 0; i < this.capacity; i++) {
       let node = this.buckets[i]

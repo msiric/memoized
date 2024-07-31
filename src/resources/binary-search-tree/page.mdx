@@ -1,6 +1,8 @@
 export const metadata = {
-  title: 'Comprehensive Guide to JavaScript and TypeScript Binary Search Tree Implementation',
-  description: 'Learn about Binary Search Trees (BST), a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
+  title:
+    'Comprehensive Guide to JavaScript and TypeScript Binary Search Tree Implementation',
+  description:
+    'Learn about Binary Search Trees (BST), a fundamental data structure, and understand their implementation in JavaScript and TypeScript.',
 }
 
 # **Binary Search Tree in JavaScript and TypeScript**
@@ -50,7 +52,6 @@ class BinarySearchTree {
     this.root = null
   }
 
-  // Insert a node in the BST
   insert(data) {
     const newNode = new TreeNode(data)
     if (this.root === null) {
@@ -76,7 +77,6 @@ class BinarySearchTree {
     }
   }
 
-  // In-order traversal
   inorderTraversal(node, result = []) {
     if (node !== null) {
       this.inorderTraversal(node.left, result)
@@ -86,7 +86,6 @@ class BinarySearchTree {
     return result
   }
 
-  // Pre-order traversal
   preorderTraversal(node, result = []) {
     if (node !== null) {
       result.push(node.data)
@@ -96,7 +95,6 @@ class BinarySearchTree {
     return result
   }
 
-  // Post-order traversal
   postorderTraversal(node, result = []) {
     if (node !== null) {
       this.postorderTraversal(node.left, result)
@@ -106,7 +104,6 @@ class BinarySearchTree {
     return result
   }
 
-  // Breadth-first traversal
   breadthFirstTraversal() {
     const result = []
     const queue = []
@@ -125,7 +122,6 @@ class BinarySearchTree {
     return result
   }
 
-  // Search for a node in the BST
   search(node, data) {
     if (node === null) {
       return null
@@ -139,7 +135,6 @@ class BinarySearchTree {
     }
   }
 
-  // Find the minimum node in the BST
   findMinNode(node) {
     if (node.left === null) {
       return node
@@ -148,7 +143,6 @@ class BinarySearchTree {
     }
   }
 
-  // Find the maximum value in the tree
   findMax() {
     if (this.root === null) {
       return null
@@ -160,7 +154,6 @@ class BinarySearchTree {
     return node.data
   }
 
-  // Find the minimum value in the tree
   findMin() {
     if (this.root === null) {
       return null
@@ -172,7 +165,6 @@ class BinarySearchTree {
     return node.data
   }
 
-  // Calculate the height of the tree
   height(node = this.root) {
     if (node === null) {
       return -1
@@ -182,7 +174,6 @@ class BinarySearchTree {
     return Math.max(leftHeight, rightHeight) + 1
   }
 
-  // Remove a node in the BST
   remove(data) {
     this.root = this.removeNode(this.root, data)
   }
@@ -198,7 +189,6 @@ class BinarySearchTree {
       node.right = this.removeNode(node.right, data)
       return node
     } else {
-      // Node with only one child or no child
       if (node.left === null && node.right === null) {
         node = null
         return node
@@ -211,7 +201,6 @@ class BinarySearchTree {
         return node
       }
 
-      // Node with two children: Get the inorder successor (smallest in the right subtree)
       const tempNode = this.findMinNode(node.right)
       node.data = tempNode.data
       node.right = this.removeNode(node.right, tempNode.data)
@@ -219,7 +208,6 @@ class BinarySearchTree {
     }
   }
 
-  // Clear the tree
   clear() {
     this.root = null
   }
@@ -248,7 +236,6 @@ class BinarySearchTree<T> {
     this.root = null
   }
 
-  // Insert a node in the BST
   insert(data: T) {
     const newNode = new TreeNode(data)
     if (this.root === null) {
@@ -274,7 +261,6 @@ class BinarySearchTree<T> {
     }
   }
 
-  // In-order traversal
   inorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       this.inorderTraversal(node.left, result)
@@ -284,7 +270,6 @@ class BinarySearchTree<T> {
     return result
   }
 
-  // Pre-order traversal
   preorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       result.push(node.data)
@@ -294,7 +279,6 @@ class BinarySearchTree<T> {
     return result
   }
 
-  // Post-order traversal
   postorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       this.postorderTraversal(node.left, result)
@@ -304,7 +288,6 @@ class BinarySearchTree<T> {
     return result
   }
 
-  // Breadth-first traversal
   breadthFirstTraversal(): T[] {
     const result: T[] = []
     const queue: Array<TreeNode<T> | null> = []
@@ -323,7 +306,6 @@ class BinarySearchTree<T> {
     return result
   }
 
-  // Search for a node in the BST
   search(node: TreeNode<T> | null, data: T): TreeNode<T> | null {
     if (node === null) {
       return null
@@ -337,7 +319,6 @@ class BinarySearchTree<T> {
     }
   }
 
-  // Find the minimum node in the BST
   findMinNode(node: TreeNode<T>): TreeNode<T> | null {
     if (node.left === null) {
       return node
@@ -346,7 +327,6 @@ class BinarySearchTree<T> {
     }
   }
 
-  // Find the maximum value in the tree
   findMax(): T | null {
     if (this.root === null) {
       return null
@@ -358,7 +338,6 @@ class BinarySearchTree<T> {
     return node.data
   }
 
-  // Find the minimum value in the tree
   findMin(): T | null {
     if (this.root === null) {
       return null
@@ -370,7 +349,6 @@ class BinarySearchTree<T> {
     return node.data
   }
 
-  // Calculate the height of the tree
   height(node: TreeNode<T> | null = this.root): number {
     if (node === null) {
       return -1
@@ -380,7 +358,6 @@ class BinarySearchTree<T> {
     return Math.max(leftHeight, rightHeight) + 1
   }
 
-  // Remove a node in the BST
   remove(data: T) {
     this.root = this.removeNode(this.root, data)
   }
@@ -396,7 +373,6 @@ class BinarySearchTree<T> {
       node.right = this.removeNode(node.right, data)
       return node
     } else {
-      // Node with only one child or no child
       if (node.left === null && node.right === null) {
         node = null
         return node
@@ -409,7 +385,6 @@ class BinarySearchTree<T> {
         return node
       }
 
-      // Node with two children: Get the inorder successor (smallest in the right subtree)
       const tempNode = this.findMinNode(node.right)
       node.data = tempNode!.data
       node.right = this.removeNode(node.right, tempNode!.data)
@@ -417,7 +392,6 @@ class BinarySearchTree<T> {
     }
   }
 
-  // Clear the tree
   clear() {
     this.root = null
   }
