@@ -1,6 +1,6 @@
 'use client'
 
-import { PREMIUM_QUERY_PARAM } from '@/constants'
+import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '@/constants'
 import clsx from 'clsx'
 import { MouseEvent, useState } from 'react'
 import { MdOutlineCheck } from 'react-icons/md'
@@ -14,9 +14,10 @@ export const PremiumModal = ({ upgradedSuccessfully }: PremiumModalProps) => {
   const [isOpen, setIsOpen] = useState(true)
   const closeModal = () => {
     setIsOpen(false)
-    // Remove the query parameter from the URL
+    // Remove the query parameters from the URL
     const url = new URL(window.location.href)
     url.searchParams.delete(PREMIUM_QUERY_PARAM)
+    url.searchParams.delete(SESSION_QUERY_PARAM)
     window.history.replaceState({}, '', url.toString())
   }
 

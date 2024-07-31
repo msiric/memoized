@@ -6,7 +6,6 @@ import {
   SESSION_QUERY_PARAM,
 } from '@/constants'
 import { retrieveStripeSession } from '@/services/stripe'
-import { getUserWithSubscriptions } from '@/services/user'
 import { Problem } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
@@ -36,13 +35,6 @@ export default async function Course({
       ? stripeSessionResult.value
       : null
 
-  const upgradedToPremium = searchParams[PREMIUM_QUERY_PARAM]
-
-  const user =
-    session && searchParams[PREMIUM_QUERY_PARAM]
-      ? await getUserWithSubscriptions(session?.userId)
-      : null
-
   const Page = dynamic(
     () => import(`../../../${CONTENT_FOLDER}/course/page.mdx`),
     {
@@ -66,8 +58,8 @@ export default async function Course({
 
   return (
     <>
-      <Page userId={user?.id} lessonId={''} problems={[]} />
-      {upgradedToPremium && (
+      <Page userId={session?.userId} lessonId={''} problems={[]} />
+      {searchParams[PREMIUM_QUERY_PARAM] && (
         <PremiumModal
           upgradedSuccessfully={stripeSession?.status === 'complete'}
         />
