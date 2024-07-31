@@ -4,6 +4,7 @@ import {
   createBillingPortalSession,
   createOrRetrieveCustomer,
   createStripeSession,
+  retrieveStripeSession,
 } from '@/services/stripe'
 import { ProductWithCoupon } from '@/types'
 import { ServiceError } from '@/utils/error'
@@ -89,6 +90,41 @@ describe('Customer Service', () => {
         }),
       ).rejects.toThrow(
         new ServiceError('Failed to retrieve or create customer'),
+      )
+    })
+  })
+
+  describe('retrieveStripeSession', () => {
+    it('should successfully retrieve a Stripe checkout session', async () => {
+      const mockSession = {
+        id: 'cs_test_123',
+        payment_status: 'paid',
+        // Add other relevant session properties here
+      }
+
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+
+      const result = await retrieveStripeSession('cs_test_123')
+
+      expect(result).toEqual(mockSession)
+      expect(stripe.checkout.sessions.retrieve).toHaveBeenCalledWith(
+        'cs_test_123',
+      )
+    })
+
+    it('should throw a ServiceError if Stripe retrieval fails', async () => {
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockRejectedValue(
+        new Error('Stripe error'),
+      )
+
+      await expect(retrieveStripeSession('cs_test_456')).rejects.toThrow(
+        new ServiceError('Failed to retrieve Stripe checkout session'),
+      )
+
+      expect(stripe.checkout.sessions.retrieve).toHaveBeenCalledWith(
+        'cs_test_456',
       )
     })
   })

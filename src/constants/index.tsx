@@ -17,6 +17,7 @@ export const CONTENT_FOLDER = 'content'
 export const RESOURCES_FOLDER = 'resources'
 
 export const PREMIUM_QUERY_PARAM = 'upgradedToPremium'
+export const SESSION_QUERY_PARAM = 'sessionId'
 
 export const DIFFICULTY_ORDER = {
   [ProblemDifficulty.EASY]: 1,

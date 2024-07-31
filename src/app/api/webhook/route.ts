@@ -54,14 +54,10 @@ export async function POST(req: Request) {
         }
         case 'checkout.session.completed': {
           const checkoutSession = event.data.object as Stripe.Checkout.Session
-          const {
-            subscription: subscriptionId,
-            id: sessionId,
-            client_reference_id: stripeCustomer,
-          } = checkoutSession
-          if (checkoutSession.mode === 'subscription') {
-            await updateSubscriptionDetails({ subscriptionId, stripeCustomer })
-          } else if (checkoutSession.mode === 'payment') {
+
+          const { id: sessionId, client_reference_id: stripeCustomer } =
+            checkoutSession
+          if (checkoutSession.mode === 'payment') {
             await createLifetimeAccess({ sessionId, stripeCustomer })
           }
           break

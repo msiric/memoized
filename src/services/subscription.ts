@@ -120,19 +120,10 @@ export const updateSubscriptionDetails = async ({
         ? stripeCustomer
         : (stripeCustomer?.id ?? '')
 
-    const recurringSubscription = updateAction
-      ? await prisma.subscription.findUnique({
-          where: { stripeSubscriptionId: subscriptionId?.toString() ?? '' },
-          select: { customer: { select: { id: true, user: true } } },
-        })
-      : null
-
-    const customer = updateAction
-      ? recurringSubscription?.customer
-      : await prisma.customer.findUnique({
-          where: { stripeCustomerId: customerId ?? '' },
-          select: { id: true, user: true },
-        })
+    const customer = await prisma.customer.findUnique({
+      where: { stripeCustomerId: customerId ?? '' },
+      select: { id: true, user: true },
+    })
 
     if (!customer?.user?.name || !customer?.user?.email)
       throw new ServiceError(`Failed to retrieve customer details`)

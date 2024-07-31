@@ -1,7 +1,7 @@
 'use server'
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { PREMIUM_QUERY_PARAM } from '@/constants'
+import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '@/constants'
 import {
   createOrRetrieveCustomer,
   createStripeSession,
@@ -15,7 +15,7 @@ import { getServerSession } from 'next-auth'
 
 export async function createCheckout(
   product: ProductWithCoupon,
-  redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true`,
+  redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
 ) {
   try {
     const session = await getServerSession(authOptions)

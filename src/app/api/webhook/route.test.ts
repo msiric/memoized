@@ -2,7 +2,7 @@ import { stripe } from '@/lib/stripe'
 import * as subscriptionService from '@/services/subscription'
 import Stripe from 'stripe'
 import type { MockedFunction } from 'vitest'
-import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { POST } from './route'
 
 const mockFn = <T extends (...args: any[]) => any>(fn: T) =>
@@ -103,27 +103,6 @@ describe('Stripe Webhook Handler', () => {
     })
   })
 
-  it('should handle checkout.session.completed event for subscription', async () => {
-    const mockCheckoutSession = {
-      id: 'cs_123',
-      subscription: 'sub_123',
-      mode: 'subscription',
-      client_reference_id: 'cus_123',
-    }
-    mockRequest = createMockRequest(
-      'checkout.session.completed',
-      mockCheckoutSession,
-    )
-
-    const response = await POST(mockRequest)
-
-    expect(response?.status).toBe(200)
-    expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
-      subscriptionId: 'sub_123',
-      stripeCustomer: 'cus_123',
-    })
-  })
-
   it('should handle checkout.session.completed event for one-time payment', async () => {
     const mockCheckoutSession = {
       id: 'cs_123',
@@ -198,46 +177,6 @@ describe('Stripe Webhook Handler', () => {
 
     expect(response?.status).toBe(400)
     expect(await response?.text()).toBe('Webhook Error: Invalid signature')
-  })
-
-  it('should handle checkout.session.completed with missing subscription ID', async () => {
-    const mockCheckoutSession = {
-      id: 'cs_123',
-      mode: 'subscription',
-      client_reference_id: 'cus_123',
-    }
-    mockRequest = createMockRequest(
-      'checkout.session.completed',
-      mockCheckoutSession,
-    )
-
-    const response = await POST(mockRequest)
-
-    expect(response?.status).toBe(200)
-    expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
-      subscriptionId: undefined,
-      stripeCustomer: 'cus_123',
-    })
-  })
-
-  it('should handle checkout.session.completed with missing client_reference_id', async () => {
-    const mockCheckoutSession = {
-      id: 'cs_123',
-      subscription: 'sub_123',
-      mode: 'subscription',
-    }
-    mockRequest = createMockRequest(
-      'checkout.session.completed',
-      mockCheckoutSession,
-    )
-
-    const response = await POST(mockRequest)
-
-    expect(response?.status).toBe(200)
-    expect(subscriptionService.updateSubscriptionDetails).toHaveBeenCalledWith({
-      subscriptionId: 'sub_123',
-      stripeCustomer: undefined,
-    })
   })
 
   it('should handle updateSubscriptionDetails throwing an error', async () => {

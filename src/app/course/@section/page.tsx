@@ -1,8 +1,13 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { PremiumModal } from '@/components/PremiumModal'
-import { CONTENT_FOLDER, PREMIUM_QUERY_PARAM } from '@/constants'
+import {
+  CONTENT_FOLDER,
+  PREMIUM_QUERY_PARAM,
+  SESSION_QUERY_PARAM,
+} from '@/constants'
+import { retrieveStripeSession } from '@/services/stripe'
 import { getUserWithSubscriptions } from '@/services/user'
-import { Problem, SubscriptionStatus } from '@prisma/client'
+import { Problem } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import dynamic from 'next/dynamic'
 import { JSXElementConstructor } from 'react'
@@ -11,15 +16,31 @@ import { JSXElementConstructor } from 'react'
 export default async function Course({
   searchParams,
 }: {
-  searchParams: { [PREMIUM_QUERY_PARAM]?: string }
+  searchParams: {
+    [PREMIUM_QUERY_PARAM]?: string
+    [SESSION_QUERY_PARAM]?: string
+  }
 }) {
-  const session = await getServerSession(authOptions)
+  const [sessionResult, stripeSessionResult] = await Promise.allSettled([
+    getServerSession(authOptions),
+    searchParams[SESSION_QUERY_PARAM]
+      ? retrieveStripeSession(searchParams[SESSION_QUERY_PARAM])
+      : Promise.resolve(null),
+  ])
+
+  const session =
+    sessionResult.status === 'fulfilled' ? sessionResult.value : null
+
+  const stripeSession =
+    stripeSessionResult.status === 'fulfilled'
+      ? stripeSessionResult.value
+      : null
 
   const upgradedToPremium = searchParams[PREMIUM_QUERY_PARAM]
 
   const user =
     session && searchParams[PREMIUM_QUERY_PARAM]
-      ? await getUserWithSubscriptions(session.userId)
+      ? await getUserWithSubscriptions(session?.userId)
       : null
 
   const Page = dynamic(
@@ -48,9 +69,7 @@ export default async function Course({
       <Page userId={user?.id} lessonId={''} problems={[]} />
       {upgradedToPremium && (
         <PremiumModal
-          upgradedSuccessfully={
-            user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
-          }
+          upgradedSuccessfully={stripeSession?.status === 'complete'}
         />
       )}
     </>

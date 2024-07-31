@@ -1,3 +1,4 @@
+import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '@/constants'
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { ProductWithCoupon } from '@/types'
@@ -164,10 +165,19 @@ export const createOrRetrieveCustomer = async ({
   }
 }
 
+export const retrieveStripeSession = async (sessionId: string) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    return session
+  } catch (error) {
+    throw new ServiceError('Failed to retrieve Stripe checkout session')
+  }
+}
+
 export const createStripeSession = async (
   product: ProductWithCoupon,
   customer: string,
-  redirectPath: string,
+  redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
 ) => {
   try {
     let params: Stripe.Checkout.SessionCreateParams = {
