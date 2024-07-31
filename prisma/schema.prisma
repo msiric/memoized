@@ -85,6 +85,7 @@ model Lesson {
   sectionId      String
   section        Section              @relation(fields: [sectionId], references: [id])
   problems       Problem[]
+  resources      Resource[]
   lessonProgress UserLessonProgress[]
 }
 
@@ -200,4 +201,6 @@ model Resource {
   body        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
+  lessonId    String?
+  lesson      Lesson?  @relation(fields: [lessonId], references: [id])
 }

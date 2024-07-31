@@ -4,9 +4,9 @@ import {
   ActiveCoupon,
   Curriculum,
   EnrichedLesson,
-  EnrichedResource,
   EnrichedUser,
   LessonWithProblems,
+  LessonWithResourcesAndProblems,
   NavigationContent,
   ProblemRow,
   ProblemStatus,
@@ -15,7 +15,6 @@ import {
 import {
   AccessOptions,
   ProblemDifficulty,
-  Resource,
   Subscription,
   SubscriptionPlan,
   SubscriptionStatus,
@@ -308,9 +307,15 @@ export const sortProblemList = (
 }
 
 export const sortResources = (
-  resources?: EnrichedResource[],
-): EnrichedResource[] | undefined => {
-  return resources?.slice().sort((a, b) => a.order - b.order)
+  lessons?: LessonWithResourcesAndProblems[],
+): LessonWithResourcesAndProblems[] | undefined => {
+  return lessons
+    ?.slice()
+    .sort((a, b) => a.section.order - b.section.order)
+    .map((list) => ({
+      ...list,
+      resources: list.resources.slice().sort((a, b) => a.order - b.order),
+    }))
 }
 
 export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
@@ -465,9 +470,9 @@ export const problemListToNavigation = (
 }
 
 export const resourcesToNavigation = (
-  resources?: Resource[],
+  resourceList?: LessonWithResourcesAndProblems[],
 ): NavigationContent | undefined => {
-  if (!resources) return undefined
+  if (!resourceList) return undefined
 
   return {
     id: 'prep-resources',
@@ -475,13 +480,22 @@ export const resourcesToNavigation = (
     title: 'Resources Navigation',
     description: 'Navigation structure for resources',
     order: 0,
-    sections: resources.map((resource) => ({
-      id: resource.id,
-      slug: resource.slug,
-      title: resource.title,
-      href: resource.href,
-      description: resource.description,
-      order: resource.order,
+    sections: resourceList.map((lesson) => ({
+      id: lesson.id,
+      slug: lesson.slug,
+      title: lesson.title,
+      href: lesson.href,
+      description: lesson.description,
+      order: lesson.order,
+      links: lesson.resources?.map((resource, index) => ({
+        id: resource.id,
+        slug: resource.href.split('/').pop() || `resource-${index}`,
+        title: resource.title,
+        href: resource.href,
+        description: null,
+        order: resource.order,
+      })),
+      access: lesson.access,
     })),
   }
 }

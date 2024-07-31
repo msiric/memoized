@@ -4,6 +4,8 @@ import {
   getLessonsAndProblems,
   getLessonsAndProblemsCounts,
   getLessonsWithProblems,
+  getLessonsWithResourcesAndProblems,
+  getProblemsCounts,
   getSectionBySlug,
   markLessonProgress,
   upsertCourse,
@@ -348,7 +350,23 @@ describe('Prisma Services', () => {
         select: expect.objectContaining({
           section: expect.objectContaining({
             select: expect.objectContaining({
-              course: expect.any(Object),
+              id: true,
+              title: true,
+              href: true,
+              body: true,
+              order: true,
+              slug: true,
+              description: true,
+              course: expect.objectContaining({
+                select: expect.objectContaining({
+                  id: true,
+                  title: true,
+                  description: true,
+                  slug: true,
+                  order: true,
+                  href: true,
+                }),
+              }),
             }),
           }),
         }),
@@ -411,6 +429,68 @@ describe('Prisma Services', () => {
       expect(result).toEqual({ lessonCount: 10, problemCount: 50 })
       expect(prisma.lesson.count).toHaveBeenCalled()
       expect(prisma.problem.count).toHaveBeenCalled()
+    })
+  })
+
+  describe('getProblemsCounts', () => {
+    it('should return problem count', async () => {
+      vi.spyOn(prisma.problem, 'count').mockResolvedValue(50)
+
+      const result = await getProblemsCounts()
+
+      expect(result).toEqual({ problemCount: 50 })
+      expect(prisma.problem.count).toHaveBeenCalled()
+    })
+  })
+
+  describe('getLessonsWithResourcesAndProblems', () => {
+    it('should return all lessons with their resources and problems', async () => {
+      const mockLessons = [
+        {
+          id: 'lesson1',
+          title: 'Lesson 1',
+          href: '/lesson1',
+          description: 'Description 1',
+          access: AccessOptions.FREE,
+          slug: 'lesson-1',
+          order: 1,
+          section: { order: 1 },
+          resources: [
+            {
+              id: 'resource1',
+              title: 'Resource 1',
+              href: '/resource1',
+              order: 1,
+            },
+          ],
+          problems: [
+            {
+              id: 'problem1',
+              title: 'Problem 1',
+              href: '/problem1',
+              difficulty: ProblemDifficulty.EASY,
+            },
+          ],
+        },
+      ]
+
+      vi.spyOn(prisma.lesson, 'findMany').mockResolvedValue(mockLessons as any)
+
+      const result = await getLessonsWithResourcesAndProblems()
+
+      expect(result).toEqual({ allLessons: mockLessons })
+      expect(prisma.lesson.findMany).toHaveBeenCalledWith({
+        select: expect.objectContaining({
+          resources: expect.any(Object),
+          problems: expect.any(Object),
+          section: expect.objectContaining({
+            select: expect.objectContaining({
+              order: true,
+            }),
+          }),
+        }),
+        orderBy: { order: 'asc' },
+      })
     })
   })
 })

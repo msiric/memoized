@@ -73,6 +73,7 @@ describe('Prisma Services', () => {
         'Resource Content',
         1,
         'resource-href',
+        '1',
       )
       expect(resource).toEqual(mockResource)
       expect(prisma.resource.upsert).toHaveBeenCalledWith({
@@ -83,6 +84,7 @@ describe('Prisma Services', () => {
           order: 1,
           body: 'Resource Content',
           href: 'resource-href',
+          lessonId: '1',
         },
         create: {
           title: 'Resource Title',
@@ -91,6 +93,7 @@ describe('Prisma Services', () => {
           slug: 'resource-slug',
           body: 'Resource Content',
           href: 'resource-href',
+          lessonId: '1',
         },
       })
     })

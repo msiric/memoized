@@ -1,6 +1,6 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { getUserProgressWithResources } from '@/services/user'
-import { Resource } from '@prisma/client'
+import { LessonWithResourcesAndProblems } from '@/types'
 import { getServerSession } from 'next-auth'
 import { Wrapper } from './wrapper'
 
@@ -16,7 +16,7 @@ export default async function Header() {
       completedProblems={data?.user?.problemProgress.map(
         (item) => item.problemId,
       )}
-      resources={data?.resources as Resource[]}
+      resourceList={data?.lessons as LessonWithResourcesAndProblems[]}
     />
   )
 }

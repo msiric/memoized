@@ -3,28 +3,30 @@
 import { Header } from '@/components/Header'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
-import { UserWithSubscriptionsAndProgress } from '@/types'
+import {
+  LessonWithResourcesAndProblems,
+  UserWithSubscriptionsAndProgress,
+} from '@/types'
 import { resourcesToNavigation } from '@/utils/helpers'
-import { Resource } from '@prisma/client'
 import { useEffect } from 'react'
 
 export type LayoutProps = {
   userData?: UserWithSubscriptionsAndProgress | null
   completedLessons?: string[]
   completedProblems?: string[]
-  resources?: Resource[]
+  resourceList?: LessonWithResourcesAndProblems[]
 }
 
 export function Wrapper({
   userData,
   completedLessons,
   completedProblems,
-  resources,
+  resourceList,
 }: LayoutProps) {
   const setUser = useAuthStore((state) => state.setUser)
   const updateContent = useContentStore((state) => state.updateContent)
 
-  const navigation = resourcesToNavigation(resources)
+  const navigation = resourcesToNavigation(resourceList)
 
   useEffect(() => {
     updateContent(completedLessons, completedProblems)

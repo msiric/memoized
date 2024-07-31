@@ -20,6 +20,7 @@ export const upsertResource = async (
   resourceContent: string,
   resourceOrder: number,
   resourceHref: string,
+  lessonId: string,
 ) => {
   return prisma.resource.upsert({
     where: { slug: resourceSlug },
@@ -29,6 +30,7 @@ export const upsertResource = async (
       order: resourceOrder,
       body: resourceContent,
       href: resourceHref,
+      lessonId: lessonId,
     },
     create: {
       title: resourceTitle,
@@ -37,6 +39,7 @@ export const upsertResource = async (
       slug: resourceSlug,
       body: resourceContent,
       href: resourceHref,
+      lessonId: lessonId,
     },
   })
 }

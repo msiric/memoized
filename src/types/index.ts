@@ -14,7 +14,8 @@ export type LessonConfig = {
   title: string
   description: string
   access: AccessOptions
-  problems: PracticeProblem[]
+  problems?: PracticeProblem[]
+  resources?: LessonResource[]
 }
 
 export type ProblemConfig = {
@@ -89,6 +90,14 @@ export type PracticeProblem = {
   difficulty: ProblemDifficulty
 }
 
+export type LessonResource = {
+  id: string
+  href: string
+  title: string
+  description: string
+  about: string
+}
+
 export type ProblemRow = {
   id: string
   title: string
@@ -134,6 +143,10 @@ export type EnrichedLesson = Prisma.LessonGetPayload<{
   orderBy: { order: 'asc' }
 }>
 
+export type EnrichedProblem = Prisma.ProblemGetPayload<{
+  select: { id: true; title: true; difficulty: true; href: true }
+}>
+
 export type EnrichedUser = Prisma.UserGetPayload<{
   select: {
     id: true
@@ -169,18 +182,6 @@ export type EnrichedUser = Prisma.UserGetPayload<{
   }
 }>
 
-export type EnrichedResource = Prisma.ResourceGetPayload<{
-  select: {
-    id: true
-    title: true
-    href: true
-    description: true
-    order: true
-    slug: true
-  }
-  orderBy: { order: 'asc' }
-}>
-
 export type LessonWithProblems = Prisma.LessonGetPayload<{
   select: {
     id: true
@@ -192,6 +193,40 @@ export type LessonWithProblems = Prisma.LessonGetPayload<{
     order: true
     section: {
       select: {
+        order: true
+      }
+    }
+    problems: {
+      select: {
+        id: true
+        title: true
+        href: true
+        difficulty: true
+      }
+    }
+  }
+  orderBy: { order: 'asc' }
+}>
+
+export type LessonWithResourcesAndProblems = Prisma.LessonGetPayload<{
+  select: {
+    id: true
+    title: true
+    href: true
+    description: true
+    access: true
+    slug: true
+    order: true
+    section: {
+      select: {
+        order: true
+      }
+    }
+    resources: {
+      select: {
+        id: true
+        title: true
+        href: true
         order: true
       }
     }

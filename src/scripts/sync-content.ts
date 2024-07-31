@@ -1,6 +1,5 @@
 import { CONTENT_FOLDER, RESOURCES_FOLDER } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
-import { completeResources } from '@/constants/resources'
 import prisma from '@/lib/prisma'
 import {
   upsertCourse,
@@ -99,49 +98,55 @@ const syncContent = async () => {
           sectionRecord.id,
         )
 
-        for (const problem of lesson.problems) {
-          await upsertProblem(
-            problem.href,
-            problem.title,
-            lessonRecord.id,
-            problem.difficulty,
+        if (lesson.problems) {
+          for (const problem of lesson.problems) {
+            await upsertProblem(
+              problem.href,
+              problem.title,
+              lessonRecord.id,
+              problem.difficulty,
+            )
+          }
+        }
+
+        if (lesson.resources) {
+          const resourcesDir = path.join(
+            process.cwd(),
+            `src/${RESOURCES_FOLDER}`,
           )
+
+          for (const [resourceOrder, resource] of lesson.resources.entries()) {
+            const {
+              title: resourceTitle,
+              description: resourceDescription,
+              id: resourceId,
+              href: resourceHref,
+            } = resource
+            const resourceSlug = slugify(resourceTitle, { lower: true })
+
+            const resourcePath = path.join(resourcesDir, resourceId, 'page.mdx')
+            if (!fs.existsSync(resourcePath)) {
+              console.error(`File not found: ${resourcePath}`)
+              continue
+            }
+
+            const resourceContent = fs.readFileSync(resourcePath, 'utf-8')
+
+            await upsertResource(
+              resourceSlug,
+              resourceTitle,
+              resourceDescription,
+              resourceContent,
+              resourceOrder,
+              resourceHref,
+              lessonRecord.id,
+            )
+          }
         }
 
         console.log(`Synced: ${lessonTitle}`)
       }
     }
-  }
-
-  const resourcesDir = path.join(process.cwd(), `src/${RESOURCES_FOLDER}`)
-
-  for (const [resourceOrder, resource] of completeResources.entries()) {
-    const {
-      title: resourceTitle,
-      description: resourceDescription,
-      id: resourceId,
-      href: resourceHref,
-    } = resource
-    const resourceSlug = slugify(resourceTitle, { lower: true })
-
-    const resourcePath = path.join(resourcesDir, resourceId, 'page.mdx')
-    if (!fs.existsSync(resourcePath)) {
-      console.error(`File not found: ${resourcePath}`)
-      continue
-    }
-
-    const resourceContent = fs.readFileSync(resourcePath, 'utf-8')
-
-    await upsertResource(
-      resourceSlug,
-      resourceTitle,
-      resourceDescription,
-      resourceContent,
-      resourceOrder,
-      resourceHref,
-    )
-
-    console.log(`Synced: ${resourceTitle}`)
   }
 
   for (const banner of ACTIVE_BANNERS) {

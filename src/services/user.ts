@@ -11,10 +11,9 @@ import {
 } from '@/utils/helpers'
 import {
   getLessonsAndProblems,
-  getLessonsAndProblemsCounts,
   getLessonsWithProblems,
+  getLessonsWithResourcesAndProblems,
 } from './lesson'
-import { getResources } from './resource'
 
 export const getUserById = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -95,21 +94,13 @@ export const getUserWithSubscriptionDetails = async (userId: string) => {
 }
 
 export const getUserProgressWithCurriculum = async (userId?: string) => {
-  const user = userId ? await getUserWithSubscriptionDetails(userId) : null
-  const { allLessons, allProblems } = await getLessonsAndProblems()
+  const [user, { allLessons, allProblems }] = await Promise.all([
+    userId ? getUserWithSubscriptionDetails(userId) : Promise.resolve(null),
+    getLessonsAndProblems(),
+  ])
 
   const curriculum = buildCurriculum(allLessons)
   const sortedContent = sortCurriculum(curriculum)
-
-  const lessons = allLessons.map(
-    ({ id, href, title, description, access }) => ({
-      id,
-      href,
-      title,
-      description,
-      access,
-    }),
-  )
 
   const problems = allProblems.map(({ id }) => ({ id }))
 
@@ -124,22 +115,32 @@ export const getUserProgressWithCurriculum = async (userId?: string) => {
   return {
     user: enrichedUser,
     curriculum: sortedContent,
-    lessons,
+    lessons: allLessons,
     problems,
   }
 }
 
 export const getUserProgressWithResources = async (userId?: string) => {
-  const user = userId ? await getUserWithSubscriptionDetails(userId) : null
-  const [{ allResources }, { lessonCount, problemCount }] = await Promise.all([
-    getResources(),
-    getLessonsAndProblemsCounts(),
+  const [user, { allLessons }] = await Promise.all([
+    userId ? getUserWithSubscriptionDetails(userId) : Promise.resolve(null),
+    getLessonsWithResourcesAndProblems(),
   ])
 
-  const sortedContent = sortResources(allResources)
+  const sortedContent = sortResources(allLessons)
+
+  const lessons = sortedContent?.filter((lesson) => !!lesson.resources?.length)
+
+  const problems = sortedContent?.flatMap((lesson) =>
+    lesson.problems?.map(({ id, title, href, difficulty }) => ({
+      id,
+      title,
+      href,
+      difficulty,
+    })),
+  )
 
   const progress = user
-    ? calculateProgress(user, lessonCount, problemCount)
+    ? calculateProgress(user, allLessons, problems ?? 0)
     : null
 
   const enrichedUser = (
@@ -148,25 +149,17 @@ export const getUserProgressWithResources = async (userId?: string) => {
 
   return {
     user: enrichedUser,
-    resources: sortedContent,
+    lessons: lessons,
   }
 }
 
 export const getUserProgressWithProblems = async (userId?: string) => {
-  const user = userId ? await getUserWithSubscriptionDetails(userId) : null
-  const { allLessons } = await getLessonsWithProblems()
+  const [user, { allLessons }] = await Promise.all([
+    userId ? getUserWithSubscriptionDetails(userId) : Promise.resolve(null),
+    getLessonsWithProblems(),
+  ])
 
   const sortedContent = sortProblemList(allLessons)
-
-  const lessons = sortedContent?.map(
-    ({ id, href, title, description, access }) => ({
-      id,
-      href,
-      title,
-      description,
-      access,
-    }),
-  )
 
   const problems = sortedContent?.flatMap((lesson) =>
     lesson.problems.map(({ id, title, href, difficulty }) => ({
@@ -178,7 +171,7 @@ export const getUserProgressWithProblems = async (userId?: string) => {
   )
 
   const progress = user
-    ? calculateProgress(user, lessons ?? [], problems ?? [])
+    ? calculateProgress(user, allLessons ?? [], problems ?? [])
     : null
 
   const enrichedUser = (
@@ -188,7 +181,7 @@ export const getUserProgressWithProblems = async (userId?: string) => {
   return {
     user: enrichedUser,
     problemList: sortedContent,
-    lessons,
+    lessons: allLessons,
     problems,
   }
 }

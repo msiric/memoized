@@ -219,6 +219,11 @@ export const getLessonsAndProblemsCounts = async () => {
   return { lessonCount, problemCount }
 }
 
+export const getProblemsCounts = async () => {
+  const problemCount = await prisma.problem.count()
+  return { problemCount }
+}
+
 export const getLessonsWithProblems = async () => {
   const allLessons = await prisma.lesson.findMany({
     select: {
@@ -231,6 +236,43 @@ export const getLessonsWithProblems = async () => {
       order: true,
       section: {
         select: {
+          order: true,
+        },
+      },
+      problems: {
+        select: {
+          id: true,
+          title: true,
+          href: true,
+          difficulty: true,
+        },
+      },
+    },
+    orderBy: { order: 'asc' },
+  })
+  return { allLessons }
+}
+
+export const getLessonsWithResourcesAndProblems = async () => {
+  const allLessons = await prisma.lesson.findMany({
+    select: {
+      id: true,
+      title: true,
+      href: true,
+      description: true,
+      access: true,
+      slug: true,
+      order: true,
+      section: {
+        select: {
+          order: true,
+        },
+      },
+      resources: {
+        select: {
+          id: true,
+          title: true,
+          href: true,
           order: true,
         },
       },
