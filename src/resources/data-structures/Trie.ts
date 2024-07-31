@@ -19,7 +19,6 @@ class Trie {
     this.root = new TrieNode(null, null)
   }
 
-  // Recursively finds the occurrence of all words in a given node
   static findAllWords(
     root: TrieNode,
     word: string,
@@ -41,7 +40,7 @@ class Trie {
       return
     }
     let node = this.root
-    for (const char of word) {
+    for (const char of word.toLowerCase()) {
       if (!node.children[char]) {
         node.children[char] = new TrieNode(char, node)
       }
@@ -53,7 +52,7 @@ class Trie {
   findPrefix(prefix: string): TrieNode | null {
     if (typeof prefix !== 'string') return null
     let node = this.root
-    for (const char of prefix) {
+    for (const char of prefix.toLowerCase()) {
       if (!node.children[char]) return null
       node = node.children[char]
     }
@@ -67,7 +66,7 @@ class Trie {
       return
     }
     let node = this.root
-    for (const char of word) {
+    for (const char of word.toLowerCase()) {
       if (!node.children[char]) return
       node = node.children[char]
     }
@@ -87,18 +86,44 @@ class Trie {
     const output: Array<{ word: string; count: number }> = []
     const node = this.findPrefix(prefix)
     if (node === null) return output
-    Trie.findAllWords(node, prefix, output)
+    Trie.findAllWords(node, prefix.toLowerCase(), output)
     return output
   }
 
   contains(word: string): boolean {
-    const node = this.findPrefix(word)
+    const node = this.findPrefix(word.toLowerCase())
     return node !== null && node.count > 0
   }
 
   findOccurrences(word: string): number {
-    const node = this.findPrefix(word)
+    const node = this.findPrefix(word.toLowerCase())
     return node ? node.count : 0
+  }
+
+  serialize(): string {
+    return JSON.stringify(this.root, (key, value) =>
+      key === 'parent' ? undefined : value,
+    )
+  }
+
+  static deserialize(data: string): Trie {
+    const trie = new Trie()
+    trie.root = JSON.parse(data)
+    trie.relinkParents(trie.root)
+    return trie
+  }
+
+  private relinkParents(node: TrieNode) {
+    for (const childKey in node.children) {
+      node.children[childKey].parent = node
+      this.relinkParents(node.children[childKey])
+    }
+  }
+
+  getAllWords(): Array<{ word: string; count: number }> {
+    const output: Array<{ word: string; count: number }> = []
+    Trie.findAllWords(this.root, '', output)
+    return output.sort((a, b) => a.word.localeCompare(b.word))
   }
 }
 

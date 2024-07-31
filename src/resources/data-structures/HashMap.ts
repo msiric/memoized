@@ -10,18 +10,20 @@ class HashMapNode<K, V> {
   }
 }
 
-class HashMap<K, V> {
-  private buckets: Array<HashMapNode<string, V> | null>
+class HashMap<K extends string | number | symbol, V> {
+  private buckets: Array<HashMapNode<K, V> | null>
   private size: number
   private capacity: number
+  private loadFactor: number
 
-  constructor(capacity: number = 16) {
+  constructor(capacity: number = 16, loadFactor: number = 0.75) {
     this.capacity = capacity
-    this.buckets = new Array<HashMapNode<string, V> | null>(capacity).fill(null)
+    this.buckets = new Array<HashMapNode<K, V> | null>(capacity).fill(null)
     this.size = 0
+    this.loadFactor = loadFactor
   }
 
-  private hash(key: string): number {
+  private hash(key: K): number {
     let hash = 0
     const keyString = key.toString()
     for (let i = 0; i < keyString.length; i++) {
@@ -31,7 +33,28 @@ class HashMap<K, V> {
     return Math.abs(hash) % this.capacity
   }
 
-  put(key: string, value: V): void {
+  private resize() {
+    const newCapacity = this.capacity * 2
+    const newBuckets: Array<HashMapNode<K, V> | null> = new Array(
+      newCapacity,
+    ).fill(null)
+    this.buckets.forEach((node) => {
+      while (node) {
+        const newIndex = this.hash(node.key) % newCapacity
+        const newNode = new HashMapNode(node.key, node.value)
+        newNode.next = newBuckets[newIndex]
+        newBuckets[newIndex] = newNode
+        node = node.next
+      }
+    })
+    this.buckets = newBuckets
+    this.capacity = newCapacity
+  }
+
+  put(key: K, value: V): void {
+    if (this.size / this.capacity >= this.loadFactor) {
+      this.resize()
+    }
     const index = this.hash(key)
     let node = this.buckets[index]
     if (!node) {
@@ -52,7 +75,7 @@ class HashMap<K, V> {
     this.size++
   }
 
-  get(key: string): V | null {
+  get(key: K): V | null {
     const index = this.hash(key)
     let node = this.buckets[index]
     while (node) {
@@ -64,10 +87,10 @@ class HashMap<K, V> {
     return null
   }
 
-  remove(key: string): V | null {
+  remove(key: K): V | null {
     const index = this.hash(key)
     let node = this.buckets[index]
-    let prevNode: HashMapNode<string, V> | null = null
+    let prevNode: HashMapNode<K, V> | null = null
 
     while (node) {
       if (node.key === key) {
@@ -85,12 +108,12 @@ class HashMap<K, V> {
     return null
   }
 
-  containsKey(key: string): boolean {
+  containsKey(key: K): boolean {
     return this.get(key) !== null
   }
 
-  keys(): string[] {
-    const keysArray: string[] = []
+  keys(): K[] {
+    const keysArray: K[] = []
     for (let i = 0; i < this.capacity; i++) {
       let node = this.buckets[i]
       while (node) {
@@ -124,6 +147,20 @@ class HashMap<K, V> {
 
   log(): void {
     console.log(this.buckets)
+  }
+
+  *iterator() {
+    for (let i = 0; i < this.capacity; i++) {
+      let node = this.buckets[i]
+      while (node) {
+        yield { key: node.key, value: node.value }
+        node = node.next
+      }
+    }
+  }
+
+  [Symbol.iterator]() {
+    return this.iterator()
   }
 }
 

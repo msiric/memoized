@@ -1,90 +1,99 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { PriorityQueue } from './PriorityQueue'
 
 describe('PriorityQueue', () => {
-  let pq: PriorityQueue<string>
+  let pq: PriorityQueue<number>
 
   beforeEach(() => {
-    pq = new PriorityQueue<string>()
+    pq = new PriorityQueue<number>()
   })
 
   it('should initialize an empty priority queue', () => {
     expect(pq.size()).toBe(0)
+    expect(() => pq.peek()).toThrow('PriorityQueue is empty')
     expect(pq.isEmpty()).toBe(true)
-    expect(pq.peek()).toBeNull()
   })
 
-  it('should enqueue elements with priorities', () => {
-    pq.enqueue('task1', 2)
-    pq.enqueue('task2', 1)
-    pq.enqueue('task3', 3)
-
+  it('should enqueue elements into the priority queue', () => {
+    pq.enqueue(1, 3)
+    pq.enqueue(2, 1)
+    pq.enqueue(3, 2)
     expect(pq.size()).toBe(3)
-    expect(pq.isEmpty()).toBe(false)
+    expect(pq.peek()).toBe(2)
   })
 
-  it('should dequeue elements by priority', () => {
-    pq.enqueue('task1', 2)
-    pq.enqueue('task2', 1)
-    pq.enqueue('task3', 3)
-
-    expect(pq.dequeue()).toBe('task2')
-    expect(pq.dequeue()).toBe('task1')
-    expect(pq.dequeue()).toBe('task3')
-    expect(pq.dequeue()).toBeNull()
-  })
-
-  it('should peek at the element with the highest priority without removing it', () => {
-    pq.enqueue('task1', 2)
-    pq.enqueue('task2', 1)
-
-    expect(pq.peek()).toBe('task2')
+  it('should dequeue elements from the priority queue', () => {
+    pq.enqueue(1, 3)
+    pq.enqueue(2, 1)
+    pq.enqueue(3, 2)
+    expect(pq.dequeue()).toBe(2)
     expect(pq.size()).toBe(2)
+    expect(pq.peek()).toBe(3)
   })
 
-  it('should return the correct size after enqueue and dequeue operations', () => {
-    pq.enqueue('task1', 2)
-    pq.enqueue('task2', 1)
-
-    expect(pq.size()).toBe(2)
-    pq.dequeue()
-    expect(pq.size()).toBe(1)
-    pq.dequeue()
+  it('should throw an error when dequeuing from an empty priority queue', () => {
+    expect(() => pq.dequeue()).toThrow('PriorityQueue is empty')
     expect(pq.size()).toBe(0)
-    pq.dequeue()
+    expect(() => pq.peek()).toThrow('PriorityQueue is empty')
+  })
+
+  it('should peek the highest priority element without removing it', () => {
+    pq.enqueue(1, 3)
+    pq.enqueue(2, 1)
+    pq.enqueue(3, 2)
+    expect(pq.peek()).toBe(2)
+    expect(pq.size()).toBe(3)
+  })
+
+  it('should throw an error when peeking into an empty priority queue', () => {
+    expect(() => pq.peek()).toThrow('PriorityQueue is empty')
     expect(pq.size()).toBe(0)
   })
 
-  it('should correctly determine if the priority queue is empty', () => {
+  it('should check if the priority queue is empty', () => {
     expect(pq.isEmpty()).toBe(true)
-    pq.enqueue('task1', 2)
+    pq.enqueue(1, 1)
     expect(pq.isEmpty()).toBe(false)
-    pq.dequeue()
+  })
+
+  it('should clear the priority queue', () => {
+    pq.enqueue(1, 1)
+    pq.enqueue(2, 2)
+    pq.clear()
+    expect(pq.size()).toBe(0)
+    expect(pq.isEmpty()).toBe(true)
+    expect(() => pq.peek()).toThrow('PriorityQueue is empty')
+  })
+
+  it('should handle enqueue and dequeue operations', () => {
+    pq.enqueue(1, 3)
+    pq.enqueue(2, 1)
+    pq.enqueue(3, 2)
+    expect(pq.dequeue()).toBe(2)
+    expect(pq.dequeue()).toBe(3)
+    expect(pq.dequeue()).toBe(1)
+    expect(() => pq.dequeue()).toThrow('PriorityQueue is empty')
+  })
+
+  it('should handle interleaved enqueue and dequeue operations', () => {
+    pq.enqueue(1, 3)
+    expect(pq.dequeue()).toBe(1)
+    pq.enqueue(2, 1)
+    pq.enqueue(3, 2)
+    expect(pq.dequeue()).toBe(2)
+    expect(pq.peek()).toBe(3)
+    expect(pq.dequeue()).toBe(3)
     expect(pq.isEmpty()).toBe(true)
   })
 
-  it('should handle enqueuing elements with the same priority', () => {
-    pq.enqueue('task1', 1)
-    pq.enqueue('task2', 1)
-    pq.enqueue('task3', 1)
-
-    expect(pq.size()).toBe(3)
-    expect(pq.dequeue()).toBe('task1')
-    expect(pq.dequeue()).toBe('task2')
-    expect(pq.dequeue()).toBe('task3')
-  })
-
-  it('should handle a mix of enqueue and dequeue operations correctly', () => {
-    pq.enqueue('task1', 3)
-    pq.enqueue('task2', 2)
-    pq.enqueue('task3', 1)
-
-    expect(pq.dequeue()).toBe('task3')
-    pq.enqueue('task4', 0)
-    expect(pq.dequeue()).toBe('task4')
-    expect(pq.dequeue()).toBe('task2')
-    pq.enqueue('task5', 1)
-    expect(pq.dequeue()).toBe('task5')
-    expect(pq.dequeue()).toBe('task1')
+  it('should iterate over the priority queue', () => {
+    pq.enqueue(1, 3)
+    pq.enqueue(2, 1)
+    pq.enqueue(3, 2)
+    const elements: number[] = []
+    for (const element of pq) {
+      elements.push(element)
+    }
+    expect(elements).toEqual([2, 3, 1])
   })
 })

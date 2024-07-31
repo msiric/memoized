@@ -86,17 +86,24 @@ class PriorityQueue<T> {
     this.bubbleUp(this.heap.length - 1)
   }
 
-  dequeue(): T | null {
-    if (this.isEmpty()) return null
-    if (this.heap.length === 1) return this.heap.pop()!.element
+  dequeue(): T {
+    if (this.isEmpty()) {
+      throw new Error('PriorityQueue is empty')
+    }
+    if (this.heap.length === 1) {
+      return this.heap.pop()!.element
+    }
     const root = this.heap[0]
     this.heap[0] = this.heap.pop()!
     this.bubbleDown(0)
     return root.element
   }
 
-  peek(): T | null {
-    return this.isEmpty() ? null : this.heap[0].element
+  peek(): T {
+    if (this.isEmpty()) {
+      throw new Error('PriorityQueue is empty')
+    }
+    return this.heap[0].element
   }
 
   size(): number {
@@ -105,6 +112,24 @@ class PriorityQueue<T> {
 
   isEmpty(): boolean {
     return this.heap.length === 0
+  }
+
+  clear(): void {
+    this.heap = []
+    this.orderCounter = 0
+  }
+
+  *iterator() {
+    const sortedHeap = [...this.heap].sort(
+      (a, b) => a.priority - b.priority || a.order - b.order,
+    )
+    for (const { element } of sortedHeap) {
+      yield element
+    }
+  }
+
+  [Symbol.iterator]() {
+    return this.iterator()
   }
 }
 

@@ -13,10 +13,16 @@ class Queue<T> {
   private tail: ListNode<T> | null
   private length: number
 
-  constructor() {
+  constructor(initialValues?: T[]) {
     this.head = null
     this.tail = null
     this.length = 0
+
+    if (Array.isArray(initialValues)) {
+      for (const value of initialValues) {
+        this.enqueue(value)
+      }
+    }
   }
 
   enqueue(element: T): void {
@@ -30,8 +36,10 @@ class Queue<T> {
     this.length++
   }
 
-  dequeue(): T | null {
-    if (this.head === null) return null
+  dequeue(): T {
+    if (this.head === null) {
+      throw new Error('Queue is empty')
+    }
     const dequeuedNode = this.head
     this.head = this.head.next
     if (this.head === null) {
@@ -41,8 +49,10 @@ class Queue<T> {
     return dequeuedNode.data
   }
 
-  peek(): T | null {
-    if (this.head === null) return null
+  peek(): T {
+    if (this.head === null) {
+      throw new Error('Queue is empty')
+    }
     return this.head.data
   }
 
@@ -68,6 +78,18 @@ class Queue<T> {
       currentNode = currentNode.next
     }
     console.log(elements)
+  }
+
+  *iterator() {
+    let currentNode = this.head
+    while (currentNode) {
+      yield currentNode.data
+      currentNode = currentNode.next
+    }
+  }
+
+  [Symbol.iterator]() {
+    return this.iterator()
   }
 }
 

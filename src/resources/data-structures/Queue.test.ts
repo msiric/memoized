@@ -10,11 +10,11 @@ describe('Queue', () => {
 
   it('should initialize an empty queue', () => {
     expect(queue.size()).toBe(0)
+    expect(() => queue.peek()).toThrow('Queue is empty')
     expect(queue.isEmpty()).toBe(true)
-    expect(queue.peek()).toBeNull()
   })
 
-  it('should enqueue elements into the queue', () => {
+  it('should enqueue elements to the queue', () => {
     queue.enqueue(1)
     queue.enqueue(2)
     queue.enqueue(3)
@@ -31,10 +31,10 @@ describe('Queue', () => {
     expect(queue.peek()).toBe(2)
   })
 
-  it('should return null when dequeuing from an empty queue', () => {
-    expect(queue.dequeue()).toBeNull()
+  it('should throw an error when dequeuing from an empty queue', () => {
+    expect(() => queue.dequeue()).toThrow('Queue is empty')
     expect(queue.size()).toBe(0)
-    expect(queue.peek()).toBeNull()
+    expect(() => queue.peek()).toThrow('Queue is empty')
   })
 
   it('should peek the front element without removing it', () => {
@@ -45,8 +45,8 @@ describe('Queue', () => {
     expect(queue.size()).toBe(3)
   })
 
-  it('should return null when peeking into an empty queue', () => {
-    expect(queue.peek()).toBeNull()
+  it('should throw an error when peeking into an empty queue', () => {
+    expect(() => queue.peek()).toThrow('Queue is empty')
     expect(queue.size()).toBe(0)
   })
 
@@ -63,16 +63,15 @@ describe('Queue', () => {
     queue.clear()
     expect(queue.size()).toBe(0)
     expect(queue.isEmpty()).toBe(true)
-    expect(queue.peek()).toBeNull()
+    expect(() => queue.peek()).toThrow('Queue is empty')
   })
 
   it('should log the queue elements', () => {
     const logSpy = vi.spyOn(console, 'log')
     queue.enqueue(1)
     queue.enqueue(2)
-    queue.enqueue(3)
     queue.log()
-    expect(logSpy).toHaveBeenCalledWith([1, 2, 3])
+    expect(logSpy).toHaveBeenCalledWith([1, 2])
     logSpy.mockRestore()
   })
 
@@ -83,7 +82,7 @@ describe('Queue', () => {
     expect(queue.dequeue()).toBe(1)
     expect(queue.dequeue()).toBe(2)
     expect(queue.dequeue()).toBe(3)
-    expect(queue.dequeue()).toBeNull()
+    expect(() => queue.dequeue()).toThrow('Queue is empty')
   })
 
   it('should handle interleaved enqueue and dequeue operations', () => {
@@ -95,5 +94,22 @@ describe('Queue', () => {
     expect(queue.peek()).toBe(3)
     expect(queue.dequeue()).toBe(3)
     expect(queue.isEmpty()).toBe(true)
+  })
+
+  it('should initialize queue with an array', () => {
+    const arrayQueue = new Queue<number>([1, 2, 3])
+    expect(arrayQueue.size()).toBe(3)
+    expect(arrayQueue.peek()).toBe(1)
+  })
+
+  it('should iterate over the queue', () => {
+    queue.enqueue(1)
+    queue.enqueue(2)
+    queue.enqueue(3)
+    const elements: number[] = []
+    for (const element of queue) {
+      elements.push(element)
+    }
+    expect(elements).toEqual([1, 2, 3])
   })
 })

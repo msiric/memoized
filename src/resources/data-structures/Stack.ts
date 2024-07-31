@@ -12,9 +12,15 @@ class Stack<T> {
   private head: ListNode<T> | null
   private length: number
 
-  constructor() {
+  constructor(initialValues?: T[]) {
     this.head = null
     this.length = 0
+
+    if (Array.isArray(initialValues)) {
+      for (const value of initialValues) {
+        this.push(value)
+      }
+    }
   }
 
   push(element: T): void {
@@ -24,16 +30,20 @@ class Stack<T> {
     this.length++
   }
 
-  pop(): T | null {
-    if (this.head === null) return null
+  pop(): T {
+    if (this.head === null) {
+      throw new Error('Stack is empty')
+    }
     const poppedNode = this.head
     this.head = this.head.next
     this.length--
     return poppedNode.data
   }
 
-  peek(): T | null {
-    if (this.head === null) return null
+  peek(): T {
+    if (this.head === null) {
+      throw new Error('Stack is empty')
+    }
     return this.head.data
   }
 
@@ -58,6 +68,18 @@ class Stack<T> {
       currentNode = currentNode.next
     }
     console.log(elements)
+  }
+
+  *iterator() {
+    let currentNode = this.head
+    while (currentNode) {
+      yield currentNode.data
+      currentNode = currentNode.next
+    }
+  }
+
+  [Symbol.iterator]() {
+    return this.iterator()
   }
 }
 

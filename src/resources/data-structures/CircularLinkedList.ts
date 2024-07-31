@@ -10,10 +10,12 @@ class CircularLinkedListNode<T> {
 
 class CircularLinkedList<T> {
   headNode: CircularLinkedListNode<T> | null
+  tailNode: CircularLinkedListNode<T> | null
   length: number
 
   constructor() {
     this.headNode = null
+    this.tailNode = null
     this.length = 0
   }
 
@@ -42,11 +44,11 @@ class CircularLinkedList<T> {
     const node = new CircularLinkedListNode(data)
     if (!this.headNode) {
       this.headNode = node
+      this.tailNode = node
       node.next = this.headNode
     } else {
       node.next = this.headNode
-      const lastNode = this.getElementAt(this.length - 1)!
-      lastNode.next = node
+      this.tailNode!.next = node
       this.headNode = node
     }
     this.length++
@@ -58,9 +60,9 @@ class CircularLinkedList<T> {
       return this.addAtFirst(data)
     }
     const node = new CircularLinkedListNode(data)
-    const lastNode = this.getElementAt(this.length - 1)!
-    lastNode.next = node
+    this.tailNode!.next = node
     node.next = this.headNode
+    this.tailNode = node
     this.length++
     return this.length
   }
@@ -68,8 +70,9 @@ class CircularLinkedList<T> {
   insertAt(index: number, data: T): number {
     if (index === 0) return this.addAtFirst(data)
     if (index === this.length) return this.add(data)
-    if (index < 0 || index > this.length)
+    if (index < 0 || index > this.length) {
       throw new RangeError(`Index is out of range. Max index is ${this.length}`)
+    }
     const node = new CircularLinkedListNode(data)
     const previousNode = this.getElementAt(index - 1)!
     node.next = previousNode.next
@@ -97,7 +100,12 @@ class CircularLinkedList<T> {
     const lastNode = this.getElementAt(this.length - 2)!
     const removedNode = lastNode.next!
     lastNode.next = this.headNode
+    this.tailNode = lastNode
     this.length--
+    if (this.isEmpty()) {
+      this.headNode = null
+      this.tailNode = null
+    }
     return removedNode.data
   }
 
@@ -108,7 +116,7 @@ class CircularLinkedList<T> {
       this.clear()
       return removedNode.data
     }
-    const lastNode = this.getElementAt(this.length - 1)!
+    const lastNode = this.tailNode!
     this.headNode = this.headNode!.next!
     lastNode.next = this.headNode
     this.length--
@@ -158,7 +166,21 @@ class CircularLinkedList<T> {
 
   clear() {
     this.headNode = null
+    this.tailNode = null
     this.length = 0
+  }
+
+  *iterator() {
+    let { currentNode, currentIndex } = this.initiateNodeAndIndex()
+    while (currentNode !== null && currentIndex < this.length) {
+      yield currentNode.data
+      currentNode = currentNode.next!
+      currentIndex++
+    }
+  }
+
+  [Symbol.iterator]() {
+    return this.iterator()
   }
 }
 

@@ -107,8 +107,11 @@ describe('CircularLinkedList', () => {
     list.add(1)
     list.add(2)
     list.add(3)
-    const iterator = list.get()
-    expect(iterator).toEqual([1, 2, 3])
+    const elements: number[] = []
+    for (const element of list) {
+      elements.push(element)
+    }
+    expect(elements).toEqual([1, 2, 3])
   })
 
   it('should log the list', () => {

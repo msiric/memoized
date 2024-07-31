@@ -1,68 +1,131 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { BinaryTree, TreeNode } from './BinaryTree'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { BinaryTree } from './BinaryTree'
 
 describe('BinaryTree', () => {
-  let bt: BinaryTree<number>
+  let tree: BinaryTree<number>
 
   beforeEach(() => {
-    bt = new BinaryTree<number>()
+    tree = new BinaryTree<number>()
   })
 
-  it('should initialize an empty tree', () => {
-    expect(bt.root).toBeNull()
+  it('should initialize an empty binary tree', () => {
+    expect(tree.root).toBeNull()
   })
 
-  it('should insert nodes in the tree', () => {
-    bt.insert(5)
-    bt.insert(3)
-    bt.insert(7)
-    expect(bt.root?.data).toBe(5)
-    expect(bt.root?.left?.data).toBe(3)
-    expect(bt.root?.right?.data).toBe(7)
+  it('should insert nodes into the binary tree', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    expect(tree.root?.data).toBe(10)
+    expect(tree.root?.left?.data).toBe(5)
+    expect(tree.root?.right?.data).toBe(15)
   })
 
   it('should perform in-order traversal', () => {
-    bt.insert(5)
-    bt.insert(3)
-    bt.insert(7)
-    bt.insert(2)
-    bt.insert(4)
-    bt.insert(6)
-    bt.insert(8)
-    expect(bt.inorderTraversal(bt.root)).toEqual([2, 3, 4, 5, 6, 7, 8])
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    tree.insert(3)
+    tree.insert(7)
+    tree.insert(12)
+    tree.insert(18)
+    expect(tree.inorderTraversal(tree.root)).toEqual([3, 5, 7, 10, 12, 15, 18])
   })
 
   it('should perform pre-order traversal', () => {
-    bt.insert(5)
-    bt.insert(3)
-    bt.insert(7)
-    bt.insert(2)
-    bt.insert(4)
-    bt.insert(6)
-    bt.insert(8)
-    expect(bt.preorderTraversal(bt.root)).toEqual([5, 3, 2, 4, 7, 6, 8])
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    tree.insert(3)
+    tree.insert(7)
+    tree.insert(12)
+    tree.insert(18)
+    expect(tree.preorderTraversal(tree.root)).toEqual([10, 5, 3, 7, 15, 12, 18])
   })
 
   it('should perform post-order traversal', () => {
-    bt.insert(5)
-    bt.insert(3)
-    bt.insert(7)
-    bt.insert(2)
-    bt.insert(4)
-    bt.insert(6)
-    bt.insert(8)
-    expect(bt.postorderTraversal(bt.root)).toEqual([2, 4, 3, 6, 8, 7, 5])
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    tree.insert(3)
+    tree.insert(7)
+    tree.insert(12)
+    tree.insert(18)
+    expect(tree.postorderTraversal(tree.root)).toEqual([
+      3, 7, 5, 12, 18, 15, 10,
+    ])
   })
 
-  it('should search for a node in the tree', () => {
-    bt.insert(5)
-    bt.insert(3)
-    bt.insert(7)
-    bt.insert(2)
-    bt.insert(4)
-    bt.insert(6)
-    bt.insert(8)
-    expect(bt.search(bt.root, 4)?.data).toBe(4)
-    expect(bt.search(bt.root, 9)).toBeNull()
+  it('should perform breadth-first traversal', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    tree.insert(3)
+    tree.insert(7)
+    tree.insert(12)
+    tree.insert(18)
+    expect(tree.breadthFirstTraversal()).toEqual([10, 5, 15, 3, 7, 12, 18])
+  })
+
+  it('should search for nodes in the binary tree', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    expect(tree.search(tree.root, 10)?.data).toBe(10)
+    expect(tree.search(tree.root, 5)?.data).toBe(5)
+    expect(tree.search(tree.root, 15)?.data).toBe(15)
+    expect(tree.search(tree.root, 20)).toBeNull()
+  })
+
+  it('should remove nodes from the binary tree', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    tree.insert(3)
+    tree.insert(7)
+    tree.insert(12)
+    tree.insert(18)
+    tree.remove(10)
+    expect(tree.inorderTraversal(tree.root)).toEqual([3, 5, 7, 12, 15, 18])
+    tree.remove(5)
+    expect(tree.inorderTraversal(tree.root)).toEqual([3, 7, 12, 15, 18])
+    tree.remove(15)
+    expect(tree.inorderTraversal(tree.root)).toEqual([3, 7, 12, 18])
+  })
+
+  it('should find the minimum value in the tree', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    expect(tree.findMin()).toBe(5)
+    tree.insert(3)
+    expect(tree.findMin()).toBe(3)
+  })
+
+  it('should find the maximum value in the tree', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    expect(tree.findMax()).toBe(15)
+    tree.insert(18)
+    expect(tree.findMax()).toBe(18)
+  })
+
+  it('should calculate the height of the tree', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    expect(tree.height()).toBe(1)
+    tree.insert(3)
+    tree.insert(7)
+    expect(tree.height()).toBe(2)
+  })
+
+  it('should clear the tree', () => {
+    tree.insert(10)
+    tree.insert(5)
+    tree.insert(15)
+    tree.clear()
+    expect(tree.root).toBeNull()
   })
 })

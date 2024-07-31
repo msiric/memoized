@@ -11,7 +11,7 @@ describe('Stack', () => {
   it('should initialize an empty stack', () => {
     expect(stack.size()).toBe(0)
     expect(stack.isEmpty()).toBe(true)
-    expect(stack.peek()).toBeNull()
+    expect(() => stack.peek()).toThrow('Stack is empty')
   })
 
   it('should push elements onto the stack', () => {
@@ -31,10 +31,10 @@ describe('Stack', () => {
     expect(stack.peek()).toBe(2)
   })
 
-  it('should return null when popping from an empty stack', () => {
-    expect(stack.pop()).toBeNull()
+  it('should throw an error when popping from an empty stack', () => {
+    expect(() => stack.pop()).toThrow('Stack is empty')
     expect(stack.size()).toBe(0)
-    expect(stack.peek()).toBeNull()
+    expect(() => stack.peek()).toThrow('Stack is empty')
   })
 
   it('should peek the top element without removing it', () => {
@@ -45,8 +45,8 @@ describe('Stack', () => {
     expect(stack.size()).toBe(3)
   })
 
-  it('should return null when peeking into an empty stack', () => {
-    expect(stack.peek()).toBeNull()
+  it('should throw an error when peeking into an empty stack', () => {
+    expect(() => stack.peek()).toThrow('Stack is empty')
     expect(stack.size()).toBe(0)
   })
 
@@ -63,7 +63,7 @@ describe('Stack', () => {
     stack.clear()
     expect(stack.size()).toBe(0)
     expect(stack.isEmpty()).toBe(true)
-    expect(stack.peek()).toBeNull()
+    expect(() => stack.peek()).toThrow('Stack is empty')
   })
 
   it('should log the stack elements', () => {
@@ -83,7 +83,7 @@ describe('Stack', () => {
     expect(stack.pop()).toBe(3)
     expect(stack.pop()).toBe(2)
     expect(stack.pop()).toBe(1)
-    expect(stack.pop()).toBeNull()
+    expect(() => stack.pop()).toThrow('Stack is empty')
   })
 
   it('should handle interleaved push and pop operations', () => {
@@ -95,5 +95,22 @@ describe('Stack', () => {
     expect(stack.peek()).toBe(2)
     expect(stack.pop()).toBe(2)
     expect(stack.isEmpty()).toBe(true)
+  })
+
+  it('should initialize stack with an array', () => {
+    const arrayStack = new Stack<number>([1, 2, 3])
+    expect(arrayStack.size()).toBe(3)
+    expect(arrayStack.peek()).toBe(3)
+  })
+
+  it('should iterate over the stack', () => {
+    stack.push(1)
+    stack.push(2)
+    stack.push(3)
+    const elements: number[] = []
+    for (const element of stack) {
+      elements.push(element)
+    }
+    expect(elements).toEqual([3, 2, 1])
   })
 })

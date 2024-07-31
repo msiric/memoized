@@ -2,62 +2,76 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { UndirectedGraph } from './UndirectedGraph'
 
 describe('UndirectedGraph', () => {
-  let graph: UndirectedGraph<string>
+  let graph: UndirectedGraph<number>
 
   beforeEach(() => {
-    graph = new UndirectedGraph<string>()
+    graph = new UndirectedGraph<number>()
   })
 
-  it('should add vertices', () => {
-    graph.addVertex('A')
-    graph.addVertex('B')
-    expect(graph.getVertices()).toEqual(['A', 'B'])
+  it('should add vertices to the graph', () => {
+    graph.addVertex(1)
+    graph.addVertex(2)
+    expect(graph.getVertices()).toEqual([1, 2])
   })
 
-  it('should add edges', () => {
-    graph.addEdge('A', 'B')
-    graph.addEdge('A', 'C')
-    expect(graph.getNeighbors('A')).toEqual(['B', 'C'])
-    expect(graph.getNeighbors('B')).toEqual(['A'])
-    expect(graph.getNeighbors('C')).toEqual(['A'])
+  it('should add edges to the graph', () => {
+    graph.addEdge(1, 2)
+    expect(graph.hasEdge(1, 2)).toBe(true)
+    expect(graph.hasEdge(2, 1)).toBe(true)
   })
 
-  it('should remove edges', () => {
-    graph.addEdge('A', 'B')
-    graph.addEdge('A', 'C')
-    graph.removeEdge('A', 'B')
-    expect(graph.getNeighbors('A')).toEqual(['C'])
-    expect(graph.getNeighbors('B')).toEqual([])
+  it('should remove edges from the graph', () => {
+    graph.addEdge(1, 2)
+    expect(graph.hasEdge(1, 2)).toBe(true)
+    graph.removeEdge(1, 2)
+    expect(graph.hasEdge(1, 2)).toBe(false)
+    expect(graph.hasEdge(2, 1)).toBe(false)
   })
 
-  it('should remove vertices', () => {
-    graph.addEdge('A', 'B')
-    graph.addEdge('A', 'C')
-    graph.removeVertex('A')
-    expect(graph.getVertices()).toEqual(['B', 'C'])
-    expect(graph.getNeighbors('B')).toEqual([])
-    expect(graph.getNeighbors('C')).toEqual([])
+  it('should remove vertices from the graph', () => {
+    graph.addEdge(1, 2)
+    graph.addEdge(2, 3)
+    graph.removeVertex(2)
+    expect(graph.getVertices()).toEqual([1, 3])
+    expect(graph.hasEdge(1, 2)).toBe(false)
+    expect(graph.hasEdge(2, 3)).toBe(false)
   })
 
-  it('should check for edges', () => {
-    graph.addEdge('A', 'B')
-    expect(graph.hasEdge('A', 'B')).toBe(true)
-    expect(graph.hasEdge('A', 'C')).toBe(false)
+  it('should return the correct neighbors for a vertex', () => {
+    graph.addEdge(1, 2)
+    graph.addEdge(1, 3)
+    expect(graph.getNeighbors(1)).toEqual([2, 3])
   })
 
   it('should perform BFS traversal', () => {
-    graph.addEdge('A', 'B')
-    graph.addEdge('A', 'C')
-    graph.addEdge('B', 'D')
-    graph.addEdge('C', 'E')
-    expect(graph.bfs('A')).toEqual(['A', 'B', 'C', 'D', 'E'])
+    graph.addEdge(1, 2)
+    graph.addEdge(1, 3)
+    graph.addEdge(2, 4)
+    graph.addEdge(3, 4)
+    expect(graph.bfs(1)).toEqual([1, 2, 3, 4])
   })
 
   it('should perform DFS traversal', () => {
-    graph.addEdge('A', 'B')
-    graph.addEdge('A', 'C')
-    graph.addEdge('B', 'D')
-    graph.addEdge('C', 'E')
-    expect(graph.dfs('A')).toEqual(['A', 'C', 'E', 'B', 'D'])
+    graph.addEdge(1, 2)
+    graph.addEdge(1, 3)
+    graph.addEdge(2, 4)
+    graph.addEdge(3, 4)
+    expect(graph.dfs(1)).toEqual([1, 3, 4, 2])
+  })
+
+  it('should detect cycles in the graph', () => {
+    graph.addEdge(1, 2)
+    graph.addEdge(2, 3)
+    graph.addEdge(3, 1)
+    expect(graph.hasCycle()).toBe(true)
+    graph.removeEdge(3, 1)
+    expect(graph.hasCycle()).toBe(false)
+  })
+
+  it('should clear the graph', () => {
+    graph.addEdge(1, 2)
+    graph.addEdge(2, 3)
+    graph.clear()
+    expect(graph.getVertices()).toEqual([])
   })
 })

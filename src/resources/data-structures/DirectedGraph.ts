@@ -87,6 +87,62 @@ class DirectedGraph<T> {
 
     return result
   }
+
+  hasCycle(): boolean {
+    const visited = new Set<T>()
+    const recStack = new Set<T>()
+
+    const dfs = (vertex: T): boolean => {
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        recStack.add(vertex)
+
+        for (const neighbor of this.getNeighbors(vertex)) {
+          if (!visited.has(neighbor) && dfs(neighbor)) {
+            return true
+          } else if (recStack.has(neighbor)) {
+            return true
+          }
+        }
+      }
+      recStack.delete(vertex)
+      return false
+    }
+
+    for (const vertex of this.adjacencyList.keys()) {
+      if (dfs(vertex)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  topologicalSort(): T[] {
+    const visited = new Set<T>()
+    const stack: T[] = []
+
+    const dfs = (vertex: T) => {
+      visited.add(vertex)
+      for (const neighbor of this.getNeighbors(vertex)) {
+        if (!visited.has(neighbor)) {
+          dfs(neighbor)
+        }
+      }
+      stack.push(vertex)
+    }
+
+    for (const vertex of this.adjacencyList.keys()) {
+      if (!visited.has(vertex)) {
+        dfs(vertex)
+      }
+    }
+
+    return stack.reverse()
+  }
+
+  clear(): void {
+    this.adjacencyList.clear()
+  }
 }
 
 export { DirectedGraph }

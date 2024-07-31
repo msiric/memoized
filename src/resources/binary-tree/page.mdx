@@ -106,6 +106,25 @@ class BinaryTree {
     return result
   }
 
+  // Breadth-first traversal
+  breadthFirstTraversal() {
+    const result = []
+    const queue = []
+    if (this.root) {
+      queue.push(this.root)
+    }
+
+    while (queue.length > 0) {
+      const node = queue.shift()
+      if (node) {
+        result.push(node.data)
+        if (node.left) queue.push(node.left)
+        if (node.right) queue.push(node.right)
+      }
+    }
+    return result
+  }
+
   // Search for a node in the binary tree
   search(node, data) {
     if (node === null) {
@@ -118,6 +137,89 @@ class BinaryTree {
     } else {
       return node
     }
+  }
+
+  // Remove a node from the binary tree
+  remove(data) {
+    this.root = this.removeNode(this.root, data)
+  }
+
+  removeNode(node, key) {
+    if (node === null) {
+      return null
+    }
+    if (key < node.data) {
+      node.left = this.removeNode(node.left, key)
+      return node
+    } else if (key > node.data) {
+      node.right = this.removeNode(node.right, key)
+      return node
+    } else {
+      if (node.left === null && node.right === null) {
+        node = null
+        return node
+      }
+      if (node.left === null) {
+        node = node.right
+        return node
+      } else if (node.right === null) {
+        node = node.left
+        return node
+      }
+
+      const aux = this.findMinNode(node.right)
+      node.data = aux.data
+      node.right = this.removeNode(node.right, aux.data)
+      return node
+    }
+  }
+
+  // Find the minimum node in a tree/subtree
+  findMinNode(node) {
+    if (node.left === null) {
+      return node
+    } else {
+      return this.findMinNode(node.left)
+    }
+  }
+
+  // Find the maximum value in the tree
+  findMax() {
+    if (this.root === null) {
+      return null
+    }
+    let node = this.root
+    while (node.right !== null) {
+      node = node.right
+    }
+    return node.data
+  }
+
+  // Find the minimum value in the tree
+  findMin() {
+    if (this.root === null) {
+      return null
+    }
+    let node = this.root
+    while (node.left !== null) {
+      node = node.left
+    }
+    return node.data
+  }
+
+  // Calculate the height of the tree
+  height(node = this.root) {
+    if (node === null) {
+      return -1
+    }
+    const leftHeight = this.height(node.left)
+    const rightHeight = this.height(node.right)
+    return Math.max(leftHeight, rightHeight) + 1
+  }
+
+  // Clear the tree
+  clear() {
+    this.root = null
   }
 }
 
@@ -200,6 +302,25 @@ class BinaryTree<T> {
     return result
   }
 
+  // Breadth-first traversal
+  breadthFirstTraversal(): T[] {
+    const result: T[] = []
+    const queue: Array<TreeNode<T> | null> = []
+    if (this.root) {
+      queue.push(this.root)
+    }
+
+    while (queue.length > 0) {
+      const node = queue.shift()
+      if (node) {
+        result.push(node.data)
+        if (node.left) queue.push(node.left)
+        if (node.right) queue.push(node.right)
+      }
+    }
+    return result
+  }
+
   // Search for a node in the binary tree
   search(node: TreeNode<T> | null, data: T): TreeNode<T> | null {
     if (node === null) {
@@ -212,6 +333,89 @@ class BinaryTree<T> {
     } else {
       return node
     }
+  }
+
+  // Remove a node from the binary tree
+  remove(data: T) {
+    this.root = this.removeNode(this.root, data)
+  }
+
+  private removeNode(node: TreeNode<T> | null, key: T): TreeNode<T> | null {
+    if (node === null) {
+      return null
+    }
+    if (key < node.data) {
+      node.left = this.removeNode(node.left, key)
+      return node
+    } else if (key > node.data) {
+      node.right = this.removeNode(node.right, key)
+      return node
+    } else {
+      if (node.left === null && node.right === null) {
+        node = null
+        return node
+      }
+      if (node.left === null) {
+        node = node.right
+        return node
+      } else if (node.right === null) {
+        node = node.left
+        return node
+      }
+
+      const aux = this.findMinNode(node.right)
+      node.data = aux!.data
+      node.right = this.removeNode(node.right, aux!.data)
+      return node
+    }
+  }
+
+  // Find the minimum node in a tree/subtree
+  private findMinNode(node: TreeNode<T>): TreeNode<T> | null {
+    if (node.left === null) {
+      return node
+    } else {
+      return this.findMinNode(node.left)
+    }
+  }
+
+  // Find the maximum value in the tree
+  findMax(): T | null {
+    if (this.root === null) {
+      return null
+    }
+    let node = this.root
+    while (node.right !== null) {
+      node = node.right
+    }
+    return node.data
+  }
+
+  // Find the minimum value in the tree
+  findMin(): T | null {
+    if (this.root === null) {
+      return null
+    }
+    let node = this.root
+    while (node.left !== null) {
+      node = node.left
+    }
+    return node.data
+  }
+
+  // Calculate the height of the tree
+  height(node: TreeNode<T> | null = this.root): number {
+    if (node === null) {
+      return -1
+    }
+    const leftHeight = this.height(node.left)
+    const rightHeight = this.height(node.right)
+    return Math.max(leftHeight, rightHeight) + 1
+  }
+
+  // Clear the tree
+  clear() {
+    this.root = null
   }
 }
 

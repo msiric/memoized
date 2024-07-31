@@ -17,7 +17,6 @@ class BinarySearchTree<T> {
     this.root = null
   }
 
-  // Insert a node in the BST
   insert(data: T) {
     const newNode = new TreeNode(data)
     if (this.root === null) {
@@ -43,7 +42,6 @@ class BinarySearchTree<T> {
     }
   }
 
-  // In-order traversal
   inorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       this.inorderTraversal(node.left, result)
@@ -53,7 +51,6 @@ class BinarySearchTree<T> {
     return result
   }
 
-  // Pre-order traversal
   preorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       result.push(node.data)
@@ -63,7 +60,6 @@ class BinarySearchTree<T> {
     return result
   }
 
-  // Post-order traversal
   postorderTraversal(node: TreeNode<T> | null, result: T[] = []): T[] {
     if (node !== null) {
       this.postorderTraversal(node.left, result)
@@ -73,7 +69,24 @@ class BinarySearchTree<T> {
     return result
   }
 
-  // Search for a node in the BST
+  breadthFirstTraversal(): T[] {
+    const result: T[] = []
+    const queue: Array<TreeNode<T> | null> = []
+    if (this.root) {
+      queue.push(this.root)
+    }
+
+    while (queue.length > 0) {
+      const node = queue.shift()
+      if (node) {
+        result.push(node.data)
+        if (node.left) queue.push(node.left)
+        if (node.right) queue.push(node.right)
+      }
+    }
+    return result
+  }
+
   search(node: TreeNode<T> | null, data: T): TreeNode<T> | null {
     if (node === null) {
       return null
@@ -87,7 +100,6 @@ class BinarySearchTree<T> {
     }
   }
 
-  // Find the minimum node in the BST
   findMinNode(node: TreeNode<T>): TreeNode<T> | null {
     if (node.left === null) {
       return node
@@ -96,7 +108,37 @@ class BinarySearchTree<T> {
     }
   }
 
-  // Remove a node in the BST
+  findMax(): T | null {
+    if (this.root === null) {
+      return null
+    }
+    let node = this.root
+    while (node.right !== null) {
+      node = node.right
+    }
+    return node.data
+  }
+
+  findMin(): T | null {
+    if (this.root === null) {
+      return null
+    }
+    let node = this.root
+    while (node.left !== null) {
+      node = node.left
+    }
+    return node.data
+  }
+
+  height(node: TreeNode<T> | null = this.root): number {
+    if (node === null) {
+      return -1
+    }
+    const leftHeight = this.height(node.left)
+    const rightHeight = this.height(node.right)
+    return Math.max(leftHeight, rightHeight) + 1
+  }
+
   remove(data: T) {
     this.root = this.removeNode(this.root, data)
   }
@@ -112,7 +154,6 @@ class BinarySearchTree<T> {
       node.right = this.removeNode(node.right, data)
       return node
     } else {
-      // Node with only one child or no child
       if (node.left === null && node.right === null) {
         node = null
         return node
@@ -125,12 +166,15 @@ class BinarySearchTree<T> {
         return node
       }
 
-      // Node with two children: Get the inorder successor (smallest in the right subtree)
       const tempNode = this.findMinNode(node.right)
       node.data = tempNode!.data
       node.right = this.removeNode(node.right, tempNode!.data)
       return node
     }
+  }
+
+  clear() {
+    this.root = null
   }
 }
 

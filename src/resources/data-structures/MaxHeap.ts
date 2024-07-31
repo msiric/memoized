@@ -106,6 +106,21 @@ class MaxHeap<T> {
     }
   }
 
+  private heapifyDownFrom(index: number): void {
+    while (this.hasLeftChild(index)) {
+      let largerChildIndex = this.getLeftChildIndex(index)
+      if (
+        this.hasRightChild(index) &&
+        this.rightChild(index) > this.leftChild(index)
+      ) {
+        largerChildIndex = this.getRightChildIndex(index)
+      }
+      if (this.heap[index] > this.heap[largerChildIndex]) break
+      this.swap(index, largerChildIndex)
+      index = largerChildIndex
+    }
+  }
+
   public size(): number {
     return this.heap.length
   }
@@ -120,6 +135,50 @@ class MaxHeap<T> {
 
   public log(): void {
     console.log(this.heap)
+  }
+
+  public contains(element: T): boolean {
+    return this.heap.includes(element)
+  }
+
+  public heapify(array: T[]): void {
+    this.heap = array
+    for (let i = Math.floor(this.heap.length / 2 - 1); i >= 0; i--) {
+      this.heapifyDownFrom(i)
+    }
+  }
+
+  public updateKey(oldKey: T, newKey: T): void {
+    const index = this.heap.indexOf(oldKey)
+    if (index === -1) return
+
+    this.heap[index] = newKey
+    if (newKey > oldKey) {
+      this.heapifyUpFrom(index)
+    } else {
+      this.heapifyDownFrom(index)
+    }
+  }
+
+  public remove(element: T): boolean {
+    const index = this.heap.indexOf(element)
+    if (index === -1) return false
+
+    if (index === this.heap.length - 1) {
+      this.heap.pop()
+    } else {
+      this.heap[index] = this.heap.pop()!
+      this.heapifyDownFrom(index)
+      this.heapifyUpFrom(index)
+    }
+    return true
+  }
+
+  private heapifyUpFrom(index: number): void {
+    while (this.hasParent(index) && this.parent(index) < this.heap[index]) {
+      this.swap(this.getParentIndex(index), index)
+      index = this.getParentIndex(index)
+    }
   }
 }
 

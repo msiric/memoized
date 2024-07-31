@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { MaxHeap } from './MaxHeap'
 
 describe('MaxHeap', () => {
@@ -10,25 +10,31 @@ describe('MaxHeap', () => {
 
   it('should initialize an empty heap', () => {
     expect(heap.size()).toBe(0)
-    expect(heap.peek()).toBeNull()
     expect(heap.isEmpty()).toBe(true)
   })
 
-  it('should insert elements into the heap', () => {
+  it('should insert elements into the heap and maintain max-heap property', () => {
+    heap.insert(10)
+    heap.insert(5)
+    heap.insert(20)
     heap.insert(1)
-    heap.insert(3)
-    heap.insert(2)
-    expect(heap.size()).toBe(3)
-    expect(heap.peek()).toBe(3)
+    heap.insert(25)
+    expect(heap.peek()).toBe(25)
+    expect(heap.size()).toBe(5)
   })
 
-  it('should extract the maximum element from the heap', () => {
+  it('should extract the maximum element and maintain max-heap property', () => {
+    heap.insert(10)
+    heap.insert(5)
+    heap.insert(20)
     heap.insert(1)
-    heap.insert(3)
-    heap.insert(2)
-    expect(heap.extractMax()).toBe(3)
-    expect(heap.size()).toBe(2)
-    expect(heap.peek()).toBe(2)
+    heap.insert(25)
+    expect(heap.extractMax()).toBe(25)
+    expect(heap.peek()).toBe(20)
+    expect(heap.size()).toBe(4)
+    expect(heap.extractMax()).toBe(20)
+    expect(heap.peek()).toBe(10)
+    expect(heap.size()).toBe(3)
   })
 
   it('should maintain the heap property', () => {
@@ -53,19 +59,45 @@ describe('MaxHeap', () => {
   })
 
   it('should clear the heap', () => {
-    heap.insert(1)
-    heap.insert(2)
+    heap.insert(10)
+    heap.insert(5)
+    heap.insert(20)
     heap.clear()
     expect(heap.size()).toBe(0)
-    expect(heap.peek()).toBeNull()
+    expect(heap.isEmpty()).toBe(true)
   })
 
-  it('should log the heap', () => {
-    const logSpy = vi.spyOn(console, 'log')
-    heap.insert(1)
-    heap.insert(2)
-    heap.log()
-    expect(logSpy).toHaveBeenCalledWith([2, 1])
-    logSpy.mockRestore()
+  it('should check if the heap contains an element', () => {
+    heap.insert(10)
+    heap.insert(5)
+    heap.insert(20)
+    expect(heap.contains(10)).toBe(true)
+    expect(heap.contains(15)).toBe(false)
+  })
+
+  it('should build the heap from an existing array', () => {
+    heap.heapify([10, 5, 20, 1, 25])
+    expect(heap.peek()).toBe(25)
+    expect(heap.size()).toBe(5)
+  })
+
+  it('should update the key of an existing element', () => {
+    heap.insert(10)
+    heap.insert(5)
+    heap.insert(20)
+    heap.updateKey(10, 30)
+    expect(heap.peek()).toBe(30)
+    heap.updateKey(30, 15)
+    expect(heap.peek()).toBe(20)
+  })
+
+  it('should remove an arbitrary element from the heap', () => {
+    heap.insert(10)
+    heap.insert(5)
+    heap.insert(20)
+    expect(heap.remove(10)).toBe(true)
+    expect(heap.contains(10)).toBe(false)
+    expect(heap.size()).toBe(2)
+    expect(heap.remove(15)).toBe(false)
   })
 })

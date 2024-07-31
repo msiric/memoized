@@ -19,17 +19,14 @@ class AVLTree<T> {
     this.root = null
   }
 
-  // Helper function to get the height of the node
   private height(node: AVLTreeNode<T> | null): number {
     return node ? node.height : 0
   }
 
-  // Helper function to get balance factor of the node
   private getBalance(node: AVLTreeNode<T> | null): number {
     return node ? this.height(node.left) - this.height(node.right) : 0
   }
 
-  // Helper function to perform right rotation
   private rightRotate(y: AVLTreeNode<T>): AVLTreeNode<T> {
     const x = y.left!
     const T2 = x.right
@@ -43,7 +40,6 @@ class AVLTree<T> {
     return x
   }
 
-  // Helper function to perform left rotation
   private leftRotate(x: AVLTreeNode<T>): AVLTreeNode<T> {
     const y = x.right!
     const T2 = y.left
@@ -57,7 +53,6 @@ class AVLTree<T> {
     return y
   }
 
-  // Insert a value into the AVL tree
   insert(value: T) {
     this.root = this.insertNode(this.root, value)
   }
@@ -77,19 +72,15 @@ class AVLTree<T> {
 
     const balance = this.getBalance(node)
 
-    // Left Left Case
     if (balance > 1 && value < node.left!.value) return this.rightRotate(node)
 
-    // Right Right Case
     if (balance < -1 && value > node.right!.value) return this.leftRotate(node)
 
-    // Left Right Case
     if (balance > 1 && value > node.left!.value) {
       node.left = this.leftRotate(node.left!)
       return this.rightRotate(node)
     }
 
-    // Right Left Case
     if (balance < -1 && value < node.right!.value) {
       node.right = this.rightRotate(node.right!)
       return this.leftRotate(node)
@@ -98,14 +89,12 @@ class AVLTree<T> {
     return node
   }
 
-  // Get the minimum value node
   private getMinValueNode(node: AVLTreeNode<T>): AVLTreeNode<T> {
     let current = node
     while (current.left) current = current.left
     return current
   }
 
-  // Delete a value from the AVL tree
   delete(value: T) {
     this.root = this.deleteNode(this.root, value)
   }
@@ -155,7 +144,6 @@ class AVLTree<T> {
     return node
   }
 
-  // Preorder traversal
   preorder(node: AVLTreeNode<T> | null = this.root, result: T[] = []): T[] {
     if (node) {
       result.push(node.value)
@@ -165,7 +153,6 @@ class AVLTree<T> {
     return result
   }
 
-  // Inorder traversal
   inorder(node: AVLTreeNode<T> | null = this.root, result: T[] = []): T[] {
     if (node) {
       this.inorder(node.left, result)
@@ -175,7 +162,6 @@ class AVLTree<T> {
     return result
   }
 
-  // Postorder traversal
   postorder(node: AVLTreeNode<T> | null = this.root, result: T[] = []): T[] {
     if (node) {
       this.postorder(node.left, result)
@@ -185,7 +171,6 @@ class AVLTree<T> {
     return result
   }
 
-  // Level order traversal
   levelOrder(): T[] {
     const result: T[] = []
     const queue: (AVLTreeNode<T> | null)[] = [this.root]

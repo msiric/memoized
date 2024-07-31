@@ -27,32 +27,26 @@ class DoublyLinkedList<T> {
     }
   }
 
-  // Initiates the currentNode and currentIndex and returns as an object
   private initiateNodeAndIndex() {
     return { currentNode: this.headNode, currentIndex: 0 }
   }
 
-  // Returns length
   size() {
     return this.length
   }
 
-  // Returns the head
   head() {
     return this.headNode?.data ?? null
   }
 
-  // Returns the tail
   tail() {
     return this.tailNode?.data ?? null
   }
 
-  // Return if the list is empty
   isEmpty() {
     return this.length === 0
   }
 
-  // Add a node at the end of the list
   addLast(element: T) {
     const node = new DoublyLinkedListNode(element)
     if (this.tailNode === null) {
@@ -67,7 +61,6 @@ class DoublyLinkedList<T> {
     return this.size()
   }
 
-  // Add a node at the beginning of the list
   addFirst(element: T) {
     const node = new DoublyLinkedListNode(element)
     if (this.headNode === null) {
@@ -82,7 +75,6 @@ class DoublyLinkedList<T> {
     return this.size()
   }
 
-  // Remove the first node from the list
   removeFirst() {
     if (this.headNode === null) {
       return null
@@ -98,7 +90,6 @@ class DoublyLinkedList<T> {
     return removedNode.data
   }
 
-  // Remove the last node from the list
   removeLast() {
     if (this.tailNode === null) {
       return null
@@ -114,7 +105,6 @@ class DoublyLinkedList<T> {
     return removedNode.data
   }
 
-  // Removes the node with the specified value
   remove(element: T) {
     if (this.isEmpty()) return null
     let currentNode = this.headNode
@@ -138,7 +128,6 @@ class DoublyLinkedList<T> {
     return null
   }
 
-  // Returns the index of the specified element, otherwise -1
   indexOf(element: T) {
     if (this.isEmpty()) return -1
     let { currentNode, currentIndex } = this.initiateNodeAndIndex()
@@ -152,7 +141,6 @@ class DoublyLinkedList<T> {
     return -1
   }
 
-  // Returns the element at the specified index
   elementAt(index: number) {
     if (index >= this.length || index < 0) {
       throw new RangeError('Out of Range index')
@@ -165,7 +153,6 @@ class DoublyLinkedList<T> {
     return currentNode!.data
   }
 
-  // Adds the element at the specified index
   addAt(index: number, element: T) {
     if (index > this.length || index < 0) {
       throw new RangeError('Out of Range index')
@@ -190,7 +177,6 @@ class DoublyLinkedList<T> {
     return this.size()
   }
 
-  // Removes the node at the specified index
   removeAt(index: number) {
     if (index < 0 || index >= this.length) {
       throw new RangeError('Out of Range index')
@@ -211,7 +197,6 @@ class DoublyLinkedList<T> {
     return removedNode!.data
   }
 
-  // Returns a reference to the middle node of the linked list
   findMiddle() {
     let fast = this.headNode
     let slow = this.headNode
@@ -223,14 +208,12 @@ class DoublyLinkedList<T> {
     return slow
   }
 
-  // Make the linked list empty
   clean() {
     this.headNode = null
     this.tailNode = null
     this.length = 0
   }
 
-  // Method to get the linked list as an array
   get() {
     const list: T[] = []
     let { currentNode } = this.initiateNodeAndIndex()
@@ -241,7 +224,6 @@ class DoublyLinkedList<T> {
     return list
   }
 
-  // Method for rotating a list to the right by k places
   rotateListRight(k: number) {
     if (!this.headNode) return
     let current = this.headNode
@@ -263,7 +245,6 @@ class DoublyLinkedList<T> {
     this.headNode!.prev = null
   }
 
-  // Method to iterate over the linked list
   *iterator() {
     let { currentNode } = this.initiateNodeAndIndex()
     while (currentNode) {
@@ -272,7 +253,6 @@ class DoublyLinkedList<T> {
     }
   }
 
-  // Custom method to log the linked list without circular references
   log() {
     const result = []
     let currentNode = this.headNode
@@ -283,7 +263,6 @@ class DoublyLinkedList<T> {
     console.log(JSON.stringify(result, null, 2))
   }
 
-  // Method to reverse the linked list
   reverse() {
     let current = this.headNode
     let temp: DoublyLinkedListNode<T> | null = null

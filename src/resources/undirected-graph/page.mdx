@@ -128,6 +128,42 @@ class UndirectedGraph {
 
     return result
   }
+
+  // Cycle detection
+  hasCycle() {
+    const visited = new Set()
+
+    const dfs = (vertex, parent) => {
+      visited.add(vertex)
+
+      for (const neighbor of this.getNeighbors(vertex)) {
+        if (!visited.has(neighbor)) {
+          if (dfs(neighbor, vertex)) {
+            return true
+          }
+        } else if (neighbor !== parent) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    for (const vertex of this.adjacencyList.keys()) {
+      if (!visited.has(vertex)) {
+        if (dfs(vertex, null)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  // Clear the graph
+  clear() {
+    this.adjacencyList.clear()
+  }
 }
 
 export { UndirectedGraph }
@@ -224,6 +260,42 @@ class UndirectedGraph<T> {
     }
 
     return result
+  }
+
+  // Cycle detection
+  hasCycle(): boolean {
+    const visited = new Set<T>()
+
+    const dfs = (vertex: T, parent: T | null): boolean => {
+      visited.add(vertex)
+
+      for (const neighbor of this.getNeighbors(vertex)) {
+        if (!visited.has(neighbor)) {
+          if (dfs(neighbor, vertex)) {
+            return true
+          }
+        } else if (neighbor !== parent) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    for (const vertex of this.adjacencyList.keys()) {
+      if (!visited.has(vertex)) {
+        if (dfs(vertex, null)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  // Clear the graph
+  clear(): void {
+    this.adjacencyList.clear()
   }
 }
 

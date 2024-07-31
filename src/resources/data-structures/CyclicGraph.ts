@@ -50,6 +50,52 @@ class CyclicGraph<T> {
     return this.adjacencyList.get(vertex) || []
   }
 
+  hasEdge(vertex1: T, vertex2: T): boolean {
+    return this.adjacencyList.get(vertex1)?.includes(vertex2) ?? false
+  }
+
+  bfs(startVertex: T): T[] {
+    const visited = new Set<T>()
+    const queue: T[] = [startVertex]
+    const result: T[] = []
+
+    while (queue.length > 0) {
+      const vertex = queue.shift()!
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        queue.push(
+          ...this.getNeighbors(vertex).filter(
+            (neighbor) => !visited.has(neighbor),
+          ),
+        )
+      }
+    }
+
+    return result
+  }
+
+  dfs(startVertex: T): T[] {
+    const visited = new Set<T>()
+    const stack: T[] = [startVertex]
+    const result: T[] = []
+
+    while (stack.length > 0) {
+      const vertex = stack.pop()!
+      if (!visited.has(vertex)) {
+        visited.add(vertex)
+        result.push(vertex)
+        stack.push(
+          ...this.getNeighbors(vertex).filter(
+            (neighbor) => !visited.has(neighbor),
+          ),
+        )
+      }
+    }
+
+    return result
+  }
+
   hasCycle(): boolean {
     const visited = new Set<T>()
     const recStack = new Set<T>()
@@ -77,6 +123,10 @@ class CyclicGraph<T> {
       }
     }
     return false
+  }
+
+  clear(): void {
+    this.adjacencyList.clear()
   }
 }
 

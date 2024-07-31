@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { Trie } from './Trie'
 
 describe('Trie', () => {
@@ -96,5 +96,51 @@ describe('Trie', () => {
       { word: 'app', count: 1 },
       { word: 'apple', count: 1 },
     ])
+  })
+
+  it('should handle case insensitivity', () => {
+    trie.insert('Apple')
+    expect(trie.contains('apple')).toBe(true)
+    expect(trie.contains('Apple')).toBe(true)
+    trie.insert('aPPle')
+    expect(trie.findOccurrences('apple')).toBe(2)
+  })
+
+  it('should serialize and deserialize the trie', () => {
+    trie.insert('apple')
+    trie.insert('app')
+    const serialized = trie.serialize()
+    const deserializedTrie = Trie.deserialize(serialized)
+    expect(deserializedTrie.contains('apple')).toBe(true)
+    expect(deserializedTrie.contains('app')).toBe(true)
+    expect(deserializedTrie.findOccurrences('apple')).toBe(1)
+  })
+
+  it('should get all words stored in the trie', () => {
+    trie.insert('apple')
+    trie.insert('app')
+    trie.insert('apricot')
+    trie.insert('banana')
+    expect(trie.getAllWords()).toEqual([
+      { word: 'app', count: 1 },
+      { word: 'apple', count: 1 },
+      { word: 'apricot', count: 1 },
+      { word: 'banana', count: 1 },
+    ])
+  })
+
+  it('should handle inserting an empty string', () => {
+    trie.insert('')
+    expect(trie.findOccurrences('')).toBe(1)
+    trie.insert('')
+    expect(trie.findOccurrences('')).toBe(2)
+    trie.remove('')
+    expect(trie.findOccurrences('')).toBe(1)
+  })
+
+  it('should handle removing non-existing words gracefully', () => {
+    trie.insert('apple')
+    trie.remove('banana')
+    expect(trie.contains('apple')).toBe(true)
   })
 })

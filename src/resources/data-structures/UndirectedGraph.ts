@@ -89,6 +89,40 @@ class UndirectedGraph<T> {
 
     return result
   }
+
+  hasCycle(): boolean {
+    const visited = new Set<T>()
+
+    const dfs = (vertex: T, parent: T | null): boolean => {
+      visited.add(vertex)
+
+      for (const neighbor of this.getNeighbors(vertex)) {
+        if (!visited.has(neighbor)) {
+          if (dfs(neighbor, vertex)) {
+            return true
+          }
+        } else if (neighbor !== parent) {
+          return true
+        }
+      }
+
+      return false
+    }
+
+    for (const vertex of this.adjacencyList.keys()) {
+      if (!visited.has(vertex)) {
+        if (dfs(vertex, null)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
+  clear(): void {
+    this.adjacencyList.clear()
+  }
 }
 
 export { UndirectedGraph }
