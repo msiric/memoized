@@ -18,7 +18,6 @@ export const ProblemProviders = ({
   navigation,
   table,
 }: ProblemProvidersProps) => {
-  console.log('nav', navigation)
   return (
     <>
       <SectionProvider sections={[]}>
