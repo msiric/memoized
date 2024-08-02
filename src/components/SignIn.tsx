@@ -1,10 +1,11 @@
 'use client'
 
+import { LogoIcon } from '@/components/Logo'
 import { APP_NAME } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import clsx from 'clsx'
 import { signIn } from 'next-auth/react'
-import Image from "next/image"
+import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 export const SignIn = () => {
@@ -72,16 +73,7 @@ export const SignIn = () => {
         ref={modalRef}
       >
         <div className="mt-2 space-y-4">
-          <Image
-            alt="Logo"
-            src="https://www.svgrepo.com/show/475643/dribbble-color.svg"
-            className="mx-auto w-10"
-            width="40"
-            height="40"
-            style={{
-              maxWidth: "100%",
-              height: "auto"
-            }} />
+          <LogoIcon className="mx-auto h-12 w-12" />
           <h2 className="mb-8 text-center text-2xl font-bold text-cyan-900 dark:text-white">
             Log in to unlock the best of {APP_NAME}
           </h2>
@@ -108,9 +100,10 @@ export const SignIn = () => {
                 width="20"
                 height="20"
                 style={{
-                  maxWidth: "100%",
-                  height: "auto"
-                }} />
+                  maxWidth: '100%',
+                  height: 'auto',
+                }}
+              />
               <span className="block w-max text-sm font-semibold tracking-wide text-gray-700 transition duration-300 group-hover:text-lime-500 sm:text-base dark:text-white">
                 Continue with Google
               </span>
@@ -154,5 +147,5 @@ export const SignIn = () => {
         </div>
       </div>
     </div>
-  );
+  )
 }
