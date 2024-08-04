@@ -41,6 +41,21 @@ export default async function RootLayout({
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="theme-color" content="#ffffff" />
+        <meta
+          name="title"
+          content="Memoized: Master Technical Interviews the JavaScript Way"
+        />
+        <meta
+          name="description"
+          content="Unlock in-depth skills to ace JavaScript and TypeScript interviews with Memoized. Tailored lessons, practice problems, and expert tips"
+        />
+        <meta
+          name="keywords"
+          content="JavaScript, TypeScript, algorithms, data structures, coding interviews, LeetCode, interview questions, technical interviews, Memoized, practice problems, coding patterns, interview prep"
+        />
+        <meta name="robots" content="index, follow" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="language" content="English" />
         <script
           defer
           src="https://cloud.umami.is/script.js"

@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://www.memoized.io/</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/premium</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/privacy</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/terms</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/problems</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures/strings</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures/numbers</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures/arrays</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures/objects</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures/sets</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures/maps</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/built-in-data-structures/remaining-primitives</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/linked-lists</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/stacks</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/queues</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/hash-tables</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/trees</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/graphs</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/heaps</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/user-defined-data-structures/tries</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/sliding-window</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/two-pointers</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/fast-and-slow-pointers</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/merge-intervals</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/cyclic-sort</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/linked-list-reversal</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/tree-bfs</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/tree-dfs</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/two-heaps</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/subsets</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/binary-search</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/top-k-elements</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/k-way-merge</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/graph-bfs</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/graph-dfs</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/topological-sort</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/matrix-traversal</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/palindromic-subsequence</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/longest-common-substring</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/recursion-and-memoization</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/backtracking</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/common-techniques/greedy-algorithms</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/dynamic-programming</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/bloom-filters</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/segment-trees</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/union-find</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/minimum-spanning-trees</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/shortest-path-algorithms</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/maximum-flow</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/bit-manipulation</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/randomized-algorithms</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/suffix-arrays-and-suffix-trees</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/approximation-algorithms</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/sqrt-decomposition</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/network-flow-algorithms</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/convex-hull</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/course/advanced-topics/combinatorial-optimization</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/singly-linked-list</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/doubly-linked-list</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/circular-linked-list</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/stack</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/queue</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/priority-queue</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/hash-map</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/binary-tree</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/binary-search-tree</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/avl-tree</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/directed-graph</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/undirected-graph</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/cyclic-graph</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/weighted-graph</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/max-heap</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/min-heap</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://www.memoized.io/resources/trie</loc>
+  <lastmod>2024-08-04T10:42:00+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+
+
+</urlset>
