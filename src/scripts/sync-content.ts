@@ -16,13 +16,13 @@ import slugify from 'slugify'
 const ACTIVE_BANNERS = [
   {
     title: 'Memoized beta launch',
-    message: 'Monthly subscription 50% off',
+    message: 'Recurring subscriptions 50% off',
     type: BannerType.INFO,
     linkText: 'Check it out',
     linkUrl: '/premium',
     isActive: true,
     startDate: new Date(),
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+    endDate: new Date(2024, 11, 31, 23, 59, 0, 0), // 31st of Dec, 23:59:00
     priority: 1,
   },
 ]
