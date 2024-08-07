@@ -1,17 +1,42 @@
 'use client'
 
 import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '@/constants'
+import { useGAConversion } from '@/hooks/useGAConversion'
 import clsx from 'clsx'
-import { MouseEvent, useState } from 'react'
+import { MouseEvent, useEffect, useState } from 'react'
 import { MdOutlineCheck } from 'react-icons/md'
 import { RxCross2 } from 'react-icons/rx'
 
 export type PremiumModalProps = {
   upgradedSuccessfully: boolean
+  stripeSessionId: string | undefined
 }
 
-export const PremiumModal = ({ upgradedSuccessfully }: PremiumModalProps) => {
+export const PremiumModal = ({
+  upgradedSuccessfully,
+  stripeSessionId,
+}: PremiumModalProps) => {
   const [isOpen, setIsOpen] = useState(true)
+
+  const reportConversion = useGAConversion()
+
+  useEffect(() => {
+    if (upgradedSuccessfully && stripeSessionId) {
+      const reportedConversions = JSON.parse(
+        localStorage.getItem('reportedConversions') || '{}',
+      )
+
+      if (!reportedConversions[stripeSessionId]) {
+        reportConversion(stripeSessionId)
+        reportedConversions[stripeSessionId] = new Date().toISOString()
+        localStorage.setItem(
+          'reportedConversions',
+          JSON.stringify(reportedConversions),
+        )
+      }
+    }
+  }, [upgradedSuccessfully, stripeSessionId])
+
   const closeModal = () => {
     setIsOpen(false)
     // Remove the query parameters from the URL

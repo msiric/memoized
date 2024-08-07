@@ -62,6 +62,7 @@ export default async function Course({
       {searchParams[PREMIUM_QUERY_PARAM] && (
         <PremiumModal
           upgradedSuccessfully={stripeSession?.status === 'complete'}
+          stripeSessionId={stripeSession?.id}
         />
       )}
     </>
