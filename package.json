@@ -29,6 +29,7 @@
     "@mdx-js/loader": "^3.0.0",
     "@mdx-js/react": "^3.0.0",
     "@next/mdx": "^14.0.4",
+    "@next/third-parties": "^14.2.5",
     "@prisma/client": "^5.14.0",
     "@sentry/nextjs": "^8",
     "@sindresorhus/slugify": "^2.1.1",

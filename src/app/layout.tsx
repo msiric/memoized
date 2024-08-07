@@ -1,5 +1,6 @@
 import { Providers } from '@/app/providers'
 import '@/styles/tailwind.css'
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { type Metadata } from 'next'
@@ -54,13 +55,14 @@ export default async function RootLayout({
           content="JavaScript, TypeScript, algorithms, data structures, coding interviews, LeetCode, interview questions, technical interviews, Memoized, practice problems, coding patterns, interview prep"
         />
         <meta name="robots" content="index, follow" />
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="language" content="English" />
         <script
           defer
           src="https://cloud.umami.is/script.js"
           data-website-id="8573b390-8d88-4b52-b4b1-63ff2a5df61d"
         ></script>
+        <GoogleAnalytics gaId="AW-16659115277" />
       </head>
       <body className="flex min-h-full bg-white antialiased dark:bg-zinc-900">
         <NextTopLoader color="#84cc16" showSpinner={false} />
