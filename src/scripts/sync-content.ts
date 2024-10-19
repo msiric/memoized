@@ -15,7 +15,7 @@ import path from 'path'
 import slugify from 'slugify'
 
 const ACTIVE_DISCOUNT = {
-  name: 'Memoized Launch',
+  name: 'Memoized Beta Launch',
   percent_off: 50,
   amount_off: undefined, // Set a value if using a fixed amount discount
   currency: undefined, // Required if amount_off is set
@@ -37,7 +37,7 @@ const ACTIVE_DISCOUNT = {
   //   expires_at: null, // Set if different from the coupon's redeem_by
   // },
   banner: {
-    title: 'Memoized Launch',
+    title: 'Memoized Beta Launch',
     message: 'Recurring subscriptions 50% off',
     type: BannerType.INFO,
     linkText: 'Check it out',
