@@ -168,10 +168,8 @@ export const syncContent = async () => {
     }
   }
 
-  // Fetch active products
   const activeProducts = await getActiveProducts()
 
-  // Filter for products specified in the discount configuration
   const relevantProducts = activeProducts.filter((product) =>
     ACTIVE_DISCOUNT.applies_to.products.some((name) =>
       product.name.includes(name),
@@ -186,7 +184,6 @@ export const syncContent = async () => {
 
   const productIds = relevantProducts.map((product) => product.id)
 
-  // Create the specific discount
   const couponConfig = {
     ...ACTIVE_DISCOUNT,
     applies_to: {
@@ -194,7 +191,6 @@ export const syncContent = async () => {
     },
   }
 
-  // Remove null values and unnecessary fields
   Object.keys(couponConfig).forEach(
     (key) =>
       (couponConfig[key as keyof typeof couponConfig] === undefined ||
@@ -214,7 +210,6 @@ export const syncContent = async () => {
       console.log(`Promotion code created: ${promotionCode.code}`)
     }
 
-    // Create banner only if discount creation was successful
     if (ACTIVE_DISCOUNT.banner) {
       const bannerData = {
         ...ACTIVE_DISCOUNT.banner,
