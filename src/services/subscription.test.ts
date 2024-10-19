@@ -22,7 +22,7 @@ vi.mock('@/lib/resend')
 vi.mock('@/lib/stripe')
 vi.mock('@/utils/helpers')
 
-describe('Subscription Service', () => {
+describe('Subscription services', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })

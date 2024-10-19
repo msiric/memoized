@@ -44,7 +44,7 @@ vi.mock('@/services/lesson', () => ({
   getLessonsWithResourcesAndProblems: vi.fn(),
 }))
 
-describe('User Service', () => {
+describe('User services', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })

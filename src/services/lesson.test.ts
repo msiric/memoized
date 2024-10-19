@@ -47,7 +47,7 @@ vi.mock('@/lib/prisma', () => {
   }
 })
 
-describe('Prisma Services', () => {
+describe('Lesson services', () => {
   afterEach(() => {
     vi.clearAllMocks()
   })

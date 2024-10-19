@@ -263,4 +263,41 @@ export type ProductWithCoupon = Stripe.Product & {
   }
 }
 
+export type ListCouponsParams = {
+  created?: Stripe.CouponListParams['created']
+  ending_before?: string
+  starting_after?: string
+  limit?: number
+}
+
+export type CouponConfig = {
+  id?: string
+  name: string
+  percent_off?: number
+  amount_off?: number
+  currency?: string
+  duration: 'forever' | 'once' | 'repeating'
+  duration_in_months?: number
+  max_redemptions?: number
+  redeem_by?: Date
+  applies_to?: {
+    products?: string[]
+  }
+  metadata?: Record<string, string>
+  currency_options?: Record<
+    string,
+    {
+      amount_off: number
+    }
+  >
+}
+
+export type PromotionCodeConfig = {
+  code?: string
+  active?: boolean
+  max_redemptions?: number
+  expires_at?: Date
+  metadata?: Record<string, string>
+}
+
 export type CompletedKey = 'completedLessons' | 'completedProblems'

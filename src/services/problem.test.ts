@@ -40,7 +40,7 @@ vi.mock('@/utils/helpers', () => ({
   filterAndSortProblems: vi.fn(),
 }))
 
-describe('Problem Services', () => {
+describe('Problem services', () => {
   afterEach(() => {
     vi.clearAllMocks()
   })

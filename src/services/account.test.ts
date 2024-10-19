@@ -23,7 +23,7 @@ vi.mock('@/lib/prisma', () => {
 })
 vi.mock('@/lib/resend')
 
-describe('Prisma Services', () => {
+describe('Account services', () => {
   afterEach(() => {
     vi.clearAllMocks()
   })

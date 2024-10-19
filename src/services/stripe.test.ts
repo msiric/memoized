@@ -3,7 +3,11 @@ import { stripe } from '@/lib/stripe'
 import {
   createBillingPortalSession,
   createOrRetrieveCustomer,
+  createStripeCoupon,
   createStripeSession,
+  deleteStripeCoupon,
+  listStripeCoupons,
+  retrieveStripeCoupon,
   retrieveStripeSession,
 } from '@/services/stripe'
 import { ProductWithCoupon } from '@/types'
@@ -16,7 +20,7 @@ vi.mock('@/lib/prisma')
 vi.mock('@/lib/stripe')
 vi.mock('@/utils/helpers')
 
-describe('Customer Service', () => {
+describe('Stripe services', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -238,6 +242,487 @@ describe('Customer Service', () => {
 
       await expect(createBillingPortalSession('cus_123')).rejects.toThrow(
         new ServiceError('Failed to create Stripe billing portal link'),
+      )
+    })
+  })
+
+  describe('listStripeCoupons', () => {
+    it('should list coupons with default parameters', async () => {
+      const mockCoupons = { data: [{ id: 'coupon1' }, { id: 'coupon2' }] }
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue(mockCoupons as any)
+
+      const result = await listStripeCoupons()
+
+      expect(result).toEqual(mockCoupons)
+      expect(stripe.coupons.list).toHaveBeenCalledWith({})
+    })
+
+    it('should list coupons with custom parameters', async () => {
+      const mockCoupons = { data: [{ id: 'coupon1' }] }
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue(mockCoupons as any)
+
+      const params = { limit: 1, starting_after: 'coupon0' }
+      const result = await listStripeCoupons(params)
+
+      expect(result).toEqual(mockCoupons)
+      expect(stripe.coupons.list).toHaveBeenCalledWith(params)
+    })
+
+    it('should throw ServiceError if listing coupons fails', async () => {
+      vi.spyOn(stripe.coupons, 'list').mockRejectedValue(
+        new Error('Stripe error'),
+      )
+
+      await expect(listStripeCoupons()).rejects.toThrow(
+        new ServiceError('Failed to list Stripe coupons'),
+      )
+    })
+  })
+
+  describe('retrieveStripeCoupon', () => {
+    it('should retrieve a coupon successfully by name', async () => {
+      const mockCoupons = {
+        data: [
+          { id: 'coupon1', name: 'Test Coupon', percent_off: 20 },
+          { id: 'coupon2', name: 'Other Coupon' },
+        ],
+      }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue(mockCoupons as any)
+
+      const result = await retrieveStripeCoupon('Test Coupon')
+
+      expect(result).toEqual(mockCoupons.data[0])
+      expect(stripe.coupons.list).toHaveBeenCalled()
+    })
+
+    it('should throw ServiceError if coupon is not found in the list', async () => {
+      const mockCoupons = {
+        data: [{ id: 'coupon1', name: 'Other Coupon' }],
+      }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue(mockCoupons as any)
+
+      await expect(retrieveStripeCoupon('Non-existent Coupon')).rejects.toThrow(
+        new ServiceError('Failed to retrieve Stripe coupon'),
+      )
+    })
+
+    it('should throw ServiceError if listing coupons fails', async () => {
+      vi.spyOn(stripe.coupons, 'list').mockRejectedValue(
+        new Error('Stripe error'),
+      )
+
+      await expect(retrieveStripeCoupon('Test Coupon')).rejects.toThrow(
+        new ServiceError('Failed to retrieve Stripe coupon'),
+      )
+    })
+  })
+
+  describe('deleteStripeCoupon', () => {
+    it('should delete a coupon successfully', async () => {
+      const mockDeletedCoupon = { id: 'coupon1', deleted: true }
+      vi.spyOn(stripe.coupons, 'del').mockResolvedValue(
+        mockDeletedCoupon as any,
+      )
+
+      const result = await deleteStripeCoupon('coupon1')
+
+      expect(result).toEqual(mockDeletedCoupon)
+      expect(stripe.coupons.del).toHaveBeenCalledWith('coupon1')
+    })
+
+    it('should throw ServiceError if deleting coupon fails', async () => {
+      vi.spyOn(stripe.coupons, 'del').mockRejectedValue(
+        new Error('Stripe error'),
+      )
+
+      await expect(deleteStripeCoupon('invalid_coupon')).rejects.toThrow(
+        new ServiceError('Failed to delete Stripe coupon'),
+      )
+    })
+  })
+
+  describe('createStripeCoupon', () => {
+    it('should delete existing valid coupon and create a new one', async () => {
+      const couponConfig = {
+        name: 'Existing Valid Coupon',
+        percent_off: 25,
+        duration: 'once' as const,
+      }
+      const existingCoupon = {
+        id: 'existing_coupon',
+        name: 'Existing Valid Coupon',
+        valid: true,
+      }
+      const newCoupon = { id: 'new_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({
+        data: [existingCoupon],
+      } as any)
+      vi.spyOn(stripe.coupons, 'del').mockResolvedValue({
+        id: 'existing_coupon',
+        deleted: true,
+      } as any)
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(newCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: newCoupon, promotionCode: null })
+      expect(stripe.coupons.list).toHaveBeenCalled()
+      expect(stripe.coupons.del).toHaveBeenCalledWith('existing_coupon')
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should not delete existing invalid coupon and create a new one', async () => {
+      const couponConfig = {
+        name: 'Existing Invalid Coupon',
+        percent_off: 25,
+        duration: 'once' as const,
+      }
+      const existingCoupon = {
+        id: 'existing_coupon',
+        name: 'Existing Invalid Coupon',
+        valid: false,
+      }
+      const newCoupon = { id: 'new_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({
+        data: [existingCoupon],
+      } as any)
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(newCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: newCoupon, promotionCode: null })
+      expect(stripe.coupons.list).toHaveBeenCalled()
+      expect(stripe.coupons.del).not.toHaveBeenCalled()
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should handle errors when deleting an existing coupon', async () => {
+      const couponConfig = {
+        name: 'Existing Coupon',
+        percent_off: 25,
+        duration: 'once' as const,
+      }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({
+        data: [{ id: 'existing_coupon', name: 'Existing Coupon', valid: true }],
+      } as any)
+      vi.spyOn(stripe.coupons, 'del').mockRejectedValue(
+        new Error('Deletion failed'),
+      )
+
+      await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
+        new ServiceError('Failed to manage Stripe coupon'),
+      )
+      expect(stripe.coupons.create).not.toHaveBeenCalled()
+    })
+
+    it('should throw ServiceError if coupon creation fails', async () => {
+      const couponConfig = {
+        name: 'Failed Coupon',
+        percent_off: 10,
+        duration: 'once' as const,
+      }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockRejectedValue(
+        new Error('Stripe error'),
+      )
+
+      await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
+        new ServiceError('Failed to manage Stripe coupon'),
+      )
+    })
+
+    it('should create a percentage off coupon', async () => {
+      const couponConfig = {
+        name: 'Percent Off Coupon',
+        percent_off: 25,
+        duration: 'once' as const,
+      }
+      const mockCoupon = { id: 'percent_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(mockCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: mockCoupon, promotionCode: null })
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should create a fixed amount off coupon', async () => {
+      const couponConfig = {
+        name: 'Fixed Amount Off Coupon',
+        amount_off: 1000, // $10 off
+        currency: 'usd',
+        duration: 'once' as const,
+      }
+      const mockCoupon = { id: 'fixed_amount_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(mockCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: mockCoupon, promotionCode: null })
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should create a coupon with forever duration', async () => {
+      const couponConfig = {
+        name: 'Forever Coupon',
+        percent_off: 10,
+        duration: 'forever' as const,
+      }
+      const mockCoupon = { id: 'forever_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(mockCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: mockCoupon, promotionCode: null })
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should create a coupon with repeating duration', async () => {
+      const couponConfig = {
+        name: 'Repeating Coupon',
+        percent_off: 15,
+        duration: 'repeating' as const,
+        duration_in_months: 3,
+      }
+      const mockCoupon = { id: 'repeating_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(mockCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: mockCoupon, promotionCode: null })
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should create a coupon with max redemptions', async () => {
+      const couponConfig = {
+        name: 'Limited Redemptions Coupon',
+        percent_off: 30,
+        duration: 'once' as const,
+        max_redemptions: 100,
+      }
+      const mockCoupon = { id: 'limited_redemptions_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(mockCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: mockCoupon, promotionCode: null })
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should create a coupon with redeem_by date', async () => {
+      const redeemBy = new Date('2023-12-31T23:59:59Z')
+      const couponConfig = {
+        name: 'Expiring Coupon',
+        percent_off: 20,
+        duration: 'once' as const,
+        redeem_by: redeemBy,
+      }
+      const mockCoupon = {
+        id: 'expiring_coupon',
+        ...couponConfig,
+        redeem_by: Math.floor(redeemBy.getTime() / 1000),
+      }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(mockCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: mockCoupon, promotionCode: null })
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...couponConfig,
+          redeem_by: Math.floor(redeemBy.getTime() / 1000),
+        }),
+      )
+    })
+
+    it('should create a coupon that applies to specific products', async () => {
+      const couponConfig = {
+        name: 'Product Specific Coupon',
+        percent_off: 15,
+        duration: 'once' as const,
+        applies_to: { products: ['prod_123', 'prod_456'] },
+      }
+      const mockCoupon = { id: 'product_specific_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockRejectedValue(
+        new Error('Not found'),
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(mockCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: mockCoupon, promotionCode: null })
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should throw an error if both percent_off and amount_off are provided', async () => {
+      const couponConfig = {
+        name: 'Invalid Coupon',
+        percent_off: 10,
+        amount_off: 1000,
+        currency: 'usd',
+        duration: 'once' as const,
+      }
+
+      await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
+        new ServiceError('Failed to manage Stripe coupon'),
+      )
+    })
+
+    it('should throw an error if amount_off is provided without currency', async () => {
+      const couponConfig = {
+        name: 'Invalid Coupon',
+        amount_off: 1000,
+        duration: 'once' as const,
+      }
+
+      await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
+        new ServiceError('Failed to manage Stripe coupon'),
+      )
+    })
+
+    it('should throw an error if duration is repeating but duration_in_months is not provided', async () => {
+      const couponConfig = {
+        name: 'Invalid Repeating Coupon',
+        percent_off: 15,
+        duration: 'repeating' as const,
+      }
+
+      await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
+        new ServiceError('Failed to manage Stripe coupon'),
+      )
+    })
+
+    it('should handle errors when deleting an existing coupon', async () => {
+      const couponConfig = {
+        name: 'Existing Coupon',
+        percent_off: 25,
+        duration: 'once' as const,
+      }
+
+      vi.spyOn(stripe.coupons, 'retrieve').mockResolvedValue({
+        id: 'existing_coupon',
+      } as any)
+      vi.spyOn(stripe.coupons, 'del').mockRejectedValue(
+        new Error('Deletion failed'),
+      )
+
+      await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
+        new ServiceError('Failed to manage Stripe coupon'),
+      )
+    })
+
+    it('should delete existing valid coupon and create a new one', async () => {
+      const couponConfig = {
+        name: 'Existing Valid Coupon',
+        percent_off: 25,
+        duration: 'once' as const,
+      }
+      const existingCoupon = {
+        id: 'existing_coupon',
+        name: 'Existing Valid Coupon',
+        valid: true,
+      }
+      const newCoupon = { id: 'new_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({
+        data: [existingCoupon],
+      } as any)
+      vi.spyOn(stripe.coupons, 'retrieve').mockResolvedValue(
+        existingCoupon as any,
+      )
+      vi.spyOn(stripe.coupons, 'del').mockResolvedValue({
+        id: 'existing_coupon',
+        deleted: true,
+      } as any)
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(newCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: newCoupon, promotionCode: null })
+      expect(stripe.coupons.list).toHaveBeenCalled()
+      expect(stripe.coupons.del).toHaveBeenCalledWith('existing_coupon')
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
+      )
+    })
+
+    it('should not delete existing invalid coupon and create a new one', async () => {
+      const couponConfig = {
+        name: 'Existing Invalid Coupon',
+        percent_off: 25,
+        duration: 'once' as const,
+      }
+      const existingCoupon = {
+        id: 'existing_coupon',
+        name: 'Existing Invalid Coupon',
+        valid: false,
+      }
+      const newCoupon = { id: 'new_coupon', ...couponConfig }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({
+        data: [existingCoupon],
+      } as any)
+      vi.spyOn(stripe.coupons, 'retrieve').mockResolvedValue(
+        existingCoupon as any,
+      )
+      vi.spyOn(stripe.coupons, 'create').mockResolvedValue(newCoupon as any)
+
+      const result = await createStripeCoupon(couponConfig)
+
+      expect(result).toEqual({ coupon: newCoupon, promotionCode: null })
+      expect(stripe.coupons.list).toHaveBeenCalled()
+      expect(stripe.coupons.del).not.toHaveBeenCalled()
+      expect(stripe.coupons.create).toHaveBeenCalledWith(
+        expect.objectContaining(couponConfig),
       )
     })
   })

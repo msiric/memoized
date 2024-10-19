@@ -22,8 +22,9 @@ export default async function Premium() {
 
   const productsWithCoupons = products.map((product) => {
     const price = product.default_price as Stripe.Price
-    const appliedCoupon = coupons.find((coupon) =>
-      coupon.applies_to?.products?.includes(product.id),
+    const appliedCoupon = coupons.find(
+      (coupon) =>
+        coupon.valid && coupon.applies_to?.products?.includes(product.id),
     )
 
     return {

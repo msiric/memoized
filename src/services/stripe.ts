@@ -1,7 +1,12 @@
 import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '@/constants'
 import prisma from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
-import { ProductWithCoupon } from '@/types'
+import {
+  CouponConfig,
+  ListCouponsParams,
+  ProductWithCoupon,
+  PromotionCodeConfig,
+} from '@/types'
 import { ServiceError } from '@/utils/error'
 import { getURL } from '@/utils/helpers'
 import Stripe from 'stripe'
@@ -248,4 +253,128 @@ export const getActiveProducts = async () => {
   })
 
   return products.data
+}
+
+export const listStripeCoupons = async (
+  params: ListCouponsParams = {},
+): Promise<Stripe.ApiList<Stripe.Coupon>> => {
+  try {
+    const { created, ending_before, starting_after, limit } = params
+
+    const listParams: Stripe.CouponListParams = {
+      created,
+      ending_before,
+      starting_after,
+      limit,
+    }
+
+    // Remove undefined values
+    Object.keys(listParams).forEach(
+      (key) =>
+        listParams[key as keyof typeof listParams] === undefined &&
+        delete listParams[key as keyof typeof listParams],
+    )
+
+    const coupons = await stripe.coupons.list(listParams)
+    console.log(`Retrieved ${coupons.data.length} coupons`)
+    return coupons
+  } catch (error) {
+    console.error(`Failed to list Stripe coupons:`, error)
+    throw new ServiceError('Failed to list Stripe coupons')
+  }
+}
+
+export const retrieveStripeCoupon = async (
+  couponName: string,
+): Promise<Stripe.Coupon> => {
+  try {
+    const coupons = await listStripeCoupons()
+    const coupon = coupons.data.find((coupon) => coupon.name === couponName)
+    if (!coupon) {
+      throw new Error('Coupon not found')
+    }
+    return coupon
+  } catch (error) {
+    console.error(`Failed to retrieve Stripe coupon:`, error)
+    throw new ServiceError('Failed to retrieve Stripe coupon')
+  }
+}
+
+export const deleteStripeCoupon = async (
+  couponId: string,
+): Promise<Stripe.DeletedCoupon> => {
+  try {
+    const deletedCoupon = await stripe.coupons.del(couponId)
+    console.log(`Deleted Stripe coupon: ${deletedCoupon.id}`)
+    return deletedCoupon
+  } catch (error) {
+    console.error(`Failed to delete Stripe coupon:`, error)
+    throw new ServiceError('Failed to delete Stripe coupon')
+  }
+}
+
+export const createStripeCoupon = async (
+  couponConfig: CouponConfig,
+  promotionCodeConfig?: PromotionCodeConfig,
+) => {
+  try {
+    let existingCoupon: Stripe.Coupon | null = null
+    try {
+      existingCoupon = await retrieveStripeCoupon(couponConfig.name)
+      console.log('Existing coupon found:', existingCoupon)
+    } catch (error) {
+      console.log(
+        'No existing coupon found, or error retrieving coupon:',
+        error,
+      )
+    }
+
+    if (existingCoupon?.valid) {
+      console.log('Deleting existing valid coupon')
+      try {
+        await deleteStripeCoupon(existingCoupon.id)
+      } catch (error) {
+        console.error('Error deleting existing coupon:', error)
+        throw new ServiceError('Failed to delete existing coupon')
+      }
+    } else if (existingCoupon && !existingCoupon.valid) {
+      console.log(
+        'Existing coupon found but it is not valid. Proceeding to create a new one.',
+      )
+    }
+
+    const couponParams: Stripe.CouponCreateParams = {
+      ...couponConfig,
+      redeem_by: couponConfig.redeem_by
+        ? Math.floor(couponConfig.redeem_by.getTime() / 1000)
+        : undefined,
+    }
+
+    if (couponConfig.applies_to?.products) {
+      couponParams.applies_to = { products: couponConfig.applies_to.products }
+    }
+
+    const coupon = await stripe.coupons.create(couponParams)
+    console.log(`Created new Stripe coupon: ${coupon.id}`)
+
+    let promotionCode: Stripe.PromotionCode | null = null
+
+    if (promotionCodeConfig) {
+      const promoCodeParams: Stripe.PromotionCodeCreateParams = {
+        coupon: coupon.id,
+        ...promotionCodeConfig,
+        expires_at: promotionCodeConfig.expires_at
+          ? Math.floor(promotionCodeConfig.expires_at.getTime() / 1000)
+          : undefined,
+      }
+
+      promotionCode = await stripe.promotionCodes.create(promoCodeParams)
+      console.log(`Created new promotion code: ${promotionCode.code}`)
+    }
+
+    return { coupon, promotionCode }
+  } catch (error) {
+    console.error(`Failed to manage Stripe coupon:`, error)
+    throw new ServiceError('Failed to manage Stripe coupon')
+  }
 }
