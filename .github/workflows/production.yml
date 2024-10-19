@@ -41,6 +41,7 @@ jobs:
         run: yarn sync
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          STRIPE_SECRET: ${{ secrets.STRIPE_SECRET }}
     
       - name: Index MeiliSearch
         run: yarn index
