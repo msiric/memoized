@@ -1,0 +1,451 @@
+# Advanced Frontend: Unit Testing Best Practices
+
+## Concept and Use Cases
+
+**Definition:**
+Advanced unit testing involves sophisticated testing strategies for complex frontend code, including asynchronous operations, component interactions, and state management.
+
+**Common Use Cases:**
+
+- Complex async operations
+- Component interactions
+- State management
+- Side effects
+- API integration
+- Error handling
+- Performance testing
+- User interactions
+
+### Visual Representation:
+
+```
+Testing Hierarchy:
+
+Unit Tests → Integration → E2E → Performance
+     ↓            ↓         ↓         ↓
+Components    Services   Flows    Benchmarks
+```
+
+## Key Concepts
+
+1. **Test Types:**
+
+   - Synchronous tests
+   - Async tests
+   - Mock testing
+   - Snapshot testing
+
+2. **Testing Practices:**
+
+   - Arrange-Act-Assert
+   - Test isolation
+   - Mock strategies
+   - Error testing
+
+3. **Testing Tools:**
+   - Jest
+   - React Testing Library
+   - MSW
+   - Sinon
+
+## Implementation Examples
+
+### 1. Advanced Async Testing
+
+```typescript
+// Complex async testing scenarios
+describe('AsyncService', () => {
+  let service: AsyncService
+  let mockAPI: jest.Mocked<API>
+
+  beforeEach(() => {
+    mockAPI = {
+      fetch: jest.fn(),
+      post: jest.fn(),
+      delete: jest.fn(),
+    }
+    service = new AsyncService(mockAPI)
+  })
+
+  it('handles multiple concurrent requests', async () => {
+    // Arrange
+    const requests = [
+      { id: 1, data: 'data1' },
+      { id: 2, data: 'data2' },
+      { id: 3, data: 'data3' },
+    ]
+
+    mockAPI.fetch.mockImplementation(async (id) => {
+      // Simulate varying response times
+      await new Promise((resolve) => setTimeout(resolve, Math.random() * 100))
+      return { id, data: `data${id}` }
+    })
+
+    // Act
+    const results = await Promise.all(
+      requests.map((req) => service.fetchData(req.id)),
+    )
+
+    // Assert
+    expect(results).toHaveLength(3)
+    results.forEach((result, index) => {
+      expect(result).toEqual({
+        id: index + 1,
+        data: `data${index + 1}`,
+      })
+    })
+  })
+
+  it('handles request cancellation', async () => {
+    // Arrange
+    const abortController = new AbortController()
+    mockAPI.fetch.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 1000)
+        }),
+    )
+
+    // Act
+    const promise = service.fetchWithTimeout(1, abortController.signal)
+    abortController.abort()
+
+    // Assert
+    await expect(promise).rejects.toThrow('Request aborted')
+  })
+
+  it('retries failed requests', async () => {
+    // Arrange
+    let attempts = 0
+    mockAPI.fetch.mockImplementation(() => {
+      attempts++
+      if (attempts < 3) {
+        return Promise.reject(new Error('Network error'))
+      }
+      return Promise.resolve({ id: 1, data: 'success' })
+    })
+
+    // Act
+    const result = await service.fetchWithRetry(1)
+
+    // Assert
+    expect(attempts).toBe(3)
+    expect(result).toEqual({ id: 1, data: 'success' })
+  })
+})
+```
+
+### 2. Mock and Stub Patterns
+
+```typescript
+// Advanced mocking strategies
+interface ComplexDependency {
+  method1(): Promise<string>
+  method2(arg: number): string
+  method3<T>(arg: T): T
+}
+
+class MockBuilder<T extends object> {
+  private mock: jest.Mocked<T>
+  private implementations: Map<string, Function> = new Map()
+
+  constructor() {
+    this.mock = this.createBaseMock()
+  }
+
+  private createBaseMock(): jest.Mocked<T> {
+    return new Proxy({} as jest.Mocked<T>, {
+      get: (target, property) => {
+        if (this.implementations.has(property.toString())) {
+          return this.implementations.get(property.toString())
+        }
+
+        if (!target[property]) {
+          target[property] = jest.fn()
+        }
+        return target[property]
+      },
+    })
+  }
+
+  withImplementation<K extends keyof T>(method: K, impl: T[K]): this {
+    this.implementations.set(method.toString(), impl)
+    return this
+  }
+
+  withAsyncImplementation<K extends keyof T>(
+    method: K,
+    impl: (...args: any[]) => Promise<any>,
+  ): this {
+    this.implementations.set(method.toString(), impl)
+    return this
+  }
+
+  build(): jest.Mocked<T> {
+    return this.mock
+  }
+}
+
+// Usage in tests
+describe('ComplexService', () => {
+  let mockDependency: jest.Mocked<ComplexDependency>
+  let service: ComplexService
+
+  beforeEach(() => {
+    mockDependency = new MockBuilder<ComplexDependency>()
+      .withAsyncImplementation('method1', async () => 'mocked')
+      .withImplementation('method2', (arg: number) => arg.toString())
+      .withImplementation('method3', <T>(arg: T) => arg)
+      .build()
+
+    service = new ComplexService(mockDependency)
+  })
+
+  it('handles complex interactions', async () => {
+    // Arrange
+    const input = 42
+
+    // Act
+    const result = await service.complexOperation(input)
+
+    // Assert
+    expect(mockDependency.method1).toHaveBeenCalled()
+    expect(mockDependency.method2).toHaveBeenCalledWith(input)
+    expect(result).toBeDefined()
+  })
+})
+```
+
+### 3. Component Testing
+
+```typescript
+// Advanced component testing
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+describe('ComplexForm', () => {
+    const mockSubmit = jest.fn();
+    const mockValidate = jest.fn();
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('handles complex form interactions', async () => {
+        // Arrange
+        render(
+            <ComplexForm
+                onSubmit={mockSubmit}
+                validate={mockValidate}
+                initialData={{ name: '', email: '' }}
+            />
+        );
+
+        // Act - Simulate user interactions
+        await userEvent.type(
+            screen.getByLabelText(/name/i),
+            'John Doe'
+        );
+
+        await userEvent.type(
+            screen.getByLabelText(/email/i),
+            'invalid'
+        );
+
+        await userEvent.click(screen.getByRole('button', {
+            name: /submit/i
+        }));
+
+        // Assert
+        expect(mockValidate).toHaveBeenCalledWith({
+            name: 'John Doe',
+            email: 'invalid'
+        });
+
+        // Wait for validation message
+        expect(await screen.findByText(/invalid email/i))
+            .toBeInTheDocument();
+
+        // Fix the email and submit again
+        await userEvent.clear(screen.getByLabelText(/email/i));
+        await userEvent.type(
+            screen.getByLabelText(/email/i),
+            'john@example.com'
+        );
+
+        await userEvent.click(screen.getByRole('button', {
+            name: /submit/i
+        }));
+
+        // Verify submission
+        expect(mockSubmit).toHaveBeenCalledWith({
+            name: 'John Doe',
+            email: 'john@example.com'
+        });
+    });
+
+    it('handles async validation', async () => {
+        // Arrange
+        mockValidate.mockImplementation(async (data) => {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            if (data.email === 'taken@example.com') {
+                return { email: 'Email already taken' };
+            }
+            return {};
+        });
+
+        render(
+            <ComplexForm
+                onSubmit={mockSubmit}
+                validate={mockValidate}
+                initialData={{ name: '', email: '' }}
+            />
+        );
+
+        // Act
+        await userEvent.type(
+            screen.getByLabelText(/email/i),
+            'taken@example.com'
+        );
+
+        // Move focus to trigger validation
+        await userEvent.tab();
+
+        // Assert
+        await waitFor(() => {
+            expect(screen.getByText(/email already taken/i))
+                .toBeInTheDocument();
+        });
+    });
+});
+```
+
+### 4. Testing Custom Hooks
+
+```typescript
+// Custom hook testing
+import { renderHook, act } from '@testing-library/react-hooks'
+
+describe('useComplexState', () => {
+  it('handles async state updates', async () => {
+    // Arrange
+    const { result } = renderHook(() =>
+      useComplexState({
+        initialValue: 0,
+        validator: async (value) => value >= 0,
+      }),
+    )
+
+    // Act
+    await act(async () => {
+      await result.current.setValue(5)
+    })
+
+    // Assert
+    expect(result.current.value).toBe(5)
+    expect(result.current.error).toBeNull()
+
+    // Test invalid value
+    await act(async () => {
+      await result.current.setValue(-1)
+    })
+
+    expect(result.current.value).toBe(5) // Unchanged
+    expect(result.current.error).toBeDefined()
+  })
+
+  it('handles concurrent updates', async () => {
+    // Arrange
+    const { result } = renderHook(() =>
+      useComplexState({
+        initialValue: 0,
+        validator: async (value) => {
+          await new Promise((resolve) =>
+            setTimeout(resolve, Math.random() * 100),
+          )
+          return value >= 0
+        },
+      }),
+    )
+
+    // Act - Trigger multiple updates
+    await Promise.all([
+      act(() => result.current.setValue(1)),
+      act(() => result.current.setValue(2)),
+      act(() => result.current.setValue(3)),
+    ])
+
+    // Assert
+    expect(result.current.value).toBe(3)
+  })
+})
+```
+
+## Best Practices
+
+1. **Test Organization:**
+
+   - Clear structure
+   - Meaningful descriptions
+   - Proper setup/cleanup
+
+2. **Mocking Strategy:**
+
+   - Minimal mocking
+   - Realistic data
+   - Clear mock scope
+
+3. **Assertions:**
+   - Specific assertions
+   - Meaningful failures
+   - Coverage goals
+
+## Common Challenges
+
+1. **Async Testing:**
+
+   - Race conditions
+   - Timing issues
+   - Cleanup
+
+2. **Complex State:**
+
+   - State management
+   - Side effects
+   - Dependencies
+
+3. **Test Maintenance:**
+   - Brittle tests
+   - Test duplication
+   - Setup complexity
+
+## Interview Tips and Tricks
+
+1. **Testing Strategy:**
+
+   - Test organization
+   - Coverage planning
+   - Tool selection
+
+2. **Best Practices:**
+
+   - Code quality
+   - Test reliability
+   - Maintenance
+
+3. **Problem Solving:**
+   - Debug failures
+   - Performance issues
+   - Edge cases
+
+## Common Interview Questions
+
+1. How do you test complex async code?
+2. What are your strategies for mocking?
+3. How do you ensure test reliability?
+4. What tools do you use for unit testing?
+5. How do you handle test maintenance?
+6. What are your approaches to test coverage?
+7. How do you test error scenarios?
+
+Understanding unit testing best practices is crucial for building reliable applications. It involves writing effective tests, maintaining good practices, and ensuring code quality through comprehensive testing.

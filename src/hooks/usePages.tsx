@@ -1,27 +1,27 @@
 'use client'
 
-import { COURSE_PREFIX } from '@/constants'
 import { useContentStore } from '@/contexts/progress'
 import { LessonResult, SectionResult } from '@/types'
 import { AccessOptions } from '@prisma/client'
 import { usePathname } from 'next/navigation'
-
-const introPage = {
-  id: '/introduction',
-  slug: 'introduction',
-  href: `${COURSE_PREFIX}`,
-  title: 'Introduction',
-  description: 'Course introduction',
-  access: AccessOptions.FREE,
-  order: -1,
-}
+import { useCourseSlug } from './useCourseSlug'
 
 export const usePages = () => {
   const pathname = usePathname()
   const fullCurriculum = useContentStore((state) => state.fullCurriculum)
-  const courseSections = fullCurriculum[0]?.sections ?? []
 
-  const isIntroduction = pathname === COURSE_PREFIX
+  const courseSlug = useCourseSlug()
+
+  const currentCourse = fullCurriculum?.find((item) => item.slug === courseSlug)
+
+  const courseSections = currentCourse?.sections ?? []
+
+  const isIntroduction = pathname === currentCourse?.href
+
+  const introPage = {
+    ...currentCourse,
+    access: AccessOptions.FREE,
+  } as LessonResult
 
   if (isIntroduction) {
     return {

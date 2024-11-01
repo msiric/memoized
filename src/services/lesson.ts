@@ -35,7 +35,7 @@ export const markLessonProgress = async ({
 export const getSectionBySlug = async (sectionSlug: string) => {
   const section = await prisma.section.findUnique({
     where: { slug: sectionSlug },
-    select: { id: true },
+    select: { id: true, course: { select: { slug: true } } },
   })
 
   if (!section) {
@@ -48,7 +48,13 @@ export const getSectionBySlug = async (sectionSlug: string) => {
 export const getLessonBySlug = async (lessonSlug: string) => {
   const lesson = await prisma.lesson.findUnique({
     where: { slug: lessonSlug },
-    select: { id: true, problems: true, title: true, access: true },
+    select: {
+      id: true,
+      problems: true,
+      title: true,
+      access: true,
+      section: { select: { slug: true, course: { select: { slug: true } } } },
+    },
   })
 
   if (!lesson) {
@@ -62,6 +68,7 @@ export const upsertCourse = async (
   courseSlug: string,
   courseTitle: string,
   courseDescription: string,
+  courseHref: string,
   courseOrder: number,
 ) => {
   return prisma.course.upsert({
@@ -70,14 +77,14 @@ export const upsertCourse = async (
       title: courseTitle,
       description: courseDescription,
       order: courseOrder,
-      href: '',
+      href: courseHref,
     },
     create: {
       title: courseTitle,
       description: courseDescription,
       order: courseOrder,
       slug: courseSlug,
-      href: '',
+      href: courseHref,
     },
   })
 }

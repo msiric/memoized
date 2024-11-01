@@ -15,7 +15,7 @@ import { getServerSession } from 'next-auth'
 
 export async function createCheckout(
   product: ProductWithCoupon,
-  redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
+  redirectPath: string = `/courses?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
 ) {
   try {
     const session = await getServerSession(authOptions)

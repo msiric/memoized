@@ -35,6 +35,7 @@ export const PremiumModal = ({
         )
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [upgradedSuccessfully, stripeSessionId])
 
   const closeModal = () => {

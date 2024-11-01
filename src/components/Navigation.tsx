@@ -30,6 +30,7 @@ import { enqueueSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
 import { AuthButton } from './AuthButton'
 import { IconWrapper } from './IconWrapper'
+import { BookIcon } from './icons/BookIcon'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
 
@@ -345,6 +346,8 @@ function NavigationGroup({
 
   const isActiveGroup = section.links?.some((link) => link.href === pathname)
 
+  const formattedPathname = `/${pathname.split('/').slice(1, 4).join('/')}`
+
   return (
     <li
       className={clsx(
@@ -356,7 +359,7 @@ function NavigationGroup({
     >
       <SectionLink
         href={section.href}
-        active={section.href === pathname}
+        active={section.href === formattedPathname}
         links={section.links}
       >
         {section.title}
@@ -432,7 +435,17 @@ export type NavigationProps = {
 } & React.ComponentPropsWithoutRef<'nav'>
 
 export function Navigation({ navigation, ...props }: NavigationProps) {
+  const pathname = usePathname()
   const navigationLinks = useNavigationLinks()
+
+  const completedItems = useContentStore((state) => state.completedLessons)
+
+  const links = navigation?.sections.flatMap((section) => section.links)
+
+  const isActive = pathname === navigation?.href
+
+  const isCompleted =
+    links?.length && links?.every((link) => completedItems.has(link?.id ?? ''))
 
   return (
     <nav {...props}>
@@ -445,9 +458,31 @@ export function Navigation({ navigation, ...props }: NavigationProps) {
           ))}
           <NavPremiumButton />
         </div>
-        {navigation?.sections.map((section) => (
-          <NavigationGroup key={section.title} section={section} />
-        ))}
+        <Link
+          href={navigation?.href ?? ''}
+          className={clsx(
+            'text-md mt-4 flex items-center justify-start font-bold md:mt-6',
+            isActive && '',
+            isCompleted
+              ? 'text-lime-600 dark:text-lime-400'
+              : 'text-zinc-900 hover:text-zinc-900 dark:text-white dark:hover:text-white',
+          )}
+        >
+          <span
+            className={clsx(
+              'mr-2 truncate',
+              isActive && 'border-b border-lime-500',
+            )}
+          >
+            {navigation?.title}
+          </span>
+          <IconWrapper icon={BookIcon} />
+        </Link>
+        <div className="px-2">
+          {navigation?.sections.map((section) => (
+            <NavigationGroup key={section.title} section={section} />
+          ))}
+        </div>
         <div className="sticky bottom-0 z-10 flex flex-col justify-between gap-2">
           <li className="bottom-0 z-10 flex justify-between gap-2">
             <AuthButton

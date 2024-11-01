@@ -15,8 +15,8 @@ export default function NotFound() {
         <p className="mt-2 text-base text-zinc-600 dark:text-zinc-400">
           Sorry, the page you’re looking for cannot be found.
         </p>
-        <Button href="/course" arrow="right" className="mt-8">
-          Back to the course
+        <Button href="/courses" arrow="right" className="mt-8">
+          Back to courses
         </Button>
       </div>
     </>

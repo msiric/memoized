@@ -1,0 +1,382 @@
+# Advanced TypeScript: Generic Patterns
+
+## Concept and Use Cases
+
+**Definition:**
+Advanced generic patterns in TypeScript enable the creation of highly reusable, type-safe abstractions that can work with multiple data types while maintaining strict type checking.
+
+**Common Use Cases:**
+
+- Generic data structures
+- Higher-order components
+- Type-safe API clients
+- State management
+- Validation systems
+- Factory patterns
+- Generic UI components
+
+### Visual Representation:
+
+```
+Generic Type Flow:
+
+Input Type → Generic Constraint → Type Transformation → Output Type
+                    ↓
+             Type Inference
+                    ↓
+           Specialized Type
+```
+
+## Key Concepts
+
+1. **Generic Constraints:**
+
+   - Extending types
+   - Multiple constraints
+   - Default type parameters
+
+2. **Type Inference:**
+
+   - Parameter inference
+   - Return type inference
+   - Contextual typing
+
+3. **Higher-Order Types:**
+   - Generic type composition
+   - Type transformation
+   - Type recursion
+
+## Advanced Generic Patterns
+
+### 1. Factory Pattern with Generic Inference
+
+```typescript
+interface Model {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// Generic factory with inference
+class Factory<T extends Model> {
+  create<K extends Partial<T>>(data: K): T & K {
+    return {
+      id: crypto.randomUUID(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...data,
+    } as T & K
+  }
+
+  createMany<K extends Partial<T>>(count: number, data: K): (T & K)[] {
+    return Array.from({ length: count }, () => this.create(data))
+  }
+}
+
+// Usage
+interface User extends Model {
+  name: string
+  email: string
+}
+
+const userFactory = new Factory<User>()
+const user = userFactory.create({ name: 'John', email: 'john@example.com' })
+```
+
+### 2. Type-Safe Event System
+
+```typescript
+type EventMap = {
+  [K: string]: any
+}
+
+class TypedEventEmitter<Events extends EventMap> {
+  private listeners = new Map<
+    keyof Events,
+    Set<(data: Events[keyof Events]) => void>
+  >()
+
+  on<K extends keyof Events>(
+    event: K,
+    callback: (data: Events[K]) => void,
+  ): void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set())
+    }
+    this.listeners.get(event)!.add(callback)
+  }
+
+  emit<K extends keyof Events>(event: K, data: Events[K]): void {
+    this.listeners.get(event)?.forEach((callback) => callback(data))
+  }
+
+  off<K extends keyof Events>(
+    event: K,
+    callback: (data: Events[K]) => void,
+  ): void {
+    this.listeners.get(event)?.delete(callback)
+  }
+}
+
+// Usage
+interface AppEvents {
+  'user:login': { userId: string; timestamp: number }
+  'user:logout': { userId: string }
+  error: { code: number; message: string }
+}
+
+const emitter = new TypedEventEmitter<AppEvents>()
+emitter.on('user:login', (data) => {
+  console.log(`User ${data.userId} logged in at ${data.timestamp}`)
+})
+```
+
+### 3. Generic State Container
+
+```typescript
+type Reducer<State, Action> = (state: State, action: Action) => State
+
+class Store<State, Action> {
+  private state: State
+  private listeners: Set<(state: State) => void> = new Set()
+
+  constructor(
+    private reducer: Reducer<State, Action>,
+    initialState: State,
+  ) {
+    this.state = initialState
+  }
+
+  getState(): State {
+    return this.state
+  }
+
+  dispatch(action: Action): void {
+    this.state = this.reducer(this.state, action)
+    this.notify()
+  }
+
+  subscribe(listener: (state: State) => void): () => void {
+    this.listeners.add(listener)
+    return () => this.listeners.delete(listener)
+  }
+
+  private notify(): void {
+    this.listeners.forEach((listener) => listener(this.state))
+  }
+}
+
+// Usage
+interface TodoState {
+  todos: { id: string; text: string; completed: boolean }[]
+}
+
+type TodoAction =
+  | { type: 'ADD_TODO'; payload: string }
+  | { type: 'TOGGLE_TODO'; payload: string }
+  | { type: 'REMOVE_TODO'; payload: string }
+
+const todoReducer: Reducer<TodoState, TodoAction> = (state, action) => {
+  switch (action.type) {
+    case 'ADD_TODO':
+      return {
+        ...state,
+        todos: [
+          ...state.todos,
+          {
+            id: crypto.randomUUID(),
+            text: action.payload,
+            completed: false,
+          },
+        ],
+      }
+    // ... other cases
+    default:
+      return state
+  }
+}
+```
+
+### 4. Generic Builder Pattern
+
+```typescript
+class Builder<T extends object> {
+  private object: Partial<T> = {}
+
+  set<K extends keyof T>(key: K, value: T[K]): this {
+    this.object[key] = value
+    return this
+  }
+
+  setMany(values: Partial<T>): this {
+    Object.assign(this.object, values)
+    return this
+  }
+
+  build(): T {
+    // Type assertion here assumes all required properties are set
+    return this.object as T
+  }
+}
+
+// Usage
+interface User {
+  id: string
+  name: string
+  email: string
+  age?: number
+}
+
+const user = new Builder<User>()
+  .set('id', '1')
+  .set('name', 'John')
+  .set('email', 'john@example.com')
+  .build()
+```
+
+### 5. Type-Safe API Client
+
+```typescript
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+
+interface EndpointDefinition<
+  TMethod extends HTTPMethod,
+  TPath extends string,
+  TRequest = undefined,
+  TResponse = any,
+> {
+  method: TMethod
+  path: TPath
+  request?: TRequest
+  response: TResponse
+}
+
+class APIClient {
+  async request<T extends EndpointDefinition<any, any, any, any>>(
+    endpoint: T,
+    data?: T['request'],
+  ): Promise<T['response']> {
+    const response = await fetch(endpoint.path, {
+      method: endpoint.method,
+      body: data ? JSON.stringify(data) : undefined,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    return response.json()
+  }
+}
+
+// Usage
+interface User {
+  id: string
+  name: string
+}
+
+const getUser: EndpointDefinition<'GET', '/users/:id', undefined, User> = {
+  method: 'GET',
+  path: '/users/:id',
+  response: {} as User,
+}
+
+const createUser: EndpointDefinition<
+  'POST',
+  '/users',
+  Omit<User, 'id'>,
+  User
+> = {
+  method: 'POST',
+  path: '/users',
+  request: {} as Omit<User, 'id'>,
+  response: {} as User,
+}
+
+const api = new APIClient()
+api.request(getUser)
+api.request(createUser, { name: 'John' })
+```
+
+## Advanced Type Manipulation
+
+### 1. Deep Partial Type
+
+```typescript
+type DeepPartial<T> = T extends object
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>
+    }
+  : T
+
+// Usage
+interface Config {
+  server: {
+    port: number
+    host: string
+    ssl: {
+      cert: string
+      key: string
+    }
+  }
+  database: {
+    url: string
+    name: string
+  }
+}
+
+type PartialConfig = DeepPartial<Config>
+```
+
+### 2. Recursive Type Transformations
+
+```typescript
+type RecursiveReadonly<T> = {
+  readonly [P in keyof T]: T[P] extends object ? RecursiveReadonly<T[P]> : T[P]
+}
+
+type RecursiveRecord<K extends keyof any, T> = {
+  [P in K]: T extends object ? RecursiveRecord<K, T[keyof T]> : T
+}
+
+// Usage
+interface Mutable {
+  name: string
+  settings: {
+    theme: string
+    notifications: boolean
+  }
+}
+
+type ImmutableConfig = RecursiveReadonly<Mutable>
+```
+
+## Interview Tips and Tricks
+
+1. **Understanding Type Inference:**
+
+   - Know how TypeScript infers generic types
+   - Understand type parameter constraints
+   - Be familiar with type parameter defaults
+
+2. **Generic Best Practices:**
+
+   - When to use generics vs union types
+   - How to handle generic constraints
+   - Error handling with generics
+
+3. **Performance Considerations:**
+   - Type system limitations
+   - Compilation performance
+   - Runtime overhead
+
+## Common Interview Questions
+
+1. What are generic constraints and when should you use them?
+2. How does type inference work with generics?
+3. Explain the difference between extends and implements with generics.
+4. How would you implement a type-safe event system?
+5. What are higher-order types and when are they useful?
+6. How do you handle generic type constraints with multiple types?
+7. What are some common pitfalls when working with generics?
+
+Understanding advanced generic patterns is crucial for building robust, type-safe applications in TypeScript. These patterns enable you to create flexible, reusable code while maintaining strong type safety.

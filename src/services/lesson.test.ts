@@ -158,6 +158,7 @@ describe('Lesson services', () => {
         'course-slug',
         'Course Title',
         'Course Description',
+        '/course',
         1,
       )
       expect(course).toEqual(mockCourse)

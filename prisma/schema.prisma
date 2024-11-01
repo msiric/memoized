@@ -130,6 +130,7 @@ model Course {
   description String?
   href        String
   slug        String    @unique
+  isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
   sections    Section[]

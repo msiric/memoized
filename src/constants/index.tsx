@@ -2,9 +2,11 @@ import { ProblemDifficulty } from '@prisma/client'
 
 export const APP_NAME = 'Memoized'
 
-export const COURSE_PREFIX = '/course'
-
+export const COURSES_PREFIX = '/courses'
+export const PROBLEMS_PREFIX = '/courses'
 export const RESOURCES_PREFIX = '/resources'
+
+export const DATA_STRUCTURES_AND_ALGORITHMS_PREFIX = '/dsa-track'
 
 export const BUILT_IN_DATA_STRUCTURES_PREFIX = '/built-in-data-structures'
 export const USER_DEFINED_DATA_STRUCTURES_PREFIX =

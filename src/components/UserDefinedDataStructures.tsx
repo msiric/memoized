@@ -1,6 +1,10 @@
 import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
-import { COURSE_PREFIX, USER_DEFINED_DATA_STRUCTURES_PREFIX } from '@/constants'
+import {
+  COURSES_PREFIX,
+  DATA_STRUCTURES_AND_ALGORITHMS_PREFIX,
+  USER_DEFINED_DATA_STRUCTURES_PREFIX,
+} from '@/constants'
 import { USER_DEFINED_DATA_STRUCTURES_PROBLEMS } from '@/problems'
 import { USER_DEFINED_DATA_STRUCTURES_RESOURCES } from '@/resources'
 import { LessonConfig } from '@/types'
@@ -9,7 +13,7 @@ import { AccessOptions } from '@prisma/client'
 export const userDefinedDataStructures: LessonConfig[] = [
   {
     id: '/linked-lists',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/linked-lists`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/linked-lists`,
     title: 'Linked Lists',
     description:
       'Learn about the various types of linked lists and their operations.',
@@ -19,7 +23,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/stacks',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/stacks`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/stacks`,
     title: 'Stacks',
     description:
       'Explore stack operations and their applications in computer science.',
@@ -29,7 +33,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/queues',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/queues`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/queues`,
     title: 'Queues',
     description:
       'Understand the FIFO principle and how queues are implemented.',
@@ -39,7 +43,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/hash-tables',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/hash-tables`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/hash-tables`,
     title: 'Hash Tables',
     description:
       'Delve into hash table implementation and its various use cases.',
@@ -49,7 +53,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/trees',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/trees`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/trees`,
     title: 'Trees',
     description: 'Study tree structures and their traversal algorithms.',
     access: AccessOptions.PREMIUM,
@@ -58,7 +62,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/graphs',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/graphs`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/graphs`,
     title: 'Graphs',
     description:
       'Learn about graph representations and graph traversal methods.',
@@ -68,7 +72,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/heaps',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/heaps`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/heaps`,
     title: 'Heaps',
     description: 'Discover heap structures and their use in priority queues.',
     access: AccessOptions.PREMIUM,
@@ -77,7 +81,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/tries',
-    href: `${COURSE_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/tries`,
+    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/tries`,
     title: 'Tries',
     description:
       'Understand trie data structures and their use in efficient searching.',

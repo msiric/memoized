@@ -1,0 +1,492 @@
+# Advanced Frontend: Loading Performance
+
+## Concept and Use Cases
+
+**Definition:**
+Loading performance optimization involves strategies to minimize initial load time and optimize resource delivery to provide a fast and smooth user experience.
+
+**Common Use Cases:**
+
+- Single page applications
+- Large applications
+- E-commerce sites
+- Content-heavy sites
+- Image-heavy applications
+- Dynamic imports
+- Third-party integrations
+- Progressive web apps
+
+### Visual Representation:
+
+```
+Loading Optimization Hierarchy:
+
+Critical Path → Initial Load → Lazy Load → Prefetch
+     ↓              ↓            ↓           ↓
+Inline CSS     Code Split    On Demand   Prediction
+```
+
+## Key Concepts
+
+1. **Code Splitting:**
+
+   - Route-based splitting
+   - Component-based splitting
+   - Module chunking
+   - Priority loading
+
+2. **Resource Loading:**
+
+   - Resource hints
+   - Preloading
+   - Prefetching
+   - Asset optimization
+
+3. **Performance Metrics:**
+   - Core Web Vitals
+   - Time to Interactive
+   - First Contentful Paint
+   - Largest Contentful Paint
+
+## Implementation Examples
+
+### 1. Advanced Code Splitting
+
+```typescript
+// Intelligent code splitting system
+interface SplitConfig {
+  priority: 'high' | 'medium' | 'low'
+  preload?: boolean
+  prefetch?: boolean
+  timeout?: number
+}
+
+class ChunkLoader {
+  private loadedChunks: Set<string> = new Set()
+  private loadingPromises: Map<string, Promise<any>> = new Map()
+  private preloadQueue: Set<string> = new Set()
+
+  async loadChunk<T>(
+    chunkName: string,
+    loader: () => Promise<T>,
+    config: SplitConfig,
+  ): Promise<T> {
+    // Return cached chunk if already loaded
+    if (this.loadedChunks.has(chunkName)) {
+      return this.loadingPromises.get(chunkName)
+    }
+
+    // Create loading promise with timeout
+    const loadPromise = new Promise<T>(async (resolve, reject) => {
+      try {
+        const timeoutPromise = config.timeout
+          ? new Promise((_, reject) =>
+              setTimeout(
+                () => reject(new Error('Chunk load timeout')),
+                config.timeout,
+              ),
+            )
+          : null
+
+        const chunk = await Promise.race(
+          [loader(), timeoutPromise].filter(Boolean),
+        )
+
+        this.loadedChunks.add(chunkName)
+        resolve(chunk)
+      } catch (error) {
+        reject(error)
+      }
+    })
+
+    this.loadingPromises.set(chunkName, loadPromise)
+    return loadPromise
+  }
+
+  preloadChunk(chunkName: string, loader: () => Promise<any>): void {
+    if (this.preloadQueue.has(chunkName)) return
+
+    const link = document.createElement('link')
+    link.rel = 'preload'
+    link.as = 'script'
+    link.href = this.getChunkUrl(loader)
+
+    document.head.appendChild(link)
+    this.preloadQueue.add(chunkName)
+  }
+
+  private getChunkUrl(loader: () => Promise<any>): string {
+    // Extract webpack chunk URL from loader function
+    const matches = loader.toString().match(/\"([^\"]+)\"/)
+    return matches ? matches[1] : ''
+  }
+}
+
+// React implementation
+function useDynamicImport<T>(
+  loader: () => Promise<{ default: T }>,
+  config: SplitConfig,
+) {
+  const [Component, setComponent] = useState<T | null>(null)
+  const [error, setError] = useState<Error | null>(null)
+  const chunkLoader = useRef(new ChunkLoader())
+
+  useEffect(() => {
+    const loadComponent = async () => {
+      try {
+        const module = await chunkLoader.current.loadChunk(
+          'component',
+          loader,
+          config,
+        )
+        setComponent(module.default)
+      } catch (err) {
+        setError(err as Error)
+      }
+    }
+
+    if (config.preload) {
+      chunkLoader.current.preloadChunk('component', loader)
+    }
+
+    loadComponent()
+  }, [loader, config])
+
+  return { Component, error }
+}
+```
+
+### 2. Resource Prioritization
+
+```typescript
+// Resource prioritization system
+interface ResourceConfig {
+  priority: 'critical' | 'high' | 'medium' | 'low'
+  type: 'script' | 'style' | 'image' | 'font'
+  url: string
+}
+
+class ResourceScheduler {
+  private loadQueue: Map<string, ResourceConfig> = new Map()
+  private networkIdleCallback: IdleRequestCallback | null = null
+
+  schedule(resources: ResourceConfig[]): void {
+    // Sort resources by priority
+    resources.sort(
+      (a, b) =>
+        this.getPriorityWeight(a.priority) - this.getPriorityWeight(b.priority),
+    )
+
+    // Add to queue
+    resources.forEach((resource) => {
+      this.loadQueue.set(resource.url, resource)
+    })
+
+    this.processQueue()
+  }
+
+  private processQueue(): void {
+    if ('requestIdleCallback' in window) {
+      this.networkIdleCallback = requestIdleCallback(
+        this.loadResources.bind(this),
+        { timeout: 2000 },
+      )
+    } else {
+      setTimeout(this.loadResources.bind(this), 0)
+    }
+  }
+
+  private loadResources(deadline?: IdleDeadline): void {
+    const hasTime = () => !deadline || deadline.timeRemaining() > 0
+
+    for (const [url, config] of this.loadQueue.entries()) {
+      if (!hasTime()) {
+        this.processQueue()
+        break
+      }
+
+      this.loadResource(config)
+      this.loadQueue.delete(url)
+    }
+  }
+
+  private loadResource(config: ResourceConfig): void {
+    switch (config.type) {
+      case 'script':
+        this.loadScript(config)
+        break
+      case 'style':
+        this.loadStyle(config)
+        break
+      case 'image':
+        this.loadImage(config)
+        break
+      case 'font':
+        this.loadFont(config)
+        break
+    }
+  }
+
+  private loadScript(config: ResourceConfig): void {
+    const script = document.createElement('script')
+    script.src = config.url
+    script.async = true
+
+    if (config.priority === 'critical') {
+      script.setAttribute('fetchpriority', 'high')
+    }
+
+    document.head.appendChild(script)
+  }
+
+  // Similar methods for other resource types...
+
+  private getPriorityWeight(priority: string): number {
+    switch (priority) {
+      case 'critical':
+        return 0
+      case 'high':
+        return 1
+      case 'medium':
+        return 2
+      case 'low':
+        return 3
+      default:
+        return 4
+    }
+  }
+}
+```
+
+### 3. Performance Monitoring
+
+```typescript
+// Performance monitoring system
+class PerformanceMonitor {
+  private metrics: Map<string, number[]> = new Map()
+  private marks: Map<string, number> = new Map()
+
+  markStart(name: string): void {
+    this.marks.set(name, performance.now())
+    performance.mark(`${name}-start`)
+  }
+
+  markEnd(name: string): void {
+    const startTime = this.marks.get(name)
+    if (startTime) {
+      const duration = performance.now() - startTime
+      const measurements = this.metrics.get(name) || []
+      measurements.push(duration)
+      this.metrics.set(name, measurements)
+
+      performance.mark(`${name}-end`)
+      performance.measure(name, `${name}-start`, `${name}-end`)
+    }
+  }
+
+  getMetrics(): Record<
+    string,
+    {
+      average: number
+      min: number
+      max: number
+      p95: number
+    }
+  > {
+    const results: Record<string, any> = {}
+
+    for (const [name, measurements] of this.metrics.entries()) {
+      const sorted = [...measurements].sort((a, b) => a - b)
+      const p95Index = Math.floor(sorted.length * 0.95)
+
+      results[name] = {
+        average: measurements.reduce((a, b) => a + b) / measurements.length,
+        min: sorted[0],
+        max: sorted[sorted.length - 1],
+        p95: sorted[p95Index],
+      }
+    }
+
+    return results
+  }
+
+  trackCoreWebVitals(): void {
+    if ('web-vital' in window) {
+      webVitals.onLCP((metric) => this.recordMetric('LCP', metric.value))
+      webVitals.onFID((metric) => this.recordMetric('FID', metric.value))
+      webVitals.onCLS((metric) => this.recordMetric('CLS', metric.value))
+    }
+  }
+
+  private recordMetric(name: string, value: number): void {
+    const measurements = this.metrics.get(name) || []
+    measurements.push(value)
+    this.metrics.set(name, measurements)
+  }
+}
+```
+
+### 4. Asset Optimization
+
+```typescript
+// Image loading optimization
+interface ImageLoaderOptions {
+  quality?: number
+  width?: number
+  height?: number
+  format?: 'webp' | 'avif' | 'jpeg'
+}
+
+class ImageLoader {
+  private loadingImages: Map<string, Promise<string>> = new Map()
+  private cache: Map<string, string> = new Map()
+
+  async loadImage(
+    src: string,
+    options: ImageLoaderOptions = {},
+  ): Promise<string> {
+    const key = this.getCacheKey(src, options)
+
+    // Check cache
+    if (this.cache.has(key)) {
+      return this.cache.get(key)!
+    }
+
+    // Check if already loading
+    if (this.loadingImages.has(key)) {
+      return this.loadingImages.get(key)!
+    }
+
+    // Load image
+    const loadPromise = new Promise<string>((resolve, reject) => {
+      const img = new Image()
+
+      img.onload = () => {
+        const optimizedSrc = this.optimizeImage(img, options)
+        this.cache.set(key, optimizedSrc)
+        resolve(optimizedSrc)
+      }
+
+      img.onerror = () => {
+        reject(new Error(`Failed to load image: ${src}`))
+      }
+
+      img.src = src
+    })
+
+    this.loadingImages.set(key, loadPromise)
+    return loadPromise
+  }
+
+  private optimizeImage(
+    img: HTMLImageElement,
+    options: ImageLoaderOptions,
+  ): string {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')!
+
+    // Set dimensions
+    const width = options.width || img.naturalWidth
+    const height = options.height || img.naturalHeight
+    canvas.width = width
+    canvas.height = height
+
+    // Draw image
+    ctx.drawImage(img, 0, 0, width, height)
+
+    // Return optimized data URL
+    return canvas.toDataURL(
+      `image/${options.format || 'jpeg'}`,
+      options.quality || 0.8,
+    )
+  }
+
+  private getCacheKey(src: string, options: ImageLoaderOptions): string {
+    return `${src}-${JSON.stringify(options)}`
+  }
+}
+
+// React implementation
+function useOptimizedImage(src: string, options: ImageLoaderOptions = {}) {
+  const [optimizedSrc, setOptimizedSrc] = useState<string | null>(null)
+  const imageLoader = useRef(new ImageLoader())
+
+  useEffect(() => {
+    imageLoader.current
+      .loadImage(src, options)
+      .then(setOptimizedSrc)
+      .catch(console.error)
+  }, [src, options])
+
+  return optimizedSrc
+}
+```
+
+## Best Practices
+
+1. **Critical Path:**
+
+   - Inline critical CSS
+   - Defer non-critical resources
+   - Optimize load order
+
+2. **Resource Loading:**
+
+   - Use resource hints
+   - Implement lazy loading
+   - Optimize assets
+
+3. **Monitoring:**
+   - Track key metrics
+   - Set performance budgets
+   - Monitor user experience
+
+## Common Challenges
+
+1. **Third-party Resources:**
+
+   - Script loading
+   - External dependencies
+   - Performance impact
+
+2. **Asset Management:**
+
+   - Image optimization
+   - Font loading
+   - Bundle size
+
+3. **Cache Strategy:**
+   - Cache invalidation
+   - Version management
+   - Resource freshness
+
+## Interview Tips and Tricks
+
+1. **Performance Analysis:**
+
+   - Core Web Vitals
+   - Loading metrics
+   - Optimization strategies
+
+2. **Best Practices:**
+
+   - Loading patterns
+   - Resource optimization
+   - Caching strategies
+
+3. **Problem Solving:**
+   - Performance debugging
+   - Optimization techniques
+   - Trade-off analysis
+
+## Common Interview Questions
+
+1. How do you implement effective code splitting?
+2. What strategies do you use for resource prioritization?
+3. How do you optimize initial load time?
+4. What are Core Web Vitals and how do you optimize for them?
+5. How do you handle third-party script loading?
+6. What are your approaches to asset optimization?
+7. How do you measure loading performance?
+
+Understanding loading performance optimization is crucial for building fast and efficient web applications. It involves implementing effective loading strategies while considering user experience and performance metrics.

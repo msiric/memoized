@@ -326,6 +326,7 @@ export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
       title: courseTitle,
       order: courseOrder,
       description: courseDescription,
+      href: courseHref,
     } = lesson.section.course
     const {
       id: sectionId,
@@ -353,6 +354,7 @@ export const buildCurriculum = (allLessons: EnrichedLesson[]): Curriculum[] => {
         title: courseTitle,
         description: courseDescription,
         order: courseOrder,
+        href: courseHref,
         sections: [],
       }
       acc.push(course)
@@ -417,6 +419,7 @@ export const curriculumToNavigation = (
     title: curriculum.title,
     description: curriculum.description,
     order: curriculum.order,
+    href: curriculum.href,
     sections: curriculum.sections.map((section) => ({
       id: section.id,
       slug: section.slug,
@@ -446,9 +449,10 @@ export const problemListToNavigation = (
   return {
     id: 'problem-navigation',
     slug: 'problem-navigation',
-    title: 'Problem Navigation',
+    title: 'Problems',
     description: 'Navigation structure for lessons and problems',
     order: 0,
+    href: '/problems',
     sections: problemList.map((lesson) => ({
       id: lesson.id,
       slug: lesson.slug,
@@ -477,9 +481,10 @@ export const resourcesToNavigation = (
   return {
     id: 'prep-resources',
     slug: 'prep-resources',
-    title: 'Resources Navigation',
+    title: 'Resources',
     description: 'Navigation structure for resources',
     order: 0,
+    href: '/resources',
     sections: resourceList.map((lesson) => ({
       id: lesson.id,
       slug: lesson.slug,

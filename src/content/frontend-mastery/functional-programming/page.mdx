@@ -1,0 +1,457 @@
+# Advanced JavaScript: Functional Programming
+
+## Concept and Use Cases
+
+**Definition:**
+Functional programming (FP) is a programming paradigm that treats computation as the evaluation of mathematical functions and avoids changing state and mutable data.
+
+**Common Use Cases:**
+
+- Data transformation pipelines
+- State management
+- Event handling
+- Async operations
+- Complex calculations with pure functions
+
+### Visual Representation:
+
+```
+Data Flow in Functional Programming:
+
+Input → Pure Function → Output
+
+function compose(f, g):
+    Input → g → Intermediate → f → Output
+```
+
+## Key Concepts
+
+1. **Pure Functions:**
+
+   - Same output for same input
+   - No side effects
+   - Predictable behavior
+
+2. **Immutability:**
+
+   - Data never changes
+   - Create new copies with modifications
+
+3. **Higher-Order Functions:**
+
+   - Functions that take functions as arguments
+   - Functions that return functions
+
+4. **Function Composition:**
+   - Building complex functions from simple ones
+   - Data transformation pipelines
+
+## Time and Space Complexity
+
+**Time Complexity:**
+
+- Pure function execution: O(1) to O(n), depending on implementation
+- Function composition: O(n) where n is the number of composed functions
+- Immutable operations: Usually O(n) due to copying
+
+**Space Complexity:**
+
+- Immutable data structures: O(n) for each modification
+- Function composition: O(1) for the composition itself
+- Closure creation: O(1)
+
+## Functional Programming: Operations and Methods
+
+### Pure Functions and Immutability
+
+**Problem:**
+Create a shopping cart system using immutable operations.
+
+**Step-by-Step Solution:**
+
+1. Create pure functions for cart operations
+2. Maintain immutability when modifying cart
+3. Implement cart calculations without side effects
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+const cart = {
+  items: [],
+  total: 0,
+}
+
+const addItem = (cart, item) => ({
+  items: [...cart.items, item],
+  total: cart.total + item.price,
+})
+
+const removeItem = (cart, itemId) => {
+  const itemIndex = cart.items.findIndex((item) => item.id === itemId)
+  if (itemIndex === -1) return cart
+
+  return {
+    items: [
+      ...cart.items.slice(0, itemIndex),
+      ...cart.items.slice(itemIndex + 1),
+    ],
+    total: cart.total - cart.items[itemIndex].price,
+  }
+}
+
+const applyDiscount = (cart, percentage) => ({
+  ...cart,
+  total: cart.total * (1 - percentage / 100),
+})
+
+// Usage
+let myCart = cart
+myCart = addItem(myCart, { id: 1, name: 'Book', price: 20 })
+myCart = addItem(myCart, { id: 2, name: 'Pen', price: 5 })
+myCart = removeItem(myCart, 1)
+myCart = applyDiscount(myCart, 10)
+
+console.log(myCart)
+```
+
+```typescript
+interface CartItem {
+  id: number
+  name: string
+  price: number
+}
+
+interface Cart {
+  items: CartItem[]
+  total: number
+}
+
+const cart: Cart = {
+  items: [],
+  total: 0,
+}
+
+const addItem = (cart: Cart, item: CartItem): Cart => ({
+  items: [...cart.items, item],
+  total: cart.total + item.price,
+})
+
+const removeItem = (cart: Cart, itemId: number): Cart => {
+  const itemIndex = cart.items.findIndex((item) => item.id === itemId)
+  if (itemIndex === -1) return cart
+
+  return {
+    items: [
+      ...cart.items.slice(0, itemIndex),
+      ...cart.items.slice(itemIndex + 1),
+    ],
+    total: cart.total - cart.items[itemIndex].price,
+  }
+}
+
+const applyDiscount = (cart: Cart, percentage: number): Cart => ({
+  ...cart,
+  total: cart.total * (1 - percentage / 100),
+})
+
+// Usage
+let myCart = cart
+myCart = addItem(myCart, { id: 1, name: 'Book', price: 20 })
+myCart = addItem(myCart, { id: 2, name: 'Pen', price: 5 })
+myCart = removeItem(myCart, 1)
+myCart = applyDiscount(myCart, 10)
+
+console.log(myCart)
+```
+
+</CodeGroup>
+
+### Higher-Order Functions
+
+**Problem:**
+Create a function composition utility that handles both synchronous and asynchronous functions.
+
+**Step-by-Step Solution:**
+
+1. Create a compose function that handles multiple functions
+2. Support both sync and async functions
+3. Implement error handling
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+const compose =
+  (...fns) =>
+  (x) =>
+    fns.reduceRight(async (acc, fn) => {
+      const awaited = await acc
+      return fn(awaited)
+    }, Promise.resolve(x))
+
+// Example functions
+const double = (x) => x * 2
+const addOne = (x) => x + 1
+const asyncSquare = async (x) => {
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  return x * x
+}
+
+// Usage
+const enhancement = compose(double, asyncSquare, addOne)
+
+enhancement(2).then((result) => {
+  console.log(result) // Output: 18
+  // (2 + 1 = 3) → (3² = 9) → (9 * 2 = 18)
+})
+```
+
+```typescript
+type AsyncFunction<T, U> = (input: T) => Promise<U>
+type SyncFunction<T, U> = (input: T) => U
+type AnyFunction<T, U> = AsyncFunction<T, U> | SyncFunction<T, U>
+
+const compose =
+  <T>(...fns: AnyFunction<any, any>[]) =>
+  (x: T): Promise<any> =>
+    fns.reduceRight(async (acc, fn) => {
+      const awaited = await acc
+      return fn(awaited)
+    }, Promise.resolve(x))
+
+// Example functions
+const double = (x: number): number => x * 2
+const addOne = (x: number): number => x + 1
+const asyncSquare = async (x: number): Promise<number> => {
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  return x * x
+}
+
+// Usage
+const enhancement = compose(double, asyncSquare, addOne)
+
+enhancement(2).then((result) => {
+  console.log(result) // Output: 18
+  // (2 + 1 = 3) → (3² = 9) → (9 * 2 = 18)
+})
+```
+
+</CodeGroup>
+
+### Functors and Monads
+
+**Problem:**
+Implement a Maybe monad for handling nullable values safely.
+
+**Step-by-Step Solution:**
+
+1. Create a Maybe type that wraps values
+2. Implement map and chain methods
+3. Handle null/undefined values gracefully
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+class Maybe {
+  constructor(value) {
+    this._value = value
+  }
+
+  static of(value) {
+    return new Maybe(value)
+  }
+
+  isNothing() {
+    return this._value === null || this._value === undefined
+  }
+
+  map(fn) {
+    return this.isNothing() ? Maybe.of(null) : Maybe.of(fn(this._value))
+  }
+
+  chain(fn) {
+    return this.isNothing() ? Maybe.of(null) : fn(this._value)
+  }
+
+  getOrElse(defaultValue) {
+    return this.isNothing() ? defaultValue : this._value
+  }
+}
+
+// Usage
+const user = {
+  name: 'John',
+  address: {
+    street: null,
+  },
+}
+
+const getStreetName = (user) =>
+  Maybe.of(user)
+    .map((u) => u.address)
+    .map((a) => a.street)
+    .getOrElse('No street address')
+
+console.log(getStreetName(user)) // Output: No street address
+```
+
+```typescript
+class Maybe<T> {
+  private _value: T | null | undefined
+
+  constructor(value: T | null | undefined) {
+    this._value = value
+  }
+
+  static of<U>(value: U): Maybe<U> {
+    return new Maybe(value)
+  }
+
+  isNothing(): boolean {
+    return this._value === null || this._value === undefined
+  }
+
+  map<U>(fn: (value: T) => U): Maybe<U> {
+    return this.isNothing() ? Maybe.of<U>(null) : Maybe.of(fn(this._value as T))
+  }
+
+  chain<U>(fn: (value: T) => Maybe<U>): Maybe<U> {
+    return this.isNothing() ? Maybe.of<U>(null) : fn(this._value as T)
+  }
+
+  getOrElse(defaultValue: T): T {
+    return this.isNothing() ? defaultValue : (this._value as T)
+  }
+}
+
+// Usage
+interface User {
+  name: string
+  address: {
+    street: string | null
+  }
+}
+
+const user: User = {
+  name: 'John',
+  address: {
+    street: null,
+  },
+}
+
+const getStreetName = (user: User): string =>
+  Maybe.of(user)
+    .map((u) => u.address)
+    .map((a) => a.street)
+    .getOrElse('No street address')
+
+console.log(getStreetName(user)) // Output: No street address
+```
+
+</CodeGroup>
+
+## Practical Tips and Tricks
+
+- **Immutability:**
+  Use spread operator and Object.freeze() for immutable data
+
+- **Performance:**
+  Be mindful of creating new objects in tight loops
+
+- **Composition:**
+  Prefer small, composable functions over large, complex ones
+
+## Common Gotchas
+
+- **Mutation in Disguise:**
+  Watch out for nested object mutations
+
+- **Reference Types:**
+  Be careful with arrays and objects in pure functions
+
+- **this Context:**
+  Arrow functions and 'this' binding in functional code
+
+## Advanced Topics
+
+### Point-Free Programming
+
+**Problem:**
+Refactor code to use point-free style (tacit programming).
+
+**Example:**
+
+<CodeGroup>
+
+```javascript
+// Instead of this:
+const addThenMultiply = (x) => multiply(add(x, 2), 3)
+
+// Write this:
+const add2 = add(2)
+const multiply3 = multiply(3)
+const addThenMultiply = pipe(add2, multiply3)
+
+// Implementation
+const pipe =
+  (...fns) =>
+  (x) =>
+    fns.reduce((y, f) => f(y), x)
+const add = (a) => (b) => a + b
+const multiply = (a) => (b) => a * b
+
+console.log(addThenMultiply(5)) // Output: 21
+```
+
+```typescript
+type UnaryFunction<T, U> = (arg: T) => U
+
+const pipe =
+  <T>(...fns: UnaryFunction<any, any>[]) =>
+  (x: T) =>
+    fns.reduce((y, f) => f(y), x)
+
+const add =
+  (a: number) =>
+  (b: number): number =>
+    a + b
+const multiply =
+  (a: number) =>
+  (b: number): number =>
+    a * b
+
+// Point-free style
+const add2: UnaryFunction<number, number> = add(2)
+const multiply3: UnaryFunction<number, number> = multiply(3)
+const addThenMultiply: UnaryFunction<number, number> = pipe(add2, multiply3)
+
+console.log(addThenMultiply(5)) // Output: 21
+```
+
+</CodeGroup>
+
+## Interview Tips and Tricks
+
+- **Explain Core Concepts:**
+  Be ready to explain pure functions, immutability, and higher-order functions
+
+- **Real-World Examples:**
+  Prepare examples of functional programming in real applications
+
+- **Performance Considerations:**
+  Understand the trade-offs of functional programming
+
+## Common Interview Questions
+
+1. What are pure functions and why are they important?
+2. Explain the concept of immutability in functional programming.
+3. What are higher-order functions and when would you use them?
+4. How does functional programming help with testing?
+5. What are the trade-offs of functional programming?
+
+By mastering functional programming concepts, you'll be able to write more predictable, testable, and maintainable code. These patterns are increasingly important in modern JavaScript development, especially in state management and data processing applications.

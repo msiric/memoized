@@ -1,0 +1,379 @@
+# Advanced React: Server-Side Rendering and Static Site Generation
+
+## Concept and Use Cases
+
+**Definition:**
+SSR and SSG are techniques to render React applications on the server or at build time, improving initial page load, SEO, and performance.
+
+**Common Use Cases:**
+
+- SEO-critical pages
+- Content-heavy sites
+- E-commerce platforms
+- Marketing pages
+- Documentation sites
+- Blogs and news sites
+- Dynamic web applications
+- Progressive web apps
+
+### Visual Representation:
+
+```
+Rendering Strategies:
+
+Client-Side (CSR)    Server-Side (SSR)    Static (SSG)
+      ↓                    ↓                   ↓
+Load JS → Render     Render → Hydrate    Build → Deploy
+```
+
+## Key Concepts
+
+1. **Rendering Methods:**
+
+   - Server-side rendering
+   - Static site generation
+   - Incremental static regeneration
+   - Hybrid rendering
+
+2. **Performance:**
+
+   - Hydration
+   - Streaming
+   - Caching
+   - Edge rendering
+
+3. **Data Flow:**
+   - Data fetching
+   - State management
+   - Revalidation
+   - Cache invalidation
+
+## Implementation Examples
+
+### 1. Server-Side Rendering Setup
+
+```typescript
+// Basic SSR setup with Express
+import express from 'express';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { StaticRouter } from 'react-router-dom/server';
+
+const app = express();
+
+// Server entry point
+app.get('*', async (req, res) => {
+    const context = {};
+    const initialData = await fetchInitialData(req.url);
+
+    const html = renderToString(
+        <StaticRouter location={req.url} context={context}>
+            <App initialData={initialData} />
+        </StaticRouter>
+    );
+
+    const finalHtml = `
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>SSR App</title>
+                <script>
+                    window.__INITIAL_DATA__ = ${JSON.stringify(initialData)};
+                </script>
+            </head>
+            <body>
+                <div id="root">${html}</div>
+                <script src="/client.js"></script>
+            </body>
+        </html>
+    `;
+
+    res.send(finalHtml);
+});
+
+// Client entry point
+import { hydrateRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+
+hydrateRoot(
+    document.getElementById('root')!,
+    <BrowserRouter>
+        <App initialData={window.__INITIAL_DATA__} />
+    </BrowserRouter>
+);
+```
+
+### 2. Static Site Generation
+
+```typescript
+// Next.js static site generation
+interface Post {
+    id: string;
+    title: string;
+    content: string;
+}
+
+// Page component with static props
+export default function BlogPost({
+    post
+}: {
+    post: Post
+}) {
+    return (
+        <article>
+            <h1>{post.title}</h1>
+            <div>{post.content}</div>
+        </article>
+    );
+}
+
+// Static page generation
+export async function getStaticPaths() {
+    const posts = await fetchAllPosts();
+
+    return {
+        paths: posts.map(post => ({
+            params: { id: post.id }
+        })),
+        fallback: false
+    };
+}
+
+export async function getStaticProps({
+    params
+}: {
+    params: { id: string }
+}) {
+    const post = await fetchPost(params.id);
+
+    return {
+        props: {
+            post
+        },
+        revalidate: 60 // ISR: Regenerate page every 60 seconds
+    };
+}
+```
+
+### 3. Hybrid Rendering Strategies
+
+```typescript
+// Component with mixed rendering strategies
+function HybridPage({
+    staticData,
+    serverData
+}: {
+    staticData: any;
+    serverData: any;
+}) {
+    const [clientData, setClientData] = useState(null);
+
+    useEffect(() => {
+        // Client-side fetch
+        fetchClientData().then(setClientData);
+    }, []);
+
+    return (
+        <div>
+            {/* Static content */}
+            <StaticContent data={staticData} />
+
+            {/* Server-rendered content */}
+            <ServerContent data={serverData} />
+
+            {/* Client-rendered content */}
+            {clientData ? (
+                <ClientContent data={clientData} />
+            ) : (
+                <Loading />
+            )}
+        </div>
+    );
+}
+
+// Data fetching configuration
+export async function getStaticProps() {
+    const staticData = await fetchStaticData();
+
+    return {
+        props: {
+            staticData
+        }
+    };
+}
+
+export async function getServerSideProps() {
+    const serverData = await fetchServerData();
+
+    return {
+        props: {
+            serverData
+        }
+    };
+}
+```
+
+### 4. Streaming SSR
+
+```typescript
+// Streaming SSR implementation
+import { renderToPipeableStream } from 'react-dom/server';
+
+function streamingHandler(req: Request, res: Response) {
+    const { pipe } = renderToPipeableStream(
+        <App />,
+        {
+            bootstrapScripts: ['/client.js'],
+            onShellReady() {
+                res.setHeader('content-type', 'text/html');
+                pipe(res);
+            },
+            onShellError(error) {
+                res.statusCode = 500;
+                res.send(`<h1>Error</h1><pre>${error}</pre>`);
+            }
+        }
+    );
+}
+
+// Component with streaming support
+function StreamingComponent() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <SlowComponent />
+        </Suspense>
+    );
+}
+
+// Data fetching with suspense
+function SlowComponent() {
+    const data = use(fetchSlowData());
+    return <div>{data}</div>;
+}
+```
+
+### 5. Edge Rendering
+
+```typescript
+// Edge function for dynamic rendering
+export default async function handler(req: Request) {
+  const url = new URL(req.url)
+  const userAgent = req.headers.get('user-agent') || ''
+
+  // Device-specific rendering
+  const isMobile = /mobile/i.test(userAgent)
+  const props = await loadProps(isMobile)
+
+  // Generate HTML at the edge
+  const html = await renderPage(props)
+
+  return new Response(html, {
+    headers: {
+      'content-type': 'text/html',
+      'cache-control': 'public, max-age=60',
+    },
+  })
+}
+
+// Middleware for edge routing
+export const config = {
+  matcher: '/product/:path*',
+}
+
+export function middleware(req: Request) {
+  const url = new URL(req.url)
+
+  // A/B testing at the edge
+  const bucket = Math.random() > 0.5 ? 'A' : 'B'
+
+  return new Response(null, {
+    headers: {
+      'x-bucket': bucket,
+      'x-edge-processed': '1',
+    },
+  })
+}
+```
+
+### 6. Performance Optimization
+
+```typescript
+// Component prefetching
+const PrefetchLink = ({
+    href,
+    children
+}: {
+    href: string;
+    children: React.ReactNode;
+}) => {
+    const prefetchData = async () => {
+        const data = await fetchPageData(href);
+        cache.set(href, data);
+    };
+
+    return (
+        <Link
+            href={href}
+            onMouseEnter={prefetchData}
+            onFocus={prefetchData}
+        >
+            {children}
+        </Link>
+    );
+};
+
+// Partial hydration
+const ClientOnlyComponent = dynamic(
+    () => import('./HeavyComponent'),
+    {
+        ssr: false,
+        loading: () => <Loading />
+    }
+);
+
+// Progressive hydration
+function ProgressiveComponent() {
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
+
+    if (!isHydrated) {
+        return <div dangerouslySetInnerHTML={{ __html: initialHtml }} />;
+    }
+
+    return <InteractiveComponent />;
+}
+```
+
+## Interview Tips and Tricks
+
+1. **Rendering Strategy Selection:**
+
+   - When to use SSR vs SSG
+   - Trade-offs between approaches
+   - Performance implications
+
+2. **Performance Optimization:**
+
+   - Hydration strategies
+   - Caching approaches
+   - Edge computing
+
+3. **Common Pitfalls:**
+   - Hydration mismatch
+   - Data fetching complexity
+   - SEO considerations
+
+## Common Interview Questions
+
+1. What are the differences between SSR and SSG?
+2. How does hydration work in React?
+3. What are the benefits and drawbacks of SSR?
+4. How do you handle data fetching in SSR?
+5. What is incremental static regeneration?
+6. How do you optimize SSR performance?
+7. What are the best practices for SEO with React?
+
+Understanding SSR and SSG is crucial for building modern React applications that require optimal performance, SEO, and user experience. The choice of rendering strategy depends on specific use cases and requirements.

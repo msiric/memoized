@@ -153,11 +153,13 @@ function SearchResult({
   const id = useId()
   const fullCurriculum = useContentStore((state) => state.fullCurriculum)
 
-  const courseSections = fullCurriculum[0]?.sections ?? []
+  const courseSections =
+    fullCurriculum.flatMap((course) => course.sections) ?? []
 
   const sectionTitle = courseSections.find((section) =>
     section.lessons.find((lesson) => lesson.href === result.href.split('#')[0]),
   )?.title
+
   const hierarchy = [sectionTitle, result.description].filter(
     (x): x is string => typeof x === 'string',
   )

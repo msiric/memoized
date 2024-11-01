@@ -17,7 +17,9 @@ const indexLessons = async () => {
       body: true,
       access: true,
       slug: true,
-      section: { select: { title: true, slug: true } },
+      section: {
+        select: { course: { select: { slug: true } }, title: true, slug: true },
+      },
     },
   })
 
@@ -28,7 +30,7 @@ const indexLessons = async () => {
     body: lesson.body,
     access: lesson.access,
     sectionTitle: lesson.section.title,
-    href: `/course/${lesson.section.slug}/${lesson.slug}`,
+    href: `/courses/${lesson.section.course.slug}/${lesson.section.slug}/${lesson.slug}`,
   }))
 
   const index = meiliSearch.index('lessons')

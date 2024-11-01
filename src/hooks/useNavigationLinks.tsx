@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 export const useNavigationLinks = (
   options = [
     { title: 'Problems', href: '/problems' },
-    { title: 'Course', href: '/course' },
+    { title: 'Courses', href: '/courses' },
     { title: 'Resources', href: '/resources' },
   ],
 ) => {

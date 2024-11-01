@@ -1,0 +1,459 @@
+# Advanced Frontend: Integration Testing
+
+## Concept and Use Cases
+
+**Definition:**
+Frontend integration testing verifies that multiple components and services work together correctly, testing the interactions between different parts of the application.
+
+**Common Use Cases:**
+
+- Component interactions
+- API integration
+- State management
+- Form submissions
+- Authentication flows
+- Navigation
+- Data flow
+- Complex user journeys
+
+### Visual Representation:
+
+```
+Integration Testing Layers:
+
+Component A → State → API Mock → Component B
+     ↓          ↓         ↓           ↓
+Events     Management   Network    Responses
+```
+
+## Key Concepts
+
+1. **Testing Scope:**
+
+   - Component composition
+   - Service integration
+   - State synchronization
+   - Event handling
+
+2. **Mock Strategies:**
+
+   - API mocking
+   - Service workers
+   - Response simulation
+   - Network handling
+
+3. **Test Environment:**
+   - Setup/teardown
+   - State isolation
+   - Data management
+   - Context providers
+
+## Implementation Examples
+
+### 1. Complex Component Integration
+
+```typescript
+// Integration test for complex component interaction
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { AuthProvider } from './auth-context';
+import { DataProvider } from './data-context';
+
+describe('UserDashboard Integration', () => {
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                retry: false,
+                cacheTime: 0
+            }
+        }
+    });
+
+    const renderWithProviders = (ui: React.ReactElement) => {
+        return render(
+            <QueryClientProvider client={queryClient}>
+                <AuthProvider>
+                    <DataProvider>
+                        {ui}
+                    </DataProvider>
+                </AuthProvider>
+            </QueryClientProvider>
+        );
+    };
+
+    beforeEach(() => {
+        queryClient.clear();
+    });
+
+    it('handles complete user flow', async () => {
+        // Arrange
+        const { container } = renderWithProviders(<UserDashboard />);
+
+        // Act - User login
+        await userEvent.type(
+            screen.getByLabelText(/email/i),
+            'user@example.com'
+        );
+        await userEvent.type(
+            screen.getByLabelText(/password/i),
+            'password123'
+        );
+        await userEvent.click(
+            screen.getByRole('button', { name: /login/i })
+        );
+
+        // Assert - Dashboard loaded
+        await waitFor(() => {
+            expect(screen.getByText(/welcome/i)).toBeInTheDocument();
+        });
+
+        // Act - Data interaction
+        await userEvent.click(
+            screen.getByRole('button', { name: /create project/i })
+        );
+        await userEvent.type(
+            screen.getByLabelText(/project name/i),
+            'New Project'
+        );
+        await userEvent.click(
+            screen.getByRole('button', { name: /save/i })
+        );
+
+        // Assert - Project created
+        await waitFor(() => {
+            expect(screen.getByText('New Project')).toBeInTheDocument();
+        });
+
+        // Take snapshot of final state
+        expect(container).toMatchSnapshot();
+    });
+});
+```
+
+### 2. API Integration Testing
+
+```typescript
+// Advanced API integration testing with MSW
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+interface APIHandlers {
+    getUser: (id: string) => Promise<User>;
+    updateUser: (user: User) => Promise<User>;
+    deleteUser: (id: string) => Promise<void>;
+}
+
+class TestAPIClient implements APIHandlers {
+    private server = setupServer();
+    private baseUrl = 'https://api.example.com';
+
+    constructor() {
+        this.setupHandlers();
+    }
+
+    private setupHandlers() {
+        this.server.use(
+            rest.get(
+                `${this.baseUrl}/users/:id`,
+                async (req, res, ctx) => {
+                    const { id } = req.params;
+                    const user = await this.getUser(id as string);
+                    return res(ctx.json(user));
+                }
+            ),
+
+            rest.put(
+                `${this.baseUrl}/users/:id`,
+                async (req, res, ctx) => {
+                    const user = await this.updateUser(req.body as User);
+                    return res(ctx.json(user));
+                }
+            ),
+
+            rest.delete(
+                `${this.baseUrl}/users/:id`,
+                async (req, res, ctx) => {
+                    const { id } = req.params;
+                    await this.deleteUser(id as string);
+                    return res(ctx.status(204));
+                }
+            )
+        );
+    }
+
+    async getUser(id: string): Promise<User> {
+        // Simulated database lookup
+        return {
+            id,
+            name: 'Test User',
+            email: 'test@example.com'
+        };
+    }
+
+    async updateUser(user: User): Promise<User> {
+        // Simulated update
+        return { ...user, updatedAt: new Date().toISOString() };
+    }
+
+    async deleteUser(id: string): Promise<void> {
+        // Simulated deletion
+    }
+
+    start() {
+        this.server.listen();
+    }
+
+    stop() {
+        this.server.close();
+    }
+
+    reset() {
+        this.server.resetHandlers();
+    }
+}
+
+// Integration tests with API client
+describe('UserManagement Integration', () => {
+    const api = new TestAPIClient();
+    const queryClient = new QueryClient();
+
+    beforeAll(() => {
+        api.start();
+    });
+
+    afterAll(() => {
+        api.stop();
+    });
+
+    beforeEach(() => {
+        api.reset();
+        queryClient.clear();
+    });
+
+    it('handles complete CRUD flow', async () => {
+        // Arrange
+        const { container } = render(
+            <QueryClientProvider client={queryClient}>
+                <UserManagement />
+            </QueryClientProvider>
+        );
+
+        // Act - Create user
+        await userEvent.click(
+            screen.getByRole('button', { name: /add user/i })
+        );
+        await userEvent.type(
+            screen.getByLabelText(/name/i),
+            'John Doe'
+        );
+        await userEvent.type(
+            screen.getByLabelText(/email/i),
+            'john@example.com'
+        );
+        await userEvent.click(
+            screen.getByRole('button', { name: /save/i })
+        );
+
+        // Assert - User created
+        await waitFor(() => {
+            expect(screen.getByText('John Doe')).toBeInTheDocument();
+        });
+
+        // Act - Update user
+        await userEvent.click(
+            screen.getByRole('button', { name: /edit/i })
+        );
+        await userEvent.clear(screen.getByLabelText(/name/i));
+        await userEvent.type(
+            screen.getByLabelText(/name/i),
+            'Jane Doe'
+        );
+        await userEvent.click(
+            screen.getByRole('button', { name: /save/i })
+        );
+
+        // Assert - User updated
+        await waitFor(() => {
+            expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+        });
+
+        // Act - Delete user
+        await userEvent.click(
+            screen.getByRole('button', { name: /delete/i })
+        );
+        await userEvent.click(
+            screen.getByRole('button', { name: /confirm/i })
+        );
+
+        // Assert - User deleted
+        await waitFor(() => {
+            expect(screen.queryByText('Jane Doe')).not.toBeInTheDocument();
+        });
+    });
+});
+```
+
+### 3. State Management Integration
+
+```typescript
+// State management integration testing
+interface TestStore<T> {
+    initialState: T;
+    actions: Record<string, (...args: any[]) => void>;
+    selectors: Record<string, (state: T) => any>;
+}
+
+class StateTestHelper<T> {
+    private store: TestStore<T>;
+    private subscribers: Set<(state: T) => void> = new Set();
+    private currentState: T;
+
+    constructor(store: TestStore<T>) {
+        this.store = store;
+        this.currentState = store.initialState;
+    }
+
+    dispatch(action: string, ...args: any[]): void {
+        const actionFn = this.store.actions[action];
+        if (!actionFn) {
+            throw new Error(`Unknown action: ${action}`);
+        }
+
+        actionFn(...args);
+        this.notifySubscribers();
+    }
+
+    select<R>(selector: string): R {
+        const selectorFn = this.store.selectors[selector];
+        if (!selectorFn) {
+            throw new Error(`Unknown selector: ${selector}`);
+        }
+
+        return selectorFn(this.currentState);
+    }
+
+    subscribe(callback: (state: T) => void): () => void {
+        this.subscribers.add(callback);
+        return () => this.subscribers.delete(callback);
+    }
+
+    private notifySubscribers(): void {
+        this.subscribers.forEach(callback => callback(this.currentState));
+    }
+}
+
+// Integration tests with state management
+describe('TodoApp State Integration', () => {
+    let stateHelper: StateTestHelper<TodoState>;
+
+    beforeEach(() => {
+        stateHelper = new StateTestHelper({
+            initialState: {
+                todos: [],
+                filter: 'all'
+            },
+            actions: {
+                addTodo: (text: string) => {/* implementation */},
+                toggleTodo: (id: string) => {/* implementation */},
+                setFilter: (filter: string) => {/* implementation */}
+            },
+            selectors: {
+                visibleTodos: (state) => {/* implementation */},
+                activeCount: (state) => {/* implementation */}
+            }
+        });
+    });
+
+    it('handles todo management flow', async () => {
+        // Arrange
+        render(<TodoApp stateHelper={stateHelper} />);
+
+        // Act - Add todo
+        await userEvent.type(
+            screen.getByLabelText(/new todo/i),
+            'Learn Testing{enter}'
+        );
+
+        // Assert
+        expect(stateHelper.select('activeCount')).toBe(1);
+        expect(screen.getByText('Learn Testing')).toBeInTheDocument();
+
+        // Act - Toggle todo
+        await userEvent.click(screen.getByText('Learn Testing'));
+
+        // Assert
+        expect(stateHelper.select('activeCount')).toBe(0);
+    });
+});
+```
+
+## Best Practices
+
+1. **Test Organization:**
+
+   - Clear scenarios
+   - Proper setup
+   - Clean teardown
+
+2. **Mock Strategy:**
+
+   - Realistic data
+   - Error scenarios
+   - Network handling
+
+3. **Assertions:**
+   - Key interactions
+   - State changes
+   - Side effects
+
+## Common Challenges
+
+1. **Test Stability:**
+
+   - Async operations
+   - Race conditions
+   - State cleanup
+
+2. **Mock Complexity:**
+
+   - Service integration
+   - Data consistency
+   - Error simulation
+
+3. **Test Maintenance:**
+   - Brittle tests
+   - Setup overhead
+   - Debugging
+
+## Interview Tips and Tricks
+
+1. **Integration Strategy:**
+
+   - Test scope
+   - Mock approach
+   - Error handling
+
+2. **Best Practices:**
+
+   - Test organization
+   - Mock management
+   - State handling
+
+3. **Problem Solving:**
+   - Debugging techniques
+   - Performance issues
+   - Edge cases
+
+## Common Interview Questions
+
+1. How do you determine integration test boundaries?
+2. What strategies do you use for API mocking?
+3. How do you handle complex state in integration tests?
+4. What tools do you use for integration testing?
+5. How do you ensure test reliability?
+6. What are your approaches to test data management?
+7. How do you handle asynchronous operations in integration tests?
+
+Understanding frontend integration testing is crucial for ensuring application reliability. It involves testing component interactions, managing state, and simulating external dependencies effectively.

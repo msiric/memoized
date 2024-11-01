@@ -49,13 +49,19 @@ export const syncContent = async () => {
   const contentDir = path.join(process.cwd(), `src/${CONTENT_FOLDER}`)
 
   for (const [courseOrder, course] of completeCurriculum.entries()) {
-    const { title: courseTitle, description: courseDescription } = course
+    const {
+      id: courseId,
+      title: courseTitle,
+      description: courseDescription,
+      href: courseHref,
+    } = course
     const courseSlug = slugify(courseTitle, { lower: true })
 
     const courseRecord = await upsertCourse(
       courseSlug,
       courseTitle,
       courseDescription,
+      courseHref,
       courseOrder,
     )
 
@@ -69,7 +75,7 @@ export const syncContent = async () => {
       } = section
       const sectionSlug = slugify(sectionTitle, { lower: true })
 
-      const sectionPath = path.join(contentDir, sectionId, 'page.mdx')
+      const sectionPath = path.join(contentDir, courseId, sectionId, 'page.mdx')
       if (!fs.existsSync(sectionPath)) {
         console.error(`File not found: ${sectionPath}`)
         continue
@@ -97,7 +103,13 @@ export const syncContent = async () => {
         } = lesson
         const lessonSlug = slugify(lessonTitle, { lower: true })
 
-        const lessonPath = path.join(contentDir, lessonId, 'page.mdx')
+        const lessonPath = path.join(
+          contentDir,
+          courseId,
+          sectionId,
+          lessonId,
+          'page.mdx',
+        )
         if (!fs.existsSync(lessonPath)) {
           console.error(`File not found: ${lessonPath}`)
           continue

@@ -223,14 +223,14 @@ describe('Stripe services', () => {
       vi.spyOn(stripe.billingPortal.sessions, 'create').mockResolvedValue(
         mockBillingPortalSession as any,
       )
-      vi.mocked(getURL).mockReturnValue('http://localhost:3000/course')
+      vi.mocked(getURL).mockReturnValue('http://localhost:3000/courses')
 
       const result = await createBillingPortalSession('cus_123')
 
       expect(result).toEqual(mockBillingPortalSession)
       expect(stripe.billingPortal.sessions.create).toHaveBeenCalledWith({
         customer: 'cus_123',
-        return_url: 'http://localhost:3000/course',
+        return_url: 'http://localhost:3000/courses',
       })
     })
 
@@ -238,7 +238,7 @@ describe('Stripe services', () => {
       vi.spyOn(stripe.billingPortal.sessions, 'create').mockRejectedValue(
         new Error('Stripe error'),
       )
-      vi.mocked(getURL).mockReturnValue('http://localhost:3000/course')
+      vi.mocked(getURL).mockReturnValue('http://localhost:3000/courses')
 
       await expect(createBillingPortalSession('cus_123')).rejects.toThrow(
         new ServiceError('Failed to create Stripe billing portal link'),

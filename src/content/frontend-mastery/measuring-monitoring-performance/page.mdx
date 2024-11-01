@@ -1,0 +1,529 @@
+# Advanced Frontend: Measuring and Monitoring Performance
+
+## Concept and Use Cases
+
+**Definition:**
+Performance measurement and monitoring involves collecting, analyzing, and tracking various metrics to ensure optimal application performance and user experience.
+
+**Common Use Cases:**
+
+- User experience tracking
+- Performance budgets
+- A/B testing
+- Error tracking
+- Resource monitoring
+- User behavior analysis
+- Performance optimization
+- Capacity planning
+
+### Visual Representation:
+
+```
+Performance Monitoring Stack:
+
+Metrics Collection → Processing → Analysis → Alerts
+       ↓               ↓            ↓          ↓
+   RUM Data      Aggregation    Insights    Actions
+```
+
+## Key Concepts
+
+1. **Performance Metrics:**
+
+   - Core Web Vitals
+   - Custom metrics
+   - Business metrics
+   - User metrics
+
+2. **Monitoring Types:**
+
+   - Real User Monitoring
+   - Synthetic monitoring
+   - Lab testing
+   - Error tracking
+
+3. **Data Collection:**
+   - Performance API
+   - Error tracking
+   - User timing
+   - Resource timing
+
+## Implementation Examples
+
+### 1. Performance Monitoring System
+
+```typescript
+// Advanced performance monitoring
+interface PerformanceMetric {
+  name: string
+  value: number
+  timestamp: number
+  type: 'timing' | 'memory' | 'resource' | 'custom'
+  metadata?: Record<string, any>
+}
+
+class PerformanceMonitor {
+  private metrics: PerformanceMetric[] = []
+  private marks: Map<string, number> = new Map()
+  private observers: Set<(metric: PerformanceMetric) => void> = new Set()
+
+  constructor() {
+    this.initializeObservers()
+  }
+
+  private initializeObservers(): void {
+    // Performance Observer for long tasks
+    if ('PerformanceObserver' in window) {
+      const longTaskObserver = new PerformanceObserver((list) => {
+        list.getEntries().forEach((entry) => {
+          this.recordMetric({
+            name: 'long-task',
+            value: entry.duration,
+            timestamp: entry.startTime,
+            type: 'timing',
+            metadata: {
+              entryType: entry.entryType,
+              attribution: entry.attribution,
+            },
+          })
+        })
+      })
+
+      longTaskObserver.observe({ entryTypes: ['longtask'] })
+    }
+
+    // Layout shift observer
+    const layoutShiftObserver = new PerformanceObserver((list) => {
+      list.getEntries().forEach((entry) => {
+        if (!entry.hadRecentInput) {
+          this.recordMetric({
+            name: 'cumulative-layout-shift',
+            value: entry.value,
+            timestamp: entry.startTime,
+            type: 'timing',
+            metadata: {
+              value: entry.value,
+              sources: entry.sources,
+            },
+          })
+        }
+      })
+    })
+
+    layoutShiftObserver.observe({ entryTypes: ['layout-shift'] })
+  }
+
+  recordMetric(metric: PerformanceMetric): void {
+    this.metrics.push(metric)
+    this.notifyObservers(metric)
+  }
+
+  mark(name: string): void {
+    const timestamp = performance.now()
+    this.marks.set(name, timestamp)
+    performance.mark(name)
+  }
+
+  measure(name: string, startMark: string): void {
+    const endTime = performance.now()
+    const startTime = this.marks.get(startMark)
+
+    if (startTime) {
+      const duration = endTime - startTime
+      this.recordMetric({
+        name,
+        value: duration,
+        timestamp: endTime,
+        type: 'timing',
+        metadata: {
+          startMark,
+          duration,
+        },
+      })
+
+      performance.measure(name, startMark)
+    }
+  }
+
+  trackCoreWebVitals(): void {
+    import('web-vitals').then(({ getLCP, getFID, getCLS }) => {
+      getLCP((metric) =>
+        this.recordMetric({
+          name: 'LCP',
+          value: metric.value,
+          timestamp: performance.now(),
+          type: 'timing',
+          metadata: metric,
+        }),
+      )
+
+      getFID((metric) =>
+        this.recordMetric({
+          name: 'FID',
+          value: metric.value,
+          timestamp: performance.now(),
+          type: 'timing',
+          metadata: metric,
+        }),
+      )
+
+      getCLS((metric) =>
+        this.recordMetric({
+          name: 'CLS',
+          value: metric.value,
+          timestamp: performance.now(),
+          type: 'timing',
+          metadata: metric,
+        }),
+      )
+    })
+  }
+
+  subscribe(callback: (metric: PerformanceMetric) => void): () => void {
+    this.observers.add(callback)
+    return () => this.observers.delete(callback)
+  }
+
+  private notifyObservers(metric: PerformanceMetric): void {
+    this.observers.forEach((observer) => observer(metric))
+  }
+}
+
+// React implementation
+function usePerformanceMonitoring() {
+  const monitor = useRef(new PerformanceMonitor())
+
+  useEffect(() => {
+    monitor.current.trackCoreWebVitals()
+
+    return () => {
+      // Cleanup if needed
+    }
+  }, [])
+
+  const recordMetric = useCallback(
+    (
+      name: string,
+      value: number,
+      type: PerformanceMetric['type'] = 'custom',
+      metadata?: Record<string, any>,
+    ) => {
+      monitor.current.recordMetric({
+        name,
+        value,
+        timestamp: performance.now(),
+        type,
+        metadata,
+      })
+    },
+    [],
+  )
+
+  return { recordMetric }
+}
+```
+
+### 2. Real User Monitoring (RUM)
+
+```typescript
+// RUM implementation
+interface RUMEvent {
+  eventType: string
+  timestamp: number
+  duration?: number
+  metadata: Record<string, any>
+}
+
+class RUMCollector {
+  private events: RUMEvent[] = []
+  private batchSize: number
+  private flushInterval: number
+  private endpoint: string
+
+  constructor(config: {
+    batchSize?: number
+    flushInterval?: number
+    endpoint: string
+  }) {
+    this.batchSize = config.batchSize || 10
+    this.flushInterval = config.flushInterval || 5000
+    this.endpoint = config.endpoint
+
+    this.initializeCollectors()
+    this.startPeriodicFlush()
+  }
+
+  private initializeCollectors(): void {
+    // Navigation timing
+    this.collectNavigationTiming()
+
+    // Resource timing
+    this.collectResourceTiming()
+
+    // Error tracking
+    this.collectErrors()
+
+    // User interactions
+    this.collectUserInteractions()
+  }
+
+  private collectNavigationTiming(): void {
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const navigation = performance.getEntriesByType(
+          'navigation',
+        )[0] as PerformanceNavigationTiming
+
+        this.recordEvent('navigation', {
+          dnsTime: navigation.domainLookupEnd - navigation.domainLookupStart,
+          tcpTime: navigation.connectEnd - navigation.connectStart,
+          ttfb: navigation.responseStart - navigation.requestStart,
+          domLoad:
+            navigation.domContentLoadedEventEnd -
+            navigation.domContentLoadedEventStart,
+          windowLoad: navigation.loadEventEnd - navigation.loadEventStart,
+        })
+      }, 0)
+    })
+  }
+
+  private collectResourceTiming(): void {
+    new PerformanceObserver((list) => {
+      list.getEntries().forEach((entry) => {
+        this.recordEvent('resource', {
+          name: entry.name,
+          duration: entry.duration,
+          initiatorType: entry.initiatorType,
+          size: entry.transferSize,
+        })
+      })
+    }).observe({ entryTypes: ['resource'] })
+  }
+
+  private collectErrors(): void {
+    window.addEventListener('error', (event) => {
+      this.recordEvent('error', {
+        message: event.message,
+        filename: event.filename,
+        lineNumber: event.lineno,
+        columnNumber: event.colno,
+        stack: event.error?.stack,
+      })
+    })
+
+    window.addEventListener('unhandledrejection', (event) => {
+      this.recordEvent('unhandledrejection', {
+        reason: event.reason,
+        stack: event.reason?.stack,
+      })
+    })
+  }
+
+  private collectUserInteractions(): void {
+    const interactionEvents = ['click', 'scroll', 'keypress']
+
+    interactionEvents.forEach((eventType) => {
+      window.addEventListener(
+        eventType,
+        (event) => {
+          this.recordEvent('interaction', {
+            type: eventType,
+            target: (event.target as HTMLElement).tagName,
+            path: this.getElementPath(event.target as HTMLElement),
+          })
+        },
+        { passive: true },
+      )
+    })
+  }
+
+  private getElementPath(element: HTMLElement): string {
+    const path: string[] = []
+    let current = element
+
+    while (current && current !== document.body) {
+      let identifier = current.tagName.toLowerCase()
+      if (current.id) {
+        identifier += `#${current.id}`
+      } else if (current.className) {
+        identifier += `.${current.className.split(' ').join('.')}`
+      }
+      path.unshift(identifier)
+      current = current.parentElement!
+    }
+
+    return path.join(' > ')
+  }
+
+  recordEvent(eventType: string, metadata: Record<string, any>): void {
+    const event: RUMEvent = {
+      eventType,
+      timestamp: performance.now(),
+      metadata,
+    }
+
+    this.events.push(event)
+
+    if (this.events.length >= this.batchSize) {
+      this.flush()
+    }
+  }
+
+  private async flush(): Promise<void> {
+    if (this.events.length === 0) return
+
+    const eventsToSend = [...this.events]
+    this.events = []
+
+    try {
+      await fetch(this.endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventsToSend),
+        // Use beacon API if available
+        keepalive: true,
+      })
+    } catch (error) {
+      console.error('Failed to send RUM data:', error)
+      // Implement retry logic if needed
+    }
+  }
+
+  private startPeriodicFlush(): void {
+    setInterval(() => this.flush(), this.flushInterval)
+
+    // Flush before page unload
+    window.addEventListener('beforeunload', () => {
+      this.flush()
+    })
+  }
+}
+```
+
+### 3. Performance Budgets
+
+```typescript
+// Performance budget monitoring
+interface PerformanceBudget {
+  metric: string
+  budget: number
+  warning?: number
+}
+
+class PerformanceBudgetMonitor {
+  private budgets: Map<string, PerformanceBudget> = new Map()
+  private violations: PerformanceMetric[] = []
+
+  setBudget(budget: PerformanceBudget): void {
+    this.budgets.set(budget.metric, budget)
+  }
+
+  checkMetric(metric: PerformanceMetric): void {
+    const budget = this.budgets.get(metric.name)
+    if (!budget) return
+
+    if (metric.value > budget.budget) {
+      this.violations.push(metric)
+      this.notifyViolation(metric, budget)
+    } else if (budget.warning && metric.value > budget.warning) {
+      this.notifyWarning(metric, budget)
+    }
+  }
+
+  private notifyViolation(
+    metric: PerformanceMetric,
+    budget: PerformanceBudget,
+  ): void {
+    console.warn(
+      `Performance budget violation: ${metric.name} ` +
+        `(${metric.value} > ${budget.budget})`,
+    )
+    // Implement notification system (e.g., analytics, alerts)
+  }
+
+  private notifyWarning(
+    metric: PerformanceMetric,
+    budget: PerformanceBudget,
+  ): void {
+    console.warn(
+      `Performance budget warning: ${metric.name} ` +
+        `(${metric.value} > ${budget.warning})`,
+    )
+  }
+
+  getViolations(): PerformanceMetric[] {
+    return [...this.violations]
+  }
+}
+```
+
+## Best Practices
+
+1. **Data Collection:**
+
+   - Minimize overhead
+   - Sample data
+   - Batch operations
+
+2. **Monitoring:**
+
+   - Set thresholds
+   - Implement alerts
+   - Track trends
+
+3. **Analysis:**
+   - Segment data
+   - Identify patterns
+   - Act on insights
+
+## Common Challenges
+
+1. **Data Volume:**
+
+   - Storage
+   - Processing
+   - Analysis
+
+2. **Accuracy:**
+
+   - Sampling bias
+   - Network conditions
+   - Browser differences
+
+3. **Privacy:**
+   - Data collection
+   - User consent
+   - Compliance
+
+## Interview Tips and Tricks
+
+1. **Performance Analysis:**
+
+   - Key metrics
+   - Monitoring tools
+   - Optimization strategies
+
+2. **Best Practices:**
+
+   - Data collection
+   - Analysis methods
+   - Action plans
+
+3. **Problem Solving:**
+   - Identifying issues
+   - Root cause analysis
+   - Solution implementation
+
+## Common Interview Questions
+
+1. How do you implement RUM effectively?
+2. What key metrics should be monitored?
+3. How do you handle performance regressions?
+4. What tools do you use for performance monitoring?
+5. How do you set performance budgets?
+6. What strategies do you use for data analysis?
+7. How do you ensure monitoring accuracy?
+
+Understanding performance measurement and monitoring is crucial for maintaining high-performing web applications. It involves implementing effective monitoring systems, analyzing data, and taking action based on insights.

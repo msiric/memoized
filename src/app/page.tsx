@@ -248,7 +248,7 @@ export default async function Home() {
                 <div className="mt-8 flex justify-center gap-4 lg:justify-start">
                   <Link
                     className="rounded-full bg-lime-300 px-4 py-2 text-sm font-semibold text-zinc-900 hover:bg-lime-200 focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-300/50 active:bg-lime-500"
-                    href="/course"
+                    href="/courses"
                   >
                     Get started
                   </Link>

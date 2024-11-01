@@ -1,0 +1,407 @@
+# Advanced React: Performance Analysis
+
+## Concept and Use Cases
+
+**Definition:**
+Performance analysis in React involves measuring, analyzing, and optimizing various aspects of application performance using specialized tools and techniques.
+
+**Common Use Cases:**
+
+- Bundle size analysis
+- Render performance
+- Runtime performance
+- Memory leaks
+- Network optimization
+- State management
+- Component profiling
+- Load time optimization
+
+### Visual Representation:
+
+```
+Performance Analysis Layers:
+
+Build Time → Load Time → Runtime → Memory
+    ↓            ↓          ↓         ↓
+Bundle Size   Initial    Rendering   Leaks
+```
+
+## Key Concepts
+
+1. **Performance Metrics:**
+
+   - Core Web Vitals
+   - First Paint
+   - Time to Interactive
+   - Bundle size
+
+2. **Analysis Tools:**
+
+   - React DevTools
+   - Lighthouse
+   - Chrome DevTools
+   - Custom profilers
+
+3. **Optimization Areas:**
+   - Code splitting
+   - Bundle optimization
+   - Render optimization
+   - Memory management
+
+## Implementation Examples
+
+### 1. Performance Monitoring System
+
+```typescript
+// Custom performance monitoring
+interface PerformanceMetric {
+    name: string;
+    value: number;
+    timestamp: number;
+}
+
+class PerformanceMonitor {
+    private metrics: PerformanceMetric[] = [];
+    private marks: Map<string, number> = new Map();
+
+    mark(name: string): void {
+        this.marks.set(name, performance.now());
+    }
+
+    measure(name: string, startMark: string): void {
+        const start = this.marks.get(startMark);
+        if (!start) return;
+
+        const end = performance.now();
+        const duration = end - start;
+
+        this.metrics.push({
+            name,
+            value: duration,
+            timestamp: Date.now()
+        });
+
+        // Clear the mark
+        this.marks.delete(startMark);
+    }
+
+    trackRender(Component: React.ComponentType): React.ComponentType {
+        return function TrackedComponent(props: any) {
+            const monitor = usePerformanceMonitor();
+            const startTime = performance.now();
+
+            useEffect(() => {
+                const renderTime = performance.now() - startTime;
+                monitor.metrics.push({
+                    name: `render_${Component.name}`,
+                    value: renderTime,
+                    timestamp: Date.now()
+                });
+            });
+
+            return <Component {...props} />;
+        };
+    }
+
+    getMetrics(): PerformanceMetric[] {
+        return [...this.metrics];
+    }
+
+    clearMetrics(): void {
+        this.metrics = [];
+        this.marks.clear();
+    }
+}
+
+// Usage with hooks
+function usePerformanceMonitor() {
+    const monitor = useMemo(() => new PerformanceMonitor(), []);
+
+    useEffect(() => {
+        return () => {
+            // Report metrics on unmount
+            const metrics = monitor.getMetrics();
+            console.log('Component Performance Metrics:', metrics);
+        };
+    }, [monitor]);
+
+    return monitor;
+}
+```
+
+### 2. Component Profiler
+
+```typescript
+// Custom component profiler
+interface ProfilerData {
+    componentName: string;
+    renderCount: number;
+    totalRenderTime: number;
+    averageRenderTime: number;
+    lastRenderTime: number;
+    props: Record<string, any>;
+}
+
+class ComponentProfiler {
+    private data: Map<string, ProfilerData> = new Map();
+
+    onRender(
+        id: string,
+        phase: 'mount' | 'update',
+        actualDuration: number,
+        baseDuration: number,
+        startTime: number,
+        commitTime: number,
+        props: Record<string, any>
+    ): void {
+        const existing = this.data.get(id) || {
+            componentName: id,
+            renderCount: 0,
+            totalRenderTime: 0,
+            averageRenderTime: 0,
+            lastRenderTime: 0,
+            props: {}
+        };
+
+        const updated: ProfilerData = {
+            ...existing,
+            renderCount: existing.renderCount + 1,
+            totalRenderTime: existing.totalRenderTime + actualDuration,
+            lastRenderTime: actualDuration,
+            props,
+            averageRenderTime:
+                (existing.totalRenderTime + actualDuration) /
+                (existing.renderCount + 1)
+        };
+
+        this.data.set(id, updated);
+    }
+
+    getProfileData(): ProfilerData[] {
+        return Array.from(this.data.values());
+    }
+
+    reset(): void {
+        this.data.clear();
+    }
+}
+
+// Profiler component
+interface ProfilingProps {
+    id: string;
+    children: React.ReactNode;
+}
+
+function ProfilingWrapper({ id, children }: ProfilingProps) {
+    const profiler = useContext(ProfilerContext);
+
+    return (
+        <Profiler
+            id={id}
+            onRender={(...args) => profiler.onRender(id, ...args)}
+        >
+            {children}
+        </Profiler>
+    );
+}
+```
+
+### 3. Memory Leak Detection
+
+```typescript
+// Memory leak detection system
+class MemoryLeakDetector {
+  private snapshots: Map<string, WeakRef<any>[]> = new Map()
+  private observations: Map<string, number> = new Map()
+
+  trackComponent(componentName: string, instance: any): void {
+    const refs = this.snapshots.get(componentName) || []
+    refs.push(new WeakRef(instance))
+    this.snapshots.set(componentName, refs)
+
+    // Update observation count
+    const count = this.observations.get(componentName) || 0
+    this.observations.set(componentName, count + 1)
+  }
+
+  async detectLeaks(): Promise<Record<string, number>> {
+    // Force garbage collection if possible
+    if (global.gc) {
+      global.gc()
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    const leaks: Record<string, number> = {}
+
+    for (const [componentName, refs] of this.snapshots.entries()) {
+      const liveInstances = refs.filter((ref) => ref.deref()).length
+      const observationCount = this.observations.get(componentName) || 0
+
+      if (liveInstances > observationCount * 0.1) {
+        leaks[componentName] = liveInstances
+      }
+    }
+
+    return leaks
+  }
+
+  reset(): void {
+    this.snapshots.clear()
+    this.observations.clear()
+  }
+}
+
+// Usage with hooks
+function useMemoryLeakDetection(componentName: string) {
+  const detector = useContext(MemoryLeakDetectorContext)
+
+  useEffect(() => {
+    detector.trackComponent(componentName, {})
+
+    return () => {
+      // Check for leaks on unmount
+      detector.detectLeaks().then((leaks) => {
+        if (Object.keys(leaks).length > 0) {
+          console.warn('Potential memory leaks detected:', leaks)
+        }
+      })
+    }
+  }, [componentName, detector])
+}
+```
+
+### 4. Bundle Analysis
+
+```typescript
+// Bundle size analysis
+interface BundleMetrics {
+  totalSize: number
+  chunks: {
+    name: string
+    size: number
+    imports: string[]
+  }[]
+}
+
+class BundleAnalyzer {
+  private metrics: BundleMetrics = {
+    totalSize: 0,
+    chunks: [],
+  }
+
+  analyzeBundleSize(stats: any): void {
+    this.metrics.totalSize = stats.assets.reduce(
+      (total: number, asset: any) => total + asset.size,
+      0,
+    )
+
+    this.metrics.chunks = stats.chunks.map((chunk: any) => ({
+      name: chunk.names[0],
+      size: chunk.size,
+      imports: chunk.modules.map((mod: any) => mod.name),
+    }))
+  }
+
+  getMetrics(): BundleMetrics {
+    return this.metrics
+  }
+
+  suggestOptimizations(): string[] {
+    const suggestions: string[] = []
+    const CHUNK_SIZE_LIMIT = 244000 // 244KB
+
+    this.metrics.chunks.forEach((chunk) => {
+      if (chunk.size > CHUNK_SIZE_LIMIT) {
+        suggestions.push(
+          `Consider splitting chunk "${chunk.name}" (${Math.round(
+            chunk.size / 1024,
+          )}KB)`,
+        )
+      }
+    })
+
+    return suggestions
+  }
+}
+```
+
+## Performance Analysis Tools
+
+### 1. React DevTools Profiler
+
+```typescript
+// Custom profiler integration
+interface ProfilerOptions {
+    includePropUpdates?: boolean;
+    includeStateUpdates?: boolean;
+    includeHookUpdates?: boolean;
+}
+
+function withProfiler<P extends object>(
+    Component: React.ComponentType<P>,
+    options: ProfilerOptions = {}
+) {
+    return function ProfiledComponent(props: P) {
+        const componentName = Component.displayName || Component.name;
+
+        return (
+            <Profiler
+                id={componentName}
+                onRender={(
+                    id,
+                    phase,
+                    actualDuration,
+                    baseDuration,
+                    startTime,
+                    commitTime,
+                    interactions
+                ) => {
+                    console.log({
+                        component: id,
+                        phase,
+                        actualDuration,
+                        baseDuration,
+                        startTime,
+                        commitTime,
+                        props: options.includePropUpdates ? props : undefined
+                    });
+                }}
+            >
+                <Component {...props} />
+            </Profiler>
+        );
+    };
+}
+```
+
+## Interview Tips and Tricks
+
+1. **Performance Analysis:**
+
+   - Identifying bottlenecks
+   - Measuring impact
+   - Tool selection
+
+2. **Best Practices:**
+
+   - Continuous monitoring
+   - Performance budgets
+   - Optimization strategy
+
+3. **Common Pitfalls:**
+   - Premature optimization
+   - Incorrect measurements
+   - Tool misuse
+
+## Common Interview Questions
+
+1. How do you identify performance bottlenecks?
+2. What tools do you use for performance analysis?
+3. How do you measure component performance?
+4. What strategies do you use for bundle optimization?
+5. How do you detect memory leaks?
+6. What metrics do you track for performance?
+7. How do you implement performance monitoring?
+
+Understanding performance analysis is crucial for maintaining and optimizing React applications. It involves using the right tools and techniques to measure and improve application performance.

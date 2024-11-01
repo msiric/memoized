@@ -30,6 +30,7 @@ export type LessonResult = {
   description: string | null
   order: number
   access: AccessOptions
+  problems?: PracticeProblem[]
 }
 
 export type NavigationLink = {
@@ -70,6 +71,7 @@ export type Curriculum = {
   title: string
   description: string | null
   order: number
+  href: string
   sections: SectionResult[]
 }
 
@@ -79,6 +81,7 @@ export type NavigationContent = {
   title: string
   description: string | null
   order: number
+  href: string
   sections: NavigationSection[]
 }
 

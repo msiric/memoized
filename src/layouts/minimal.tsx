@@ -14,10 +14,10 @@ export const MinimalLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <div className="flex gap-8">
           <Link
-            href="/course"
+            href="/courses"
             className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
           >
-            Course
+            Courses
           </Link>
           <Link
             href="/problems"

@@ -1,0 +1,469 @@
+# Advanced Frontend: Design Patterns
+
+## Concept and Use Cases
+
+**Definition:**
+Frontend design patterns are reusable solutions to common problems in frontend development, focusing on code organization, component communication, and application architecture.
+
+**Common Use Cases:**
+
+- Component communication
+- State management
+- Event handling
+- Data flow
+- UI composition
+- Form handling
+- Feature toggling
+- Cross-cutting concerns
+
+### Visual Representation:
+
+```
+Design Pattern Categories:
+
+Creational → Structural → Behavioral → Architectural
+    ↓            ↓            ↓            ↓
+ Factory     Composite    Observer     MVVM/Flux
+```
+
+## Key Patterns
+
+1. **Behavioral Patterns:**
+
+   - Observer
+   - Pub/Sub
+   - Command
+   - Strategy
+
+2. **Structural Patterns:**
+
+   - Composite
+   - Adapter
+   - Bridge
+   - Facade
+
+3. **Architectural Patterns:**
+   - MVVM
+   - Flux
+   - Repository
+   - Command Query
+
+## Implementation Examples
+
+### 1. Observer Pattern
+
+```typescript
+// Advanced Observer implementation
+interface Observer<T> {
+    update(data: T): void;
+}
+
+class Observable<T> {
+    private observers: Set<Observer<T>> = new Set();
+    private value: T;
+
+    constructor(initialValue: T) {
+        this.value = initialValue;
+    }
+
+    subscribe(observer: Observer<T>): () => void {
+        this.observers.add(observer);
+        // Immediately notify new observer of current value
+        observer.update(this.value);
+
+        return () => {
+            this.observers.delete(observer);
+        };
+    }
+
+    notify(data: T): void {
+        this.value = data;
+        this.observers.forEach(observer => observer.update(data));
+    }
+
+    getValue(): T {
+        return this.value;
+    }
+}
+
+// React implementation
+function useObservable<T>(observable: Observable<T>): T {
+    const [value, setValue] = useState<T>(observable.getValue());
+
+    useEffect(() => {
+        const observer: Observer<T> = {
+            update: setValue
+        };
+
+        return observable.subscribe(observer);
+    }, [observable]);
+
+    return value;
+}
+
+// Usage example
+const userState = new Observable<User | null>(null);
+
+function UserProfile() {
+    const user = useObservable(userState);
+
+    if (!user) return <div>Loading...</div>;
+
+    return <div>{user.name}</div>;
+}
+```
+
+### 2. Pub/Sub Pattern
+
+```typescript
+// Type-safe Pub/Sub system
+type EventMap = {
+  'user:login': { userId: string; timestamp: number }
+  'user:logout': { userId: string }
+  'data:update': { entity: string; data: any }
+}
+
+class EventBus {
+  private handlers = new Map<keyof EventMap, Set<(data: any) => void>>()
+
+  subscribe<T extends keyof EventMap>(
+    event: T,
+    handler: (data: EventMap[T]) => void,
+  ): () => void {
+    if (!this.handlers.has(event)) {
+      this.handlers.set(event, new Set())
+    }
+
+    this.handlers.get(event)!.add(handler)
+
+    return () => {
+      const handlers = this.handlers.get(event)
+      if (handlers) {
+        handlers.delete(handler)
+        if (handlers.size === 0) {
+          this.handlers.delete(event)
+        }
+      }
+    }
+  }
+
+  publish<T extends keyof EventMap>(event: T, data: EventMap[T]): void {
+    const handlers = this.handlers.get(event)
+    if (handlers) {
+      handlers.forEach((handler) => handler(data))
+    }
+  }
+
+  once<T extends keyof EventMap>(
+    event: T,
+    handler: (data: EventMap[T]) => void,
+  ): () => void {
+    const unsubscribe = this.subscribe(event, (data) => {
+      handler(data)
+      unsubscribe()
+    })
+
+    return unsubscribe
+  }
+}
+
+// React hook implementation
+function useEventBus<T extends keyof EventMap>(
+  event: T,
+  handler: (data: EventMap[T]) => void,
+) {
+  useEffect(() => {
+    const eventBus = window.eventBus
+    return eventBus.subscribe(event, handler)
+  }, [event, handler])
+}
+```
+
+### 3. Command Pattern
+
+```typescript
+// Command pattern with undo/redo
+interface Command {
+  execute(): void
+  undo(): void
+}
+
+class CommandManager {
+  private undoStack: Command[] = []
+  private redoStack: Command[] = []
+
+  execute(command: Command): void {
+    command.execute()
+    this.undoStack.push(command)
+    this.redoStack = []
+  }
+
+  undo(): void {
+    const command = this.undoStack.pop()
+    if (command) {
+      command.undo()
+      this.redoStack.push(command)
+    }
+  }
+
+  redo(): void {
+    const command = this.redoStack.pop()
+    if (command) {
+      command.execute()
+      this.undoStack.push(command)
+    }
+  }
+
+  canUndo(): boolean {
+    return this.undoStack.length > 0
+  }
+
+  canRedo(): boolean {
+    return this.redoStack.length > 0
+  }
+}
+
+// Example commands
+class UpdateTodoCommand implements Command {
+  private previousState: Todo
+
+  constructor(
+    private todo: Todo,
+    private updates: Partial<Todo>,
+  ) {
+    this.previousState = { ...todo }
+  }
+
+  execute(): void {
+    Object.assign(this.todo, this.updates)
+  }
+
+  undo(): void {
+    Object.assign(this.todo, this.previousState)
+  }
+}
+```
+
+### 4. Strategy Pattern
+
+```typescript
+// Strategy pattern for form validation
+interface ValidationStrategy {
+  validate(value: any): string | null
+}
+
+class RequiredFieldStrategy implements ValidationStrategy {
+  validate(value: any): string | null {
+    return !value ? 'This field is required' : null
+  }
+}
+
+class EmailStrategy implements ValidationStrategy {
+  validate(value: string): string | null {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return !emailRegex.test(value) ? 'Invalid email' : null
+  }
+}
+
+class ValidationContext {
+  constructor(private strategies: ValidationStrategy[]) {}
+
+  validate(value: any): string | null {
+    for (const strategy of this.strategies) {
+      const error = strategy.validate(value)
+      if (error) return error
+    }
+    return null
+  }
+}
+
+// React form implementation
+function useFormField(
+  initialValue: string,
+  validationStrategies: ValidationStrategy[],
+) {
+  const [value, setValue] = useState(initialValue)
+  const [error, setError] = useState<string | null>(null)
+  const validator = useMemo(
+    () => new ValidationContext(validationStrategies),
+    [validationStrategies],
+  )
+
+  const validate = useCallback(() => {
+    const error = validator.validate(value)
+    setError(error)
+    return !error
+  }, [value, validator])
+
+  return {
+    value,
+    error,
+    setValue,
+    validate,
+  }
+}
+```
+
+### 5. Repository Pattern
+
+```typescript
+// Repository pattern for data access
+interface Repository<T> {
+  find(id: string): Promise<T>
+  findAll(): Promise<T[]>
+  create(entity: Omit<T, 'id'>): Promise<T>
+  update(id: string, entity: Partial<T>): Promise<T>
+  delete(id: string): Promise<void>
+}
+
+class HttpRepository<T> implements Repository<T> {
+  constructor(
+    private baseUrl: string,
+    private cache?: Cache<T>,
+  ) {}
+
+  async find(id: string): Promise<T> {
+    if (this.cache) {
+      const cached = await this.cache.get(id)
+      if (cached) return cached
+    }
+
+    const response = await fetch(`${this.baseUrl}/${id}`)
+    const data = await response.json()
+
+    if (this.cache) {
+      await this.cache.set(id, data)
+    }
+
+    return data
+  }
+
+  async findAll(): Promise<T[]> {
+    const response = await fetch(this.baseUrl)
+    return response.json()
+  }
+
+  async create(entity: Omit<T, 'id'>): Promise<T> {
+    const response = await fetch(this.baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entity),
+    })
+    return response.json()
+  }
+
+  async update(id: string, entity: Partial<T>): Promise<T> {
+    const response = await fetch(`${this.baseUrl}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entity),
+    })
+    return response.json()
+  }
+
+  async delete(id: string): Promise<void> {
+    await fetch(`${this.baseUrl}/${id}`, {
+      method: 'DELETE',
+    })
+  }
+}
+
+// React hook implementation
+function useRepository<T>(repository: Repository<T>) {
+  const [data, setData] = useState<T[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const result = await repository.findAll()
+      setData(result)
+    } catch (err) {
+      setError(err as Error)
+    } finally {
+      setLoading(false)
+    }
+  }, [repository])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  return {
+    data,
+    loading,
+    error,
+    refresh: loadData,
+  }
+}
+```
+
+## Best Practices
+
+1. **Pattern Selection:**
+
+   - Choose appropriate patterns
+   - Consider complexity
+   - Evaluate trade-offs
+
+2. **Implementation:**
+
+   - Keep it simple
+   - Maintain flexibility
+   - Consider testing
+
+3. **Documentation:**
+   - Document patterns
+   - Explain trade-offs
+   - Provide examples
+
+## Common Challenges
+
+1. **Pattern Complexity:**
+
+   - Over-engineering
+   - Learning curve
+   - Maintenance cost
+
+2. **Integration:**
+
+   - Pattern composition
+   - Framework integration
+   - Testing strategy
+
+3. **Performance:**
+   - Memory usage
+   - Execution overhead
+   - Bundle size
+
+## Interview Tips and Tricks
+
+1. **Pattern Knowledge:**
+
+   - Understanding principles
+   - Use cases
+   - Trade-offs
+
+2. **Implementation:**
+
+   - Code organization
+   - Testing strategy
+   - Performance considerations
+
+3. **Problem Solving:**
+   - Pattern selection
+   - Pattern combination
+   - Real-world examples
+
+## Common Interview Questions
+
+1. How do you choose appropriate design patterns?
+2. What patterns do you use for component communication?
+3. How do you implement the Observer pattern in React?
+4. What are the trade-offs of different patterns?
+5. How do you test code using design patterns?
+6. What patterns do you use for state management?
+7. How do you handle cross-cutting concerns?
+
+Understanding frontend design patterns is crucial for building maintainable and scalable applications. It involves selecting appropriate patterns and implementing them effectively while considering performance and maintainability.

@@ -182,7 +182,7 @@ export const retrieveStripeSession = async (sessionId: string) => {
 export const createStripeSession = async (
   product: ProductWithCoupon,
   customer: string,
-  redirectPath: string = `/course?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
+  redirectPath: string = `/courses?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
 ) => {
   try {
     let params: Stripe.Checkout.SessionCreateParams = {
@@ -205,7 +205,7 @@ export const createStripeSession = async (
           },
         ],
       }),
-      cancel_url: getURL('/course'),
+      cancel_url: getURL('/courses'),
       success_url: getURL(redirectPath),
     }
 
@@ -232,7 +232,7 @@ export const createBillingPortalSession = async (customer: string) => {
   try {
     const billingSession = await stripe.billingPortal.sessions.create({
       customer,
-      return_url: getURL('/course'),
+      return_url: getURL('/courses'),
     })
     return billingSession
   } catch (error) {
