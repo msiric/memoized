@@ -1,60 +1,160 @@
 import prisma from '@/lib/prisma'
-import {
-  buildCurriculum,
-  calculateProgress,
-  sortCurriculum,
-} from '@/utils/helpers'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../app/api/auth/[...nextauth]/route'
 import { getUserWithSubscriptionDetails } from './user'
 
-export const getActiveCoursesWithProgress = async (userId?: string) => {
-  const userPromise = userId
-    ? getUserWithSubscriptionDetails(userId)
-    : Promise.resolve(null)
+export const getActiveCoursesWithProgress = async () => {
+  const session = await getServerSession(authOptions)
 
-  const lessonsPromise = prisma.lesson.findMany({
-    include: {
-      section: {
-        include: {
-          course: true,
+  const userId = session?.userId
+
+  const [user, activeCourses] = await Promise.all([
+    userId ? getUserWithSubscriptionDetails(userId) : Promise.resolve(null),
+    prisma.course.findMany({
+      where: {
+        isActive: true,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        href: true,
+        slug: true,
+        order: true,
+        sections: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            slug: true,
+            order: true,
+            href: true,
+            lessons: {
+              select: {
+                id: true,
+                title: true,
+                description: true,
+                slug: true,
+                order: true,
+                href: true,
+                access: true,
+                problems: {
+                  select: {
+                    id: true,
+                    title: true,
+                    difficulty: true,
+                    problemProgress: userId
+                      ? {
+                          where: {
+                            userId: userId,
+                            completed: true,
+                          },
+                          select: {
+                            completed: true,
+                          },
+                        }
+                      : false,
+                  },
+                },
+                lessonProgress: userId
+                  ? {
+                      where: {
+                        userId: userId,
+                        completed: true,
+                      },
+                      select: {
+                        completed: true,
+                      },
+                    }
+                  : false,
+              },
+            },
+          },
         },
       },
-      problems: true,
-      resources: true,
-      lessonProgress: userId ? { where: { userId, completed: true } } : false,
-    },
-    where: {
-      section: {
-        course: {
-          isActive: true,
-        },
-      },
-    },
-  })
+    }),
+  ])
 
-  const [user, lessons] = await Promise.all([userPromise, lessonsPromise])
+  if (!activeCourses.length) {
+    return []
+  }
 
-  // Use buildCurriculum to structure the courses
-  const curriculum = buildCurriculum(lessons)
-
-  // Sort curriculum by order
-  const sortedCurriculum = sortCurriculum(curriculum)
-
-  // Map each course with its progress data if user exists
-  const coursesWithProgress = sortedCurriculum?.map((course) => {
+  const coursesWithProgress = activeCourses.map((course) => {
     const courseLessons = course.sections.flatMap((section) => section.lessons)
-    const courseProblems = courseLessons.flatMap((lesson) => lesson.problems)
+    const totalLessons = courseLessons.length
 
-    const progress = user
-      ? calculateProgress(user, courseLessons.length, courseProblems.length)
-      : null
+    const courseProblems = courseLessons.flatMap((lesson) => lesson.problems)
+    const totalProblems = courseProblems.length
+
+    const problemsByDifficulty = courseProblems.reduce(
+      (acc, problem) => {
+        acc[problem.difficulty] = (acc[problem.difficulty] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>,
+    )
+
+    const completedLessons = user
+      ? courseLessons.reduce(
+          (acc, lesson) => acc + (lesson.lessonProgress?.length ? 1 : 0),
+          0,
+        )
+      : 0
+
+    const completedProblems = user
+      ? courseProblems.reduce(
+          (acc, problem) => acc + (problem.problemProgress?.length ? 1 : 0),
+          0,
+        )
+      : 0
 
     return {
       ...course,
-      progress,
+      metadata: {
+        lessons: {
+          total: totalLessons,
+          free: courseLessons.filter((lesson) => lesson.access === 'FREE')
+            .length,
+          premium: courseLessons.filter((lesson) => lesson.access === 'PREMIUM')
+            .length,
+        },
+        problems: {
+          total: totalProblems,
+          byDifficulty: problemsByDifficulty,
+        },
+      },
+      progress: user
+        ? {
+            lessonProgress: {
+              completed: completedLessons,
+              total: totalLessons,
+              percentage: (completedLessons / totalLessons) * 100,
+            },
+            problemProgress: {
+              completed: completedProblems,
+              total: totalProblems,
+              percentage:
+                totalProblems > 0
+                  ? (completedProblems / totalProblems) * 100
+                  : 0,
+            },
+          }
+        : null,
+      sections: course.sections.map((section) => ({
+        ...section,
+        lessons: section.lessons.map((lesson) => ({
+          ...lesson,
+          isCompleted: lesson.lessonProgress?.length > 0,
+          problems: lesson.problems.map((problem) => ({
+            ...problem,
+            isCompleted: problem.problemProgress?.length > 0,
+          })),
+        })),
+      })),
     }
   })
 
-  return coursesWithProgress
+  return coursesWithProgress.sort((a, b) => a.order - b.order)
 }
 
 export const getCourseBySlug = async (courseSlug: string) => {

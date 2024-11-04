@@ -195,6 +195,7 @@ describe('User services', () => {
               id: 'course1',
               slug: 'course-1',
               title: 'Course 1',
+              href: '/course-1',
               order: 1,
               description: 'Course Description',
             },

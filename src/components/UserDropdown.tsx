@@ -5,12 +5,12 @@ import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useSignOut } from '@/hooks/useSignOut'
 import { CustomError, handleError } from '@/utils/error'
-import { getInitials } from '@/utils/helpers'
+import { formatPercentage, getInitials } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './Button'
@@ -31,8 +31,8 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
     (state) => state.currentProblemProgress,
   )
 
-  const formattedLessonProgress = `${currentLessonProgress.toFixed(2)}%`
-  const formattedProblemProgress = `${currentProblemProgress.toFixed(2)}%`
+  const formattedLessonProgress = `${formatPercentage(currentLessonProgress)}%`
+  const formattedProblemProgress = `${formatPercentage(currentProblemProgress)}%`
 
   const isPremiumUser =
     user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
@@ -153,9 +153,9 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
               </p>
             </div>
             <div className="block h-2.5 w-full rounded-full px-4">
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white">
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-zinc-700/80 dark:bg-white/20">
                 <div
-                  className="h-1.5 bg-lime-500"
+                  className="h-1.5 bg-lime-600 dark:bg-lime-500"
                   style={{ width: formattedLessonProgress }}
                 />
               </div>
@@ -167,9 +167,9 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
               </p>
             </div>
             <div className="block h-2.5 w-full rounded-full px-4">
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white">
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-zinc-700/80 dark:bg-white/20">
                 <div
-                  className="h-1.5 bg-indigo-400"
+                  className="h-1.5 bg-indigo-600 dark:bg-indigo-500"
                   style={{ width: formattedProblemProgress }}
                 />
               </div>

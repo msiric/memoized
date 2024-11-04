@@ -10,13 +10,30 @@ import {
   DATA_STRUCTURES_AND_ALGORITHMS_PREFIX,
   USER_DEFINED_DATA_STRUCTURES_PREFIX,
 } from '.'
+import { Coding } from '../components/icons/Coding'
+import { UserIcon } from '../components/icons/UserIcon'
+
+export const curriculumUI = {
+  [DATA_STRUCTURES_AND_ALGORITHMS_PREFIX]: {
+    icon: UserIcon,
+    pattern: {
+      y: 16,
+      squares: [
+        [0, 1],
+        [1, 3],
+      ],
+    },
+  },
+}
 
 export const completeCurriculum = [
   {
     id: DATA_STRUCTURES_AND_ALGORITHMS_PREFIX,
     title: 'DSA Track',
-    description: 'The complete coding interview preparation',
+    description:
+      'Master algorithmic problem solving through practical examples and real interview questions',
     href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}`,
+    icon: Coding,
     sections: [
       {
         id: BUILT_IN_DATA_STRUCTURES_PREFIX,

@@ -12,9 +12,9 @@ export function GridPattern({
 }: React.ComponentPropsWithoutRef<'svg'> & {
   width: number
   height: number
-  x: string | number
-  y: string | number
-  squares: Array<[x: number, y: number]>
+  x?: string | number
+  y?: string | number
+  squares?: Array<[x: number, y: number]>
 }) {
   const patternId = useId()
 

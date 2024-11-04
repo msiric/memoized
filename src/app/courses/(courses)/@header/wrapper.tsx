@@ -1,6 +1,6 @@
 'use client'
 
-import { Navigation } from '@/components/Navigation'
+import { Header } from '@/components/Header'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import {
@@ -11,24 +11,26 @@ import {
 } from '@/types'
 import { curriculumToNavigation } from '@/utils/helpers'
 import { useEffect } from 'react'
-import { useCourseSlug } from '../../../../hooks/useCourseSlug'
 
 export type LayoutProps = {
   courseSlug: string
   userData?: UserWithSubscriptionsAndProgress | null
+  completedLessons?: string[]
+  completedProblems?: string[]
   fullCurriculum?: Curriculum[]
   allLessons?: LessonConfig[]
   allProblems?: ProblemConfig[]
 }
 
 export function Wrapper({
+  courseSlug,
   userData,
+  completedLessons,
+  completedProblems,
   fullCurriculum,
   allLessons,
   allProblems,
 }: LayoutProps) {
-  const courseSlug = useCourseSlug()
-
   const setUser = useAuthStore((state) => state.setUser)
   const updateContent = useContentStore((state) => state.updateContent)
 
@@ -37,20 +39,31 @@ export function Wrapper({
   const navigation = curriculumToNavigation(currentCourse)
 
   useEffect(() => {
-    updateContent(undefined, undefined, fullCurriculum, allLessons, allProblems)
+    updateContent(
+      completedLessons,
+      completedProblems,
+      fullCurriculum,
+      allLessons,
+      allProblems,
+    )
     setUser(userData ?? null)
   }, [
+    completedLessons,
     updateContent,
     allLessons,
     fullCurriculum,
     setUser,
     userData,
+    completedProblems,
     allProblems,
   ])
 
-  if (!courseSlug) return null
-
   return (
-    <Navigation navigation={navigation} className="hidden lg:mt-10 lg:block" />
+    <Header
+      navigation={navigation}
+      withSearch={false}
+      withSubheader
+      fullWidth
+    />
   )
 }

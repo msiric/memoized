@@ -8,11 +8,12 @@ import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 
 export const PremiumButton = () => {
+  const pathname = usePathname()
   const router = useRouter()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -22,6 +23,8 @@ export const PremiumButton = () => {
   const currentSubscription = capitalizeFirstLetter(
     user?.currentSubscriptionPlan ?? 'Subscribed',
   )
+
+  const shouldRender = !pathname.startsWith('/premium')
 
   const handleStripePortalRequest = async () => {
     try {
@@ -36,6 +39,8 @@ export const PremiumButton = () => {
       setIsSubmitting(false)
     }
   }
+
+  if (!shouldRender) return null
 
   const content =
     user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (

@@ -1,28 +1,33 @@
 'use client'
 
-import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
-import { SectionProvider, type Section } from '@/components/SectionProvider'
+import { Section } from '@prisma/client'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
+import { Footer } from '../../../components/Footer'
+import { SectionProvider } from '../../../components/SectionProvider'
 
 export type CourseProvidersProps = {
-  allSections: Record<string, Array<Section>>
   header: ReactNode
   navigation: ReactNode
-  section: ReactNode
+  allSections: Record<string, Array<Section>>
+  children: ReactNode
 }
 
 export const CourseProviders = ({
-  allSections,
   header,
   navigation,
-  section,
+  allSections,
+  children,
 }: CourseProvidersProps) => {
   const pathname = usePathname()
   const formattedPathname = `/${pathname.split('/').slice(3).join('/')}`
+
+  console.log('what is this', children)
+
+  console.log('navvvvv parent', navigation)
 
   return (
     <SectionProvider sections={allSections?.[formattedPathname] ?? []}>
@@ -42,7 +47,7 @@ export const CourseProviders = ({
           </div>
         </motion.header>
         <div className="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
-          <main className="flex-auto">{section}</main>
+          <main className="flex-auto">{children}</main>
           <Footer fullWidth={false} />
         </div>
       </div>

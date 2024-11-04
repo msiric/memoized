@@ -93,14 +93,20 @@ describe('Lesson services', () => {
 
   describe('getSectionBySlug', () => {
     it('should return section by slug', async () => {
-      const mockSection = { id: '1' }
+      const mockSection = {
+        id: '1',
+        course: { slug: 'course-slug' },
+      }
       ;(prisma.section.findUnique as Mock).mockResolvedValue(mockSection)
 
       const section = await getSectionBySlug('section-slug')
       expect(section).toEqual(mockSection)
       expect(prisma.section.findUnique).toHaveBeenCalledWith({
         where: { slug: 'section-slug' },
-        select: { id: true },
+        select: {
+          id: true,
+          course: { select: { slug: true } },
+        },
       })
     })
 
@@ -112,7 +118,10 @@ describe('Lesson services', () => {
 
       expect(prisma.section.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
-        select: { id: true },
+        select: {
+          id: true,
+          course: { select: { slug: true } },
+        },
       })
     })
   })
@@ -125,6 +134,10 @@ describe('Lesson services', () => {
         problems: [],
         title: 'Lesson Title',
         access: AccessOptions.FREE,
+        section: {
+          slug: 'section-slug',
+          course: { slug: 'course-slug' },
+        },
       }
       ;(prisma.lesson.findUnique as Mock).mockResolvedValue(mockLesson)
 
@@ -132,7 +145,18 @@ describe('Lesson services', () => {
       expect(lesson).toEqual(mockLesson)
       expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
         where: { slug: 'lesson-slug' },
-        select: { id: true, problems: true, title: true, access: true },
+        select: {
+          id: true,
+          problems: true,
+          title: true,
+          access: true,
+          section: {
+            select: {
+              slug: true,
+              course: { select: { slug: true } },
+            },
+          },
+        },
       })
     })
 
@@ -144,14 +168,29 @@ describe('Lesson services', () => {
 
       expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
-        select: { id: true, problems: true, title: true, access: true },
+        select: {
+          id: true,
+          problems: true,
+          title: true,
+          access: true,
+          section: {
+            select: {
+              slug: true,
+              course: { select: { slug: true } },
+            },
+          },
+        },
       })
     })
   })
 
   describe('upsertCourse', () => {
     it('should upsert a course', async () => {
-      const mockCourse = { id: '1', slug: 'course-slug', title: 'Course Title' }
+      const mockCourse = {
+        id: '1',
+        slug: 'course-slug',
+        title: 'Course Title',
+      }
       ;(prisma.course.upsert as Mock).mockResolvedValue(mockCourse)
 
       const course = await upsertCourse(
@@ -168,14 +207,14 @@ describe('Lesson services', () => {
           title: 'Course Title',
           description: 'Course Description',
           order: 1,
-          href: '',
+          href: '/course',
         },
         create: {
           title: 'Course Title',
           description: 'Course Description',
           order: 1,
           slug: 'course-slug',
-          href: '',
+          href: '/course',
         },
       })
     })
@@ -312,7 +351,6 @@ describe('Lesson services', () => {
             id: 'section1',
             title: 'Section 1',
             href: '/section1',
-            body: 'Section body',
             order: 1,
             slug: 'section-1',
             description: 'Section description',
@@ -354,7 +392,6 @@ describe('Lesson services', () => {
               id: true,
               title: true,
               href: true,
-              body: true,
               order: true,
               slug: true,
               description: true,

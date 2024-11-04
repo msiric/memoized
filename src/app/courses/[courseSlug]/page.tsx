@@ -24,6 +24,7 @@ export default async function Course({
     courseSlug: string
   }
 }) {
+  console.log('test')
   const { courseSlug } = params
   const [sessionResult, stripeSessionResult] = await Promise.allSettled([
     getServerSession(authOptions),
@@ -41,7 +42,7 @@ export default async function Course({
       : null
 
   const Page = dynamic(
-    () => import(`../../../../${CONTENT_FOLDER}/${courseSlug}/page.mdx`),
+    () => import(`../../../${CONTENT_FOLDER}/${courseSlug}/page.mdx`),
     {
       loading: () => (
         <section className="h-screen bg-white dark:bg-zinc-900">

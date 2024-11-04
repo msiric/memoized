@@ -126,7 +126,6 @@ export type EnrichedLesson = Prisma.LessonGetPayload<{
         id: true
         title: true
         href: true
-        body: true
         order: true
         slug: true
         description: true

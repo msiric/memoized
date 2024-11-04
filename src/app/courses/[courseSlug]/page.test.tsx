@@ -22,6 +22,7 @@ vi.mock('@/components/PremiumModal', () => ({
     </div>
   ),
 }))
+
 vi.mock('next/dynamic', () => ({
   default: () => {
     const DynamicComponent = ({

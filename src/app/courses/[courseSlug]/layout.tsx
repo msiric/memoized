@@ -18,15 +18,15 @@ export const metadata: Metadata = {
 export type CourseLayoutProps = {
   header: ReactNode
   navigation: ReactNode
-  section: ReactNode
   params: { courseSlug: string }
+  children: ReactNode
 }
 
 export default async function CourseLayout({
   header,
   navigation,
-  section,
   params,
+  children,
 }: CourseLayoutProps) {
   const { courseSlug } = params
 
@@ -47,14 +47,16 @@ export default async function CourseLayout({
         .sections,
     ]),
   )) as Array<[string, Array<Section>]>
+
   const allSections = Object.fromEntries(allSectionsEntries)
 
   return (
     <CourseProviders
       header={header}
       navigation={navigation}
-      section={section}
       allSections={allSections}
-    />
+    >
+      {children}
+    </CourseProviders>
   )
 }

@@ -192,7 +192,6 @@ export const getLessonsAndProblems = async () => {
             id: true,
             title: true,
             href: true,
-            body: true,
             order: true,
             slug: true,
             description: true,

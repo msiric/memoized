@@ -27,7 +27,7 @@ interface ContentStore {
   toggleCompletedProblem: (problemId: string) => void
 }
 
-function calculateProgress<T>(completed: Set<string>, total: T[]) {
+const calculateProgress = <T>(completed: Set<string>, total: T[]) => {
   const progress = (completed.size / total.length) * 100
   return progress
 }
