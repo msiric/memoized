@@ -24,7 +24,6 @@ export default async function Course({
     courseSlug: string
   }
 }) {
-  console.log('test')
   const { courseSlug } = params
   const [sessionResult, stripeSessionResult] = await Promise.allSettled([
     getServerSession(authOptions),

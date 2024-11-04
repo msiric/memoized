@@ -25,10 +25,6 @@ export const CourseProviders = ({
   const pathname = usePathname()
   const formattedPathname = `/${pathname.split('/').slice(3).join('/')}`
 
-  console.log('what is this', children)
-
-  console.log('navvvvv parent', navigation)
-
   return (
     <SectionProvider sections={allSections?.[formattedPathname] ?? []}>
       <div className="h-full lg:ml-72 xl:ml-80">

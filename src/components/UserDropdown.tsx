@@ -14,6 +14,13 @@ import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
 import { Button } from './Button'
+import { PREMIUM_BUTTON_STYLES } from './PremiumButton'
+
+const DROPDOWN_STYLES = {
+  lifetime: 'inline-block text-lime-500',
+  listItem:
+    'block w-full px-4 py-2 text-left hover:bg-zinc-600 disabled:opacity-50',
+}
 
 export const UserDropdown = ({ isMobile = false, ...props }) => {
   const router = useRouter()
@@ -180,7 +187,14 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
           {user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
             user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
               <li>
-                <p className="block w-full px-4 py-2">Lifetime &#10024;</p>
+                <p
+                  className={clsx(
+                    DROPDOWN_STYLES.lifetime,
+                    DROPDOWN_STYLES.listItem,
+                  )}
+                >
+                  Lifetime &#10024;
+                </p>
               </li>
             ) : (
               <li>
@@ -188,8 +202,8 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
                   onClick={handleStripePortalRequest}
                   disabled={isSubmitting}
                   className={clsx(
-                    'block w-full px-4 py-2 text-left hover:bg-zinc-600 hover:text-white disabled:opacity-50',
-                    isSubmitting && 'cursor-wait',
+                    DROPDOWN_STYLES.listItem,
+                    isSubmitting && PREMIUM_BUTTON_STYLES.loading,
                   )}
                 >
                   Subscription
@@ -198,10 +212,7 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
             )
           ) : null}
           <li>
-            <button
-              onClick={handleClick}
-              className="block w-full px-4 py-2 text-left hover:bg-zinc-600 hover:text-white disabled:opacity-50"
-            >
+            <button onClick={handleClick} className={DROPDOWN_STYLES.listItem}>
               Sign out
             </button>
           </li>

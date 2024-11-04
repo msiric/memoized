@@ -29,10 +29,15 @@ import { usePathname, useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
 import { AuthButton } from './AuthButton'
-import { IconWrapper } from './IconWrapper'
 import { BookIcon } from './icons/BookIcon'
 import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
+import { IconWrapper } from './IconWrapper'
+import { PREMIUM_BUTTON_STYLES } from './PremiumButton'
+
+const NAV_PREMIUM_STYLES = {
+  base: 'text-md block py-1 my-1 rounded-md',
+}
 
 function useInitialValue<T>(value: T, condition = true) {
   const initialValue = useRef(value).current
@@ -130,7 +135,13 @@ export const NavPremiumButton = () => {
     ) : user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
       user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
         <li>
-          <p className="text-md block py-1 text-zinc-600 dark:text-white">
+          <p
+            className={clsx(
+              'inline-block',
+              PREMIUM_BUTTON_STYLES.shared,
+              NAV_PREMIUM_STYLES.base,
+            )}
+          >
             {currentSubscription} &#10024;
           </p>
         </li>
@@ -140,8 +151,11 @@ export const NavPremiumButton = () => {
             onClick={handleStripePortalRequest}
             disabled={isSubmitting}
             className={clsx(
-              'text-md block py-1 text-zinc-600 transition hover:text-zinc-900 dark:text-white dark:hover:text-lime-500',
-              isSubmitting && 'cursor-wait',
+              PREMIUM_BUTTON_STYLES.shared,
+              PREMIUM_BUTTON_STYLES.interactive,
+              PREMIUM_BUTTON_STYLES.disabled,
+              NAV_PREMIUM_STYLES.base,
+              isSubmitting && PREMIUM_BUTTON_STYLES.loading,
             )}
           >
             {currentSubscription}
@@ -150,11 +164,16 @@ export const NavPremiumButton = () => {
       )
     ) : (
       <li className="md:hidden">
-        <Link
-          href="/premium"
-          className="text-md block py-1 text-zinc-600 transition hover:text-zinc-900 dark:text-white dark:hover:text-lime-500"
-        >
-          Premium
+        <Link href="/premium">
+          <button
+            className={clsx(
+              PREMIUM_BUTTON_STYLES.shared,
+              PREMIUM_BUTTON_STYLES.interactive,
+              NAV_PREMIUM_STYLES.base,
+            )}
+          >
+            Premium
+          </button>
         </Link>
       </li>
     )

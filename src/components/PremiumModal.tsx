@@ -60,10 +60,10 @@ export const PremiumModal = ({
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 ${isOpen ? 'block' : 'hidden'}`}
     >
       <div className="relative w-full max-w-md p-4 md:h-auto">
-        <div className="relative rounded-lg bg-white p-6 text-center shadow-2xl dark:bg-zinc-700">
+        <div className="relative rounded-lg bg-white p-6 text-center shadow-2xl dark:bg-zinc-800">
           <button
             type="button"
-            className="absolute right-2.5 top-2.5 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white"
+            className="absolute right-2.5 top-2.5 ml-auto inline-flex items-center rounded-lg bg-transparent p-1.5 text-sm text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-white"
             onClick={closeModal}
           >
             <svg
@@ -83,7 +83,7 @@ export const PremiumModal = ({
           </button>
           <div
             className={clsx(
-              'mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full p-2',
+              'mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full p-2 text-white',
               upgradedSuccessfully ? 'bg-lime-600' : 'bg-red-600',
             )}
           >
@@ -96,10 +96,10 @@ export const PremiumModal = ({
               {upgradedSuccessfully ? 'Success' : 'Error'}
             </span>
           </div>
-          <h2 className="mb-4 text-2xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="mb-4 text-2xl font-semibold text-zinc-900 dark:text-white">
             {upgradedSuccessfully ? 'Upgrade Successful' : 'Upgrade Failed'}
           </h2>
-          <div className="mb-6 text-gray-600 dark:text-gray-300">
+          <div className="mb-6 text-zinc-600 dark:text-zinc-300">
             {upgradedSuccessfully ? (
               <>
                 <p>
@@ -133,8 +133,8 @@ export const PremiumModal = ({
                 >
                   <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                 </svg>
-                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                <div className="ml-4 text-left text-zinc-600 dark:text-zinc-300">
+                  <p className="text-md font-medium text-zinc-600 dark:text-white">
                     Built-In Data Structures
                   </p>
                 </div>
@@ -147,8 +147,8 @@ export const PremiumModal = ({
                 >
                   <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                 </svg>
-                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                <div className="ml-4 text-left text-zinc-600 dark:text-zinc-300">
+                  <p className="text-md font-medium text-zinc-600 dark:text-white">
                     User-Defined Data Structures
                   </p>
                 </div>
@@ -161,8 +161,8 @@ export const PremiumModal = ({
                 >
                   <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                 </svg>
-                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                <div className="ml-4 text-left text-zinc-600 dark:text-zinc-300">
+                  <p className="text-md font-medium text-zinc-600 dark:text-white">
                     Common Techniques
                   </p>
                 </div>
@@ -175,8 +175,8 @@ export const PremiumModal = ({
                 >
                   <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                 </svg>
-                <div className="ml-4 text-left text-gray-600 dark:text-gray-300">
-                  <p className="text-md font-medium text-gray-600 dark:text-white">
+                <div className="ml-4 text-left text-zinc-600 dark:text-zinc-300">
+                  <p className="text-md font-medium text-zinc-600 dark:text-white">
                     Advanced Topics
                   </p>
                 </div>

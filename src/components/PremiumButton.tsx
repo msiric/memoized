@@ -12,18 +12,24 @@ import { usePathname, useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 
+export const PREMIUM_BUTTON_STYLES = {
+  shared:
+    'border border-solid border-lime-600 px-1.5 py-0.5 leading-5 text-lime-600 dark:border-lime-500 dark:text-lime-500 leading-5',
+  base: 'text-sm rounded-lg',
+  interactive:
+    'transition hover:border-lime-500 hover:text-lime-500 dark:hover:border-lime-400 dark:hover:text-lime-400',
+  disabled: 'disabled:opacity-50',
+  loading: 'cursor-wait',
+}
+
 export const PremiumButton = () => {
   const pathname = usePathname()
   const router = useRouter()
-
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const user = useAuthStore((state) => state.user)
-
   const currentSubscription = capitalizeFirstLetter(
     user?.currentSubscriptionPlan ?? 'Subscribed',
   )
-
   const shouldRender = !pathname.startsWith('/premium')
 
   const handleStripePortalRequest = async () => {
@@ -45,7 +51,13 @@ export const PremiumButton = () => {
   const content =
     user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
       user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
-        <p className="text-sm leading-5 text-zinc-600 dark:text-zinc-400">
+        <p
+          className={clsx(
+            'inline-block',
+            PREMIUM_BUTTON_STYLES.shared,
+            PREMIUM_BUTTON_STYLES.base,
+          )}
+        >
           {currentSubscription} &#10024;
         </p>
       ) : (
@@ -53,19 +65,27 @@ export const PremiumButton = () => {
           onClick={handleStripePortalRequest}
           disabled={isSubmitting}
           className={clsx(
-            'text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 disabled:opacity-50 dark:text-zinc-400 dark:hover:text-white',
-            isSubmitting && 'cursor-wait',
+            PREMIUM_BUTTON_STYLES.shared,
+            PREMIUM_BUTTON_STYLES.base,
+            PREMIUM_BUTTON_STYLES.interactive,
+            PREMIUM_BUTTON_STYLES.disabled,
+            isSubmitting && PREMIUM_BUTTON_STYLES.loading,
           )}
         >
           {currentSubscription}
         </button>
       )
     ) : (
-      <Link
-        href="/premium"
-        className="text-sm leading-5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
-      >
-        Premium
+      <Link href="/premium">
+        <button
+          className={clsx(
+            PREMIUM_BUTTON_STYLES.shared,
+            PREMIUM_BUTTON_STYLES.base,
+            PREMIUM_BUTTON_STYLES.interactive,
+          )}
+        >
+          Premium
+        </button>
       </Link>
     )
 
