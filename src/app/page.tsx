@@ -30,9 +30,8 @@ import {
 } from 'react-icons/md'
 import { RiJavascriptLine } from 'react-icons/ri'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
-import { codeToHtml } from 'shiki'
-import { ThemeToggle } from '../components/ThemeToggle'
 import { HomepageBackground } from '../components/icons/HomepageBackground'
+import { ThemeToggle } from '../components/ThemeToggle'
 
 const EXTENSION = 'js'
 
@@ -184,13 +183,7 @@ const codeSnippets = [
 ]
 
 export default async function Home() {
-  const [activeBanners, initialSnippet] = await Promise.all([
-    getActiveBanners(),
-    codeToHtml(codeSnippets[0]?.code, {
-      lang: 'ts',
-      theme: 'nord',
-    }),
-  ])
+  const activeBanners = await getActiveBanners()
 
   return (
     <div className="flex w-full flex-col">
@@ -278,7 +271,6 @@ export default async function Home() {
                     <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-lime-400/0 via-lime-400 to-lime-400/0" />
                     <AnimatedCode
                       initialTab={codeSnippets[0].tab}
-                      initialSnippet={initialSnippet}
                       codeSnippets={codeSnippets}
                     />
                   </div>
