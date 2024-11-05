@@ -59,7 +59,7 @@ export const completeCurriculum = [
       },
       {
         id: COMMON_TECHNIQUES_PREFIX,
-        href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${COURSES_PREFIX}`,
+        href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${COMMON_TECHNIQUES_PREFIX}`,
         title: 'Common Techniques',
         description:
           'Exploring widely-used algorithms and problem-solving techniques.',

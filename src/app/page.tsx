@@ -1,8 +1,6 @@
 import { AnimatedCode } from '@/components/AnimatedCode'
 import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
-import { OverlayedImage } from '@/components/OverlayedImage'
-import { ThemeToggle } from '@/components/ThemeToggle'
 import TopBanner from '@/components/TopBanner'
 import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
@@ -33,6 +31,8 @@ import {
 import { RiJavascriptLine } from 'react-icons/ri'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
 import { codeToHtml } from 'shiki'
+import { ThemeToggle } from '../components/ThemeToggle'
+import { HomepageBackground } from '../components/icons/HomepageBackground'
 
 const EXTENSION = 'js'
 
@@ -263,190 +263,11 @@ export default async function Home() {
             </div>
             <div className="relative lg:static xl:pl-10">
               <div className="absolute inset-x-[-50vw] -bottom-48 -top-24 [mask-image:linear-gradient(transparent,white,white)] lg:-bottom-32 lg:-top-24 lg:left-[calc(50%+14rem)] lg:right-0 lg:[mask-image:none] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:dark:[mask-image:linear-gradient(white,white,transparent)]">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 668 1069"
+                <HomepageBackground
                   width={668}
                   height={1069}
-                  fill="none"
                   className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 lg:left-0 lg:translate-x-0 lg:translate-y-[-60%]"
-                >
-                  <defs>
-                    <clipPath id=":Rqja:-clip-path">
-                      <path
-                        fill="#fff"
-                        transform="rotate(-180 334 534.4)"
-                        d="M0 0h668v1068.8H0z"
-                      />
-                    </clipPath>
-                  </defs>
-                  <g
-                    opacity=".4"
-                    clipPath="url(#:Rqja:-clip-path)"
-                    strokeWidth={4}
-                  >
-                    <path
-                      opacity=".3"
-                      d="M584.5 770.4v-474M484.5 770.4v-474M384.5 770.4v-474M283.5 769.4v-474M183.5 768.4v-474M83.5 767.4v-474"
-                      stroke="#334155"
-                    />
-                    <path
-                      d="M83.5 221.275v6.587a50.1 50.1 0 0 0 22.309 41.686l55.581 37.054a50.102 50.102 0 0 1 22.309 41.686v6.587M83.5 716.012v6.588a50.099 50.099 0 0 0 22.309 41.685l55.581 37.054a50.102 50.102 0 0 1 22.309 41.686v6.587M183.7 584.5v6.587a50.1 50.1 0 0 0 22.31 41.686l55.581 37.054a50.097 50.097 0 0 1 22.309 41.685v6.588M384.101 277.637v6.588a50.1 50.1 0 0 0 22.309 41.685l55.581 37.054a50.1 50.1 0 0 1 22.31 41.686v6.587M384.1 770.288v6.587a50.1 50.1 0 0 1-22.309 41.686l-55.581 37.054A50.099 50.099 0 0 0 283.9 897.3v6.588"
-                      stroke="#334155"
-                    />
-                    <path
-                      d="M384.1 770.288v6.587a50.1 50.1 0 0 1-22.309 41.686l-55.581 37.054A50.099 50.099 0 0 0 283.9 897.3v6.588M484.3 594.937v6.587a50.1 50.1 0 0 1-22.31 41.686l-55.581 37.054A50.1 50.1 0 0 0 384.1 721.95v6.587M484.3 872.575v6.587a50.1 50.1 0 0 1-22.31 41.686l-55.581 37.054a50.098 50.098 0 0 0-22.309 41.686v6.582M584.501 663.824v39.988a50.099 50.099 0 0 1-22.31 41.685l-55.581 37.054a50.102 50.102 0 0 0-22.309 41.686v6.587M283.899 945.637v6.588a50.1 50.1 0 0 1-22.309 41.685l-55.581 37.05a50.12 50.12 0 0 0-22.31 41.69v6.59M384.1 277.637c0 19.946 12.763 37.655 31.686 43.962l137.028 45.676c18.923 6.308 31.686 24.016 31.686 43.962M183.7 463.425v30.69c0 21.564 13.799 40.709 34.257 47.529l134.457 44.819c18.922 6.307 31.686 24.016 31.686 43.962M83.5 102.288c0 19.515 13.554 36.412 32.604 40.645l235.391 52.309c19.05 4.234 32.605 21.13 32.605 40.646M83.5 463.425v-58.45M183.699 542.75V396.625M283.9 1068.8V945.637M83.5 363.225v-141.95M83.5 179.524v-77.237M83.5 60.537V0M384.1 630.425V277.637M484.301 830.824V594.937M584.5 1068.8V663.825M484.301 555.275V452.988M584.5 622.075V452.988M384.1 728.537v-56.362M384.1 1068.8v-20.88M384.1 1006.17V770.287M283.9 903.888V759.85M183.699 1066.71V891.362M83.5 1068.8V716.012M83.5 674.263V505.175"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="83.5"
-                      cy="384.1"
-                      r="10.438"
-                      transform="rotate(-180 83.5 384.1)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="83.5"
-                      cy="200.399"
-                      r="10.438"
-                      transform="rotate(-180 83.5 200.399)"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="83.5"
-                      cy="81.412"
-                      r="10.438"
-                      transform="rotate(-180 83.5 81.412)"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="183.699"
-                      cy="375.75"
-                      r="10.438"
-                      transform="rotate(-180 183.699 375.75)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="183.699"
-                      cy="563.625"
-                      r="10.438"
-                      transform="rotate(-180 183.699 563.625)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="384.1"
-                      cy="651.3"
-                      r="10.438"
-                      transform="rotate(-180 384.1 651.3)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="484.301"
-                      cy="574.062"
-                      r="10.438"
-                      transform="rotate(-180 484.301 574.062)"
-                      fill="#A3E635"
-                      fillOpacity=".42"
-                      stroke="#A3E635"
-                    />
-                    <circle
-                      cx="384.1"
-                      cy="749.412"
-                      r="10.438"
-                      transform="rotate(-180 384.1 749.412)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="384.1"
-                      cy="1027.05"
-                      r="10.438"
-                      transform="rotate(-180 384.1 1027.05)"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="283.9"
-                      cy="924.763"
-                      r="10.438"
-                      transform="rotate(-180 283.9 924.763)"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="183.699"
-                      cy="870.487"
-                      r="10.438"
-                      transform="rotate(-180 183.699 870.487)"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="283.9"
-                      cy="738.975"
-                      r="10.438"
-                      transform="rotate(-180 283.9 738.975)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="83.5"
-                      cy="695.138"
-                      r="10.438"
-                      transform="rotate(-180 83.5 695.138)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="83.5"
-                      cy="484.3"
-                      r="10.438"
-                      transform="rotate(-180 83.5 484.3)"
-                      fill="#A3E635"
-                      fillOpacity=".42"
-                      stroke="#A3E635"
-                    />
-                    <circle
-                      cx="484.301"
-                      cy="432.112"
-                      r="10.438"
-                      transform="rotate(-180 484.301 432.112)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="584.5"
-                      cy="432.112"
-                      r="10.438"
-                      transform="rotate(-180 584.5 432.112)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="584.5"
-                      cy="642.95"
-                      r="10.438"
-                      transform="rotate(-180 584.5 642.95)"
-                      fill="#1E293B"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="484.301"
-                      cy="851.699"
-                      r="10.438"
-                      transform="rotate(-180 484.301 851.699)"
-                      stroke="#334155"
-                    />
-                    <circle
-                      cx="384.1"
-                      cy="256.763"
-                      r="10.438"
-                      transform="rotate(-180 384.1 256.763)"
-                      stroke="#334155"
-                    />
-                  </g>
-                </svg>
+                />
               </div>
               <div className="min-h-full">
                 <div className="relative">
@@ -477,8 +298,9 @@ export default async function Home() {
                     Why {APP_NAME}?
                   </h2>
                   <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
-                    Tailored interview prep for JavaScript engineers. Master
-                    data structures, algorithms, and practical insights
+                    Transform your interview preparation with a comprehensive
+                    dual-track approach, designed specifically for JavaScript
+                    engineers.
                   </p>
                 </div>
                 <ul
@@ -548,9 +370,10 @@ export default async function Home() {
                       Advanced Topics
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
-                      Dive deep into sophisticated algorithms and data
-                      structures. Gain knowledge of advanced concepts and their
-                      practical applications to stay ahead.
+                      Dive deep into sophisticated algorithms and modern
+                      frontend architectures. Master advanced concepts and their
+                      practical applications to stand out in technical
+                      interviews.
                     </p>
                   </li>
                 </ul>
@@ -567,15 +390,12 @@ export default async function Home() {
                   A Unique Approach to Interview Preparation
                 </p>
                 <p className="mt-4 text-left text-zinc-500 dark:text-zinc-300">
-                  Tired of interview prep courses that dive into data structures
-                  before you’ve mastered the language? Frustrated with lessons
-                  on algorithms that don’t explain their purpose, usage, or how
-                  to recognize patterns? This platform is tailored for
-                  JavaScript and TypeScript engineers, offering comprehensive
-                  coverage from the fundamentals of built-in data structures to
-                  advanced concepts. Learn the why, when, and how of algorithms
-                  and data structures, ensuring you have all the tools and
-                  techniques needed to excel in technical interviews.
+                  Tired of interview prep courses that don’t align with
+                  real-world engineering challenges? Frustrated with platforms
+                  that don’t address both algorithmic and practical frontend
+                  development needs? {APP_NAME} offers two specialized tracks
+                  designed to cover the full spectrum of technical interview
+                  scenarios:
                 </p>
                 <ul role="list" className="mt-8 space-y-3">
                   <li className="flex">
@@ -644,88 +464,63 @@ export default async function Home() {
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
                     <span className="ml-4 text-zinc-500 dark:text-zinc-300">
-                      Advanced Topics: Dive into complex topics for an in-depth
-                      understanding of sophisticated algorithms, including
-                      network flow algorithms, dynamic programming, segment
-                      trees, union find, minimum spanning trees, shortest path
-                      algorithms, and more.
+                      Advanced Topics: From network flow algorithms to
+                      micro-frontend architecture, master advanced concepts that
+                      set you apart.
                     </span>
                   </li>
                 </ul>
-                <p className="mt-8 text-left text-zinc-500 dark:text-zinc-300">
-                  Join {APP_NAME} and start your journey to becoming a
-                  JavaScript expert. Master data structures, algorithms, and
-                  interview techniques to land your dream job. With a focus on
-                  depth, practical insights, and interactive learning, you’ll be
-                  well-equipped to tackle any technical interview with
-                  confidence.
-                </p>
               </div>
             </section>
-
-            <div className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center">
-              <div className="min-w-0 max-w-3xl flex-auto py-10 lg:max-w-none lg:py-20">
-                <article>
-                  <div className="grid grid-cols-1 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <OverlayedImage
-                      src="/images/covers/strings-practical-tips.png"
-                      title="Practical Tips"
-                      description="Enhance your string manipulation skills with practical advice."
-                    />
-                    <OverlayedImage
-                      src="/images/covers/linked-lists-algorithms.png"
-                      title="Algorithms"
-                      description="Discover tips and tricks to optimize your use of linked lists."
-                    />
-                    <OverlayedImage
-                      src="/images/covers/sliding-window-fixed-size.png"
-                      title="Common Techniques"
-                      description="Understand the sliding window technique for fixed-size problems."
-                    />
-                    <OverlayedImage
-                      src="/images/covers/dynamic-programming-advanced-topics.png"
-                      title="Advanced Topics"
-                      description="Dive deep into advanced topics in dynamic programming."
-                    />
-                  </div>
-                </article>
-              </div>
-            </div>
 
             <header className="mx-auto max-w-3xl pb-8 pt-8 text-center sm:pb-12 sm:pt-12">
               <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
                 Content overview
               </h2>
               <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
-                Tailored interview prep for JavaScript engineers. Master data
-                structures, algorithms, and practical insights
+                Comprehensive interview preparation covering both algorithmic
+                challenges and advanced frontend techniques
               </p>
             </header>
             <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
-              <div className="not-prose my-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {completeCurriculum[0].sections.map((section) => (
+              <div className="grid grid-cols-1 gap-8 px-4 lg:grid-cols-2 lg:gap-12">
+                {completeCurriculum.map((track) => (
                   <div
-                    key={section.title}
-                    className="group relative rounded-xl"
+                    key={track.id}
+                    className="mx-auto w-full max-w-[650px] rounded-2xl px-4 sm:px-8 lg:px-12"
                   >
-                    <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
-                    <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center">
-                      <div className="rounded-full bg-zinc-800 p-4">
-                        {
-                          SECTION_ICONS[
-                            section.icon as keyof typeof SECTION_ICONS
-                          ]
-                        }
-                      </div>
-                      <h2 className="font-display mt-4 text-base text-zinc-900 dark:text-white">
-                        <a href={section.href}>
-                          <span className="absolute -inset-px rounded-xl" />
-                          {section.title}
-                        </a>
-                      </h2>
-                      <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-300">
-                        {section.about}
+                    <div className="mb-8">
+                      <h3 className="text-center text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                        {track.title}
+                      </h3>
+                      <p className="text-md mt-2 text-center text-zinc-500 dark:text-zinc-300">
+                        {track.description}
                       </p>
+                    </div>
+                    <div className="not-prose grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {track.sections.map((section) => (
+                        <div
+                          key={section.title}
+                          className="group relative mx-auto w-full max-w-[280px] rounded-xl"
+                        >
+                          <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-200 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
+                          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center">
+                            <div className="rounded-full bg-zinc-700 p-4">
+                              {
+                                SECTION_ICONS[
+                                  section.icon as keyof typeof SECTION_ICONS
+                                ]
+                              }
+                            </div>
+                            <h2 className="font-display mt-4 text-base text-zinc-900 dark:text-white">
+                              <a href={section.href}>
+                                <span className="absolute -inset-px rounded-xl" />
+                                {section.title}
+                              </a>
+                            </h2>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -744,13 +539,11 @@ export default async function Home() {
             </header>
             <div>
               <p className="mt-3 text-center text-zinc-300 dark:text-zinc-300">
-                Algorithmic interviews are the standard for evaluating technical
-                skills at major tech companies and in industries like finance
-                and logistics. These interviews assess your problem-solving
-                abilities, critical thinking, and technical proficiency.
-                Embracing this format is essential for advancing your career as
-                a software engineer and standing out in a competitive job
-                market.
+                Top tech companies evaluate candidates on both algorithmic
+                problem-solving and practical frontend development skills. This
+                platfrom prepares you for the full spectrum of technical
+                interviews, ensuring you can tackle both algorithmic challenges
+                and real-world engineering problems with confidence.
               </p>
               <div className="mt-8 grid grid-cols-3 gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
                 <div className="flex items-center justify-center">
@@ -816,9 +609,9 @@ export default async function Home() {
             <div>
               <h2 className="mb-4 text-2xl font-bold">Practice Problems</h2>
               <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                Access over 150 diverse practice problems on our /problems
-                route. Each problem is categorized by topic and aligned with the
-                lessons, ensuring targeted and effective practice.
+                Access over 150 diverse practice problems and questions. Each
+                problem is categorized by topic and aligned with the lessons,
+                ensuring targeted and effective practice.
               </p>
               <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
                 Problems range from beginner to advanced levels, helping you
@@ -827,10 +620,6 @@ export default async function Home() {
               <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
                 Regular practice reinforces concepts, improves problem-solving
                 skills, and boosts your confidence for technical interviews.
-              </p>
-              <p className="text-lg text-zinc-500 dark:text-zinc-300">
-                Start practicing and master data structures and algorithms to
-                elevate your coding skills and ace your technical interviews.
               </p>
             </div>
           </article>
@@ -869,11 +658,6 @@ export default async function Home() {
                 New content is added regularly, giving you access to the latest
                 resources and tools for success in technical interviews.
               </p>
-              <p className="text-lg text-zinc-500 dark:text-zinc-300">
-                By tracking your progress and engaging with new content, you can
-                systematically build and reinforce your skills, making steady
-                improvements along the way.
-              </p>
             </div>
           </article>
         </div>
@@ -911,24 +695,25 @@ export default async function Home() {
               <ul role="list" className="space-y-10">
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    Why focus on JavaScript and TypeScript?
+                    Why offer both DSA and Frontend tracks?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Many interview preparation courses focus on Python and often
-                    skip over the built-in data structures of the language. This
-                    platform is tailored specifically for JavaScript and
-                    TypeScript engineers, starting with the basics and covering
-                    everything necessary to tackle technical interviews.
+                    Modern technical interviews often assess both algorithmic
+                    problem-solving and practical frontend development skills.
+                    This dual-track approach ensures you’re prepared for all
+                    types of technical interviews, from DSA challenges to
+                    frontend system design discussions.
                   </p>
                 </li>
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    What kind of content can I expect?
+                    Which track should I choose?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    The platform covers a wide range of topics from built-in
-                    data structures to advanced algorithms. Each lesson includes
-                    practical tips, tricks, and insights into common pitfalls.
+                    You can study both tracks or focus on one based on your
+                    goals. The DSA track is essential for algorithmic
+                    interviews, while the Frontend track is ideal for senior
+                    frontend positions. Complete both to be fully prepared.
                   </p>
                 </li>
                 <li>
@@ -936,9 +721,10 @@ export default async function Home() {
                     How are the lessons structured?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Each lesson begins with foundational concepts and gradually
-                    moves to more complex topics. Lessons contain real-world
-                    coding challenges from popular programming platforms.
+                    Each track begins with foundational concepts and progresses
+                    to advanced topics. The DSA track includes coding
+                    challenges, while the Frontend track combines theoretical
+                    knowledge with practical questions.
                   </p>
                 </li>
               </ul>
@@ -950,22 +736,23 @@ export default async function Home() {
                     What makes this platform unique?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Unlike other platforms, this one focuses on mastering
-                    JavaScript and TypeScript, starting from the basics and
-                    building up to advanced concepts. It provides practical
-                    insights and common pitfalls to ensure you’re well-prepared
-                    for technical interviews.
+                    {APP_NAME} is the only platform offering comprehensive
+                    JavaScript-focused preparation for both algorithmic and
+                    frontend interviews. The content is tailored specifically
+                    for JavaScript and TypeScript engineers, covering everything
+                    from data structures to advanced frontend architecture.
                   </p>
                 </li>
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    How do I get started?
+                    What does Premium unlock?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Simply sign up on the platform and start with the
-                    introductory lessons. Each lesson is designed to build on
-                    the previous one, so it’s recommended to follow them in
-                    order.
+                    Premium gives you complete access to everything on the
+                    platform. This includes both the full DSA and Frontend
+                    tracks, all practice problems, practical questions, and any
+                    future courses or content updates. You’ll have unlimited
+                    access to every feature and resource available.
                   </p>
                 </li>
                 <li>
@@ -973,10 +760,10 @@ export default async function Home() {
                     Are there any prerequisites?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    A basic understanding of JavaScript is helpful, but not
-                    required. The lessons start from the basics and gradually
-                    increase in complexity, making it suitable for both
-                    beginners and experienced developers.
+                    Basic JavaScript knowledge is helpful but not required. The
+                    DSA track starts with fundamentals, while the Frontend track
+                    assumes basic React knowledge. Both tracks provide resources
+                    to help you catch up on prerequisites.
                   </p>
                 </li>
               </ul>
@@ -998,9 +785,9 @@ export default async function Home() {
                     Is there any interactive content?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Yes, each lesson includes real-world coding challenges to
-                    reinforce your learning and ensure you can apply the
-                    concepts in practical scenarios.
+                    Yes, each lesson includes real-world coding challenges or
+                    practical questions to reinforce your learning and ensure
+                    you can apply the concepts in real-life scenarios.
                   </p>
                 </li>
                 <li>
@@ -1008,9 +795,10 @@ export default async function Home() {
                     How can I track my progress?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    The platform includes tools to track your progress through
-                    the lessons and exercises. You can see how far you’ve come
-                    and what areas you need to focus on.
+                    The platform tracks your progress across both tracks
+                    independently. You can monitor your completion status,
+                    practice problem statistics, and identify areas for
+                    improvement in each specialization.
                   </p>
                 </li>
               </ul>
@@ -1052,8 +840,7 @@ export default async function Home() {
                 for teaching, I created this platform to help JavaScript and
                 TypeScript engineers excel in their technical interviews. My
                 goal is to provide comprehensive, practical, and insightful
-                content that empowers you to master data structures and
-                algorithms.
+                content that empowers you to become a better software engineer.
               </p>
               <p className="mt-4 text-lg tracking-tight text-zinc-300">
                 I‘ve worked in various tech industries, where I‘ve honed my

@@ -13,7 +13,7 @@ export const SECTION_ICONS = {
   builtInDataStructuresIcon: (
     <svg
       viewBox="0 0 24 24"
-      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
+      className="h-[60px] w-[60px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -43,7 +43,7 @@ export const SECTION_ICONS = {
       viewBox="0 0 1024 1024"
       width="50"
       height="50"
-      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
+      className="h-[60px] w-[60px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       stroke="none"
@@ -68,7 +68,7 @@ export const SECTION_ICONS = {
       viewBox="0 0 24 24"
       width="50"
       height="50"
-      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
+      className="h-[60px] w-[60px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -93,7 +93,7 @@ export const SECTION_ICONS = {
       viewBox="0 0 256 256"
       width="50"
       height="50"
-      className="h-[60px] w-[60px] sm:h-[75px] sm:w-[75px]"
+      className="h-[60px] w-[60px]"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
