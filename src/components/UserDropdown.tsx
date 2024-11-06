@@ -17,7 +17,7 @@ import { Button } from './Button'
 import { PREMIUM_BUTTON_STYLES } from './PremiumButton'
 
 const DROPDOWN_STYLES = {
-  lifetime: 'inline-block text-lime-500',
+  lifetime: 'inline-block text-lime-500 hover:bg-transparent',
   listItem:
     'block w-full px-4 py-2 text-left hover:bg-zinc-600 disabled:opacity-50',
 }
@@ -189,8 +189,8 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
               <li>
                 <p
                   className={clsx(
-                    DROPDOWN_STYLES.lifetime,
                     DROPDOWN_STYLES.listItem,
+                    DROPDOWN_STYLES.lifetime,
                   )}
                 >
                   Lifetime &#10024;
