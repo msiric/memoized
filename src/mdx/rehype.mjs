@@ -23,7 +23,17 @@ function rehypeShiki() {
 
     const highlighter = await getSingletonHighlighter({
       themes: ['github-dark'],
-      langs: ['json', 'javascript', 'typescript', 'jsx', 'tsx'],
+      langs: [
+        'json',
+        'yaml',
+        'http',
+        'html',
+        'css',
+        'javascript',
+        'typescript',
+        'jsx',
+        'tsx',
+      ],
     })
 
     visit(tree, 'element', (node) => {

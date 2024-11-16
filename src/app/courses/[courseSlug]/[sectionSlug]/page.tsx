@@ -10,7 +10,7 @@ import { JSXElementConstructor } from 'react'
 export default async function Section({
   params,
 }: {
-  params: { sectionSlug: string }
+  params: { sectionSlug: string; courseSlug: string }
 }) {
   const session = await getServerSession(authOptions)
 
@@ -26,7 +26,7 @@ export default async function Section({
   const Page = dynamic(
     () =>
       import(
-        `../../../../${CONTENT_FOLDER}/${section.course.slug}/${params.sectionSlug}/page.mdx`
+        `../../../../${CONTENT_FOLDER}/${params.courseSlug}/${params.sectionSlug}/page.mdx`
       ),
     {
       loading: () => (

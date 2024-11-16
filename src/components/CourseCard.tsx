@@ -11,7 +11,6 @@ import Link from 'next/link'
 import { ComponentType, MouseEvent as ReactMouseEvent, SVGProps } from 'react'
 import { curriculumUI } from '../constants/curriculum'
 import { formatPercentage } from '../utils/helpers'
-import { Coding } from './icons/Coding'
 
 export type CourseProgressProps = {
   percentage: number
@@ -164,7 +163,8 @@ export const CourseCard = ({
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
 
-  const { pattern } = curriculumUI[`/${slug}` as keyof typeof curriculumUI]
+  const { pattern, icon } =
+    curriculumUI[`/${slug}` as keyof typeof curriculumUI]
 
   const lessonProgressPercentage = progress?.lessonProgress?.percentage ?? 0
   const problemProgressPercentage = progress?.problemProgress?.percentage ?? 0
@@ -190,7 +190,7 @@ export const CourseCard = ({
         <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-zinc-900/7.5 group-hover:ring-zinc-900/10 dark:ring-white/10 dark:group-hover:ring-white/20" />
         <div className="relative flex w-full items-center justify-between gap-4 rounded-2xl px-4 pb-4 pt-4 md:pt-12">
           <div>
-            <CourseIcon icon={Coding} />
+            <CourseIcon icon={icon} />
             <h3 className="mt-4 text-xl font-semibold leading-7 text-zinc-900 md:text-2xl dark:text-white">
               <span className="absolute inset-0 rounded-2xl" />
               {title}

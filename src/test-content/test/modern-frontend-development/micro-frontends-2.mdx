@@ -1,0 +1,892 @@
+# **Micro-Frontend Architecture: Advanced Patterns & Integration**
+
+This lesson covers advanced patterns, integration strategies, and real-world implementation challenges in micro-frontend architectures.
+
+## **Cross-Team Collaboration Patterns**
+
+### **Contract Testing**
+
+```typescript
+// Interface contracts between teams
+interface ModuleContract {
+  name: string
+  version: string
+  exports: {
+    [key: string]: {
+      type: 'component' | 'function' | 'object'
+      props?: Record<string, PropDefinition>
+    }
+  }
+}
+
+interface PropDefinition {
+  type: 'string' | 'number' | 'boolean' | 'object' | 'function'
+  required?: boolean
+  description?: string
+}
+
+// Contract validator
+class ContractValidator {
+  validateModule(
+    implementation: any,
+    contract: ModuleContract,
+  ): ValidationResult {
+    const errors: string[] = []
+
+    Object.entries(contract.exports).forEach(([exportName, def]) => {
+      if (!implementation[exportName]) {
+        errors.push(`Missing export: ${exportName}`)
+        return
+      }
+
+      if (def.type === 'component' && def.props) {
+        errors.push(
+          ...this.validateProps(implementation[exportName], def.props),
+        )
+      }
+    })
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    }
+  }
+
+  private validateProps(
+    component: React.ComponentType<any>,
+    contractProps: Record<string, PropDefinition>,
+  ): string[] {
+    const errors: string[] = []
+    const propTypes = component.propTypes || {}
+
+    Object.entries(contractProps).forEach(([propName, def]) => {
+      if (def.required && !propTypes[propName]) {
+        errors.push(`Missing required prop: ${propName}`)
+      }
+    })
+
+    return errors
+  }
+}
+```
+
+### **API Gateway Integration**
+
+```typescript
+// API Gateway for micro-frontends
+class MicroFrontendGateway {
+  private apiMap: Map<string, string> = new Map()
+  private authToken: string | null = null
+
+  registerApi(name: string, baseUrl: string): void {
+    this.apiMap.set(name, baseUrl)
+  }
+
+  setAuthToken(token: string): void {
+    this.authToken = token
+  }
+
+  async request<T>(
+    appName: string,
+    path: string,
+    options: RequestInit = {},
+  ): Promise<T> {
+    const baseUrl = this.apiMap.get(appName)
+    if (!baseUrl) {
+      throw new Error(`Unknown app: ${appName}`)
+    }
+
+    const headers = new Headers(options.headers)
+    if (this.authToken) {
+      headers.set('Authorization', `Bearer ${this.authToken}`)
+    }
+
+    const response = await fetch(`${baseUrl}${path}`, {
+      ...options,
+      headers,
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    return response.json()
+  }
+}
+
+// React hook for API Gateway
+function useGatewayRequest<T>(
+  appName: string,
+  path: string,
+  options: RequestInit = {},
+) {
+  const [data, setData] = useState<T | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await gateway.request<T>(appName, path, options)
+        setData(result)
+      } catch (e) {
+        setError(e as Error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [appName, path])
+
+  return { data, loading, error }
+}
+```
+
+## **State Management Across Micro-Frontends**
+
+### **Distributed State Management**
+
+```typescript
+// Distributed state manager
+class DistributedStateManager {
+  private stores: Map<string, Store> = new Map()
+  private syncChannel: BroadcastChannel
+
+  constructor() {
+    this.syncChannel = new BroadcastChannel('state-sync')
+    this.syncChannel.onmessage = this.handleSync.bind(this)
+  }
+
+  createStore<T>(
+    name: string,
+    initialState: T,
+    options: StoreOptions = {},
+  ): Store<T> {
+    if (this.stores.has(name)) {
+      return this.stores.get(name) as Store<T>
+    }
+
+    const store = new Store(name, initialState, this.syncChannel, options)
+    this.stores.set(name, store)
+    return store
+  }
+
+  private handleSync(event: MessageEvent): void {
+    const { storeName, action, payload } = event.data
+    const store = this.stores.get(storeName)
+    if (store) {
+      store.handleExternalAction(action, payload)
+    }
+  }
+}
+
+class Store<T> {
+  private state: T
+  private subscribers = new Set<(state: T) => void>()
+  private syncChannel: BroadcastChannel
+
+  constructor(
+    private name: string,
+    initialState: T,
+    syncChannel: BroadcastChannel,
+    private options: StoreOptions = {},
+  ) {
+    this.state = initialState
+    this.syncChannel = syncChannel
+  }
+
+  getState(): T {
+    return this.state
+  }
+
+  dispatch(action: string, payload?: any): void {
+    this.handleAction(action, payload)
+    if (this.options.sync !== false) {
+      this.syncChannel.postMessage({
+        storeName: this.name,
+        action,
+        payload,
+      })
+    }
+  }
+
+  subscribe(callback: (state: T) => void): () => void {
+    this.subscribers.add(callback)
+    return () => this.subscribers.delete(callback)
+  }
+
+  handleExternalAction(action: string, payload: any): void {
+    this.handleAction(action, payload)
+  }
+
+  private handleAction(action: string, payload: any): void {
+    const newState = this.reducer(this.state, action, payload)
+    if (newState !== this.state) {
+      this.state = newState
+      this.notifySubscribers()
+    }
+  }
+
+  private notifySubscribers(): void {
+    this.subscribers.forEach((callback) => callback(this.state))
+  }
+
+  private reducer(state: T, action: string, payload: any): T {
+    // Implement your reducer logic here
+    return state
+  }
+}
+```
+
+### **Shared Authentication**
+
+```typescript
+// Authentication manager for micro-frontends
+class AuthManager {
+  private static instance: AuthManager
+  private authState: AuthState | null = null
+  private subscribers = new Set<(state: AuthState | null) => void>()
+
+  static getInstance(): AuthManager {
+    if (!AuthManager.instance) {
+      AuthManager.instance = new AuthManager()
+    }
+    return AuthManager.instance
+  }
+
+  async login(credentials: Credentials): Promise<void> {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      })
+
+      if (!response.ok) {
+        throw new Error('Login failed')
+      }
+
+      const authState = await response.json()
+      this.setAuthState(authState)
+    } catch (error) {
+      this.setAuthState(null)
+      throw error
+    }
+  }
+
+  async logout(): Promise<void> {
+    await fetch('/api/auth/logout')
+    this.setAuthState(null)
+  }
+
+  getAuthState(): AuthState | null {
+    return this.authState
+  }
+
+  subscribe(callback: (state: AuthState | null) => void): () => void {
+    this.subscribers.add(callback)
+    callback(this.authState)
+    return () => this.subscribers.delete(callback)
+  }
+
+  private setAuthState(state: AuthState | null): void {
+    this.authState = state
+    this.subscribers.forEach((callback) => callback(state))
+  }
+}
+
+// React hook for authentication
+function useAuth() {
+  const [authState, setAuthState] = useState<AuthState | null>(null)
+  const auth = useMemo(() => AuthManager.getInstance(), [])
+
+  useEffect(() => {
+    return auth.subscribe(setAuthState)
+  }, [auth])
+
+  return {
+    authState,
+    login: auth.login.bind(auth),
+    logout: auth.logout.bind(auth),
+  }
+}
+```
+
+## **Testing Strategies**
+
+### **Integration Testing**
+
+```typescript
+// Integration test setup
+interface TestContext {
+  container: HTMLElement
+  history: History
+  getByTestId: (id: string) => HTMLElement
+  queryByTestId: (id: string) => HTMLElement | null
+}
+
+const createTestContext = async (): Promise<TestContext> => {
+  const container = document.createElement('div')
+  document.body.appendChild(container)
+
+  const history = createMemoryHistory()
+
+  return {
+    container,
+    history,
+    getByTestId: (id: string) =>
+      container.querySelector(`[data-testid="${id}"]`)!,
+    queryByTestId: (id: string) =>
+      container.querySelector(`[data-testid="${id}"]`),
+  }
+}
+
+// Integration test example
+describe('Micro-frontend Integration', () => {
+  let context: TestContext
+
+  beforeEach(async () => {
+    context = await createTestContext()
+  })
+
+  it('should load and communicate between micro-frontends', async () => {
+    const { container, getByTestId } = context
+
+    // Load micro-frontends
+    await loadRemoteModule('app1', './App1')
+    await loadRemoteModule('app2', './App2')
+
+    // Simulate interaction
+    const button = getByTestId('app1-button')
+    fireEvent.click(button)
+
+    // Wait for communication
+    await waitFor(() => {
+      expect(getByTestId('app2-display')).toHaveTextContent('Updated')
+    })
+  })
+})
+```
+
+### **End-to-End Testing**
+
+```typescript
+// Cypress custom commands
+Cypress.Commands.add('loadMicroFrontend', (name: string, path: string) => {
+  cy.window().then((win) => {
+    return new Promise((resolve) => {
+      const script = win.document.createElement('script')
+      script.src = `http://localhost:${ports[name]}/remoteEntry.js`
+      script.onload = resolve
+      win.document.head.appendChild(script)
+    })
+  })
+})
+
+// E2E test example
+describe('Micro-frontend E2E', () => {
+  beforeEach(() => {
+    cy.visit('/')
+    cy.loadMicroFrontend('dashboard', '/')
+    cy.loadMicroFrontend('profile', '/')
+  })
+
+  it('should navigate between micro-frontends', () => {
+    cy.get('[data-testid="nav-dashboard"]').click()
+    cy.get('[data-testid="dashboard-content"]').should('be.visible')
+
+    cy.get('[data-testid="nav-profile"]').click()
+    cy.get('[data-testid="profile-content"]').should('be.visible')
+  })
+
+  it('should maintain state across micro-frontends', () => {
+    cy.get('[data-testid="update-state"]').click()
+    cy.get('[data-testid="shared-state"]').should('have.text', 'Updated')
+
+    cy.get('[data-testid="nav-profile"]').click()
+    cy.get('[data-testid="profile-state"]').should('have.text', 'Updated')
+  })
+})
+```
+
+## **Deployment Patterns**
+
+### **Progressive Deployment**
+
+```typescript
+// Feature flag manager for deployment
+class FeatureFlagManager {
+  private flags: Map<string, boolean> = new Map()
+  private subscribers = new Set<(flags: Map<string, boolean>) => void>()
+
+  async loadFlags(): Promise<void> {
+    const response = await fetch('/api/feature-flags')
+    const flags = await response.json()
+
+    Object.entries(flags).forEach(([key, value]) => {
+      this.flags.set(key, value as boolean)
+    })
+
+    this.notifySubscribers()
+  }
+
+  isEnabled(flag: string): boolean {
+    return this.flags.get(flag) || false
+  }
+
+  subscribe(callback: (flags: Map<string, boolean>) => void): () => void {
+    this.subscribers.add(callback)
+    callback(this.flags)
+    return () => this.subscribers.delete(callback)
+  }
+
+  private notifySubscribers(): void {
+    this.subscribers.forEach((callback) => callback(this.flags))
+  }
+}
+
+// Deployment manager
+class DeploymentManager {
+  private versions: Map<string, string> = new Map()
+  private loadingStates: Map<string, boolean> = new Map()
+
+  async deployVersion(appName: string, version: string): Promise<void> {
+    this.loadingStates.set(appName, true)
+
+    try {
+      await this.loadRemoteEntry(appName, version)
+      this.versions.set(appName, version)
+    } finally {
+      this.loadingStates.set(appName, false)
+    }
+  }
+
+  private async loadRemoteEntry(
+    appName: string,
+    version: string,
+  ): Promise<void> {
+    const script = document.createElement('script')
+    script.src = `/${appName}/${version}/remoteEntry.js`
+
+    return new Promise((resolve, reject) => {
+      script.onload = resolve
+      script.onerror = reject
+      document.head.appendChild(script)
+    })
+  }
+}
+```
+
+### **Blue-Green Deployment**
+
+```typescript
+// Blue-green deployment configuration
+interface DeploymentConfig {
+  apps: {
+    [key: string]: {
+      blue: string
+      green: string
+      active: 'blue' | 'green'
+    }
+  }
+}
+
+class BlueGreenDeployment {
+  constructor(private config: DeploymentConfig) {}
+
+  getActiveUrl(appName: string): string {
+    const app = this.config.apps[appName]
+    return app[app.active]
+  }
+
+  async switchEnvironment(appName: string): Promise<void> {
+    const app = this.config.apps[appName]
+    const newActive = app.active === 'blue' ? 'green' : 'blue'
+
+    // Verify new environment
+    await this.verifyEnvironment(app[newActive])
+
+    // Switch traffic
+    app.active = newActive
+
+    // Update configuration
+    await this.updateConfig()
+  }
+
+  private async verifyEnvironment(url: string): Promise<void> {
+    const response = await fetch(`${url}/health`)
+    if (!response.ok) {
+      throw new Error('Environment verification failed')
+    }
+  }
+
+  private async updateConfig(): Promise<void> {
+    await fetch('/api/deployment/config', {
+      method: 'PUT',
+      body: JSON.stringify(this.config),
+    })
+  }
+}
+```
+
+## **Performance Optimization**
+
+### **Lazy Loading Strategy**
+
+```typescript
+// Advanced lazy loading manager
+class LazyLoadManager {
+  private loadedModules: Set<string> = new Set();
+  private loading: Map<string, Promise<any>> = new Map();
+  private prefetchQueue: string[] = [];
+
+  async loadModule(
+    scope: string,
+    module: string
+  ): Promise<any> {
+    const key = `${scope}/${module}`;
+      return window[scope].get(module);
+    }
+
+    if (this.loading.has(key)) {
+      return this.loading.get(key);
+    }
+
+    const loadPromise = this.loadRemoteModule(scope, module)
+      .then(module => {
+        this.loadedModules.add(key);
+        this.loading.delete(key);
+        return module;
+      })
+      .catch(error => {
+        this.loading.delete(key);
+        throw error;
+      });
+
+    this.loading.set(key, loadPromise);
+    return loadPromise;
+  }
+
+  prefetch(scope: string, module: string): void {
+    const key = `${scope}/${module}`;
+    if (!this.loadedModules.has(key) && !this.loading.has(key)) {
+      this.prefetchQueue.push(key);
+      this.processPrefetchQueue();
+    }
+  }
+
+  private async processPrefetchQueue(): Promise<void> {
+    if (this.prefetchQueue.length === 0) return;
+
+    // Process in chunks to avoid overwhelming the browser
+    const chunk = this.prefetchQueue.splice(0, 3);
+
+    await Promise.all(
+      chunk.map(async key => {
+        const [scope, module] = key.split('/');
+        try {
+          await this.loadModule(scope, module);
+        } catch (error) {
+          console.warn(`Failed to prefetch ${key}:`, error);
+        }
+      })
+    );
+
+    if (this.prefetchQueue.length > 0) {
+      setTimeout(() => this.processPrefetchQueue(), 100);
+    }
+  }
+}
+
+// Performance monitoring
+class PerformanceMonitor {
+  private metrics: Map<string, Performance[]> = new Map();
+
+  startTracking(moduleId: string): void {
+    performance.mark(`${moduleId}-start`);
+  }
+
+  endTracking(moduleId: string): void {
+    performance.mark(`${moduleId}-end`);
+    performance.measure(
+      moduleId,
+      `${moduleId}-start`,
+      `${moduleId}-end`
+    );
+
+    const entries = performance.getEntriesByName(moduleId);
+    if (!this.metrics.has(moduleId)) {
+      this.metrics.set(moduleId, []);
+    }
+    this.metrics.get(moduleId)!.push(entries[entries.length - 1]);
+  }
+
+  getMetrics(moduleId: string): PerformanceReport {
+    const entries = this.metrics.get(moduleId) || [];
+    const durations = entries.map(entry => entry.duration);
+
+    return {
+      average: durations.reduce((a, b) => a + b, 0) / durations.length,
+      min: Math.min(...durations),
+      max: Math.max(...durations),
+      count: durations.length
+    };
+  }
+}
+Resource Optimization
+typescriptCopy// Shared resource cache
+class ResourceCache {
+  private cache: Map<string, {
+    data: any;
+    timestamp: number;
+    ttl: number;
+  }> = new Map();
+
+  async get<T>(
+    key: string,
+    loader: () => Promise<T>,
+    ttl: number = 5 * 60 * 1000
+  ): Promise<T> {
+    const cached = this.cache.get(key);
+
+    if (cached && Date.now() - cached.timestamp < cached.ttl) {
+      return cached.data;
+    }
+
+    const data = await loader();
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl
+    });
+
+    return data;
+  }
+
+  invalidate(key: string): void {
+    this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+}
+
+// Asset preloader
+class AssetPreloader {
+  private preloaded: Set<string> = new Set();
+
+  preloadAssets(assets: string[]): void {
+    const head = document.head;
+
+    assets.forEach(asset => {
+      if (this.preloaded.has(asset)) return;
+
+      if (asset.endsWith('.js')) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'script';
+        link.href = asset;
+        head.appendChild(link);
+      } else if (asset.endsWith('.css')) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'style';
+        link.href = asset;
+        head.appendChild(link);
+      }
+
+      this.preloaded.add(asset);
+    });
+  }
+}
+CI/CD Integration
+Build Pipeline
+typescriptCopy// Build configuration manager
+class BuildManager {
+  private configs: Map<string, BuildConfig> = new Map();
+
+  addConfig(appName: string, config: BuildConfig): void {
+    this.configs.set(appName, config);
+  }
+
+  async buildAll(): Promise<BuildResult[]> {
+    const results: BuildResult[] = [];
+
+    for (const [appName, config] of this.configs) {
+      try {
+        const result = await this.buildApp(appName, config);
+        results.push(result);
+      } catch (error) {
+        results.push({
+          appName,
+          success: false,
+          error: error as Error
+        });
+      }
+    }
+
+    return results;
+  }
+
+  private async buildApp(
+    appName: string,
+    config: BuildConfig
+  ): Promise<BuildResult> {
+    // Validate dependencies
+    await this.validateDependencies(config.dependencies);
+
+    // Build process
+    await this.runBuild(appName, config);
+
+    // Run tests
+    await this.runTests(appName);
+
+    return {
+      appName,
+      success: true,
+      artifacts: await this.collectArtifacts(appName)
+    };
+  }
+
+  private async validateDependencies(
+    dependencies: Record<string, string>
+  ): Promise<void> {
+    // Implementation of dependency validation
+  }
+
+  private async runBuild(
+    appName: string,
+    config: BuildConfig
+  ): Promise<void> {
+    // Implementation of build process
+  }
+
+  private async runTests(appName: string): Promise<void> {
+    // Implementation of test execution
+  }
+
+  private async collectArtifacts(appName: string): Promise<string[]> {
+    // Implementation of artifact collection
+  }
+}
+Deployment Pipeline
+typescriptCopy// Deployment orchestrator
+class DeploymentOrchestrator {
+  private deployments: Map<string, DeploymentConfig> = new Map();
+
+  async deploy(
+    appName: string,
+    version: string,
+    config: DeploymentConfig
+  ): Promise<DeploymentResult> {
+    try {
+      // Pre-deployment checks
+      await this.runPreflightChecks(appName, version);
+
+      // Deploy new version
+      await this.deployVersion(appName, version, config);
+
+      // Health checks
+      await this.runHealthChecks(appName, version);
+
+      // Traffic shifting
+      await this.shiftTraffic(appName, version);
+
+      return {
+        success: true,
+        version,
+        timestamp: new Date()
+      };
+    } catch (error) {
+      // Rollback on failure
+      await this.rollback(appName, version);
+      throw error;
+    }
+  }
+
+  private async runPreflightChecks(
+    appName: string,
+    version: string
+  ): Promise<void> {
+    // Implementation of preflight checks
+  }
+
+  private async deployVersion(
+    appName: string,
+    version: string,
+    config: DeploymentConfig
+  ): Promise<void> {
+    // Implementation of version deployment
+  }
+
+  private async runHealthChecks(
+    appName: string,
+    version: string
+  ): Promise<void> {
+    // Implementation of health checks
+  }
+
+  private async shiftTraffic(
+    appName: string,
+    version: string
+  ): Promise<void> {
+    // Implementation of traffic shifting
+  }
+
+  private async rollback(
+    appName: string,
+    version: string
+  ): Promise<void> {
+    // Implementation of rollback process
+  }
+}
+Interview Questions
+
+"How would you handle versioning and backward compatibility in a micro-frontend architecture?"
+"What strategies would you use to optimize performance in a micro-frontend system?"
+"How would you implement progressive deployment of micro-frontends?"
+"Explain your approach to testing micro-frontend integrations."
+"How would you handle shared authentication across micro-frontends?"
+"What strategies would you use for error handling and monitoring in a micro-frontend system?"
+
+Practice Problems
+
+Implement a blue-green deployment system for micro-frontends
+Create a performance monitoring system for micro-frontend loading
+Build a contract testing system for micro-frontend interfaces
+Implement a distributed state management system
+
+Additional Resources
+
+Micro-Frontend Testing Strategies
+Module Federation Advanced Concepts
+Deployment Patterns for Micro-Frontends
+
+Would you like me to:
+
+Add more practical examples?
+Include more interview questions?
+Add more implementation patterns?
+Create more practice problems?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```

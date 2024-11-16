@@ -1,0 +1,810 @@
+# Advanced Types in TypeScript
+
+## Building The Mental Model
+
+### Types as Transformations
+
+Think of advanced TypeScript types as a series of transformations, similar to data pipelines:
+
+- Input types go through type-level operations
+- Each operation produces a new type
+- The final type represents our desired shape
+
+For example:
+
+```typescript
+// Simple transformation
+type User = { name: string; age: number }
+type UserKeys = keyof User // 'name' | 'age'
+
+// Complex transformation
+type Nullable<T> = {
+  [K in keyof T]: T[K] | null
+}
+type NullableUser = Nullable<User> // { name: string | null; age: number | null }
+```
+
+### Types as Compile-Time Functions
+
+Advanced types work like functions that operate on types rather than values:
+
+- They take type parameters (inputs)
+- They perform operations
+- They return new types (outputs)
+
+## Conditional Types
+
+### Understanding Conditional Types
+
+Conditional types are like if statements for types. They follow the pattern:
+
+```typescript
+T extends U ? X : Y
+```
+
+Think of it as asking: "Is T assignable to U? If yes, use X; if no, use Y"
+
+```typescript
+// Simple example
+type IsString<T> = T extends string ? true : false
+
+// Results:
+type A = IsString<'hello'> // true
+type B = IsString<42> // false
+type C = IsString<string> // true
+type D = IsString<string | number> // false
+```
+
+### Advanced Conditional Types
+
+1. **Distributive Conditionals**
+
+```typescript
+type ToArray<T> = T extends any ? T[] : never
+
+// With union type:
+type StringOrNumber = string | number
+type Result = ToArray<StringOrNumber> // string[] | number[]
+
+// This is equivalent to:
+// ToArray<string> | ToArray<number>
+```
+
+2. **Inferring Within Conditionals**
+
+```typescript
+// Extract return type of a function
+type ReturnTypeOf<T> = T extends (...args: any[]) => infer R ? R : never
+
+// Examples:
+function greet(name: string) {
+  return `Hello, ${name}!`
+}
+
+type GreetReturn = ReturnTypeOf<typeof greet> // string
+
+// Extract array element type
+type ElementType<T> = T extends Array<infer E> ? E : never
+type NumberArrayElement = ElementType<number[]> // number
+```
+
+3. **Chaining Conditionals**
+
+```typescript
+type TypeName<T> = T extends string
+  ? 'string'
+  : T extends number
+    ? 'number'
+    : T extends boolean
+      ? 'boolean'
+      : T extends undefined
+        ? 'undefined'
+        : T extends Function
+          ? 'function'
+          : 'object'
+
+// Usage:
+type T0 = TypeName<string> // "string"
+type T1 = TypeName<number[]> // "object"
+type T2 = TypeName<() => void> // "function"
+```
+
+## Mapped Types
+
+### Understanding Mapped Types
+
+Mapped types transform each property in a type:
+
+- They iterate over keys using `keyof`
+- They can modify property types
+- They can modify property modifiers (readonly, optional)
+
+```typescript
+// Basic mapped type
+type Optional<T> = {
+  [K in keyof T]?: T[K]
+}
+
+// Example usage:
+interface User {
+  name: string
+  age: number
+}
+
+type OptionalUser = Optional<User>
+// Equivalent to:
+// {
+//     name?: string;
+//     age?: number;
+// }
+```
+
+### Advanced Mapped Type Patterns
+
+1. **Modifying Property Modifiers**
+
+```typescript
+// Make all properties readonly
+type Immutable<T> = {
+  readonly [K in keyof T]: T[K]
+}
+
+// Remove readonly
+type Mutable<T> = {
+  -readonly [K in keyof T]: T[K]
+}
+
+// Remove optional
+type Required<T> = {
+  [K in keyof T]-?: T[K]
+}
+
+// Example:
+interface Config {
+  readonly endpoint: string
+  timeout?: number
+}
+
+type MutableConfig = Mutable<Config> // both mutable
+type RequiredConfig = Required<Config> // both required
+```
+
+2. **Filtering Properties**
+
+```typescript
+// Keep only properties of specific type
+type PickType<T, U> = {
+  [K in keyof T as T[K] extends U ? K : never]: T[K]
+}
+
+interface Mixed {
+  name: string
+  age: number
+  isActive: boolean
+  meta: object
+}
+
+type StringProps = PickType<Mixed, string> // { name: string }
+```
+
+3. **Transforming Property Names**
+
+```typescript
+// Convert to getter methods
+type Getters<T> = {
+  [K in keyof T as `get${Capitalize<string & K>}`]: () => T[K]
+}
+
+interface Person {
+  name: string
+  age: number
+}
+
+type PersonGetters = Getters<Person>
+// {
+//     getName: () => string;
+//     getAge: () => number;
+// }
+```
+
+### Combining Patterns
+
+```typescript
+// Deep partial implementation
+type DeepPartial<T> = T extends object
+  ? {
+      [K in keyof T]?: DeepPartial<T[K]>
+    }
+  : T
+
+// Recursive readonly
+type DeepReadonly<T> = T extends object
+  ? {
+      readonly [K in keyof T]: DeepReadonly<T[K]>
+    }
+  : T
+
+// Complex example
+interface NestedConfig {
+  api: {
+    endpoint: string
+    timeout: number
+    retries: {
+      count: number
+      delay: number
+    }
+  }
+  features: {
+    logging: boolean
+    cache: {
+      enabled: boolean
+      duration: number
+    }
+  }
+}
+
+// All properties become optional recursively
+type PartialConfig = DeepPartial<NestedConfig>
+
+// All properties become readonly recursively
+type ReadonlyConfig = DeepReadonly<NestedConfig>
+```
+
+# Template Literal Types & Advanced Patterns
+
+## Understanding Template Literal Types
+
+### The Mental Model
+
+Template literal types operate on string literals, like template strings in JavaScript but at the type level:
+
+- They combine and manipulate strings
+- They can use unions within the template
+- They can transform text using built-in helpers
+
+```typescript
+// Basic string manipulation
+type Greeting = `Hello, ${string}!`
+
+// Union in template literals
+type Alignment = 'left' | 'right' | 'center'
+type Margin = `margin-${Alignment}` // 'margin-left' | 'margin-right' | 'margin-center'
+```
+
+### Advanced Template Patterns
+
+1. **Event Handler Types**
+
+```typescript
+type EventType = 'click' | 'focus' | 'blur' | 'mouseover'
+
+// Creates: 'onClick' | 'onFocus' | 'onBlur' | 'onMouseover'
+type EventHandler = `on${Capitalize<EventType>}`
+
+// Full handler type
+type HandlerType<T extends string> = {
+  [K in EventType as `on${Capitalize<K>}`]: (event: `${T}Event`) => void
+}
+
+// Usage
+type ButtonEvents = HandlerType<'Button'>
+// {
+//     onClick: (event: 'ButtonEvent') => void;
+//     onFocus: (event: 'ButtonEvent') => void;
+//     ...
+// }
+```
+
+2. **CSS Property Generator**
+
+```typescript
+type CSSValue = number | string
+type Unit = 'px' | 'em' | 'rem' | '%'
+
+type CSSProperty<T extends string> = T extends string
+  ? `${T}${Unit}` | T
+  : never
+
+type Spacing = 'margin' | 'padding'
+type Direction = 'top' | 'right' | 'bottom' | 'left'
+
+type SpacingProperty = `${Spacing}-${Direction}`
+// 'margin-top' | 'margin-right' | ... | 'padding-left'
+
+// Usage
+interface Styles {
+  [K in SpacingProperty]: CSSProperty<string>
+}
+```
+
+3. **API Route Builder**
+
+```typescript
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
+type Version = 'v1' | 'v2'
+type Resource = 'users' | 'posts' | 'comments'
+
+type APIRoute = `/${Version}/${Resource}`
+type APIEndpoint = `${HTTPMethod} ${APIRoute}`
+
+// Creates types like:
+// 'GET /v1/users'
+// 'POST /v2/posts'
+// etc.
+
+// Usage in router
+type RouterConfig = {
+  [K in APIEndpoint]: {
+    handler: (req: Request) => Promise<Response>
+    auth: boolean
+  }
+}
+```
+
+## Real-World Advanced Patterns
+
+### Type-Safe Event Emitter
+
+```typescript
+type EventMap = {
+  userLoggedIn: { userId: string; timestamp: Date }
+  userLoggedOut: { userId: string }
+  error: { code: number; message: string }
+}
+
+type EventKey = keyof EventMap
+type EventPayload<K extends EventKey> = EventMap[K]
+
+class TypedEventEmitter {
+  private listeners = new Map<EventKey, Set<(payload: any) => void>>()
+
+  on<K extends EventKey>(
+    event: K,
+    callback: (payload: EventPayload<K>) => void,
+  ) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set())
+    }
+    this.listeners.get(event)!.add(callback)
+
+    // Return unsubscribe function
+    return () => {
+      this.listeners.get(event)?.delete(callback)
+    }
+  }
+
+  emit<K extends EventKey>(event: K, payload: EventPayload<K>) {
+    this.listeners.get(event)?.forEach((callback) => {
+      callback(payload)
+    })
+  }
+
+  once<K extends EventKey>(
+    event: K,
+    callback: (payload: EventPayload<K>) => void,
+  ) {
+    const unsubscribe = this.on(event, (payload) => {
+      callback(payload)
+      unsubscribe()
+    })
+  }
+}
+```
+
+### Deep Partial Type System
+
+```typescript
+// Advanced Deep Partial with array support
+type DeepPartialArray<T> = Array<DeepPartial<T>>
+
+type DeepPartial<T> =
+  T extends Array<infer U>
+    ? DeepPartialArray<U>
+    : T extends object
+      ? { [K in keyof T]?: DeepPartial<T[K]> }
+      : T
+
+// Usage example
+interface NestedStructure {
+  basic: string
+  nested: {
+    array: number[]
+    object: {
+      field: boolean
+    }
+  }
+  items: Array<{
+    id: number
+    data: string
+  }>
+}
+
+// All properties become optional recursively, including array elements
+type PartialNested = DeepPartial<NestedStructure>
+
+const partial: PartialNested = {
+  nested: {
+    array: [1, 2], // Can be partial array
+    object: {}, // Can be empty
+  },
+  items: [
+    {
+      // Can have partial array elements
+      id: 1,
+      // data can be omitted
+    },
+  ],
+}
+```
+
+### String Manipulation Type System
+
+```typescript
+// String case transformations
+type Cases<S extends string> = {
+  original: S
+  camelCase: CamelCase<S>
+  snakeCase: SnakeCase<S>
+  kebabCase: KebabCase<S>
+}
+
+type CamelCase<S extends string> = S extends `${infer F}_${infer R}`
+  ? `${Lowercase<F>}${Capitalize<CamelCase<R>>}`
+  : Lowercase<S>
+
+type SnakeCase<S extends string> = S extends `${infer F}${infer R}`
+  ? F extends Uppercase<F>
+    ? `_${Lowercase<F>}${SnakeCase<R>}`
+    : `${F}${SnakeCase<R>}`
+  : S
+
+type KebabCase<S extends string> = S extends `${infer F}${infer R}`
+  ? F extends Uppercase<F>
+    ? `-${Lowercase<F>}${KebabCase<R>}`
+    : `${F}${KebabCase<R>}`
+  : S
+
+// String manipulation utilities
+type StringManipulation<S extends string> = {
+  append: <T extends string>(suffix: T) => `${S}${T}`
+  prepend: <T extends string>(prefix: T) => `${T}${S}`
+  replace: <Find extends string, Replace extends string>(
+    searchValue: Find,
+    replaceValue: Replace,
+  ) => S extends `${infer Prefix}${Find}${infer Suffix}`
+    ? `${Prefix}${Replace}${Suffix}`
+    : S
+}
+
+// Usage example
+type UserFields = 'firstName' | 'lastName' | 'emailAddress'
+
+type APIFields = {
+  [K in UserFields as SnakeCase<K>]: string
+}
+// {
+//     first_name: string;
+//     last_name: string;
+//     email_address: string;
+// }
+```
+
+# Practice Problems and Solutions
+
+## Building a Type-Safe Form System
+
+### The Problem
+
+Create a type-safe form system that supports:
+
+- Field validation
+- Nested fields
+- Custom error messages
+- Type inference for form values
+
+### The Solution
+
+```typescript
+// Core types for the form system
+type ValidationRule<T> = {
+  validate: (value: T) => boolean
+  message: string
+}
+
+type FieldDefinition<T> = {
+  initialValue: T
+  rules?: ValidationRule<T>[]
+  transform?: (value: string) => T
+}
+
+type FormConfig<T extends Record<string, any>> = {
+  [K in keyof T]: FieldDefinition<T[K]>
+}
+
+// Form implementation
+class TypedForm<T extends Record<string, any>> {
+  private values: T
+  private errors: Partial<Record<keyof T, string>> = {}
+
+  constructor(private config: FormConfig<T>) {
+    this.values = Object.keys(config).reduce((acc, key) => {
+      acc[key] = config[key].initialValue
+      return acc
+    }, {} as T)
+  }
+
+  setValue<K extends keyof T>(field: K, value: T[K]) {
+    this.values[field] = value
+    this.validateField(field)
+  }
+
+  private validateField<K extends keyof T>(field: K) {
+    const fieldConfig = this.config[field]
+    const value = this.values[field]
+
+    if (fieldConfig.rules) {
+      const error = fieldConfig.rules.find((rule) => !rule.validate(value))
+
+      if (error) {
+        this.errors[field] = error.message
+      } else {
+        delete this.errors[field]
+      }
+    }
+  }
+
+  isValid(): boolean {
+    return Object.keys(this.errors).length === 0
+  }
+
+  getValues(): T {
+    return { ...this.values }
+  }
+
+  getErrors(): Readonly<typeof this.errors> {
+    return this.errors
+  }
+}
+
+// Usage example
+interface UserForm {
+  name: string
+  age: number
+  email: string
+  preferences: {
+    newsletter: boolean
+    theme: 'light' | 'dark'
+  }
+}
+
+const userForm = new TypedForm<UserForm>({
+  name: {
+    initialValue: '',
+    rules: [
+      {
+        validate: (v) => v.length >= 2,
+        message: 'Name must be at least 2 characters',
+      },
+    ],
+  },
+  age: {
+    initialValue: 0,
+    transform: (v) => parseInt(v, 10),
+    rules: [
+      {
+        validate: (v) => v >= 18,
+        message: 'Must be 18 or older',
+      },
+    ],
+  },
+  email: {
+    initialValue: '',
+    rules: [
+      {
+        validate: (v) => /^[^@]+@[^@]+\.[^@]+$/.test(v),
+        message: 'Invalid email format',
+      },
+    ],
+  },
+  preferences: {
+    initialValue: {
+      newsletter: false,
+      theme: 'light' as const,
+    },
+  },
+})
+```
+
+## Building a Type-Safe API Client
+
+### The Problem
+
+Create a type-safe API client that supports:
+
+- Type inference for endpoints
+- Request/response type validation
+- Error handling
+- Authentication
+
+### The Solution
+
+```typescript
+// API types
+type EndpointDefinition<TParams = any, TResponse = any, TError = any> = {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  params?: TParams
+  response: TResponse
+  error: TError
+}
+
+type APIDefinition = {
+  'users/get': EndpointDefinition<
+    { id: number },
+    { name: string; email: string },
+    { code: number; message: string }
+  >
+  'users/create': EndpointDefinition<
+    { name: string; email: string },
+    { id: number },
+    { code: number; message: string }
+  >
+}
+
+// Client implementation
+class TypedAPIClient {
+  constructor(private baseUrl: string) {}
+
+  async request<TEndpoint extends keyof APIDefinition>(
+    endpoint: TEndpoint,
+    params: APIDefinition[TEndpoint]['params'],
+  ): Promise<APIDefinition[TEndpoint]['response']> {
+    const definition = this.getEndpointDefinition(endpoint)
+
+    try {
+      const response = await fetch(`${this.baseUrl}/${endpoint}`, {
+        method: definition.method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: definition.method !== 'GET' ? JSON.stringify(params) : undefined,
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw this.createError(error)
+      }
+
+      return response.json()
+    } catch (error) {
+      throw this.createError(error)
+    }
+  }
+
+  private getEndpointDefinition<TEndpoint extends keyof APIDefinition>(
+    endpoint: TEndpoint,
+  ): EndpointDefinition {
+    // In real implementation, would load from configuration
+    return {} as any
+  }
+
+  private createError(error: unknown): Error {
+    if (error instanceof Error) {
+      return error
+    }
+    return new Error('Unknown error occurred')
+  }
+}
+
+// Usage
+const api = new TypedAPIClient('https://api.example.com')
+
+// TypeScript knows the exact types!
+const user = await api.request('users/get', { id: 1 })
+// user is { name: string; email: string }
+```
+
+## String Manipulation Type System
+
+### The Problem
+
+Create a type system for complex string manipulations that supports:
+
+- Case transformations
+- Template generation
+- Path parsing
+- Query string typing
+
+### The Solution
+
+```typescript
+// String case transformations
+type StringCases<S extends string> = {
+  original: S
+  camel: ToCamelCase<S>
+  snake: ToSnakeCase<S>
+  kebab: ToKebabCase<S>
+  pascal: ToPascalCase<S>
+}
+
+// URL path parser
+type ParsePath<T extends string> = T extends `${infer Start}/${infer Rest}`
+  ? [Start, ...ParsePath<Rest>]
+  : [T]
+
+// Query string parser
+type ParseQueryString<T extends string> =
+  T extends `${infer Param}&${infer Rest}`
+    ? MergeParams<ParseParam<Param>, ParseQueryString<Rest>>
+    : ParseParam<T>
+
+type ParseParam<T extends string> = T extends `${infer Key}=${infer Value}`
+  ? { [K in Key]: Value }
+  : { [K in T]: true }
+
+type MergeParams<
+  T extends Record<string, any>,
+  U extends Record<string, any>,
+> = {
+  [K in keyof T | keyof U]: K extends keyof T
+    ? K extends keyof U
+      ? T[K] | U[K]
+      : T[K]
+    : K extends keyof U
+      ? U[K]
+      : never
+}
+
+// Path parameter extractor
+type ExtractPathParams<T extends string> =
+  T extends `${infer Start}:${infer Param}/${infer Rest}`
+    ? { [K in Param]: string } & ExtractPathParams<Rest>
+    : T extends `${infer Start}:${infer Param}`
+      ? { [K in Param]: string }
+      : {}
+
+// Usage examples
+type Paths = ParsePath<'api/v1/users/:id'>
+// ["api", "v1", "users", ":id"]
+
+type Params = ExtractPathParams<'users/:id/posts/:postId'>
+// { id: string; postId: string }
+
+type Query = ParseQueryString<'name=john&age=25'>
+// { name: "john"; age: "25" }
+
+// Practical application
+type RouteDefinition<TPath extends string, TMethod extends string> = {
+  path: TPath
+  method: TMethod
+  params: ExtractPathParams<TPath>
+  query?: Record<string, string>
+}
+
+function createRoute<TPath extends string, TMethod extends string>(
+  definition: RouteDefinition<TPath, TMethod>,
+) {
+  return {
+    execute: (
+      params: ExtractPathParams<TPath>,
+      query?: Record<string, string>,
+    ) => {
+      // Implementation
+    },
+  }
+}
+
+// Usage
+const userRoute = createRoute({
+  path: 'users/:id/posts/:postId',
+  method: 'GET',
+})
+
+userRoute.execute({ id: '123', postId: '456' }, { include: 'comments' })
+```
+
+These practice problems demonstrate how to use advanced TypeScript types to create robust, type-safe systems. The solutions show:
+
+1. How to combine multiple type features
+2. Real-world applications of advanced types
+3. Type inference and validation patterns
+4. Error handling with type safety

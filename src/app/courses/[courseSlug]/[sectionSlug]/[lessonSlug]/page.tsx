@@ -15,7 +15,7 @@ import { JSXElementConstructor } from 'react'
 export default async function Lesson({
   params,
 }: {
-  params: { lessonSlug: string }
+  params: { lessonSlug: string; sectionSlug: string; courseSlug: string }
 }) {
   const session = await getServerSession(authOptions)
 
@@ -42,7 +42,7 @@ export default async function Lesson({
   const Page = dynamic(
     () =>
       import(
-        `../../../../../${CONTENT_FOLDER}/${lesson.section.course.slug}/${lesson.section.slug}/${params.lessonSlug}/page.mdx`
+        `../../../../../${CONTENT_FOLDER}/${params.courseSlug}/${params.sectionSlug}/${params.lessonSlug}/page.mdx`
       ),
     {
       loading: () => (

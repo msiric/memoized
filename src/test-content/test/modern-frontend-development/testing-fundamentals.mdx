@@ -1,0 +1,544 @@
+# **Testing Fundamentals & Unit Testing**
+
+This lesson covers core testing concepts, unit testing strategies, and implementation patterns for React applications.
+
+## **Testing Setup & Configuration**
+
+### **Test Runner Setup**
+
+```typescript
+// jest.config.ts
+const config = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(css|less|scss)$': 'identity-obj-proxy',
+  },
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+}
+
+// setupTests.ts
+import '@testing-library/jest-dom'
+import { configure } from '@testing-library/react'
+
+configure({
+  testIdAttribute: 'data-testid',
+})
+
+// Custom matchers
+expect.extend({
+  toBeWithinRange(received: number, floor: number, ceiling: number) {
+    const pass = received >= floor && received <= ceiling
+    return {
+      message: () =>
+        `expected ${received} to be within range ${floor} - ${ceiling}`,
+      pass,
+    }
+  },
+})
+```
+
+### **Test Utils**
+
+```typescript
+// test-utils.tsx
+import { render, RenderOptions } from '@testing-library/react';
+import { ThemeProvider } from './ThemeProvider';
+import { store } from './store';
+import { Provider } from 'react-redux';
+
+const AllProviders: React.FC = ({ children }) => {
+  return (
+    <Provider store={store}>
+      <ThemeProvider>
+        {children}
+      </ThemeProvider>
+    </Provider>
+  );
+};
+
+const customRender = (
+  ui: React.ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) =>
+  render(ui, { wrapper: AllProviders, ...options });
+
+// Re-export everything
+export * from '@testing-library/react';
+export { customRender as render };
+```
+
+## **Unit Testing Components**
+
+### **Component Testing Patterns**
+
+```typescript
+// Button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders with correct text', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
+  });
+
+  it('handles click events', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
+
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies variant styles correctly', () => {
+    const { rerender } = render(
+      <Button variant="primary">Button</Button>
+    );
+
+    expect(screen.getByText('Button'))
+      .toHaveClass('button--primary');
+
+    rerender(<Button variant="secondary">Button</Button>);
+    expect(screen.getByText('Button'))
+      .toHaveClass('button--secondary');
+  });
+
+  it('handles loading state', () => {
+    render(<Button loading>Submit</Button>);
+
+    expect(screen.getByRole('button')).toBeDisabled();
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+    expect(screen.getByText('Submit')).toHaveStyle({ opacity: '0.7' });
+  });
+});
+
+// Form.test.tsx
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Form } from './Form';
+
+describe('Form', () => {
+  const mockSubmit = jest.fn();
+
+  beforeEach(() => {
+    mockSubmit.mockClear();
+  });
+
+  it('validates required fields', async () => {
+    render(<Form onSubmit={mockSubmit} />);
+
+    fireEvent.click(screen.getByText('Submit'));
+
+    expect(await screen.findByText('Email is required'))
+      .toBeInTheDocument();
+    expect(mockSubmit).not.toHaveBeenCalled();
+  });
+
+  it('handles form submission', async () => {
+    render(<Form onSubmit={mockSubmit} />);
+
+    await userEvent.type(
+      screen.getByLabelText('Email'),
+      'test@example.com'
+    );
+    await userEvent.type(
+      screen.getByLabelText('Password'),
+      'password123'
+    );
+
+    fireEvent.click(screen.getByText('Submit'));
+
+    await waitFor(() => {
+      expect(mockSubmit).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        password: 'password123'
+      });
+    });
+  });
+});
+```
+
+### **Snapshot Testing**
+
+```typescript
+// Card.test.tsx
+import { render } from '@testing-library/react';
+import { Card } from './Card';
+
+describe('Card', () => {
+  it('matches snapshot', () => {
+    const { container } = render(
+      <Card
+        title="Test Card"
+        description="This is a test"
+        image="test.jpg"
+      />
+    );
+
+    expect(container).toMatchSnapshot();
+  });
+
+  it('matches snapshot with different variants', () => {
+    const variants = ['default', 'elevated', 'outlined'];
+
+    variants.forEach(variant => {
+      const { container } = render(
+        <Card
+          variant={variant}
+          title="Test Card"
+        />
+      );
+
+      expect(container).toMatchSnapshot(
+        `Card - ${variant} variant`
+      );
+    });
+  });
+});
+
+// Custom snapshot serializer
+expect.addSnapshotSerializer({
+  test: (val) => val && val.type === 'Card',
+  print: (val, serialize) => {
+    const { children, ...props } = val.props;
+    return `
+      <Card
+        ${Object.entries(props)
+          .map(([key, value]) => `${key}="${value}"`)
+          .join('\n        ')}
+      >
+        ${serialize(children)}
+      </Card>
+    `;
+  }
+});
+```
+
+## **Testing Hooks**
+
+### **Custom Hook Testing**
+
+```typescript
+// useCounter.test.ts
+import { renderHook, act } from '@testing-library/react-hooks'
+import { useCounter } from './useCounter'
+
+describe('useCounter', () => {
+  it('initializes with default value', () => {
+    const { result } = renderHook(() => useCounter())
+    expect(result.current.count).toBe(0)
+  })
+
+  it('increments counter', () => {
+    const { result } = renderHook(() => useCounter(0))
+
+    act(() => {
+      result.current.increment()
+    })
+
+    expect(result.current.count).toBe(1)
+  })
+
+  it('updates with new initial value', () => {
+    const { result, rerender } = renderHook(
+      ({ initial }) => useCounter(initial),
+      { initialProps: { initial: 0 } },
+    )
+
+    rerender({ initial: 10 })
+    expect(result.current.count).toBe(10)
+  })
+
+  it('handles async updates', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useCounter(0))
+
+    act(() => {
+      result.current.incrementAsync()
+    })
+
+    await waitForNextUpdate()
+    expect(result.current.count).toBe(1)
+  })
+})
+
+// useApi.test.ts
+import { renderHook } from '@testing-library/react-hooks'
+import { useApi } from './useApi'
+
+describe('useApi', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('fetches data successfully', async () => {
+    const mockData = { id: 1, name: 'Test' }
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockData,
+    })
+
+    const { result, waitForNextUpdate } = renderHook(() => useApi('test-url'))
+
+    expect(result.current.loading).toBe(true)
+    await waitForNextUpdate()
+
+    expect(result.current.data).toEqual(mockData)
+    expect(result.current.loading).toBe(false)
+    expect(result.current.error).toBeNull()
+  })
+
+  it('handles error states', async () => {
+    const error = new Error('API Error')
+    global.fetch = jest.fn().mockRejectedValueOnce(error)
+
+    const { result, waitForNextUpdate } = renderHook(() => useApi('test-url'))
+
+    await waitForNextUpdate()
+
+    expect(result.current.error).toBe(error)
+    expect(result.current.loading).toBe(false)
+    expect(result.current.data).toBeNull()
+  })
+})
+```
+
+## **Mocking Patterns**
+
+### **Service Mocking**
+
+```typescript
+// apiService.mock.ts
+export const mockApiService = {
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  delete: jest.fn()
+};
+
+jest.mock('./apiService', () => mockApiService);
+
+// Component test with mocked service
+describe('UserProfile', () => {
+  beforeEach(() => {
+    mockApiService.get.mockClear();
+  });
+
+  it('fetches user data', async () => {
+    const mockUser = { id: 1, name: 'John' };
+    mockApiService.get.mockResolvedValueOnce(mockUser);
+
+    render(<UserProfile userId={1} />);
+
+    expect(mockApiService.get)
+      .toHaveBeenCalledWith('/users/1');
+
+    await waitFor(() => {
+      expect(screen.getByText('John')).toBeInTheDocument();
+    });
+  });
+});
+
+// Module mocking
+jest.mock('./utils', () => ({
+  formatDate: jest.fn(date => date.toISOString()),
+  calculateTotal: jest.fn(items => items.length)
+}));
+
+// Timer mocking
+describe('Timer', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('updates every second', () => {
+    render(<Timer />);
+    expect(screen.getByText('0')).toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByText('1')).toBeInTheDocument();
+  });
+});
+```
+
+### **Context Mocking**
+
+```typescript
+// context-mock.tsx
+const MockThemeContext = React.createContext(null);
+
+export const MockThemeProvider: React.FC<{
+  theme?: Theme;
+  children: React.ReactNode;
+}> = ({ theme = defaultTheme, children }) => (
+  <MockThemeContext.Provider value={theme}>
+    {children}
+  </MockThemeContext.Provider>
+);
+
+// Testing with mocked context
+describe('ThemedComponent', () => {
+  it('renders with theme', () => {
+    const mockTheme = {
+      colors: {
+        primary: 'red'
+      }
+    };
+
+    render(
+      <MockThemeProvider theme={mockTheme}>
+        <ThemedComponent />
+      </MockThemeProvider>
+    );
+
+    expect(screen.getByTestId('themed-element'))
+      .toHaveStyle({ color: 'red' });
+  });
+});
+```
+
+## **Testing Utilities and Helpers**
+
+### **Custom Matchers**
+
+```typescript
+// custom-matchers.ts
+import { expect } from '@jest/globals'
+
+expect.extend({
+  toHaveBeenCalledOnceWith(received: jest.Mock, ...expected: any[]) {
+    const pass =
+      received.mock.calls.length === 1 &&
+      JSON.stringify(received.mock.calls[0]) === JSON.stringify(expected)
+
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected ${received.getMockName()} not to have been called once with ${expected}`
+          : `expected ${received.getMockName()} to have been called once with ${expected}`,
+    }
+  },
+
+  toBeWithinRange(received: number, floor: number, ceiling: number) {
+    const pass = received >= floor && received <= ceiling
+    return {
+      pass,
+      message: () =>
+        pass
+          ? `expected ${received} not to be within range ${floor} - ${ceiling}`
+          : `expected ${received} to be within range ${floor} - ${ceiling}`,
+    }
+  },
+})
+
+// Test data generators
+const createMockUser = (override = {}) => ({
+  id: Math.random().toString(36).substr(2, 9),
+  name: 'Test User',
+  email: 'test@example.com',
+  ...override,
+})
+
+const createMockPost = (override = {}) => ({
+  id: Math.random().toString(36).substr(2, 9),
+  title: 'Test Post',
+  content: 'Test Content',
+  ...override,
+})
+```
+
+## **Performance Testing**
+
+### **Component Performance Tests**
+
+```typescript
+// performance.test.tsx
+import { render, screen } from '@testing-library/react';
+import { measurePerformance } from './test-utils';
+
+describe('List Performance', () => {
+  it('renders large lists efficiently', async () => {
+    const items = Array.from({ length: 1000 }, (_, i) => ({
+      id: i,
+      text: `Item ${i}`
+    }));
+
+    const { duration } = await measurePerformance(() => {
+      render(<VirtualList items={items} />);
+    });
+
+    expect(duration).toBeLessThan(100); // 100ms threshold
+  });
+
+  it('handles frequent updates efficiently', async () => {
+    const { duration } = await measurePerformance(async () => {
+      const { rerender } = render(<Counter />);
+
+      for (let i = 0; i < 100; i++) {
+        rerender(<Counter value={i} />);
+      }
+    });
+
+    expect(duration).toBeLessThan(50); // 50ms threshold
+  });
+});
+
+// Memory leak detection
+describe('MemoryComponent', () => {
+  it('should not leak memory', async () => {
+    const getMemoryUsage = () =>
+      process.memoryUsage().heapUsed / 1024 / 1024;
+
+    const initialMemory = getMemoryUsage();
+
+    for (let i = 0; i < 100; i++) {
+      const { unmount } = render(<MemoryComponent />);
+      unmount();
+    }
+
+    const finalMemory = getMemoryUsage();
+    const diff = finalMemory - initialMemory;
+
+    expect(diff).toBeLessThan(10); // 10MB threshold
+  });
+});
+```
+
+## **Interview Questions**
+
+1. "What's the difference between unit tests and integration tests?"
+2. "How would you test a custom hook that uses context?"
+3. "Explain the benefits and drawbacks of snapshot testing."
+4. "How would you test asynchronous components?"
+5. "What strategies would you use for mocking complex dependencies?"
+6. "How would you test performance-critical components?"
+
+## **Practice Problems**
+
+1. Implement a test suite for a form validation system
+2. Create tests for a custom hook that manages API calls
+3. Build performance tests for a virtualized list component
+4. Implement snapshot tests with custom serializers
+
+## **Additional Resources**
+
+- [Testing Library Documentation](https://testing-library.com/docs/)
+- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [React Testing Best Practices](https://react

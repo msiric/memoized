@@ -1,0 +1,701 @@
+# Understanding 'this' in JavaScript
+
+## Building a Mental Model of 'this'
+
+### What is 'this'?
+
+In JavaScript, `this` is a special keyword that refers to the current execution context. Think of it as an object that gets created whenever a function runs, like a special delivery package containing information about how the function was called.
+
+However, unlike most programming concepts, `this` isn't determined by where you write your code (lexical scope) but by how you call the function (execution context).
+
+### The Four Rules of 'this'
+
+Think of 'this' binding like a hierarchy of rules, where each rule can be overridden by the next:
+
+1. Default Binding (Lowest priority)
+2. Implicit Binding
+3. Explicit Binding
+4. New Binding (Highest priority)
+
+Let's explore each in detail.
+
+## The Default Binding
+
+When none of the other rules apply, JavaScript defaults to the global object (or `undefined` in strict mode).
+
+```javascript
+function showThis() {
+  console.log(this)
+}
+
+// In non-strict mode
+showThis() // window (browser) or global (Node.js)
+
+// In strict mode
+;('use strict')
+showThis() // undefined
+```
+
+Common Gotcha: Event Handlers in Node.js
+
+```javascript
+// This can be surprising:
+const server = require('http').createServer()
+
+server.on('request', function () {
+  console.log(this === server) // true! 'this' is the server
+})
+
+// vs a regular function
+function standalone() {
+  console.log(this) // undefined (strict) or global (non-strict)
+}
+```
+
+## Implicit Binding
+
+When a method is called on an object, `this` becomes the object itself:
+
+```javascript
+const user = {
+  name: 'John',
+  greet() {
+    return `Hello, ${this.name}!`
+  },
+  address: {
+    street: 'Main St',
+    showAddress() {
+      return `${this.street}` // 'this' is address object
+    },
+  },
+}
+
+console.log(user.greet()) // "Hello, John!"
+console.log(user.address.showAddress()) // "Main St"
+```
+
+### The Lost Binding Problem
+
+One of the most common sources of bugs with `this`:
+
+```javascript
+const user = {
+  name: 'John',
+  greet() {
+    return `Hello, ${this.name}!`
+  },
+}
+
+// This works
+console.log(user.greet()) // "Hello, John!"
+
+// This doesn't work
+const greet = user.greet
+console.log(greet()) // "Hello, undefined!"
+
+// Common real-world example with event listeners
+class Button {
+  constructor(label) {
+    this.label = label
+
+    // This doesn't work
+    document.addEventListener('click', this.handleClick)
+
+    // This works
+    document.addEventListener('click', this.handleClick.bind(this))
+    // Or
+    document.addEventListener('click', () => this.handleClick())
+  }
+
+  handleClick() {
+    console.log(`Button ${this.label} clicked`)
+  }
+}
+```
+
+### Method Borrowing
+
+Implicit binding allows method borrowing between objects:
+
+```javascript
+const methods = {
+  calculateTotal() {
+    return this.items.reduce((sum, item) => sum + item.price, 0)
+  },
+}
+
+const cart1 = {
+  items: [{ price: 10 }, { price: 20 }],
+}
+
+const cart2 = {
+  items: [{ price: 30 }, { price: 40 }],
+}
+
+// Borrow the method
+cart1.calculate = methods.calculateTotal
+cart2.calculate = methods.calculateTotal
+
+console.log(cart1.calculate()) // 30
+console.log(cart2.calculate()) // 70
+```
+
+## Explicit Binding
+
+You can explicitly specify `this` using `call`, `apply`, or `bind`:
+
+```javascript
+function greet(greeting, punctuation) {
+  return `${greeting}, ${this.name}${punctuation}`
+}
+
+const user = { name: 'John' }
+const admin = { name: 'Admin' }
+
+// Using call (pass arguments individually)
+console.log(greet.call(user, 'Hello', '!')) // "Hello, John!"
+console.log(greet.call(admin, 'Welcome', '.')) // "Welcome, Admin."
+
+// Using apply (pass arguments as array)
+console.log(greet.apply(user, ['Hi', '!'])) // "Hi, John!"
+
+// Using bind (creates new function with fixed 'this')
+const greetUser = greet.bind(user)
+console.log(greetUser('Hey', '!')) // "Hey, John!"
+
+// Partial application with bind
+const sayHelloToUser = greet.bind(user, 'Hello')
+console.log(sayHelloToUser('!')) // "Hello, John!"
+```
+
+### Creating Bound Methods
+
+Common patterns for ensuring correct `this` binding:
+
+```javascript
+class DataService {
+  constructor() {
+    this.data = []
+
+    // Bind all methods in constructor
+    this.add = this.add.bind(this)
+    this.remove = this.remove.bind(this)
+    this.clear = this.clear.bind(this)
+  }
+
+  // Alternative: Use arrow functions for auto-binding
+  add = (item) => {
+    this.data.push(item)
+  }
+
+  remove(id) {
+    this.data = this.data.filter((item) => item.id !== id)
+  }
+
+  clear() {
+    this.data = []
+  }
+}
+
+// Usage with event handlers
+const service = new DataService()
+document.getElementById('addButton').onclick = service.add
+document.getElementById('clearButton').onclick = service.clear
+```
+
+## The 'new' Binding
+
+When a function is called with `new`, JavaScript creates a new object and makes it the `this` context:
+
+```javascript
+function User(name) {
+  // 'this' is a new empty object
+  this.name = name
+
+  // 'this' is automatically returned
+}
+
+const user = new User('John')
+console.log(user.name) // "John"
+
+// What happens under the hood:
+function customNew(Constructor, ...args) {
+  // 1. Create new object with Constructor's prototype
+  const obj = Object.create(Constructor.prototype)
+
+  // 2. Call Constructor with 'this' as the new object
+  const result = Constructor.apply(obj, args)
+
+  // 3. Return the object (unless Constructor returned something)
+  return result instanceof Object ? result : obj
+}
+```
+
+### Constructor Return Values
+
+Special case behavior with constructor returns:
+
+```javascript
+function Example1() {
+  this.value = 42
+  return // Implicit return, 'this' is returned
+}
+
+function Example2() {
+  this.value = 42
+  return { custom: true } // Explicit object return
+}
+
+function Example3() {
+  this.value = 42
+  return 123 // Primitive return is ignored
+}
+
+console.log(new Example1().value) // 42
+console.log(new Example2().value) // undefined
+console.log(new Example3().value) // 42
+```
+
+## Practical Patterns and Solutions
+
+### Safe This Reference
+
+```javascript
+class AsyncHandler {
+  constructor() {
+    this.data = []
+
+    // Capture 'this' for async operations
+    const self = this
+
+    async function processData() {
+      const result = await fetch('/api/data')
+      self.data = await result.json()
+    }
+  }
+}
+
+// Modern alternative using arrow functions
+class ModernAsyncHandler {
+  constructor() {
+    this.data = []
+  }
+
+  processData = async () => {
+    const result = await fetch('/api/data')
+    this.data = await result.json()
+  }
+}
+```
+
+### Method Factories
+
+Create methods with guaranteed `this` binding:
+
+```javascript
+function createSafeMethod(obj, method) {
+  let boundMethod = obj[method].bind(obj)
+
+  // Add ability to rebind if needed
+  boundMethod.rebind = function (newThis) {
+    boundMethod = obj[method].bind(newThis)
+    return boundMethod
+  }
+
+  return boundMethod
+}
+
+const calculator = {
+  value: 0,
+  add(x) {
+    this.value += x
+    return this
+  },
+}
+
+const safeAdd = createSafeMethod(calculator, 'add')
+safeAdd(5)
+console.log(calculator.value) // 5
+```
+
+# Understanding Prototypes in JavaScript
+
+## The Prototype Chain
+
+### Mental Model: DNA Inheritance
+
+Think of prototypes like genetic inheritance in biology. Objects can "inherit" properties and methods from their prototype, just like how children inherit traits from their parents. If an object doesn't have a property, JavaScript looks up its prototype chain, like looking through a family tree.
+
+```javascript
+// Creating a prototype chain
+const animal = {
+  eat() {
+    return `${this.name} is eating`
+  },
+  sleep() {
+    return `${this.name} is sleeping`
+  },
+}
+
+const dog = Object.create(animal)
+dog.bark = function () {
+  return `${this.name} says woof!`
+}
+
+const rover = Object.create(dog)
+rover.name = 'Rover'
+
+console.log(rover.bark()) // "Rover says woof!"
+console.log(rover.eat()) // "Rover is eating"
+console.log(rover.sleep()) // "Rover is sleeping"
+
+// Check prototype chain
+console.log(rover.__proto__ === dog) // true
+console.log(dog.__proto__ === animal) // true
+console.log(animal.__proto__ === Object.prototype) // true
+```
+
+### Property Lookup Process
+
+JavaScript follows a specific process when looking for properties:
+
+```javascript
+const parent = {
+  value: 'parent value',
+  getValue() {
+    return this.value
+  },
+}
+
+const child = Object.create(parent)
+child.value = 'child value'
+
+const grandChild = Object.create(child)
+
+console.log(parent.getValue()) // "parent value"
+console.log(child.getValue()) // "child value"
+console.log(grandChild.getValue()) // "child value"
+
+// Property shadowing
+console.log(child.hasOwnProperty('value')) // true
+console.log(child.hasOwnProperty('getValue')) // false
+
+// Delete child's value
+delete child.value
+console.log(child.getValue()) // "parent value"
+```
+
+## Constructor Functions and Prototypes
+
+### The Classical Pattern
+
+```javascript
+function Vehicle(type) {
+  // Instance properties
+  this.type = type
+  this.isRunning = false
+}
+
+// Prototype methods
+Vehicle.prototype.start = function () {
+  this.isRunning = true
+  return `${this.type} is starting`
+}
+
+Vehicle.prototype.stop = function () {
+  this.isRunning = false
+  return `${this.type} is stopping`
+}
+
+// Creating instances
+const car = new Vehicle('car')
+const truck = new Vehicle('truck')
+
+console.log(car.start()) // "car is starting"
+console.log(truck.stop()) // "truck is stopping"
+
+// Check prototype relationships
+console.log(car.__proto__ === Vehicle.prototype) // true
+console.log(Vehicle.prototype.__proto__ === Object.prototype) // true
+```
+
+### Implementing Inheritance
+
+```javascript
+function Animal(name) {
+  this.name = name
+}
+
+Animal.prototype.makeSound = function () {
+  return `${this.name} makes a sound`
+}
+
+function Dog(name, breed) {
+  // Call parent constructor
+  Animal.call(this, name)
+  this.breed = breed
+}
+
+// Set up inheritance
+Dog.prototype = Object.create(Animal.prototype)
+Dog.prototype.constructor = Dog // Fix constructor reference
+
+// Add Dog-specific methods
+Dog.prototype.bark = function () {
+  return `${this.name} (${this.breed}) barks!`
+}
+
+const rex = new Dog('Rex', 'German Shepherd')
+console.log(rex.makeSound()) // "Rex makes a sound"
+console.log(rex.bark()) // "Rex (German Shepherd) barks!"
+```
+
+## Modern Class Syntax
+
+### Basic Class Structure
+
+```javascript
+class BankAccount {
+  // Private fields (modern browsers)
+  #balance = 0
+
+  // Public fields
+  owner
+  transactions = []
+
+  constructor(owner, initialBalance = 0) {
+    this.owner = owner
+    this.#balance = initialBalance
+  }
+
+  // Methods are added to prototype
+  deposit(amount) {
+    if (amount <= 0) throw new Error('Invalid amount')
+
+    this.#balance += amount
+    this.transactions.push({
+      type: 'deposit',
+      amount,
+      date: new Date(),
+    })
+
+    return this.#balance
+  }
+
+  withdraw(amount) {
+    if (amount > this.#balance) {
+      throw new Error('Insufficient funds')
+    }
+
+    this.#balance -= amount
+    this.transactions.push({
+      type: 'withdrawal',
+      amount,
+      date: new Date(),
+    })
+
+    return this.#balance
+  }
+
+  get balance() {
+    return this.#balance
+  }
+
+  // Static methods
+  static createEmpty(owner) {
+    return new BankAccount(owner)
+  }
+}
+
+const account = new BankAccount('John', 1000)
+account.deposit(500)
+console.log(account.balance) // 1500
+```
+
+### Class Inheritance
+
+```javascript
+class Shape {
+  constructor(color) {
+    this.color = color
+  }
+
+  draw() {
+    return `Drawing a ${this.color} shape`
+  }
+
+  static create(...args) {
+    return new this(...args)
+  }
+}
+
+class Circle extends Shape {
+  constructor(color, radius) {
+    super(color)
+    this.radius = radius
+  }
+
+  draw() {
+    return `${super.draw()} - circle with radius ${this.radius}`
+  }
+
+  get area() {
+    return Math.PI * this.radius ** 2
+  }
+}
+
+const redCircle = Circle.create('red', 5)
+console.log(redCircle.draw()) // "Drawing a red shape - circle with radius 5"
+```
+
+## Advanced Prototype Patterns
+
+### Mixin Pattern
+
+```javascript
+// Create mixins
+const speakable = {
+  speak() {
+    return `${this.name} says: ${this.sound}`
+  },
+}
+
+const moveable = {
+  move(distance) {
+    return `${this.name} moved ${distance} meters`
+  },
+}
+
+// Apply mixins to a class
+class Robot {
+  constructor(name) {
+    this.name = name
+    this.sound = 'beep'
+  }
+}
+
+// Mixing in behavior
+Object.assign(Robot.prototype, speakable, moveable)
+
+const robot = new Robot('R2D2')
+console.log(robot.speak()) // "R2D2 says: beep"
+console.log(robot.move(10)) // "R2D2 moved 10 meters"
+```
+
+### Factory with Prototypes
+
+```javascript
+function createGameEntity(type, properties) {
+  // Base prototype for all game entities
+  const baseEntity = {
+    position: { x: 0, y: 0 },
+    move(x, y) {
+      this.position.x += x
+      this.position.y += y
+      return this.position
+    },
+    toString() {
+      return `${this.type} at (${this.position.x}, ${this.position.y})`
+    },
+  }
+
+  // Type-specific prototypes
+  const typePrototypes = {
+    player: {
+      health: 100,
+      damage: 10,
+      attack(target) {
+        target.health -= this.damage
+        return `${this.type} attacks for ${this.damage} damage!`
+      },
+    },
+    enemy: {
+      health: 50,
+      points: 100,
+      die() {
+        return `${this.type} dies, awarding ${this.points} points`
+      },
+    },
+  }
+
+  // Create entity with combined prototype
+  const entity = Object.create(baseEntity)
+  Object.assign(entity, typePrototypes[type], properties, { type })
+
+  return entity
+}
+
+// Usage
+const player = createGameEntity('player', {
+  name: 'Hero',
+  specialAbility() {
+    return `${this.name} uses special ability!`
+  },
+})
+
+const enemy = createGameEntity('enemy', {
+  name: 'Goblin',
+})
+
+console.log(player.move(10, 5)) // { x: 10, y: 5 }
+console.log(player.attack(enemy)) // "player attacks for 10 damage!"
+console.log(enemy.toString()) // "enemy at (0, 0)"
+```
+
+### Prototype Chain Utilities
+
+```javascript
+class PrototypeInspector {
+  static getPrototypeChain(obj) {
+    const chain = []
+    let current = obj
+
+    while (current) {
+      chain.push(current)
+      current = Object.getPrototypeOf(current)
+    }
+
+    return chain
+  }
+
+  static findPropertyOwner(obj, prop) {
+    let current = obj
+
+    while (current) {
+      if (current.hasOwnProperty(prop)) {
+        return current
+      }
+      current = Object.getPrototypeOf(current)
+    }
+
+    return null
+  }
+
+  static getAllProperties(obj) {
+    const props = new Set()
+    let current = obj
+
+    while (current) {
+      Object.getOwnPropertyNames(current).forEach((prop) => props.add(prop))
+      current = Object.getPrototypeOf(current)
+    }
+
+    return Array.from(props)
+  }
+}
+
+// Usage example
+class A {
+  prop1() {}
+}
+class B extends A {
+  prop2() {}
+}
+class C extends B {
+  prop3() {}
+}
+
+const instance = new C()
+console.log(PrototypeInspector.getPrototypeChain(instance))
+console.log(PrototypeInspector.getAllProperties(instance))
+```

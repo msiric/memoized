@@ -1,10 +1,9 @@
-import React from 'react'
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getServerSession } from 'next-auth'
 import { getLessonBySlug } from '@/services/lesson'
 import { getUserWithSubscriptions } from '@/services/user'
 import { userHasAccess } from '@/utils/helpers'
+import { render, screen } from '@testing-library/react'
+import { getServerSession } from 'next-auth'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Lesson from './page'
 
 // Mock the imported modules
@@ -44,7 +43,15 @@ describe('Lesson component', () => {
     } as any)
     vi.mocked(userHasAccess).mockReturnValue(false)
 
-    render(await Lesson({ params: { lessonSlug: 'test-lesson' } }))
+    render(
+      await Lesson({
+        params: {
+          lessonSlug: 'test-lesson',
+          sectionSlug: 'test-section',
+          courseSlug: 'test-course',
+        },
+      }),
+    )
 
     expect(screen.getByText('Upgrade to Premium')).toBeDefined()
     expect(
@@ -68,7 +75,15 @@ describe('Lesson component', () => {
     } as any)
     vi.mocked(userHasAccess).mockReturnValue(true)
 
-    render(await Lesson({ params: { lessonSlug: 'test-lesson' } }))
+    render(
+      await Lesson({
+        params: {
+          lessonSlug: 'test-lesson',
+          sectionSlug: 'test-section',
+          courseSlug: 'test-course',
+        },
+      }),
+    )
 
     expect(screen.getByText('Mocked Dynamic Component')).toBeDefined()
   })
@@ -77,7 +92,13 @@ describe('Lesson component', () => {
     vi.mocked(getServerSession).mockResolvedValue(null)
     vi.mocked(getLessonBySlug).mockResolvedValue(null)
 
-    await Lesson({ params: { lessonSlug: 'non-existent-lesson' } })
+    await Lesson({
+      params: {
+        lessonSlug: 'non-existent-lesson',
+        sectionSlug: 'test-section',
+        courseSlug: 'test-course',
+      },
+    })
 
     expect(notFoundMock).toHaveBeenCalled()
   })

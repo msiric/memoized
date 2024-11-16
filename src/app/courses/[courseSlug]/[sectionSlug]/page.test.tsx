@@ -42,7 +42,11 @@ describe('Section component', () => {
     } as any)
     vi.mocked(userHasAccess).mockReturnValue(true)
 
-    render(await Section({ params: { sectionSlug: 'test-section' } }))
+    render(
+      await Section({
+        params: { sectionSlug: 'test-section', courseSlug: 'test-course' },
+      }),
+    )
 
     expect(screen.getByText('Mocked Dynamic Component')).toBeDefined()
   })
@@ -51,7 +55,12 @@ describe('Section component', () => {
     vi.mocked(getServerSession).mockResolvedValue(null)
     vi.mocked(getSectionBySlug).mockResolvedValue(null)
 
-    await Section({ params: { sectionSlug: 'non-existent-section' } })
+    await Section({
+      params: {
+        sectionSlug: 'non-existent-section',
+        courseSlug: 'test-course',
+      },
+    })
 
     expect(notFoundMock).toHaveBeenCalled()
   })

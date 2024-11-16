@@ -13,6 +13,7 @@
     "migrate": "prisma migrate deploy",
     "generate": "prisma generate",
     "sync:dev": "tsx --env-file .env src/scripts/sync-content.ts",
+    "sync:clean": "tsx --env-file .env src/scripts/clean-database.ts && yarn sync:dev",
     "index:dev": "tsx --env-file .env src/scripts/index-search.ts",
     "sync": "tsx src/scripts/sync-content.ts",
     "index": "tsx src/scripts/index-search.ts",

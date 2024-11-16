@@ -2,7 +2,7 @@ import { Button } from '@/components/Button'
 import { Heading } from '@/components/Heading'
 import {
   COURSES_PREFIX,
-  DATA_STRUCTURES_AND_ALGORITHMS_PREFIX,
+  DSA_TRACK_PREFIX,
   USER_DEFINED_DATA_STRUCTURES_PREFIX,
 } from '@/constants'
 import { USER_DEFINED_DATA_STRUCTURES_PROBLEMS } from '@/problems'
@@ -13,7 +13,7 @@ import { AccessOptions } from '@prisma/client'
 export const userDefinedDataStructures: LessonConfig[] = [
   {
     id: '/linked-lists',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/linked-lists`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/linked-lists`,
     title: 'Linked Lists',
     description:
       'Learn about the various types of linked lists and their operations.',
@@ -23,7 +23,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/stacks',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/stacks`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/stacks`,
     title: 'Stacks',
     description:
       'Explore stack operations and their applications in computer science.',
@@ -33,7 +33,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/queues',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/queues`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/queues`,
     title: 'Queues',
     description:
       'Understand the FIFO principle and how queues are implemented.',
@@ -43,7 +43,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/hash-tables',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/hash-tables`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/hash-tables`,
     title: 'Hash Tables',
     description:
       'Delve into hash table implementation and its various use cases.',
@@ -53,7 +53,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/trees',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/trees`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/trees`,
     title: 'Trees',
     description: 'Study tree structures and their traversal algorithms.',
     access: AccessOptions.PREMIUM,
@@ -62,7 +62,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/graphs',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/graphs`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/graphs`,
     title: 'Graphs',
     description:
       'Learn about graph representations and graph traversal methods.',
@@ -72,7 +72,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/heaps',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/heaps`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/heaps`,
     title: 'Heaps',
     description: 'Discover heap structures and their use in priority queues.',
     access: AccessOptions.PREMIUM,
@@ -81,7 +81,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
   },
   {
     id: '/tries',
-    href: `${COURSES_PREFIX}${DATA_STRUCTURES_AND_ALGORITHMS_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/tries`,
+    href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${USER_DEFINED_DATA_STRUCTURES_PREFIX}/tries`,
     title: 'Tries',
     description:
       'Understand trie data structures and their use in efficient searching.',
@@ -98,16 +98,16 @@ export function UserDefinedDataStructures() {
         User-Defined Data Structures
       </Heading>
       <div className="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-zinc-900/5 pt-10 sm:grid-cols-2 xl:grid-cols-4 dark:border-white/5">
-        {userDefinedDataStructures.map((dataStructure) => (
-          <div key={dataStructure.href}>
+        {userDefinedDataStructures.map((item) => (
+          <div key={item.href}>
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-              {dataStructure.title}
+              {item.title}
             </h3>
             <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-              {dataStructure.description}
+              {item.description}
             </p>
             <p className="mt-4">
-              <Button href={dataStructure.href} variant="text" arrow="right">
+              <Button href={item.href} variant="text" arrow="right">
                 Read more
               </Button>
             </p>

@@ -1,0 +1,449 @@
+# **Asynchronous JavaScript: Fundamentals & Patterns**
+
+Understanding asynchronous JavaScript is crucial for building performant applications. This lesson covers fundamental concepts, implementation patterns, and best practices.
+
+## **Promise Mechanics**
+
+### **Promise States and Implementation**
+
+```javascript
+// Promise implementation
+class MyPromise {
+  constructor(executor) {
+    this.state = 'pending'
+    this.value = undefined
+    this.callbacks = []
+
+    const resolve = (value) => {
+      if (this.state === 'pending') {
+        this.state = 'fulfilled'
+        this.value = value
+        this.callbacks.forEach((cb) => cb(value))
+      }
+    }
+
+    const reject = (error) => {
+      if (this.state === 'pending') {
+        this.state = 'rejected'
+        this.value = error
+        this.callbacks.forEach((cb) => cb(error))
+      }
+    }
+
+    try {
+      executor(resolve, reject)
+    } catch (error) {
+      reject(error)
+    }
+  }
+
+  then(onFulfilled, onRejected) {
+    return new MyPromise((resolve, reject) => {
+      const callback = () => {
+        try {
+          const result = (
+            this.state === 'fulfilled' ? onFulfilled : onRejected
+          )(this.value)
+          resolve(result)
+        } catch (error) {
+          reject(error)
+        }
+      }
+
+      if (this.state === 'pending') {
+        this.callbacks.push(callback)
+      } else {
+        setTimeout(callback, 0)
+      }
+    })
+  }
+
+  catch(onRejected) {
+    return this.then(null, onRejected)
+  }
+
+  finally(onFinally) {
+    return this.then(
+      (value) => {
+        onFinally()
+        return value
+      },
+      (error) => {
+        onFinally()
+        throw error
+      },
+    )
+  }
+}
+```
+
+### **Promise Chaining**
+
+```javascript
+// Sequential execution
+function fetchUserData(userId) {
+  return fetch(`/api/users/${userId}`)
+    .then((response) => response.json())
+    .then((user) => fetch(`/api/posts/${user.id}`))
+    .then((response) => response.json())
+    .catch((error) => {
+      console.error('Error fetching data:', error)
+      throw error // Re-throw to propagate
+    })
+}
+
+// Parallel execution
+function fetchMultipleUsers(userIds) {
+  const promises = userIds.map((id) =>
+    fetch(`/api/users/${id}`).then((res) => res.json()),
+  )
+
+  return Promise.all(promises).then((users) => {
+    return users.reduce((acc, user) => {
+      acc[user.id] = user
+      return acc
+    }, {})
+  })
+}
+```
+
+## **Async/Await Internals**
+
+### **Understanding the Transformation**
+
+```javascript
+// How async/await works under the hood
+async function example() {
+  const result = await someAsyncOperation()
+  return result
+}
+
+// Is transformed to something like:
+function example() {
+  return new Promise((resolve, reject) => {
+    someAsyncOperation()
+      .then((result) => resolve(result))
+      .catch((error) => reject(error))
+  })
+}
+
+// More complex example
+async function processData() {
+  try {
+    const data = await fetchData()
+    const processed = await processAsync(data)
+    return processed
+  } catch (error) {
+    console.error('Error:', error)
+    throw error
+  }
+}
+
+// Implementation details
+function processData() {
+  return new Promise((resolve, reject) => {
+    let data
+
+    fetchData()
+      .then((result) => {
+        data = result
+        return processAsync(data)
+      })
+      .then((processed) => resolve(processed))
+      .catch((error) => {
+        console.error('Error:', error)
+        reject(error)
+      })
+  })
+}
+```
+
+### **Control Flow Patterns**
+
+```javascript
+// Sequential execution
+async function sequential() {
+  const result1 = await operation1()
+  const result2 = await operation2(result1)
+  const result3 = await operation3(result2)
+  return result3
+}
+
+// Parallel execution
+async function parallel() {
+  const [result1, result2] = await Promise.all([operation1(), operation2()])
+  return combineResults(result1, result2)
+}
+
+// Concurrent execution with limit
+async function concurrentWithLimit(items, limit) {
+  const results = []
+  const pending = new Set()
+
+  for (const item of items) {
+    if (pending.size >= limit) {
+      await Promise.race([...pending])
+    }
+
+    const promise = processItem(item).then((result) => {
+      results.push(result)
+      pending.delete(promise)
+    })
+
+    pending.add(promise)
+  }
+
+  await Promise.all([...pending])
+  return results
+}
+```
+
+## **Error Handling Patterns**
+
+### **Comprehensive Error Handling**
+
+```javascript
+// Custom error classes
+class APIError extends Error {
+  constructor(message, statusCode) {
+    super(message)
+    this.name = 'APIError'
+    this.statusCode = statusCode
+  }
+}
+
+class ValidationError extends Error {
+  constructor(message, fields) {
+    super(message)
+    this.name = 'ValidationError'
+    this.fields = fields
+  }
+}
+
+// Error handling middleware
+async function errorHandler(operation) {
+  try {
+    return await operation()
+  } catch (error) {
+    if (error instanceof APIError) {
+      // Handle API errors
+      handleAPIError(error)
+    } else if (error instanceof ValidationError) {
+      // Handle validation errors
+      handleValidationError(error)
+    } else {
+      // Handle unknown errors
+      handleUnknownError(error)
+    }
+    throw error // Re-throw after handling
+  }
+}
+
+// Retry mechanism
+async function withRetry(operation, retries = 3, delay = 1000) {
+  let lastError
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await operation()
+    } catch (error) {
+      lastError = error
+      if (!isRetryable(error)) {
+        throw error
+      }
+      if (i < retries - 1) {
+        await sleep(delay * Math.pow(2, i)) // Exponential backoff
+      }
+    }
+  }
+
+  throw lastError
+}
+
+// Usage
+async function fetchWithRetry(url) {
+  return withRetry(async () => {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new APIError('API request failed', response.status)
+    }
+    return response.json()
+  })
+}
+```
+
+### **Timeout Pattern**
+
+```javascript
+// Timeout wrapper
+function withTimeout(promise, timeout) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Operation timed out')), timeout),
+    ),
+  ])
+}
+
+// Usage with abort controller
+async function fetchWithTimeout(url, timeout) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+    return response
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error.name === 'AbortError') {
+      throw new Error('Request timed out')
+    }
+    throw error
+  }
+}
+```
+
+## **Performance Optimization**
+
+### **Caching and Memoization**
+
+```javascript
+// Async memoization
+function memoizeAsync(fn, keyFn = (...args) => JSON.stringify(args)) {
+  const cache = new Map()
+
+  return async function (...args) {
+    const key = keyFn(...args)
+
+    if (cache.has(key)) {
+      return cache.get(key)
+    }
+
+    const result = await fn.apply(this, args)
+    cache.set(key, result)
+    return result
+  }
+}
+
+// Usage
+const fetchUserMemoized = memoizeAsync(async (userId) => {
+  const response = await fetch(`/api/users/${userId}`)
+  return response.json()
+})
+
+// Cache with expiration
+class AsyncCache {
+  constructor(ttl = 60000) {
+    this.cache = new Map()
+    this.ttl = ttl
+  }
+
+  async get(key, producer) {
+    const cached = this.cache.get(key)
+
+    if (cached && Date.now() - cached.timestamp < this.ttl) {
+      return cached.value
+    }
+
+    const value = await producer()
+    this.cache.set(key, {
+      value,
+      timestamp: Date.now(),
+    })
+
+    return value
+  }
+
+  invalidate(key) {
+    this.cache.delete(key)
+  }
+}
+```
+
+### **Resource Management**
+
+```javascript
+// Resource pool
+class AsyncPool {
+  constructor(factory, size) {
+    this.resources = []
+    this.available = []
+    this.waiters = []
+    this.factory = factory
+    this.size = size
+  }
+
+  async acquire() {
+    if (this.available.length > 0) {
+      return this.available.pop()
+    }
+
+    if (this.resources.length < this.size) {
+      const resource = await this.factory()
+      this.resources.push(resource)
+      return resource
+    }
+
+    return new Promise((resolve) => {
+      this.waiters.push(resolve)
+    })
+  }
+
+  release(resource) {
+    if (this.waiters.length > 0) {
+      const waiter = this.waiters.shift()
+      waiter(resource)
+    } else {
+      this.available.push(resource)
+    }
+  }
+
+  async using(fn) {
+    const resource = await this.acquire()
+    try {
+      return await fn(resource)
+    } finally {
+      this.release(resource)
+    }
+  }
+}
+
+// Usage
+const dbPool = new AsyncPool(() => createDatabaseConnection(), 10)
+
+await dbPool.using(async (connection) => {
+  // Use connection
+})
+```
+
+## **Interview Questions**
+
+1. "Explain the difference between microtasks and macrotasks in the event loop."
+2. "How would you implement a Promise.race() that returns the first resolved value?"
+3. "What are the advantages and disadvantages of async/await over Promises?"
+4. "How would you handle multiple API calls that depend on each other?"
+5. "Explain how error bubbling works in async/await."
+6. "How would you implement a retry mechanism for failed API calls?"
+
+## **Practice Problems**
+
+1. Implement a Promise-based semaphore for limiting concurrent operations
+2. Create a caching system for async operations with TTL
+3. Build a rate limiter for API calls
+4. Implement an async queue with priority support
+
+## **Additional Resources**
+
+- [MDN: Using Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
+- [Jake Archibald: Tasks, microtasks, queues and schedules](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/)
+- [Async JavaScript: From Callbacks to Promises to Async/Await](https://tylermcginnis.com/async-javascript-from-callbacks-to-promises-to-async-await/)
+
+Would you like me to:
+
+1. Add more practical examples?
+2. Include more interview questions?
+3. Add more performance optimization techniques?
+4. Create more practice problems?

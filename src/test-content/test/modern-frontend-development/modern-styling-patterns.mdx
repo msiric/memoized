@@ -1,0 +1,488 @@
+# **Modern CSS Architecture & Patterns**
+
+This lesson covers advanced CSS patterns, implementations, and optimizations for modern React applications.
+
+## **CSS-in-JS Implementation**
+
+### **Styled Components Engine**
+
+```typescript
+// Basic styled-components implementation
+type StyleFunction = (props: any) => string
+type StyleInterpolation = string | StyleFunction
+
+class StyledComponent {
+  private styles: StyleInterpolation[]
+  private tag: keyof HTMLElementTagNameMap
+
+  constructor(tag: keyof HTMLElementTagNameMap, styles: StyleInterpolation[]) {
+    this.tag = tag
+    this.styles = styles
+  }
+
+  generateStyles(props: any): string {
+    return this.styles
+      .map((style) => (typeof style === 'function' ? style(props) : style))
+      .join('')
+  }
+
+  createElement(props: any): HTMLElement {
+    const element = document.createElement(this.tag)
+    const styles = this.generateStyles(props)
+    element.setAttribute('style', styles)
+    return element
+  }
+}
+
+// Styled function implementation
+function styled(tag: keyof HTMLElementTagNameMap) {
+  return (
+    strings: TemplateStringsArray,
+    ...interpolations: StyleInterpolation[]
+  ) => {
+    const styles = strings.reduce((acc, str, i) => {
+      const interpolation = interpolations[i - 1]
+      return [...acc, str, interpolation]
+    }, [] as StyleInterpolation[])
+
+    return new StyledComponent(tag, styles)
+  }
+}
+
+// Usage
+const Button = styled('button')`
+  background: ${(props) => (props.primary ? 'blue' : 'white')};
+  color: ${(props) => (props.primary ? 'white' : 'black')};
+  padding: 8px 16px;
+  border-radius: 4px;
+`
+```
+
+### **Dynamic Styles with Emotion**
+
+```typescript
+// Emotion-like implementation
+interface StyleSheet {
+  [key: string]: any
+}
+
+class EmotionCache {
+  private cache: Map<string, string> = new Map()
+  private counter: number = 0
+
+  insert(styles: StyleSheet): string {
+    const className = `css-${this.counter++}`
+    const cssString = this.stringifyStyles(styles)
+
+    if (!this.cache.has(cssString)) {
+      this.cache.set(cssString, className)
+      this.insertStyles(className, cssString)
+    }
+
+    return this.cache.get(cssString)!
+  }
+
+  private stringifyStyles(styles: StyleSheet): string {
+    return Object.entries(styles)
+      .map(([property, value]) => {
+        const cssProperty = property.replace(/([A-Z])/g, '-$1').toLowerCase()
+        return `${cssProperty}: ${value};`
+      })
+      .join('')
+  }
+
+  private insertStyles(className: string, styles: string): void {
+    const styleSheet = document.createElement('style')
+    styleSheet.textContent = `.${className} { ${styles} }`
+    document.head.appendChild(styleSheet)
+  }
+}
+
+// React hook for dynamic styles
+function useStyles(stylesFn: (theme: Theme) => StyleSheet) {
+  const theme = useTheme()
+  const cache = useContext(EmotionCacheContext)
+
+  return useMemo(() => {
+    const styles = stylesFn(theme)
+    return cache.insert(styles)
+  }, [stylesFn, theme, cache])
+}
+
+// Usage
+const useButtonStyles = (props: ButtonProps) => {
+  return useStyles((theme) => ({
+    backgroundColor:
+      props.variant === 'primary'
+        ? theme.colors.primary
+        : theme.colors.secondary,
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    '&:hover': {
+      opacity: 0.8,
+    },
+  }))
+}
+```
+
+## **Atomic CSS and Utility-First Patterns**
+
+### **Atomic CSS Generator**
+
+```typescript
+// Atomic CSS generator
+class AtomicCSSGenerator {
+  private classes: Map<string, string> = new Map()
+  private styleSheet: HTMLStyleElement
+
+  constructor() {
+    this.styleSheet = document.createElement('style')
+    document.head.appendChild(this.styleSheet)
+  }
+
+  generate(properties: Record<string, string | number>): string {
+    const classNames: string[] = []
+
+    Object.entries(properties).forEach(([property, value]) => {
+      const className = this.createAtomicClass(property, value)
+      classNames.push(className)
+    })
+
+    return classNames.join(' ')
+  }
+
+  private createAtomicClass(property: string, value: string | number): string {
+    const key = `${property}-${value}`
+
+    if (!this.classes.has(key)) {
+      const className = `${property.charAt(0)}${this.classes.size}`
+      const rule = `.${className}{${property}:${value}}`
+
+      this.classes.set(key, className)
+      this.styleSheet.sheet?.insertRule(rule)
+    }
+
+    return this.classes.get(key)!
+  }
+}
+
+// Utility class generator
+class UtilityClassGenerator {
+  private config: UtilityConfig
+
+  constructor(config: UtilityConfig) {
+    this.config = config
+  }
+
+  generateUtilities(): string {
+    return Object.entries(this.config)
+      .map(([category, values]) => this.generateCategory(category, values))
+      .join('\n')
+  }
+
+  private generateCategory(
+    category: string,
+    values: Record<string, string | number>,
+  ): string {
+    return Object.entries(values)
+      .map(([key, value]) => {
+        const className = `${category}-${key}`
+        return `.${className} { ${category}: ${value}; }`
+      })
+      .join('\n')
+  }
+}
+
+// Usage
+const utilities = new UtilityClassGenerator({
+  padding: {
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+  },
+  margin: {
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+  },
+})
+```
+
+## **CSS Modules and Scoping**
+
+### **CSS Module System**
+
+```typescript
+// CSS Module loader implementation
+class CSSModuleLoader {
+  private modules: Map<string, Record<string, string>> = new Map()
+  private scopeId: number = 0
+
+  async loadModule(
+    cssText: string,
+    filename: string,
+  ): Promise<Record<string, string>> {
+    if (this.modules.has(filename)) {
+      return this.modules.get(filename)!
+    }
+
+    const scopedStyles = this.scopeStyles(cssText)
+    const classMap = this.generateClassMap(cssText)
+
+    this.insertStyles(scopedStyles)
+    this.modules.set(filename, classMap)
+
+    return classMap
+  }
+
+  private scopeStyles(cssText: string): string {
+    const scope = `scope-${this.scopeId++}`
+
+    return cssText.replace(/([.][A-Za-z_-][A-Za-z0-9_-]*)/g, `$1_${scope}`)
+  }
+
+  private generateClassMap(cssText: string): Record<string, string> {
+    const classMap: Record<string, string> = {}
+    const scope = `scope-${this.scopeId}`
+
+    cssText.match(/[.][A-Za-z_-][A-Za-z0-9_-]*/g)?.forEach((className) => {
+      const original = className.slice(1)
+      classMap[original] = `${original}_${scope}`
+    })
+
+    return classMap
+  }
+
+  private insertStyles(styles: string): void {
+    const styleSheet = document.createElement('style')
+    styleSheet.textContent = styles
+    document.head.appendChild(styleSheet)
+  }
+}
+
+// React hook for CSS Modules
+function useCSSModule(
+  styles: string,
+  filename: string,
+): Record<string, string> {
+  const [classMap, setClassMap] = useState<Record<string, string>>({})
+  const loader = useContext(CSSModuleLoaderContext)
+
+  useEffect(() => {
+    loader.loadModule(styles, filename).then(setClassMap)
+  }, [styles, filename, loader])
+
+  return classMap
+}
+```
+
+### **Scope Isolation**
+
+```typescript
+// Shadow DOM encapsulation
+class ShadowDOMStyles {
+  private host: HTMLElement;
+  private shadow: ShadowRoot;
+
+  constructor(host: HTMLElement) {
+    this.host = host;
+    this.shadow = host.attachShadow({ mode: 'closed' });
+  }
+
+  addStyles(css: string): void {
+    const style = document.createElement('style');
+    style.textContent = css;
+    this.shadow.appendChild(style);
+  }
+
+  querySelector(selector: string): Element | null {
+    return this.shadow.querySelector(selector);
+  }
+}
+
+// React component with Shadow DOM
+const ShadowComponent: React.FC<{
+  styles: string;
+  children: React.ReactNode;
+}> = ({ styles, children }) => {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const shadowRef = useRef<ShadowDOMStyles>();
+
+  useEffect(() => {
+    if (hostRef.current && !shadowRef.current) {
+      shadowRef.current = new ShadowDOMStyles(hostRef.current);
+      shadowRef.current.addStyles(styles);
+    }
+  }, [styles]);
+
+  return <div ref={hostRef}>{children}</div>;
+};
+```
+
+## **Theme System Design**
+
+### **Theme Provider Implementation**
+
+```typescript
+// Theme system implementation
+interface Theme {
+  colors: Record<string, string>;
+  spacing: (multiplier: number) => string;
+  breakpoints: Record<string, number>;
+  typography: Record<string, any>;
+}
+
+class ThemeProvider {
+  private theme: Theme;
+  private subscribers = new Set<(theme: Theme) => void>();
+
+  constructor(initialTheme: Theme) {
+    this.theme = initialTheme;
+  }
+
+  getTheme(): Theme {
+    return this.theme;
+  }
+
+  setTheme(newTheme: Partial<Theme>): void {
+    this.theme = { ...this.theme, ...newTheme };
+    this.notifySubscribers();
+  }
+
+  subscribe(callback: (theme: Theme) => void): () => void {
+    this.subscribers.add(callback);
+    callback(this.theme);
+    return () => this.subscribers.delete(callback);
+  }
+
+  private notifySubscribers(): void {
+    this.subscribers.forEach(callback => callback(this.theme));
+  }
+}
+
+// React hook for theme
+function useTheme(): Theme {
+  const [theme, setTheme] = useState<Theme>(
+    useContext(ThemeContext)
+  );
+
+  useEffect(() => {
+    return themeProvider.subscribe(setTheme);
+  }, []);
+
+  return theme;
+}
+
+// Theme-aware component
+function ThemedComponent({
+  variant = 'primary',
+  children
+}: {
+  variant?: 'primary' | 'secondary';
+  children: React.ReactNode;
+}) {
+  const theme = useTheme();
+  const className = useStyles({
+    backgroundColor: theme.colors[variant],
+    padding: theme.spacing(2),
+    ...theme.typography.body1
+  });
+
+  return <div className={className}>{children}</div>;
+}
+```
+
+## **Dynamic Styling Patterns**
+
+### **State-Based Styling**
+
+```typescript
+// State-based style manager
+class StateStyleManager {
+  private states: Map<string, StyleSheet> = new Map()
+  private activeStates = new Set<string>()
+
+  addState(name: string, styles: StyleSheet): void {
+    this.states.set(name, styles)
+  }
+
+  toggleState(name: string, active: boolean): void {
+    if (active) {
+      this.activeStates.add(name)
+    } else {
+      this.activeStates.delete(name)
+    }
+  }
+
+  getActiveStyles(): StyleSheet {
+    return Array.from(this.activeStates).reduce(
+      (acc, state) => ({
+        ...acc,
+        ...this.states.get(state),
+      }),
+      {},
+    )
+  }
+}
+
+// React hook for state-based styles
+function useStateStyles(
+  baseStyles: StyleSheet,
+  states: Record<string, StyleSheet>,
+) {
+  const [activeStates, setActiveStates] = useState<Set<string>>(new Set())
+
+  const computedStyles = useMemo(() => {
+    return Array.from(activeStates).reduce(
+      (styles, state) => ({
+        ...styles,
+        ...states[state],
+      }),
+      baseStyles,
+    )
+  }, [baseStyles, states, activeStates])
+
+  const toggleState = useCallback((state: string, active: boolean) => {
+    setActiveStates((prev) => {
+      const next = new Set(prev)
+      if (active) {
+        next.add(state)
+      } else {
+        next.delete(state)
+      }
+      return next
+    })
+  }, [])
+
+  return [computedStyles, toggleState] as const
+}
+```
+
+## **Interview Questions**
+
+1. "Compare CSS-in-JS with CSS Modules. When would you use each?"
+2. "How would you implement a theme system that supports runtime changes?"
+3. "Explain the benefits and drawbacks of atomic CSS."
+4. "How would you handle style isolation in a micro-frontend architecture?"
+5. "What strategies would you use for optimizing CSS performance?"
+6. "How would you implement a dynamic styling system based on component state?"
+
+## **Practice Problems**
+
+1. Implement a basic CSS-in-JS engine with template literals
+2. Create a utility-first CSS generator
+3. Build a theme system with runtime theme switching
+4. Implement a scoped styling system with Shadow DOM
+
+## **Additional Resources**
+
+- [CSS Modules Documentation](https://github.com/css-modules/css-modules)
+- [Styled Components Deep Dive](https://styled-components.com/docs/advanced)
+- [Atomic CSS Principles](https://acss.io/)
+
+Would you like me to:
+
+1. Add more practical examples?
+2. Include more interview questions?
+3. Add more implementation patterns?
+4. Create more practice problems?

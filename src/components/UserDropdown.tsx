@@ -19,7 +19,7 @@ import { PREMIUM_BUTTON_STYLES } from './PremiumButton'
 const DROPDOWN_STYLES = {
   lifetime: 'inline-block text-lime-500 hover:bg-transparent',
   listItem:
-    'block w-full px-4 py-2 text-left hover:bg-zinc-600 disabled:opacity-50',
+    'flex items-center w-full px-4 py-2 text-left hover:bg-zinc-600 disabled:opacity-50',
 }
 
 export const UserDropdown = ({ isMobile = false, ...props }) => {
@@ -184,7 +184,7 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
           </div>
         </div>
         <ul className="py-2 text-sm text-zinc-200">
-          {user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
+          {!!user?.currentSubscriptionStatus ? (
             user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
               <li>
                 <p
@@ -207,6 +207,21 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
                   )}
                 >
                   Subscription
+                  <span
+                    className={clsx(
+                      'ml-2 inline-block h-1 w-1 rounded-full',
+                      user?.currentSubscriptionStatus ===
+                        SubscriptionStatus.ACTIVE
+                        ? 'bg-lime-500'
+                        : 'bg-red-500',
+                    )}
+                    title={
+                      user?.currentSubscriptionStatus ===
+                      SubscriptionStatus.ACTIVE
+                        ? 'Active'
+                        : 'Inactive'
+                    }
+                  />
                 </button>
               </li>
             )

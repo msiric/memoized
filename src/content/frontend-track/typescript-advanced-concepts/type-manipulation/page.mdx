@@ -1,0 +1,834 @@
+# Understanding Type Manipulation
+
+## Built-in Utility Types
+
+### The Mental Model
+
+Think of utility types as type-level functions that transform types in predictable ways:
+
+- Like functions, they take input types and return new types
+- They follow consistent patterns
+- They can be composed together
+
+### Essential Utility Types
+
+1. **Partial and Required**
+
+```typescript
+interface User {
+  name: string
+  email: string
+  preferences: {
+    newsletter: boolean
+    theme: 'light' | 'dark'
+  }
+}
+
+// Makes all properties optional
+type UpdateableUser = Partial<User>
+// {
+//     name?: string;
+//     email?: string;
+//     preferences?: {
+//         newsletter: boolean;
+//         theme: 'light' | 'dark';
+//     };
+// }
+
+// Makes all properties required
+type StrictUser = Required<User>
+// All properties become non-optional
+```
+
+2. **Pick and Omit**
+
+```typescript
+interface Article {
+  id: number
+  title: string
+  content: string
+  author: string
+  publishedDate: Date
+  tags: string[]
+}
+
+// Select specific properties
+type ArticlePreview = Pick<Article, 'title' | 'author'>
+// {
+//     title: string;
+//     author: string;
+// }
+
+// Remove specific properties
+type DraftArticle = Omit<Article, 'id' | 'publishedDate'>
+// {
+//     title: string;
+//     content: string;
+//     author: string;
+//     tags: string[];
+// }
+```
+
+3. **Record and Extract**
+
+```typescript
+// Create type with specific keys and value type
+type Roles = 'admin' | 'user' | 'guest'
+type Permissions = Record<Roles, string[]>
+// {
+//     admin: string[];
+//     user: string[];
+//     guest: string[];
+// }
+
+// Extract specific union members
+type NumericValue = string | number | boolean
+type Numbers = Extract<NumericValue, number> // number
+```
+
+### Creating Custom Utility Types
+
+1. **DeepPartial**
+
+```typescript
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+}
+
+interface Config {
+  server: {
+    port: number
+    host: string
+    options: {
+      timeout: number
+      retries: number
+    }
+  }
+  database: {
+    url: string
+    name: string
+  }
+}
+
+// All properties become deeply optional
+type PartialConfig = DeepPartial<Config>
+```
+
+2. **NonNullable Properties**
+
+```typescript
+type NonNullableProperties<T> = {
+  [P in keyof T]: NonNullable<T[P]>
+}
+
+interface Form {
+  name: string | null
+  email: string | undefined
+  age: number | null
+}
+
+type RequiredForm = NonNullableProperties<Form>
+// {
+//     name: string;
+//     email: string;
+//     age: number;
+// }
+```
+
+3. **Mutable Version**
+
+```typescript
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P]
+}
+
+interface ReadOnlyUser {
+  readonly id: number
+  readonly name: string
+}
+
+type MutableUser = Mutable<ReadOnlyUser>
+// {
+//     id: number;
+//     name: string;
+// }
+```
+
+### Advanced Utility Patterns
+
+1. **Conditional Type Utilities**
+
+```typescript
+type If<C extends boolean, T, F> = C extends true ? T : F
+
+type ArrayElement<T> = T extends Array<infer E> ? E : never
+
+type IsFunction<T> = T extends Function ? true : false
+
+// Usage
+type NumberArray = ArrayElement<number[]> // number
+type StringOrNumber = If<true, string, number> // string
+type IsCallable = IsFunction<() => void> // true
+```
+
+2. **String Manipulation Utilities**
+
+```typescript
+type CamelToSnake<S extends string> = S extends `${infer T}${infer U}`
+    ? `${T extends Capitalize<T>
+        ? '_' + Lowercase<T>
+        : T}${CamelToSnake<U>}`
+    : S;
+
+type SnakeToCamel<S extends string> = S extends `${infer T}_${infer U}`
+    ? `${T}${Capitalize<SnakeToCamel<U>>}`
+    : S;
+
+// Usage
+type Snake = CamelToSnake<'userId'>;  // 'user_id'
+type Camel = SnakeToCamel<'user_id'>;  // 'userId'
+```
+
+3. **Object Manipulation Utilities**
+
+```typescript
+type FlattenObject<T extends object> = {
+  [K in keyof T]: T[K] extends object
+    ? T[K] extends Array<any>
+      ? T[K] // Keep arrays as-is
+      : FlattenObject<T[K]>
+    : T[K]
+}
+
+interface NestedUser {
+  info: {
+    name: string
+    address: {
+      street: string
+      city: string
+    }
+  }
+  settings: {
+    theme: 'light' | 'dark'
+  }
+}
+
+type FlatUser = FlattenObject<NestedUser>
+// {
+//     info: {
+//         name: string;
+//         address: {
+//             street: string;
+//             city: string;
+//         };
+//     };
+//     settings: {
+//         theme: 'light' | 'dark';
+//     };
+// }
+```
+
+4. **Function Type Utilities**
+
+```typescript
+type Parameters<T extends (...args: any) => any> = T extends (
+  ...args: infer P
+) => any
+  ? P
+  : never
+
+type ReturnType<T extends (...args: any) => any> = T extends (
+  ...args: any
+) => infer R
+  ? R
+  : any
+
+type AsyncReturnType<T extends (...args: any) => Promise<any>> = T extends (
+  ...args: any
+) => Promise<infer R>
+  ? R
+  : any
+
+// Usage
+async function fetchUser(id: number) {
+  return { id, name: 'John' }
+}
+
+type FetchUserParams = Parameters<typeof fetchUser> // [number]
+type FetchUserReturn = AsyncReturnType<typeof fetchUser>
+// { id: number; name: string; }
+```
+
+# Type Guards and Type Assertions
+
+## Understanding Type Guards
+
+### The Mental Model
+
+Think of type guards as runtime checkpoints that help TypeScript understand types:
+
+- They narrow down types in conditional blocks
+- They provide runtime type safety
+- They connect runtime checks with the type system
+
+### Built-in Type Guards
+
+1. **typeof Guards**
+
+```typescript
+function processValue(value: string | number) {
+  // TypeScript knows which type we have inside each block
+  if (typeof value === 'string') {
+    // value is string here
+    return value.toUpperCase()
+  } else {
+    // value is number here
+    return value.toFixed(2)
+  }
+}
+
+// Multiple types
+function formatValue(value: string | number | boolean) {
+  switch (typeof value) {
+    case 'string':
+      return `"${value}"` // value is string
+    case 'number':
+      return `${value.toFixed(2)}` // value is number
+    case 'boolean':
+      return value ? 'Yes' : 'No' // value is boolean
+  }
+}
+```
+
+2. **instanceof Guards**
+
+```typescript
+class ApiError extends Error {
+  constructor(
+    public statusCode: number,
+    message: string,
+  ) {
+    super(message)
+  }
+}
+
+class ValidationError extends Error {
+  constructor(
+    public field: string,
+    message: string,
+  ) {
+    super(message)
+  }
+}
+
+function handleError(error: Error | ApiError | ValidationError) {
+  if (error instanceof ApiError) {
+    // error is ApiError here
+    console.error(`API Error ${error.statusCode}: ${error.message}`)
+  } else if (error instanceof ValidationError) {
+    // error is ValidationError here
+    console.error(`Invalid ${error.field}: ${error.message}`)
+  } else {
+    // error is Error here
+    console.error(`Error: ${error.message}`)
+  }
+}
+```
+
+### Custom Type Guards
+
+1. **User-Defined Type Guards**
+
+```typescript
+interface User {
+  id: number
+  name: string
+}
+
+interface Admin extends User {
+  role: 'admin'
+  permissions: string[]
+}
+
+// Type predicate
+function isAdmin(user: User): user is Admin {
+  return 'role' in user && user.role === 'admin'
+}
+
+function handleUser(user: User) {
+  if (isAdmin(user)) {
+    // TypeScript knows user is Admin here
+    console.log(`Admin ${user.name} has permissions:`, user.permissions)
+  } else {
+    // TypeScript knows user is just User here
+    console.log(`User ${user.name}`)
+  }
+}
+```
+
+2. **Complex Type Guards**
+
+```typescript
+type ApiResponse<T> =
+  | {
+      status: 'success'
+      data: T
+    }
+  | {
+      status: 'error'
+      error: {
+        code: number
+        message: string
+      }
+    }
+
+function isSuccessResponse<T>(
+  response: ApiResponse<T>,
+): response is Extract<ApiResponse<T>, { status: 'success' }> {
+  return response.status === 'success'
+}
+
+async function fetchData<T>(url: string): Promise<T> {
+  const response = await fetch(url)
+  const result: ApiResponse<T> = await response.json()
+
+  if (isSuccessResponse(result)) {
+    return result.data // TypeScript knows we have the data
+  } else {
+    throw new Error(result.error.message)
+  }
+}
+```
+
+## Type Assertions
+
+### Best Practices for Type Assertions
+
+1. **Using as for Type Assertions**
+
+```typescript
+// Avoid any when possible
+function processInput(input: unknown) {
+  if (typeof input === 'string') {
+    return (input as string).toUpperCase()
+  }
+
+  // Use type guard instead of assertion when possible
+  if (Array.isArray(input)) {
+    return input.length
+  }
+
+  throw new Error('Invalid input')
+}
+```
+
+2. **Double Assertion Pattern**
+
+```typescript
+type CardinalDirection = 'North' | 'South' | 'East' | 'West'
+
+// Sometimes we need to assert through 'unknown'
+const direction = 'North' as unknown as CardinalDirection
+
+// Better approach: validate at runtime
+function assertDirection(dir: string): asserts dir is CardinalDirection {
+  if (!['North', 'South', 'East', 'West'].includes(dir)) {
+    throw new Error('Invalid direction')
+  }
+}
+```
+
+3. **Assertion Functions**
+
+```typescript
+function assertIsString(value: unknown): asserts value is string {
+  if (typeof value !== 'string') {
+    throw new Error('Not a string!')
+  }
+}
+
+function assertIsArray(value: unknown): asserts value is Array<unknown> {
+  if (!Array.isArray(value)) {
+    throw new Error('Not an array!')
+  }
+}
+
+function processValues(input: unknown) {
+  assertIsArray(input)
+  // TypeScript now knows input is an array
+  input.forEach((item) => {
+    assertIsString(item)
+    // TypeScript now knows item is a string
+    console.log(item.toUpperCase())
+  })
+}
+```
+
+### Runtime Type Checking
+
+1. **Basic Runtime Type Checking**
+
+```typescript
+type TypeChecker<T> = (value: unknown) => value is T
+
+const isString: TypeChecker<string> = (value): value is string =>
+  typeof value === 'string'
+
+const isNumber: TypeChecker<number> = (value): value is number =>
+  typeof value === 'number'
+
+const isBoolean: TypeChecker<boolean> = (value): value is boolean =>
+  typeof value === 'boolean'
+
+// Composite checker
+const isStringArray: TypeChecker<string[]> = (value): value is string[] =>
+  Array.isArray(value) && value.every(isString)
+```
+
+2. **Schema Validation Pattern**
+
+```typescript
+type Schema<T> = {
+  validate(value: unknown): value is T
+  describe(): string
+}
+
+class StringSchema implements Schema<string> {
+  validate(value: unknown): value is string {
+    return typeof value === 'string'
+  }
+
+  describe() {
+    return 'string'
+  }
+}
+
+class NumberSchema implements Schema<number> {
+  validate(value: unknown): value is number {
+    return typeof value === 'number' && !isNaN(value)
+  }
+
+  describe() {
+    return 'number'
+  }
+}
+
+class ObjectSchema<T> implements Schema<T> {
+  constructor(private shape: { [K in keyof T]: Schema<T[K]> }) {}
+
+  validate(value: unknown): value is T {
+    if (typeof value !== 'object' || value === null) {
+      return false
+    }
+
+    return Object.entries(this.shape).every(([key, schema]) => {
+      return schema.validate((value as any)[key])
+    })
+  }
+
+  describe() {
+    return `object with shape: ${JSON.stringify(
+      Object.fromEntries(
+        Object.entries(this.shape).map(([key, schema]) => [
+          key,
+          schema.describe(),
+        ]),
+      ),
+    )}`
+  }
+}
+```
+
+# Practice Problems and Real-World Applications
+
+## Building a Type-Safe Validation System
+
+### Problem 1: Schema Builder with Type Inference
+
+```typescript
+// First, let's create a type-safe schema builder
+type ValidationRule<T> = {
+  validate: (value: T) => boolean
+  message: string
+}
+
+class SchemaBuilder<T> {
+  private rules: ValidationRule<T>[] = []
+
+  required(message = 'Field is required'): this {
+    this.rules.push({
+      validate: (value: T) => value !== undefined && value !== null,
+      message,
+    })
+    return this
+  }
+
+  custom(validator: (value: T) => boolean, message: string): this {
+    this.rules.push({ validate: validator, message })
+    return this
+  }
+
+  validate(value: T): string[] {
+    return this.rules
+      .filter((rule) => !rule.validate(value))
+      .map((rule) => rule.message)
+  }
+}
+
+// Specialized schema builders
+class StringSchema extends SchemaBuilder<string> {
+  minLength(length: number, message = `Min length is ${length}`): this {
+    return this.custom((value) => value.length >= length, message)
+  }
+
+  email(message = 'Invalid email'): this {
+    return this.custom((value) => /^[^@]+@[^@]+\.[^@]+$/.test(value), message)
+  }
+}
+
+class NumberSchema extends SchemaBuilder<number> {
+  min(min: number, message = `Min value is ${min}`): this {
+    return this.custom((value) => value >= min, message)
+  }
+
+  max(max: number, message = `Max value is ${max}`): this {
+    return this.custom((value) => value <= max, message)
+  }
+}
+
+// Usage example
+const userSchema = {
+  name: new StringSchema().required().minLength(2),
+  age: new NumberSchema().required().min(18),
+  email: new StringSchema().required().email(),
+}
+
+type InferSchema<T> = {
+  [K in keyof T]: T[K] extends SchemaBuilder<infer U> ? U : never
+}
+
+type User = InferSchema<typeof userSchema>
+// { name: string; age: number; email: string; }
+```
+
+### Problem 2: Type-Safe Form Validation
+
+```typescript
+type FormErrors<T> = Partial<Record<keyof T, string[]>>
+
+class TypedForm<T extends Record<string, any>> {
+  private values: Partial<T> = {}
+  private errors: FormErrors<T> = {}
+  private touched = new Set<keyof T>()
+
+  constructor(
+    private schema: {
+      [K in keyof T]: SchemaBuilder<T[K]>
+    },
+  ) {}
+
+  setValue<K extends keyof T>(field: K, value: T[K]): void {
+    this.values[field] = value
+    this.touched.add(field)
+    this.validateField(field)
+  }
+
+  private validateField<K extends keyof T>(field: K): void {
+    const value = this.values[field]
+    const schema = this.schema[field]
+
+    const fieldErrors = schema.validate(value as T[K])
+
+    if (fieldErrors.length > 0) {
+      this.errors[field] = fieldErrors
+    } else {
+      delete this.errors[field]
+    }
+  }
+
+  getFieldError(field: keyof T): string[] | undefined {
+    return this.errors[field]
+  }
+
+  isValid(): boolean {
+    return Object.keys(this.errors).length === 0
+  }
+
+  isFieldTouched(field: keyof T): boolean {
+    return this.touched.has(field)
+  }
+
+  getValues(): Partial<T> {
+    return { ...this.values }
+  }
+}
+
+// Usage example
+const form = new TypedForm(userSchema)
+
+form.setValue('name', 'John')
+form.setValue('age', 16) // Will show validation error
+console.log(form.getFieldError('age')) // ["Min value is 18"]
+```
+
+### Problem 3: Runtime Type Checking System
+
+```typescript
+type TypeDefinition<T> = {
+  name: string
+  validate(value: unknown): value is T
+  children?: Record<string, TypeDefinition<any>>
+}
+
+class TypeChecker<T> {
+  constructor(private definition: TypeDefinition<T>) {}
+
+  static string(): TypeChecker<string> {
+    return new TypeChecker({
+      name: 'string',
+      validate: (value): value is string => typeof value === 'string',
+    })
+  }
+
+  static number(): TypeChecker<number> {
+    return new TypeChecker({
+      name: 'number',
+      validate: (value): value is number =>
+        typeof value === 'number' && !isNaN(value),
+    })
+  }
+
+  static object<T extends Record<string, any>>(shape: {
+    [K in keyof T]: TypeChecker<T[K]>
+  }): TypeChecker<T> {
+    return new TypeChecker({
+      name: 'object',
+      validate: (value): value is T => {
+        if (typeof value !== 'object' || value === null) {
+          return false
+        }
+
+        return Object.entries(shape).every(([key, checker]) =>
+          checker.check((value as any)[key]),
+        )
+      },
+      children: shape,
+    })
+  }
+
+  static array<T>(itemChecker: TypeChecker<T>): TypeChecker<T[]> {
+    return new TypeChecker({
+      name: 'array',
+      validate: (value): value is T[] =>
+        Array.isArray(value) && value.every((item) => itemChecker.check(item)),
+    })
+  }
+
+  check(value: unknown): value is T {
+    return this.definition.validate(value)
+  }
+
+  assert(value: unknown): asserts value is T {
+    if (!this.check(value)) {
+      throw new TypeError(
+        `Expected ${this.definition.name}, got ${typeof value}`,
+      )
+    }
+  }
+}
+
+// Usage example
+const userChecker = TypeChecker.object({
+  name: TypeChecker.string(),
+  age: TypeChecker.number(),
+  hobbies: TypeChecker.array(TypeChecker.string()),
+})
+
+function processUser(input: unknown) {
+  userChecker.assert(input)
+  // TypeScript now knows input is { name: string; age: number; hobbies: string[] }
+  console.log(input.name.toUpperCase())
+  console.log(input.hobbies.map((h) => h.toLowerCase()))
+}
+```
+
+### Problem 4: Implementing a Type-Safe Event System
+
+```typescript
+type EventMap = {
+  'user:login': { userId: string; timestamp: Date }
+  'user:logout': { userId: string }
+  error: { code: number; message: string }
+}
+
+class TypedEventEmitter<TEvents extends Record<string, any>> {
+  private listeners = new Map<keyof TEvents, Set<(data: any) => void>>()
+
+  on<TEvent extends keyof TEvents>(
+    event: TEvent,
+    handler: (data: TEvents[TEvent]) => void,
+  ): () => void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set())
+    }
+
+    const handlers = this.listeners.get(event)!
+    handlers.add(handler)
+
+    return () => {
+      handlers.delete(handler)
+      if (handlers.size === 0) {
+        this.listeners.delete(event)
+      }
+    }
+  }
+
+  once<TEvent extends keyof TEvents>(
+    event: TEvent,
+    handler: (data: TEvents[TEvent]) => void,
+  ): () => void {
+    const unsubscribe = this.on(event, (data) => {
+      handler(data)
+      unsubscribe()
+    })
+    return unsubscribe
+  }
+
+  emit<TEvent extends keyof TEvents>(
+    event: TEvent,
+    data: TEvents[TEvent],
+  ): void {
+    this.listeners.get(event)?.forEach((handler) => {
+      try {
+        handler(data)
+      } catch (error) {
+        console.error('Error in event handler:', error)
+      }
+    })
+  }
+
+  removeAllListeners(): void {
+    this.listeners.clear()
+  }
+}
+
+// Usage
+const events = new TypedEventEmitter<EventMap>()
+
+// TypeScript knows the exact type of the data
+events.on('user:login', ({ userId, timestamp }) => {
+  console.log(`User ${userId} logged in at ${timestamp}`)
+})
+
+events.emit('user:login', {
+  userId: '123',
+  timestamp: new Date(),
+})
+```
+
+These practice problems demonstrate:
+
+1. How to build type-safe systems
+2. Runtime type checking with TypeScript
+3. Complex type inference
+4. Practical applications of type guards and assertions

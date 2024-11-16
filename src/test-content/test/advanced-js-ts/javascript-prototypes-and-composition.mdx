@@ -1,0 +1,483 @@
+# **Advanced JavaScript Patterns: Prototypes & Composition**
+
+Understanding prototypes and composition patterns is crucial for designing flexible and maintainable JavaScript applications. These patterns form the foundation of object-oriented and functional programming in JavaScript.
+
+## **Prototypal Inheritance**
+
+### **Prototype Chain Fundamentals**
+
+1. **Object Prototype**
+
+   ```javascript
+   // Basic prototype chain
+   const animal = {
+     eat: function () {
+       return `${this.name} is eating.`
+     },
+   }
+
+   const dog = Object.create(animal)
+   dog.name = 'Rex'
+   dog.bark = function () {
+     return 'Woof!'
+   }
+
+   console.log(dog.eat()) // Rex is eating.
+   console.log(dog.bark()) // Woof!
+   console.log(Object.getPrototypeOf(dog) === animal) // true
+   ```
+
+2. **Constructor Functions**
+
+   ```javascript
+   function Animal(name) {
+     this.name = name
+   }
+
+   Animal.prototype.eat = function () {
+     return `${this.name} is eating.`
+   }
+
+   function Dog(name, breed) {
+     Animal.call(this, name)
+     this.breed = breed
+   }
+
+   // Set up inheritance
+   Dog.prototype = Object.create(Animal.prototype)
+   Dog.prototype.constructor = Dog
+
+   Dog.prototype.bark = function () {
+     return `${this.name} says woof!`
+   }
+
+   const rex = new Dog('Rex', 'German Shepherd')
+   console.log(rex.eat()) // Rex is eating.
+   console.log(rex.bark()) // Rex says woof!
+   ```
+
+### **Advanced Prototype Patterns**
+
+1. **Multiple Inheritance Simulation**
+
+   ```javascript
+   const swimmer = {
+     swim: function () {
+       return `${this.name} is swimming.`
+     },
+   }
+
+   const flyer = {
+     fly: function () {
+       return `${this.name} is flying.`
+     },
+   }
+
+   function Duck(name) {
+     this.name = name
+   }
+
+   // Extend prototype with multiple behaviors
+   Object.assign(Duck.prototype, swimmer, flyer)
+
+   const donald = new Duck('Donald')
+   console.log(donald.swim()) // Donald is swimming.
+   console.log(donald.fly()) // Donald is flying.
+   ```
+
+2. **Dynamic Prototypes**
+
+   ```javascript
+   function Vehicle(type) {
+     // Dynamic prototype pattern
+     if (typeof Vehicle.prototype.getType !== 'function') {
+       Vehicle.prototype.getType = function () {
+         return this.type
+       }
+     }
+
+     this.type = type
+   }
+
+   const car = new Vehicle('Car')
+   console.log(car.getType()) // Car
+   ```
+
+## **Object Composition**
+
+### **Composition Patterns**
+
+1. **Factory Functions**
+
+   ```javascript
+   // Behaviors as separate objects
+   const hasName = (name) => ({
+     getName: () => name,
+     setName: (newName) => (name = newName),
+   })
+
+   const canSpeak = (sound) => ({
+     speak: () => sound,
+   })
+
+   const canEat = () => ({
+     eat: (food) => `Eating ${food}`,
+   })
+
+   // Factory function combining behaviors
+   function createAnimal(name, sound) {
+     return {
+       ...hasName(name),
+       ...canSpeak(sound),
+       ...canEat(),
+     }
+   }
+
+   const dog = createAnimal('Rex', 'Woof!')
+   console.log(dog.getName()) // Rex
+   console.log(dog.speak()) // Woof!
+   console.log(dog.eat('bone')) // Eating bone
+   ```
+
+2. **Mixins**
+
+   ```javascript
+   const loggerMixin = {
+     log(message) {
+       console.log(`[${this.name}]: ${message}`)
+     },
+     error(message) {
+       console.error(`[${this.name}] Error: ${message}`)
+     },
+   }
+
+   const timestampMixin = {
+     getTimestamp() {
+       return new Date().toISOString()
+     },
+     logWithTime(message) {
+       console.log(`${this.getTimestamp()} - ${message}`)
+     },
+   }
+
+   class Logger {
+     constructor(name) {
+       this.name = name
+     }
+   }
+
+   // Apply mixins
+   Object.assign(Logger.prototype, loggerMixin, timestampMixin)
+
+   const logger = new Logger('AppLogger')
+   logger.log('Application started')
+   logger.logWithTime('Event occurred')
+   ```
+
+### **Functional Composition**
+
+1. **Function Composition**
+
+   ```javascript
+   const compose =
+     (...fns) =>
+     (x) =>
+       fns.reduceRight((acc, fn) => fn(acc), x)
+
+   const pipe =
+     (...fns) =>
+     (x) =>
+       fns.reduce((acc, fn) => fn(acc), x)
+
+   // Example functions
+   const addTax = (price) => price * 1.2
+   const addShipping = (price) => price + 5
+   const formatPrice = (price) => `$${price.toFixed(2)}`
+
+   // Compose functions
+   const calculateTotalPrice = compose(formatPrice, addShipping, addTax)
+
+   console.log(calculateTotalPrice(100)) // $125.00
+   ```
+
+2. **Point-Free Style**
+
+   ```javascript
+   const map = (fn) => (array) => array.map(fn)
+   const filter = (predicate) => (array) => array.filter(predicate)
+   const reduce = (fn, initial) => (array) => array.reduce(fn, initial)
+
+   // Example usage
+   const numbers = [1, 2, 3, 4, 5]
+   const double = (n) => n * 2
+   const isEven = (n) => n % 2 === 0
+   const sum = (a, b) => a + b
+
+   const sumOfDoubledEvens = pipe(filter(isEven), map(double), reduce(sum, 0))
+
+   console.log(sumOfDoubledEvens(numbers)) // 12
+   ```
+
+## **ES6 Class Implementation**
+
+### **Class Patterns**
+
+1. **Basic Class Structure**
+
+   ```javascript
+   class Vehicle {
+     #privateField = 'private' // Private field
+
+     constructor(make, model) {
+       this.make = make
+       this.model = model
+     }
+
+     static create(make, model) {
+       return new Vehicle(make, model)
+     }
+
+     get description() {
+       return `${this.make} ${this.model}`
+     }
+
+     set year(value) {
+       if (value > 1900) {
+         this._year = value
+       }
+     }
+
+     toString() {
+       return `${this.description} (${this._year})`
+     }
+   }
+   ```
+
+2. **Inheritance and Super**
+
+   ```javascript
+   class ElectricVehicle extends Vehicle {
+     constructor(make, model, batteryCapacity) {
+       super(make, model)
+       this.batteryCapacity = batteryCapacity
+     }
+
+     get range() {
+       return this.batteryCapacity * 4
+     }
+
+     toString() {
+       return `${super.toString()} - Range: ${this.range}mi`
+     }
+   }
+   ```
+
+### **Advanced Class Patterns**
+
+1. **Abstract Classes**
+
+   ```javascript
+   class AbstractRepository {
+     constructor() {
+       if (new.target === AbstractRepository) {
+         throw new Error('Cannot instantiate abstract class')
+       }
+     }
+
+     create() {
+       throw new Error('Method not implemented')
+     }
+     read() {
+       throw new Error('Method not implemented')
+     }
+     update() {
+       throw new Error('Method not implemented')
+     }
+     delete() {
+       throw new Error('Method not implemented')
+     }
+   }
+
+   class UserRepository extends AbstractRepository {
+     create(user) {
+       // Implementation
+     }
+
+     read(id) {
+       // Implementation
+     }
+
+     update(user) {
+       // Implementation
+     }
+
+     delete(id) {
+       // Implementation
+     }
+   }
+   ```
+
+2. **Singleton Pattern**
+
+   ```javascript
+   class Singleton {
+     static #instance
+
+     constructor() {
+       if (Singleton.#instance) {
+         return Singleton.#instance
+       }
+       Singleton.#instance = this
+     }
+
+     static getInstance() {
+       if (!Singleton.#instance) {
+         Singleton.#instance = new Singleton()
+       }
+       return Singleton.#instance
+     }
+   }
+   ```
+
+## **Design Patterns with Prototypes and Classes**
+
+1. **Observer Pattern**
+
+   ```javascript
+   class EventEmitter {
+     constructor() {
+       this.events = new Map()
+     }
+
+     on(event, callback) {
+       if (!this.events.has(event)) {
+         this.events.set(event, [])
+       }
+       this.events.get(event).push(callback)
+     }
+
+     emit(event, data) {
+       if (this.events.has(event)) {
+         this.events.get(event).forEach((callback) => callback(data))
+       }
+     }
+
+     off(event, callback) {
+       if (this.events.has(event)) {
+         const callbacks = this.events.get(event)
+         this.events.set(
+           event,
+           callbacks.filter((cb) => cb !== callback),
+         )
+       }
+     }
+   }
+   ```
+
+2. **Decorator Pattern**
+
+   ```javascript
+   class Coffee {
+     cost() {
+       return 5
+     }
+
+     description() {
+       return 'Coffee'
+     }
+   }
+
+   class MilkDecorator {
+     constructor(coffee) {
+       this.coffee = coffee
+     }
+
+     cost() {
+       return this.coffee.cost() + 2
+     }
+
+     description() {
+       return `${this.coffee.description()} with milk`
+     }
+   }
+
+   class SugarDecorator {
+     constructor(coffee) {
+       this.coffee = coffee
+     }
+
+     cost() {
+       return this.coffee.cost() + 1
+     }
+
+     description() {
+       return `${this.coffee.description()} with sugar`
+     }
+   }
+
+   let coffee = new Coffee()
+   coffee = new MilkDecorator(coffee)
+   coffee = new SugarDecorator(coffee)
+   ```
+
+## **Performance Optimization**
+
+1. **Prototype Chain Optimization**
+
+   ```javascript
+   // Bad - creates new function for each instance
+   function BadAnimal(name) {
+     this.name = name
+     this.speak = function () {
+       return `${this.name} makes a sound`
+     }
+   }
+
+   // Good - shares function through prototype
+   function GoodAnimal(name) {
+     this.name = name
+   }
+
+   GoodAnimal.prototype.speak = function () {
+     return `${this.name} makes a sound`
+   }
+   ```
+
+2. **Property Lookup Optimization**
+   ```javascript
+   // Cache prototype lookups
+   function optimizedMethod() {
+     const proto = Object.getPrototypeOf(this)
+     // Cache the result
+     optimizedMethod.cachedProto = proto
+   }
+   ```
+
+## **Interview Questions**
+
+1. "Explain the prototype chain in JavaScript."
+2. "What are the differences between classical inheritance and prototypal inheritance?"
+3. "How would you implement multiple inheritance in JavaScript?"
+4. "Explain the benefits of composition over inheritance."
+5. "What are the advantages of using ES6 classes over constructor functions?"
+6. "How would you implement private properties in classes before private fields?"
+
+## **Practice Problems**
+
+1. Implement a mixin system that handles method conflicts
+2. Create a class hierarchy that demonstrates the limitations of inheritance
+3. Refactor an inheritance-based system to use composition
+4. Implement a plugin system using prototypes
+
+## **Additional Resources**
+
+- [MDN Inheritance and the Prototype Chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain)
+- [JavaScript Design Patterns](https://addyosmani.com/resources/essentialjsdesignpatterns/book/)
+- [You Don't Know JS: this & Object Prototypes](https://github.com/getify/You-Dont-Know-JS/tree/1st-ed/this%20%26%20object%20prototypes)
+
+Would you like me to:
+
+1. Add more practical examples?
+2. Include more interview questions?
+3. Add more performance optimization techniques?
+4. Create more practice problems?

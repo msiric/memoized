@@ -1,0 +1,558 @@
+# **Advanced Styling Systems & Design Systems**
+
+This lesson covers the implementation of design systems and advanced styling patterns for large-scale React applications.
+
+## **Design System Implementation**
+
+### **Token Management**
+
+```typescript
+// Design token system
+interface DesignToken<T = any> {
+  value: T
+  type: string
+  category: string
+  description?: string
+}
+
+class DesignTokens {
+  private tokens: Map<string, DesignToken> = new Map()
+  private aliases: Map<string, string> = new Map()
+
+  register<T>(
+    name: string,
+    token: Omit<DesignToken<T>, 'value'> & { value: T },
+  ): void {
+    this.tokens.set(name, token)
+  }
+
+  alias(alias: string, tokenName: string): void {
+    if (!this.tokens.has(tokenName)) {
+      throw new Error(`Token ${tokenName} not found`)
+    }
+    this.aliases.set(alias, tokenName)
+  }
+
+  get<T>(name: string): T {
+    const tokenName = this.aliases.get(name) || name
+    const token = this.tokens.get(tokenName)
+
+    if (!token) {
+      throw new Error(`Token ${name} not found`)
+    }
+
+    return token.value as T
+  }
+
+  export(): Record<string, any> {
+    const result: Record<string, any> = {}
+
+    this.tokens.forEach((token, name) => {
+      result[name] = token.value
+    })
+
+    this.aliases.forEach((tokenName, alias) => {
+      result[alias] = this.tokens.get(tokenName)?.value
+    })
+
+    return result
+  }
+}
+
+// Usage
+const tokens = new DesignTokens()
+
+tokens.register('color.primary', {
+  value: '#0066cc',
+  type: 'color',
+  category: 'brand',
+})
+
+tokens.register('spacing.unit', {
+  value: 4,
+  type: 'number',
+  category: 'spacing',
+})
+
+tokens.alias('primaryColor', 'color.primary')
+```
+
+### **Component System**
+
+```typescript
+// Component variant system
+interface VariantDefinition {
+  styles: StyleSheet;
+  props?: Record<string, any>;
+}
+
+class ComponentSystem {
+  private components = new Map<
+    string,
+    Map<string, VariantDefinition>
+  >();
+
+  registerComponent(
+    name: string,
+    variants: Record<string, VariantDefinition>
+  ): void {
+    const variantMap = new Map(Object.entries(variants));
+    this.components.set(name, variantMap);
+  }
+
+  getVariant(
+    componentName: string,
+    variantName: string
+  ): VariantDefinition {
+    const component = this.components.get(componentName);
+    if (!component) {
+      throw new Error(`Component ${componentName} not found`);
+    }
+
+    const variant = component.get(variantName);
+    if (!variant) {
+      throw new Error(
+        `Variant ${variantName} not found for ${componentName}`
+      );
+    }
+
+    return variant;
+  }
+}
+
+// React implementation
+interface DesignComponentProps {
+  component: string;
+  variant: string;
+  [key: string]: any;
+}
+
+const DesignComponent: React.FC<DesignComponentProps> = ({
+  component,
+  variant,
+  ...props
+}) => {
+  const system = useContext(ComponentSystemContext);
+  const { styles, props: variantProps } = system.getVariant(
+    component,
+    variant
+  );
+
+  const className = useStyles(styles);
+
+  return (
+    <div
+      className={className}
+      {...variantProps}
+      {...props}
+    />
+  );
+};
+```
+
+## **Component Styling Architecture**
+
+### **Style Composition System**
+
+```typescript
+// Style composition engine
+type StyleComposition = {
+  base: StyleSheet
+  variants: Record<string, StyleSheet>
+  states: Record<string, StyleSheet>
+  modifiers: Record<string, (props: any) => StyleSheet>
+}
+
+class StyleComposer {
+  compose(composition: StyleComposition, props: any): StyleSheet {
+    let result = { ...composition.base }
+
+    // Apply variants
+    if (props.variant && composition.variants[props.variant]) {
+      result = {
+        ...result,
+        ...composition.variants[props.variant],
+      }
+    }
+
+    // Apply states
+    Object.entries(composition.states).forEach(([state, styles]) => {
+      if (props[state]) {
+        result = { ...result, ...styles }
+      }
+    })
+
+    // Apply modifiers
+    Object.entries(composition.modifiers).forEach(([name, modifier]) => {
+      if (props[name] !== undefined) {
+        result = {
+          ...result,
+          ...modifier(props[name]),
+        }
+      }
+    })
+
+    return result
+  }
+}
+
+// React hook for style composition
+function useComposedStyles(composition: StyleComposition, props: any) {
+  const composer = useContext(StyleComposerContext)
+
+  return useMemo(() => {
+    return composer.compose(composition, props)
+  }, [composer, composition, props])
+}
+
+// Usage
+const buttonStyles: StyleComposition = {
+  base: {
+    padding: '8px 16px',
+    borderRadius: '4px',
+    border: 'none',
+    cursor: 'pointer',
+  },
+  variants: {
+    primary: {
+      backgroundColor: 'blue',
+      color: 'white',
+    },
+    secondary: {
+      backgroundColor: 'gray',
+      color: 'black',
+    },
+  },
+  states: {
+    disabled: {
+      opacity: 0.5,
+      cursor: 'not-allowed',
+    },
+    loading: {
+      cursor: 'wait',
+    },
+  },
+  modifiers: {
+    size: (size: 'small' | 'large') => ({
+      fontSize: size === 'small' ? '12px' : '18px',
+      padding: size === 'small' ? '4px 8px' : '12px 24px',
+    }),
+  },
+}
+```
+
+## **Design Tokens and Variables**
+
+### **Token Transform System**
+
+```typescript
+// Token transformer
+type TransformFunction = (value: any) => any
+
+class TokenTransformer {
+  private transforms = new Map<string, TransformFunction>()
+
+  register(type: string, transform: TransformFunction): void {
+    this.transforms.set(type, transform)
+  }
+
+  transform(token: DesignToken): any {
+    const transform = this.transforms.get(token.type)
+    return transform ? transform(token.value) : token.value
+  }
+}
+
+// CSS variable generator
+class CSSVariableGenerator {
+  private prefix: string
+
+  constructor(prefix: string = '--') {
+    this.prefix = prefix
+  }
+
+  generateVariables(tokens: DesignTokens): Record<string, string> {
+    const variables: Record<string, string> = {}
+    const exported = tokens.export()
+
+    Object.entries(exported).forEach(([name, value]) => {
+      variables[`${this.prefix}${name}`] = this.formatValue(value)
+    })
+
+    return variables
+  }
+
+  private formatValue(value: any): string {
+    if (typeof value === 'number') {
+      return `${value}px`
+    }
+    return String(value)
+  }
+}
+
+// CSS custom properties manager
+class CustomPropertiesManager {
+  private sheet: HTMLStyleElement
+
+  constructor() {
+    this.sheet = document.createElement('style')
+    document.head.appendChild(this.sheet)
+  }
+
+  setProperties(
+    properties: Record<string, string>,
+    selector: string = ':root',
+  ): void {
+    const rules = Object.entries(properties)
+      .map(([prop, value]) => `${prop}: ${value};`)
+      .join('\n')
+
+    this.sheet.textContent = `
+      ${selector} {
+        ${rules}
+      }
+    `
+  }
+}
+```
+
+## **Responsive Patterns**
+
+### **Responsive System**
+
+```typescript
+// Breakpoint system
+interface Breakpoint {
+  min?: number
+  max?: number
+}
+
+class BreakpointSystem {
+  private breakpoints: Map<string, Breakpoint> = new Map()
+
+  register(name: string, breakpoint: Breakpoint): void {
+    this.breakpoints.set(name, breakpoint)
+  }
+
+  createMediaQuery(name: string): string {
+    const breakpoint = this.breakpoints.get(name)
+    if (!breakpoint) {
+      throw new Error(`Breakpoint ${name} not found`)
+    }
+
+    const conditions: string[] = []
+
+    if (breakpoint.min !== undefined) {
+      conditions.push(`(min-width: ${breakpoint.min}px)`)
+    }
+
+    if (breakpoint.max !== undefined) {
+      conditions.push(`(max-width: ${breakpoint.max}px)`)
+    }
+
+    return `@media ${conditions.join(' and ')}`
+  }
+}
+
+// Responsive style generator
+class ResponsiveStyleGenerator {
+  private breakpointSystem: BreakpointSystem
+
+  constructor(breakpointSystem: BreakpointSystem) {
+    this.breakpointSystem = breakpointSystem
+  }
+
+  generate(styles: Record<string, Record<string, any>>): StyleSheet {
+    const result: StyleSheet = {}
+
+    Object.entries(styles).forEach(([breakpoint, style]) => {
+      if (breakpoint === 'base') {
+        Object.assign(result, style)
+      } else {
+        const query = this.breakpointSystem.createMediaQuery(breakpoint)
+        result[query] = style
+      }
+    })
+
+    return result
+  }
+}
+
+// React hook for responsive styles
+function useResponsiveStyles(styles: Record<string, Record<string, any>>) {
+  const generator = useContext(ResponsiveStyleGeneratorContext)
+
+  return useMemo(() => {
+    return generator.generate(styles)
+  }, [generator, styles])
+}
+```
+
+## **Animation System**
+
+### **Animation Framework**
+
+```typescript
+// Animation system
+interface AnimationDefinition {
+  keyframes: Keyframe[];
+  options?: KeyframeEffectOptions;
+}
+
+class AnimationSystem {
+  private animations = new Map<string, AnimationDefinition>();
+
+  register(name: string, animation: AnimationDefinition): void {
+    this.animations.set(name, animation);
+  }
+
+  create(
+    name: string,
+    element: Element
+  ): Animation {
+    const definition = this.animations.get(name);
+    if (!definition) {
+      throw new Error(`Animation ${name} not found`);
+    }
+
+    return element.animate(
+      definition.keyframes,
+      definition.options
+    );
+  }
+}
+
+// React hook for animations
+function useAnimation(name: string) {
+  const elementRef = useRef<HTMLElement>(null);
+  const animationRef = useRef<Animation | null>(null);
+  const system = useContext(AnimationSystemContext);
+
+  const play = useCallback(() => {
+    if (elementRef.current && !animationRef.current) {
+      animationRef.current = system.create(name, elementRef.current);
+    }
+    animationRef.current?.play();
+  }, [name, system]);
+
+  const pause = useCallback(() => {
+    animationRef.current?.pause();
+  }, []);
+
+  const stop = useCallback(() => {
+    animationRef.current?.cancel();
+    animationRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      animationRef.current?.cancel();
+    };
+  }, []);
+
+  return { elementRef, play, pause, stop };
+}
+
+// Usage
+const FadeInComponent: React.FC = () => {
+  const { elementRef, play } = useAnimation('fadeIn');
+
+  useEffect(() => {
+    play();
+  }, [play]);
+
+  return <div ref={elementRef}>Content</div>;
+};
+```
+
+## **Accessibility Patterns**
+
+### **Accessible Style System**
+
+```typescript
+// Accessibility enhancer
+class AccessibilityEnhancer {
+  private rules = new Map<string, (styles: StyleSheet) => StyleSheet>()
+
+  register(name: string, enhancer: (styles: StyleSheet) => StyleSheet): void {
+    this.rules.set(name, enhancer)
+  }
+
+  enhance(styles: StyleSheet, rules: string[]): StyleSheet {
+    return rules.reduce((enhanced, rule) => {
+      const enhancer = this.rules.get(rule)
+      return enhancer ? enhancer(enhanced) : enhanced
+    }, styles)
+  }
+}
+
+// Focus management system
+class FocusStyleManager {
+  private styles: StyleSheet = {
+    outline: '2px solid blue',
+    outlineOffset: '2px',
+  }
+
+  setFocusStyles(styles: StyleSheet): void {
+    this.styles = styles
+  }
+
+  getFocusStyles(): StyleSheet {
+    return this.styles
+  }
+
+  apply(element: HTMLElement): void {
+    const originalOutline = element.style.outline
+    const originalOutlineOffset = element.style.outlineOffset
+
+    element.addEventListener('focus', () => {
+      Object.assign(element.style, this.styles)
+    })
+
+    element.addEventListener('blur', () => {
+      element.style.outline = originalOutline
+      element.style.outlineOffset = originalOutlineOffset
+    })
+  }
+}
+
+// React hook for accessible styles
+function useAccessibleStyles(
+  baseStyles: StyleSheet,
+  accessibilityRules: string[],
+) {
+  const enhancer = useContext(AccessibilityEnhancerContext)
+
+  return useMemo(() => {
+    return enhancer.enhance(baseStyles, accessibilityRules)
+  }, [enhancer, baseStyles, accessibilityRules])
+}
+```
+
+## **Interview Questions**
+
+1. "How would you implement a scalable design token system?"
+2. "Explain your approach to building a component variant system."
+3. "How would you handle responsive design in a design system?"
+4. "What strategies would you use for managing animation complexity?"
+5. "How would you implement accessibility features in a design system?"
+6. "Explain your approach to managing theme variations in a design system."
+
+## **Practice Problems**
+
+1. Implement a design token system with aliasing and transformations
+2. Create a component variant system with composition
+3. Build a responsive style generator
+4. Implement an animation system with keyframe management
+
+## **Additional Resources**
+
+- [Design Systems Handbook](https://www.designbetter.co/design-systems-handbook)
+- [Building Design Systems](https://www.atomic-design.bradfrost.com/)
+- [Web Animation API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API)
+
+Would you like me to:
+
+1. Add more practical examples?
+2. Include more interview questions?
+3. Add more implementation patterns?
+4. Create more practice problems?
