@@ -30,6 +30,7 @@ import {
 } from 'react-icons/md'
 import { RiJavascriptLine } from 'react-icons/ri'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
+import { codeToHtml } from 'shiki'
 import { HomepageBackground } from '../components/icons/HomepageBackground'
 import { ThemeToggle } from '../components/ThemeToggle'
 
@@ -183,7 +184,13 @@ const codeSnippets = [
 ]
 
 export default async function Home() {
-  const activeBanners = await getActiveBanners()
+  const [activeBanners, initialSnippet] = await Promise.all([
+    getActiveBanners(),
+    codeToHtml(codeSnippets[0]?.code, {
+      lang: 'ts',
+      theme: 'nord',
+    }),
+  ])
 
   return (
     <div className="flex w-full flex-col">
@@ -271,6 +278,7 @@ export default async function Home() {
                     <div className="absolute -bottom-px left-11 right-20 h-px bg-gradient-to-r from-lime-400/0 via-lime-400 to-lime-400/0" />
                     <AnimatedCode
                       initialTab={codeSnippets[0].tab}
+                      initialSnippet={initialSnippet}
                       codeSnippets={codeSnippets}
                     />
                   </div>
@@ -372,6 +380,60 @@ export default async function Home() {
               </div>
             </section>
 
+            <header className="mx-auto max-w-3xl pb-8 pt-8 text-center sm:pb-12 sm:pt-12">
+              <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
+                Content overview
+              </h2>
+              <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
+                Comprehensive interview preparation covering both algorithmic
+                challenges and advanced frontend techniques
+              </p>
+            </header>
+            <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
+              <div className="grid grid-cols-1 gap-8 px-4 lg:grid-cols-2 lg:gap-12">
+                {completeCurriculum.map((track) => (
+                  <div
+                    key={track.id}
+                    className="mx-auto w-full max-w-[650px] rounded-2xl px-4 sm:px-8 lg:px-12"
+                  >
+                    <div className="mb-8">
+                      <h3 className="text-center text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+                        {track.title}
+                      </h3>
+                      <p className="text-md mt-2 text-center text-zinc-500 dark:text-zinc-300">
+                        {track.description}
+                      </p>
+                    </div>
+                    <div className="not-prose grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {track.sections.map((section) => (
+                        <div
+                          key={section.title}
+                          className="group relative mx-auto w-full max-w-[280px] rounded-xl"
+                        >
+                          <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-200 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
+                          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center">
+                            <div className="rounded-full bg-zinc-700 p-4">
+                              {
+                                SECTION_ICONS[
+                                  section.icon as keyof typeof SECTION_ICONS
+                                ]
+                              }
+                            </div>
+                            <h2 className="font-display mt-4 text-base text-zinc-900 dark:text-white">
+                              <a href={section.href}>
+                                <span className="absolute -inset-px rounded-xl" />
+                                {section.title}
+                              </a>
+                            </h2>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <section
               id="introduction"
               aria-label="Introduction"
@@ -464,60 +526,6 @@ export default async function Home() {
                 </ul>
               </div>
             </section>
-
-            <header className="mx-auto max-w-3xl pb-8 pt-8 text-center sm:pb-12 sm:pt-12">
-              <h2 className="text-3xl font-medium tracking-tight text-zinc-900 dark:text-white">
-                Content overview
-              </h2>
-              <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
-                Comprehensive interview preparation covering both algorithmic
-                challenges and advanced frontend techniques
-              </p>
-            </header>
-            <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
-              <div className="grid grid-cols-1 gap-8 px-4 lg:grid-cols-2 lg:gap-12">
-                {completeCurriculum.map((track) => (
-                  <div
-                    key={track.id}
-                    className="mx-auto w-full max-w-[650px] rounded-2xl px-4 sm:px-8 lg:px-12"
-                  >
-                    <div className="mb-8">
-                      <h3 className="text-center text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
-                        {track.title}
-                      </h3>
-                      <p className="text-md mt-2 text-center text-zinc-500 dark:text-zinc-300">
-                        {track.description}
-                      </p>
-                    </div>
-                    <div className="not-prose grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {track.sections.map((section) => (
-                        <div
-                          key={section.title}
-                          className="group relative mx-auto w-full max-w-[280px] rounded-xl"
-                        >
-                          <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 transition-all duration-200 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.lime.50)),var(--quick-links-hover-bg,theme(colors.lime.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.lime.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />
-                          <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-xl p-6 text-center">
-                            <div className="rounded-full bg-zinc-700 p-4">
-                              {
-                                SECTION_ICONS[
-                                  section.icon as keyof typeof SECTION_ICONS
-                                ]
-                              }
-                            </div>
-                            <h2 className="font-display mt-4 text-base text-zinc-900 dark:text-white">
-                              <a href={section.href}>
-                                <span className="absolute -inset-px rounded-xl" />
-                                {section.title}
-                              </a>
-                            </h2>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </article>
         </div>
       </div>

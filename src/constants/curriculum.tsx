@@ -115,7 +115,7 @@ export const completeCurriculum = [
           'Understanding and utilizing built-in data structures in programming.',
         about:
           'Understand and utilize the fundamental data structures built into JavaScript. Learn their concepts, use cases, time and space complexities, and practical tips and tricks. Avoid common pitfalls and master advanced string algorithms, numerical operations, arrays, objects, sets, maps, and more.',
-        icon: 'browserAndWebApisIcon',
+        icon: 'browserAndWebAPIsIcon',
         lessons: [...browserAndWebApis],
       },
       {
@@ -137,7 +137,7 @@ export const completeCurriculum = [
           'Exploring widely-used algorithms and problem-solving techniques.',
         about:
           'Explore widely-used algorithms and problem-solving techniques essential for coding interviews. Master sliding windows, two pointers, cyclic sort, tree and graph traversals, binary search, and many more. Apply these techniques to solve complex problems with confidence.',
-        icon: 'typescriptAdvancedConceptsIcon',
+        icon: 'typescriptAdvancedIcon',
         lessons: [...typescriptAdvancedConcepts],
       },
       {
@@ -147,7 +147,7 @@ export const completeCurriculum = [
         description: 'Diving into complex topics for in-depth understanding.',
         about:
           'Dive into complex topics for an in-depth understanding of sophisticated algorithms. Study network flow algorithms, dynamic programming, segment trees, union find, minimum spanning trees, shortest path algorithms, and more. Gain a competitive edge with knowledge of advanced concepts and their practical applications.',
-        icon: 'modernFrontendDevelopmentIcon',
+        icon: 'modernFrontendIcon',
         lessons: [...modernFrontendDevelopment],
       },
     ],
