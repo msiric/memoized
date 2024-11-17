@@ -1,0 +1,1299 @@
+**Lesson Title**: **Execution Context and Call Stack in JavaScript**
+
+**Lesson Description**:  
+Delve into the fundamental concepts of Execution Contexts and the Call Stack in JavaScript. Understand how the JavaScript engine manages different execution contexts, how functions are invoked, and how the call stack operates. This comprehensive lesson will equip you with the knowledge to write efficient code, debug effectively, and excel in technical interviews by exploring often overlooked aspects of JavaScript's execution model.
+
+---
+
+# **Execution Context and Call Stack in JavaScript**
+
+Understanding Execution Contexts and the Call Stack is crucial for grasping how JavaScript code runs under the hood. These concepts are foundational for debugging, optimizing performance, and answering technical interview questions with confidence. This lesson provides an in-depth exploration of global and function execution contexts, how the call stack manages these contexts, and the implications for your JavaScript programs.
+
+---
+
+## **Execution Contexts**
+
+### **What is an Execution Context?**
+
+An **Execution Context** is an abstract concept that holds information about the environment within which the current code is being executed. It encompasses everything that is needed for the JavaScript engine to evaluate and execute the code.
+
+### **Types of Execution Contexts**
+
+1. **Global Execution Context**
+2. **Functional Execution Context**
+3. **Eval Execution Context** (rarely used and generally discouraged)
+
+### **1. Global Execution Context**
+
+- **Definition**: The default or base context where any JavaScript code runs first.
+- **Characteristics**:
+  - Creates a global object (`window` in browsers, `global` in Node.js).
+  - Establishes the `this` keyword to refer to the global object.
+  - Executes global code and sets up the environment for subsequent code execution.
+- **Creation Phase**:
+  - **Creation of Global Object**: Sets up the global environment.
+  - **Setting Up the `this` Keyword**: Points to the global object.
+  - **Variable Object (VO)**: Contains all global variables and function declarations.
+
+### **2. Functional Execution Context**
+
+- **Definition**: Created whenever a function is invoked.
+- **Characteristics**:
+  - Each function call has its own execution context.
+  - Establishes a new scope for variables and functions declared within the function.
+  - Manages the `this` keyword based on how the function is called.
+- **Creation Phase**:
+  - **Creation of Variable Object**: Includes function arguments, inner variable declarations, and inner function declarations.
+  - **Setting Up the `this` Keyword**: Depends on the invocation pattern (default, implicit, explicit, `new`, or arrow functions).
+  - **Lexical Environment**: Defines how variables and functions are scoped and accessed.
+
+### **3. Eval Execution Context**
+
+- **Definition**: Created when code is executed inside an `eval()` function.
+- **Characteristics**:
+  - Not commonly used due to security and performance concerns.
+  - Can introduce new variables and functions into the existing scope.
+
+---
+
+## **Call Stack**
+
+### **What is the Call Stack?**
+
+The **Call Stack** is a stack data structure that keeps track of function calls in a program. It follows the Last-In-First-Out (LIFO) principle, meaning the last function called is the first to be executed.
+
+### **How the Call Stack Works**
+
+1. **Function Invocation**: When a function is invoked, a new execution context is created and pushed onto the call stack.
+2. **Function Execution**: The JavaScript engine executes the function's code within its execution context.
+3. **Function Completion**: Once the function finishes execution, its execution context is popped off the call stack.
+4. **Error Handling**: If an error occurs within a function, the call stack unwinds to identify where the error originated.
+
+### **Call Stack Flow**
+
+**Example:**
+
+```javascript
+function first() {
+  second()
+  console.log('First Function')
+}
+
+function second() {
+  console.log('Second Function')
+}
+
+first()
+```
+
+**Execution Steps:**
+
+1. **Global Context**: Created and pushed onto the call stack.
+2. **Function `first` Call**:
+   - `first` execution context is created and pushed onto the stack.
+3. **Function `second` Call Inside `first`**:
+   - `second` execution context is created and pushed onto the stack.
+4. **Logging in `second`**:
+   - `'Second Function'` is logged.
+   - `second` execution context is popped off the stack.
+5. **Logging in `first`**:
+   - `'First Function'` is logged.
+   - `first` execution context is popped off the stack.
+6. **Global Context**: Remains until the program ends.
+
+**Call Stack Visualization:**
+
+```
+[Global Execution Context]
+        |
+        V
+      first()
+        |
+        V
+      second()
+```
+
+**Output:**
+
+```
+Second Function
+First Function
+```
+
+---
+
+### **Recursion and the Call Stack**
+
+**Example:**
+
+```javascript
+function factorial(n) {
+  if (n === 0) return 1
+  return n * factorial(n - 1)
+}
+
+console.log(factorial(3))
+```
+
+**Execution Steps:**
+
+1. **Global Context**: Pushed onto the stack.
+2. **Function `factorial(3)` Call**:
+   - `factorial(3)` execution context pushed.
+3. **Function `factorial(2)` Call Inside `factorial(3)`**:
+   - `factorial(2)` execution context pushed.
+4. **Function `factorial(1)` Call Inside `factorial(2)`**:
+   - `factorial(1)` execution context pushed.
+5. **Function `factorial(0)` Call Inside `factorial(1)`**:
+   - `factorial(0)` execution context pushed.
+6. **Base Case Reached**:
+   - Returns `1`.
+   - `factorial(0)` execution context popped.
+7. **Return to `factorial(1)`**:
+   - Calculates `1 * 1 = 1`.
+   - Returns `1`.
+   - `factorial(1)` execution context popped.
+8. **Return to `factorial(2)`**:
+   - Calculates `2 * 1 = 2`.
+   - Returns `2`.
+   - `factorial(2)` execution context popped.
+9. **Return to `factorial(3)`**:
+   - Calculates `3 * 2 = 6`.
+   - Returns `6`.
+   - `factorial(3)` execution context popped.
+10. **Global Context**:
+    - Logs `6`.
+
+**Output:**
+
+```
+6
+```
+
+---
+
+## **Detailed Breakdown of Execution Context Phases**
+
+Each execution context goes through two phases:
+
+1. **Creation Phase**
+2. **Execution Phase**
+
+### **1. Creation Phase**
+
+- **Variable Object (VO)**:
+  - **Global Context**:
+    - Contains global variables and functions.
+  - **Function Context**:
+    - Contains function arguments, inner variables, and inner functions.
+- **Scope Chain**:
+  - Determines the accessibility of variables.
+  - Comprises the current context's Variable Object and its outer context's Variable Objects.
+- **`this` Binding**:
+  - Determines the value of `this` within the context.
+
+### **2. Execution Phase**
+
+- **Variable Assignment**:
+  - Variables are assigned their values.
+- **Function Execution**:
+  - Function code is executed line by line.
+
+---
+
+## **Global vs. Function Execution Contexts**
+
+### **Global Execution Context**
+
+- **Single Instance**: Only one global execution context exists per program.
+- **Scope**: Contains all globally scoped variables and functions.
+- **`this` Keyword**:
+  - Refers to the global object (`window` in browsers).
+- **Lifecycle**: Exists throughout the lifetime of the application.
+
+**Example:**
+
+```javascript
+var globalVar = 'I am global'
+
+function greet() {
+  console.log('Hello')
+}
+
+greet()
+```
+
+- **Global Context VO**:
+  - `globalVar`: `'I am global'`
+  - `greet`: Function reference
+
+### **Function Execution Context**
+
+- **Multiple Instances**: Each function invocation creates a new execution context.
+- **Scope**: Contains local variables, parameters, and inner functions.
+- **`this` Keyword**:
+  - Depends on how the function is called (default, implicit, explicit, `new`, or arrow functions).
+- **Lifecycle**: Exists from the time the function is invoked until it returns.
+
+**Example:**
+
+```javascript
+function add(a, b) {
+  var result = a + b
+  return result
+}
+
+add(2, 3)
+```
+
+- **Function `add` Context VO**:
+  - `a`: `2`
+  - `b`: `3`
+  - `result`: `5`
+
+---
+
+## **Call Stack Management**
+
+### **Stack Frames**
+
+Each execution context corresponds to a **stack frame** on the call stack. A stack frame contains:
+
+- **Variable Object**: Variables and function declarations.
+- **Scope Chain**: For resolving variable access.
+- **`this` Binding**: Context-specific `this` value.
+
+### **Function Invocation and Stack Frames**
+
+1. **Function Call**: Invokes a function, creating a new stack frame.
+2. **Function Execution**: Executes within its own context.
+3. **Function Return**: Removes the stack frame from the call stack.
+
+**Example:**
+
+```javascript
+function first() {
+  second()
+  console.log('First')
+}
+
+function second() {
+  console.log('Second')
+}
+
+first()
+```
+
+**Call Stack Steps:**
+
+1. **Global Context**:
+   - Executes `first()`.
+2. **`first` Function Context**:
+   - Executes `second()`.
+3. **`second` Function Context**:
+   - Logs `'Second'`.
+   - Returns to `first` context.
+4. **`first` Function Context**:
+   - Logs `'First'`.
+   - Returns to Global context.
+
+**Call Stack Visualization:**
+
+```
+[Global Execution Context]
+        |
+        V
+      first()
+        |
+        V
+      second()
+```
+
+**Output:**
+
+```
+Second
+First
+```
+
+---
+
+### **Recursion and the Call Stack**
+
+**Example:**
+
+```javascript
+function countdown(n) {
+  if (n === 0) {
+    console.log('Blast off!')
+    return
+  }
+  console.log(n)
+  countdown(n - 1)
+}
+
+countdown(3)
+```
+
+**Execution Steps:**
+
+1. **Global Context**: Calls `countdown(3)`.
+2. **`countdown(3)` Context**:
+   - Logs `3`.
+   - Calls `countdown(2)`.
+3. **`countdown(2)` Context**:
+   - Logs `2`.
+   - Calls `countdown(1)`.
+4. **`countdown(1)` Context**:
+   - Logs `1`.
+   - Calls `countdown(0)`.
+5. **`countdown(0)` Context**:
+   - Logs `'Blast off!'`.
+   - Returns to `countdown(1)`.
+6. **`countdown(1)` Context**:
+   - Returns to `countdown(2)`.
+7. **`countdown(2)` Context**:
+   - Returns to `countdown(3)`.
+8. **`countdown(3)` Context**:
+   - Returns to Global context.
+
+**Output:**
+
+```
+3
+2
+1
+Blast off!
+```
+
+---
+
+### **Call Stack Overflow**
+
+A **Call Stack Overflow** occurs when the call stack exceeds its maximum size, typically due to excessive or infinite recursion.
+
+**Example:**
+
+```javascript
+function infiniteRecursion() {
+  infiniteRecursion()
+}
+
+infiniteRecursion()
+```
+
+**Result:**
+
+- JavaScript engine throws a `RangeError: Maximum call stack size exceeded`.
+
+**Prevention:**
+
+- Ensure base cases in recursive functions.
+- Avoid deep recursion; consider iterative solutions where possible.
+
+---
+
+## **Hoisting and Execution Contexts**
+
+### **What is Hoisting?**
+
+**Hoisting** is JavaScript's default behavior of moving declarations to the top of their containing scope during the creation phase of the execution context. This applies to:
+
+- **Variable Declarations**: `var` declarations are hoisted; `let` and `const` are hoisted but not initialized.
+- **Function Declarations**: Entire function declarations are hoisted.
+
+### **Hoisting Behavior**
+
+**Example 1: Variable Hoisting with `var`**
+
+```javascript
+console.log(a) // Outputs: undefined
+var a = 5
+console.log(a) // Outputs: 5
+```
+
+**Explanation:**
+
+- During the creation phase, `var a` is hoisted, initializing `a` with `undefined`.
+- The assignment `a = 5` happens during the execution phase.
+
+**Example 2: Variable Hoisting with `let` and `const`**
+
+```javascript
+console.log(b) // ReferenceError: Cannot access 'b' before initialization
+let b = 10
+```
+
+**Explanation:**
+
+- `let` and `const` declarations are hoisted but are not initialized.
+- Accessing them before initialization results in a `ReferenceError` due to the Temporal Dead Zone (TDZ).
+
+**Example 3: Function Hoisting**
+
+```javascript
+greet() // Outputs: "Hello!"
+
+function greet() {
+  console.log('Hello!')
+}
+```
+
+**Explanation:**
+
+- The entire `greet` function is hoisted, allowing it to be called before its declaration.
+
+**Example 4: Function Expression Hoisting**
+
+```javascript
+sayHi() // TypeError: sayHi is not a function
+
+var sayHi = function () {
+  console.log('Hi!')
+}
+```
+
+**Explanation:**
+
+- Only the variable `sayHi` is hoisted and initialized with `undefined`.
+- Attempting to call `sayHi` before the assignment results in a `TypeError`.
+
+---
+
+## **The `this` Keyword in Execution Contexts**
+
+### **Understanding `this`**
+
+The value of `this` is determined by how a function is called, not where it's defined. It varies across different execution contexts.
+
+### **Binding Rules for `this`**
+
+1. **Default Binding**:
+
+   - In the global context or regular function calls, `this` refers to the global object (`window` in browsers).
+   - In strict mode, `this` is `undefined` in regular function calls.
+
+2. **Implicit Binding**:
+
+   - When a function is called as a method of an object, `this` refers to that object.
+
+3. **Explicit Binding**:
+
+   - Using `.call()`, `.apply()`, or `.bind()`, you can explicitly set the value of `this`.
+
+4. **New Binding**:
+
+   - When a function is invoked with the `new` keyword, `this` refers to the newly created instance.
+
+5. **Arrow Functions**:
+   - `this` is lexically bound; it inherits `this` from the surrounding (parent) scope.
+
+### **Examples**
+
+**Example 1: Default Binding**
+
+```javascript
+function show() {
+  console.log(this)
+}
+
+show() // In browsers: Window object
+```
+
+**Example 2: Implicit Binding**
+
+```javascript
+const obj = {
+  name: 'Alice',
+  greet: function () {
+    console.log(`Hello, ${this.name}!`)
+  },
+}
+
+obj.greet() // Outputs: "Hello, Alice!"
+```
+
+**Example 3: Explicit Binding with `.call()`**
+
+```javascript
+function greet() {
+  console.log(`Hello, ${this.name}!`)
+}
+
+const person = { name: 'Bob' }
+
+greet.call(person) // Outputs: "Hello, Bob!"
+```
+
+**Example 4: New Binding**
+
+```javascript
+function Person(name) {
+  this.name = name
+}
+
+const person = new Person('Charlie')
+console.log(person.name) // Outputs: "Charlie"
+```
+
+**Example 5: Arrow Function Binding**
+
+```javascript
+const obj = {
+  name: 'Diana',
+  greet: () => {
+    console.log(`Hello, ${this.name}!`)
+  },
+}
+
+obj.greet() // Outputs: "Hello, undefined!" in browsers
+```
+
+**Explanation:**
+
+- Arrow functions do not have their own `this`. They inherit `this` from the surrounding scope.
+- In the global context, `this` refers to the global object (`window`), so `this.name` is `undefined` unless explicitly set.
+
+---
+
+## **Practical Examples and Code Analysis**
+
+### **Example 1: Execution Context in Nested Functions**
+
+```javascript
+var a = 10
+
+function outer() {
+  var b = 20
+
+  function inner() {
+    var c = 30
+    console.log(a, b, c)
+  }
+
+  inner()
+}
+
+outer()
+```
+
+**Execution Steps:**
+
+1. **Global Execution Context**:
+   - Variables: `a = 10`.
+   - Functions: `outer`.
+2. **Call to `outer()`**:
+   - **Outer Execution Context**:
+     - Variables: `b = 20`.
+     - Functions: `inner`.
+3. **Call to `inner()`**:
+   - **Inner Execution Context**:
+     - Variables: `c = 30`.
+     - Accesses `a` (from Global) and `b` (from Outer).
+4. **Logging**:
+   - Outputs: `10 20 30`.
+5. **Execution Contexts Popped**:
+   - `inner` context popped.
+   - `outer` context popped.
+   - Global context remains until program ends.
+
+**Output:**
+
+```
+10 20 30
+```
+
+### **Example 2: The Temporal Dead Zone (TDZ)**
+
+```javascript
+console.log(x) // ReferenceError: Cannot access 'x' before initialization
+let x = 5
+```
+
+**Explanation:**
+
+- Variables declared with `let` and `const` are hoisted but not initialized.
+- Accessing them before initialization results in a `ReferenceError` due to the TDZ.
+
+### **Example 3: `this` in Different Contexts**
+
+```javascript
+const obj = {
+  name: 'Eve',
+  regularFunc: function () {
+    console.log(this.name)
+  },
+  arrowFunc: () => {
+    console.log(this.name)
+  },
+}
+
+obj.regularFunc() // Outputs: "Eve"
+obj.arrowFunc() // Outputs: undefined (in browsers)
+```
+
+**Explanation:**
+
+- `regularFunc` is a regular function called as a method of `obj`, so `this` refers to `obj`.
+- `arrowFunc` is an arrow function; `this` refers to the surrounding scope (global object), which doesn't have a `name` property.
+
+### **Example 4: Implicit vs. Explicit Binding**
+
+```javascript
+function showName() {
+  console.log(this.name)
+}
+
+const person1 = { name: 'Frank' }
+const person2 = { name: 'Grace' }
+
+showName() // In browsers: undefined (strict mode: undefined)
+showName.call(person1) // Outputs: "Frank"
+showName.apply(person2) // Outputs: "Grace"
+```
+
+**Explanation:**
+
+- `showName()` called without context: `this` refers to the global object (`window`), which may not have a `name` property.
+- `.call(person1)` and `.apply(person2)` explicitly set `this` to `person1` and `person2`, respectively.
+
+---
+
+## **Tips, Tricks, and Best Practices**
+
+### **1. Understand the Execution Context Lifecycle**
+
+- **Creation Phase**:
+  - Hoisting of variable and function declarations.
+  - Setting up the scope chain.
+  - Binding `this`.
+- **Execution Phase**:
+  - Assigning values to variables.
+  - Executing the code line by line.
+
+### **2. Avoid Unintentional Globals**
+
+- Always declare variables using `var`, `let`, or `const`.
+- Use strict mode to prevent accidental global declarations.
+
+  ```javascript
+  'use strict'
+  function example() {
+    x = 10 // Throws ReferenceError
+  }
+  example()
+  ```
+
+### **3. Manage `this` Effectively**
+
+- Use regular functions when you need dynamic `this` binding.
+- Use arrow functions to inherit `this` from the surrounding context.
+
+### **4. Optimize Recursive Functions**
+
+- Ensure base cases are well-defined to prevent stack overflows.
+- Consider iterative solutions for deep or infinite recursion scenarios.
+
+### **5. Debugging with the Call Stack**
+
+- Use browser DevTools to inspect the call stack during debugging.
+- Understand how functions are called and how contexts are created.
+
+### **6. Limit Stack Depth in Recursion**
+
+- Be cautious with recursive functions that can lead to deep call stacks.
+- Implement tail recursion optimization where possible (though JavaScript engines have limited support).
+
+### **7. Leverage Closures Wisely**
+
+- Understand how closures interact with execution contexts.
+- Avoid unnecessary retention of variables to prevent memory leaks.
+
+---
+
+## **Common Interview Questions**
+
+1. **What is an execution context in JavaScript, and how does it work?**
+
+   **Answer:**
+
+   An **execution context** is an abstract environment where JavaScript code is evaluated and executed. It includes information about the variables, the scope chain, and the value of `this`. There are different types of execution contexts, such as the global context and function contexts. When code runs, a new execution context is created and pushed onto the call stack. Once the code in that context is executed, the context is popped off the stack.
+
+2. **Can you explain the difference between the global execution context and the function execution context?**
+
+   **Answer:**
+
+   The **global execution context** is the default context where JavaScript code runs initially. It sets up the global object and the global scope. There is only one global execution context per program. In contrast, a **function execution context** is created every time a function is invoked. Each function execution context has its own scope, variables, and `this` binding. Multiple function execution contexts can exist simultaneously, managed by the call stack.
+
+3. **How does the call stack manage execution contexts in JavaScript?**
+
+   **Answer:**
+
+   The **call stack** is a stack data structure that keeps track of execution contexts in a Last-In-First-Out (LIFO) order. When a function is called, its execution context is created and pushed onto the call stack. The JavaScript engine executes the code within the topmost context on the stack. Once the function completes execution, its context is popped off the stack, and control returns to the previous context. This management ensures that functions execute in the correct order and maintain their own scope and variables.
+
+4. **What is the Temporal Dead Zone (TDZ) in JavaScript?**
+
+   **Answer:**
+
+   The **Temporal Dead Zone (TDZ)** refers to the period between the start of a block and the point where a `let` or `const` variable is declared and initialized. During the TDZ, the variable exists but is not accessible, and attempting to access it results in a `ReferenceError`. This behavior helps prevent the use of variables before they are properly declared.
+
+   **Example:**
+
+   ```javascript
+   console.log(a) // ReferenceError
+   let a = 5
+   ```
+
+5. **How do closures interact with execution contexts and the call stack?**
+
+   **Answer:**
+
+   A **closure** is created when a function retains access to its outer (enclosing) function's variables even after the outer function has returned. When a function is created, it captures the variables from its surrounding execution context. This allows the inner function to access these variables whenever it is invoked, regardless of the current state of the call stack. Closures are essential for data encapsulation and creating private variables.
+
+6. **What causes a call stack overflow in JavaScript, and how can it be prevented?**
+
+   **Answer:**
+
+   A **call stack overflow** occurs when the call stack exceeds its maximum size, usually due to excessive or infinite recursion. Each function call consumes stack space, and without a base case or termination condition, recursive calls can continue indefinitely, leading to an overflow.
+
+   **Prevention:**
+
+   - Ensure recursive functions have well-defined base cases.
+   - Limit the depth of recursion.
+   - Use iterative approaches where feasible.
+   - Implement tail recursion optimization if supported by the engine.
+
+7. **Describe how the `this` keyword is determined in different execution contexts.**
+
+   **Answer:**
+
+   The value of `this` depends on how a function is invoked:
+
+   - **Global Context**: In non-strict mode, `this` refers to the global object (`window` in browsers). In strict mode, `this` is `undefined`.
+   - **Function Context**: In regular function calls, `this` refers to the global object or `undefined` in strict mode. When called as a method of an object, `this` refers to that object.
+   - **Explicit Binding**: Using `.call()`, `.apply()`, or `.bind()`, `this` can be explicitly set to a specific value.
+   - **Constructor Context**: When a function is invoked with `new`, `this` refers to the newly created instance.
+   - **Arrow Functions**: `this` is lexically bound, inheriting the value from the surrounding scope.
+
+8. **How does hoisting affect the execution context in JavaScript?**
+
+   **Answer:**
+
+   **Hoisting** is JavaScript's behavior of moving declarations to the top of their containing scope during the creation phase of the execution context. This affects how variables and functions are accessed before their actual declaration in the code.
+
+   - **Variable Declarations**: `var` declarations are hoisted and initialized with `undefined`. `let` and `const` declarations are hoisted but remain uninitialized, leading to the Temporal Dead Zone.
+   - **Function Declarations**: Entire function declarations are hoisted, allowing functions to be called before they appear in the code.
+   - **Function Expressions**: Only the variable declaration is hoisted, not the assignment, which can lead to `TypeError` if called before assignment.
+
+   **Example:**
+
+   ```javascript
+   console.log(foo) // undefined
+   var foo = 'bar'
+
+   console.log(baz) // ReferenceError
+   let baz = 'qux'
+
+   greet() // "Hello!"
+   function greet() {
+     console.log('Hello!')
+   }
+
+   sayHi() // TypeError: sayHi is not a function
+   var sayHi = function () {
+     console.log('Hi!')
+   }
+   ```
+
+9. **What is the difference between the call stack and the heap in JavaScript?**
+
+   **Answer:**
+
+   - **Call Stack**:
+     - Manages execution contexts.
+     - Follows LIFO (Last-In-First-Out) order.
+     - Stores function calls and execution contexts.
+     - Limited in size.
+   - **Heap**:
+     - Used for dynamic memory allocation.
+     - Stores objects, arrays, and functions.
+     - Unstructured and large compared to the call stack.
+     - Managed by the garbage collector.
+
+   The call stack is used for managing the execution flow of the program, while the heap is used for storing data structures and objects that require dynamic memory allocation.
+
+10. **How can understanding execution contexts and the call stack help in debugging JavaScript code?**
+
+    **Answer:**
+
+    - **Error Tracing**: Understanding the call stack helps trace the sequence of function calls leading to an error.
+    - **Performance Optimization**: Identifying deep or excessive recursion can prevent stack overflows and improve performance.
+    - **Variable Scope**: Knowing how execution contexts manage scope can help resolve scope-related bugs.
+    - **Closure Debugging**: Understanding how closures interact with execution contexts can aid in identifying unintended variable retention.
+
+---
+
+## **Exercises**
+
+### **Exercise 1: Analyzing Execution Contexts**
+
+**Question:**
+
+Consider the following code:
+
+```javascript
+var globalVar = 'Global'
+
+function first() {
+  var firstVar = 'First'
+
+  function second() {
+    var secondVar = 'Second'
+    console.log(globalVar, firstVar, secondVar)
+  }
+
+  second()
+  console.log(globalVar, firstVar)
+}
+
+first()
+console.log(globalVar)
+```
+
+**Tasks:**
+
+1. Identify the different execution contexts created during the execution of the code.
+2. Explain what is logged at each `console.log` statement.
+3. Draw a visualization of the call stack at the point where `'Second'` is logged.
+
+**Answer:**
+
+1. **Execution Contexts Created:**
+
+   - **Global Execution Context**:
+     - Variables: `globalVar = 'Global'`
+     - Functions: `first`
+   - **Function `first` Execution Context**:
+     - Variables: `firstVar = 'First'`
+     - Functions: `second`
+   - **Function `second` Execution Context**:
+     - Variables: `secondVar = 'Second'`
+
+2. **Logging Output:**
+
+   - **Inside `second()`**:
+     - `console.log(globalVar, firstVar, secondVar);`
+     - Logs: `'Global First Second'`
+   - **After `second()` in `first()`**:
+     - `console.log(globalVar, firstVar);`
+     - Logs: `'Global First'`
+   - **In Global Context After `first()`**:
+     - `console.log(globalVar);`
+     - Logs: `'Global'`
+
+3. **Call Stack Visualization at `'Second'` Log:**
+
+```
+[Global Execution Context]
+        |
+        V
+      first()
+        |
+        V
+      second()
+```
+
+---
+
+### **Exercise 2: Understanding `this` in Different Contexts**
+
+**Question:**
+
+What will be the output of the following code? Explain why.
+
+```javascript
+var name = 'Global'
+
+const obj = {
+  name: 'Object',
+  regularFunc: function () {
+    console.log(this.name)
+  },
+  arrowFunc: () => {
+    console.log(this.name)
+  },
+}
+
+obj.regularFunc()
+obj.arrowFunc()
+
+const standaloneFunc = obj.regularFunc
+standaloneFunc()
+
+const boundFunc = obj.regularFunc.bind({ name: 'Bound' })
+boundFunc()
+```
+
+**Answer:**
+
+**Output:**
+
+```
+Object
+Global
+Global
+Bound
+```
+
+**Explanation:**
+
+1. **`obj.regularFunc();`**
+
+   - **Context**: Called as a method of `obj`.
+   - **`this`**: Refers to `obj`.
+   - **Output**: `'Object'`
+
+2. **`obj.arrowFunc();`**
+
+   - **Context**: Arrow function inherits `this` from the surrounding (global) scope.
+   - **`this`**: Refers to the global object (`window` in browsers).
+   - **Output**: `'Global'`
+
+3. **`standaloneFunc();`**
+
+   - **Context**: Called as a standalone function.
+   - **`this`**: In non-strict mode, refers to the global object; in strict mode, `undefined`.
+   - **Assuming non-strict mode**:
+     - **Output**: `'Global'`
+   - **If strict mode is enabled**:
+     - Throws a `TypeError` as `this` is `undefined`.
+
+4. **`boundFunc();`**
+   - **Context**: Function bound to `{ name: 'Bound' }` using `.bind()`.
+   - **`this`**: Refers to `{ name: 'Bound' }`.
+   - **Output**: `'Bound'`
+
+---
+
+### **Exercise 3: Predicting Call Stack Behavior**
+
+**Question:**
+
+Predict the output and explain the call stack behavior for the following code:
+
+```javascript
+function a() {
+  console.log('Function a')
+  b()
+  console.log('Function a end')
+}
+
+function b() {
+  console.log('Function b')
+  c()
+  console.log('Function b end')
+}
+
+function c() {
+  console.log('Function c')
+}
+
+a()
+```
+
+**Answer:**
+
+**Output:**
+
+```
+Function a
+Function b
+Function c
+Function b end
+Function a end
+```
+
+**Explanation:**
+
+1. **Call to `a()`**:
+   - **Call Stack**: `[Global, a()]`
+   - **Logs**: `'Function a'`
+2. **Within `a()`, call to `b()`**:
+   - **Call Stack**: `[Global, a(), b()]`
+   - **Logs**: `'Function b'`
+3. **Within `b()`, call to `c()`**:
+   - **Call Stack**: `[Global, a(), b(), c()]`
+   - **Logs**: `'Function c'`
+   - **`c()` completes**: Popped off the stack.
+4. **Back to `b()`, logs**: `'Function b end'`
+   - **Call Stack**: `[Global, a(), b()]`
+   - **`b()` completes**: Popped off the stack.
+5. **Back to `a()`, logs**: `'Function a end'`
+   - **Call Stack**: `[Global, a()]`
+   - **`a()` completes**: Popped off the stack.
+6. **Global Execution Context** remains until program ends.
+
+---
+
+### **Exercise 4: Call Stack Overflow Prevention**
+
+**Question:**
+
+Identify the issue in the following code and suggest a solution to prevent a call stack overflow.
+
+```javascript
+function recursiveFunction() {
+  recursiveFunction()
+}
+
+recursiveFunction()
+```
+
+**Answer:**
+
+**Issue:**
+
+- The function `recursiveFunction` calls itself indefinitely without a base case.
+- This leads to infinite recursion, causing the call stack to grow until it exceeds its maximum size, resulting in a `RangeError: Maximum call stack size exceeded`.
+
+**Solution:**
+
+- Implement a base case to terminate the recursion.
+
+**Fixed Code:**
+
+```javascript
+function recursiveFunction(counter) {
+  if (counter <= 0) return
+  console.log(counter)
+  recursiveFunction(counter - 1)
+}
+
+recursiveFunction(5)
+```
+
+**Output:**
+
+```
+5
+4
+3
+2
+1
+```
+
+**Explanation:**
+
+- The `recursiveFunction` now accepts a `counter` parameter.
+- When `counter` reaches `0`, the function returns, preventing further recursive calls and avoiding a stack overflow.
+
+---
+
+### **Exercise 5: Understanding Hoisting with Function Declarations and Expressions**
+
+**Question:**
+
+What will be the output of the following code? Explain the hoisting behavior.
+
+```javascript
+foo() // ?
+
+bar() // ?
+
+function foo() {
+  console.log('Function foo')
+}
+
+var bar = function () {
+  console.log('Function bar')
+}
+
+foo()
+bar()
+```
+
+**Answer:**
+
+**Output:**
+
+```
+Function foo
+TypeError: bar is not a function
+Function foo
+Function bar
+```
+
+**Explanation:**
+
+1. **First `foo();` Call:**
+   - **Hoisting**: Function declarations are fully hoisted.
+   - **Execution**: `foo` is available and logs `'Function foo'`.
+2. **First `bar();` Call:**
+   - **Hoisting**: Variable `bar` is hoisted and initialized with `undefined`.
+   - **Execution**: Attempting to call `bar` (which is `undefined`) as a function results in a `TypeError`.
+3. **Function Definitions:**
+   - `foo` is a function declaration and fully hoisted.
+   - `bar` is a function expression assigned to a `var` variable. Only the variable declaration is hoisted; the assignment happens during the execution phase.
+4. **Second `foo();` Call:**
+   - **Execution**: Calls the already defined `foo` function, logging `'Function foo'`.
+5. **Second `bar();` Call:**
+   - **Execution**: Now `bar` has been assigned the function expression and logs `'Function bar'`.
+
+---
+
+## **Additional Interview Questions**
+
+6. **How does the call stack manage multiple function calls in JavaScript?**
+
+   **Answer:**
+
+   The call stack manages function calls in a Last-In-First-Out (LIFO) manner. When a function is invoked, its execution context is created and pushed onto the stack. The JavaScript engine executes the function's code within this context. If another function is called within, a new context is pushed onto the stack. Once a function completes execution, its context is popped off the stack, and control returns to the previous context. This mechanism ensures that functions execute in the correct order and maintain their own scope and variables.
+
+7. **Explain how closures work with execution contexts and the call stack.**
+
+   **Answer:**
+
+   A **closure** occurs when an inner function retains access to the outer (enclosing) function's variables even after the outer function has returned. When a function is invoked, its execution context is created and pushed onto the call stack. If it returns an inner function, the outer execution context remains in memory because the inner function references its variables. This allows the inner function to access these variables whenever it is called, effectively "closing over" the variables from its lexical environment.
+
+   **Example:**
+
+   ```javascript
+   function outer() {
+     var count = 0
+     return function inner() {
+       count++
+       console.log(count)
+     }
+   }
+
+   const counter = outer()
+   counter() // Outputs: 1
+   counter() // Outputs: 2
+   ```
+
+   - The `inner` function retains access to `count` even after `outer` has finished execution.
+
+8. **What happens to the call stack when an error is thrown in a function?**
+
+   **Answer:**
+
+   When an error is thrown within a function, the JavaScript engine unwinds the call stack to identify the point where the error occurred. The engine stops executing the current function and looks up the stack for any surrounding `try...catch` blocks that can handle the error. If no appropriate error handler is found, the error propagates up the call stack until it reaches the global context, potentially terminating the program. The call stack is popped accordingly as the engine backtracks through the execution contexts.
+
+9. **Describe how asynchronous functions interact with the call stack.**
+
+   **Answer:**
+
+   Asynchronous functions, such as those using `setTimeout`, Promises, or `async/await`, interact with the call stack through the event loop and task queues. When an asynchronous function is invoked, its callback is registered and moved to the appropriate task queue (macrotask or microtask). The initial function call completes and its execution context is popped off the call stack. Once the call stack is empty, the event loop processes the task queues, pushing the callbacks onto the call stack for execution. This allows asynchronous operations to run without blocking the main thread.
+
+10. **How does the JavaScript engine handle recursive function calls in terms of the call stack?**
+
+    **Answer:**
+
+    Each recursive function call creates a new execution context and pushes it onto the call stack. The JavaScript engine manages these contexts in a LIFO order. For each recursive call, the stack grows until the base case is reached, after which the contexts are popped off one by one as the recursion unwinds. If the recursion is too deep without a proper base case, it can lead to a call stack overflow, causing a `RangeError`.
+
+---
+
+## **Additional Resources**
+
+- **Books**:
+  - _JavaScript: The Definitive Guide_ by David Flanagan.
+  - _You Don't Know JS Yet_ series by Kyle Simpson.
+- **Articles**:
+  - [Understanding Execution Contexts in JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Execution_Context)
+  - [JavaScript Call Stack](https://developer.mozilla.org/en-US/docs/Glossary/Call_stack)
+  - [Closures in JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures)
+- **Videos**:
+  - [JavaScript Execution Context & Call Stack](https://www.youtube.com/watch?v=8aGhZQkoFbQ) by Philip Roberts.
+  - [JavaScript Call Stack, Heap, and Event Loop Explained](https://www.youtube.com/watch?v=8aGhZQkoFbQ) by Academind.
+
+---
+
+## **Conclusion**
+
+Grasping Execution Contexts and the Call Stack is fundamental to understanding how JavaScript operates. These concepts underpin the language's execution model, influencing variable scope, function invocation, recursion, and error handling. Mastery of these topics not only enhances your coding skills but also prepares you to tackle complex technical interview questions with confidence.
+
+---
+
+## **Next Steps**
+
+- **Practice**:
+  - Write functions that demonstrate different execution contexts.
+  - Implement recursive algorithms and observe the call stack behavior.
+- **Debugging**:
+  - Use browser DevTools to inspect the call stack during code execution.
+  - Set breakpoints and step through code to see execution contexts in action.
+- **Deepen Knowledge**:
+  - Explore advanced topics like asynchronous execution and how it interacts with the call stack.
+  - Study how JavaScript engines optimize the call stack and execution contexts for performance.
+
+---
+
+**Stay curious and keep exploring the depths of JavaScript's execution model!**
+
+---
+
+# **Appendix**
+
+## **Glossary**
+
+- **Execution Context**: An abstract environment where JavaScript code is evaluated and executed.
+- **Call Stack**: A stack data structure that manages execution contexts in a Last-In-First-Out (LIFO) order.
+- **Variable Object (VO)**: Contains variables, function declarations, and function parameters within an execution context.
+- **Scope Chain**: The hierarchy of variable objects that determines variable accessibility.
+- **Lexical Environment**: Represents the association between identifiers and their values, along with the scope chain.
+- **Hoisting**: The behavior of moving declarations to the top of their containing scope during the creation phase.
+- **Closure**: A function that retains access to its outer (enclosing) function's variables even after the outer function has returned.
+- **Temporal Dead Zone (TDZ)**: The period during which a `let` or `const` variable is hoisted but not yet initialized, resulting in a `ReferenceError` if accessed.
+- **Recursion**: A programming technique where a function calls itself to solve smaller instances of a problem.
+- **Stack Overflow**: An error that occurs when the call stack exceeds its maximum size, often due to infinite or excessive recursion.
+
+---
+
+## **Additional Interview Questions**
+
+11. **How does the JavaScript engine handle variable scope within different execution contexts?**
+
+    **Answer:**
+
+    Variable scope in JavaScript is determined by the execution context's scope chain. Each execution context has its own Variable Object (VO) that holds its variables and function declarations. When accessing a variable, the engine looks up the scope chain starting from the current VO and moving outward to parent contexts until it finds the variable or reaches the global context. This hierarchical lookup ensures that variables are accessed based on their lexical scope.
+
+12. **Can you explain how the JavaScript engine optimizes function calls using the call stack?**
+
+    **Answer:**
+
+    JavaScript engines optimize function calls by efficiently managing the call stack. Techniques include:
+
+    - **Inlining**: Replacing a function call with the function's body to reduce call overhead.
+    - **Tail Call Optimization (TCO)**: Reusing stack frames for tail-recursive functions to prevent stack growth.
+    - **Lazy Evaluation**: Deferring the execution of functions until necessary.
+
+    These optimizations enhance performance by minimizing the work the engine needs to do to manage the call stack.
+
+13. **What is the role of the execution context's variable environment in variable resolution?**
+
+    **Answer:**
+
+    The **variable environment** within an execution context holds the current set of variables, function declarations, and parameters. It plays a crucial role in variable resolution by providing the necessary bindings for variable access. When a variable is referenced, the engine searches the current variable environment and traverses the scope chain to resolve the variable's value.
+
+14. **Describe how JavaScript engines handle asynchronous function calls in relation to the call stack.**
+
+    **Answer:**
+
+    Asynchronous function calls, such as those using `setTimeout` or Promises, interact with the call stack through the event loop and task queues. When an asynchronous function is invoked, its callback is registered and placed in the appropriate task queue. The initial function call completes, and its execution context is popped off the call stack. Once the call stack is empty, the event loop processes the task queues, pushing the callbacks onto the call stack for execution. This mechanism allows asynchronous operations to run without blocking the main thread.
+
+15. **How do JavaScript engines prevent memory leaks related to execution contexts and the call stack?**
+
+    **Answer:**
+
+    JavaScript engines prevent memory leaks by:
+
+    - **Garbage Collection**: Automatically freeing memory occupied by objects that are no longer reachable.
+    - **Scope Management**: Ensuring that execution contexts are properly popped off the call stack after function execution.
+    - **Closure Control**: Limiting the retention of variables through closures to only those that are necessary.
+    - **Weak References**: Using weak references (e.g., `WeakMap`, `WeakSet`) to allow garbage collection of objects when no strong references exist.
+
+    These strategies help maintain optimal memory usage and prevent leaks related to lingering execution contexts or unreferenced objects.
+
+---
+
+**End of Lesson**

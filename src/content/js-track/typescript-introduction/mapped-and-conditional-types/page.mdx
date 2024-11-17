@@ -1,0 +1,885 @@
+**Lesson Title**: **Mapped and Conditional Types in TypeScript**
+
+**Lesson Description**:  
+Advance your TypeScript proficiency by mastering mapped and conditional types. This lesson explores the powerful features of the `keyof` and `typeof` operators, enabling you to create dynamic and flexible type definitions. Additionally, delve into conditional type expressions to build complex type logic that adapts based on input types. By understanding mapped and conditional types, you will enhance your ability to write expressive, type-safe, and maintainable TypeScript code. This comprehensive lesson will deepen your knowledge of TypeScript's advanced type system and prepare you for technical interviews by covering these essential topics.
+
+---
+
+# **Mapped and Conditional Types in TypeScript**
+
+Mapped and conditional types are advanced features in TypeScript that allow developers to create sophisticated type transformations and logic. Mapped types enable you to create new types by transforming existing ones, while conditional types allow types to be defined based on conditions. This lesson covers how to effectively use the `keyof` and `typeof` operators, mapped types, and conditional type expressions to write more dynamic and flexible TypeScript code.
+
+---
+
+## **Table of Contents**
+
+1. **Introduction to Mapped and Conditional Types**
+   - Overview of Advanced Type Features
+   - Importance in TypeScript
+2. **The `keyof` Operator**
+   - Understanding `keyof`
+   - Examples of `keyof` in Practice
+3. **The `typeof` Operator**
+   - Type Queries with `typeof`
+   - Using `typeof` in Type Definitions
+4. **Mapped Types**
+   - What are Mapped Types?
+   - Basic Mapped Type Syntax
+   - Using Mapped Types with `keyof`
+5. **Conditional Types**
+   - What are Conditional Types?
+   - Syntax of Conditional Types
+   - Practical Examples
+6. **Distributive Conditional Types**
+   - Understanding Distributive Behavior
+   - Common Use Cases
+7. **Built-in Utility Types**
+   - Partial, Readonly, Pick, Record
+   - Exclude, Extract, NonNullable, ReturnType
+8. **Advanced Examples**
+   - Building Custom Utility Types
+   - Real-world Applications
+9. **Best Practices**
+10. **Common Interview Questions**
+11. **Exercises**
+12. **Conclusion**
+13. **Next Steps**
+14. **Appendix**
+
+---
+
+## **1. Introduction to Mapped and Conditional Types**
+
+### **1.1 Overview of Advanced Type Features**
+
+- **Mapped Types**: Types that transform properties in an existing type to create a new type.
+- **Conditional Types**: Types that choose between two possible types based on a condition.
+- **Operators**:
+  - **`keyof`**: Creates a union of the keys of a type.
+  - **`typeof`**: Gets the type of a value or variable.
+
+### **1.2 Importance in TypeScript**
+
+- **Type Transformation**: Enables dynamic creation and manipulation of types.
+- **Type Safety**: Enhances code robustness by enforcing stricter type checks.
+- **Code Reusability**: Facilitates the creation of generic and reusable type definitions.
+- **Expressiveness**: Allows for complex type logic that adapts to different scenarios.
+
+---
+
+## **2. The `keyof` Operator**
+
+### **2.1 Understanding `keyof`**
+
+- **Definition**: The `keyof` operator takes an object type and produces a union of its keys.
+- **Purpose**:
+  - Extract property names from a type.
+  - Useful for creating dynamic and type-safe property accessors.
+
+### **2.2 Examples of `keyof` in Practice**
+
+- **Basic Usage**:
+
+  ```typescript
+  interface Person {
+    name: string
+    age: number
+    location: string
+  }
+
+  type PersonKeys = keyof Person // 'name' | 'age' | 'location'
+
+  let key: PersonKeys = 'name' // Valid
+  // key = 'height'; // Error: Type '"height"' is not assignable to type 'PersonKeys'
+  ```
+
+- **Using with Generics**:
+
+  ```typescript
+  function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+    return obj[key]
+  }
+
+  let person: Person = { name: 'Alice', age: 30, location: 'Wonderland' }
+  let age = getProperty(person, 'age') // Type is number
+  ```
+
+- **Benefits**:
+  - Enforces that only valid property names can be used.
+  - Improves type safety in functions that operate on object properties.
+
+---
+
+## **3. The `typeof` Operator**
+
+### **3.1 Type Queries with `typeof`**
+
+- **Definition**: The `typeof` operator, when used in a type context, obtains the type of a value or variable.
+- **Purpose**:
+  - Capture the type of an existing variable or object.
+  - Useful for creating types based on values.
+
+### **3.2 Using `typeof` in Type Definitions**
+
+- **Basic Usage**:
+
+  ```typescript
+  let s = 'hello'
+  type Str = typeof s // Type is 'string'
+
+  const person = { name: 'Bob', age: 25 }
+  type PersonType = typeof person // { name: string; age: number; }
+  ```
+
+- **Creating Aliases**:
+
+  ```typescript
+  function greet(person: typeof person): void {
+    console.log(`Hello, ${person.name}`)
+  }
+
+  greet({ name: 'Alice', age: 30 })
+  ```
+
+- **Using with `keyof`**:
+
+  ```typescript
+  type PersonKeys = keyof typeof person // 'name' | 'age'
+  ```
+
+- **Benefits**:
+  - Eliminates duplication of type definitions.
+  - Ensures consistency between variables and their types.
+
+---
+
+## **4. Mapped Types**
+
+### **4.1 What are Mapped Types?**
+
+- **Definition**: Mapped types create new types by transforming each property of an existing type.
+- **Purpose**:
+  - Apply a transformation to each property in a type.
+  - Create variations of existing types (e.g., making all properties optional or readonly).
+
+### **4.2 Basic Mapped Type Syntax**
+
+- **Syntax**:
+
+  ```typescript
+  type MappedType = { [P in K]: T }
+  ```
+
+  - **`P`**: The property name variable.
+  - **`K`**: A union of property names (often `keyof T`).
+  - **`T`**: The type being mapped.
+
+- **Example**:
+
+  ```typescript
+  type Readonly<T> = {
+    readonly [P in keyof T]: T[P]
+  }
+
+  interface Person {
+    name: string
+    age: number
+  }
+
+  type ReadonlyPerson = Readonly<Person>
+
+  const person: ReadonlyPerson = { name: 'Alice', age: 30 }
+  // person.age = 31; // Error: Cannot assign to 'age' because it is a read-only property.
+  ```
+
+### **4.3 Using Mapped Types with `keyof`**
+
+- **Creating Partial Types**:
+
+  ```typescript
+  type Partial<T> = {
+    [P in keyof T]?: T[P]
+  }
+
+  type PartialPerson = Partial<Person>
+
+  let partialPerson: PartialPerson = { name: 'Bob' } // 'age' is optional
+  ```
+
+- **Filtering Properties**:
+
+  ```typescript
+  type Pick<T, K extends keyof T> = {
+    [P in K]: T[P]
+  }
+
+  type PersonName = Pick<Person, 'name'>
+
+  let personName: PersonName = { name: 'Charlie' }
+  ```
+
+- **Modifying Property Types**:
+
+  ```typescript
+  type Record<K extends keyof any, T> = {
+    [P in K]: T
+  }
+
+  type StringMap = Record<'a' | 'b' | 'c', string>
+
+  let stringMap: StringMap = { a: 'foo', b: 'bar', c: 'baz' }
+  ```
+
+---
+
+## **5. Conditional Types**
+
+### **5.1 What are Conditional Types?**
+
+- **Definition**: Conditional types allow types to be defined based on conditions, using a syntax similar to ternary operators.
+- **Syntax**:
+
+  ```typescript
+  T extends U ? X : Y
+  ```
+
+  - If type `T` extends type `U`, then the type resolves to `X`; otherwise, it resolves to `Y`.
+
+### **5.2 Syntax of Conditional Types**
+
+- **Basic Example**:
+
+  ```typescript
+  type NonNullable<T> = T extends null | undefined ? never : T
+
+  type A = NonNullable<string | null> // string
+  type B = NonNullable<number | undefined> // number
+  type C = NonNullable<string | null | undefined> // string
+  ```
+
+- **Using in Type Aliases**:
+
+  ```typescript
+  type IsString<T> = T extends string ? true : false
+
+  type A = IsString<'hello'> // true
+  type B = IsString<42> // false
+  ```
+
+### **5.3 Practical Examples**
+
+- **Extracting Types**:
+
+  ```typescript
+  type Extract<T, U> = T extends U ? T : never
+
+  type T0 = Extract<'a' | 'b' | 'c', 'a' | 'f'> // 'a'
+  ```
+
+- **Excluding Types**:
+
+  ```typescript
+  type Exclude<T, U> = T extends U ? never : T
+
+  type T1 = Exclude<'a' | 'b' | 'c', 'a' | 'f'> // 'b' | 'c'
+  ```
+
+- **Inferring Types**:
+
+  ```typescript
+  type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any
+
+  function getUser() {
+    return { name: 'Alice', age: 30 }
+  }
+
+  type UserType = ReturnType<typeof getUser> // { name: string; age: number; }
+  ```
+
+---
+
+## **6. Distributive Conditional Types**
+
+### **6.1 Understanding Distributive Behavior**
+
+- **Definition**: Conditional types distribute over unions. When a conditional type operates on a union type, it is applied to each member of the union individually.
+
+- **Example**:
+
+  ```typescript
+  type NonNullable<T> = T extends null | undefined ? never : T
+
+  type T0 = NonNullable<string | number | undefined> // string | number
+  ```
+
+- **Visualization**:
+
+  ```
+  NonNullable<string | number | undefined>
+  =>
+  NonNullable<string> | NonNullable<number> | NonNullable<undefined>
+  =>
+  string | number | never
+  =>
+  string | number
+  ```
+
+### **6.2 Common Use Cases**
+
+- **Filtering Union Types**:
+
+  - **Exclude** and **Extract** types are examples of distributive conditional types used to filter union types.
+
+- **Applying Transformations**:
+
+  - Modifying each member of a union type individually.
+
+- **Example**:
+
+  ```typescript
+  type PromiseType<T> = T extends Promise<infer U> ? U : T
+
+  type T1 = PromiseType<Promise<string>> // string
+  type T2 = PromiseType<string> // string
+  ```
+
+---
+
+## **7. Built-in Utility Types**
+
+TypeScript provides several built-in utility types that leverage mapped and conditional types.
+
+### **7.1 Partial**
+
+- **Definition**: Constructs a type with all properties of `T` set to optional.
+
+- **Syntax**:
+
+  ```typescript
+  type Partial<T> = {
+    [P in keyof T]?: T[P]
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  interface User {
+    id: number
+    name: string
+    email: string
+  }
+
+  type PartialUser = Partial<User>
+
+  let user: PartialUser = { name: 'Alice' } // 'id' and 'email' are optional
+  ```
+
+### **7.2 Readonly**
+
+- **Definition**: Constructs a type with all properties of `T` set to readonly.
+
+- **Syntax**:
+
+  ```typescript
+  type Readonly<T> = {
+    readonly [P in keyof T]: T[P]
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  type ReadonlyUser = Readonly<User>
+
+  const user: ReadonlyUser = { id: 1, name: 'Bob', email: 'bob@example.com' }
+  // user.name = 'Robert'; // Error: Cannot assign to 'name' because it is a read-only property.
+  ```
+
+### **7.3 Pick**
+
+- **Definition**: Constructs a type by picking a set of properties `K` from `T`.
+
+- **Syntax**:
+
+  ```typescript
+  type Pick<T, K extends keyof T> = {
+    [P in K]: T[P]
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  type UserPreview = Pick<User, 'id' | 'name'>
+
+  let userPreview: UserPreview = { id: 1, name: 'Charlie' }
+  ```
+
+### **7.4 Record**
+
+- **Definition**: Constructs a type with a set of properties `K` of type `T`.
+
+- **Syntax**:
+
+  ```typescript
+  type Record<K extends keyof any, T> = {
+    [P in K]: T
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  type Roles = 'admin' | 'user' | 'guest'
+
+  type Permissions = Record<Roles, boolean>
+
+  let permissions: Permissions = {
+    admin: true,
+    user: true,
+    guest: false,
+  }
+  ```
+
+### **7.5 Exclude**
+
+- **Definition**: Excludes from `T` those types that are assignable to `U`.
+
+- **Syntax**:
+
+  ```typescript
+  type Exclude<T, U> = T extends U ? never : T
+  ```
+
+- **Example**:
+
+  ```typescript
+  type T0 = Exclude<'a' | 'b' | 'c', 'a' | 'f'> // 'b' | 'c'
+  ```
+
+### **7.6 Extract**
+
+- **Definition**: Extracts from `T` those types that are assignable to `U`.
+
+- **Syntax**:
+
+  ```typescript
+  type Extract<T, U> = T extends U ? T : never
+  ```
+
+- **Example**:
+
+  ```typescript
+  type T1 = Extract<'a' | 'b' | 'c', 'a' | 'f'> // 'a'
+  ```
+
+### **7.7 NonNullable**
+
+- **Definition**: Excludes `null` and `undefined` from `T`.
+
+- **Syntax**:
+
+  ```typescript
+  type NonNullable<T> = T extends null | undefined ? never : T
+  ```
+
+- **Example**:
+
+  ```typescript
+  type T2 = NonNullable<string | number | undefined> // string | number
+  ```
+
+### **7.8 ReturnType**
+
+- **Definition**: Obtains the return type of a function type.
+
+- **Syntax**:
+
+  ```typescript
+  type ReturnType<T extends (...args: any) => any> = T extends (
+    ...args: any
+  ) => infer R
+    ? R
+    : any
+  ```
+
+- **Example**:
+
+  ```typescript
+  function getUser() {
+    return { id: 1, name: 'Alice' }
+  }
+
+  type UserType = ReturnType<typeof getUser> // { id: number; name: string; }
+  ```
+
+---
+
+## **8. Advanced Examples**
+
+### **8.1 Building Custom Utility Types**
+
+- **DeepPartial**: Makes all properties in a type and its sub-types optional.
+
+  ```typescript
+  type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+  }
+
+  interface User {
+    id: number
+    name: string
+    address: {
+      street: string
+      city: string
+    }
+  }
+
+  type PartialUser = DeepPartial<User>
+
+  let user: PartialUser = {
+    name: 'Bob',
+    address: {
+      city: 'New York',
+    },
+  }
+  ```
+
+- **Mutable**: Removes readonly modifiers from all properties.
+
+  ```typescript
+  type Mutable<T> = {
+    -readonly [P in keyof T]: T[P]
+  }
+
+  type MutableUser = Mutable<ReadonlyUser>
+
+  let mutableUser: MutableUser = {
+    id: 1,
+    name: 'Charlie',
+    email: 'charlie@example.com',
+  }
+  mutableUser.name = 'Charles' // Now allowed
+  ```
+
+### **8.2 Real-world Applications**
+
+- **API Response Types**:
+
+  ```typescript
+  type ApiResponse<T> = {
+    data: T
+    error?: string
+  }
+
+  interface User {
+    id: number
+    name: string
+  }
+
+  type UserResponse = ApiResponse<User>
+
+  let response: UserResponse = { data: { id: 1, name: 'Alice' } }
+  ```
+
+- **Event Handlers**:
+
+  ```typescript
+  type EventHandlers<T> = {
+    [K in keyof T as `on${Capitalize<string & K>}`]?: (value: T[K]) => void
+  }
+
+  interface FormFields {
+    name: string
+    age: number
+  }
+
+  type FormEventHandlers = EventHandlers<FormFields>
+
+  let handlers: FormEventHandlers = {
+    onName: (name) => console.log(`Name changed to ${name}`),
+    onAge: (age) => console.log(`Age changed to ${age}`),
+  }
+  ```
+
+---
+
+## **9. Best Practices**
+
+- **Leverage Built-in Utility Types**:
+
+  - Use TypeScript's provided utility types before creating custom ones.
+
+- **Understand Distributive Conditional Types**:
+
+  - Be aware of how conditional types distribute over unions to avoid unexpected results.
+
+- **Use Descriptive Type Parameter Names**:
+
+  - Improve code readability by using meaningful names in mapped and conditional types.
+
+- **Avoid Overcomplicating Types**:
+
+  - Keep type definitions as simple as possible to maintain code clarity.
+
+- **Test Complex Types**:
+
+  - Use type assertions and assignments to validate complex type logic during development.
+
+- **Keep Type Transformations Predictable**:
+  - Ensure that mapped and conditional types behave as expected across different scenarios.
+
+---
+
+## **10. Common Interview Questions**
+
+1. **What is the `keyof` operator in TypeScript, and how is it used?**
+
+   **Answer**:
+
+   - The `keyof` operator takes an object type and produces a union of its keys.
+   - It is used to create dynamic and type-safe property accessors or transformations.
+   - **Example**:
+
+     ```typescript
+     interface Person {
+       name: string
+       age: number
+     }
+
+     type PersonKeys = keyof Person // 'name' | 'age'
+     ```
+
+2. **Explain how the `typeof` operator works in a type context.**
+
+   **Answer**:
+
+   - When used in a type context, `typeof` obtains the type of a value or variable.
+   - It allows you to create type definitions based on existing values.
+   - **Example**:
+
+     ```typescript
+     let person = { name: 'Alice', age: 30 }
+     type PersonType = typeof person // { name: string; age: number; }
+     ```
+
+3. **What are mapped types, and when would you use them?**
+
+   **Answer**:
+
+   - Mapped types create new types by transforming each property of an existing type.
+   - They are used to apply modifications, such as making properties optional or readonly.
+   - **Example**:
+
+     ```typescript
+     type Readonly<T> = {
+       readonly [P in keyof T]: T[P]
+     }
+     ```
+
+4. **Describe conditional types and provide a use case.**
+
+   **Answer**:
+
+   - Conditional types allow types to be defined based on conditions, similar to ternary expressions.
+   - They are useful for type transformations and creating types that depend on other types.
+   - **Example**:
+
+     ```typescript
+     type NonNullable<T> = T extends null | undefined ? never : T
+
+     type A = NonNullable<string | null> // string
+     ```
+
+5. **How do distributive conditional types work in TypeScript?**
+
+   **Answer**:
+
+   - Distributive conditional types automatically distribute over union types, applying the conditional type to each member of the union individually.
+   - This behavior is utilized in utility types like `Exclude` and `Extract`.
+   - **Example**:
+
+     ```typescript
+     type T0 = Exclude<'a' | 'b' | 'c', 'a' | 'f'> // 'b' | 'c'
+     ```
+
+---
+
+## **11. Exercises**
+
+### **Exercise 1: Using `keyof` Operator**
+
+**Question**:
+
+Given the interface `Product`, define a type `ProductKeys` that represents all keys of `Product`. Then, write a function `getValue` that takes a `Product` and a key of `ProductKeys`, and returns the value corresponding to that key.
+
+```typescript
+interface Product {
+  id: number
+  name: string
+  price: number
+}
+```
+
+**Answer**:
+
+```typescript
+type ProductKeys = keyof Product // 'id' | 'name' | 'price'
+
+function getValue(product: Product, key: ProductKeys): Product[ProductKeys] {
+  return product[key]
+}
+
+// Usage
+const product: Product = { id: 1, name: 'Laptop', price: 1200 }
+console.log(getValue(product, 'name')) // Outputs: 'Laptop'
+```
+
+---
+
+### **Exercise 2: Mapped Types**
+
+**Question**:
+
+Create a mapped type `Nullable<T>` that makes all properties of `T` nullable. Apply this type to an interface `User` and create an object with some properties set to `null`.
+
+```typescript
+interface User {
+  id: number
+  name: string
+  email: string
+}
+```
+
+**Answer**:
+
+```typescript
+type Nullable<T> = {
+  [P in keyof T]: T[P] | null
+}
+
+type NullableUser = Nullable<User>
+
+let user: NullableUser = {
+  id: null,
+  name: 'Alice',
+  email: null,
+}
+```
+
+---
+
+### **Exercise 3: Conditional Types**
+
+**Question**:
+
+Define a conditional type `IsArray<T>` that checks if `T` is an array type. It should resolve to `true` if `T` is an array, and `false` otherwise. Test this type with different inputs.
+
+**Answer**:
+
+```typescript
+type IsArray<T> = T extends any[] ? true : false
+
+type Test1 = IsArray<string[]> // true
+type Test2 = IsArray<number> // false
+type Test3 = IsArray<boolean[]> // true
+```
+
+---
+
+### **Exercise 4: Built-in Utility Types**
+
+**Question**:
+
+Using the built-in utility types, define a type `UserPreview` that includes only the `id` and `name` properties from the `User` interface.
+
+```typescript
+interface User {
+  id: number
+  name: string
+  email: string
+}
+```
+
+**Answer**:
+
+```typescript
+type UserPreview = Pick<User, 'id' | 'name'>
+
+let userPreview: UserPreview = { id: 1, name: 'Bob' }
+```
+
+---
+
+### **Exercise 5: Custom Utility Type**
+
+**Question**:
+
+Create a custom utility type `RequiredKeys<T>` that extracts the keys of `T` that are required (not optional). Apply this type to an interface and test it.
+
+```typescript
+interface Person {
+  id: number
+  name?: string
+  age: number
+}
+```
+
+**Answer**:
+
+```typescript
+type RequiredKeys<T> = {
+  [K in keyof T]-?: T extends Record<K, T[K]> ? K : never
+}[keyof T]
+
+type PersonRequiredKeys = RequiredKeys<Person> // 'id' | 'age'
+```
+
+---
+
+## **12. Conclusion**
+
+Mapped and conditional types are advanced features in TypeScript that empower developers to create dynamic, flexible, and type-safe code. By leveraging the `keyof` and `typeof` operators, you can manipulate and infer types based on existing structures and values. Mapped types allow you to transform types systematically, while conditional types enable you to define types that adapt based on conditions. Mastery of these advanced type system features enhances your ability to build robust TypeScript applications and prepares you for complex development challenges and technical interviews.
+
+---
+
+## **13. Next Steps**
+
+- **Practice**:
+
+  - Implement mapped and conditional types in your projects.
+  - Experiment with creating custom utility types.
+
+- **Explore**:
+
+  - Learn about template literal types and advanced type inference.
+  - Study how these advanced types interact with generics and interfaces.
+
+- **Prepare**:
+  - Review additional interview questions on TypeScript's type system.
+  - Build projects using advanced types to reinforce your understanding.
+
+---
+
+**Continue enhancing your TypeScript expertise by mastering mapped and conditional types!**
+
+---
+
+## **14. Appendix**
+
+### **Glossary**
+
+- **`keyof` Operator**: An operator that takes an object type and produces a union of its keys.
+- **`typeof` Operator**: When used in a type context, it obtains the type of a value or variable.
+- **Mapped Type**: A type that creates a new type by transforming each property of an existing type.
+- **Conditional Type**: A type that selects one of two possible types based on a condition.
+- **Distributive Conditional Type**: A conditional type that distributes over a union type, applying the conditional to each member.
+- **Utility Type**: Built-in types provided by TypeScript that perform common type transformations.
+- **Type Transformation**: The process of creating new types by modifying existing ones.
+- **Type Inference**: The compiler's ability to automatically determine the type of a variable or expression.
+- **Type Predicate**: A return type in the form `parameterName is Type`, used in custom type guards.
+
+---
+
+**End of Lesson**

@@ -1,0 +1,1041 @@
+**Lesson Title**: **Decorators and Metadata in TypeScript**
+
+**Lesson Description**:  
+Enhance your TypeScript expertise by mastering decorators and metadata. This lesson delves into class, method, and property decorators, as well as the Metadata Reflection API. By understanding how to implement and utilize decorators, you will be able to add annotations and metadata to your code, enabling powerful features like dependency injection, aspect-oriented programming, and more. This comprehensive lesson will deepen your understanding of advanced TypeScript concepts and prepare you for complex development tasks and technical interviews by covering these essential topics.
+
+---
+
+# **Decorators and Metadata in TypeScript**
+
+Decorators are a powerful feature in TypeScript that allow developers to add annotations and metadata to classes, methods, properties, and parameters. They provide a way to modify or enhance the behavior of the code through declarative syntax. The Metadata Reflection API complements decorators by enabling the inspection and manipulation of metadata at runtime. This lesson explores how to effectively use decorators and metadata in TypeScript to write more expressive and maintainable code.
+
+---
+
+## **Table of Contents**
+
+1. **Introduction to Decorators**
+   - What are Decorators?
+   - Enabling Experimental Decorators
+   - Use Cases for Decorators
+2. **Decorator Factories**
+   - Creating Decorators with Parameters
+   - Example of Decorator Factories
+3. **Class Decorators**
+   - Defining Class Decorators
+   - Applying Class Decorators
+   - Examples and Use Cases
+4. **Method Decorators**
+   - Defining Method Decorators
+   - Applying Method Decorators
+   - Examples and Use Cases
+5. **Property Decorators**
+   - Defining Property Decorators
+   - Applying Property Decorators
+   - Examples and Use Cases
+6. **Parameter Decorators**
+   - Defining Parameter Decorators
+   - Applying Parameter Decorators
+   - Examples and Use Cases
+7. **Metadata Reflection API**
+   - Introduction to Metadata Reflection
+   - Using `reflect-metadata` Library
+   - Practical Examples
+8. **Decorators in Practice**
+   - Combining Multiple Decorators
+   - Decorator Execution Order
+   - Real-World Applications
+9. **Best Practices**
+10. **Common Interview Questions**
+11. **Exercises**
+12. **Conclusion**
+13. **Next Steps**
+14. **Appendix**
+
+---
+
+## **1. Introduction to Decorators**
+
+### **1.1 What are Decorators?**
+
+- **Definition**: Decorators are special declarations that can be attached to classes, methods, properties, or parameters to modify their behavior.
+- **Syntax**: Decorators are preceded by an `@` symbol and placed immediately before the declaration they decorate.
+
+  ```typescript
+  @decorator
+  class MyClass {}
+
+  class MyClass {
+    @decorator
+    myMethod() {}
+  }
+  ```
+
+- **Purpose**:
+  - Add metadata to code elements.
+  - Enable aspect-oriented programming.
+  - Modify or enhance code behavior without altering the original code directly.
+
+### **1.2 Enabling Experimental Decorators**
+
+- **Decorators are an Experimental Feature**:
+  - As of TypeScript 5.x, decorators are officially supported, but some features may still be experimental.
+- **Compiler Option**:
+
+  - Enable decorators by setting `experimentalDecorators` to `true` in `tsconfig.json`:
+
+    ```json
+    {
+      "compilerOptions": {
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
+      }
+    }
+    ```
+
+- **Note on `emitDecoratorMetadata`**:
+  - The `emitDecoratorMetadata` option enables the compiler to emit additional design-time type metadata for decorated declarations, used with the `reflect-metadata` library.
+
+### **1.3 Use Cases for Decorators**
+
+- **Logging and Debugging**: Automatically log method calls and parameters.
+- **Access Control and Authorization**: Restrict access to certain methods or properties.
+- **Dependency Injection**: Inject dependencies into classes or methods.
+- **Validation**: Validate input parameters or property values.
+- **Frameworks**: Widely used in frameworks like Angular for component declarations.
+
+---
+
+## **2. Decorator Factories**
+
+### **2.1 Creating Decorators with Parameters**
+
+- **Decorator Factory**:
+
+  - A function that returns a decorator function.
+  - Allows passing parameters to the decorator.
+
+- **Syntax**:
+
+  ```typescript
+  function decoratorFactory(param: any): DecoratorFunction {
+    return function (
+      target: any,
+      key?: string,
+      descriptor?: PropertyDescriptor,
+    ) {
+      // Decorator logic using 'param'
+    }
+  }
+  ```
+
+### **2.2 Example of Decorator Factories**
+
+- **Example**: Creating a `Logger` decorator factory that logs messages with a custom prefix.
+
+  ```typescript
+  function Logger(prefix: string) {
+    return function (target: any, key: string) {
+      let value = target[key]
+
+      const getter = () => {
+        console.log(`${prefix} Getting value: ${value}`)
+        return value
+      }
+
+      const setter = (newVal: any) => {
+        console.log(`${prefix} Setting value: ${newVal}`)
+        value = newVal
+      }
+
+      Object.defineProperty(target, key, {
+        get: getter,
+        set: setter,
+        enumerable: true,
+        configurable: true,
+      })
+    }
+  }
+
+  class Person {
+    @Logger('Person')
+    public name: string
+
+    constructor(name: string) {
+      this.name = name
+    }
+  }
+
+  const person = new Person('Alice')
+  person.name = 'Bob' // Logs: 'Person Setting value: Bob'
+  console.log(person.name) // Logs: 'Person Getting value: Bob'
+  ```
+
+---
+
+## **3. Class Decorators**
+
+### **3.1 Defining Class Decorators**
+
+- **Definition**: A class decorator is a function that takes a constructor and returns a new constructor or modifies the existing one.
+
+- **Signature**:
+
+  ```typescript
+  function classDecorator<T extends { new (...args: any[]): {} }>(
+    constructor: T,
+  ): T | void {
+    // Decorator logic
+  }
+  ```
+
+### **3.2 Applying Class Decorators**
+
+- **Syntax**:
+
+  ```typescript
+  @classDecorator
+  class MyClass {
+    // Class body
+  }
+  ```
+
+### **3.3 Examples and Use Cases**
+
+- **Example 1: Simple Class Decorator**
+
+  ```typescript
+  function sealed(constructor: Function) {
+    Object.seal(constructor)
+    Object.seal(constructor.prototype)
+  }
+
+  @sealed
+  class Greeter {
+    greeting: string
+    constructor(message: string) {
+      this.greeting = message
+    }
+    greet() {
+      return `Hello, ${this.greeting}`
+    }
+  }
+  ```
+
+  - **Explanation**: The `sealed` decorator seals the constructor and its prototype, preventing new properties from being added.
+
+- **Example 2: Modifying Constructor**
+
+  ```typescript
+  function withTimestamp<T extends { new (...args: any[]): {} }>(
+    constructor: T,
+  ) {
+    return class extends constructor {
+      timestamp = new Date()
+    }
+  }
+
+  @withTimestamp
+  class User {
+    name: string
+    constructor(name: string) {
+      this.name = name
+    }
+  }
+
+  const user = new User('Alice')
+  console.log(user.timestamp) // Outputs the creation timestamp
+  ```
+
+  - **Explanation**: The `withTimestamp` decorator returns a new class that extends the original class, adding a `timestamp` property.
+
+---
+
+## **4. Method Decorators**
+
+### **4.1 Defining Method Decorators**
+
+- **Definition**: A method decorator is a function that takes the target object, method name, and property descriptor, allowing modification of the method's behavior.
+
+- **Signature**:
+
+  ```typescript
+  function methodDecorator(
+    target: Object,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor,
+  ): PropertyDescriptor | void {
+    // Decorator logic
+  }
+  ```
+
+### **4.2 Applying Method Decorators**
+
+- **Syntax**:
+
+  ```typescript
+  class MyClass {
+    @methodDecorator
+    myMethod() {
+      // Method body
+    }
+  }
+  ```
+
+### **4.3 Examples and Use Cases**
+
+- **Example 1: Logging Method Calls**
+
+  ```typescript
+  function log(
+    target: Object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
+    const originalMethod = descriptor.value
+    descriptor.value = function (...args: any[]) {
+      console.log(`Calling ${propertyKey} with`, args)
+      const result = originalMethod.apply(this, args)
+      console.log(`Returned from ${propertyKey} with`, result)
+      return result
+    }
+    return descriptor
+  }
+
+  class Calculator {
+    @log
+    add(a: number, b: number): number {
+      return a + b
+    }
+  }
+
+  const calculator = new Calculator()
+  calculator.add(2, 3)
+  // Logs:
+  // Calling add with [2, 3]
+  // Returned from add with 5
+  ```
+
+- **Example 2: Method Caching**
+
+  ```typescript
+  function cache(
+    target: Object,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
+    const originalMethod = descriptor.value
+    const cacheKey = Symbol()
+
+    descriptor.value = function (...args: any[]) {
+      if (!this[cacheKey]) {
+        this[cacheKey] = originalMethod.apply(this, args)
+      }
+      return this[cacheKey]
+    }
+    return descriptor
+  }
+
+  class DataFetcher {
+    @cache
+    fetchData() {
+      console.log('Fetching data...')
+      return { data: 'Sample data' }
+    }
+  }
+
+  const fetcher = new DataFetcher()
+  fetcher.fetchData() // Logs: Fetching data...
+  fetcher.fetchData() // Does not log, returns cached result
+  ```
+
+---
+
+## **5. Property Decorators**
+
+### **5.1 Defining Property Decorators**
+
+- **Definition**: A property decorator is a function that is called when a property declaration is processed, allowing you to observe or modify the property's metadata.
+
+- **Signature**:
+
+  ```typescript
+  function propertyDecorator(
+    target: Object,
+    propertyKey: string | symbol,
+  ): void {
+    // Decorator logic
+  }
+  ```
+
+### **5.2 Applying Property Decorators**
+
+- **Syntax**:
+
+  ```typescript
+  class MyClass {
+    @propertyDecorator
+    myProperty: string
+  }
+  ```
+
+### **5.3 Examples and Use Cases**
+
+- **Example 1: Input Validation**
+
+  ```typescript
+  function required(target: Object, propertyKey: string) {
+    let value = target[propertyKey]
+
+    const getter = () => value
+    const setter = (newVal: any) => {
+      if (newVal === null || newVal === undefined) {
+        throw new Error(`${propertyKey} is required`)
+      }
+      value = newVal
+    }
+
+    Object.defineProperty(target, propertyKey, {
+      get: getter,
+      set: setter,
+      enumerable: true,
+      configurable: true,
+    })
+  }
+
+  class User {
+    @required
+    name: string
+  }
+
+  const user = new User()
+  // user.name = null; // Throws Error: name is required
+  user.name = 'Alice' // Works fine
+  ```
+
+- **Example 2: Metadata Storage**
+
+  ```typescript
+  function format(formatString: string) {
+    return Reflect.metadata('format', formatString)
+  }
+
+  class Person {
+    @format('Hello, %s!')
+    name: string
+
+    constructor(name: string) {
+      this.name = name
+    }
+  }
+
+  // Usage of metadata would require the reflect-metadata library
+  ```
+
+---
+
+## **6. Parameter Decorators**
+
+### **6.1 Defining Parameter Decorators**
+
+- **Definition**: A parameter decorator is a function that is called when a function parameter is declared, allowing you to observe or modify the parameter's metadata.
+
+- **Signature**:
+
+  ```typescript
+  function parameterDecorator(
+    target: Object,
+    propertyKey: string | symbol,
+    parameterIndex: number,
+  ): void {
+    // Decorator logic
+  }
+  ```
+
+### **6.2 Applying Parameter Decorators**
+
+- **Syntax**:
+
+  ```typescript
+  class MyClass {
+    myMethod(@parameterDecorator param: any) {
+      // Method body
+    }
+  }
+  ```
+
+### **6.3 Examples and Use Cases**
+
+- **Example: Logging Parameter Values**
+
+  ```typescript
+  function logParameter(
+    target: Object,
+    propertyKey: string,
+    parameterIndex: number,
+  ) {
+    const metadataKey = `log_${propertyKey}_parameters`
+    if (Array.isArray(target[metadataKey])) {
+      target[metadataKey].push(parameterIndex)
+    } else {
+      target[metadataKey] = [parameterIndex]
+    }
+  }
+
+  class Calculator {
+    add(@logParameter a: number, @logParameter b: number): number {
+      return a + b
+    }
+  }
+
+  // Note: Accessing the metadata requires custom logic
+  ```
+
+---
+
+## **7. Metadata Reflection API**
+
+### **7.1 Introduction to Metadata Reflection**
+
+- **Purpose**: The Metadata Reflection API allows developers to define and retrieve metadata about program elements (classes, methods, properties, parameters) at runtime.
+
+- **Library**: Uses the `reflect-metadata` library to enable metadata reflection.
+
+- **Installation**:
+
+  ```bash
+  npm install reflect-metadata
+  ```
+
+- **Importing**:
+
+  ```typescript
+  import 'reflect-metadata'
+  ```
+
+### **7.2 Using `reflect-metadata` Library**
+
+- **Setting Metadata**:
+
+  ```typescript
+  Reflect.defineMetadata(metadataKey, metadataValue, target, propertyKey)
+  ```
+
+- **Getting Metadata**:
+
+  ```typescript
+  const metadata = Reflect.getMetadata(metadataKey, target, propertyKey)
+  ```
+
+- **Example**:
+
+  ```typescript
+  function format(formatString: string) {
+    return Reflect.metadata('format', formatString)
+  }
+
+  class Greeter {
+    @format('Hello, %s!')
+    greeting: string
+
+    constructor(message: string) {
+      this.greeting = message
+    }
+
+    greet() {
+      const formatString = Reflect.getMetadata('format', this, 'greeting')
+      return formatString.replace('%s', this.greeting)
+    }
+  }
+
+  const greeter = new Greeter('World')
+  console.log(greeter.greet()) // Outputs: Hello, World!
+  ```
+
+### **7.3 Practical Examples**
+
+- **Dependency Injection**:
+
+  ```typescript
+  function injectable(target: Function) {
+    Reflect.defineMetadata('injectable', true, target)
+  }
+
+  function inject(token: any) {
+    return function (
+      target: Object,
+      propertyKey: string | symbol,
+      parameterIndex: number,
+    ) {
+      const existingInjectedParameters: any[] =
+        Reflect.getMetadata('inject', target, propertyKey) || []
+      existingInjectedParameters.push({ index: parameterIndex, token })
+      Reflect.defineMetadata(
+        'inject',
+        existingInjectedParameters,
+        target,
+        propertyKey,
+      )
+    }
+  }
+
+  @injectable
+  class ServiceA {}
+
+  @injectable
+  class ServiceB {
+    constructor(@inject(ServiceA) private serviceA: ServiceA) {}
+  }
+  ```
+
+- **Runtime Type Information**:
+
+  ```typescript
+  class Person {
+    constructor(
+      public name: string,
+      public age: number,
+    ) {}
+  }
+
+  function printTypes(target: Function) {
+    const types = Reflect.getMetadata('design:paramtypes', target)
+    types.forEach((type: any) => console.log(type.name))
+  }
+
+  @printTypes
+  class Employee extends Person {
+    constructor(
+      name: string,
+      age: number,
+      public department: string,
+    ) {
+      super(name, age)
+    }
+  }
+
+  // Outputs:
+  // String
+  // Number
+  // String
+  ```
+
+  - **Note**: Requires `emitDecoratorMetadata` to be `true` in `tsconfig.json`.
+
+---
+
+## **8. Decorators in Practice**
+
+### **8.1 Combining Multiple Decorators**
+
+- **Syntax**:
+
+  ```typescript
+  @decoratorA
+  @decoratorB
+  class MyClass {}
+  ```
+
+- **Execution Order**:
+  - **Declaration Order**: The decorators are applied from top to bottom.
+  - **Execution Order**: The decorator expressions are evaluated from bottom to top.
+
+### **8.2 Decorator Execution Order**
+
+- **Example**:
+
+  ```typescript
+  function decoratorA() {
+    console.log('Decorator A evaluated')
+    return function (target: Function) {
+      console.log('Decorator A executed')
+    }
+  }
+
+  function decoratorB() {
+    console.log('Decorator B evaluated')
+    return function (target: Function) {
+      console.log('Decorator B executed')
+    }
+  }
+
+  @decoratorA()
+  @decoratorB()
+  class MyClass {}
+
+  // Output:
+  // Decorator B evaluated
+  // Decorator A evaluated
+  // Decorator B executed
+  // Decorator A executed
+  ```
+
+### **8.3 Real-World Applications**
+
+- **Angular Framework**: Uses decorators for components, directives, services, etc.
+
+  ```typescript
+  @Component({
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+  })
+  export class AppComponent {}
+  ```
+
+- **Logging and Error Handling**: Automatically log method calls and handle exceptions.
+
+- **ORMs and Data Mappers**: Define entity models and relationships using decorators.
+
+  ```typescript
+  @Entity()
+  class User {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
+    name: string
+  }
+  ```
+
+---
+
+## **9. Best Practices**
+
+- **Keep Decorators Pure**: Avoid side effects in decorators; they should not modify the decorated code in unexpected ways.
+
+- **Use Decorators for Cross-Cutting Concerns**: Apply decorators for concerns like logging, validation, caching, etc.
+
+- **Leverage Metadata**: Use metadata to store and retrieve additional information about code elements.
+
+- **Avoid Overusing Decorators**: Excessive use can make code harder to understand and maintain.
+
+- **Document Decorators**: Provide clear documentation and usage instructions for custom decorators.
+
+- **Handle Errors Gracefully**: Ensure decorators handle exceptions and edge cases appropriately.
+
+---
+
+## **10. Common Interview Questions**
+
+1. **What is a decorator in TypeScript, and what are its use cases?**
+
+   **Answer**:
+
+   - A decorator is a special declaration that can be attached to classes, methods, properties, or parameters to modify their behavior.
+   - Use cases include adding metadata, logging, validation, dependency injection, and modifying class or method behavior without altering the original code.
+
+2. **Explain how to create and apply a method decorator in TypeScript.**
+
+   **Answer**:
+
+   - **Creating a Method Decorator**:
+
+     ```typescript
+     function methodDecorator(
+       target: Object,
+       propertyKey: string | symbol,
+       descriptor: PropertyDescriptor,
+     ): PropertyDescriptor | void {
+       // Decorator logic
+     }
+     ```
+
+   - **Applying a Method Decorator**:
+
+     ```typescript
+     class MyClass {
+       @methodDecorator
+       myMethod() {
+         // Method body
+       }
+     }
+     ```
+
+   - The decorator function can modify the method's behavior by changing the descriptor.
+
+3. **What is the Metadata Reflection API in TypeScript, and how is it used with decorators?**
+
+   **Answer**:
+
+   - The Metadata Reflection API allows defining and retrieving metadata about program elements at runtime.
+   - It is used with decorators to store and access metadata, such as type information, which can be used for dependency injection, validation, etc.
+   - Requires the `reflect-metadata` library and enabling `emitDecoratorMetadata` in `tsconfig.json`.
+
+4. **Describe the difference between a class decorator and a method decorator.**
+
+   **Answer**:
+
+   - **Class Decorator**:
+     - Applied to a class declaration.
+     - Receives the constructor function as its argument.
+     - Can modify or replace the class constructor.
+   - **Method Decorator**:
+     - Applied to a method within a class.
+     - Receives the target object, method name, and property descriptor.
+     - Can modify the method's behavior by altering the descriptor.
+
+5. **How can decorators be used to implement dependency injection in TypeScript?**
+
+   **Answer**:
+
+   - Decorators can be used to annotate classes and constructor parameters with metadata about dependencies.
+   - For example, an `@injectable` decorator can mark a class as available for injection, and an `@inject` decorator can specify which dependencies to inject.
+   - At runtime, a dependency injection framework can use the metadata to resolve and inject the required instances.
+
+---
+
+## **11. Exercises**
+
+### **Exercise 1: Creating a Simple Class Decorator**
+
+**Question**:
+
+Create a class decorator `@singleton` that ensures a class has only one instance. Modify the class constructor to return the same instance every time.
+
+**Answer**:
+
+```typescript
+function singleton<T extends { new (...args: any[]): {} }>(constructor: T) {
+  let instance: T
+  return class extends constructor {
+    constructor(...args: any[]) {
+      if (!instance) {
+        super(...args)
+        instance = this
+      }
+      return instance
+    }
+  }
+}
+
+@singleton
+class Database {
+  name: string
+  constructor(name: string) {
+    this.name = name
+  }
+}
+
+const db1 = new Database('DB1')
+const db2 = new Database('DB2')
+
+console.log(db1 === db2) // Outputs: true
+console.log(db1.name) // Outputs: 'DB1'
+console.log(db2.name) // Outputs: 'DB1'
+```
+
+---
+
+### **Exercise 2: Implementing a Method Decorator for Timing**
+
+**Question**:
+
+Write a method decorator `@timing` that measures and logs the execution time of the decorated method.
+
+**Answer**:
+
+```typescript
+function timing(
+  target: Object,
+  propertyKey: string,
+  descriptor: PropertyDescriptor,
+) {
+  const originalMethod = descriptor.value
+  descriptor.value = function (...args: any[]) {
+    const start = performance.now()
+    const result = originalMethod.apply(this, args)
+    const end = performance.now()
+    console.log(`Execution time for ${propertyKey}: ${end - start} ms`)
+    return result
+  }
+  return descriptor
+}
+
+class MathOperations {
+  @timing
+  factorial(n: number): number {
+    if (n <= 1) return 1
+    return n * this.factorial(n - 1)
+  }
+}
+
+const mathOps = new MathOperations()
+mathOps.factorial(5)
+// Logs: Execution time for factorial: X ms
+```
+
+---
+
+### **Exercise 3: Using Property Decorators for Validation**
+
+**Question**:
+
+Create a property decorator `@minLength(length: number)` that validates a string property to ensure it meets a minimum length requirement. Throw an error if the validation fails.
+
+**Answer**:
+
+```typescript
+function minLength(length: number) {
+  return function (target: Object, propertyKey: string) {
+    let value: string
+
+    const getter = () => value
+    const setter = (newVal: string) => {
+      if (newVal.length < length) {
+        throw new Error(
+          `The length of ${propertyKey} should be at least ${length}`,
+        )
+      }
+      value = newVal
+    }
+
+    Object.defineProperty(target, propertyKey, {
+      get: getter,
+      set: setter,
+      enumerable: true,
+      configurable: true,
+    })
+  }
+}
+
+class User {
+  @minLength(5)
+  username: string
+
+  constructor(username: string) {
+    this.username = username
+  }
+}
+
+const user = new User('Alice') // Works fine
+// const user = new User('Bob'); // Throws Error: The length of username should be at least 5
+```
+
+---
+
+### **Exercise 4: Applying Parameter Decorators**
+
+**Question**:
+
+Implement a parameter decorator `@logParam` that logs the parameter index and value whenever the method is called.
+
+**Answer**:
+
+```typescript
+function logParam(target: Object, propertyKey: string, parameterIndex: number) {
+  const originalMethod = target[propertyKey]
+
+  target[propertyKey] = function (...args: any[]) {
+    console.log(`Parameter at index ${parameterIndex}:`, args[parameterIndex])
+    return originalMethod.apply(this, args)
+  }
+}
+
+class Messenger {
+  sendMessage(@logParam message: string) {
+    console.log(`Sending message: ${message}`)
+  }
+}
+
+const messenger = new Messenger()
+messenger.sendMessage('Hello, World!')
+// Logs:
+// Parameter at index 0: Hello, World!
+// Sending message: Hello, World!
+```
+
+---
+
+### **Exercise 5: Using Metadata Reflection API**
+
+**Question**:
+
+Use the `reflect-metadata` library to create a decorator `@type(typeName: string)` that stores the type information of a property. Write a function that retrieves and logs this metadata for all properties of a class.
+
+**Answer**:
+
+```typescript
+import 'reflect-metadata'
+
+function type(typeName: string) {
+  return Reflect.metadata('type', typeName)
+}
+
+class Product {
+  @type('string')
+  name: string
+
+  @type('number')
+  price: number
+
+  constructor(name: string, price: number) {
+    this.name = name
+    this.price = price
+  }
+}
+
+function printTypes(target: any) {
+  const keys = Object.getOwnPropertyNames(target.prototype)
+  keys.forEach((key) => {
+    const typeInfo = Reflect.getMetadata('type', target.prototype, key)
+    if (typeInfo) {
+      console.log(`${key}: ${typeInfo}`)
+    }
+  })
+}
+
+printTypes(Product)
+// Outputs:
+// name: string
+// price: number
+```
+
+---
+
+## **12. Conclusion**
+
+Decorators and metadata are powerful tools in TypeScript that enable developers to add annotations, modify behavior, and enhance the functionality of code elements without altering their original implementation. By mastering class, method, property, and parameter decorators, as well as the Metadata Reflection API, you can write more expressive, maintainable, and scalable TypeScript applications. Understanding these advanced concepts prepares you for tackling complex development challenges and technical interviews.
+
+---
+
+## **13. Next Steps**
+
+- **Practice**:
+
+  - Implement custom decorators in your projects.
+  - Explore the use of metadata in real-world applications.
+
+- **Explore**:
+
+  - Learn about the new decorator syntax and proposals in the latest TypeScript versions.
+  - Study how frameworks like Angular and NestJS utilize decorators.
+
+- **Prepare**:
+  - Review additional interview questions on TypeScript decorators and metadata.
+  - Build projects that leverage decorators to reinforce your understanding.
+
+---
+
+**Continue enhancing your TypeScript expertise by mastering decorators and metadata!**
+
+---
+
+## **14. Appendix**
+
+### **Glossary**
+
+- **Decorator**: A special declaration that can be attached to classes, methods, properties, or parameters to modify their behavior.
+- **Decorator Factory**: A function that returns a decorator function, allowing parameters to be passed.
+- **Class Decorator**: A decorator applied to a class declaration, receiving the constructor as its argument.
+- **Method Decorator**: A decorator applied to a method, receiving the target, method name, and property descriptor.
+- **Property Decorator**: A decorator applied to a property, receiving the target and property name.
+- **Parameter Decorator**: A decorator applied to a method parameter, receiving the target, method name, and parameter index.
+- **Metadata Reflection API**: An API that allows defining and retrieving metadata about program elements at runtime, typically using the `reflect-metadata` library.
+- **`reflect-metadata`**: A library that enables metadata reflection capabilities in TypeScript.
+- **`experimentalDecorators`**: A TypeScript compiler option that enables support for decorators.
+- **`emitDecoratorMetadata`**: A TypeScript compiler option that emits design-time type metadata for decorated declarations.
+- **Aspect-Oriented Programming**: A programming paradigm that aims to increase modularity by allowing the separation of cross-cutting concerns.
+
+---
+
+**End of Lesson**

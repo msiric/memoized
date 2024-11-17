@@ -1,0 +1,755 @@
+**Lesson Title**: **Type Guards and Type Narrowing in TypeScript**
+
+**Lesson Description**:  
+Enhance your TypeScript expertise by mastering type guards and type narrowing. This lesson delves into user-defined type guards and discriminated unions, powerful features that enable you to refine types at runtime and ensure type safety. By understanding how to implement custom type guards and leverage discriminated unions, you will be able to write more robust, maintainable, and type-safe TypeScript code. This comprehensive lesson will deepen your understanding of TypeScript's type system and prepare you for technical interviews by covering these essential topics.
+
+---
+
+# **Type Guards and Type Narrowing in TypeScript**
+
+Type guards and type narrowing are essential features in TypeScript that allow developers to refine types at runtime, ensuring that variables are used safely and correctly. User-defined type guards enable you to create custom checks that inform the TypeScript compiler about the specific type of a variable. Discriminated unions simplify type checking for union types by using a common property (the discriminant). This lesson explores how to effectively use type guards and discriminated unions to write safer and more expressive TypeScript code.
+
+---
+
+## **Table of Contents**
+
+1. **Introduction to Type Guards and Type Narrowing**
+   - Overview of Type Guards
+   - Importance in TypeScript
+2. **Understanding Type Guards**
+   - Built-in Type Guards
+   - Using `typeof` Operator
+   - Using `instanceof` Operator
+3. **User-Defined Type Guards**
+   - What are User-Defined Type Guards?
+   - Implementing Type Guards with Type Predicates
+   - Practical Examples
+4. **Type Narrowing**
+   - Understanding Type Narrowing
+   - Control Flow Analysis
+   - Narrowing with Conditionals
+5. **Discriminated Unions**
+   - What are Discriminated Unions?
+   - Defining Discriminated Unions
+   - Using Discriminated Unions with `switch` Statements
+6. **Exhaustiveness Checking**
+   - Ensuring All Cases are Handled
+   - Using `never` Type for Exhaustiveness
+7. **Advanced Type Guards**
+   - Type Guards with `in` Operator
+   - Type Guards with Custom Functions
+8. **Best Practices**
+9. **Common Interview Questions**
+10. **Exercises**
+11. **Conclusion**
+12. **Next Steps**
+13. **Appendix**
+
+---
+
+## **1. Introduction to Type Guards and Type Narrowing**
+
+### **1.1 Overview of Type Guards**
+
+- **Definition**: Type guards are expressions that perform runtime checks, allowing TypeScript to narrow the type within a conditional block.
+- **Purpose**:
+  - Enable safe access to properties and methods specific to a type.
+  - Improve code safety by informing the compiler about variable types.
+
+### **1.2 Importance in TypeScript**
+
+- **Type Safety**: Prevent runtime errors by ensuring variables are of the expected type.
+- **Code Readability**: Clarify the developer's intent regarding type handling.
+- **Expressiveness**: Allow complex type checks and refinements.
+
+---
+
+## **2. Understanding Type Guards**
+
+### **2.1 Built-in Type Guards**
+
+TypeScript provides built-in type guards using operators like `typeof` and `instanceof`.
+
+### **2.2 Using `typeof` Operator**
+
+- **Definition**: Checks the type of a variable at runtime.
+- **Applicable Types**: `number`, `string`, `boolean`, `symbol`, `undefined`, `object`, `function`.
+
+- **Syntax**:
+
+  ```typescript
+  if (typeof variable === 'type') {
+    // variable is narrowed to 'type'
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  function padLeft(value: string, padding: string | number): string {
+    if (typeof padding === 'number') {
+      return ' '.repeat(padding) + value
+    }
+    if (typeof padding === 'string') {
+      return padding + value
+    }
+    throw new Error(`Expected string or number, got '${typeof padding}'.`)
+  }
+  ```
+
+### **2.3 Using `instanceof` Operator**
+
+- **Definition**: Checks if an object is an instance of a class or constructor function.
+
+- **Syntax**:
+
+  ```typescript
+  if (variable instanceof ClassName) {
+    // variable is narrowed to 'ClassName'
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  class Dog {
+    bark() {
+      console.log('Woof!')
+    }
+  }
+
+  class Cat {
+    meow() {
+      console.log('Meow!')
+    }
+  }
+
+  function makeSound(animal: Dog | Cat): void {
+    if (animal instanceof Dog) {
+      animal.bark()
+    } else if (animal instanceof Cat) {
+      animal.meow()
+    }
+  }
+  ```
+
+---
+
+## **3. User-Defined Type Guards**
+
+### **3.1 What are User-Defined Type Guards?**
+
+- **Definition**: Custom functions that perform type checks and inform the TypeScript compiler of the type of a variable within a specific scope.
+- **Type Predicates**: Special return types in the form `parameterName is Type`.
+
+### **3.2 Implementing Type Guards with Type Predicates**
+
+- **Syntax**:
+
+  ```typescript
+  function isType(variable: any): variable is Type {
+    // Type check logic
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  interface Fish {
+    swim(): void
+  }
+
+  interface Bird {
+    fly(): void
+  }
+
+  function isFish(pet: Fish | Bird): pet is Fish {
+    return (pet as Fish).swim !== undefined
+  }
+  ```
+
+### **3.3 Practical Examples**
+
+- **Example 1: Checking Interface Implementation**
+
+  ```typescript
+  function move(animal: Fish | Bird): void {
+    if (isFish(animal)) {
+      animal.swim()
+    } else {
+      animal.fly()
+    }
+  }
+  ```
+
+- **Example 2: Validating Object Shape**
+
+  ```typescript
+  interface Car {
+    make: string
+    model: string
+    drive(): void
+  }
+
+  function isCar(vehicle: any): vehicle is Car {
+    return (
+      vehicle &&
+      typeof vehicle.make === 'string' &&
+      typeof vehicle.model === 'string' &&
+      typeof vehicle.drive === 'function'
+    )
+  }
+
+  function operate(vehicle: any): void {
+    if (isCar(vehicle)) {
+      vehicle.drive()
+    } else {
+      console.log('Not a car.')
+    }
+  }
+  ```
+
+---
+
+## **4. Type Narrowing**
+
+### **4.1 Understanding Type Narrowing**
+
+- **Definition**: The process by which TypeScript infers more specific types based on control flow analysis.
+- **Purpose**: Allow the compiler to understand and enforce type constraints within different code paths.
+
+### **4.2 Control Flow Analysis**
+
+- TypeScript analyzes the flow of code to determine variable types at different points.
+- Variables can have different types in different branches.
+
+### **4.3 Narrowing with Conditionals**
+
+- **Example**:
+
+  ```typescript
+  function processValue(value: string | number | boolean): void {
+    if (typeof value === 'string') {
+      // value is string
+      console.log(value.toUpperCase())
+    } else if (typeof value === 'number') {
+      // value is number
+      console.log(value.toFixed(2))
+    } else {
+      // value is boolean
+      console.log(value ? 'True' : 'False')
+    }
+  }
+  ```
+
+- **Type Guards in Action**:
+  - Using `typeof`, `instanceof`, custom type guards, and control flow statements to narrow types.
+
+---
+
+## **5. Discriminated Unions**
+
+### **5.1 What are Discriminated Unions?**
+
+- **Definition**: A union of types that have a common literal property (the discriminant), allowing the compiler to narrow types based on the value of that property.
+- **Purpose**: Simplify type checking and ensure all possible types are handled.
+
+### **5.2 Defining Discriminated Unions**
+
+- **Structure**:
+
+  ```typescript
+  interface TypeA {
+    kind: 'A'
+    // properties specific to TypeA
+  }
+
+  interface TypeB {
+    kind: 'B'
+    // properties specific to TypeB
+  }
+
+  type UnionType = TypeA | TypeB
+  ```
+
+### **5.3 Using Discriminated Unions with `switch` Statements**
+
+- **Example**:
+
+  ```typescript
+  interface Square {
+    kind: 'square'
+    size: number
+  }
+
+  interface Rectangle {
+    kind: 'rectangle'
+    width: number
+    height: number
+  }
+
+  interface Circle {
+    kind: 'circle'
+    radius: number
+  }
+
+  type Shape = Square | Rectangle | Circle
+
+  function area(shape: Shape): number {
+    switch (shape.kind) {
+      case 'square':
+        return shape.size ** 2
+      case 'rectangle':
+        return shape.width * shape.height
+      case 'circle':
+        return Math.PI * shape.radius ** 2
+      default:
+        // Exhaustiveness checking
+        const _exhaustiveCheck: never = shape
+        return _exhaustiveCheck
+    }
+  }
+  ```
+
+---
+
+## **6. Exhaustiveness Checking**
+
+### **6.1 Ensuring All Cases are Handled**
+
+- **Purpose**: Verify that all possible types in a union are accounted for.
+- **Technique**: Use `never` type in the default case to trigger a compile-time error if a new type is added but not handled.
+
+### **6.2 Using `never` Type for Exhaustiveness**
+
+- **Example**:
+
+  ```typescript
+  function assertNever(value: never): never {
+    throw new Error(`Unexpected value: ${value}`)
+  }
+
+  function area(shape: Shape): number {
+    switch (shape.kind) {
+      case 'square':
+        return shape.size ** 2
+      case 'rectangle':
+        return shape.width * shape.height
+      case 'circle':
+        return Math.PI * shape.radius ** 2
+      default:
+        return assertNever(shape) // Compile-time error if 'shape' is not 'never'
+    }
+  }
+  ```
+
+- **Benefits**:
+  - Catch errors during development when new types are added but not handled.
+  - Improve code robustness.
+
+---
+
+## **7. Advanced Type Guards**
+
+### **7.1 Type Guards with `in` Operator**
+
+- **Definition**: Checks if an object has a specific property.
+
+- **Syntax**:
+
+  ```typescript
+  if ('property' in variable) {
+    // variable is narrowed to types that have 'property'
+  }
+  ```
+
+- **Example**:
+
+  ```typescript
+  interface Admin {
+    name: string
+    privileges: string[]
+  }
+
+  interface Employee {
+    name: string
+    startDate: Date
+  }
+
+  type Staff = Admin | Employee
+
+  function printStaffInfo(staff: Staff): void {
+    console.log(`Name: ${staff.name}`)
+    if ('privileges' in staff) {
+      console.log(`Privileges: ${staff.privileges.join(', ')}`)
+    }
+    if ('startDate' in staff) {
+      console.log(`Start Date: ${staff.startDate.toDateString()}`)
+    }
+  }
+  ```
+
+### **7.2 Type Guards with Custom Functions**
+
+- **Complex Checks**:
+
+  ```typescript
+  function isDate(value: any): value is Date {
+    return value instanceof Date && !isNaN(value.getTime())
+  }
+
+  function process(input: string | Date): void {
+    if (isDate(input)) {
+      console.log(`Date is ${input.toDateString()}`)
+    } else {
+      console.log(`String is ${input}`)
+    }
+  }
+  ```
+
+---
+
+## **8. Best Practices**
+
+- **Use Type Guards to Narrow Types Safely**:
+
+  - Utilize built-in operators and custom type guards to inform the compiler about types.
+
+- **Leverage Discriminated Unions**:
+
+  - Simplify type checks by using a common discriminant property.
+
+- **Implement Exhaustiveness Checking**:
+
+  - Use `never` type to ensure all cases are handled, catching errors during development.
+
+- **Keep Type Guards Simple and Readable**:
+
+  - Write clear and concise type guard functions.
+
+- **Avoid Overusing Type Assertions**:
+  - Prefer type guards over type assertions to maintain type safety.
+
+---
+
+## **9. Common Interview Questions**
+
+1. **What is a type guard in TypeScript, and how does it differ from a type assertion?**
+
+   **Answer**:
+
+   - A type guard is an expression that performs a runtime check to narrow the type of a variable within a specific scope, informing the TypeScript compiler about the type.
+   - A type assertion tells the compiler to treat a variable as a certain type without any checks, potentially leading to runtime errors if incorrect.
+   - Type guards enhance type safety by validating types, whereas type assertions override the compiler's type inference.
+
+2. **How do you create a user-defined type guard in TypeScript?**
+
+   **Answer**:
+
+   - By defining a function that performs a type check and returns a type predicate in the form `parameterName is Type`.
+   - **Example**:
+
+     ```typescript
+     function isString(value: any): value is string {
+       return typeof value === 'string'
+     }
+     ```
+
+3. **Explain what discriminated unions are and provide an example.**
+
+   **Answer**:
+
+   - Discriminated unions are union types that have a common discriminant property with a literal type, allowing the compiler to narrow the type based on the value of that property.
+   - **Example**:
+
+     ```typescript
+     interface Circle {
+       kind: 'circle'
+       radius: number
+     }
+
+     interface Square {
+       kind: 'square'
+       size: number
+     }
+
+     type Shape = Circle | Square
+     ```
+
+4. **What is the purpose of the `never` type in TypeScript, and how is it used in exhaustiveness checking?**
+
+   **Answer**:
+
+   - The `never` type represents values that never occur, such as the return type of functions that always throw an error.
+   - In exhaustiveness checking, `never` is used to ensure that all possible cases in a union are handled. If a variable is of type `never` in a `default` case, the compiler will error if there are unhandled types.
+   - **Example**:
+
+     ```typescript
+     function assertNever(value: never): never {
+       throw new Error(`Unexpected value: ${value}`)
+     }
+     ```
+
+5. **How does the `in` operator help in type guarding, and when would you use it?**
+
+   **Answer**:
+
+   - The `in` operator checks if an object has a specific property.
+   - It helps in type guarding by narrowing the variable to types that have that property.
+   - It's useful when dealing with union types that share some properties but differ in others.
+   - **Example**:
+
+     ```typescript
+     if ('startDate' in staff) {
+       // staff is narrowed to types that have 'startDate'
+     }
+     ```
+
+---
+
+## **10. Exercises**
+
+### **Exercise 1: Implementing a User-Defined Type Guard**
+
+**Question**:
+
+Define interfaces `Dog` with a method `bark()` and `Cat` with a method `meow()`. Write a user-defined type guard `isDog` to determine if an object is a `Dog`. Create a function `makeSound` that uses the type guard to call the appropriate method.
+
+**Answer**:
+
+```typescript
+interface Dog {
+  name: string
+  bark(): void
+}
+
+interface Cat {
+  name: string
+  meow(): void
+}
+
+function isDog(pet: Dog | Cat): pet is Dog {
+  return (pet as Dog).bark !== undefined
+}
+
+function makeSound(pet: Dog | Cat): void {
+  if (isDog(pet)) {
+    pet.bark()
+  } else {
+    pet.meow()
+  }
+}
+
+// Usage
+const dog: Dog = { name: 'Rex', bark: () => console.log('Woof!') }
+const cat: Cat = { name: 'Whiskers', meow: () => console.log('Meow!') }
+
+makeSound(dog) // Outputs: Woof!
+makeSound(cat) // Outputs: Meow!
+```
+
+---
+
+### **Exercise 2: Using Discriminated Unions**
+
+**Question**:
+
+Create a discriminated union `Vehicle` with types `Car` and `Boat`. Both should have a `type` property (`'car'` or `'boat'`). `Car` should have a `drive()` method, and `Boat` should have a `sail()` method. Write a function `operateVehicle` that uses a `switch` statement to call the appropriate method based on the `type`.
+
+**Answer**:
+
+```typescript
+interface Car {
+  type: 'car'
+  drive(): void
+}
+
+interface Boat {
+  type: 'boat'
+  sail(): void
+}
+
+type Vehicle = Car | Boat
+
+function operateVehicle(vehicle: Vehicle): void {
+  switch (vehicle.type) {
+    case 'car':
+      vehicle.drive()
+      break
+    case 'boat':
+      vehicle.sail()
+      break
+    default:
+      const _exhaustiveCheck: never = vehicle
+      return _exhaustiveCheck
+  }
+}
+
+// Usage
+const car: Car = { type: 'car', drive: () => console.log('Driving') }
+const boat: Boat = { type: 'boat', sail: () => console.log('Sailing') }
+
+operateVehicle(car) // Outputs: Driving
+operateVehicle(boat) // Outputs: Sailing
+```
+
+---
+
+### **Exercise 3: Type Guards with `in` Operator**
+
+**Question**:
+
+Define interfaces `Square` with a property `sideLength` and `Rectangle` with properties `width` and `height`. Write a function `calculateArea` that accepts a parameter of type `Square | Rectangle` and uses the `in` operator to determine the shape and calculate the area accordingly.
+
+**Answer**:
+
+```typescript
+interface Square {
+  sideLength: number
+}
+
+interface Rectangle {
+  width: number
+  height: number
+}
+
+function calculateArea(shape: Square | Rectangle): number {
+  if ('sideLength' in shape) {
+    return shape.sideLength ** 2
+  } else if ('width' in shape && 'height' in shape) {
+    return shape.width * shape.height
+  }
+  throw new Error('Invalid shape')
+}
+
+// Usage
+const square: Square = { sideLength: 5 }
+const rectangle: Rectangle = { width: 4, height: 6 }
+
+console.log(calculateArea(square)) // Outputs: 25
+console.log(calculateArea(rectangle)) // Outputs: 24
+```
+
+---
+
+### **Exercise 4: Type Narrowing with Control Flow**
+
+**Question**:
+
+Write a function `formatInput` that accepts a parameter of type `string | number | string[]`. Use type narrowing to handle each type differently: if it's a string, return it in uppercase; if it's a number, return it formatted with two decimal places; if it's an array of strings, join them with commas.
+
+**Answer**:
+
+```typescript
+function formatInput(input: string | number | string[]): string {
+  if (typeof input === 'string') {
+    return input.toUpperCase()
+  } else if (typeof input === 'number') {
+    return input.toFixed(2)
+  } else if (Array.isArray(input)) {
+    return input.join(', ')
+  }
+  throw new Error('Invalid input type')
+}
+
+// Usage
+console.log(formatInput('hello')) // Outputs: HELLO
+console.log(formatInput(3.14159)) // Outputs: 3.14
+console.log(formatInput(['a', 'b', 'c'])) // Outputs: a, b, c
+```
+
+---
+
+### **Exercise 5: Exhaustiveness Checking**
+
+**Question**:
+
+Given the discriminated union `Shape` with types `Circle`, `Square`, and `Triangle`, write a function `describeShape` that uses a `switch` statement to handle each shape. Implement exhaustiveness checking to ensure all possible types are covered.
+
+**Answer**:
+
+```typescript
+interface Circle {
+  kind: 'circle'
+  radius: number
+}
+
+interface Square {
+  kind: 'square'
+  sideLength: number
+}
+
+interface Triangle {
+  kind: 'triangle'
+  base: number
+  height: number
+}
+
+type Shape = Circle | Square | Triangle
+
+function describeShape(shape: Shape): string {
+  switch (shape.kind) {
+    case 'circle':
+      return `A circle with radius ${shape.radius}`
+    case 'square':
+      return `A square with side length ${shape.sideLength}`
+    case 'triangle':
+      return `A triangle with base ${shape.base} and height ${shape.height}`
+    default:
+      const _exhaustiveCheck: never = shape
+      return _exhaustiveCheck
+  }
+}
+
+// Usage
+const circle: Circle = { kind: 'circle', radius: 5 }
+console.log(describeShape(circle)) // Outputs: A circle with radius 5
+```
+
+---
+
+## **11. Conclusion**
+
+Type guards and type narrowing are powerful features in TypeScript that enable developers to write safer and more expressive code. By implementing user-defined type guards and leveraging discriminated unions, you can refine types at runtime and ensure that your code handles all possible cases correctly. Understanding and utilizing these features will enhance your ability to build robust TypeScript applications and prepare you for complex development challenges and technical interviews.
+
+---
+
+## **12. Next Steps**
+
+- **Practice**:
+
+  - Implement user-defined type guards in your projects.
+  - Use discriminated unions to simplify type handling.
+
+- **Explore**:
+
+  - Learn about advanced type manipulation with conditional types.
+  - Study how type guards interact with generics and utility types.
+
+- **Prepare**:
+  - Review additional interview questions on TypeScript's type system.
+  - Build projects using type guards and narrowing to reinforce your understanding.
+
+---
+
+**Continue enhancing your TypeScript expertise by mastering type guards and type narrowing!**
+
+---
+
+## **13. Appendix**
+
+### **Glossary**
+
+- **Type Guard**: An expression that performs a runtime check to narrow the type of a variable within a specific scope.
+- **Type Narrowing**: Refining the type of a variable based on control flow analysis.
+- **User-Defined Type Guard**: A custom function that performs a type check and returns a type predicate.
+- **Type Predicate**: A return type in the form `parameterName is Type`, used in user-defined type guards.
+- **Discriminated Union**: A union of types that share a common property with a literal type, allowing type-safe narrowing.
+- **Exhaustiveness Checking**: Ensuring that all possible types in a union are handled, often using the `never` type.
+- **`never` Type**: A type that represents values that never occur, used for exhaustive type checking.
+- **Control Flow Analysis**: The process by which TypeScript determines the types of variables based on the flow of code.
+- **`in` Operator**: An operator that checks if an object has a specific property, used for type guarding.
+
+---
+
+**End of Lesson**

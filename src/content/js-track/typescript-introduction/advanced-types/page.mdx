@@ -1,0 +1,874 @@
+**Lesson Title**: **Advanced Types in TypeScript**
+
+**Lesson Description**:  
+Elevate your TypeScript skills by mastering advanced types. This lesson delves into union and intersection types, enabling you to create complex and flexible type definitions. Additionally, learn about type guards and type narrowing to refine types at runtime, enhancing type safety and code robustness. By understanding these advanced types and techniques, you will be able to write more expressive and type-safe TypeScript applications. This comprehensive lesson will deepen your knowledge of TypeScript's type system and prepare you for technical interviews by covering these essential topics.
+
+---
+
+# **Advanced Types in TypeScript**
+
+TypeScript's advanced types provide powerful tools for developers to create flexible and precise type definitions. Union and intersection types allow combining multiple types into one, offering greater expressiveness. Type guards and type narrowing enable refining types at runtime, ensuring type safety and preventing errors. This lesson explores how to leverage these advanced types and techniques effectively in TypeScript.
+
+---
+
+## **Table of Contents**
+
+1. **Introduction to Advanced Types**
+   - Overview of Advanced Types
+   - Importance in TypeScript
+2. **Union Types**
+   - Defining Union Types
+   - Use Cases for Union Types
+   - Working with Union Types
+3. **Intersection Types**
+   - Defining Intersection Types
+   - Use Cases for Intersection Types
+   - Combining Interfaces and Types
+4. **Type Guards**
+   - What are Type Guards?
+   - Using `typeof` and `instanceof`
+   - Custom Type Guards
+5. **Type Narrowing**
+   - Understanding Type Narrowing
+   - Control Flow Based Type Analysis
+   - Discriminated Unions
+6. **Type Predicates**
+   - Defining Type Predicates
+   - Implementing Type Guards with Predicates
+7. **Type Compatibility and Assignability**
+   - Structural Typing in TypeScript
+   - Type Compatibility Rules
+8. **Type Assertions and Casting**
+   - Refreshing Type Assertions
+   - Casting Between Types
+9. **Best Practices**
+10. **Common Interview Questions**
+11. **Exercises**
+12. **Conclusion**
+13. **Next Steps**
+14. **Appendix**
+
+---
+
+## **1. Introduction to Advanced Types**
+
+### **1.1 Overview of Advanced Types**
+
+- **Advanced Types**: Enhance TypeScript's type system, allowing more complex and expressive type definitions.
+- **Features**:
+  - **Union Types**: A value can be one of several types.
+  - **Intersection Types**: Combine multiple types into one.
+  - **Type Guards**: Runtime checks that refine types within a scope.
+  - **Type Narrowing**: Refining types based on control flow analysis.
+
+### **1.2 Importance in TypeScript**
+
+- **Flexibility**: Allows defining types that can handle various scenarios.
+- **Type Safety**: Improves error detection and code robustness.
+- **Expressiveness**: Enables precise type definitions that reflect complex data structures.
+- **Code Maintainability**: Facilitates writing cleaner and more maintainable code.
+
+---
+
+## **2. Union Types**
+
+### **2.1 Defining Union Types**
+
+- **Definition**: A union type describes a value that can be one of several types.
+- **Syntax**:
+
+  ```typescript
+  type UnionType = Type1 | Type2 | Type3
+  ```
+
+- **Example**:
+
+  ```typescript
+  type ID = number | string
+
+  let userId: ID
+  userId = 101 // Valid
+  userId = 'abc123' // Valid
+  // userId = true;  // Error: Type 'boolean' is not assignable to type 'ID'.
+  ```
+
+### **2.2 Use Cases for Union Types**
+
+- **Flexible Function Parameters**:
+
+  ```typescript
+  function formatInput(input: string | number): string {
+    return `Input: ${input}`
+  }
+  ```
+
+- **Handling Multiple Return Types**:
+
+  ```typescript
+  function getValue(): number | null {
+    // Implementation
+    return null
+  }
+  ```
+
+- **Defining Flexible Data Structures**:
+
+  ```typescript
+  interface TextMessage {
+    kind: 'text'
+    content: string
+  }
+
+  interface ImageMessage {
+    kind: 'image'
+    url: string
+  }
+
+  type Message = TextMessage | ImageMessage
+  ```
+
+### **2.3 Working with Union Types**
+
+- **Type Guards with Union Types**:
+
+  ```typescript
+  function printId(id: number | string): void {
+    if (typeof id === 'string') {
+      console.log(`ID (string): ${id.toUpperCase()}`)
+    } else {
+      console.log(`ID (number): ${id}`)
+    }
+  }
+  ```
+
+- **Accessing Common Properties**:
+
+  ```typescript
+  function getLength(input: string | any[]): number {
+    return input.length
+  }
+  ```
+
+- **Cautions**:
+
+  - Only access properties and methods common to all types in the union unless type guarding.
+
+---
+
+## **3. Intersection Types**
+
+### **3.1 Defining Intersection Types**
+
+- **Definition**: An intersection type combines multiple types into one, requiring the value to satisfy all included types.
+- **Syntax**:
+
+  ```typescript
+  type IntersectionType = Type1 & Type2 & Type3
+  ```
+
+- **Example**:
+
+  ```typescript
+  interface Person {
+    name: string
+  }
+
+  interface Employee {
+    employeeId: number
+  }
+
+  type Staff = Person & Employee
+
+  let staffMember: Staff = {
+    name: 'Alice',
+    employeeId: 123,
+  }
+  ```
+
+### **3.2 Use Cases for Intersection Types**
+
+- **Combining Interfaces**:
+
+  - Merging properties from multiple interfaces.
+
+- **Mixin Patterns**:
+
+  - Creating types that combine behaviors from multiple sources.
+
+- **Extending Types**:
+
+  - Enhancing types with additional properties or methods.
+
+### **3.3 Combining Interfaces and Types**
+
+- **Example**:
+
+  ```typescript
+  interface Drivable {
+    drive(): void
+  }
+
+  interface Flyable {
+    fly(): void
+  }
+
+  type FlyingCar = Drivable & Flyable
+
+  class FutureCar implements FlyingCar {
+    drive(): void {
+      console.log('Driving on the road.')
+    }
+    fly(): void {
+      console.log('Flying in the sky.')
+    }
+  }
+  ```
+
+---
+
+## **4. Type Guards**
+
+### **4.1 What are Type Guards?**
+
+- **Definition**: Type guards are expressions that perform runtime checks, ensuring that a variable is of a certain type in a given scope.
+- **Purpose**:
+  - Refine types within conditional blocks.
+  - Enable safe access to properties and methods specific to a type.
+
+### **4.2 Using `typeof` and `instanceof`**
+
+- **Using `typeof` Operator**:
+
+  ```typescript
+  function isNumber(value: any): boolean {
+    return typeof value === 'number'
+  }
+
+  function add(a: number | string, b: number | string): number | string {
+    if (typeof a === 'number' && typeof b === 'number') {
+      return a + b // Both are numbers
+    }
+    if (typeof a === 'string' && typeof b === 'string') {
+      return a.concat(b) // Both are strings
+    }
+    throw new Error('Invalid arguments')
+  }
+  ```
+
+- **Using `instanceof` Operator**:
+
+  ```typescript
+  class Dog {
+    bark(): void {
+      console.log('Woof!')
+    }
+  }
+
+  class Cat {
+    meow(): void {
+      console.log('Meow!')
+    }
+  }
+
+  function makeSound(animal: Dog | Cat): void {
+    if (animal instanceof Dog) {
+      animal.bark()
+    } else if (animal instanceof Cat) {
+      animal.meow()
+    }
+  }
+  ```
+
+### **4.3 Custom Type Guards**
+
+- **Defining Custom Type Guards**:
+
+  ```typescript
+  function isString(value: any): value is string {
+    return typeof value === 'string'
+  }
+
+  function process(value: string | number): void {
+    if (isString(value)) {
+      // TypeScript now knows 'value' is a string
+      console.log(value.toUpperCase())
+    } else {
+      console.log(value.toFixed(2))
+    }
+  }
+  ```
+
+- **Using Type Predicates**:
+
+  - A type predicate is a return type in the form `parameterName is Type`.
+
+---
+
+## **5. Type Narrowing**
+
+### **5.1 Understanding Type Narrowing**
+
+- **Definition**: Type narrowing is the process of refining a variable's type within a specific scope based on control flow analysis.
+- **Purpose**:
+  - Allows TypeScript to understand and verify code paths.
+  - Improves type safety by ensuring correct usage of variables.
+
+### **5.2 Control Flow Based Type Analysis**
+
+- **Example with `if` Statements**:
+
+  ```typescript
+  function process(value: number | string | boolean): void {
+    if (typeof value === 'string') {
+      // 'value' is narrowed to 'string'
+      console.log(value.toUpperCase())
+    } else if (typeof value === 'number') {
+      // 'value' is narrowed to 'number'
+      console.log(value.toFixed(2))
+    } else {
+      // 'value' is narrowed to 'boolean'
+      console.log(value ? 'True' : 'False')
+    }
+  }
+  ```
+
+- **Example with `in` Operator**:
+
+  ```typescript
+  interface Square {
+    kind: 'square'
+    size: number
+  }
+
+  interface Rectangle {
+    kind: 'rectangle'
+    width: number
+    height: number
+  }
+
+  type Shape = Square | Rectangle
+
+  function area(shape: Shape): number {
+    if ('size' in shape) {
+      return shape.size ** 2
+    } else {
+      return shape.width * shape.height
+    }
+  }
+  ```
+
+### **5.3 Discriminated Unions**
+
+- **Definition**: A pattern where types in a union have a common property (the discriminant) with a literal type, allowing type guards based on its value.
+- **Example**:
+
+  ```typescript
+  interface Circle {
+    kind: 'circle'
+    radius: number
+  }
+
+  interface Triangle {
+    kind: 'triangle'
+    base: number
+    height: number
+  }
+
+  type Shape = Circle | Triangle
+
+  function area(shape: Shape): number {
+    switch (shape.kind) {
+      case 'circle':
+        return Math.PI * shape.radius ** 2
+      case 'triangle':
+        return (shape.base * shape.height) / 2
+      default:
+        const _exhaustiveCheck: never = shape
+        return _exhaustiveCheck
+    }
+  }
+  ```
+
+---
+
+## **6. Type Predicates**
+
+### **6.1 Defining Type Predicates**
+
+- **Syntax**:
+
+  ```typescript
+  function functionName(parameter: any): parameter is Type {
+    // Function body
+  }
+  ```
+
+- **Purpose**:
+
+  - Allow custom functions to act as type guards.
+  - Inform TypeScript about the type within a conditional block.
+
+### **6.2 Implementing Type Guards with Predicates**
+
+- **Example**:
+
+  ```typescript
+  interface Fish {
+    swim(): void
+  }
+
+  interface Bird {
+    fly(): void
+  }
+
+  function isFish(pet: Fish | Bird): pet is Fish {
+    return (pet as Fish).swim !== undefined
+  }
+
+  function move(animal: Fish | Bird): void {
+    if (isFish(animal)) {
+      animal.swim() // TypeScript knows 'animal' is 'Fish'
+    } else {
+      animal.fly() // TypeScript knows 'animal' is 'Bird'
+    }
+  }
+  ```
+
+- **Explanation**:
+
+  - The `isFish` function checks if `pet` is a `Fish`.
+  - The return type `pet is Fish` is a type predicate.
+
+---
+
+## **7. Type Compatibility and Assignability**
+
+### **7.1 Structural Typing in TypeScript**
+
+- **Definition**: TypeScript uses structural typing (also known as duck typing), where compatibility is determined by the structure of the types rather than their explicit declarations.
+
+- **Example**:
+
+  ```typescript
+  interface Point {
+    x: number
+    y: number
+  }
+
+  let point: Point = { x: 10, y: 20 }
+  let coordinates = { x: 10, y: 20, z: 30 }
+
+  point = coordinates // Valid: 'coordinates' has at least the properties of 'Point'
+  ```
+
+### **7.2 Type Compatibility Rules**
+
+- **Assignability**:
+
+  - A type `S` is assignable to a type `T` if `S` has at least the required properties of `T`.
+
+- **Function Types**:
+
+  - Function parameter bivariance (simplified for beginners):
+
+    ```typescript
+    type Handler = (a: number) => void
+
+    let handler1: Handler = (a: number) => {} // Valid
+    let handler2: Handler = (a: number, b: string) => {} // Error: Parameters do not match
+    ```
+
+- **Generics**:
+
+  - Generic types are compatible if their structures are compatible.
+
+    ```typescript
+    interface Container<T> {
+      value: T
+    }
+
+    let numberContainer: Container<number> = { value: 123 }
+    let stringContainer: Container<string> = { value: 'hello' }
+
+    // numberContainer = stringContainer; // Error: Type 'string' is not assignable to type 'number'
+    ```
+
+---
+
+## **8. Type Assertions and Casting**
+
+### **8.1 Refreshing Type Assertions**
+
+- **Syntax**:
+
+  ```typescript
+  let variable = value as Type
+  // or
+  let variable = <Type>value
+  ```
+
+- **Purpose**:
+
+  - Override TypeScript's inferred type when the developer has more information.
+
+### **8.2 Casting Between Types**
+
+- **Casting to a More Specific Type**:
+
+  ```typescript
+  interface Animal {
+    name: string
+  }
+
+  interface Cat extends Animal {
+    meow(): void
+  }
+
+  let animal: Animal = { name: 'Tom' }
+  let cat = animal as Cat
+
+  // cat.meow(); // Error at runtime if 'animal' is not actually a 'Cat'
+  ```
+
+- **Caution**:
+
+  - Type assertions do not perform runtime checks.
+  - Use with care to avoid runtime errors.
+
+---
+
+## **9. Best Practices**
+
+- **Use Type Guards to Refine Types**:
+
+  - Utilize `typeof`, `instanceof`, and custom type guards to narrow types safely.
+
+- **Prefer Type Predicates for Custom Guards**:
+
+  - Implement type predicates for complex type checks.
+
+- **Leverage Discriminated Unions**:
+
+  - Use discriminant properties to simplify type narrowing.
+
+- **Avoid Unnecessary Type Assertions**:
+
+  - Rely on type inference and type guards before resorting to assertions.
+
+- **Understand Structural Typing**:
+
+  - Be mindful of how TypeScript determines type compatibility.
+
+- **Combine Union and Intersection Types Appropriately**:
+
+  - Use union types for flexibility and intersection types for combining properties.
+
+---
+
+## **10. Common Interview Questions**
+
+1. **What are union types in TypeScript, and when would you use them?**
+
+   **Answer**:
+
+   - Union types allow a variable to be one of several types, defined using the `|` operator.
+   - They are used when a value can be of multiple types and you want to enforce type safety while accommodating different possible types.
+   - **Example**:
+
+     ```typescript
+     type ID = number | string
+     let userId: ID
+     ```
+
+2. **Explain intersection types and provide a use case.**
+
+   **Answer**:
+
+   - Intersection types combine multiple types into one, requiring that a value satisfies all included types, using the `&` operator.
+   - They are useful when you want to merge properties from multiple types or interfaces.
+   - **Example**:
+
+     ```typescript
+     interface Person {
+       name: string
+     }
+     interface Employee {
+       employeeId: number
+     }
+     type Staff = Person & Employee
+     let staffMember: Staff = { name: 'Alice', employeeId: 123 }
+     ```
+
+3. **What are type guards, and how do they help in TypeScript?**
+
+   **Answer**:
+
+   - Type guards are expressions that perform runtime checks to refine the type of a variable within a specific scope.
+   - They help TypeScript understand what type a variable is, enabling safe property access and method calls.
+   - Common type guards include `typeof`, `instanceof`, and custom type guards using type predicates.
+
+4. **How does TypeScript's control flow analysis assist in type narrowing?**
+
+   **Answer**:
+
+   - TypeScript uses control flow analysis to track the types of variables across different code paths.
+   - Based on conditions and type guards, it narrows down the possible types of a variable within specific blocks.
+   - This ensures type safety and allows for more precise type checking.
+
+5. **Can you explain what discriminated unions are and their benefits?**
+
+   **Answer**:
+
+   - Discriminated unions are union types that have a common discriminant property with a literal type.
+   - They allow TypeScript to narrow types based on the value of the discriminant.
+   - Benefits include exhaustive type checking and simplified type guards.
+   - **Example**:
+
+     ```typescript
+     interface Circle {
+       kind: 'circle'
+       radius: number
+     }
+     interface Square {
+       kind: 'square'
+       size: number
+     }
+     type Shape = Circle | Square
+     ```
+
+---
+
+## **11. Exercises**
+
+### **Exercise 1: Union Types**
+
+**Question**:
+
+Define a type `Result` that can be either `Success` or `Error`. `Success` should have a `data` property of type `string`, and `Error` should have an `message` property of type `string`. Write a function `handleResult` that takes a `Result` and logs the `data` or `message` accordingly.
+
+**Answer**:
+
+```typescript
+interface Success {
+  status: 'success'
+  data: string
+}
+
+interface Error {
+  status: 'error'
+  message: string
+}
+
+type Result = Success | Error
+
+function handleResult(result: Result): void {
+  if (result.status === 'success') {
+    console.log(`Data: ${result.data}`)
+  } else {
+    console.log(`Error: ${result.message}`)
+  }
+}
+
+// Usage
+const successResult: Success = {
+  status: 'success',
+  data: 'Operation completed.',
+}
+const errorResult: Error = { status: 'error', message: 'An error occurred.' }
+
+handleResult(successResult) // Outputs: Data: Operation completed.
+handleResult(errorResult) // Outputs: Error: An error occurred.
+```
+
+---
+
+### **Exercise 2: Intersection Types**
+
+**Question**:
+
+Create interfaces `HasName` with a `name` property and `HasAge` with an `age` property. Define a type `Person` as an intersection of `HasName` and `HasAge`. Create a function `greet` that accepts a `Person` and logs a greeting message.
+
+**Answer**:
+
+```typescript
+interface HasName {
+  name: string
+}
+
+interface HasAge {
+  age: number
+}
+
+type Person = HasName & HasAge
+
+function greet(person: Person): void {
+  console.log(
+    `Hello, my name is ${person.name}, and I am ${person.age} years old.`,
+  )
+}
+
+// Usage
+const person: Person = { name: 'Alice', age: 30 }
+greet(person) // Outputs: Hello, my name is Alice, and I am 30 years old.
+```
+
+---
+
+### **Exercise 3: Type Guards with `typeof`**
+
+**Question**:
+
+Write a function `formatValue` that accepts a parameter of type `string | number`. If the value is a string, return it in uppercase. If it's a number, return it formatted with two decimal places.
+
+**Answer**:
+
+```typescript
+function formatValue(value: string | number): string {
+  if (typeof value === 'string') {
+    return value.toUpperCase()
+  } else {
+    return value.toFixed(2)
+  }
+}
+
+// Usage
+console.log(formatValue('hello')) // Outputs: HELLO
+console.log(formatValue(3.14159)) // Outputs: 3.14
+```
+
+---
+
+### **Exercise 4: Custom Type Guards**
+
+**Question**:
+
+Define interfaces `Car` with a method `drive()` and `Boat` with a method `sail()`. Write a custom type guard `isBoat` to determine if an object is a `Boat`. Create a function `move` that uses the type guard to call the appropriate method.
+
+**Answer**:
+
+```typescript
+interface Car {
+  drive(): void
+}
+
+interface Boat {
+  sail(): void
+}
+
+function isBoat(vehicle: Car | Boat): vehicle is Boat {
+  return (vehicle as Boat).sail !== undefined
+}
+
+function move(vehicle: Car | Boat): void {
+  if (isBoat(vehicle)) {
+    vehicle.sail()
+  } else {
+    vehicle.drive()
+  }
+}
+
+// Usage
+const car: Car = {
+  drive: () => console.log('Driving on the road.'),
+}
+
+const boat: Boat = {
+  sail: () => console.log('Sailing on the water.'),
+}
+
+move(car) // Outputs: Driving on the road.
+move(boat) // Outputs: Sailing on the water.
+```
+
+---
+
+### **Exercise 5: Discriminated Unions**
+
+**Question**:
+
+Create a discriminated union `Pet` with types `Dog` and `Cat`. Both should have a `type` property (`'dog'` or `'cat'`). `Dog` should have a `bark()` method, and `Cat` should have a `meow()` method. Write a function `makeSound` that uses a `switch` statement to call the appropriate method based on the `type`.
+
+**Answer**:
+
+```typescript
+interface Dog {
+  type: 'dog'
+  bark(): void
+}
+
+interface Cat {
+  type: 'cat'
+  meow(): void
+}
+
+type Pet = Dog | Cat
+
+function makeSound(pet: Pet): void {
+  switch (pet.type) {
+    case 'dog':
+      pet.bark()
+      break
+    case 'cat':
+      pet.meow()
+      break
+    default:
+      const _exhaustiveCheck: never = pet
+      return _exhaustiveCheck
+  }
+}
+
+// Usage
+const myDog: Dog = { type: 'dog', bark: () => console.log('Woof!') }
+const myCat: Cat = { type: 'cat', meow: () => console.log('Meow!') }
+
+makeSound(myDog) // Outputs: Woof!
+makeSound(myCat) // Outputs: Meow!
+```
+
+---
+
+## **12. Conclusion**
+
+Advanced types in TypeScript, including union and intersection types, type guards, and type narrowing, empower developers to write more expressive and type-safe code. Union and intersection types provide flexibility in defining complex types, while type guards and narrowing enable precise control over type refinement at runtime. By mastering these advanced features, you enhance your ability to build robust TypeScript applications and prepare yourself for tackling complex development challenges and technical interviews.
+
+---
+
+## **13. Next Steps**
+
+- **Practice**:
+
+  - Implement advanced types in your projects.
+  - Write custom type guards and explore type narrowing.
+
+- **Explore**:
+
+  - Learn about conditional types and mapped types.
+  - Study how advanced types interact with generics and interfaces.
+
+- **Prepare**:
+
+  - Review additional interview questions on TypeScript's type system.
+  - Build projects using advanced types to reinforce your understanding.
+
+---
+
+**Continue enhancing your TypeScript expertise by mastering advanced types!**
+
+---
+
+## **14. Appendix**
+
+### **Glossary**
+
+- **Union Type**: A type that represents a value that can be one of several types, defined using the `|` operator.
+- **Intersection Type**: A type that combines multiple types into one, requiring the value to satisfy all included types, using the `&` operator.
+- **Type Guard**: A runtime check that allows narrowing the type within a conditional block.
+- **Type Narrowing**: Refining the type of a variable based on control flow analysis.
+- **Type Predicate**: A return type in the form `parameterName is Type`, used in custom type guards.
+- **Discriminated Union**: A union of types that share a common property with a literal type, enabling type-safe narrowing.
+- **Structural Typing**: A type system where compatibility is determined by the structure of types rather than their explicit declarations.
+- **Type Assertion**: A way to override TypeScript's inferred type when the developer has more information, also known as casting.
+
+---
+
+**End of Lesson**

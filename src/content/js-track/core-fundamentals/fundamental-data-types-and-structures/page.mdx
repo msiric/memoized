@@ -1,0 +1,956 @@
+**Lesson Title**: **Fundamental Data Types and Structures in JavaScript**
+
+**Lesson Description**:  
+Gain a deep understanding of the fundamental data types and structures in JavaScript. Learn the differences between primitive types and objects, and explore the built-in data structures like arrays, sets, and maps. Understand their methods and how to use them effectively in your code. This comprehensive lesson will enhance your ability to manipulate data structures, write efficient code, and prepare you for technical interviews by covering these essential topics.
+
+---
+
+# **Fundamental Data Types and Structures in JavaScript**
+
+JavaScript provides a variety of data types and structures to help developers manage and manipulate data efficiently. Understanding the differences between primitive types and objects, as well as how to use arrays, sets, and maps, is crucial for writing effective JavaScript code. This lesson delves into the fundamental data types, explores the built-in data structures, and teaches you how to utilize their methods to solve common programming problems.
+
+---
+
+## **Table of Contents**
+
+1. **Primitive Data Types**
+   - Overview of Primitives
+   - Characteristics of Primitives
+2. **Objects**
+   - Understanding Objects
+   - Primitives vs. Objects
+3. **Arrays**
+   - Creating Arrays
+   - Array Methods
+   - Iterating Over Arrays
+4. **Sets**
+   - Introduction to Sets
+   - Creating Sets
+   - Set Methods
+   - Use Cases for Sets
+5. **Maps**
+   - Introduction to Maps
+   - Creating Maps
+   - Map Methods
+   - Use Cases for Maps
+6. **WeakSet and WeakMap**
+   - Understanding WeakSet
+   - Understanding WeakMap
+7. **Best Practices**
+8. **Common Interview Questions**
+9. **Exercises**
+10. **Conclusion**
+11. **Next Steps**
+12. **Appendix**
+
+---
+
+## **1. Primitive Data Types**
+
+### **1.1 Overview of Primitives**
+
+JavaScript has seven primitive data types:
+
+1. **Number**: Represents numeric values.
+2. **String**: Represents sequences of characters.
+3. **Boolean**: Represents logical values `true` and `false`.
+4. **Null**: Represents the intentional absence of any object value.
+5. **Undefined**: Represents a variable that has been declared but not assigned a value.
+6. **Symbol**: Represents a unique and immutable identifier (introduced in ES6).
+7. **BigInt**: Represents whole numbers larger than `2^53 - 1` (introduced in ES2020).
+
+### **1.2 Characteristics of Primitives**
+
+- **Immutable**: Primitive values are immutable; they cannot be altered. Operations on primitives create new values.
+
+  **Example**:
+
+  ```javascript
+  let str = 'Hello'
+  str[0] = 'h'
+  console.log(str) // Outputs: 'Hello' (unchanged)
+  ```
+
+- **Passed by Value**: When assigning or passing a primitive value, a copy is made.
+
+  **Example**:
+
+  ```javascript
+  let a = 10
+  let b = a
+  b = 20
+  console.log(a) // Outputs: 10
+  console.log(b) // Outputs: 20
+  ```
+
+---
+
+## **2. Objects**
+
+### **2.1 Understanding Objects**
+
+- **Definition**: An object is a collection of properties, where each property is a key-value pair.
+- **Types of Objects**:
+  - Plain Objects (`{}`): Created using object literals or the `Object` constructor.
+  - Arrays (`[]`): Ordered collections of values.
+  - Functions: Callable objects.
+  - Dates, RegExps, Errors, etc.
+
+### **2.2 Primitives vs. Objects**
+
+- **Mutability**:
+
+  - Primitives are immutable.
+  - Objects are mutable; their properties can be changed.
+
+  **Example**:
+
+  ```javascript
+  let obj = { name: 'Alice' }
+  obj.name = 'Bob'
+  console.log(obj.name) // Outputs: 'Bob'
+  ```
+
+- **Reference vs. Value**:
+
+  - Objects are passed by reference. Assigning an object copies the reference, not the object itself.
+
+  **Example**:
+
+  ```javascript
+  let obj1 = { value: 1 }
+  let obj2 = obj1
+  obj2.value = 2
+  console.log(obj1.value) // Outputs: 2
+  ```
+
+---
+
+## **3. Arrays**
+
+### **3.1 Creating Arrays**
+
+- **Array Literals**:
+
+  ```javascript
+  let fruits = ['apple', 'banana', 'cherry']
+  ```
+
+- **Array Constructor**:
+
+  ```javascript
+  let numbers = new Array(1, 2, 3)
+  ```
+
+- **Empty Arrays**:
+
+  ```javascript
+  let emptyArray = []
+  ```
+
+### **3.2 Array Methods**
+
+- **Adding and Removing Elements**:
+
+  - **`push(element)`**: Adds an element to the end.
+
+    ```javascript
+    fruits.push('date') // ['apple', 'banana', 'cherry', 'date']
+    ```
+
+  - **`pop()`**: Removes the last element.
+
+    ```javascript
+    let lastFruit = fruits.pop() // 'date'; fruits: ['apple', 'banana', 'cherry']
+    ```
+
+  - **`unshift(element)`**: Adds an element to the beginning.
+
+    ```javascript
+    fruits.unshift('elderberry') // ['elderberry', 'apple', 'banana', 'cherry']
+    ```
+
+  - **`shift()`**: Removes the first element.
+
+    ```javascript
+    let firstFruit = fruits.shift() // 'elderberry'; fruits: ['apple', 'banana', 'cherry']
+    ```
+
+- **Accessing Elements**:
+
+  ```javascript
+  let firstFruit = fruits[0] // 'apple'
+  let lastFruit = fruits[fruits.length - 1] // 'cherry'
+  ```
+
+- **Array Length**:
+
+  ```javascript
+  let length = fruits.length // 3
+  ```
+
+- **Finding Elements**:
+
+  - **`indexOf(element)`**: Returns the first index of the element or `-1` if not found.
+
+    ```javascript
+    let index = fruits.indexOf('banana') // 1
+    ```
+
+  - **`includes(element)`**: Returns `true` if the array contains the element.
+
+    ```javascript
+    let hasCherry = fruits.includes('cherry') // true
+    ```
+
+- **Transforming Arrays**:
+
+  - **`map(callback)`**: Creates a new array by applying the callback to each element.
+
+    ```javascript
+    let lengths = fruits.map((fruit) => fruit.length) // [5, 6, 6]
+    ```
+
+  - **`filter(callback)`**: Creates a new array with elements that pass the test.
+
+    ```javascript
+    let longFruits = fruits.filter((fruit) => fruit.length > 5) // ['banana', 'cherry']
+    ```
+
+  - **`reduce(callback, initialValue)`**: Reduces the array to a single value.
+
+    ```javascript
+    let totalLength = fruits.reduce((acc, fruit) => acc + fruit.length, 0) // 17
+    ```
+
+- **Iterating Over Arrays**:
+
+  - **`forEach(callback)`**:
+
+    ```javascript
+    fruits.forEach((fruit) => console.log(fruit))
+    ```
+
+- **Other Useful Methods**:
+
+  - **`slice(start, end)`**: Returns a shallow copy of a portion of the array.
+
+    ```javascript
+    let someFruits = fruits.slice(1, 3) // ['banana', 'cherry']
+    ```
+
+  - **`splice(start, deleteCount, items...)`**: Adds/removes elements.
+
+    ```javascript
+    fruits.splice(1, 1, 'blueberry') // Removes 'banana', adds 'blueberry'
+    // fruits: ['apple', 'blueberry', 'cherry']
+    ```
+
+  - **`concat(array)`**: Merges arrays.
+
+    ```javascript
+    let moreFruits = fruits.concat(['fig', 'grape']) // ['apple', 'blueberry', 'cherry', 'fig', 'grape']
+    ```
+
+  - **`join(separator)`**: Joins elements into a string.
+
+    ```javascript
+    let fruitString = fruits.join(', ') // 'apple, blueberry, cherry'
+    ```
+
+  - **`reverse()`**: Reverses the array in place.
+
+    ```javascript
+    fruits.reverse() // ['cherry', 'blueberry', 'apple']
+    ```
+
+  - **`sort()`**: Sorts the array.
+
+    ```javascript
+    fruits.sort() // ['apple', 'blueberry', 'cherry']
+    ```
+
+### **3.3 Iterating Over Arrays**
+
+- **For Loop**:
+
+  ```javascript
+  for (let i = 0; i < fruits.length; i++) {
+    console.log(fruits[i])
+  }
+  ```
+
+- **For...of Loop**:
+
+  ```javascript
+  for (let fruit of fruits) {
+    console.log(fruit)
+  }
+  ```
+
+- **Array Methods** (`forEach`, `map`, etc.):
+
+  ```javascript
+  fruits.forEach((fruit) => console.log(fruit))
+  ```
+
+---
+
+## **4. Sets**
+
+### **4.1 Introduction to Sets**
+
+- **Definition**: A `Set` is a collection of unique values.
+- **Characteristics**:
+  - No duplicate elements.
+  - Order is based on insertion.
+  - Elements can be of any type.
+
+### **4.2 Creating Sets**
+
+- **Empty Set**:
+
+  ```javascript
+  let mySet = new Set()
+  ```
+
+- **Set from Array**:
+
+  ```javascript
+  let numberSet = new Set([1, 2, 3, 4, 4, 5]) // {1, 2, 3, 4, 5}
+  ```
+
+### **4.3 Set Methods**
+
+- **Adding Elements**:
+
+  - **`add(value)`**:
+
+    ```javascript
+    mySet.add(1)
+    mySet.add(2)
+    ```
+
+- **Deleting Elements**:
+
+  - **`delete(value)`**:
+
+    ```javascript
+    mySet.delete(1)
+    ```
+
+- **Checking for Elements**:
+
+  - **`has(value)`**:
+
+    ```javascript
+    mySet.has(2) // true
+    ```
+
+- **Size of Set**:
+
+  ```javascript
+  mySet.size // 1
+  ```
+
+- **Clearing a Set**:
+
+  - **`clear()`**:
+
+    ```javascript
+    mySet.clear() // mySet is now empty
+    ```
+
+### **4.4 Iterating Over Sets**
+
+- **For...of Loop**:
+
+  ```javascript
+  for (let value of mySet) {
+    console.log(value)
+  }
+  ```
+
+- **`forEach` Method**:
+
+  ```javascript
+  mySet.forEach((value) => console.log(value))
+  ```
+
+### **4.5 Use Cases for Sets**
+
+- **Removing Duplicates from an Array**:
+
+  ```javascript
+  let numbers = [1, 2, 2, 3, 4, 4, 5]
+  let uniqueNumbers = [...new Set(numbers)] // [1, 2, 3, 4, 5]
+  ```
+
+- **Efficient Membership Testing**:
+
+  - Faster than arrays for checking the existence of a value.
+
+---
+
+## **5. Maps**
+
+### **5.1 Introduction to Maps**
+
+- **Definition**: A `Map` is a collection of key-value pairs.
+- **Characteristics**:
+  - Keys can be of any type, including objects and functions.
+  - Remember the original insertion order of the keys.
+
+### **5.2 Creating Maps**
+
+- **Empty Map**:
+
+  ```javascript
+  let myMap = new Map()
+  ```
+
+- **Map from Array of Pairs**:
+
+  ```javascript
+  let entries = [
+    ['name', 'Alice'],
+    ['age', 30],
+  ]
+  let userMap = new Map(entries)
+  ```
+
+### **5.3 Map Methods**
+
+- **Adding Entries**:
+
+  - **`set(key, value)`**:
+
+    ```javascript
+    myMap.set('city', 'New York')
+    ```
+
+- **Retrieving Values**:
+
+  - **`get(key)`**:
+
+    ```javascript
+    let city = myMap.get('city') // 'New York'
+    ```
+
+- **Checking for Keys**:
+
+  - **`has(key)`**:
+
+    ```javascript
+    myMap.has('city') // true
+    ```
+
+- **Deleting Entries**:
+
+  - **`delete(key)`**:
+
+    ```javascript
+    myMap.delete('city')
+    ```
+
+- **Size of Map**:
+
+  ```javascript
+  myMap.size // Number of key-value pairs
+  ```
+
+- **Clearing a Map**:
+
+  - **`clear()`**:
+
+    ```javascript
+    myMap.clear() // myMap is now empty
+    ```
+
+### **5.4 Iterating Over Maps**
+
+- **For...of Loop**:
+
+  ```javascript
+  for (let [key, value] of myMap) {
+    console.log(`${key}: ${value}`)
+  }
+  ```
+
+- **`forEach` Method**:
+
+  ```javascript
+  myMap.forEach((value, key) => {
+    console.log(`${key}: ${value}`)
+  })
+  ```
+
+- **Iterators**:
+
+  - **`keys()`**: Returns an iterator of keys.
+  - **`values()`**: Returns an iterator of values.
+  - **`entries()`**: Returns an iterator of `[key, value]` pairs.
+
+  ```javascript
+  for (let key of myMap.keys()) {
+    console.log(key)
+  }
+  ```
+
+### **5.5 Use Cases for Maps**
+
+- **Storing Metadata**:
+
+  - Using objects as keys to store associated data.
+
+  ```javascript
+  let objKey = {}
+  myMap.set(objKey, 'Some value')
+  ```
+
+- **Counting Occurrences**:
+
+  ```javascript
+  let wordCount = new Map()
+  let words = ['apple', 'banana', 'apple', 'cherry', 'banana', 'apple']
+
+  words.forEach((word) => {
+    let count = wordCount.get(word) || 0
+    wordCount.set(word, count + 1)
+  })
+
+  // wordCount: Map { 'apple' => 3, 'banana' => 2, 'cherry' => 1 }
+  ```
+
+---
+
+## **6. WeakSet and WeakMap**
+
+### **6.1 Understanding WeakSet**
+
+- **Definition**: A `WeakSet` is a collection of objects.
+- **Characteristics**:
+
+  - Only objects can be added (no primitives).
+  - Objects are held weakly (no strong references).
+  - Does not prevent garbage collection if no other references exist.
+  - No size property or clear method.
+  - Not iterable.
+
+- **Use Case**:
+
+  - Tracking objects without preventing garbage collection.
+
+  **Example**:
+
+  ```javascript
+  let ws = new WeakSet()
+  let obj = {}
+  ws.add(obj)
+  // If obj is set to null or goes out of scope, it can be garbage collected.
+  ```
+
+### **6.2 Understanding WeakMap**
+
+- **Definition**: A `WeakMap` is a collection of key-value pairs where keys are objects.
+- **Characteristics**:
+
+  - Keys must be objects.
+  - Keys are held weakly.
+  - Does not prevent garbage collection of key objects.
+  - No size property or clear method.
+  - Not iterable.
+
+- **Use Case**:
+
+  - Associating data with objects without affecting their garbage collection.
+
+  **Example**:
+
+  ```javascript
+  let wm = new WeakMap()
+  let element = document.getElementById('myElement')
+  wm.set(element, { eventHandlers: [] })
+  // If element is removed from the DOM and there are no other references, it can be garbage collected.
+  ```
+
+---
+
+## **7. Best Practices**
+
+### **7.1 Choosing the Right Data Structure**
+
+- **Arrays**:
+
+  - Use when you need ordered collections.
+  - Good for storing lists where duplicates are allowed.
+  - Provides a rich set of methods for manipulation.
+
+- **Sets**:
+
+  - Use when you need to store unique values.
+  - Efficient for membership testing.
+  - No duplicates allowed.
+
+- **Maps**:
+
+  - Use when you need key-value pairs with keys of any type.
+  - Better performance for frequent additions/removals compared to objects.
+
+- **Objects**:
+
+  - Use when you need simple key-value pairs with string/symbol keys.
+  - Good for modeling entities.
+
+### **7.2 Avoiding Pitfalls with Primitives and Objects**
+
+- **Don't Mutate Primitives**:
+
+  - Remember that primitives are immutable.
+
+- **Be Careful with Object References**:
+
+  - Modifying an object through one reference affects all references.
+
+  **Example**:
+
+  ```javascript
+  let a = { value: 1 }
+  let b = a
+  b.value = 2
+  console.log(a.value) // Outputs: 2
+  ```
+
+- **Cloning Objects**:
+
+  - Use shallow copies to prevent unintended side effects.
+
+  ```javascript
+  let a = { value: 1 }
+  let b = { ...a } // Shallow copy
+  b.value = 2
+  console.log(a.value) // Outputs: 1
+  ```
+
+### **7.3 Use Appropriate Methods**
+
+- **Use Built-in Methods**:
+
+  - They are optimized and reduce code complexity.
+
+- **Immutable Operations**:
+
+  - Prefer methods that do not mutate the original data structure when immutability is desired.
+
+  **Example**:
+
+  - Use `slice` instead of `splice` when you don't want to mutate the array.
+
+- **Error Handling with Maps and Sets**:
+
+  - Check for existence before accessing elements.
+
+  **Example**:
+
+  ```javascript
+  if (myMap.has(key)) {
+    // Safe to access myMap.get(key)
+  }
+  ```
+
+---
+
+## **8. Common Interview Questions**
+
+1. **What are the differences between primitive data types and objects in JavaScript?**
+
+   **Answer**:
+
+   - **Primitives**:
+
+     - Immutable values (Number, String, Boolean, Null, Undefined, Symbol, BigInt).
+     - Stored directly in the variable's memory location.
+     - Passed by value; copying a primitive creates a new value.
+
+   - **Objects**:
+
+     - Mutable collections of properties.
+     - Stored as references; variables hold a reference to the object's memory location.
+     - Passed by reference; copying an object copies the reference, not the object itself.
+
+2. **How do you remove duplicates from an array in JavaScript?**
+
+   **Answer**:
+
+   - Using a `Set`:
+
+     ```javascript
+     let numbers = [1, 2, 2, 3, 4, 4, 5]
+     let uniqueNumbers = [...new Set(numbers)] // [1, 2, 3, 4, 5]
+     ```
+
+3. **What are the key differences between an object and a Map in JavaScript?**
+
+   **Answer**:
+
+   - **Object**:
+
+     - Keys are strings or symbols.
+     - Not ordered; property order is not guaranteed.
+     - Prototypes can affect key lookup.
+     - Limited built-in methods for manipulation.
+
+   - **Map**:
+
+     - Keys can be of any type, including objects and functions.
+     - Maintains the insertion order of keys.
+     - No prototype chain affecting key lookup.
+     - Provides methods like `set`, `get`, `has`, `delete`, and is iterable.
+
+4. **When would you use a WeakMap over a Map?**
+
+   **Answer**:
+
+   - Use a `WeakMap` when you need to associate data with objects without preventing their garbage collection.
+   - Ideal for storing metadata or private data related to an object.
+   - Keys are held weakly; if there are no other references to the key object, it can be garbage collected.
+
+5. **Explain how the `map` and `filter` methods work on arrays.**
+
+   **Answer**:
+
+   - **`map(callback)`**:
+
+     - Creates a new array by applying the callback function to each element of the original array.
+     - The original array is not modified.
+
+     **Example**:
+
+     ```javascript
+     let numbers = [1, 2, 3]
+     let squares = numbers.map((n) => n * n) // [1, 4, 9]
+     ```
+
+   - **`filter(callback)`**:
+
+     - Creates a new array with all elements that pass the test implemented by the callback function.
+     - The original array is not modified.
+
+     **Example**:
+
+     ```javascript
+     let numbers = [1, 2, 3, 4, 5]
+     let evenNumbers = numbers.filter((n) => n % 2 === 0) // [2, 4]
+     ```
+
+---
+
+## **9. Exercises**
+
+### **Exercise 1: Primitives vs. Objects**
+
+**Question**:
+
+What will be the output of the following code?
+
+```javascript
+let a = 5
+let b = a
+b = b + 5
+
+console.log(a) // ?
+console.log(b) // ?
+
+let obj1 = { value: 10 }
+let obj2 = obj1
+obj2.value = obj2.value + 10
+
+console.log(obj1.value) // ?
+console.log(obj2.value) // ?
+```
+
+**Answer**:
+
+```
+5
+10
+20
+20
+```
+
+**Explanation**:
+
+- **Primitives**:
+
+  - `a` is a primitive; `b = a` copies the value.
+  - Modifying `b` does not affect `a`.
+
+- **Objects**:
+
+  - `obj1` and `obj2` reference the same object.
+  - Modifying `obj2.value` affects `obj1.value` because they point to the same object.
+
+---
+
+### **Exercise 2: Array Methods**
+
+**Question**:
+
+Given the array `let nums = [1, 2, 3, 4, 5];`, write code to:
+
+1. Remove the first element.
+2. Add `0` to the beginning.
+3. Replace the middle element with `10`.
+4. Create a new array with the squares of the numbers.
+5. Filter out numbers less than `3`.
+
+**Answer**:
+
+```javascript
+// 1. Remove the first element
+nums.shift() // nums: [2, 3, 4, 5]
+
+// 2. Add `0` to the beginning
+nums.unshift(0) // nums: [0, 2, 3, 4, 5]
+
+// 3. Replace the middle element with `10`
+let middleIndex = Math.floor(nums.length / 2)
+nums[middleIndex] = 10 // nums: [0, 2, 10, 4, 5]
+
+// 4. Create a new array with the squares of the numbers
+let squares = nums.map((n) => n * n) // [0, 4, 100, 16, 25]
+
+// 5. Filter out numbers less than `3`
+let filteredNums = nums.filter((n) => n >= 3) // [10, 4, 5]
+```
+
+---
+
+### **Exercise 3: Using Sets**
+
+**Question**:
+
+Given two arrays:
+
+```javascript
+let array1 = [1, 2, 3, 4]
+let array2 = [3, 4, 5, 6]
+```
+
+Write code to find the intersection (common elements) of the two arrays using sets.
+
+**Answer**:
+
+```javascript
+let set1 = new Set(array1)
+let set2 = new Set(array2)
+
+let intersection = [...set1].filter((item) => set2.has(item)) // [3, 4]
+```
+
+**Explanation**:
+
+- Convert arrays to sets to utilize efficient membership testing.
+- Use `filter` to collect elements that are present in both sets.
+
+---
+
+### **Exercise 4: Working with Maps**
+
+**Question**:
+
+Create a `Map` to store the number of occurrences of each character in the string `'hello world'`.
+
+**Answer**:
+
+```javascript
+let str = 'hello world'
+let charCount = new Map()
+
+for (let char of str) {
+  if (char !== ' ') {
+    // Exclude spaces
+    let count = charCount.get(char) || 0
+    charCount.set(char, count + 1)
+  }
+}
+
+// charCount: Map { 'h' => 1, 'e' => 1, 'l' => 3, 'o' => 2, 'w' => 1, 'r' => 1, 'd' => 1 }
+```
+
+---
+
+### **Exercise 5: Understanding WeakMaps**
+
+**Question**:
+
+Explain why a `WeakMap` is suitable for associating metadata with DOM elements in a web application.
+
+**Answer**:
+
+- **Reason**:
+
+  - `WeakMap` keys are held weakly, meaning that if the DOM element (key) has no other references and is removed from the DOM, it can be garbage collected.
+  - This prevents memory leaks as the metadata associated with the element in the `WeakMap` will also be garbage collected.
+  - A regular `Map` would prevent the element from being garbage collected because it holds a strong reference to the key.
+
+---
+
+## **10. Conclusion**
+
+Understanding fundamental data types and structures in JavaScript is essential for writing efficient and effective code. By mastering primitives, objects, arrays, sets, and maps, you can manipulate data more effectively, optimize performance, and solve complex programming challenges. This knowledge also prepares you for technical interviews and real-world development tasks.
+
+---
+
+## **11. Next Steps**
+
+- **Practice**:
+
+  - Implement common algorithms using arrays, sets, and maps.
+  - Experiment with different data structures to solve problems.
+
+- **Explore**:
+
+  - Learn about other data structures like linked lists, stacks, and queues.
+  - Study how JavaScript's built-in methods are implemented under the hood.
+
+- **Prepare**:
+
+  - Review and answer additional interview questions on data types and structures.
+  - Explain these concepts to a peer or through writing to reinforce your understanding.
+
+---
+
+**Continue enhancing your JavaScript expertise by mastering fundamental data types and structures!**
+
+---
+
+## **12. Appendix**
+
+### **Glossary**
+
+- **Primitive Data Types**: Basic data types that are not objects and have no methods (Number, String, Boolean, Null, Undefined, Symbol, BigInt).
+
+- **Object**: A collection of properties (key-value pairs) and methods.
+
+- **Array**: An ordered collection of elements, indexed by non-negative integers.
+
+- **Set**: A collection of unique values.
+
+- **Map**: A collection of key-value pairs where keys can be of any type.
+
+- **WeakSet**: A set of objects where the objects are held weakly, allowing for garbage collection.
+
+- **WeakMap**: A map where keys are objects held weakly, preventing memory leaks.
+
+- **Immutable**: Cannot be changed after creation.
+
+- **Mutable**: Can be changed after creation.
+
+- **Shallow Copy**: A copy of an object where only the top-level properties are copied.
+
+- **Deep Copy**: A copy of an object where all nested objects are recursively copied.
+
+---
+
+**End of Lesson**
