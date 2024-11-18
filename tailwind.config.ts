@@ -1,7 +1,7 @@
+import headlessuiPlugin from '@headlessui/tailwindcss'
+import typographyPlugin from '@tailwindcss/typography'
 import { type Config } from 'tailwindcss'
 import typographyStyles from './typography'
-import typographyPlugin from '@tailwindcss/typography'
-import headlessuiPlugin from '@headlessui/tailwindcss'
 
 export default {
   content: ['./src/**/*.{js,mjs,jsx,ts,tsx,mdx}'],
@@ -62,6 +62,10 @@ export default {
       scale: {
         '175': '1.75',
         '200': '2',
+      },
+      spacing: {
+        'sidebar-lg': '18rem', // 72px equivalent
+        'sidebar-xl': '20rem', // 80px equivalent
       },
     },
   },

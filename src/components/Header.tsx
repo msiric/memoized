@@ -51,7 +51,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
           className={clsx(
             className,
             'fixed inset-x-0 top-0 z-50 flex h-14 items-center justify-between gap-4 px-4 transition xs:gap-6 sm:px-6 md:gap-12 lg:z-30 lg:px-8',
-            fullWidth ? '' : 'lg:left-72 xl:left-80',
+            fullWidth ? '' : 'lg:ml-sidebar-lg xl:ml-sidebar-xl',
             !isInsideMobileNavigation && 'backdrop-blur-sm dark:backdrop-blur',
             isInsideMobileNavigation
               ? 'bg-white dark:bg-zinc-900'
