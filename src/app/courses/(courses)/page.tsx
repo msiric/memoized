@@ -54,7 +54,7 @@ export default async function Courses({ searchParams }: CoursesProps) {
               />
             ))}
           </div>
-          <div className="mt-16 rounded-xl bg-zinc-50 dark:bg-zinc-900/50">
+          <div className="mt-16 rounded-xl">
             <div className="flex flex-col items-start gap-4">
               <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
                 Not sure where to start?
