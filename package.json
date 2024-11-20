@@ -21,7 +21,9 @@
     "test": "vitest",
     "test:check": "vitest run",
     "prebuild": "yarn run migrate",
-    "postinstall": "yarn run generate"
+    "postinstall": "yarn run generate",
+    "extract": "tsx src/scripts/extract-questions.ts",
+    "import": "tsx src/scripts/import-problems.ts"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
