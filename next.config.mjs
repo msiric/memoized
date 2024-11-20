@@ -1,15 +1,9 @@
 import nextMDX from '@next/mdx'
 import { withSentryConfig } from '@sentry/nextjs'
-import { recmaPlugins } from './src/mdx/recma.mjs'
-import { rehypePlugins } from './src/mdx/rehype.mjs'
-import { remarkPlugins } from './src/mdx/remark.mjs'
+import { mdxOptions } from './src/mdx/index.mjs'
 
 const withMDX = nextMDX({
-  options: {
-    remarkPlugins,
-    rehypePlugins,
-    recmaPlugins,
-  },
+  options: mdxOptions,
 })
 
 /** @type {import('next').NextConfig} */

@@ -6,6 +6,7 @@ import { SessionProvider } from 'next-auth/react'
 import { ThemeProvider, useTheme } from 'next-themes'
 import { SnackbarProvider } from 'notistack'
 import React, { useEffect } from 'react'
+import MdxProvider from '../providers/MdxProvider'
 
 function ThemeWatcher() {
   const { resolvedTheme, setTheme } = useTheme()
@@ -45,7 +46,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           }}
         >
           <ThemeWatcher />
-          {children}
+          <MdxProvider>{children}</MdxProvider>
           <SignIn />
         </SnackbarProvider>
       </ThemeProvider>
