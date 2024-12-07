@@ -195,7 +195,7 @@ const name = 'Alice'
 
 JavaScript functions can be invoked in several ways, and the value of `this` within the function depends on the invocation pattern.
 
-### **1. Regular Function Invocation**
+### **Regular Function Invocation**
 
 - **Definition**: A function called without any context or as a standalone function.
 - **`this` Binding**: In non-strict mode, `this` refers to the global object. In strict mode, `this` is `undefined`.
@@ -210,7 +210,7 @@ function showThis() {
 showThis() // Outputs: Window object (or undefined in strict mode)
 ```
 
-### **2. Method Invocation**
+### **Method Invocation**
 
 - **Definition**: A function called as a method of an object.
 - **`this` Binding**: `this` refers to the object invoking the method.
@@ -228,7 +228,7 @@ const person = {
 person.greet() // Outputs: Hello, Bob!
 ```
 
-### **3. Constructor Invocation**
+### **Constructor Invocation**
 
 - **Definition**: A function called with the `new` keyword, creating a new instance.
 - **`this` Binding**: `this` refers to the newly created object.
@@ -244,7 +244,7 @@ const charlie = new Person('Charlie')
 console.log(charlie.name) // Outputs: Charlie
 ```
 
-### **4. Indirect Invocation using `call()`, `apply()`, and `bind()`**
+### **Indirect Invocation using `call()`, `apply()`, and `bind()`**
 
 - **Definition**: Methods used to explicitly set the `this` value when invoking a function.
 
@@ -264,7 +264,7 @@ sayHello.call(diana) // Outputs: Hello, Diana!
 
 ## **The `call()`, `apply()`, and `bind()` Methods**
 
-### **1. The `call()` Method**
+### **The `call()` Method**
 
 - **Definition**: Calls a function with a given `this` value and arguments provided individually.
 - **Syntax**:
@@ -286,7 +286,7 @@ introduce.call(person, 'English')
 // Outputs: I'm Eve and I speak English.
 ```
 
-### **2. The `apply()` Method**
+### **The `apply()` Method**
 
 - **Definition**: Calls a function with a given `this` value and arguments provided as an array.
 - **Syntax**:
@@ -308,7 +308,7 @@ introduce.apply(person, ['French', 'German'])
 // Outputs: I'm Frank and I speak French and German.
 ```
 
-### **3. The `bind()` Method**
+### **The `bind()` Method**
 
 - **Definition**: Creates a new function that, when called, has its `this` keyword set to the provided value.
 - **Syntax**:
@@ -461,7 +461,7 @@ CounterModule.reset() // Outputs: Counter reset.
 
 ## **Best Practices**
 
-### **1. Understand Hoisting with Function Declarations and Expressions**
+### **Understand Hoisting with Function Declarations and Expressions**
 
 - **Function Declarations**: Can be called before their definition due to hoisting.
 - **Function Expressions**: Not hoisted in the same way; avoid calling them before assignment.
@@ -470,17 +470,17 @@ CounterModule.reset() // Outputs: Counter reset.
 
 - Define function expressions before calling them to prevent errors.
 
-### **2. Use IIFE to Create Private Scopes**
+### **Use IIFE to Create Private Scopes**
 
 - Encapsulate code that doesn't need to be globally accessible.
 - Useful in module patterns and to prevent variable name collisions.
 
-### **3. Use `call()`, `apply()`, and `bind()` Appropriately**
+### **Use `call()`, `apply()`, and `bind()` Appropriately**
 
 - **`call()` and `apply()`**: Useful for invoking functions with a specific `this` value.
 - **`bind()`**: Useful for creating functions with a fixed `this` value, especially in event handlers.
 
-### **4. Prefer Arrow Functions for Lexical `this`**
+### **Prefer Arrow Functions for Lexical `this`**
 
 - Arrow functions inherit `this` from the enclosing scope.
 - Avoid using arrow functions as methods in objects where `this` is expected to refer to the object.
@@ -498,7 +498,7 @@ const obj = {
 console.log(obj.getValue()) // Outputs: 42
 ```
 
-### **5. Be Mindful of Context When Passing Functions**
+### **Be Mindful of Context When Passing Functions**
 
 - When passing methods as callbacks, ensure the context (`this`) is maintained.
 - Use `bind()` or arrow functions to preserve `this`.

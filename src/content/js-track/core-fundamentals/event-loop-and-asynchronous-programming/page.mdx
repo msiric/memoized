@@ -188,7 +188,7 @@ Timeout
 
 ## **Understanding Task Queues**
 
-### **1. Task Queue (Macrotask Queue)**
+### **Task Queue (Macrotask Queue)**
 
 - **Examples of Tasks Added to the Task Queue:**
 
@@ -201,7 +201,7 @@ Timeout
   - Tasks are queued in the order they are received.
   - The event loop processes tasks from the task queue after the microtask queue is empty.
 
-### **2. Microtask Queue**
+### **Microtask Queue**
 
 - **Examples of Microtasks:**
 
@@ -420,19 +420,19 @@ Fetch End: Data
 
 ## **Best Practices for Asynchronous Programming**
 
-### **1. Avoid Blocking the Main Thread**
+### **Avoid Blocking the Main Thread**
 
 - **Reason**: Blocking operations prevent the browser from responding to user interactions.
 
 - **Solution**: Use asynchronous APIs for long-running tasks.
 
-### **2. Understand the Event Loop**
+### **Understand the Event Loop**
 
 - **Reason**: Knowing how the event loop works helps prevent unexpected behavior.
 
 - **Solution**: Be mindful of how tasks and microtasks are scheduled.
 
-### **3. Use Promises and Async/Await**
+### **Use Promises and Async/Await**
 
 - **Reason**: They provide a cleaner and more manageable way to handle asynchronous code.
 
@@ -450,13 +450,13 @@ Fetch End: Data
   }
   ```
 
-### **4. Be Careful with `setTimeout`**
+### **Be Careful with `setTimeout`**
 
 - **Issue**: `setTimeout` does not guarantee exact timing.
 
 - **Explanation**: The callback is executed after the specified delay, but only when the call stack is empty and after processing microtasks.
 
-### **5. Handle Promise Rejections**
+### **Handle Promise Rejections**
 
 - **Reason**: Unhandled promise rejections can lead to uncaught exceptions.
 
@@ -471,7 +471,7 @@ Fetch End: Data
     .catch((error) => console.error('Error:', error))
   ```
 
-### **6. Limit the Use of Global Variables**
+### **Limit the Use of Global Variables**
 
 - **Reason**: Helps avoid unintended side effects and makes code more predictable.
 

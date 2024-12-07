@@ -46,9 +46,9 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **1. Introduction to Generics**
+## **Introduction to Generics**
 
-### **1.1 What are Generics?**
+### **What are Generics?**
 
 - **Definition**: Generics allow you to create components that can work with a variety of types rather than a single one.
 - **Purpose**:
@@ -56,7 +56,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   - Provide type safety while working with different types.
   - Allow for flexible and maintainable code.
 
-### **1.2 Benefits of Using Generics**
+### **Benefits of Using Generics**
 
 - **Type Safety**: Ensures that the types used are consistent and valid.
 - **Reusability**: Write code once and use it with multiple types.
@@ -65,9 +65,9 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **2. Generic Functions**
+## **Generic Functions**
 
-### **2.1 Defining Generic Functions**
+### **Defining Generic Functions**
 
 - **Syntax**:
 
@@ -90,7 +90,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   let output2 = identity<number>(42)
   ```
 
-### **2.2 Type Inference with Generics**
+### **Type Inference with Generics**
 
 - **TypeScript Can Infer Generic Types**:
 
@@ -102,7 +102,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   - Reduces verbosity.
   - Improves code readability.
 
-### **2.3 Generic Constraints in Functions**
+### **Generic Constraints in Functions**
 
 - **Problem Without Constraints**:
 
@@ -132,9 +132,9 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **3. Generic Classes**
+## **Generic Classes**
 
-### **3.1 Defining Generic Classes**
+### **Defining Generic Classes**
 
 - **Syntax**:
 
@@ -164,7 +164,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   }
   ```
 
-### **3.2 Using Generic Classes**
+### **Using Generic Classes**
 
 - **Creating Instances**:
 
@@ -176,7 +176,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   console.log(numberBox.getContents()) // Outputs: 100
   ```
 
-### **3.3 Generic Constraints in Classes**
+### **Generic Constraints in Classes**
 
 - **Applying Constraints**:
 
@@ -216,9 +216,9 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **4. Using Constraints with `extends`**
+## **Using Constraints with `extends`**
 
-### **4.1 Applying Type Constraints**
+### **Applying Type Constraints**
 
 - **Syntax**:
 
@@ -240,7 +240,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   // logProperty({ age: 30 }); // Error: Property 'name' is missing
   ```
 
-### **4.2 Using Multiple Constraints**
+### **Using Multiple Constraints**
 
 - **Extending Multiple Types with Intersection**:
 
@@ -273,7 +273,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   // createEmployee({ name: 'Bob' }); // Error: Property 'employeeId' is missing
   ```
 
-### **4.3 Bounded Generic Types**
+### **Bounded Generic Types**
 
 - **Limiting Types with Constraints**:
 
@@ -295,9 +295,9 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **5. Keyof Constraint**
+## **Keyof Constraint**
 
-### **5.1 Using `keyof` Operator**
+### **Using `keyof` Operator**
 
 - **Definition**: The `keyof` operator takes an object type and produces a string or numeric literal union of its keys.
 
@@ -321,7 +321,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   // let invalid = getProperty(person, 'invalid'); // Error: Argument of type '"invalid"' is not assignable to parameter of type 'keyof Person'.
   ```
 
-### **5.2 Index Types and Lookup Types**
+### **Index Types and Lookup Types**
 
 - **Accessing Property Types**:
 
@@ -346,9 +346,9 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **6. Generic Interfaces**
+## **Generic Interfaces**
 
-### **6.1 Defining Generic Interfaces**
+### **Defining Generic Interfaces**
 
 - **Syntax**:
 
@@ -370,7 +370,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   let kvp: KeyValuePair<string, number> = { key: 'age', value: 30 }
   ```
 
-### **6.2 Implementing Generic Interfaces**
+### **Implementing Generic Interfaces**
 
 - **Example**:
 
@@ -401,9 +401,9 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **7. Generic Constraints and Interfaces**
+## **Generic Constraints and Interfaces**
 
-### **7.1 Extending Interfaces in Constraints**
+### **Extending Interfaces in Constraints**
 
 - **Defining Constraints with Interfaces**:
 
@@ -422,7 +422,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   // loggingIdentity(3); // Error: Type 'number' does not satisfy the constraint 'Lengthwise'
   ```
 
-### **7.2 Constrained Generic Functions with Interfaces**
+### **Constrained Generic Functions with Interfaces**
 
 - **Example**:
 
@@ -451,7 +451,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **8. Best Practices**
+## **Best Practices**
 
 - **Use Generics When the Type is Variable**:
 
@@ -478,7 +478,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **9. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What are generics in TypeScript, and why are they useful?**
 
@@ -551,7 +551,7 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 
 ---
 
-## **10. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Generic Function**
 
@@ -719,13 +719,13 @@ console.log(areEqual(p1, p3)) // Outputs: false
 
 ---
 
-## **11. Conclusion**
+## **Conclusion**
 
 Generics and constraints are powerful features in TypeScript that enable you to write flexible, reusable, and type-safe code. By using generics in functions, classes, and interfaces, you can create components that work with a variety of types while maintaining strong type checking. Constraints with `extends` allow you to enforce type requirements, ensuring that your generic components behave as expected. Mastery of generics and constraints enhances your ability to build robust TypeScript applications and prepares you for advanced development tasks and technical interviews.
 
 ---
 
-## **12. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -748,7 +748,7 @@ Generics and constraints are powerful features in TypeScript that enable you to 
 
 ---
 
-## **13. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

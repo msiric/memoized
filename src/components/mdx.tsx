@@ -82,7 +82,10 @@ export const wrapper = function Wrapper({
 }: WrapperProps) {
   return (
     <article
-      className={clsx('flex h-full flex-col', withPadding && 'pb-10 pt-16')}
+      className={clsx(
+        'flex h-full flex-col',
+        withPadding ? 'pb-10 pt-16' : 'p-1 pt-2',
+      )}
     >
       <Prose className="flex-auto">{children}</Prose>
       <div className="prose flex-auto dark:prose-invert [html_:where(&>*)]:mx-auto [html_:where(&>*)]:max-w-2xl [html_:where(&>*)]:lg:mx-[calc(50%-min(50%,theme(maxWidth.lg)))] [html_:where(&>*)]:lg:max-w-3xl">

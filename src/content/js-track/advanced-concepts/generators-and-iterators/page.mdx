@@ -40,9 +40,9 @@ Generators and iterators are advanced features in JavaScript that enable you to 
 
 ---
 
-## **1. Introduction to Iterables and Iterators**
+## **Introduction to Iterables and Iterators**
 
-### **1.1 What are Iterables?**
+### **What are Iterables?**
 
 - **Iterable**: An object that can be iterated over, meaning you can loop over its values.
 - **Examples of Iterables**:
@@ -52,7 +52,7 @@ Generators and iterators are advanced features in JavaScript that enable you to 
   - Sets
   - The `arguments` object
 
-### **1.2 The Iterator Protocol**
+### **The Iterator Protocol**
 
 - **Iterator Protocol**: Defines how to produce a sequence of values.
 - An object is an **iterator** when it implements a `next()` method.
@@ -84,9 +84,9 @@ const iterable = {
 
 ---
 
-## **2. Creating Custom Iterators**
+## **Creating Custom Iterators**
 
-### **2.1 Implementing the Iterator Protocol**
+### **Implementing the Iterator Protocol**
 
 To create a custom iterator, you need to define an object with a `[Symbol.iterator]` method that returns an iterator object.
 
@@ -119,7 +119,7 @@ for (const value of myIterable) {
 // World
 ```
 
-### **2.2 Examples of Custom Iterators**
+### **Examples of Custom Iterators**
 
 **Example 1: Fibonacci Sequence Iterator**
 
@@ -179,15 +179,15 @@ for (const num of range(1, 5)) {
 
 ---
 
-## **3. Generator Functions**
+## **Generator Functions**
 
-### **3.1 Introduction to Generators**
+### **Introduction to Generators**
 
 - **Generator Functions**: Special functions that can pause execution and resume later.
 - Declared using `function*` syntax.
 - Use the `yield` keyword to yield values.
 
-### **3.2 Syntax and Usage**
+### **Syntax and Usage**
 
 **Declaration**:
 
@@ -211,7 +211,7 @@ console.log(gen.next()) // { value: 'World', done: false }
 console.log(gen.next()) // { value: undefined, done: true }
 ```
 
-### **3.3 Yielding Values**
+### **Yielding Values**
 
 - **`yield` Expression**: Pauses the function execution and returns the yielded value.
 - Execution resumes when `.next()` is called.
@@ -234,9 +234,9 @@ console.log(counter.next().value) // 3
 
 ---
 
-## **4. Advanced Generator Techniques**
+## **Advanced Generator Techniques**
 
-### **4.1 Iterating Over Generators**
+### **Iterating Over Generators**
 
 Generators are iterable and can be used in loops.
 
@@ -258,7 +258,7 @@ for (const fruit of fruitsGenerator()) {
 // Cherry
 ```
 
-### **4.2 Delegating Generators (`yield*`)**
+### **Delegating Generators (`yield*`)**
 
 - **`yield*` Expression**: Delegates to another generator or iterable.
 
@@ -290,7 +290,7 @@ for (const item of combined()) {
 // B
 ```
 
-### **4.3 Generators as Data Producers**
+### **Generators as Data Producers**
 
 Generators can produce infinite sequences or compute values on demand.
 
@@ -313,19 +313,19 @@ console.log(evens.next().value) // 4
 
 ---
 
-## **5. Using Generators for Asynchronous Control Flow**
+## **Using Generators for Asynchronous Control Flow**
 
-### **5.1 The Problem with Asynchronous Code**
+### **The Problem with Asynchronous Code**
 
 - **Callback Hell**: Nested callbacks leading to hard-to-read code.
 - **Promise Chains**: Can become complex when handling multiple asynchronous operations.
 
-### **5.2 Generators and `async/await`**
+### **Generators and `async/await`**
 
 - Before `async/await`, generators were used to simplify asynchronous control flow.
 - Libraries like **co** helped manage asynchronous operations with generators.
 
-### **5.3 Implementing Async Control Flow with Generators**
+### **Implementing Async Control Flow with Generators**
 
 **Example**: Simulating `async/await` with Generators
 
@@ -386,9 +386,9 @@ runGenerator(asyncGenerator)
 
 ---
 
-## **6. Best Practices**
+## **Best Practices**
 
-### **6.1 Use Generators for Lazy Evaluation**
+### **Use Generators for Lazy Evaluation**
 
 - Generators are ideal for sequences where values are computed on demand.
 
@@ -413,12 +413,12 @@ for (const page of pages) {
 // Page: [5, 6]
 ```
 
-### **6.2 Avoid Overcomplicating with Generators**
+### **Avoid Overcomplicating with Generators**
 
 - Use generators when they provide clear benefits.
 - For simple iteration, regular loops or array methods may suffice.
 
-### **6.3 Handle Errors Appropriately**
+### **Handle Errors Appropriately**
 
 - Generators can throw errors using the `throw()` method.
 - Use `try/catch` within generators to handle errors.
@@ -444,7 +444,7 @@ console.log(gen.next()) // Logs: Caught error: Error: An error occurred
 
 ---
 
-## **7. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is the purpose of the `Symbol.iterator` in JavaScript?**
 
@@ -511,7 +511,7 @@ console.log(gen.next()) // Logs: Caught error: Error: An error occurred
 
 ---
 
-## **8. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Creating a Custom Iterator**
 
@@ -696,13 +696,13 @@ gen.throw(new Error('Something went wrong'))
 
 ---
 
-## **9. Conclusion**
+## **Conclusion**
 
 Generators and iterators are powerful tools in JavaScript that enable custom iteration behavior and advanced control flow management. By mastering these concepts, you can create efficient data processing pipelines, handle asynchronous operations more elegantly, and write more expressive code. Understanding generators also deepens your grasp of how modern JavaScript features like `async/await` work under the hood.
 
 ---
 
-## **10. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -725,7 +725,7 @@ Generators and iterators are powerful tools in JavaScript that enable custom ite
 
 ---
 
-## **11. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

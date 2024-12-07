@@ -36,7 +36,7 @@ JavaScript determines the value of `this` based on the following binding rules, 
 4. **New Binding**
 5. **Arrow Functions**
 
-### **1. Default Binding**
+### **Default Binding**
 
 - **Context**: When a function is called without any context (standalone function invocation).
 - **Non-Strict Mode**: `this` refers to the global object (`window` in browsers, `global` in Node.js).
@@ -64,7 +64,7 @@ function showThis() {
 showThis() // Outputs: undefined
 ```
 
-### **2. Implicit Binding**
+### **Implicit Binding**
 
 - **Context**: When a function is called as a method of an object.
 - **Binding Rule**: `this` refers to the object before the dot notation used to invoke the function.
@@ -86,7 +86,7 @@ person.greet() // Outputs: Hello, my name is Alice.
 
 - `this` refers to `person` because `greet` is called as `person.greet()`.
 
-### **3. Explicit Binding**
+### **Explicit Binding**
 
 - **Context**: When using `.call()`, `.apply()`, or `.bind()` to invoke a function.
 - **Binding Rule**: `this` is explicitly set to the first argument provided to `.call()`, `.apply()`, or `.bind()`.
@@ -122,7 +122,7 @@ const boundFunction = introduce.bind(person, 'Italian', 'Portuguese')
 boundFunction() // Outputs: I'm Bob and I speak Italian and Portuguese.
 ```
 
-### **4. New Binding**
+### **New Binding**
 
 - **Context**: When a function is invoked as a constructor using the `new` keyword.
 - **Binding Rule**: `this` refers to the newly created object.
@@ -144,7 +144,7 @@ const charlie = new Person('Charlie')
 - A new object is created, and `this` refers to that object.
 - The properties and methods are added to the new object.
 
-### **5. Arrow Functions and `this`**
+### **Arrow Functions and `this`**
 
 - **Definition**: Arrow functions (`()=>{}`) do not have their own `this` binding.
 - **Binding Rule**: `this` in an arrow function refers to `this` in the enclosing (lexical) scope.
@@ -306,7 +306,7 @@ console.log(boundGetName()) // Outputs: Jack
 
 ## **Best Practices**
 
-### **1. Use Arrow Functions for Lexical `this`**
+### **Use Arrow Functions for Lexical `this`**
 
 - Use arrow functions when you need to access `this` from the enclosing scope.
 - Avoid using arrow functions as methods in objects intended to use `this`.
@@ -328,7 +328,7 @@ obj.increment()
 console.log(obj.count) // Outputs: 1
 ```
 
-### **2. Avoid Arrow Functions as Object Methods**
+### **Avoid Arrow Functions as Object Methods**
 
 - Arrow functions cannot have their `this` overridden.
 - If you need `this` to refer to the object, use regular functions.
@@ -359,7 +359,7 @@ const obj = {
 obj.getValue() // Outputs: 10
 ```
 
-### **3. Use `.bind()` to Set `this` Permanently**
+### **Use `.bind()` to Set `this` Permanently**
 
 - Use `.bind()` when you need to ensure a function always has the same `this`.
 
@@ -376,7 +376,7 @@ const boundLogValue = logValue.bind(obj)
 boundLogValue() // Outputs: 5
 ```
 
-### **4. Be Careful with Callbacks and Event Handlers**
+### **Be Careful with Callbacks and Event Handlers**
 
 - When passing methods as callbacks, the `this` context may be lost.
 

@@ -11,9 +11,9 @@ Asynchronous programming is a cornerstone of JavaScript, enabling non-blocking o
 
 ---
 
-## **1. Callbacks in JavaScript**
+## **Callbacks in JavaScript**
 
-### **1.1 What is a Callback Function?**
+### **What is a Callback Function?**
 
 - **Definition**: A callback is a function passed as an argument to another function, to be executed after an operation has completed.
 
@@ -40,7 +40,7 @@ fetchData((result) => {
 - It accepts a `callback` function, which it calls after the data is "fetched".
 - When `fetchData` is called, we pass an anonymous function that logs the result.
 
-### **1.2 Callback Patterns**
+### **Callback Patterns**
 
 #### **1.2.1 Error-First Callbacks**
 
@@ -97,7 +97,7 @@ doFirstTask
         └── doThirdTask
 ```
 
-### **1.3 Issues with Callbacks**
+### **Issues with Callbacks**
 
 #### **1.3.1 Callback Hell**
 
@@ -120,9 +120,9 @@ doFirstTask
 
 ---
 
-## **2. Promises**
+## **Promises**
 
-### **2.1 What is a Promise?**
+### **What is a Promise?**
 
 - **Definition**: An object representing the eventual completion or failure of an asynchronous operation.
 
@@ -163,7 +163,7 @@ promise
 - `then()` handles fulfilled state.
 - `catch()` handles rejected state.
 
-### **2.2 Promise Chaining**
+### **Promise Chaining**
 
 - **Purpose**: Allows sequential execution of asynchronous operations.
 
@@ -190,7 +190,7 @@ doFirstTask()
 - Each `then()` returns a new promise, allowing chaining.
 - Errors are propagated down the chain to the `catch()` block.
 
-### **2.3 Error Handling in Promises**
+### **Error Handling in Promises**
 
 - **Automatic Propagation**: If a promise is rejected, it skips subsequent `then()` handlers until it finds a `catch()`.
 
@@ -218,7 +218,7 @@ doFirstTask()
 
 - Throwing an error inside `then()` or rejecting a promise calls the `catch()` block.
 
-### **2.4 Creating Promises**
+### **Creating Promises**
 
 #### **2.4.1 Wrapping Callback APIs**
 
@@ -253,7 +253,7 @@ Promise.reject(new Error('Immediate rejection')).catch((error) => {
 })
 ```
 
-### **2.5 Combining Promises**
+### **Combining Promises**
 
 #### **2.5.1 `Promise.all()`**
 
@@ -307,9 +307,9 @@ Promise.allSettled([promise1, promise2, promise3]).then((results) => {
 
 ---
 
-## **3. Async/Await**
+## **Async/Await**
 
-### **3.1 What is Async/Await?**
+### **What is Async/Await?**
 
 - **Definition**: Syntactic sugar over promises, making asynchronous code look and behave like synchronous code.
 
@@ -317,7 +317,7 @@ Promise.allSettled([promise1, promise2, promise3]).then((results) => {
   - `async`: Declares an async function that returns a promise.
   - `await`: Pauses the execution of an async function until the awaited promise is settled.
 
-### **3.2 Using Async/Await**
+### **Using Async/Await**
 
 **Example**:
 
@@ -341,7 +341,7 @@ fetchData()
 - `await` pauses execution until the promise is resolved.
 - `try...catch` handles errors, similar to synchronous code.
 
-### **3.3 Error Handling with Async/Await**
+### **Error Handling with Async/Await**
 
 - **Using `try...catch`**: Wrap `await` expressions in `try...catch` blocks to handle errors.
 
@@ -359,7 +359,7 @@ async function processData() {
 }
 ```
 
-### **3.4 Parallel Execution with Async/Await**
+### **Parallel Execution with Async/Await**
 
 - **Issue**: `await` statements are executed sequentially by default.
 
@@ -387,7 +387,7 @@ async function getData() {
 - Both fetch requests start simultaneously.
 - Awaiting their results after both requests have been initiated.
 
-### **3.5 Combining Async/Await with Promise Methods**
+### **Combining Async/Await with Promise Methods**
 
 - **Example**:
 
@@ -404,9 +404,9 @@ async function getAllData() {
 
 ---
 
-## **4. Best Practices**
+## **Best Practices**
 
-### **4.1 Use Async/Await Over Callbacks and Promises**
+### **Use Async/Await Over Callbacks and Promises**
 
 - **Reason**: Improves code readability and maintainability.
 
@@ -437,7 +437,7 @@ async function getAllData() {
   }
   ```
 
-### **4.2 Handle Errors Properly**
+### **Handle Errors Properly**
 
 - **Reason**: Prevents unhandled rejections and improves reliability.
 
@@ -446,13 +446,13 @@ async function getAllData() {
   - Use `try...catch` with `async/await`.
   - Use `.catch()` with promises.
 
-### **4.3 Avoid Blocking the Event Loop**
+### **Avoid Blocking the Event Loop**
 
 - **Issue**: Synchronous code or long-running loops block the event loop.
 
 - **Solution**: Use asynchronous APIs or offload heavy computations.
 
-### **4.4 Be Careful with Promise Rejections**
+### **Be Careful with Promise Rejections**
 
 - **Issue**: Unhandled promise rejections can cause crashes.
 
@@ -461,7 +461,7 @@ async function getAllData() {
   - Always handle rejections with `.catch()` or `try...catch`.
   - Use `process.on('unhandledRejection', handler)` in Node.js.
 
-### **4.5 Limit Concurrent Operations**
+### **Limit Concurrent Operations**
 
 - **Issue**: Too many concurrent promises can overwhelm resources.
 
@@ -470,7 +470,7 @@ async function getAllData() {
   - Implement concurrency control.
   - Use libraries like `p-limit` for limiting concurrent promises.
 
-### **4.6 Avoid Mixing Callback and Promise APIs**
+### **Avoid Mixing Callback and Promise APIs**
 
 - **Reason**: Mixing patterns can lead to confusion and errors.
 
@@ -479,7 +479,7 @@ async function getAllData() {
   - Prefer promises and `async/await` over callbacks.
   - If using callbacks, consider converting them to promises.
 
-### **4.7 Use Linter Rules**
+### **Use Linter Rules**
 
 - **Recommendation**: Use ESLint with plugins like `eslint-plugin-promise` to enforce best practices.
 

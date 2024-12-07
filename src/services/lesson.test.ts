@@ -13,7 +13,7 @@ import {
   upsertProblem,
   upsertSection,
 } from '@/services/lesson'
-import { AccessOptions, ProblemDifficulty } from '@prisma/client'
+import { AccessOptions, ProblemDifficulty, ProblemType } from '@prisma/client'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
 
 // Mocking the Prisma client
@@ -309,28 +309,41 @@ describe('Lesson services', () => {
         id: '1',
         href: 'problem-href',
         title: 'Problem Title',
+        difficulty: ProblemDifficulty.MEDIUM,
+        question: 'Problem Question',
+        answer: 'Problem Answer',
+        type: ProblemType.ALGORITHM,
       }
       ;(prisma.problem.upsert as Mock).mockResolvedValue(mockProblem)
 
       const problem = await upsertProblem(
         'problem-href',
         'Problem Title',
-        'lesson-id',
         ProblemDifficulty.MEDIUM,
+        'Problem Question',
+        'Problem Answer',
+        ProblemType.ALGORITHM,
+        'lesson-id',
       )
       expect(problem).toEqual(mockProblem)
       expect(prisma.problem.upsert).toHaveBeenCalledWith({
         where: { href: 'problem-href' },
         update: {
           title: 'Problem Title',
-          lessonId: 'lesson-id',
           difficulty: ProblemDifficulty.MEDIUM,
+          lessonId: 'lesson-id',
+          question: 'Problem Question',
+          answer: 'Problem Answer',
+          type: ProblemType.ALGORITHM,
         },
         create: {
           title: 'Problem Title',
           href: 'problem-href',
           lessonId: 'lesson-id',
           difficulty: ProblemDifficulty.MEDIUM,
+          question: 'Problem Question',
+          answer: 'Problem Answer',
+          type: ProblemType.ALGORITHM,
         },
       })
     })

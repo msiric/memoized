@@ -51,9 +51,9 @@ Enums (short for enumerations) and literal types are powerful features in TypeSc
 
 ---
 
-## **1. Introduction to Enums**
+## **Introduction to Enums**
 
-### **1.1 What are Enums?**
+### **What are Enums?**
 
 - **Definition**: Enums are a way to define a set of named constants, which can be either numeric or string values.
 - **Purpose**:
@@ -61,7 +61,7 @@ Enums (short for enumerations) and literal types are powerful features in TypeSc
   - Enhance code readability and maintainability.
   - Group related constants together.
 
-### **1.2 Benefits of Using Enums**
+### **Benefits of Using Enums**
 
 - **Type Safety**: Enums are types in TypeScript, allowing for compile-time checks.
 - **IntelliSense Support**: Enums provide better tooling support, including autocompletion.
@@ -70,11 +70,11 @@ Enums (short for enumerations) and literal types are powerful features in TypeSc
 
 ---
 
-## **2. Numeric Enums**
+## **Numeric Enums**
 
 Numeric enums are the default in TypeScript and assign numeric values to enum members.
 
-### **2.1 Defining Numeric Enums**
+### **Defining Numeric Enums**
 
 - **Syntax**:
 
@@ -98,7 +98,7 @@ Numeric enums are the default in TypeScript and assign numeric values to enum me
   }
   ```
 
-### **2.2 Auto-incrementing Behavior**
+### **Auto-incrementing Behavior**
 
 - **Default Values**:
 
@@ -119,7 +119,7 @@ Numeric enums are the default in TypeScript and assign numeric values to enum me
   console.log(dir) // Outputs: 0
   ```
 
-### **2.3 Customizing Enum Values**
+### **Customizing Enum Values**
 
 - **Assigning Specific Values**:
 
@@ -157,11 +157,11 @@ Numeric enums are the default in TypeScript and assign numeric values to enum me
 
 ---
 
-## **3. String Enums**
+## **String Enums**
 
 String enums are enums where each member is initialized with a string literal.
 
-### **3.1 Defining String Enums**
+### **Defining String Enums**
 
 - **Syntax**:
 
@@ -187,7 +187,7 @@ String enums are enums where each member is initialized with a string literal.
   console.log(dir) // Outputs: 'NORTH'
   ```
 
-### **3.2 Differences from Numeric Enums**
+### **Differences from Numeric Enums**
 
 - **No Auto-incrementing**: Each member must be initialized with a string value.
 - **No Reverse Mapping**: String enums do not have reverse mapping at runtime.
@@ -195,11 +195,11 @@ String enums are enums where each member is initialized with a string literal.
 
 ---
 
-## **4. Heterogeneous Enums**
+## **Heterogeneous Enums**
 
 Enums that mix numeric and string members.
 
-### **4.1 Mixing Numeric and String Values**
+### **Mixing Numeric and String Values**
 
 - **Syntax**:
 
@@ -210,7 +210,7 @@ Enums that mix numeric and string members.
   }
   ```
 
-### **4.2 Use Cases and Considerations**
+### **Use Cases and Considerations**
 
 - **Use Cases**:
 
@@ -223,11 +223,11 @@ Enums that mix numeric and string members.
 
 ---
 
-## **5. Enum Members**
+## **Enum Members**
 
 Enum members can be constant or computed.
 
-### **5.1 Constant vs. Computed Members**
+### **Constant vs. Computed Members**
 
 - **Constant Members**:
 
@@ -251,18 +251,18 @@ Enum members can be constant or computed.
   }
   ```
 
-### **5.2 Enum Member Types**
+### **Enum Member Types**
 
 - **Numeric Enums**: Can have constant or computed members.
 - **String Enums**: Members must have constant string values.
 
 ---
 
-## **6. Enums at Runtime**
+## **Enums at Runtime**
 
 Enums are objects that exist at runtime.
 
-### **6.1 Reverse Mapping**
+### **Reverse Mapping**
 
 - **Numeric Enums Support Reverse Mapping**:
 
@@ -289,7 +289,7 @@ Enums are objects that exist at runtime.
   // Direction['NORTH'] is undefined
   ```
 
-### **6.2 Using Enums in Code**
+### **Using Enums in Code**
 
 - **Comparisons**:
 
@@ -319,11 +319,11 @@ Enums are objects that exist at runtime.
 
 ---
 
-## **7. Literal Types**
+## **Literal Types**
 
 Literal types allow you to specify exact values a variable can hold.
 
-### **7.1 String Literal Types**
+### **String Literal Types**
 
 - **Definition**: Type of a variable must be a specific string value.
 
@@ -344,7 +344,7 @@ Literal types allow you to specify exact values a variable can hold.
   move = 'Up' // Error: Type '"Up"' is not assignable to type 'Direction'.
   ```
 
-### **7.2 Numeric Literal Types**
+### **Numeric Literal Types**
 
 - **Definition**: Type of a variable must be a specific numeric value.
 
@@ -358,7 +358,7 @@ Literal types allow you to specify exact values a variable can hold.
   }
   ```
 
-### **7.3 Boolean Literal Types**
+### **Boolean Literal Types**
 
 - **Definition**: Type is either `true` or `false`.
 
@@ -377,11 +377,11 @@ Literal types allow you to specify exact values a variable can hold.
 
 ---
 
-## **8. Type Aliases with Literal Types**
+## **Type Aliases with Literal Types**
 
 Type aliases can be used to create custom types from literal types.
 
-### **8.1 Union of Literal Types**
+### **Union of Literal Types**
 
 - **Example**:
 
@@ -396,7 +396,7 @@ Type aliases can be used to create custom types from literal types.
   move('Up') // Error
   ```
 
-### **8.2 Creating Custom Types**
+### **Creating Custom Types**
 
 - **Example with Status Codes**:
 
@@ -413,11 +413,11 @@ Type aliases can be used to create custom types from literal types.
 
 ---
 
-## **9. Discriminated Unions**
+## **Discriminated Unions**
 
 Combining enums or literal types with type aliases to create flexible and type-safe code.
 
-### **9.1 Combining Enums and Literal Types**
+### **Combining Enums and Literal Types**
 
 - **Example**:
 
@@ -447,7 +447,7 @@ Combining enums or literal types with type aliases to create flexible and type-s
   }
   ```
 
-### **9.2 Pattern Matching with Type Guards**
+### **Pattern Matching with Type Guards**
 
 - **Using `switch` Statements**:
 
@@ -471,7 +471,7 @@ Combining enums or literal types with type aliases to create flexible and type-s
 
 ---
 
-## **10. Best Practices**
+## **Best Practices**
 
 - **Use Enums for Related Constants**:
 
@@ -502,7 +502,7 @@ Combining enums or literal types with type aliases to create flexible and type-s
 
 ---
 
-## **11. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is an enum in TypeScript, and why would you use one?**
 
@@ -557,7 +557,7 @@ Combining enums or literal types with type aliases to create flexible and type-s
 
 ---
 
-## **12. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Defining Numeric Enums**
 
@@ -696,13 +696,13 @@ console.log(colorValue) // Outputs: 3
 
 ---
 
-## **13. Conclusion**
+## **Conclusion**
 
 Enums and literal types are powerful features in TypeScript that enhance code expressiveness and type safety. Enums provide a way to define a set of named constants, improving code readability and maintainability. Literal types allow developers to specify exact values a variable can hold, enabling the creation of precise and flexible types. By mastering enums and literal types, you can write more robust, type-safe, and expressive TypeScript applications, preparing you for advanced development tasks and technical interviews.
 
 ---
 
-## **14. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -725,7 +725,7 @@ Enums and literal types are powerful features in TypeScript that enhance code ex
 
 ---
 
-## **15. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

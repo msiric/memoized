@@ -35,7 +35,7 @@ Modules are a fundamental aspect of modern JavaScript development, enabling deve
 
 Over the years, various module systems have emerged in JavaScript to address the lack of native module support before ES6.
 
-### **1. CommonJS**
+### **CommonJS**
 
 - **Origin**: Primarily used in Node.js.
 - **Purpose**: Synchronous module loading for server-side JavaScript.
@@ -67,7 +67,7 @@ console.log(math.add(2, 3)) // Outputs: 5
 - `module.exports` is used to export functions or variables.
 - `require()` is used to import modules synchronously.
 
-### **2. AMD (Asynchronous Module Definition)**
+### **AMD (Asynchronous Module Definition)**
 
 - **Origin**: Designed for asynchronous loading in the browser.
 - **Purpose**: Support module loading in browsers where files are loaded asynchronously.
@@ -102,7 +102,7 @@ require(['math'], function (math) {
 - `define()` is used to define a module with dependencies.
 - `require()` is used to load modules asynchronously.
 
-### **3. UMD (Universal Module Definition)**
+### **UMD (Universal Module Definition)**
 
 - **Purpose**: Bridge the gap between CommonJS and AMD, supporting both module systems.
 - **Use Case**: Write modules that can run in both Node.js and the browser.
@@ -140,7 +140,7 @@ require(['math'], function (math) {
 - Checks for the existence of `define` (AMD) and `module.exports` (CommonJS) and exports accordingly.
 - If neither exists, it attaches the module to the global object (`window` in browsers).
 
-### **4. ES6 Modules (ECMAScript 2015 Modules)**
+### **ES6 Modules (ECMAScript 2015 Modules)**
 
 - **Native Support**: Introduced in ES6 (ES2015), providing a standardized module system for JavaScript.
 - **Purpose**: Enable modular programming with a simple syntax.
@@ -594,7 +594,7 @@ npx webpack
 
 ## **Best Practices for Using Modules**
 
-### **1. Prefer ES6 Modules**
+### **Prefer ES6 Modules**
 
 - **Reason**: Standardized, widely supported, and offer better tooling and optimization.
 - **Example**:
@@ -605,7 +605,7 @@ npx webpack
   }
   ```
 
-### **2. Use Default Exports Sparingly**
+### **Use Default Exports Sparingly**
 
 - **Reason**: Named exports make it easier to refactor code and avoid name conflicts.
 - **Example**:
@@ -617,17 +617,17 @@ npx webpack
   }
   ```
 
-### **3. Keep Modules Focused**
+### **Keep Modules Focused**
 
 - **Reason**: Improves maintainability and reusability.
 - **Recommendation**: Each module should have a single responsibility.
 
-### **4. Avoid Mixing Module Systems**
+### **Avoid Mixing Module Systems**
 
 - **Reason**: Can lead to confusion and compatibility issues.
 - **Recommendation**: Stick to one module system in your project.
 
-### **5. Use Relative Paths Correctly**
+### **Use Relative Paths Correctly**
 
 - **Reason**: Ensure modules are correctly resolved.
 - **Example**:
@@ -636,12 +636,12 @@ npx webpack
   import { myFunction } from './utils/myFunction.js'
   ```
 
-### **6. Organize Module Files**
+### **Organize Module Files**
 
 - **Reason**: Improves code organization and navigation.
 - **Recommendation**: Group related modules in directories.
 
-### **7. Handle Circular Dependencies Carefully**
+### **Handle Circular Dependencies Carefully**
 
 - **Issue**: Circular dependencies can cause errors or unexpected behavior.
 - **Solution**: Refactor code to eliminate circular references.

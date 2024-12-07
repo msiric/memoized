@@ -7,6 +7,7 @@ import {
   JS_TRACK_PREFIX,
 } from '../constants'
 import { LessonConfig } from '../types'
+import { ADVANCED_CONCEPTS } from '@/problems'
 
 export const advancedConcepts: LessonConfig[] = [
   {
@@ -16,7 +17,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Learn about pure functions, immutability, and managing side effects in functional programming.',
     access: AccessOptions.FREE,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.functionalProgrammingPrinciples,
   },
   {
     id: '/higher-order-functions-and-callbacks',
@@ -25,7 +26,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Master functions as first-class citizens and essential array methods like map, filter, and reduce.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.higherOrderFunctionsAndCallbacks,
   },
   {
     id: '/promises-and-asynchronous-patterns',
@@ -34,16 +35,16 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Learn about creating and handling promises, including Promise.all and Promise.race patterns.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.promisesAndAsynchronousPatterns,
   },
   {
     id: '/async-await-deep-dive',
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${ADVANCED_CONCEPTS_PREFIX}/async-await-deep-dive`,
-    title: 'Async/Await Deep Dive',
+    title: 'Async Await Deep Dive',
     description:
       'Master error handling with try/catch and understand sequential vs. parallel execution in async/await.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.asyncAwaitDeepDive,
   },
   {
     id: '/generators-and-iterators',
@@ -52,7 +53,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Explore creating iterators and using generators for asynchronous control flow.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.generatorsAndIterators,
   },
   {
     id: '/meta-programming-with-proxies-and-reflect',
@@ -61,7 +62,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Learn about intercepting object operations and practical use cases for proxies.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.metaProgrammingWithProxiesAndReflect,
   },
   {
     id: '/symbols-and-symbol-usage',
@@ -70,7 +71,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Understand unique property keys and well-known symbols in JavaScript.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.symbolsAndSymbolUsage,
   },
   {
     id: '/memory-leaks-and-prevention',
@@ -79,7 +80,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Learn to identify memory leaks and implement tools and best practices for prevention.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.memoryLeaksAndPrevention,
   },
   {
     id: '/web-workers-and-multithreading',
@@ -88,7 +89,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Master offloading tasks and communication with web workers for better performance.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.webWorkersAndMultithreading,
   },
   {
     id: '/service-workers-and-pwas',
@@ -97,7 +98,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Explore caching strategies and implementing offline capabilities in Progressive Web Apps.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.serviceWorkersAndPwas,
   },
   {
     id: '/performance-optimization-techniques',
@@ -106,7 +107,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Learn about debouncing, throttling, and optimizing loops and DOM interactions.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.performanceOptimizationTechniques,
   },
   {
     id: '/browser-storage-mechanisms',
@@ -115,7 +116,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Master different storage options including localStorage, sessionStorage, IndexedDB, and Web SQL.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.browserStorageMechanisms,
   },
   {
     id: '/event-handling-and-delegation',
@@ -124,7 +125,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Understand event propagation and implement efficient event handling patterns.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.eventHandlingAndDelegation,
   },
   {
     id: '/security-best-practices',
@@ -133,7 +134,7 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Learn about preventing XSS and CSRF attacks, and implementing Content Security Policy.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.securityBestPractices,
   },
   {
     id: '/advanced-patterns-and-best-practices',
@@ -142,7 +143,16 @@ export const advancedConcepts: LessonConfig[] = [
     description:
       'Explore module patterns including the module pattern and revealing module pattern.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: ADVANCED_CONCEPTS.advancedPatternsAndBestPractices,
+  },
+  {
+    id: '/reflection-and-meta-programming',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${ADVANCED_CONCEPTS_PREFIX}/refl`,
+    title: 'Reflection and Meta Programming',
+    description:
+      'Explore module patterns including the module pattern and revealing module pattern.',
+    access: AccessOptions.PREMIUM,
+    problems: ADVANCED_CONCEPTS.reflectionAndMetaProgramming,
   },
 ]
 

@@ -40,14 +40,14 @@ Asynchronous programming is crucial for developing responsive and efficient Java
 
 ---
 
-## **1. Introduction to Promises**
+## **Introduction to Promises**
 
-### **1.1 What is a Promise?**
+### **What is a Promise?**
 
 - **Definition**: A **Promise** is an object representing the eventual completion or failure of an asynchronous operation.
 - Promises provide a way to associate handlers with an asynchronous action's eventual success value or failure reason.
 
-### **1.2 States of a Promise**
+### **States of a Promise**
 
 A Promise can be in one of three states:
 
@@ -57,7 +57,7 @@ A Promise can be in one of three states:
 
 ![Promise States Diagram](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises/promises.png)
 
-### **1.3 Why Use Promises?**
+### **Why Use Promises?**
 
 - **Avoid Callback Hell**: Promises help in avoiding deeply nested callbacks, making code more readable.
 - **Better Error Handling**: Promises provide a unified way to handle errors through `.catch()`.
@@ -66,9 +66,9 @@ A Promise can be in one of three states:
 
 ---
 
-## **2. Creating Promises**
+## **Creating Promises**
 
-### **2.1 The Promise Constructor**
+### **The Promise Constructor**
 
 To create a new Promise, you use the `Promise` constructor:
 
@@ -82,7 +82,7 @@ const promise = new Promise((resolve, reject) => {
   - **`resolve`**: A function to call when the promise is fulfilled.
   - **`reject`**: A function to call when the promise is rejected.
 
-### **2.2 Resolving and Rejecting Promises**
+### **Resolving and Rejecting Promises**
 
 **Example 1: Resolving a Promise**
 
@@ -119,7 +119,7 @@ const promise = new Promise((resolve, reject) => {
 
 ---
 
-## **3. Handling Promises**
+## **Handling Promises**
 
 ### \*\*3.1 `.then()`, `.catch()`, and `.finally()`
 
@@ -152,7 +152,7 @@ promise
   })
 ```
 
-### **3.2 Chaining Promises**
+### **Chaining Promises**
 
 Promises can be chained to perform sequential asynchronous operations.
 
@@ -181,9 +181,9 @@ doTask1()
 
 ---
 
-## **4. Promise.all and Promise.race**
+## **Promise.all and Promise.race**
 
-### **4.1 Using `Promise.all()`**
+### **Using `Promise.all()`**
 
 **Definition**:
 
@@ -229,7 +229,7 @@ Promise.all([promise1, promise2, promise3])
   })
 ```
 
-### **4.2 Using `Promise.race()`**
+### **Using `Promise.race()`**
 
 **Definition**:
 
@@ -277,9 +277,9 @@ Promise.race([promise1, promise2])
 
 ---
 
-## **5. Asynchronous Patterns**
+## **Asynchronous Patterns**
 
-### **5.1 Sequential vs. Parallel Execution**
+### **Sequential vs. Parallel Execution**
 
 **Sequential Execution**:
 
@@ -315,7 +315,7 @@ Promise.all([promise1, promise2, promise3])
   .catch((error) => console.error('Error:', error))
 ```
 
-### **5.2 Combining Promises**
+### **Combining Promises**
 
 **Example: Fetching Multiple URLs**
 
@@ -335,7 +335,7 @@ Promise.all(promises)
   .catch((error) => console.error('Error:', error))
 ```
 
-### **5.3 Error Handling in Promises**
+### **Error Handling in Promises**
 
 - Errors propagate down the promise chain until they are caught.
 - Use `.catch()` at the end of the chain to handle errors.
@@ -359,9 +359,9 @@ doTask1()
 
 ---
 
-## **6. Best Practices**
+## **Best Practices**
 
-### **6.1 Always Return Promises**
+### **Always Return Promises**
 
 - Ensure that you return promises from functions to maintain the chain.
 
@@ -385,7 +385,7 @@ function doTask() {
 }
 ```
 
-### **6.2 Handle Errors Appropriately**
+### **Handle Errors Appropriately**
 
 - Always add a `.catch()` handler to your promise chains.
 
@@ -401,7 +401,7 @@ promise
   })
 ```
 
-### **6.3 Use `Promise.allSettled()` for Independent Promises**
+### **Use `Promise.allSettled()` for Independent Promises**
 
 - If you have multiple promises and you want to wait for all of them to settle regardless of whether they fulfill or reject, use `Promise.allSettled()`.
 
@@ -419,7 +419,7 @@ Promise.allSettled([promise1, promise2, promise3]).then((results) => {
 })
 ```
 
-### **6.4 Avoid the Promise Constructor Anti-Pattern**
+### **Avoid the Promise Constructor Anti-Pattern**
 
 - Do not wrap promises inside new promises unnecessarily.
 
@@ -443,7 +443,7 @@ function fetchData() {
 }
 ```
 
-### **6.5 Use Async/Await for Simplicity**
+### **Use Async/Await for Simplicity**
 
 - For sequential asynchronous operations, consider using `async/await` syntax.
 
@@ -466,7 +466,7 @@ processTasks()
 
 ---
 
-## **7. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is a Promise in JavaScript, and why is it useful?**
 
@@ -536,7 +536,7 @@ processTasks()
 
 ---
 
-## **8. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Creating and Handling Promises**
 
@@ -694,13 +694,13 @@ promise
 
 ---
 
-## **9. Conclusion**
+## **Conclusion**
 
 Promises are a fundamental part of modern JavaScript, providing a powerful way to handle asynchronous operations. By understanding how to create and handle promises, and how to use methods like `Promise.all()` and `Promise.race()`, you can write more efficient and maintainable asynchronous code. Mastering these concepts not only enhances your coding skills but also prepares you for technical interviews and complex development challenges.
 
 ---
 
-## **10. Next Steps**
+## **Next Steps**
 
 - **Practice:**
 
@@ -723,7 +723,7 @@ Promises are a fundamental part of modern JavaScript, providing a powerful way t
 
 ---
 
-## **11. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

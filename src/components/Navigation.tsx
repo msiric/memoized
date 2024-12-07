@@ -367,8 +367,6 @@ function NavigationGroup({
 
   const formattedPathname = `/${pathname.split('/').slice(1, 4).join('/')}`
 
-  console.log('test', section.links, isActiveGroup, pathname, formattedPathname)
-
   return (
     <li
       className={clsx(

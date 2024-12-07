@@ -50,9 +50,9 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **1. Introduction to Advanced Types**
+## **Introduction to Advanced Types**
 
-### **1.1 Overview of Advanced Types**
+### **Overview of Advanced Types**
 
 - **Advanced Types**: Enhance TypeScript's type system, allowing more complex and expressive type definitions.
 - **Features**:
@@ -61,7 +61,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   - **Type Guards**: Runtime checks that refine types within a scope.
   - **Type Narrowing**: Refining types based on control flow analysis.
 
-### **1.2 Importance in TypeScript**
+### **Importance in TypeScript**
 
 - **Flexibility**: Allows defining types that can handle various scenarios.
 - **Type Safety**: Improves error detection and code robustness.
@@ -70,9 +70,9 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **2. Union Types**
+## **Union Types**
 
-### **2.1 Defining Union Types**
+### **Defining Union Types**
 
 - **Definition**: A union type describes a value that can be one of several types.
 - **Syntax**:
@@ -92,7 +92,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   // userId = true;  // Error: Type 'boolean' is not assignable to type 'ID'.
   ```
 
-### **2.2 Use Cases for Union Types**
+### **Use Cases for Union Types**
 
 - **Flexible Function Parameters**:
 
@@ -127,7 +127,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   type Message = TextMessage | ImageMessage
   ```
 
-### **2.3 Working with Union Types**
+### **Working with Union Types**
 
 - **Type Guards with Union Types**:
 
@@ -155,9 +155,9 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **3. Intersection Types**
+## **Intersection Types**
 
-### **3.1 Defining Intersection Types**
+### **Defining Intersection Types**
 
 - **Definition**: An intersection type combines multiple types into one, requiring the value to satisfy all included types.
 - **Syntax**:
@@ -185,7 +185,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   }
   ```
 
-### **3.2 Use Cases for Intersection Types**
+### **Use Cases for Intersection Types**
 
 - **Combining Interfaces**:
 
@@ -199,7 +199,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
   - Enhancing types with additional properties or methods.
 
-### **3.3 Combining Interfaces and Types**
+### **Combining Interfaces and Types**
 
 - **Example**:
 
@@ -226,16 +226,16 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **4. Type Guards**
+## **Type Guards**
 
-### **4.1 What are Type Guards?**
+### **What are Type Guards?**
 
 - **Definition**: Type guards are expressions that perform runtime checks, ensuring that a variable is of a certain type in a given scope.
 - **Purpose**:
   - Refine types within conditional blocks.
   - Enable safe access to properties and methods specific to a type.
 
-### **4.2 Using `typeof` and `instanceof`**
+### **Using `typeof` and `instanceof`**
 
 - **Using `typeof` Operator**:
 
@@ -279,7 +279,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   }
   ```
 
-### **4.3 Custom Type Guards**
+### **Custom Type Guards**
 
 - **Defining Custom Type Guards**:
 
@@ -304,16 +304,16 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **5. Type Narrowing**
+## **Type Narrowing**
 
-### **5.1 Understanding Type Narrowing**
+### **Understanding Type Narrowing**
 
 - **Definition**: Type narrowing is the process of refining a variable's type within a specific scope based on control flow analysis.
 - **Purpose**:
   - Allows TypeScript to understand and verify code paths.
   - Improves type safety by ensuring correct usage of variables.
 
-### **5.2 Control Flow Based Type Analysis**
+### **Control Flow Based Type Analysis**
 
 - **Example with `if` Statements**:
 
@@ -357,7 +357,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   }
   ```
 
-### **5.3 Discriminated Unions**
+### **Discriminated Unions**
 
 - **Definition**: A pattern where types in a union have a common property (the discriminant) with a literal type, allowing type guards based on its value.
 - **Example**:
@@ -391,9 +391,9 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **6. Type Predicates**
+## **Type Predicates**
 
-### **6.1 Defining Type Predicates**
+### **Defining Type Predicates**
 
 - **Syntax**:
 
@@ -408,7 +408,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   - Allow custom functions to act as type guards.
   - Inform TypeScript about the type within a conditional block.
 
-### **6.2 Implementing Type Guards with Predicates**
+### **Implementing Type Guards with Predicates**
 
 - **Example**:
 
@@ -441,9 +441,9 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **7. Type Compatibility and Assignability**
+## **Type Compatibility and Assignability**
 
-### **7.1 Structural Typing in TypeScript**
+### **Structural Typing in TypeScript**
 
 - **Definition**: TypeScript uses structural typing (also known as duck typing), where compatibility is determined by the structure of the types rather than their explicit declarations.
 
@@ -461,7 +461,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   point = coordinates // Valid: 'coordinates' has at least the properties of 'Point'
   ```
 
-### **7.2 Type Compatibility Rules**
+### **Type Compatibility Rules**
 
 - **Assignability**:
 
@@ -495,9 +495,9 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **8. Type Assertions and Casting**
+## **Type Assertions and Casting**
 
-### **8.1 Refreshing Type Assertions**
+### **Refreshing Type Assertions**
 
 - **Syntax**:
 
@@ -511,7 +511,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
   - Override TypeScript's inferred type when the developer has more information.
 
-### **8.2 Casting Between Types**
+### **Casting Between Types**
 
 - **Casting to a More Specific Type**:
 
@@ -537,7 +537,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **9. Best Practices**
+## **Best Practices**
 
 - **Use Type Guards to Refine Types**:
 
@@ -565,7 +565,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **10. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What are union types in TypeScript, and when would you use them?**
 
@@ -638,7 +638,7 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
 ---
 
-## **11. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Union Types**
 
@@ -827,13 +827,13 @@ makeSound(myCat) // Outputs: Meow!
 
 ---
 
-## **12. Conclusion**
+## **Conclusion**
 
 Advanced types in TypeScript, including union and intersection types, type guards, and type narrowing, empower developers to write more expressive and type-safe code. Union and intersection types provide flexibility in defining complex types, while type guards and narrowing enable precise control over type refinement at runtime. By mastering these advanced features, you enhance your ability to build robust TypeScript applications and prepare yourself for tackling complex development challenges and technical interviews.
 
 ---
 
-## **13. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -856,7 +856,7 @@ Advanced types in TypeScript, including union and intersection types, type guard
 
 ---
 
-## **14. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

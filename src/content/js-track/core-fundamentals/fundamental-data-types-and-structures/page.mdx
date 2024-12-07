@@ -45,9 +45,9 @@ JavaScript provides a variety of data types and structures to help developers ma
 
 ---
 
-## **1. Primitive Data Types**
+## **Primitive Data Types**
 
-### **1.1 Overview of Primitives**
+### **Overview of Primitives**
 
 JavaScript has seven primitive data types:
 
@@ -59,7 +59,7 @@ JavaScript has seven primitive data types:
 6. **Symbol**: Represents a unique and immutable identifier (introduced in ES6).
 7. **BigInt**: Represents whole numbers larger than `2^53 - 1` (introduced in ES2020).
 
-### **1.2 Characteristics of Primitives**
+### **Characteristics of Primitives**
 
 - **Immutable**: Primitive values are immutable; they cannot be altered. Operations on primitives create new values.
 
@@ -85,9 +85,9 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **2. Objects**
+## **Objects**
 
-### **2.1 Understanding Objects**
+### **Understanding Objects**
 
 - **Definition**: An object is a collection of properties, where each property is a key-value pair.
 - **Types of Objects**:
@@ -96,7 +96,7 @@ JavaScript has seven primitive data types:
   - Functions: Callable objects.
   - Dates, RegExps, Errors, etc.
 
-### **2.2 Primitives vs. Objects**
+### **Primitives vs. Objects**
 
 - **Mutability**:
 
@@ -126,9 +126,9 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **3. Arrays**
+## **Arrays**
 
-### **3.1 Creating Arrays**
+### **Creating Arrays**
 
 - **Array Literals**:
 
@@ -148,7 +148,7 @@ JavaScript has seven primitive data types:
   let emptyArray = []
   ```
 
-### **3.2 Array Methods**
+### **Array Methods**
 
 - **Adding and Removing Elements**:
 
@@ -270,7 +270,7 @@ JavaScript has seven primitive data types:
     fruits.sort() // ['apple', 'blueberry', 'cherry']
     ```
 
-### **3.3 Iterating Over Arrays**
+### **Iterating Over Arrays**
 
 - **For Loop**:
 
@@ -296,9 +296,9 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **4. Sets**
+## **Sets**
 
-### **4.1 Introduction to Sets**
+### **Introduction to Sets**
 
 - **Definition**: A `Set` is a collection of unique values.
 - **Characteristics**:
@@ -306,7 +306,7 @@ JavaScript has seven primitive data types:
   - Order is based on insertion.
   - Elements can be of any type.
 
-### **4.2 Creating Sets**
+### **Creating Sets**
 
 - **Empty Set**:
 
@@ -320,7 +320,7 @@ JavaScript has seven primitive data types:
   let numberSet = new Set([1, 2, 3, 4, 4, 5]) // {1, 2, 3, 4, 5}
   ```
 
-### **4.3 Set Methods**
+### **Set Methods**
 
 - **Adding Elements**:
 
@@ -361,7 +361,7 @@ JavaScript has seven primitive data types:
     mySet.clear() // mySet is now empty
     ```
 
-### **4.4 Iterating Over Sets**
+### **Iterating Over Sets**
 
 - **For...of Loop**:
 
@@ -377,7 +377,7 @@ JavaScript has seven primitive data types:
   mySet.forEach((value) => console.log(value))
   ```
 
-### **4.5 Use Cases for Sets**
+### **Use Cases for Sets**
 
 - **Removing Duplicates from an Array**:
 
@@ -392,16 +392,16 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **5. Maps**
+## **Maps**
 
-### **5.1 Introduction to Maps**
+### **Introduction to Maps**
 
 - **Definition**: A `Map` is a collection of key-value pairs.
 - **Characteristics**:
   - Keys can be of any type, including objects and functions.
   - Remember the original insertion order of the keys.
 
-### **5.2 Creating Maps**
+### **Creating Maps**
 
 - **Empty Map**:
 
@@ -419,7 +419,7 @@ JavaScript has seven primitive data types:
   let userMap = new Map(entries)
   ```
 
-### **5.3 Map Methods**
+### **Map Methods**
 
 - **Adding Entries**:
 
@@ -467,7 +467,7 @@ JavaScript has seven primitive data types:
     myMap.clear() // myMap is now empty
     ```
 
-### **5.4 Iterating Over Maps**
+### **Iterating Over Maps**
 
 - **For...of Loop**:
 
@@ -497,7 +497,7 @@ JavaScript has seven primitive data types:
   }
   ```
 
-### **5.5 Use Cases for Maps**
+### **Use Cases for Maps**
 
 - **Storing Metadata**:
 
@@ -524,9 +524,9 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **6. WeakSet and WeakMap**
+## **WeakSet and WeakMap**
 
-### **6.1 Understanding WeakSet**
+### **Understanding WeakSet**
 
 - **Definition**: A `WeakSet` is a collection of objects.
 - **Characteristics**:
@@ -550,7 +550,7 @@ JavaScript has seven primitive data types:
   // If obj is set to null or goes out of scope, it can be garbage collected.
   ```
 
-### **6.2 Understanding WeakMap**
+### **Understanding WeakMap**
 
 - **Definition**: A `WeakMap` is a collection of key-value pairs where keys are objects.
 - **Characteristics**:
@@ -576,9 +576,9 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **7. Best Practices**
+## **Best Practices**
 
-### **7.1 Choosing the Right Data Structure**
+### **Choosing the Right Data Structure**
 
 - **Arrays**:
 
@@ -602,7 +602,7 @@ JavaScript has seven primitive data types:
   - Use when you need simple key-value pairs with string/symbol keys.
   - Good for modeling entities.
 
-### **7.2 Avoiding Pitfalls with Primitives and Objects**
+### **Avoiding Pitfalls with Primitives and Objects**
 
 - **Don't Mutate Primitives**:
 
@@ -632,7 +632,7 @@ JavaScript has seven primitive data types:
   console.log(a.value) // Outputs: 1
   ```
 
-### **7.3 Use Appropriate Methods**
+### **Use Appropriate Methods**
 
 - **Use Built-in Methods**:
 
@@ -660,7 +660,7 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **8. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What are the differences between primitive data types and objects in JavaScript?**
 
@@ -745,7 +745,7 @@ JavaScript has seven primitive data types:
 
 ---
 
-## **9. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Primitives vs. Objects**
 
@@ -896,13 +896,13 @@ Explain why a `WeakMap` is suitable for associating metadata with DOM elements i
 
 ---
 
-## **10. Conclusion**
+## **Conclusion**
 
 Understanding fundamental data types and structures in JavaScript is essential for writing efficient and effective code. By mastering primitives, objects, arrays, sets, and maps, you can manipulate data more effectively, optimize performance, and solve complex programming challenges. This knowledge also prepares you for technical interviews and real-world development tasks.
 
 ---
 
-## **11. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -925,7 +925,7 @@ Understanding fundamental data types and structures in JavaScript is essential f
 
 ---
 
-## **12. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

@@ -2,6 +2,7 @@ import {
   AccessOptions,
   Prisma,
   ProblemDifficulty,
+  ProblemType,
   SubscriptionPlan,
 } from '@prisma/client'
 import Stripe from 'stripe'
@@ -91,6 +92,9 @@ export type PracticeProblem = {
   href: string
   title: string
   difficulty: ProblemDifficulty
+  question: string
+  answer: string
+  type: ProblemType
 }
 
 export type LessonResource = {
@@ -203,6 +207,9 @@ export type LessonWithProblems = Prisma.LessonGetPayload<{
         id: true
         title: true
         href: true
+        question: true
+        answer: true
+        type: true
         difficulty: true
       }
     }
@@ -238,6 +245,9 @@ export type LessonWithResourcesAndProblems = Prisma.LessonGetPayload<{
         id: true
         title: true
         href: true
+        question: true
+        answer: true
+        type: true
         difficulty: true
       }
     }

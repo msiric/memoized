@@ -13,7 +13,7 @@ Objects are a fundamental part of JavaScript, providing a way to store and manip
 
 ## **Object Creation in JavaScript**
 
-### **1. Object Literals**
+### **Object Literals**
 
 - **Definition**: The simplest way to create an object using curly braces `{}`.
 
@@ -35,7 +35,7 @@ person.greet() // Outputs: Hello, my name is Alice.
 
 - The `person` object has properties `name`, `age`, and a method `greet`.
 
-### **2. Using `Object.create()`**
+### **Using `Object.create()`**
 
 - **Definition**: Creates a new object with the specified prototype object and properties.
 
@@ -57,7 +57,7 @@ dog.eat() // Outputs: Buddy is eating.
 
 - `dog` is created with `animal` as its prototype.
 
-### **3. Constructor Functions**
+### **Constructor Functions**
 
 - **Definition**: Functions used to create multiple similar objects.
 
@@ -89,7 +89,7 @@ console.log(myCar.getInfo()) // Outputs: Toyota Corolla
 - `Car` is a constructor function.
 - The `new` keyword creates a new object, sets `this` to that object, and returns it.
 
-### **4. ES6 Classes**
+### **ES6 Classes**
 
 - **Definition**: Syntactic sugar over JavaScript's existing prototype-based inheritance.
 
@@ -420,11 +420,11 @@ myCar.honk() // Outputs: Toyota Corolla says beep beep!
 
 ## **Best Practices**
 
-### **1. Use ES6 Classes for Object-Oriented Programming**
+### **Use ES6 Classes for Object-Oriented Programming**
 
 - **Reason**: Cleaner syntax, better readability, and modern features.
 
-### **2. Name Classes and Constructors with UpperCamelCase**
+### **Name Classes and Constructors with UpperCamelCase**
 
 - **Convention**: Helps differentiate constructors and classes from regular functions.
 
@@ -436,19 +436,19 @@ class UserAccount {
 }
 ```
 
-### **3. Use `super()` in Subclasses**
+### **Use `super()` in Subclasses**
 
 - **Reason**: Ensure the parent class's constructor is called.
 
-### **4. Define Methods on Prototypes**
+### **Define Methods on Prototypes**
 
 - For constructor functions, define shared methods on `ConstructorFunction.prototype`.
 
-### **5. Avoid Extending Built-in Objects**
+### **Avoid Extending Built-in Objects**
 
 - **Reason**: Can lead to unexpected behavior and conflicts.
 
-### **6. Be Mindful of `this` Binding**
+### **Be Mindful of `this` Binding**
 
 - In classes and constructor functions, `this` refers to the instance.
 - Arrow functions do not have their own `this`; be cautious when using them as methods.

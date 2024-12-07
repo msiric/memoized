@@ -48,9 +48,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **1. Introduction to Type-Level Programming**
+## **Introduction to Type-Level Programming**
 
-### **1.1 What is Type-Level Programming?**
+### **What is Type-Level Programming?**
 
 - **Definition**: Type-level programming is the practice of writing code that operates on types rather than values. It involves using TypeScript's type system to perform computations, transformations, and validations at the type level.
 - **Purpose**:
@@ -58,7 +58,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   - Create more expressive and flexible type definitions.
   - Enable complex type transformations and validations.
 
-### **1.2 Importance in TypeScript**
+### **Importance in TypeScript**
 
 - **Type Safety**: Improves the robustness of code by catching errors at compile time.
 - **Expressiveness**: Allows for more precise type definitions that can model complex data structures and patterns.
@@ -66,9 +66,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **2. Recursive Types**
+## **Recursive Types**
 
-### **2.1 Understanding Recursive Types**
+### **Understanding Recursive Types**
 
 - **Definition**: Recursive types are types that reference themselves in their definition. They are useful for modeling recursive data structures such as trees, linked lists, and nested objects.
 - **Syntax**:
@@ -80,7 +80,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   }
   ```
 
-### **2.2 Examples of Recursive Types**
+### **Examples of Recursive Types**
 
 - **Example 1: Linked List Node**
 
@@ -108,7 +108,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   - The `JSONValue` type represents any valid JSON data, including nested objects and arrays.
   - It uses recursion to define that a JSON value can be an object whose values are also `JSONValue`.
 
-### **2.3 Practical Use Cases**
+### **Practical Use Cases**
 
 - **Nested Data Structures**: Defining types for nested objects, trees, or graphs.
 - **Parsing and Serialization**: Validating data structures that can be serialized to or from formats like JSON or XML.
@@ -116,9 +116,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **3. Advanced Type Manipulations**
+## **Advanced Type Manipulations**
 
-### **3.1 Conditional Types Revisited**
+### **Conditional Types Revisited**
 
 - **Definition**: Conditional types allow for type expressions that depend on other types.
 - **Syntax**:
@@ -146,7 +146,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   type T0 = Exclude<'a' | 'b' | 'c', 'a' | 'f'> // 'b' | 'c'
   ```
 
-### **3.2 Mapped Types with Modifiers**
+### **Mapped Types with Modifiers**
 
 - **Adding Modifiers**: Use `+` or `-` to add or remove modifiers like `readonly` or `?`.
 
@@ -175,7 +175,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   // Now 'name' is required
   ```
 
-### **3.3 Infer Keyword and Type Inference**
+### **Infer Keyword and Type Inference**
 
 - **Definition**: The `infer` keyword allows you to extract and manipulate types within conditional types.
 
@@ -212,9 +212,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **4. Template Literal Types**
+## **Template Literal Types**
 
-### **4.1 Introduction to Template Literal Types**
+### **Introduction to Template Literal Types**
 
 - **Definition**: Template literal types allow you to create string literal types by combining other types or string literals.
 
@@ -224,7 +224,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   type HelloWorld = `Hello ${string}`
   ```
 
-### **4.2 String Manipulation at the Type Level**
+### **String Manipulation at the Type Level**
 
 - **Creating Union Types from Strings**:
 
@@ -254,7 +254,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   // 'onClick' | 'onHover' | 'onScroll'
   ```
 
-### **4.3 Practical Applications**
+### **Practical Applications**
 
 - **Dynamic Property Names**: Generate types for objects with dynamic keys.
 
@@ -270,9 +270,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **5. Key Remapping in Mapped Types**
+## **Key Remapping in Mapped Types**
 
-### **5.1 Changing Property Names**
+### **Changing Property Names**
 
 - **Key Remapping Syntax**:
 
@@ -303,7 +303,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   // }
   ```
 
-### **5.2 Filtering and Transforming Keys**
+### **Filtering and Transforming Keys**
 
 - **Filtering Keys**:
 
@@ -330,9 +330,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **6. Variadic Tuple Types**
+## **Variadic Tuple Types**
 
-### **6.1 Working with Tuple Types**
+### **Working with Tuple Types**
 
 - **Definition**: Tuples are fixed-length arrays with known types at each index.
 
@@ -342,7 +342,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   const point: Point = [10, 20]
   ```
 
-### **6.2 Manipulating Tuples with Type-Level Functions**
+### **Manipulating Tuples with Type-Level Functions**
 
 - **Rest Elements in Tuple Types**:
 
@@ -372,9 +372,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **7. Creating Complex Types**
+## **Creating Complex Types**
 
-### **7.1 Composing Types**
+### **Composing Types**
 
 - **Combining Types**:
 
@@ -393,7 +393,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   // { a: string; b: number; }
   ```
 
-### **7.2 Building Utility Types**
+### **Building Utility Types**
 
 - **DeepPartial**: Makes all properties and sub-properties optional.
 
@@ -445,9 +445,9 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **8. Practical Examples**
+## **Practical Examples**
 
-### **8.1 Recursive Type Example: JSON Validation**
+### **Recursive Type Example: JSON Validation**
 
 - **Validating JSON Structures**:
 
@@ -479,7 +479,7 @@ Type-level programming in TypeScript involves writing code that operates on type
   }
   ```
 
-### **8.2 Advanced Type Manipulation Example: Flattening Types**
+### **Advanced Type Manipulation Example: Flattening Types**
 
 - **Flattening Nested Types**:
 
@@ -505,7 +505,7 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **9. Best Practices**
+## **Best Practices**
 
 - **Use Type Inference Wisely**: Leverage TypeScript's type inference to simplify type definitions.
 - **Avoid Overcomplicating Types**: Keep type definitions as simple as possible to maintain code readability.
@@ -516,7 +516,7 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **10. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is a recursive type in TypeScript, and when would you use it?**
 
@@ -587,7 +587,7 @@ Type-level programming in TypeScript involves writing code that operates on type
 
 ---
 
-## **11. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Recursive Type for a Tree Structure**
 
@@ -702,13 +702,13 @@ type ComposedFunc = Compose<[number, string], boolean>
 
 ---
 
-## **12. Conclusion**
+## **Conclusion**
 
 Type-level programming in TypeScript opens up a world of possibilities for creating complex, expressive, and type-safe applications. By mastering recursive types, advanced type manipulations, template literal types, and variadic tuple types, you can harness the full power of TypeScript's type system. Understanding these advanced concepts will enhance your ability to build robust applications and prepare you for tackling complex development challenges and technical interviews.
 
 ---
 
-## **13. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -730,7 +730,7 @@ Type-level programming in TypeScript opens up a world of possibilities for creat
 
 ---
 
-## **14. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

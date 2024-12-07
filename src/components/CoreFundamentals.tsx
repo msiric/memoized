@@ -7,6 +7,7 @@ import {
   JS_TRACK_PREFIX,
 } from '../constants'
 import { LessonConfig } from '../types'
+import { CORE_FUNDAMENTALS } from '@/problems'
 
 export const coreFundamentals: LessonConfig[] = [
   {
@@ -15,7 +16,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Engine and Runtime Environment',
     description: 'Explore string methods and their usage in JavaScript.',
     access: AccessOptions.FREE,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.engineAndRuntimeEnvironment,
   },
   {
     id: '/execution-context-and-call-stack',
@@ -24,7 +25,7 @@ export const coreFundamentals: LessonConfig[] = [
     description:
       'Understand numerical operations and the Number object in JavaScript.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.executionContextAndCallStack,
   },
   {
     id: '/variable-scope-and-hoisting',
@@ -32,7 +33,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Variable Scope and Hoisting',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.variableScopeAndHoisting,
   },
   {
     id: '/closures-and-lexical-environment',
@@ -40,7 +41,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Closures and Lexical Environment',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.closuresAndLexicalEnvironment,
   },
   {
     id: '/this-keyword-and-binding-rules',
@@ -48,7 +49,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'this Keyword and Binding Rules',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.thisKeywordAndBindingRules,
   },
   {
     id: '/prototypes-and-prototypal-inheritance',
@@ -56,7 +57,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Prototypes and Prototypal Inheritance',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.prototypesAndPrototypalInheritance,
   },
   {
     id: '/function-types-and-invocation-patterns',
@@ -64,7 +65,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Function Types and Invocation Patterns',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.functionTypesAndInvocationPatterns,
   },
   {
     id: '/object-creation-and-class-patterns',
@@ -72,7 +73,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Object Creation and Class Patterns',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.objectCreationAndClassPatterns,
   },
   {
     id: '/error-handling-and-debugging',
@@ -80,7 +81,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Error Handling and Debugging',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.errorHandlingAndDebugging,
   },
   {
     id: '/memory-management-and-garbage-collection',
@@ -88,7 +89,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Memory Management and Garbage Collection',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.memoryManagementAndGarbageCollection,
   },
   {
     id: '/modules-and-module-systems',
@@ -96,7 +97,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Modules and Module Systems',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.modulesAndModuleSystems,
   },
   {
     id: '/event-loop-and-asynchronous-programming',
@@ -104,7 +105,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Event Loop and Asynchronous Programming',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.eventLoopAndAsynchronousProgramming,
   },
   {
     id: '/asynchronous-javascript',
@@ -112,7 +113,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Asynchronous JavaScript',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.asynchronousJavascript,
   },
   {
     id: '/execution-context-and-scope-chain',
@@ -120,7 +121,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Execution Context and Scope Chain',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.executionContextAndScopeChain,
   },
   {
     id: '/fundamental-data-types-and-structures',
@@ -128,7 +129,7 @@ export const coreFundamentals: LessonConfig[] = [
     title: 'Fundamental Data Types and Structures',
     description: 'Learn about array methods and how to manipulate arrays.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: CORE_FUNDAMENTALS.fundamentalDataTypesAndStructures,
   },
 ]
 

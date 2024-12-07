@@ -23,7 +23,7 @@ An **Execution Context** is an abstract concept that holds information about the
 2. **Functional Execution Context**
 3. **Eval Execution Context** (rarely used and generally discouraged)
 
-### **1. Global Execution Context**
+### **Global Execution Context**
 
 - **Definition**: The default or base context where any JavaScript code runs first.
 - **Characteristics**:
@@ -35,7 +35,7 @@ An **Execution Context** is an abstract concept that holds information about the
   - **Setting Up the `this` Keyword**: Points to the global object.
   - **Variable Object (VO)**: Contains all global variables and function declarations.
 
-### **2. Functional Execution Context**
+### **Functional Execution Context**
 
 - **Definition**: Created whenever a function is invoked.
 - **Characteristics**:
@@ -47,7 +47,7 @@ An **Execution Context** is an abstract concept that holds information about the
   - **Setting Up the `this` Keyword**: Depends on the invocation pattern (default, implicit, explicit, `new`, or arrow functions).
   - **Lexical Environment**: Defines how variables and functions are scoped and accessed.
 
-### **3. Eval Execution Context**
+### **Eval Execution Context**
 
 - **Definition**: Created when code is executed inside an `eval()` function.
 - **Characteristics**:
@@ -179,7 +179,7 @@ Each execution context goes through two phases:
 1. **Creation Phase**
 2. **Execution Phase**
 
-### **1. Creation Phase**
+### **Creation Phase**
 
 - **Variable Object (VO)**:
   - **Global Context**:
@@ -192,7 +192,7 @@ Each execution context goes through two phases:
 - **`this` Binding**:
   - Determines the value of `this` within the context.
 
-### **2. Execution Phase**
+### **Execution Phase**
 
 - **Variable Assignment**:
   - Variables are assigned their values.
@@ -661,7 +661,7 @@ showName.apply(person2) // Outputs: "Grace"
 
 ## **Tips, Tricks, and Best Practices**
 
-### **1. Understand the Execution Context Lifecycle**
+### **Understand the Execution Context Lifecycle**
 
 - **Creation Phase**:
   - Hoisting of variable and function declarations.
@@ -671,7 +671,7 @@ showName.apply(person2) // Outputs: "Grace"
   - Assigning values to variables.
   - Executing the code line by line.
 
-### **2. Avoid Unintentional Globals**
+### **Avoid Unintentional Globals**
 
 - Always declare variables using `var`, `let`, or `const`.
 - Use strict mode to prevent accidental global declarations.
@@ -684,27 +684,27 @@ showName.apply(person2) // Outputs: "Grace"
   example()
   ```
 
-### **3. Manage `this` Effectively**
+### **Manage `this` Effectively**
 
 - Use regular functions when you need dynamic `this` binding.
 - Use arrow functions to inherit `this` from the surrounding context.
 
-### **4. Optimize Recursive Functions**
+### **Optimize Recursive Functions**
 
 - Ensure base cases are well-defined to prevent stack overflows.
 - Consider iterative solutions for deep or infinite recursion scenarios.
 
-### **5. Debugging with the Call Stack**
+### **Debugging with the Call Stack**
 
 - Use browser DevTools to inspect the call stack during debugging.
 - Understand how functions are called and how contexts are created.
 
-### **6. Limit Stack Depth in Recursion**
+### **Limit Stack Depth in Recursion**
 
 - Be cautious with recursive functions that can lead to deep call stacks.
 - Implement tail recursion optimization where possible (though JavaScript engines have limited support).
 
-### **7. Leverage Closures Wisely**
+### **Leverage Closures Wisely**
 
 - Understand how closures interact with execution contexts.
 - Avoid unnecessary retention of variables to prevent memory leaks.
@@ -749,87 +749,6 @@ showName.apply(person2) // Outputs: "Grace"
    **Answer:**
 
    A **closure** is created when a function retains access to its outer (enclosing) function's variables even after the outer function has returned. When a function is created, it captures the variables from its surrounding execution context. This allows the inner function to access these variables whenever it is invoked, regardless of the current state of the call stack. Closures are essential for data encapsulation and creating private variables.
-
-6. **What causes a call stack overflow in JavaScript, and how can it be prevented?**
-
-   **Answer:**
-
-   A **call stack overflow** occurs when the call stack exceeds its maximum size, usually due to excessive or infinite recursion. Each function call consumes stack space, and without a base case or termination condition, recursive calls can continue indefinitely, leading to an overflow.
-
-   **Prevention:**
-
-   - Ensure recursive functions have well-defined base cases.
-   - Limit the depth of recursion.
-   - Use iterative approaches where feasible.
-   - Implement tail recursion optimization if supported by the engine.
-
-7. **Describe how the `this` keyword is determined in different execution contexts.**
-
-   **Answer:**
-
-   The value of `this` depends on how a function is invoked:
-
-   - **Global Context**: In non-strict mode, `this` refers to the global object (`window` in browsers). In strict mode, `this` is `undefined`.
-   - **Function Context**: In regular function calls, `this` refers to the global object or `undefined` in strict mode. When called as a method of an object, `this` refers to that object.
-   - **Explicit Binding**: Using `.call()`, `.apply()`, or `.bind()`, `this` can be explicitly set to a specific value.
-   - **Constructor Context**: When a function is invoked with `new`, `this` refers to the newly created instance.
-   - **Arrow Functions**: `this` is lexically bound, inheriting the value from the surrounding scope.
-
-8. **How does hoisting affect the execution context in JavaScript?**
-
-   **Answer:**
-
-   **Hoisting** is JavaScript's behavior of moving declarations to the top of their containing scope during the creation phase of the execution context. This affects how variables and functions are accessed before their actual declaration in the code.
-
-   - **Variable Declarations**: `var` declarations are hoisted and initialized with `undefined`. `let` and `const` declarations are hoisted but remain uninitialized, leading to the Temporal Dead Zone.
-   - **Function Declarations**: Entire function declarations are hoisted, allowing functions to be called before they appear in the code.
-   - **Function Expressions**: Only the variable declaration is hoisted, not the assignment, which can lead to `TypeError` if called before assignment.
-
-   **Example:**
-
-   ```javascript
-   console.log(foo) // undefined
-   var foo = 'bar'
-
-   console.log(baz) // ReferenceError
-   let baz = 'qux'
-
-   greet() // "Hello!"
-   function greet() {
-     console.log('Hello!')
-   }
-
-   sayHi() // TypeError: sayHi is not a function
-   var sayHi = function () {
-     console.log('Hi!')
-   }
-   ```
-
-9. **What is the difference between the call stack and the heap in JavaScript?**
-
-   **Answer:**
-
-   - **Call Stack**:
-     - Manages execution contexts.
-     - Follows LIFO (Last-In-First-Out) order.
-     - Stores function calls and execution contexts.
-     - Limited in size.
-   - **Heap**:
-     - Used for dynamic memory allocation.
-     - Stores objects, arrays, and functions.
-     - Unstructured and large compared to the call stack.
-     - Managed by the garbage collector.
-
-   The call stack is used for managing the execution flow of the program, while the heap is used for storing data structures and objects that require dynamic memory allocation.
-
-10. **How can understanding execution contexts and the call stack help in debugging JavaScript code?**
-
-    **Answer:**
-
-    - **Error Tracing**: Understanding the call stack helps trace the sequence of function calls leading to an error.
-    - **Performance Optimization**: Identifying deep or excessive recursion can prevent stack overflows and improve performance.
-    - **Variable Scope**: Knowing how execution contexts manage scope can help resolve scope-related bugs.
-    - **Closure Debugging**: Understanding how closures interact with execution contexts can aid in identifying unintended variable retention.
 
 ---
 

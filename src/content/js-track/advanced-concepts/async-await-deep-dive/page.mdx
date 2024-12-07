@@ -32,16 +32,16 @@ Asynchronous programming is a fundamental aspect of JavaScript, enabling non-blo
 
 ---
 
-## **1. Introduction to Async/Await**
+## **Introduction to Async/Await**
 
-### **1.1 What is Async/Await?**
+### **What is Async/Await?**
 
 - **Async/Await** is syntactic sugar built on top of promises, allowing asynchronous code to be written in a synchronous-looking manner.
 - **`async` Function**: A function declared with the `async` keyword.
   - Always returns a promise.
 - **`await` Operator**: Used to pause the execution of an `async` function until a promise is settled (fulfilled or rejected).
 
-### **1.2 How Async/Await Works**
+### **How Async/Await Works**
 
 - **Async Functions**:
   - Declared using `async function` syntax.
@@ -70,9 +70,9 @@ fetchData().then((data) => {
 
 ---
 
-## **2. Error Handling with Try/Catch**
+## **Error Handling with Try/Catch**
 
-### **2.1 Using Try/Catch with Async/Await**
+### **Using Try/Catch with Async/Await**
 
 - **Error Handling**: Use `try/catch` blocks within `async` functions to handle errors from `await` expressions.
 - **Rejection Handling**: If a promise is rejected, an error is thrown, which can be caught by `catch`.
@@ -103,7 +103,7 @@ getUserData()
 - If an error occurs (e.g., network error, non-200 response), it is caught in the `catch` block.
 - The error can be logged or handled as needed.
 
-### **2.2 Common Pitfalls and Solutions**
+### **Common Pitfalls and Solutions**
 
 #### **2.2.1 Unhandled Promise Rejections**
 
@@ -185,9 +185,9 @@ async function processData() {
 
 ---
 
-## **3. Sequential vs. Parallel Execution**
+## **Sequential vs. Parallel Execution**
 
-### **3.1 Sequential Execution with Async/Await**
+### **Sequential Execution with Async/Await**
 
 - **Sequential Execution**: Operations are performed one after another, each waiting for the previous to complete.
 
@@ -207,7 +207,7 @@ async function sequentialTasks() {
 - Each `await` waits for the previous promise to resolve before continuing.
 - This can lead to unnecessary delays if tasks are independent.
 
-### **3.2 Parallel Execution Techniques**
+### **Parallel Execution Techniques**
 
 #### **3.2.1 Starting Promises Concurrently**
 
@@ -275,7 +275,7 @@ async function parallelTasks() {
 }
 ```
 
-### **3.3 Combining Sequential and Parallel Operations**
+### **Combining Sequential and Parallel Operations**
 
 - You can mix sequential and parallel execution as needed.
 
@@ -306,9 +306,9 @@ async function mixedExecution() {
 
 ---
 
-## **4. Best Practices**
+## **Best Practices**
 
-### **4.1 Use `try/catch` for Error Handling**
+### **Use `try/catch` for Error Handling**
 
 - **Consistency**: Always use `try/catch` within `async` functions to handle errors from `await` expressions.
 - **Granularity**: Catch errors at the appropriate level; you can have multiple `try/catch` blocks.
@@ -331,12 +331,12 @@ async function processData() {
 }
 ```
 
-### **4.2 Avoid Blocking the Event Loop**
+### **Avoid Blocking the Event Loop**
 
 - **Issue**: Synchronous code or long-running tasks can block the event loop.
 - **Solution**: Keep `async` functions non-blocking by avoiding CPU-intensive operations.
 
-### **4.3 Handle Rejections in Concurrent Operations**
+### **Handle Rejections in Concurrent Operations**
 
 - When using `Promise.all`, be aware that if one promise rejects, the entire `Promise.all` rejects.
 
@@ -370,7 +370,7 @@ async function fetchMultipleUrls(urls) {
 }
 ```
 
-### **4.4 Be Mindful of `await` in Loops**
+### **Be Mindful of `await` in Loops**
 
 - **Issue**: Using `await` inside a loop can lead to sequential execution.
 
@@ -399,14 +399,14 @@ async function processArray(array) {
 
 - Be careful with parallel execution if operations have side effects or depend on shared resources.
 
-### **4.5 Use `async`/`await` over `.then()` Chains**
+### **Use `async`/`await` over `.then()` Chains**
 
 - **Readability**: `async/await` makes asynchronous code look synchronous, improving readability.
 - **Error Handling**: Easier to handle errors with `try/catch`.
 
 ---
 
-## **5. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is the purpose of the `async` keyword in JavaScript?**
 
@@ -456,7 +456,7 @@ async function processArray(array) {
 
 ---
 
-## **6. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Error Handling with Try/Catch**
 
@@ -701,13 +701,13 @@ async function executeTasks() {
 
 ---
 
-## **7. Conclusion**
+## **Conclusion**
 
 Understanding `async/await` is essential for modern JavaScript development, providing a cleaner and more intuitive way to handle asynchronous operations. By mastering error handling with `try/catch` and effectively managing sequential and parallel execution, you can write efficient, maintainable, and robust asynchronous code. These skills are invaluable for building responsive applications and preparing for advanced technical interviews.
 
 ---
 
-## **8. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -730,7 +730,7 @@ Understanding `async/await` is essential for modern JavaScript development, prov
 
 ---
 
-## **9. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

@@ -97,7 +97,6 @@ export const ExpandableAnswer = ({ problem }: ExpandableAnswerProps) => {
               onClick={() => toggleAnswer(problem.id)}
               className="flex items-center gap-1 text-sm font-bold text-zinc-600 hover:text-zinc-800 dark:text-zinc-300 dark:hover:text-zinc-100"
             >
-              Answer
               <div
                 className={`transform transition-transform duration-200 ${
                   expandedAnswers.has(problem.id) ? 'rotate-180' : ''
@@ -105,6 +104,7 @@ export const ExpandableAnswer = ({ problem }: ExpandableAnswerProps) => {
               >
                 <BiChevronDown className="h-5 w-5" />
               </div>
+              Answer
             </button>
           )}
         </div>
@@ -117,6 +117,9 @@ export const ExpandableAnswer = ({ problem }: ExpandableAnswerProps) => {
         }`}
       >
         <div className="overflow-hidden">
+          {problem.question && (
+            <p className="color-white m-0 mt-5 font-bold">{problem.question}</p>
+          )}
           {problem.answer && <MdxRenderer content={problem.answer} />}
         </div>
       </div>

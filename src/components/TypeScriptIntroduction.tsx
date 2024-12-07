@@ -7,6 +7,7 @@ import {
   TYPESCRIPT_INTRODUCTION_PREFIX,
 } from '../constants'
 import { LessonConfig } from '../types'
+import { TYPESCRIPT_INTRODUCTION } from '@/problems'
 
 export const typescriptIntroduction: LessonConfig[] = [
   {
@@ -16,7 +17,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Learn how to set up TypeScript and understand its key benefits over JavaScript.',
     access: AccessOptions.FREE,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.typescriptFundamentals,
   },
   {
     id: '/basic-types-and-type-annotations',
@@ -25,7 +26,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Master fundamental TypeScript types including number, string, boolean, array, tuple, and type inference.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.basicTypesAndTypeAnnotations,
   },
   {
     id: '/interfaces-and-type-aliases',
@@ -34,7 +35,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Learn how to define object shapes and extend interfaces in TypeScript.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.interfacesAndTypeAliases,
   },
   {
     id: '/enums-and-literal-types',
@@ -43,7 +44,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Explore numeric and string enums, and understand literal type constraints.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.enumsAndLiteralTypes,
   },
   {
     id: '/generics-and-constraints',
@@ -52,7 +53,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Master generic functions and classes, and learn how to use constraints with extends keyword.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.genericsAndConstraints,
   },
   {
     id: '/advanced-types',
@@ -61,7 +62,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Understand union and intersection types, type guards, and type narrowing techniques.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.advancedTypes,
   },
   {
     id: '/mapped-and-conditional-types',
@@ -70,7 +71,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Master keyof and typeof operators, and learn to work with conditional type expressions.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.mappedAndConditionalTypes,
   },
   {
     id: '/utility-types-deep-dive',
@@ -79,16 +80,16 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Explore built-in utility types like Partial, Readonly, Pick, Omit, Record, Exclude, and Extract.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.utilityTypesDeepDive,
   },
   {
-    id: '/type-guards-and-narrowing',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${TYPESCRIPT_INTRODUCTION_PREFIX}/type-guards-and-narrowing`,
+    id: '/type-guards-and-type-narrowing',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${TYPESCRIPT_INTRODUCTION_PREFIX}/type-guards-and-type-narrowing`,
     title: 'Type Guards and Type Narrowing',
     description:
       'Learn about user-defined type guards and working with discriminated unions.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.typeGuardsAndTypeNarrowing,
   },
   {
     id: '/declaration-files-and-ambient-declarations',
@@ -97,7 +98,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Master creating .d.ts files and consuming JavaScript libraries in TypeScript.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.declarationFilesAndAmbientDeclarations,
   },
   {
     id: '/decorators-and-metadata',
@@ -106,7 +107,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Explore class, method, and property decorators, and the metadata reflection API.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.decoratorsAndMetadata,
   },
   {
     id: '/type-level-programming',
@@ -115,16 +116,16 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Master recursive types and advanced type manipulations in TypeScript.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.typeLevelProgramming,
   },
   {
-    id: '/typescript-compiler-api',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${TYPESCRIPT_INTRODUCTION_PREFIX}/typescript-compiler-api`,
-    title: 'TypeScript Compiler API',
+    id: '/compiler-api',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${TYPESCRIPT_INTRODUCTION_PREFIX}/compiler-api`,
+    title: 'Compiler API',
     description:
       'Learn about programmatic AST manipulation and creating custom transformers.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.compilerApi,
   },
   {
     id: '/project-configuration-and-build-tools',
@@ -133,7 +134,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Master tsconfig.json options and integration with Webpack and Babel.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.projectConfigurationAndBuildTools,
   },
   {
     id: '/migration-strategies',
@@ -142,7 +143,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Learn strategies for migrating from JavaScript to TypeScript and implementing incremental adoption.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.migrationStrategies,
   },
   {
     id: '/type-inference-and-compatibility',
@@ -151,7 +152,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Understand structural typing and compatibility between different types in TypeScript.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.typeInferenceAndCompatibility,
   },
   {
     id: '/namespaces-and-modules',
@@ -160,7 +161,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description:
       'Learn about organizing code with namespaces and implementing module resolution strategies.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: TYPESCRIPT_INTRODUCTION.namespacesAndModules,
   },
 ]
 

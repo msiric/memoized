@@ -43,9 +43,9 @@ Events are fundamental to interactive web applications, allowing users to intera
 
 ---
 
-## **1. Introduction to Event Handling**
+## **Introduction to Event Handling**
 
-### **1.1 What are Events?**
+### **What are Events?**
 
 - **Definition**: Events are actions or occurrences recognized by the browser, often in response to user interactions like clicks, key presses, or mouse movements.
 - **Event Types**:
@@ -54,7 +54,7 @@ Events are fundamental to interactive web applications, allowing users to intera
   - **Form Events**: `submit`, `change`, `focus`, `blur`
   - **Window Events**: `load`, `resize`, `scroll`, `unload`
 
-### **1.2 Adding Event Listeners**
+### **Adding Event Listeners**
 
 - **`addEventListener` Method**:
   - Syntax: `element.addEventListener(eventType, listener, useCapture)`
@@ -78,9 +78,9 @@ button.addEventListener('click', function (event) {
 
 ---
 
-## **2. Event Propagation**
+## **Event Propagation**
 
-### **2.1 Event Flow in the DOM**
+### **Event Flow in the DOM**
 
 - **Event Propagation**: The process by which events are dispatched to their targets in the DOM and then propagated through the ancestor elements.
 - **Phases of Event Propagation**:
@@ -90,7 +90,7 @@ button.addEventListener('click', function (event) {
 
 ![Event Propagation Diagram](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events/event_flow.svg)
 
-### **2.2 Capturing Phase**
+### **Capturing Phase**
 
 - **Definition**: The phase where the event moves from the outermost element (`window`) down through the DOM tree to the target element.
 - **Usage**:
@@ -108,14 +108,14 @@ document.addEventListener(
 )
 ```
 
-### **2.3 Target Phase**
+### **Target Phase**
 
 - **Definition**: The phase where the event has reached the target element.
 - **Characteristics**:
   - Event listeners on the target element handle the event in the target phase.
   - Listeners will handle the event regardless of the `useCapture` value.
 
-### **2.4 Bubbling Phase**
+### **Bubbling Phase**
 
 - **Definition**: The phase where the event bubbles up from the target element back to the outermost element (`window`).
 - **Usage**:
@@ -133,15 +133,15 @@ document.addEventListener('click', function (event) {
 
 ---
 
-## **3. Event Delegation**
+## **Event Delegation**
 
-### **3.1 Understanding Event Delegation**
+### **Understanding Event Delegation**
 
 - **Definition**: A technique where a single event listener is added to a parent element to handle events from its child elements, leveraging event bubbling.
 - **Concept**:
   - Instead of adding separate event listeners to multiple child elements, attach one listener to their common ancestor.
 
-### **3.2 Advantages of Event Delegation**
+### **Advantages of Event Delegation**
 
 - **Performance Improvement**:
   - Reduces the number of event listeners, lowering memory usage.
@@ -150,7 +150,7 @@ document.addEventListener('click', function (event) {
 - **Simplified Code Management**:
   - Centralizes event handling logic.
 
-### **3.3 Implementing Event Delegation**
+### **Implementing Event Delegation**
 
 **HTML Structure**:
 
@@ -198,16 +198,16 @@ function handleMenuAction(action) {
 
 ---
 
-## **4. Efficient Event Handling**
+## **Efficient Event Handling**
 
-### **4.1 Avoiding Memory Leaks**
+### **Avoiding Memory Leaks**
 
 - **Issue**: Adding numerous event listeners can increase memory usage and may lead to memory leaks if not managed properly.
 - **Solution**:
   - Use event delegation to minimize the number of event listeners.
   - Remove event listeners when they are no longer needed.
 
-### **4.2 Managing Event Listeners**
+### **Managing Event Listeners**
 
 - **Adding Event Listeners**:
 
@@ -222,7 +222,7 @@ function handleMenuAction(action) {
 
   - Must match the parameters used in `addEventListener`.
 
-### **4.3 Best Practices**
+### **Best Practices**
 
 - **Use Named Functions**:
 
@@ -247,9 +247,9 @@ function handleMenuAction(action) {
 
 ---
 
-## **5. Stopping Event Propagation**
+## **Stopping Event Propagation**
 
-### **5.1 `stopPropagation` and `stopImmediatePropagation`**
+### **`stopPropagation` and `stopImmediatePropagation`**
 
 - **`event.stopPropagation()`**:
 
@@ -268,7 +268,7 @@ element.addEventListener('click', function (event) {
 })
 ```
 
-### **5.2 Preventing Default Actions**
+### **Preventing Default Actions**
 
 - **`event.preventDefault()`**:
   - Prevents the default action associated with the event (e.g., following a link, submitting a form).
@@ -284,14 +284,14 @@ document.getElementById('myLink').addEventListener('click', function (event) {
 
 ---
 
-## **6. Event Object Properties**
+## **Event Object Properties**
 
-### **6.1 Accessing Event Information**
+### **Accessing Event Information**
 
 - **`event` Object**:
   - Provides information about the event and the element that triggered it.
 
-### **6.2 Common Event Properties**
+### **Common Event Properties**
 
 - **`event.type`**:
 
@@ -329,7 +329,7 @@ document.addEventListener('click', function (event) {
 
 ---
 
-## **7. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is event bubbling and event capturing in JavaScript?**
 
@@ -394,7 +394,7 @@ document.addEventListener('click', function (event) {
 
 ---
 
-## **8. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Understanding Event Propagation**
 
@@ -565,13 +565,13 @@ textInput.addEventListener('keydown', function (event) {
 
 ---
 
-## **9. Conclusion**
+## **Conclusion**
 
 Event handling is a fundamental aspect of JavaScript programming, enabling interactive and dynamic web applications. By understanding event propagation and implementing event delegation, you can write more efficient and maintainable code. Efficient event handling not only improves performance but also simplifies the management of event listeners, especially in applications with dynamic content. Mastery of these concepts equips you with the skills to build responsive applications and prepares you for technical interviews and advanced development challenges.
 
 ---
 
-## **10. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -593,7 +593,7 @@ Event handling is a fundamental aspect of JavaScript programming, enabling inter
 
 ---
 
-## **11. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

@@ -225,7 +225,7 @@ try {
 
 ## **Debugging Techniques**
 
-### **1. Using `console` Methods**
+### **Using `console` Methods**
 
 - **`console.log()`**: Output values and messages.
 - **`console.error()`**: Output error messages.
@@ -244,7 +244,7 @@ const users = [
 console.table(users)
 ```
 
-### **2. Setting Breakpoints**
+### **Setting Breakpoints**
 
 - Use breakpoints to pause code execution at specific lines.
 - Available in browser developer tools and IDEs like Visual Studio Code.
@@ -257,7 +257,7 @@ console.table(users)
 4. Click on the line number to set a breakpoint.
 5. Reload the page or trigger the code execution.
 
-### **3. Stepping Through Code**
+### **Stepping Through Code**
 
 - **Step Over**: Execute the next function without stepping into it.
 - **Step Into**: Step into the next function call.
@@ -268,7 +268,7 @@ console.table(users)
 - Examine the flow of execution.
 - Inspect variable values at each step.
 
-### **4. Using Debugger Statements**
+### **Using Debugger Statements**
 
 - Insert `debugger;` in your code to programmatically set a breakpoint.
 
@@ -284,17 +284,17 @@ function calculateSum(a, b) {
 calculateSum(5, 10)
 ```
 
-### **5. Call Stack Inspection**
+### **Call Stack Inspection**
 
 - View the call stack to see the sequence of function calls.
 - Helps identify where an error originated.
 
-### **6. Watch Expressions**
+### **Watch Expressions**
 
 - Monitor the values of variables or expressions over time.
 - Add variables to the "Watch" panel in Developer Tools.
 
-### **7. Conditional Breakpoints**
+### **Conditional Breakpoints**
 
 - Breakpoints that only pause execution when a specific condition is met.
 
@@ -304,7 +304,7 @@ calculateSum(5, 10)
 2. Select "Add conditional breakpoint."
 3. Enter the condition (e.g., `index === 5`).
 
-### **8. Exception Handling in Debugger**
+### **Exception Handling in Debugger**
 
 - Configure the debugger to pause on caught or uncaught exceptions.
 
@@ -316,7 +316,7 @@ calculateSum(5, 10)
 
 ## **Debugging Tools**
 
-### **1. Browser Developer Tools**
+### **Browser Developer Tools**
 
 - **Chrome DevTools**: Comprehensive tools for debugging JavaScript, inspecting elements, and monitoring network activity.
 - **Firefox Developer Tools**: Similar features tailored for Firefox.
@@ -330,7 +330,7 @@ calculateSum(5, 10)
 - Performance profiling.
 - Memory leak detection.
 
-### **2. Integrated Development Environments (IDEs)**
+### **Integrated Development Environments (IDEs)**
 
 - **Visual Studio Code**:
 
@@ -341,7 +341,7 @@ calculateSum(5, 10)
   - Advanced JavaScript debugging features.
   - Integration with version control systems.
 
-### **3. Node.js Debugging**
+### **Node.js Debugging**
 
 - Use the `--inspect` flag to debug Node.js applications.
 
@@ -353,7 +353,7 @@ node --inspect index.js
 
 - Connect to `chrome://inspect` in Chrome to debug.
 
-### **4. Linters**
+### **Linters**
 
 - Tools like ESLint help identify syntax and style issues before runtime.
 
@@ -373,7 +373,7 @@ node --inspect index.js
   npx eslint yourfile.js
   ```
 
-### **5. Logging Libraries**
+### **Logging Libraries**
 
 - Use libraries like `winston` or `log4js` for advanced logging in applications.
 
@@ -394,7 +394,7 @@ logger.error('Error message')
 
 ## **Best Practices for Error Handling and Debugging**
 
-### **1. Handle Errors Gracefully**
+### **Handle Errors Gracefully**
 
 - Anticipate potential errors and handle them appropriately.
 - Provide user-friendly error messages.
@@ -409,12 +409,12 @@ try {
 }
 ```
 
-### **2. Avoid Silent Failures**
+### **Avoid Silent Failures**
 
 - Do not suppress errors without logging or handling them.
 - Silent failures make debugging difficult.
 
-### **3. Use Meaningful Error Messages**
+### **Use Meaningful Error Messages**
 
 - Provide clear and descriptive error messages.
 
@@ -424,7 +424,7 @@ try {
 throw new Error('Invalid user ID provided')
 ```
 
-### **4. Validate User Input**
+### **Validate User Input**
 
 - Check inputs before processing to prevent errors.
 
@@ -439,16 +439,16 @@ function processData(data) {
 }
 ```
 
-### **5. Log Errors Appropriately**
+### **Log Errors Appropriately**
 
 - Use logging mechanisms to record errors and important events.
 - Include timestamps, error types, and stack traces when logging.
 
-### **6. Clean Up Resources**
+### **Clean Up Resources**
 
 - Use `finally` blocks or ensure resources are released even when errors occur.
 
-### **7. Keep Stack Traces Intact**
+### **Keep Stack Traces Intact**
 
 - When re-throwing errors, preserve the original stack trace.
 
@@ -463,12 +463,12 @@ try {
 }
 ```
 
-### **8. Avoid Overusing `try...catch`**
+### **Avoid Overusing `try...catch`**
 
 - Use `try...catch` where necessary.
 - Do not wrap large blocks of code unnecessarily.
 
-### **9. Use Async/Await Error Handling**
+### **Use Async/Await Error Handling**
 
 - When using async/await, use `try...catch` to handle errors in asynchronous code.
 
@@ -486,7 +486,7 @@ async function fetchData() {
 }
 ```
 
-### **10. Document Known Issues**
+### **Document Known Issues**
 
 - Keep track of known bugs and issues.
 - Document workarounds or temporary fixes.

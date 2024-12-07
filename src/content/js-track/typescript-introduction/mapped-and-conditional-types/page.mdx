@@ -48,9 +48,9 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
 ---
 
-## **1. Introduction to Mapped and Conditional Types**
+## **Introduction to Mapped and Conditional Types**
 
-### **1.1 Overview of Advanced Type Features**
+### **Overview of Advanced Type Features**
 
 - **Mapped Types**: Types that transform properties in an existing type to create a new type.
 - **Conditional Types**: Types that choose between two possible types based on a condition.
@@ -58,7 +58,7 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
   - **`keyof`**: Creates a union of the keys of a type.
   - **`typeof`**: Gets the type of a value or variable.
 
-### **1.2 Importance in TypeScript**
+### **Importance in TypeScript**
 
 - **Type Transformation**: Enables dynamic creation and manipulation of types.
 - **Type Safety**: Enhances code robustness by enforcing stricter type checks.
@@ -67,16 +67,16 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
 ---
 
-## **2. The `keyof` Operator**
+## **The `keyof` Operator**
 
-### **2.1 Understanding `keyof`**
+### **Understanding `keyof`**
 
 - **Definition**: The `keyof` operator takes an object type and produces a union of its keys.
 - **Purpose**:
   - Extract property names from a type.
   - Useful for creating dynamic and type-safe property accessors.
 
-### **2.2 Examples of `keyof` in Practice**
+### **Examples of `keyof` in Practice**
 
 - **Basic Usage**:
 
@@ -110,16 +110,16 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
 ---
 
-## **3. The `typeof` Operator**
+## **The `typeof` Operator**
 
-### **3.1 Type Queries with `typeof`**
+### **Type Queries with `typeof`**
 
 - **Definition**: The `typeof` operator, when used in a type context, obtains the type of a value or variable.
 - **Purpose**:
   - Capture the type of an existing variable or object.
   - Useful for creating types based on values.
 
-### **3.2 Using `typeof` in Type Definitions**
+### **Using `typeof` in Type Definitions**
 
 - **Basic Usage**:
 
@@ -153,16 +153,16 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
 ---
 
-## **4. Mapped Types**
+## **Mapped Types**
 
-### **4.1 What are Mapped Types?**
+### **What are Mapped Types?**
 
 - **Definition**: Mapped types create new types by transforming each property of an existing type.
 - **Purpose**:
   - Apply a transformation to each property in a type.
   - Create variations of existing types (e.g., making all properties optional or readonly).
 
-### **4.2 Basic Mapped Type Syntax**
+### **Basic Mapped Type Syntax**
 
 - **Syntax**:
 
@@ -192,7 +192,7 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
   // person.age = 31; // Error: Cannot assign to 'age' because it is a read-only property.
   ```
 
-### **4.3 Using Mapped Types with `keyof`**
+### **Using Mapped Types with `keyof`**
 
 - **Creating Partial Types**:
 
@@ -232,9 +232,9 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
 ---
 
-## **5. Conditional Types**
+## **Conditional Types**
 
-### **5.1 What are Conditional Types?**
+### **What are Conditional Types?**
 
 - **Definition**: Conditional types allow types to be defined based on conditions, using a syntax similar to ternary operators.
 - **Syntax**:
@@ -245,7 +245,7 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
   - If type `T` extends type `U`, then the type resolves to `X`; otherwise, it resolves to `Y`.
 
-### **5.2 Syntax of Conditional Types**
+### **Syntax of Conditional Types**
 
 - **Basic Example**:
 
@@ -266,7 +266,7 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
   type B = IsString<42> // false
   ```
 
-### **5.3 Practical Examples**
+### **Practical Examples**
 
 - **Extracting Types**:
 
@@ -298,9 +298,9 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
 ---
 
-## **6. Distributive Conditional Types**
+## **Distributive Conditional Types**
 
-### **6.1 Understanding Distributive Behavior**
+### **Understanding Distributive Behavior**
 
 - **Definition**: Conditional types distribute over unions. When a conditional type operates on a union type, it is applied to each member of the union individually.
 
@@ -324,7 +324,7 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
   string | number
   ```
 
-### **6.2 Common Use Cases**
+### **Common Use Cases**
 
 - **Filtering Union Types**:
 
@@ -345,11 +345,11 @@ Mapped and conditional types are advanced features in TypeScript that allow deve
 
 ---
 
-## **7. Built-in Utility Types**
+## **Built-in Utility Types**
 
 TypeScript provides several built-in utility types that leverage mapped and conditional types.
 
-### **7.1 Partial**
+### **Partial**
 
 - **Definition**: Constructs a type with all properties of `T` set to optional.
 
@@ -375,7 +375,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   let user: PartialUser = { name: 'Alice' } // 'id' and 'email' are optional
   ```
 
-### **7.2 Readonly**
+### **Readonly**
 
 - **Definition**: Constructs a type with all properties of `T` set to readonly.
 
@@ -396,7 +396,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   // user.name = 'Robert'; // Error: Cannot assign to 'name' because it is a read-only property.
   ```
 
-### **7.3 Pick**
+### **Pick**
 
 - **Definition**: Constructs a type by picking a set of properties `K` from `T`.
 
@@ -416,7 +416,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   let userPreview: UserPreview = { id: 1, name: 'Charlie' }
   ```
 
-### **7.4 Record**
+### **Record**
 
 - **Definition**: Constructs a type with a set of properties `K` of type `T`.
 
@@ -442,7 +442,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   }
   ```
 
-### **7.5 Exclude**
+### **Exclude**
 
 - **Definition**: Excludes from `T` those types that are assignable to `U`.
 
@@ -458,7 +458,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   type T0 = Exclude<'a' | 'b' | 'c', 'a' | 'f'> // 'b' | 'c'
   ```
 
-### **7.6 Extract**
+### **Extract**
 
 - **Definition**: Extracts from `T` those types that are assignable to `U`.
 
@@ -474,7 +474,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   type T1 = Extract<'a' | 'b' | 'c', 'a' | 'f'> // 'a'
   ```
 
-### **7.7 NonNullable**
+### **NonNullable**
 
 - **Definition**: Excludes `null` and `undefined` from `T`.
 
@@ -490,7 +490,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   type T2 = NonNullable<string | number | undefined> // string | number
   ```
 
-### **7.8 ReturnType**
+### **ReturnType**
 
 - **Definition**: Obtains the return type of a function type.
 
@@ -516,9 +516,9 @@ TypeScript provides several built-in utility types that leverage mapped and cond
 
 ---
 
-## **8. Advanced Examples**
+## **Advanced Examples**
 
-### **8.1 Building Custom Utility Types**
+### **Building Custom Utility Types**
 
 - **DeepPartial**: Makes all properties in a type and its sub-types optional.
 
@@ -563,7 +563,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
   mutableUser.name = 'Charles' // Now allowed
   ```
 
-### **8.2 Real-world Applications**
+### **Real-world Applications**
 
 - **API Response Types**:
 
@@ -605,7 +605,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
 
 ---
 
-## **9. Best Practices**
+## **Best Practices**
 
 - **Leverage Built-in Utility Types**:
 
@@ -632,7 +632,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
 
 ---
 
-## **10. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is the `keyof` operator in TypeScript, and how is it used?**
 
@@ -706,7 +706,7 @@ TypeScript provides several built-in utility types that leverage mapped and cond
 
 ---
 
-## **11. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Using `keyof` Operator**
 
@@ -838,13 +838,13 @@ type PersonRequiredKeys = RequiredKeys<Person> // 'id' | 'age'
 
 ---
 
-## **12. Conclusion**
+## **Conclusion**
 
 Mapped and conditional types are advanced features in TypeScript that empower developers to create dynamic, flexible, and type-safe code. By leveraging the `keyof` and `typeof` operators, you can manipulate and infer types based on existing structures and values. Mapped types allow you to transform types systematically, while conditional types enable you to define types that adapt based on conditions. Mastery of these advanced type system features enhances your ability to build robust TypeScript applications and prepares you for complex development challenges and technical interviews.
 
 ---
 
-## **13. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -866,7 +866,7 @@ Mapped and conditional types are advanced features in TypeScript that empower de
 
 ---
 
-## **14. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

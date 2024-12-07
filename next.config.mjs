@@ -24,12 +24,19 @@ const nextConfig = {
   },
   experimental: {
     esmExternals: 'loose',
+    optimizePackageImports: ['shiki'],
   },
+  transpilePackages: ['next-mdx-remote'],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
       use: ['@svgr/webpack'],
     })
+    config.ignoreWarnings = [
+      {
+        module: /picocolors/,
+      },
+    ]
     return config
   },
 }

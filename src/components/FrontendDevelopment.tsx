@@ -7,6 +7,7 @@ import {
   JS_TRACK_PREFIX,
 } from '../constants'
 import { LessonConfig } from '../types'
+import { FRONTEND_DEVELOPMENT } from '@/problems'
 
 export const frontendDevelopment: LessonConfig[] = [
   {
@@ -16,7 +17,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Master MVC, MVVM, Flux patterns and component-based design principles.',
     access: AccessOptions.FREE,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.componentArchitecturePatterns,
   },
   {
     id: '/state-management-solutions',
@@ -25,7 +26,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Learn Redux principles and explore alternatives like Context API and MobX.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.stateManagementSolutions,
   },
   {
     id: '/virtual-dom-and-rendering',
@@ -34,7 +35,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Understand how Virtual DOM works and explore reconciliation algorithms.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.virtualDomAndRendering,
   },
   {
     id: '/rendering-and-reconciliation',
@@ -43,7 +44,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Master efficient updates and understand React Fiber architecture.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.renderingAndReconciliation,
   },
   {
     id: '/browser-apis-and-web-standards',
@@ -52,7 +53,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Learn DOM manipulation, Fetch API, and WebSocket implementation.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.browserApisAndWebStandards,
   },
   {
     id: '/cross-origin-communication',
@@ -60,7 +61,7 @@ export const frontendDevelopment: LessonConfig[] = [
     title: 'Cross-Origin Communication',
     description: 'Master CORS mechanisms and working with the postMessage API.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.crossOriginCommunication,
   },
   {
     id: '/testing-strategies',
@@ -69,7 +70,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Learn unit testing with Jest and integration testing with Testing Library.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.testingStrategies,
   },
   {
     id: '/build-tools-and-bundlers',
@@ -78,7 +79,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Master Webpack configuration, code splitting, and tree shaking techniques.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.buildToolsAndBundlers,
   },
   {
     id: '/code-splitting-and-lazy-loading',
@@ -87,7 +88,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Implement dynamic imports and optimize performance with lazy loading.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.codeSplittingAndLazyLoading,
   },
   {
     id: '/micro-frontend-architecture',
@@ -96,16 +97,16 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Learn to build scalable frontends and implement integration patterns.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.microFrontendArchitecture,
   },
   {
     id: '/server-side-rendering',
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/server-side-rendering`,
-    title: 'Server-Side Rendering (SSR)',
+    title: 'Server-Side Rendering',
     description:
       'Understand SSR benefits and implement it in React/Angular applications.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.serverSideRendering,
   },
   {
     id: '/web-performance-metrics',
@@ -114,7 +115,7 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Master performance measurement with Lighthouse and optimize load times.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.webPerformanceMetrics,
   },
   {
     id: '/accessibility-implementation',
@@ -123,16 +124,16 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Learn ARIA roles and attributes and implement accessible design practices.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.accessibilityImplementation,
   },
   {
-    id: '/security-best-practices-frontend',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/security-best-practices-frontend`,
+    id: '/security-best-practices',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/security-best-practices`,
     title: 'Security Best Practices',
     description:
       'Master OWASP Top Ten and implement secure authentication and authorization.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.securityBestPractices,
   },
   {
     id: '/interview-questions-and-challenges',
@@ -141,25 +142,16 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Practice solving algorithmic problems and learn whiteboard coding techniques.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.commonInterviewQuestionsAndCodingChallenges,
   },
   {
-    id: '/mock-interviews-and-problem-solving',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/mock-interviews-and-problem-solving`,
-    title: 'Mock Interviews and Problem-Solving Sessions',
-    description:
-      'Experience simulated interview scenarios and get improvement strategies.',
-    access: AccessOptions.PREMIUM,
-    problems: [],
-  },
-  {
-    id: '/full-stack-application-development',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/full-stack-application-development`,
-    title: 'Building and Deploying a Full-Stack Application',
+    id: '/building-and-deploying-applications',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/building-and-deploying-applications`,
+    title: 'Building and Deploying Applications',
     description:
       'Learn project setup, development, and deployment to cloud services.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.buildingAndDeployingApplications,
   },
   {
     id: '/version-control-and-collaboration',
@@ -168,16 +160,16 @@ export const frontendDevelopment: LessonConfig[] = [
     description:
       'Master Git workflows, code reviews, and pull request processes.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.versionControlAndCollaboration,
   },
   {
-    id: '/continuous-integration-deployment',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/continuous-integration-deployment`,
-    title: 'Continuous Integration/Deployment (CI/CD)',
+    id: '/continuous-integration-and-deployment',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/continuous-integration-and-deployment`,
+    title: 'Continuous Integration and Deployment',
     description:
       'Set up CI pipelines and implement automated testing and deployment.',
     access: AccessOptions.PREMIUM,
-    problems: [],
+    problems: FRONTEND_DEVELOPMENT.continuousIntegrationAndDeployment,
   },
 ]
 

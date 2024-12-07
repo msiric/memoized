@@ -30,7 +30,7 @@ Efficient memory management is crucial for creating high-performance application
 
 ## **Memory Allocation in JavaScript**
 
-### **1. Primitive Types**
+### **Primitive Types**
 
 - **Primitive Values**: Stored directly on the stack (small, fixed-size memory).
 - **Types**: `undefined`, `null`, `boolean`, `number`, `string`, `symbol`, `bigint`.
@@ -42,7 +42,7 @@ let age = 30 // Allocates memory for a number
 let name = 'Alice' // Allocates memory for a string
 ```
 
-### **2. Reference Types**
+### **Reference Types**
 
 - **Objects and Functions**: Stored in the heap (dynamic memory allocation).
 - **Variables**: Hold a reference (pointer) to the memory location.
@@ -60,7 +60,7 @@ function greet() {
 } // Allocates memory for a function
 ```
 
-### **3. Function Calls**
+### **Function Calls**
 
 - **Call Stack**: Functions are pushed onto the call stack when invoked.
 - **Activation Records**: Each function call creates an activation record containing local variables and parameters.
@@ -86,7 +86,7 @@ let result = add(5, 10) // Allocates memory for parameters 'a' and 'b', and the 
 
 ### **Common Causes of Memory Leaks**
 
-#### **1. Unintended Global Variables**
+#### **Unintended Global Variables**
 
 - **Issue**: Variables declared without `var`, `let`, or `const` become global.
 - **Example**:
@@ -99,7 +99,7 @@ let result = add(5, 10) // Allocates memory for parameters 'a' and 'b', and the 
 
 - **Solution**: Always declare variables with `let`, `const`, or `var`.
 
-#### **2. Closures with Unreleased References**
+#### **Closures with Unreleased References**
 
 - **Issue**: Functions retain references to variables in their outer scope, preventing garbage collection.
 - **Example**:
@@ -130,7 +130,7 @@ let result = add(5, 10) // Allocates memory for parameters 'a' and 'b', and the 
   const closure = createClosure()
   ```
 
-#### **3. Detached DOM Nodes**
+#### **Detached DOM Nodes**
 
 - **Issue**: References to DOM elements that have been removed from the document can prevent them from being garbage collected.
 - **Example**:
@@ -147,7 +147,7 @@ let result = add(5, 10) // Allocates memory for parameters 'a' and 'b', and the 
   element = null
   ```
 
-#### **4. Timers and Callbacks**
+#### **Timers and Callbacks**
 
 - **Issue**: `setInterval` and event listeners can keep references alive.
 - **Example**:
@@ -165,7 +165,7 @@ let result = add(5, 10) // Allocates memory for parameters 'a' and 'b', and the 
   clearInterval(intervalId)
   ```
 
-#### **5. Outdated References in Data Structures**
+#### **Outdated References in Data Structures**
 
 - **Issue**: Objects stored in arrays or maps prevent them from being collected.
 - **Example**:
@@ -198,7 +198,7 @@ JavaScript engines implement garbage collection using various algorithms. The tw
 1. **Reference Counting**
 2. **Mark-and-Sweep**
 
-#### **1. Reference Counting**
+#### **Reference Counting**
 
 - **Concept**: Keeps track of the number of references to each object.
 - **Mechanism**:
@@ -221,7 +221,7 @@ function createCircularReference() {
 
 - **Problem**: Neither `objA` nor `objB` can be collected because their reference counts never reach zero.
 
-#### **2. Mark-and-Sweep Algorithm**
+#### **Mark-and-Sweep Algorithm**
 
 - **Concept**: The most commonly used garbage collection algorithm in modern JavaScript engines.
 - **Mechanism**:
@@ -274,7 +274,7 @@ function createCircularReference() {
 
 ## **Best Practices to Avoid Memory Leaks**
 
-### **1. Use `let`, `const`, or `var` to Declare Variables**
+### **Use `let`, `const`, or `var` to Declare Variables**
 
 - **Reason**: Prevents unintended global variables.
 - **Example**:
@@ -283,7 +283,7 @@ function createCircularReference() {
   let count = 0
   ```
 
-### **2. Nullify References**
+### **Nullify References**
 
 - **Reason**: Helps garbage collector identify unused objects.
 - **Example**:
@@ -292,7 +292,7 @@ function createCircularReference() {
   obj = null
   ```
 
-### **3. Remove Event Listeners**
+### **Remove Event Listeners**
 
 - **Reason**: Event listeners can hold references to objects.
 - **Example**:
@@ -301,7 +301,7 @@ function createCircularReference() {
   element.removeEventListener('click', handler)
   ```
 
-### **4. Clear Intervals and Timeouts**
+### **Clear Intervals and Timeouts**
 
 - **Reason**: Timers can prevent objects from being collected.
 - **Example**:
@@ -311,12 +311,12 @@ function createCircularReference() {
   clearTimeout(timeoutId)
   ```
 
-### **5. Avoid Global Variables**
+### **Avoid Global Variables**
 
 - **Reason**: Global variables persist throughout the application's lifecycle.
 - **Solution**: Use module patterns or closures to encapsulate variables.
 
-### **6. Use Weak References for Caches**
+### **Use Weak References for Caches**
 
 - **Reason**: Weak references do not prevent garbage collection.
 - **Example**:
@@ -325,7 +325,7 @@ function createCircularReference() {
   const cache = new WeakMap()
   ```
 
-### **7. Profile Memory Usage**
+### **Profile Memory Usage**
 
 - **Reason**: Identify memory leaks and optimize memory usage.
 - **Tools**:

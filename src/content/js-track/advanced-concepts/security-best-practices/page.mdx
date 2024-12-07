@@ -40,16 +40,16 @@ Security is a critical aspect of web development, as vulnerabilities can lead to
 
 ---
 
-## **1. Introduction to Web Security**
+## **Introduction to Web Security**
 
-### **1.1 Importance of Security in Web Applications**
+### **Importance of Security in Web Applications**
 
 - **Protecting User Data**: Safeguarding sensitive information such as personal details, authentication credentials, and financial data.
 - **Maintaining Trust**: Users expect applications to protect their data; breaches can lead to loss of trust and reputation.
 - **Legal Compliance**: Adhering to regulations like GDPR, HIPAA, and others that mandate data protection.
 - **Preventing Financial Loss**: Security incidents can result in significant costs due to downtime, legal penalties, and remediation efforts.
 
-### **1.2 Common Security Vulnerabilities**
+### **Common Security Vulnerabilities**
 
 - **Cross-Site Scripting (XSS)**
 - **Cross-Site Request Forgery (CSRF)**
@@ -60,9 +60,9 @@ Security is a critical aspect of web development, as vulnerabilities can lead to
 
 ---
 
-## **2. Cross-Site Scripting (XSS)**
+## **Cross-Site Scripting (XSS)**
 
-### **2.1 What is XSS?**
+### **What is XSS?**
 
 - **Definition**: Cross-Site Scripting (XSS) is a type of security vulnerability that allows attackers to inject malicious scripts into web pages viewed by other users.
 - **Impact**:
@@ -71,7 +71,7 @@ Security is a critical aspect of web development, as vulnerabilities can lead to
   - Redirecting users to malicious sites.
   - Performing actions on behalf of users.
 
-### **2.2 Types of XSS Attacks**
+### **Types of XSS Attacks**
 
 1. **Stored XSS (Persistent XSS)**:
 
@@ -90,7 +90,7 @@ Security is a critical aspect of web development, as vulnerabilities can lead to
    - Client-side vulnerability due to insecure JavaScript code.
    - Example: Insecure use of `innerHTML` or `eval()`.
 
-### **2.3 Preventing XSS Attacks**
+### **Preventing XSS Attacks**
 
 #### **2.3.1 Input Validation and Sanitization**
 
@@ -148,9 +148,9 @@ document.getElementById('output').innerHTML = cleanHTML
 
 ---
 
-## **3. Cross-Site Request Forgery (CSRF)**
+## **Cross-Site Request Forgery (CSRF)**
 
-### **3.1 What is CSRF?**
+### **What is CSRF?**
 
 - **Definition**: Cross-Site Request Forgery (CSRF) is an attack that forces a user to execute unwanted actions on a web application where they're authenticated.
 - **Impact**:
@@ -158,7 +158,7 @@ document.getElementById('output').innerHTML = cleanHTML
   - Changing account details.
   - Manipulating data.
 
-### **3.2 How CSRF Attacks Work**
+### **How CSRF Attacks Work**
 
 - **Attack Flow**:
   1. Victim is authenticated on a target site.
@@ -166,7 +166,7 @@ document.getElementById('output').innerHTML = cleanHTML
   3. Victim unknowingly triggers the request (e.g., by visiting a malicious site).
   4. The request includes the victim's credentials (cookies), and the server processes it as a legitimate action.
 
-### **3.3 Preventing CSRF Attacks**
+### **Preventing CSRF Attacks**
 
 #### **3.3.1 CSRF Tokens**
 
@@ -228,16 +228,16 @@ fetch('/api/endpoint', {
 
 ---
 
-## **4. Content Security Policy (CSP)**
+## **Content Security Policy (CSP)**
 
-### **4.1 Introduction to CSP**
+### **Introduction to CSP**
 
 - **Definition**: Content Security Policy is an HTTP header that allows web developers to control resources the user agent is allowed to load.
 - **Purpose**:
   - Mitigate XSS and data injection attacks.
   - Restrict the sources of scripts, styles, images, and other content.
 
-### **4.2 Implementing CSP**
+### **Implementing CSP**
 
 #### **4.2.1 Setting CSP Headers**
 
@@ -280,7 +280,7 @@ fetch('/api/endpoint', {
 Content-Security-Policy-Report-Only: default-src 'self'; report-uri /csp-violation-report-endpoint/
 ```
 
-### **4.3 Best Practices with CSP**
+### **Best Practices with CSP**
 
 #### **4.3.1 Avoid `unsafe-inline` and `unsafe-eval`**
 
@@ -324,9 +324,9 @@ Content-Security-Policy: script-src 'nonce-randomNonceValue'
 
 ---
 
-## **5. Other Security Best Practices**
+## **Other Security Best Practices**
 
-### **5.1 Input Validation and Sanitization**
+### **Input Validation and Sanitization**
 
 - **Validate Input on Both Client and Server**:
 
@@ -337,7 +337,7 @@ Content-Security-Policy: script-src 'nonce-randomNonceValue'
   - Use well-tested libraries to sanitize input.
   - Avoid writing custom sanitization functions unless necessary.
 
-### **5.2 Secure Handling of Cookies and Tokens**
+### **Secure Handling of Cookies and Tokens**
 
 - **Set Secure Cookie Attributes**:
   - **`HttpOnly`**:
@@ -357,7 +357,7 @@ Set-Cookie: sessionId=abc123; Secure; HttpOnly; SameSite=Strict
   - Use JWTs or other tokens with care.
   - Store tokens securely (preferably in HTTP-only cookies).
 
-### **5.3 Using HTTPS and Secure Headers**
+### **Using HTTPS and Secure Headers**
 
 - **Enforce HTTPS**:
 
@@ -388,7 +388,7 @@ X-Content-Type-Options: nosniff
 
 ---
 
-## **6. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is Cross-Site Scripting (XSS), and how can it be prevented?**
 
@@ -445,7 +445,7 @@ X-Content-Type-Options: nosniff
 
 ---
 
-## **7. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Sanitizing User Input**
 
@@ -579,13 +579,13 @@ Set-Cookie: sessionId=abc123; Secure; HttpOnly; SameSite=Strict
 
 ---
 
-## **8. Conclusion**
+## **Conclusion**
 
 Security is an indispensable aspect of web development, and understanding how to protect your applications from common vulnerabilities is crucial. By learning how to prevent XSS and CSRF attacks, you can safeguard your users and data from malicious exploits. Implementing Content Security Policy (CSP) adds an additional layer of defense by controlling the sources of content that your application can load. Adhering to security best practices not only protects your application but also enhances user trust and complies with legal requirements. Mastery of these concepts prepares you for advanced development challenges and technical interviews, reinforcing your role as a responsible and proficient developer.
 
 ---
 
-## **9. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -609,7 +609,7 @@ Security is an indispensable aspect of web development, and understanding how to
 
 ---
 
-## **10. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

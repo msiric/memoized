@@ -39,16 +39,16 @@ JavaScript is traditionally a single-threaded language, meaning that only one pi
 
 ---
 
-## **1. Introduction to Web Workers**
+## **Introduction to Web Workers**
 
-### **1.1 What are Web Workers?**
+### **What are Web Workers?**
 
 - **Definition**: Web Workers are a simple means for web content to run scripts in background threads. They allow concurrent execution of code without blocking the main execution thread.
 - **Purpose**:
   - Perform heavy computations without freezing the UI.
   - Improve application performance and responsiveness.
 
-### **1.2 Importance of Multithreading in JavaScript**
+### **Importance of Multithreading in JavaScript**
 
 - **Single-threaded Nature**:
   - JavaScript executes code on a single thread, known as the main thread.
@@ -60,9 +60,9 @@ JavaScript is traditionally a single-threaded language, meaning that only one pi
 
 ---
 
-## **2. Creating and Using Web Workers**
+## **Creating and Using Web Workers**
 
-### **2.1 The Worker Interface**
+### **The Worker Interface**
 
 - **Creating a Worker**:
 
@@ -77,7 +77,7 @@ JavaScript is traditionally a single-threaded language, meaning that only one pi
   - The script specified (`worker.js`) runs in a separate thread.
   - Workers have a limited scope and cannot access the DOM directly.
 
-### **2.2 Offloading Tasks to Workers**
+### **Offloading Tasks to Workers**
 
 **Main Script (`main.js`)**:
 
@@ -121,9 +121,9 @@ function heavyComputation(input) {
 
 ---
 
-## **3. Communication with Web Workers**
+## **Communication with Web Workers**
 
-### **3.1 Message Passing Mechanism**
+### **Message Passing Mechanism**
 
 - **Event-Driven Communication**:
 
@@ -136,7 +136,7 @@ function heavyComputation(input) {
   - No shared variables or state between threads.
   - Data is exchanged through message passing.
 
-### **3.2 Sending and Receiving Messages**
+### **Sending and Receiving Messages**
 
 **Main Script (`main.js`)**:
 
@@ -177,16 +177,16 @@ self.onmessage = function (event) {
 
 ---
 
-## **4. Types of Web Workers**
+## **Types of Web Workers**
 
-### **4.1 Dedicated Workers**
+### **Dedicated Workers**
 
 - **Definition**: Workers that are dedicated to a single script or window.
 - **Usage**:
   - Created using the `Worker` constructor.
   - Communication is only between the main thread and the worker.
 
-### **4.2 Shared Workers**
+### **Shared Workers**
 
 - **Definition**: Workers that can be accessed by multiple scripts or windows (e.g., different tabs).
 - **Creation**:
@@ -227,7 +227,7 @@ self.onmessage = function (event) {
   }
   ```
 
-### **4.3 Service Workers (Overview)**
+### **Service Workers (Overview)**
 
 - **Definition**: Scripts that run in the background and act as a proxy between the web application and the network.
 - **Purpose**:
@@ -238,9 +238,9 @@ self.onmessage = function (event) {
 
 ---
 
-## **5. Data Transfer Between Threads**
+## **Data Transfer Between Threads**
 
-### **5.1 Structured Cloning Algorithm**
+### **Structured Cloning Algorithm**
 
 - **Definition**: A method of copying complex data structures between threads.
 - **Supported Data Types**:
@@ -251,7 +251,7 @@ self.onmessage = function (event) {
 - **Limitations**:
   - Functions, Error objects, and DOM nodes cannot be cloned.
 
-### **5.2 Transferring Data with `postMessage`**
+### **Transferring Data with `postMessage`**
 
 - **Syntax**:
 
@@ -286,7 +286,7 @@ self.onmessage = function (event) {
 
 ---
 
-## **6. Error Handling in Web Workers**
+## **Error Handling in Web Workers**
 
 - **Capturing Errors**:
   - Use the `onerror` event handler in the main script to catch errors from the worker.
@@ -309,24 +309,24 @@ worker.onerror = function (error) {
 
 ---
 
-## **7. Best Practices**
+## **Best Practices**
 
-### **7.1 Keep Workers Self-contained**
+### **Keep Workers Self-contained**
 
 - Workers cannot access the DOM or global variables of the main script.
 - All required scripts and data should be loaded or passed to the worker.
 
-### **7.2 Avoid Blocking the Worker Thread**
+### **Avoid Blocking the Worker Thread**
 
 - Although workers run in separate threads, they can still become blocked.
 - Avoid heavy synchronous operations inside workers if possible.
 
-### **7.3 Use Transferable Objects Wisely**
+### **Use Transferable Objects Wisely**
 
 - Transferable objects improve performance but render the original data unusable.
 - Ensure that the main thread does not need the data after transferring.
 
-### **7.4 Clean Up Workers**
+### **Clean Up Workers**
 
 - Terminate workers when they are no longer needed to free up resources.
 
@@ -334,14 +334,14 @@ worker.onerror = function (error) {
   worker.terminate()
   ```
 
-### **7.5 Security Considerations**
+### **Security Considerations**
 
 - Workers have the same origin policy.
 - Be cautious with data being passed between threads.
 
 ---
 
-## **8. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What are Web Workers in JavaScript, and why are they used?**
 
@@ -396,7 +396,7 @@ worker.onerror = function (error) {
 
 ---
 
-## **9. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Creating a Web Worker**
 
@@ -601,13 +601,13 @@ sharedWorker.port.postMessage('Hello from script')
 
 ---
 
-## **10. Conclusion**
+## **Conclusion**
 
 Web Workers provide a powerful way to improve the performance and responsiveness of JavaScript applications by enabling multithreading. By offloading heavy computations and non-UI tasks to background threads, you can ensure that the main thread remains free to handle user interactions smoothly. Understanding how to create, communicate with, and manage workers is essential for developing efficient web applications. Mastery of these concepts not only enhances your coding skills but also prepares you for technical interviews and complex development challenges.
 
 ---
 
-## **11. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -630,7 +630,7 @@ Web Workers provide a powerful way to improve the performance and responsiveness
 
 ---
 
-## **12. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

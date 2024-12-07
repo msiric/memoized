@@ -48,9 +48,9 @@ Interfaces and type aliases are fundamental features in TypeScript that allow de
 
 ---
 
-## **1. Introduction to Interfaces and Type Aliases**
+## **Introduction to Interfaces and Type Aliases**
 
-### **1.1 The Role of Interfaces and Type Aliases**
+### **The Role of Interfaces and Type Aliases**
 
 - **Interfaces**:
 
@@ -63,7 +63,7 @@ Interfaces and type aliases are fundamental features in TypeScript that allow de
   - Define custom types, including union and intersection types.
   - Provide flexibility in type definitions.
 
-### **1.2 Differences Between Interfaces and Type Aliases**
+### **Differences Between Interfaces and Type Aliases**
 
 - **Interfaces**:
 
@@ -78,11 +78,11 @@ Interfaces and type aliases are fundamental features in TypeScript that allow de
 
 ---
 
-## **2. Defining Object Shapes with Interfaces**
+## **Defining Object Shapes with Interfaces**
 
 Interfaces allow you to define the structure of an object by specifying its properties and their types.
 
-### **2.1 Basic Interface Syntax**
+### **Basic Interface Syntax**
 
 - **Syntax**:
 
@@ -110,7 +110,7 @@ Interfaces allow you to define the structure of an object by specifying its prop
   }
   ```
 
-### **2.2 Optional Properties**
+### **Optional Properties**
 
 - **Definition**: Properties that may or may not be present in the object.
 
@@ -144,7 +144,7 @@ Interfaces allow you to define the structure of an object by specifying its prop
   }
   ```
 
-### **2.3 Readonly Properties**
+### **Readonly Properties**
 
 - **Definition**: Properties that cannot be changed after they are initialized.
 
@@ -170,11 +170,11 @@ Interfaces allow you to define the structure of an object by specifying its prop
 
 ---
 
-## **3. Function Types in Interfaces**
+## **Function Types in Interfaces**
 
 Interfaces can be used to define the shape of functions, specifying parameter types and return types.
 
-### **3.1 Defining Function Interfaces**
+### **Defining Function Interfaces**
 
 - **Syntax**:
 
@@ -198,7 +198,7 @@ Interfaces can be used to define the shape of functions, specifying parameter ty
   console.log(toUpperCase('hello')) // Outputs: HELLO
   ```
 
-### **3.2 Using Interfaces to Describe Function Signatures**
+### **Using Interfaces to Describe Function Signatures**
 
 - **Example with Callback Functions**:
 
@@ -219,11 +219,11 @@ Interfaces can be used to define the shape of functions, specifying parameter ty
 
 ---
 
-## **4. Extending Interfaces**
+## **Extending Interfaces**
 
 Interfaces can inherit from other interfaces, allowing for the creation of more complex types based on existing ones.
 
-### **4.1 Interface Inheritance**
+### **Interface Inheritance**
 
 - **Syntax**:
 
@@ -256,7 +256,7 @@ Interfaces can inherit from other interfaces, allowing for the creation of more 
   }
   ```
 
-### **4.2 Extending Multiple Interfaces**
+### **Extending Multiple Interfaces**
 
 - **Syntax**:
 
@@ -298,11 +298,11 @@ Interfaces can inherit from other interfaces, allowing for the creation of more 
 
 ---
 
-## **5. Implementing Interfaces in Classes**
+## **Implementing Interfaces in Classes**
 
 Classes can implement interfaces to ensure they adhere to a specific structure.
 
-### **5.1 Using Interfaces with Classes**
+### **Using Interfaces with Classes**
 
 - **Syntax**:
 
@@ -349,7 +349,7 @@ Classes can implement interfaces to ensure they adhere to a specific structure.
   console.log(employee.getFullName()) // Outputs: Alice Johnson
   ```
 
-### **5.2 Enforcing Class Contracts**
+### **Enforcing Class Contracts**
 
 - **Benefit**: Ensures that a class provides specific methods and properties.
 
@@ -381,11 +381,11 @@ Classes can implement interfaces to ensure they adhere to a specific structure.
 
 ---
 
-## **6. Type Aliases**
+## **Type Aliases**
 
 Type aliases allow you to create new names for types, including primitives, unions, intersections, and other types.
 
-### **6.1 Defining Type Aliases**
+### **Defining Type Aliases**
 
 - **Syntax**:
 
@@ -402,7 +402,7 @@ Type aliases allow you to create new names for types, including primitives, unio
   userId = 'abc123'
   ```
 
-### **6.2 Union and Intersection Types**
+### **Union and Intersection Types**
 
 - **Union Types**:
 
@@ -453,7 +453,7 @@ Type aliases allow you to create new names for types, including primitives, unio
     }
     ```
 
-### **6.3 Type Aliases vs. Interfaces**
+### **Type Aliases vs. Interfaces**
 
 - **Interfaces**:
 
@@ -473,11 +473,11 @@ Type aliases allow you to create new names for types, including primitives, unio
 
 ---
 
-## **7. Indexable Types and Interfaces**
+## **Indexable Types and Interfaces**
 
 Interfaces can define types that can be indexed, similar to arrays or objects with dynamic keys.
 
-### **7.1 Defining Index Signatures**
+### **Defining Index Signatures**
 
 - **Syntax**:
 
@@ -498,7 +498,7 @@ Interfaces can define types that can be indexed, similar to arrays or objects wi
   console.log(myArray[1]) // Outputs: Bob
   ```
 
-### **7.2 Using Indexable Types**
+### **Using Indexable Types**
 
 - **Dynamic Property Names**:
 
@@ -524,11 +524,11 @@ Interfaces can define types that can be indexed, similar to arrays or objects wi
 
 ---
 
-## **8. Hybrid Types**
+## **Hybrid Types**
 
 Some types can act as both objects and functions.
 
-### **8.1 Combining Function and Object Types**
+### **Combining Function and Object Types**
 
 - **Syntax**:
 
@@ -571,7 +571,7 @@ Some types can act as both objects and functions.
   console.log(myCounter.value) // Outputs: 0
   ```
 
-### **8.2 Examples of Hybrid Types**
+### **Examples of Hybrid Types**
 
 - **Event Handlers**:
 
@@ -589,7 +589,7 @@ Some types can act as both objects and functions.
 
 ---
 
-## **9. Best Practices**
+## **Best Practices**
 
 - **Use Interfaces for Object Shapes**:
 
@@ -617,7 +617,7 @@ Some types can act as both objects and functions.
 
 ---
 
-## **10. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is the purpose of interfaces in TypeScript, and how do they differ from type aliases?**
 
@@ -731,7 +731,7 @@ Some types can act as both objects and functions.
 
 ---
 
-## **11. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Defining an Interface**
 
@@ -857,13 +857,13 @@ clock.tick() // Outputs: beep beep
 
 ---
 
-## **12. Conclusion**
+## **Conclusion**
 
 Interfaces and type aliases are powerful tools in TypeScript that enhance code organization, readability, and type safety. By defining object shapes with interfaces and extending them, you can create complex and reusable types that enforce consistent structures across your codebase. Type aliases offer flexibility in defining custom types, including unions and intersections. Mastery of interfaces and type aliases empowers you to write robust, maintainable, and scalable TypeScript applications, preparing you for advanced development challenges and technical interviews.
 
 ---
 
-## **13. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -886,7 +886,7 @@ Interfaces and type aliases are powerful tools in TypeScript that enhance code o
 
 ---
 
-## **14. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

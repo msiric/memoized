@@ -42,9 +42,9 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **1. Introduction to Declaration Files**
+## **Introduction to Declaration Files**
 
-### **1.1 What are Declaration Files?**
+### **What are Declaration Files?**
 
 - **Definition**: Declaration files (`.d.ts` files) are files that provide type information about code written in JavaScript, allowing TypeScript to understand the types of variables, functions, classes, and more.
 - **Purpose**:
@@ -52,7 +52,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
   - Provide IntelliSense (code completion and documentation) in editors.
   - Facilitate better integration between TypeScript and JavaScript codebases.
 
-### **1.2 Importance in TypeScript**
+### **Importance in TypeScript**
 
 - **Interoperability**: Essential for integrating third-party JavaScript libraries into TypeScript projects.
 - **Type Safety**: Helps catch errors at compile time by enforcing type checks.
@@ -60,15 +60,15 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **2. Creating Declaration Files**
+## **Creating Declaration Files**
 
-### **2.1 Structure of `.d.ts` Files**
+### **Structure of `.d.ts` Files**
 
 - **File Extension**: Declaration files use the `.d.ts` extension.
 - **Content**: Contains type declarations without actual implementation code.
 - **Placement**: Can be placed alongside the JavaScript files or in a separate `types` directory.
 
-### **2.2 Writing Type Declarations**
+### **Writing Type Declarations**
 
 - **Basic Syntax**:
 
@@ -107,16 +107,16 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **3. Ambient Declarations**
+## **Ambient Declarations**
 
-### **3.1 Understanding Ambient Declarations**
+### **Understanding Ambient Declarations**
 
 - **Definition**: Declarations that describe the shape of code that exists elsewhere (e.g., in a JavaScript library) without providing an actual implementation.
 - **Purpose**:
   - Inform TypeScript about variables, functions, or modules that are provided by external code.
   - Prevent TypeScript errors about missing declarations.
 
-### **3.2 Using the `declare` Keyword**
+### **Using the `declare` Keyword**
 
 - **Syntax**:
 
@@ -153,16 +153,16 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **4. Consuming JavaScript Libraries**
+## **Consuming JavaScript Libraries**
 
-### **4.1 Installing Type Definitions**
+### **Installing Type Definitions**
 
 - **Type Definition Files**: Many JavaScript libraries have accompanying type definition files that describe their API in TypeScript.
 - **Methods to Obtain Type Definitions**:
   - **Bundled Definitions**: Some libraries include `.d.ts` files in their npm packages.
   - **DefinitelyTyped Repository**: A community-driven repository of type definitions.
 
-### **4.2 Using `@types` Packages**
+### **Using `@types` Packages**
 
 - **Definition**: The `@types` namespace on npm hosts type definitions for JavaScript libraries.
 - **Installation**:
@@ -189,9 +189,9 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **5. Writing Declaration Files for JavaScript Libraries**
+## **Writing Declaration Files for JavaScript Libraries**
 
-### **5.1 Module Declarations**
+### **Module Declarations**
 
 - **Definition**: Declarations for libraries that are imported using module syntax (e.g., CommonJS, AMD, ES Modules).
 - **Syntax**:
@@ -226,7 +226,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
   const difference = subtract(10, 4)
   ```
 
-### **5.2 Global Declarations**
+### **Global Declarations**
 
 - **Definition**: Declarations for libraries that expose variables or functions in the global scope.
 - **Syntax**:
@@ -252,9 +252,9 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **6. Advanced Type Declarations**
+## **Advanced Type Declarations**
 
-### **6.1 Function Overloads**
+### **Function Overloads**
 
 - **Definition**: Declaring multiple function signatures for a single function to represent different call patterns.
 - **Syntax**:
@@ -272,7 +272,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
   declare function calculate(a: string, b: string): string
   ```
 
-### **6.2 Interfaces and Classes**
+### **Interfaces and Classes**
 
 - **Interfaces**: Describe object shapes and can be extended.
 
@@ -293,7 +293,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
   }
   ```
 
-### **6.3 Namespaces and Modules**
+### **Namespaces and Modules**
 
 - **Namespaces**: Used to organize code in a global context.
 
@@ -313,7 +313,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **7. Best Practices for Declaration Files**
+## **Best Practices for Declaration Files**
 
 - **Follow Official Guidelines**: Refer to the [TypeScript Declaration File Handbook](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html).
 - **Use Consistent Naming**: Name your declaration files after the library or module they describe.
@@ -325,7 +325,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **8. Common Issues and Troubleshooting**
+## **Common Issues and Troubleshooting**
 
 - **Module Not Found Errors**: Ensure the module name in your `declare module` matches exactly with how it's imported.
 - **Duplicate Identifier Errors**: Avoid redeclaring types or variables that may already exist in the global scope or in other libraries.
@@ -335,7 +335,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **9. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is a declaration file in TypeScript, and why is it important?**
 
@@ -397,7 +397,7 @@ TypeScript's declaration files (`.d.ts` files) play a crucial role in providing 
 
 ---
 
-## **10. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Writing a Declaration File for a Global Library**
 
@@ -519,13 +519,13 @@ const result = Utils.calculate(5, 10) // 15
 
 ---
 
-## **11. Conclusion**
+## **Conclusion**
 
 Declaration files and ambient declarations are essential tools in TypeScript that enable seamless integration with JavaScript libraries and codebases. By mastering how to create `.d.ts` files and use ambient declarations, you can ensure type safety, improve code intelligence, and enhance the developer experience in your TypeScript projects. Understanding these concepts is crucial for advanced TypeScript development and will prepare you for tackling complex interoperability challenges and technical interviews.
 
 ---
 
-## **12. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -547,7 +547,7 @@ Declaration files and ambient declarations are essential tools in TypeScript tha
 
 ---
 
-## **13. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

@@ -65,6 +65,8 @@ export const syncContent = async () => {
       courseOrder,
     )
 
+    console.log(`Synced course: ${courseTitle}`)
+
     for (const [sectionOrder, section] of course.sections.entries()) {
       const {
         title: sectionTitle,
@@ -92,6 +94,8 @@ export const syncContent = async () => {
         sectionHref,
         courseRecord.id,
       )
+
+      console.log(`Synced section: ${sectionTitle}`)
 
       for (const [lessonOrder, lesson] of courseLessons.entries()) {
         const {
@@ -128,14 +132,20 @@ export const syncContent = async () => {
           sectionRecord.id,
         )
 
+        console.log(`Synced lesson: ${lesson.title}`)
+
         if (lesson.problems) {
           for (const problem of lesson.problems) {
             await upsertProblem(
               problem.href,
               problem.title,
-              lessonRecord.id,
               problem.difficulty,
+              problem.question,
+              problem.answer,
+              problem.type,
+              lessonRecord.id,
             )
+            console.log(`Synced problem: ${problem.title}`)
           }
         }
 
@@ -174,8 +184,6 @@ export const syncContent = async () => {
             )
           }
         }
-
-        console.log(`Synced: ${lessonTitle}`)
       }
     }
   }

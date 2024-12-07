@@ -24,6 +24,7 @@ import {
 } from '@/utils/helpers'
 import {
   ProblemDifficulty,
+  ProblemType,
   SubscriptionPlan,
   SubscriptionStatus,
 } from '@prisma/client'
@@ -294,12 +295,18 @@ describe('User services', () => {
               id: 'problem1',
               title: 'Problem 1',
               href: '/problem-1',
+              question: 'Problem 1',
+              answer: 'Answer 1',
+              type: ProblemType.THEORETICAL,
               difficulty: ProblemDifficulty.EASY,
             },
             {
               id: 'problem2',
               title: 'Problem 2',
               href: '/problem-2',
+              question: 'Problem 2',
+              answer: 'Answer 2',
+              type: ProblemType.THEORETICAL,
               difficulty: ProblemDifficulty.MEDIUM,
             },
           ],
@@ -417,6 +424,9 @@ describe('User services', () => {
               id: 'problem1',
               title: 'Problem 1',
               href: '/problem-1',
+              question: 'Problem 1',
+              answer: 'Answer 1',
+              type: ProblemType.THEORETICAL,
               difficulty: ProblemDifficulty.EASY,
             },
           ],

@@ -36,7 +36,7 @@ JavaScript's execution context and scope chain are critical concepts that determ
 
 ---
 
-## **1. Introduction to Execution Context**
+## **Introduction to Execution Context**
 
 ### **What is an Execution Context?**
 
@@ -68,7 +68,7 @@ An execution context is created when the JavaScript engine prepares to execute a
 
 ---
 
-## **2. Variable Environments and Lexical Environments**
+## **Variable Environments and Lexical Environments**
 
 ### **Variable Environment**
 
@@ -84,7 +84,7 @@ An execution context is created when the JavaScript engine prepares to execute a
 
 ---
 
-## **3. Understanding Scope**
+## **Understanding Scope**
 
 ### **Scope**
 
@@ -92,7 +92,7 @@ An execution context is created when the JavaScript engine prepares to execute a
 
 ### **Types of Scope**
 
-#### **1. Global Scope**
+#### **Global Scope**
 
 - Variables declared outside any function or block are in the global scope.
 - Accessible from anywhere in your code.
@@ -109,7 +109,7 @@ function foo() {
 foo() // Outputs: I am global
 ```
 
-#### **2. Function Scope**
+#### **Function Scope**
 
 - Variables declared within a function are scoped to that function.
 - Not accessible outside the function.
@@ -126,7 +126,7 @@ foo() // Outputs: I am inside a function
 console.log(functionVar) // Error: functionVar is not defined
 ```
 
-#### **3. Block Scope (ES6)**
+#### **Block Scope (ES6)**
 
 - Introduced in ES6 with `let` and `const`.
 - Variables declared within a block `{}` are scoped to that block.
@@ -146,7 +146,7 @@ console.log(blockVar) // Error: blockVar is not defined
 
 ---
 
-## **4. Scope Chain Lookup**
+## **Scope Chain Lookup**
 
 ### **How the Scope Chain Works**
 
@@ -198,7 +198,7 @@ outerFunction()
 
 ---
 
-## **5. Variable Shadowing**
+## **Variable Shadowing**
 
 ### **What is Variable Shadowing?**
 
@@ -266,15 +266,15 @@ greet('Alice') // Outputs: Hello, Alice
 
 ---
 
-## **6. Best Practices for Managing Scope**
+## **Best Practices for Managing Scope**
 
-### **1. Avoid Global Variables**
+### **Avoid Global Variables**
 
 - **Reason**: Reduces the risk of variable name collisions and unintended interactions.
 
 - **Solution**: Use function or block scope to encapsulate variables.
 
-### **2. Use `let` and `const` Instead of `var`**
+### **Use `let` and `const` Instead of `var`**
 
 - **Reason**: `let` and `const` have block scope, which is more predictable.
 
@@ -287,7 +287,7 @@ greet('Alice') // Outputs: Hello, Alice
   // console.log(i); // Error: i is not defined
   ```
 
-### **3. Be Mindful of Variable Shadowing**
+### **Be Mindful of Variable Shadowing**
 
 - **Reason**: Can lead to confusion and bugs if not handled carefully.
 
@@ -296,7 +296,7 @@ greet('Alice') // Outputs: Hello, Alice
   - Use different variable names for clarity.
   - Avoid re-declaring variables in inner scopes unless intentional.
 
-### **4. Limit the Use of Global Scope**
+### **Limit the Use of Global Scope**
 
 - **Reason**: Keeps the global namespace clean.
 
@@ -313,7 +313,7 @@ greet('Alice') // Outputs: Hello, Alice
 console.log(localVar) // Error: localVar is not defined
 ```
 
-### **5. Understand Hoisting**
+### **Understand Hoisting**
 
 - **Reason**: Variable and function declarations are hoisted to the top of their scope.
 
@@ -326,13 +326,13 @@ console.log(localVar) // Error: localVar is not defined
 
 - **Explanation**: The declaration of `a` is hoisted, but its assignment is not.
 
-### **6. Avoid Polluting the Global Namespace**
+### **Avoid Polluting the Global Namespace**
 
 - **Solution**: Use modules (`import`/`export`) to manage scope and dependencies.
 
 ---
 
-## **7. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is an execution context in JavaScript?**
 
@@ -378,7 +378,7 @@ console.log(localVar) // Error: localVar is not defined
 
 ---
 
-## **8. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Scope Chain Lookup**
 
@@ -548,13 +548,13 @@ counter2() // ?
 
 ---
 
-## **9. Conclusion**
+## **Conclusion**
 
 Understanding execution context and scope chains is crucial for writing predictable and efficient JavaScript code. By knowing how JavaScript looks up variables and how scope affects variable accessibility, you can avoid common pitfalls like variable shadowing and unintended global variables. Mastery of these concepts not only improves your coding skills but also prepares you for technical interviews and real-world development challenges.
 
 ---
 
-## **10. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -577,7 +577,7 @@ Understanding execution context and scope chains is crucial for writing predicta
 
 ---
 
-## **11. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

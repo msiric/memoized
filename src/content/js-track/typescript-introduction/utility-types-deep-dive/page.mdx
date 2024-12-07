@@ -53,9 +53,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **1. Introduction to Utility Types**
+## **Introduction to Utility Types**
 
-### **1.1 What are Utility Types?**
+### **What are Utility Types?**
 
 - **Definition**: Utility types are predefined types in TypeScript that provide type transformations.
 - **Purpose**:
@@ -63,7 +63,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Reduce boilerplate code.
   - Enhance type safety and code readability.
 
-### **1.2 Importance in TypeScript**
+### **Importance in TypeScript**
 
 - **Efficiency**: Streamline the process of creating new types based on existing ones.
 - **Consistency**: Ensure consistent type transformations across the codebase.
@@ -71,9 +71,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **2. Partial**
+## **Partial**
 
-### **2.1 Understanding `Partial<T>`**
+### **Understanding `Partial<T>`**
 
 - **Definition**: Constructs a type with all properties of `T` set to optional.
 - **Syntax**:
@@ -88,7 +88,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Creating functions that update objects partially.
   - Handling optional parameters in functions.
 
-### **2.2 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Updating an Object**
 
@@ -126,9 +126,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **3. Readonly**
+## **Readonly**
 
-### **3.1 Understanding `Readonly<T>`**
+### **Understanding `Readonly<T>`**
 
 - **Definition**: Constructs a type with all properties of `T` set to `readonly`.
 - **Syntax**:
@@ -143,7 +143,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Preventing modification of objects.
   - Ensuring immutability in data structures.
 
-### **3.2 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Immutable Data Objects**
 
@@ -170,9 +170,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **4. Pick**
+## **Pick**
 
-### **4.1 Understanding `Pick<T, K>`**
+### **Understanding `Pick<T, K>`**
 
 - **Definition**: Constructs a type by picking a set of properties `K` from `T`.
 - **Syntax**:
@@ -187,7 +187,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Creating subsets of types.
   - Selecting specific properties for APIs or components.
 
-### **4.2 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Creating a Subtype**
 
@@ -223,9 +223,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **5. Omit**
+## **Omit**
 
-### **5.1 Understanding `Omit<T, K>`**
+### **Understanding `Omit<T, K>`**
 
 - **Definition**: Constructs a type by picking all properties from `T` and then removing `K`.
 - **Syntax**:
@@ -238,7 +238,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Excluding certain properties from a type.
   - Modifying existing types for specific use cases.
 
-### **5.2 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Removing Sensitive Information**
 
@@ -277,9 +277,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **6. Record**
+## **Record**
 
-### **6.1 Understanding `Record<K, T>`**
+### **Understanding `Record<K, T>`**
 
 - **Definition**: Constructs a type with a set of properties `K` of type `T`.
 - **Syntax**:
@@ -294,7 +294,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Creating dictionaries or maps with specific keys and value types.
   - Enforcing consistent value types across a set of properties.
 
-### **6.2 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Mapping Roles to Permissions**
 
@@ -332,9 +332,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **7. Exclude**
+## **Exclude**
 
-### **7.1 Understanding `Exclude<T, U>`**
+### **Understanding `Exclude<T, U>`**
 
 - **Definition**: Excludes from `T` those types that are assignable to `U`.
 - **Syntax**:
@@ -347,7 +347,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Removing types from a union.
   - Filtering out unwanted types.
 
-### **7.2 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Filtering Union Types**
 
@@ -373,9 +373,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **8. Extract**
+## **Extract**
 
-### **8.1 Understanding `Extract<T, U>`**
+### **Understanding `Extract<T, U>`**
 
 - **Definition**: Extracts from `T` those types that are assignable to `U`.
 - **Syntax**:
@@ -388,7 +388,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   - Selecting specific types from a union.
   - Narrowing down types.
 
-### **8.2 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Extracting Shared Types**
 
@@ -414,9 +414,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **9. Other Utility Types**
+## **Other Utility Types**
 
-### **9.1 NonNullable**
+### **NonNullable**
 
 - **Definition**: Excludes `null` and `undefined` from `T`.
 - **Syntax**:
@@ -435,7 +435,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   // name = null; // Error
   ```
 
-### **9.2 ReturnType**
+### **ReturnType**
 
 - **Definition**: Obtains the return type of a function type.
 - **Syntax**:
@@ -460,7 +460,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   const user: User = { id: 1, name: 'Bob' }
   ```
 
-### **9.3 InstanceType**
+### **InstanceType**
 
 - **Definition**: Obtains the instance type of a constructor function type.
 - **Syntax**:
@@ -490,9 +490,9 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **10. Creating Custom Utility Types**
+## **Creating Custom Utility Types**
 
-### **10.1 Combining Utility Types**
+### **Combining Utility Types**
 
 - **Example: DeepReadonly**
 
@@ -526,7 +526,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   // obj.details.age = 31; // Error: Cannot assign to 'age' because it is a read-only property.
   ```
 
-### **10.2 Building Custom Types**
+### **Building Custom Types**
 
 - **Example: Mutable**
 
@@ -565,7 +565,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **11. Best Practices**
+## **Best Practices**
 
 - **Leverage Built-in Utility Types**:
 
@@ -588,7 +588,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **12. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is the purpose of the `Partial` utility type in TypeScript?**
 
@@ -689,7 +689,7 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 ---
 
-## **13. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Using `Partial`**
 
@@ -817,13 +817,13 @@ const profile: ProfileWithRequiredId = {
 
 ---
 
-## **14. Conclusion**
+## **Conclusion**
 
 Utility types in TypeScript are powerful tools that enhance your ability to manipulate and transform types effectively. By mastering utility types like `Partial`, `Readonly`, `Pick`, `Omit`, `Record`, `Exclude`, and `Extract`, you can write more concise, flexible, and type-safe code. These utility types simplify common type transformations, reduce boilerplate code, and improve code maintainability. Understanding and utilizing utility types will significantly enhance your TypeScript development skills and prepare you for advanced programming challenges and technical interviews.
 
 ---
 
-## **15. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 

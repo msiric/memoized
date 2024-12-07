@@ -49,26 +49,26 @@ TypeScript builds upon JavaScript by adding a robust type system, enabling devel
 
 ---
 
-## **1. Introduction to TypeScript Types**
+## **Introduction to TypeScript Types**
 
-### **1.1 The Importance of Types**
+### **The Importance of Types**
 
 - **Type Safety**: Types help catch errors at compile time, reducing runtime exceptions.
 - **Code Clarity**: Explicit types make code more readable and maintainable.
 - **Tooling Support**: Types enhance IDE features like autocompletion and refactoring tools.
 
-### **1.2 Static Typing vs. Dynamic Typing**
+### **Static Typing vs. Dynamic Typing**
 
 - **Static Typing**: Type checking is performed at compile time (e.g., TypeScript, Java).
 - **Dynamic Typing**: Type checking is performed at runtime (e.g., JavaScript, Python).
 
 ---
 
-## **2. Primitive Types**
+## **Primitive Types**
 
 TypeScript supports the same primitive types as JavaScript, along with type annotations.
 
-### **2.1 Number**
+### **Number**
 
 - **Definition**: Represents both integer and floating-point numbers.
 - **Example**:
@@ -81,7 +81,7 @@ TypeScript supports the same primitive types as JavaScript, along with type anno
   let octal: number = 0o744 // Octal
   ```
 
-### **2.2 String**
+### **String**
 
 - **Definition**: Represents text data, enclosed in single or double quotes, or backticks for template literals.
 - **Example**:
@@ -92,7 +92,7 @@ TypeScript supports the same primitive types as JavaScript, along with type anno
   let greeting: string = `Hello, ${firstName} ${lastName}!`
   ```
 
-### **2.3 Boolean**
+### **Boolean**
 
 - **Definition**: Represents logical values `true` and `false`.
 - **Example**:
@@ -102,7 +102,7 @@ TypeScript supports the same primitive types as JavaScript, along with type anno
   let hasPermission: boolean = true
   ```
 
-### **2.4 Null and Undefined**
+### **Null and Undefined**
 
 - **`null`**: Represents the intentional absence of any object value.
 - **`undefined`**: Denotes a variable that has not been assigned a value.
@@ -117,11 +117,11 @@ TypeScript supports the same primitive types as JavaScript, along with type anno
 
 ---
 
-## **3. Type Annotations**
+## **Type Annotations**
 
 Type annotations explicitly specify the type of a variable or function.
 
-### **3.1 Declaring Variables with Type Annotations**
+### **Declaring Variables with Type Annotations**
 
 - **Syntax**:
 
@@ -137,7 +137,7 @@ Type annotations explicitly specify the type of a variable or function.
   let isActive: boolean = true
   ```
 
-### **3.2 Function Parameters and Return Types**
+### **Function Parameters and Return Types**
 
 - **Syntax**:
 
@@ -161,11 +161,11 @@ Type annotations explicitly specify the type of a variable or function.
 
 ---
 
-## **4. Arrays**
+## **Arrays**
 
 Arrays can be typed to specify the type of elements they contain.
 
-### **4.1 Typed Arrays**
+### **Typed Arrays**
 
 - **Syntax**:
 
@@ -189,7 +189,7 @@ Arrays can be typed to specify the type of elements they contain.
   ]
   ```
 
-### **4.2 Generic Array Types**
+### **Generic Array Types**
 
 - **Syntax**:
 
@@ -206,11 +206,11 @@ Arrays can be typed to specify the type of elements they contain.
 
 ---
 
-## **5. Tuples**
+## **Tuples**
 
 Tuples represent arrays with fixed sizes and known types at each index.
 
-### **5.1 Defining Tuples**
+### **Defining Tuples**
 
 - **Syntax**:
 
@@ -225,7 +225,7 @@ Tuples represent arrays with fixed sizes and known types at each index.
   let coordinates: [number, number, number] = [10, 20, 30]
   ```
 
-### **5.2 Accessing Tuple Elements**
+### **Accessing Tuple Elements**
 
 - **Example**:
 
@@ -250,11 +250,11 @@ Tuples represent arrays with fixed sizes and known types at each index.
 
 ---
 
-## **6. Type Inference**
+## **Type Inference**
 
 TypeScript can automatically infer types based on assigned values.
 
-### **6.1 How Type Inference Works**
+### **How Type Inference Works**
 
 - **Variable Initialization**:
 
@@ -280,7 +280,7 @@ TypeScript can automatically infer types based on assigned values.
   }
   ```
 
-### **6.2 Best Practices with Type Inference**
+### **Best Practices with Type Inference**
 
 - **Explicit vs. Inferred Types**:
 
@@ -304,9 +304,9 @@ TypeScript can automatically infer types based on assigned values.
 
 ---
 
-## **7. Any, Unknown, and Void Types**
+## **Any, Unknown, and Void Types**
 
-### **7.1 The `any` Type**
+### **The `any` Type**
 
 - **Definition**: Represents any type, opting out of type checking.
 - **Usage**:
@@ -319,7 +319,7 @@ TypeScript can automatically infer types based on assigned values.
 
 - **Caution**: Overusing `any` defeats the purpose of TypeScript's type safety.
 
-### **7.2 The `unknown` Type**
+### **The `unknown` Type**
 
 - **Definition**: Similar to `any`, but requires type checking before usage.
 - **Usage**:
@@ -334,7 +334,7 @@ TypeScript can automatically infer types based on assigned values.
 
 - **Benefit**: Encourages type safety by forcing type checks.
 
-### **7.3 The `void` Type**
+### **The `void` Type**
 
 - **Definition**: Represents the absence of a type, commonly used as the return type for functions that do not return a value.
 - **Usage**:
@@ -347,11 +347,11 @@ TypeScript can automatically infer types based on assigned values.
 
 ---
 
-## **8. Type Assertions**
+## **Type Assertions**
 
 Type assertions allow you to override TypeScript's inferred type when you have more information about the type of a value.
 
-### **8.1 Casting Types**
+### **Casting Types**
 
 - **Syntax**:
 
@@ -368,7 +368,7 @@ Type assertions allow you to override TypeScript's inferred type when you have m
   let strLength: number = (someValue as string).length
   ```
 
-### **8.2 When to Use Type Assertions**
+### **When to Use Type Assertions**
 
 - **DOM Manipulation**:
 
@@ -384,7 +384,7 @@ Type assertions allow you to override TypeScript's inferred type when you have m
 
 ---
 
-## **9. Best Practices**
+## **Best Practices**
 
 - **Explicit Types for Function Parameters and Return Types**:
 
@@ -411,7 +411,7 @@ Type assertions allow you to override TypeScript's inferred type when you have m
 
 ---
 
-## **10. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What are the basic primitive types in TypeScript?**
 
@@ -479,7 +479,7 @@ Type assertions allow you to override TypeScript's inferred type when you have m
 
 ---
 
-## **11. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Type Annotations**
 
@@ -570,13 +570,13 @@ emailInput.value = 'user@example.com'
 
 ---
 
-## **12. Conclusion**
+## **Conclusion**
 
 Understanding basic types and type annotations is essential for writing robust TypeScript code. By leveraging primitive types, arrays, tuples, and type inference, you can enhance code safety and readability. Type annotations enable you to specify exactly what types of data your variables and functions can accept and return, catching errors early in the development process. Mastery of these fundamental concepts lays the groundwork for exploring more advanced TypeScript features and contributes to your growth as a proficient developer.
 
 ---
 
-## **13. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -599,7 +599,7 @@ Understanding basic types and type annotations is essential for writing robust T
 
 ---
 
-## **14. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

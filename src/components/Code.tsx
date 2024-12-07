@@ -279,7 +279,8 @@ const usePreferredLanguageStore = create<{
 }))
 
 function useTabGroupProps(availableLanguages: Array<string>) {
-  const { preferredLanguages, addPreferredLanguage } = usePreferredLanguageStore()
+  const { preferredLanguages, addPreferredLanguage } =
+    usePreferredLanguageStore()
   const [selectedIndex, setSelectedIndex] = useState(0)
   const activeLanguage = [...availableLanguages].sort(
     (a, z) => preferredLanguages.indexOf(z) - preferredLanguages.indexOf(a),
@@ -320,6 +321,7 @@ export function CodeGroup({
 
   const containerClassName =
     'my-6 overflow-hidden rounded-2xl bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10'
+
   const header = (
     <CodeGroupHeader title={title} selectedIndex={tabGroupProps.selectedIndex}>
       {children}

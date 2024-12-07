@@ -47,16 +47,16 @@ Type guards and type narrowing are essential features in TypeScript that allow d
 
 ---
 
-## **1. Introduction to Type Guards and Type Narrowing**
+## **Introduction to Type Guards and Type Narrowing**
 
-### **1.1 Overview of Type Guards**
+### **Overview of Type Guards**
 
 - **Definition**: Type guards are expressions that perform runtime checks, allowing TypeScript to narrow the type within a conditional block.
 - **Purpose**:
   - Enable safe access to properties and methods specific to a type.
   - Improve code safety by informing the compiler about variable types.
 
-### **1.2 Importance in TypeScript**
+### **Importance in TypeScript**
 
 - **Type Safety**: Prevent runtime errors by ensuring variables are of the expected type.
 - **Code Readability**: Clarify the developer's intent regarding type handling.
@@ -64,13 +64,13 @@ Type guards and type narrowing are essential features in TypeScript that allow d
 
 ---
 
-## **2. Understanding Type Guards**
+## **Understanding Type Guards**
 
-### **2.1 Built-in Type Guards**
+### **Built-in Type Guards**
 
 TypeScript provides built-in type guards using operators like `typeof` and `instanceof`.
 
-### **2.2 Using `typeof` Operator**
+### **Using `typeof` Operator**
 
 - **Definition**: Checks the type of a variable at runtime.
 - **Applicable Types**: `number`, `string`, `boolean`, `symbol`, `undefined`, `object`, `function`.
@@ -97,7 +97,7 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
   }
   ```
 
-### **2.3 Using `instanceof` Operator**
+### **Using `instanceof` Operator**
 
 - **Definition**: Checks if an object is an instance of a class or constructor function.
 
@@ -135,14 +135,14 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **3. User-Defined Type Guards**
+## **User-Defined Type Guards**
 
-### **3.1 What are User-Defined Type Guards?**
+### **What are User-Defined Type Guards?**
 
 - **Definition**: Custom functions that perform type checks and inform the TypeScript compiler of the type of a variable within a specific scope.
 - **Type Predicates**: Special return types in the form `parameterName is Type`.
 
-### **3.2 Implementing Type Guards with Type Predicates**
+### **Implementing Type Guards with Type Predicates**
 
 - **Syntax**:
 
@@ -168,7 +168,7 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
   }
   ```
 
-### **3.3 Practical Examples**
+### **Practical Examples**
 
 - **Example 1: Checking Interface Implementation**
 
@@ -211,19 +211,19 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **4. Type Narrowing**
+## **Type Narrowing**
 
-### **4.1 Understanding Type Narrowing**
+### **Understanding Type Narrowing**
 
 - **Definition**: The process by which TypeScript infers more specific types based on control flow analysis.
 - **Purpose**: Allow the compiler to understand and enforce type constraints within different code paths.
 
-### **4.2 Control Flow Analysis**
+### **Control Flow Analysis**
 
 - TypeScript analyzes the flow of code to determine variable types at different points.
 - Variables can have different types in different branches.
 
-### **4.3 Narrowing with Conditionals**
+### **Narrowing with Conditionals**
 
 - **Example**:
 
@@ -247,14 +247,14 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **5. Discriminated Unions**
+## **Discriminated Unions**
 
-### **5.1 What are Discriminated Unions?**
+### **What are Discriminated Unions?**
 
 - **Definition**: A union of types that have a common literal property (the discriminant), allowing the compiler to narrow types based on the value of that property.
 - **Purpose**: Simplify type checking and ensure all possible types are handled.
 
-### **5.2 Defining Discriminated Unions**
+### **Defining Discriminated Unions**
 
 - **Structure**:
 
@@ -272,7 +272,7 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
   type UnionType = TypeA | TypeB
   ```
 
-### **5.3 Using Discriminated Unions with `switch` Statements**
+### **Using Discriminated Unions with `switch` Statements**
 
 - **Example**:
 
@@ -313,14 +313,14 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **6. Exhaustiveness Checking**
+## **Exhaustiveness Checking**
 
-### **6.1 Ensuring All Cases are Handled**
+### **Ensuring All Cases are Handled**
 
 - **Purpose**: Verify that all possible types in a union are accounted for.
 - **Technique**: Use `never` type in the default case to trigger a compile-time error if a new type is added but not handled.
 
-### **6.2 Using `never` Type for Exhaustiveness**
+### **Using `never` Type for Exhaustiveness**
 
 - **Example**:
 
@@ -349,9 +349,9 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **7. Advanced Type Guards**
+## **Advanced Type Guards**
 
-### **7.1 Type Guards with `in` Operator**
+### **Type Guards with `in` Operator**
 
 - **Definition**: Checks if an object has a specific property.
 
@@ -389,7 +389,7 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
   }
   ```
 
-### **7.2 Type Guards with Custom Functions**
+### **Type Guards with Custom Functions**
 
 - **Complex Checks**:
 
@@ -409,7 +409,7 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **8. Best Practices**
+## **Best Practices**
 
 - **Use Type Guards to Narrow Types Safely**:
 
@@ -432,7 +432,7 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **9. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is a type guard in TypeScript, and how does it differ from a type assertion?**
 
@@ -507,7 +507,7 @@ TypeScript provides built-in type guards using operators like `typeof` and `inst
 
 ---
 
-## **10. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Implementing a User-Defined Type Guard**
 
@@ -708,13 +708,13 @@ console.log(describeShape(circle)) // Outputs: A circle with radius 5
 
 ---
 
-## **11. Conclusion**
+## **Conclusion**
 
 Type guards and type narrowing are powerful features in TypeScript that enable developers to write safer and more expressive code. By implementing user-defined type guards and leveraging discriminated unions, you can refine types at runtime and ensure that your code handles all possible cases correctly. Understanding and utilizing these features will enhance your ability to build robust TypeScript applications and prepare you for complex development challenges and technical interviews.
 
 ---
 
-## **12. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -736,7 +736,7 @@ Type guards and type narrowing are powerful features in TypeScript that enable d
 
 ---
 
-## **13. Appendix**
+## **Appendix**
 
 ### **Glossary**
 

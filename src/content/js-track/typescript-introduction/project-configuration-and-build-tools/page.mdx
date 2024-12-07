@@ -1,0 +1,920 @@
+**Lesson Title**: **Project Configuration and Build Tools in TypeScript**
+
+**Lesson Description**:  
+Enhance your TypeScript development workflow by mastering project configuration and build tools. This lesson focuses on the `tsconfig.json` options that control the TypeScript compiler behavior and how to integrate TypeScript with popular build tools like Webpack and Babel. By understanding how to configure your TypeScript projects effectively and leverage build tools, you will improve your development efficiency, optimize your applications, and ensure smooth integration into existing build processes. This comprehensive lesson will deepen your understanding of TypeScript project setup and prepare you for advanced development tasks and technical interviews by covering these essential topics.
+
+---
+
+# **Project Configuration and Build Tools in TypeScript**
+
+TypeScript's flexibility allows it to integrate seamlessly with various build tools and workflows. Understanding how to configure your TypeScript projects using the `tsconfig.json` file and integrating TypeScript with build tools like Webpack and Babel is essential for efficient development and deployment. This lesson explores the options available in `tsconfig.json` and provides guidance on integrating TypeScript into modern build processes.
+
+---
+
+## **Table of Contents**
+
+1. **Introduction to Project Configuration**
+   - The Role of `tsconfig.json`
+   - Importance of Proper Configuration
+2. **Understanding `tsconfig.json`**
+   - Structure of `tsconfig.json`
+   - Compiler Options Overview
+3. **Common `tsconfig.json` Compiler Options**
+   - Target and Module Options
+   - Source Map Options
+   - Strict Type Checking Options
+   - Module Resolution Options
+   - Experimental Options
+4. **Advanced `tsconfig.json` Configuration**
+   - Including and Excluding Files
+   - Composite Projects and Project References
+   - Paths Mapping and Aliases
+5. **Integrating TypeScript with Build Tools**
+   - Why Use Build Tools with TypeScript?
+   - Overview of Webpack and Babel
+6. **Integrating TypeScript with Webpack**
+   - Setting Up Webpack with TypeScript
+   - Using `ts-loader` for Compilation
+   - Configuring Webpack for Development and Production
+7. **Integrating TypeScript with Babel**
+   - TypeScript and Babel Overview
+   - Setting Up Babel with TypeScript
+   - Using `@babel/preset-typescript`
+8. **Combining Webpack and Babel with TypeScript**
+   - Transpiling TypeScript with Babel and Bundling with Webpack
+   - Configuring Loaders and Presets
+9. **Best Practices**
+10. **Common Interview Questions**
+11. **Exercises**
+12. **Conclusion**
+13. **Next Steps**
+14. **Appendix**
+
+---
+
+## **Introduction to Project Configuration**
+
+### **The Role of `tsconfig.json`**
+
+- **Definition**: The `tsconfig.json` file specifies the root files and compiler options required to compile a TypeScript project.
+- **Purpose**:
+  - Configures the TypeScript compiler (`tsc`).
+  - Defines which files are included or excluded from the compilation.
+  - Controls how the TypeScript code is transformed into JavaScript.
+
+### **Importance of Proper Configuration**
+
+- **Consistency**: Ensures all team members compile code with the same settings.
+- **Type Safety**: Enables strict type checking options to catch errors early.
+- **Compatibility**: Configures output to be compatible with target environments.
+- **Optimization**: Allows for compiler optimizations and output customization.
+
+---
+
+## **Understanding `tsconfig.json`**
+
+### **Structure of `tsconfig.json`**
+
+- **Basic Structure**:
+
+  ```json
+  {
+    "compilerOptions": {
+      // Compiler options go here
+    },
+    "include": [
+      // Array of files or patterns to include
+    ],
+    "exclude": [
+      // Array of files or patterns to exclude
+    ],
+    "files": [
+      // Specific files to include
+    ],
+    "references": [
+      // Project references for composite projects
+    ]
+  }
+  ```
+
+- **Sections**:
+  - **compilerOptions**: Specifies the compiler settings.
+  - **include**: Specifies files or patterns to include in the compilation.
+  - **exclude**: Specifies files or patterns to exclude.
+  - **files**: Specifies an explicit list of files to include.
+  - **references**: Used for project references in composite projects.
+
+### **Compiler Options Overview**
+
+- **Categories of Options**:
+  - **Basic Options**: Target, module, lib, etc.
+  - **Strict Type Checking Options**: `strict`, `noImplicitAny`, etc.
+  - **Module Resolution Options**: `moduleResolution`, `baseUrl`, etc.
+  - **Source Map Options**: `sourceMap`, `inlineSourceMap`, etc.
+  - **Experimental Options**: `experimentalDecorators`, `emitDecoratorMetadata`, etc.
+
+---
+
+## **Common `tsconfig.json` Compiler Options**
+
+### **Target and Module Options**
+
+- **`target`**: Specifies the ECMAScript target version.
+
+  ```json
+  "compilerOptions": {
+    "target": "ES2015" // Options: "ES3", "ES5", "ES6"/"ES2015", "ES2016", etc.
+  }
+  ```
+
+- **`module`**: Specifies the module system.
+
+  ```json
+  "compilerOptions": {
+    "module": "CommonJS" // Options: "CommonJS", "AMD", "ES6"/"ES2015", "ESNext", etc.
+  }
+  ```
+
+- **`lib`**: Includes library files in the compilation.
+
+  ```json
+  "compilerOptions": {
+    "lib": ["ES2015", "DOM"]
+  }
+  ```
+
+### **Source Map Options**
+
+- **`sourceMap`**: Generates corresponding `.map` files.
+
+  ```json
+  "compilerOptions": {
+    "sourceMap": true
+  }
+  ```
+
+- **`inlineSourceMap`**: Embeds the source map directly in the output file.
+
+  ```json
+  "compilerOptions": {
+    "inlineSourceMap": true
+  }
+  ```
+
+- **`inlineSources`**: Embed source code in the source maps.
+
+  ```json
+  "compilerOptions": {
+    "inlineSources": true
+  }
+  ```
+
+### **Strict Type Checking Options**
+
+- **`strict`**: Enables all strict type checking options.
+
+  ```json
+  "compilerOptions": {
+    "strict": true
+  }
+  ```
+
+- **Individual Options**:
+  - **`noImplicitAny`**: Raise error on expressions and declarations with an implied `any` type.
+  - **`strictNullChecks`**: Make `null` and `undefined` types separate from other types.
+  - **`strictFunctionTypes`**: Ensure function type assignments are structurally compatible.
+  - **`strictPropertyInitialization`**: Check that class properties are initialized in the constructor.
+
+### **Module Resolution Options**
+
+- **`moduleResolution`**: Determines how module paths are resolved.
+
+  ```json
+  "compilerOptions": {
+    "moduleResolution": "node" // Options: "classic", "node"
+  }
+  ```
+
+- **`baseUrl`**: Base directory to resolve non-relative module names.
+
+  ```json
+  "compilerOptions": {
+    "baseUrl": "./src"
+  }
+  ```
+
+- **`paths`**: Map module names to locations relative to the `baseUrl`.
+
+  ```json
+  "compilerOptions": {
+    "paths": {
+      "@app/*": ["app/*"],
+      "@components/*": ["app/components/*"]
+    }
+  }
+  ```
+
+### **Experimental Options**
+
+- **`experimentalDecorators`**: Enables experimental support for decorators.
+
+  ```json
+  "compilerOptions": {
+    "experimentalDecorators": true
+  }
+  ```
+
+- **`emitDecoratorMetadata`**: Emits metadata for decorators.
+
+  ```json
+  "compilerOptions": {
+    "emitDecoratorMetadata": true
+  }
+  ```
+
+- **`allowSyntheticDefaultImports`**: Allow default imports from modules with no default export.
+
+  ```json
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true
+  }
+  ```
+
+---
+
+## **Advanced `tsconfig.json` Configuration**
+
+### **Including and Excluding Files**
+
+- **`include`**: Specifies files or patterns to include.
+
+  ```json
+  "include": ["src/**/*"]
+  ```
+
+- **`exclude`**: Specifies files or patterns to exclude.
+
+  ```json
+  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+  ```
+
+- **Default Behavior**:
+  - If neither `files` nor `include` are specified, the compiler includes all TypeScript files in the project directory except those in `node_modules`.
+
+### **Composite Projects and Project References**
+
+- **Composite Projects**: Allows TypeScript projects to reference other projects, enabling incremental builds.
+
+  ```json
+  "compilerOptions": {
+    "composite": true
+  }
+  ```
+
+- **Project References**:
+
+  ```json
+  "references": [
+    { "path": "../shared" },
+    { "path": "../core" }
+  ]
+  ```
+
+- **Benefits**:
+  - Faster builds by reusing outputs from referenced projects.
+  - Better organization and modularity.
+
+### **Paths Mapping and Aliases**
+
+- **`baseUrl` and `paths`**: Configure module resolution aliases.
+
+  ```json
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@models/*": ["src/models/*"],
+      "@utils/*": ["src/utils/*"]
+    }
+  }
+  ```
+
+- **Usage in Code**:
+
+  ```typescript
+  import { User } from '@models/User';
+  import { calculate } from '@utils/math';
+  ```
+
+- **Note**: When using build tools like Webpack, you need to configure corresponding aliases.
+
+---
+
+## **Integrating TypeScript with Build Tools**
+
+### **Why Use Build Tools with TypeScript?**
+
+- **Bundling**: Combine multiple modules into a single file for deployment.
+- **Transpilation**: Convert TypeScript to JavaScript and target specific environments.
+- **Optimization**: Minify and optimize code for better performance.
+- **Compatibility**: Integrate with existing JavaScript tools and workflows.
+- **Hot Module Replacement**: Enable live reloading during development.
+
+### **Overview of Webpack and Babel**
+
+- **Webpack**:
+  - A module bundler that processes and bundles JavaScript modules along with assets.
+  - Supports loaders and plugins for handling different types of files and transformations.
+
+- **Babel**:
+  - A JavaScript compiler that transforms modern JavaScript into code compatible with older environments.
+  - Can transpile TypeScript code using `@babel/preset-typescript`.
+
+---
+
+## **Integrating TypeScript with Webpack**
+
+### **Setting Up Webpack with TypeScript**
+
+- **Install Required Packages**:
+
+  ```bash
+  npm install --save-dev webpack webpack-cli typescript ts-loader
+  ```
+
+- **Project Structure**:
+
+  ```
+  project-root/
+  ├── src/
+  │   └── index.ts
+  ├── dist/
+  ├── tsconfig.json
+  ├── webpack.config.js
+  └── package.json
+  ```
+
+### **Using `ts-loader` for Compilation**
+
+- **`ts-loader`**: A TypeScript loader for Webpack.
+
+- **webpack.config.js**:
+
+  ```javascript
+  const path = require('path');
+
+  module.exports = {
+    entry: './src/index.ts',
+    output: {
+      filename: 'bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+    },
+    resolve: {
+      extensions: ['.ts', '.js'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: 'ts-loader',
+          exclude: /node_modules/,
+        },
+      ],
+    },
+    mode: 'development', // or 'production'
+  };
+  ```
+
+### **Configuring Webpack for Development and Production**
+
+- **Development Mode**:
+
+  - Set `mode` to `'development'` for easier debugging and faster builds.
+
+- **Production Mode**:
+
+  - Set `mode` to `'production'` to enable optimizations like minification.
+
+- **Source Maps**:
+
+  - Enable source maps for debugging.
+
+    ```javascript
+    module.exports = {
+      // ... other config options
+      devtool: 'source-map', // Options: 'source-map', 'inline-source-map', etc.
+    };
+    ```
+
+- **Plugins**:
+
+  - Use plugins like `HtmlWebpackPlugin` to generate HTML files.
+
+    ```bash
+    npm install --save-dev html-webpack-plugin
+    ```
+
+    ```javascript
+    const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+    module.exports = {
+      // ... other config options
+      plugins: [
+        new HtmlWebpackPlugin({
+          template: './src/index.html',
+        }),
+      ],
+    };
+    ```
+
+---
+
+## **Integrating TypeScript with Babel**
+
+### **TypeScript and Babel Overview**
+
+- **Babel Transpilation**:
+
+  - Babel can transpile TypeScript code to JavaScript.
+  - Babel focuses on transpilation, not type checking.
+  - Type checking is handled separately using the TypeScript compiler (`tsc`).
+
+### **Setting Up Babel with TypeScript**
+
+- **Install Required Packages**:
+
+  ```bash
+  npm install --save-dev @babel/core @babel/cli @babel/preset-env @babel/preset-typescript
+  ```
+
+- **babel.config.json**:
+
+  ```json
+  {
+    "presets": ["@babel/preset-env", "@babel/preset-typescript"]
+  }
+  ```
+
+- **Transpiling Code**:
+
+  ```bash
+  npx babel src --out-dir dist --extensions ".ts,.tsx"
+  ```
+
+### **Using `@babel/preset-typescript`**
+
+- **`@babel/preset-typescript`**:
+
+  - A Babel preset that enables Babel to understand TypeScript syntax.
+  - Does not perform type checking.
+
+- **Type Checking with `tsc`**:
+
+  - Run `tsc --noEmit` to perform type checking without emitting JavaScript code.
+
+    ```bash
+    npx tsc --noEmit
+    ```
+
+- **Advantages**:
+
+  - Leverage Babel's plugin ecosystem.
+  - Consistent build process with existing Babel configurations.
+
+---
+
+## **Combining Webpack and Babel with TypeScript**
+
+### **Transpiling TypeScript with Babel and Bundling with Webpack**
+
+- **Install Additional Packages**:
+
+  ```bash
+  npm install --save-dev babel-loader
+  ```
+
+- **webpack.config.js**:
+
+  ```javascript
+  const path = require('path');
+
+  module.exports = {
+    entry: './src/index.ts',
+    output: {
+      filename: 'bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+    },
+    resolve: {
+      extensions: ['.ts', '.js'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: 'babel-loader',
+          exclude: /node_modules/,
+        },
+      ],
+    },
+    mode: 'development',
+  };
+  ```
+
+- **babel.config.json**:
+
+  ```json
+  {
+    "presets": ["@babel/preset-env", "@babel/preset-typescript"]
+  }
+  ```
+
+### **Configuring Loaders and Presets**
+
+- **Loaders**:
+
+  - **`babel-loader`**: Transpiles JavaScript files using Babel.
+  - **`ts-loader`**: Compiles TypeScript files using the TypeScript compiler.
+
+- **Choosing Between `ts-loader` and `babel-loader`**:
+
+  - **Use `ts-loader`** if you want TypeScript compilation and type checking during the build.
+  - **Use `babel-loader`** with `@babel/preset-typescript` if you prefer Babel's transpilation and plugins.
+
+- **Combining Loaders**:
+
+  - Use both loaders to leverage TypeScript's type checking and Babel's plugins.
+
+    ```javascript
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: [
+            {
+              loader: 'babel-loader',
+            },
+            {
+              loader: 'ts-loader',
+              options: { transpileOnly: true },
+            },
+          ],
+          exclude: /node_modules/,
+        },
+      ],
+    },
+    ```
+
+  - **Note**: Setting `transpileOnly: true` disables type checking in `ts-loader`. Use `tsc --noEmit` for type checking separately.
+
+---
+
+## **Best Practices**
+
+- **Use `strict` Mode**: Enable strict type checking for better type safety.
+
+  ```json
+  "compilerOptions": {
+    "strict": true
+  }
+  ```
+
+- **Keep `tsconfig.json` Clean**: Only include necessary compiler options and document any non-default settings.
+
+- **Consistent Module Resolution**: Ensure module resolution settings in `tsconfig.json` match your build tool configurations.
+
+- **Use `paths` for Module Aliases**: Simplify import statements and improve code readability.
+
+- **Separate Type Checking and Transpilation**:
+
+  - Consider separating type checking from transpilation when using Babel.
+  - Use `tsc --noEmit` for type checking and Babel for transpilation.
+
+- **Optimize Build for Production**:
+
+  - Enable optimizations and minification in production builds.
+  - Use environment variables to switch between development and production configurations.
+
+- **Leverage Source Maps**:
+
+  - Enable source maps for easier debugging.
+  - Configure source maps in both TypeScript and build tools.
+
+- **Stay Updated**:
+
+  - Keep dependencies up-to-date to benefit from the latest features and bug fixes.
+  - Regularly check TypeScript and build tool documentation for changes.
+
+---
+
+## **Common Interview Questions**
+
+1. **What is the purpose of the `tsconfig.json` file in a TypeScript project?**
+
+   **Answer**:
+
+   - The `tsconfig.json` file specifies the root files and compiler options required to compile a TypeScript project.
+   - It configures the TypeScript compiler (`tsc`), defines which files are included or excluded, and controls how TypeScript code is transformed into JavaScript.
+
+2. **How can you configure module resolution and path aliases in TypeScript?**
+
+   **Answer**:
+
+   - By setting the `baseUrl` and `paths` options in `tsconfig.json`.
+   - **Example**:
+
+     ```json
+     "compilerOptions": {
+       "baseUrl": "./",
+       "paths": {
+         "@models/*": ["src/models/*"],
+         "@utils/*": ["src/utils/*"]
+       }
+     }
+     ```
+
+   - This allows for simplified import statements using aliases.
+
+3. **Explain how to integrate TypeScript with Webpack for bundling.**
+
+   **Answer**:
+
+   - Install required packages: `webpack`, `webpack-cli`, `typescript`, and `ts-loader`.
+   - Configure `webpack.config.js` to use `ts-loader` for handling `.ts` files.
+   - **Example**:
+
+     ```javascript
+     module.exports = {
+       entry: './src/index.ts',
+       // ... other config options
+       module: {
+         rules: [
+           {
+             test: /\.ts$/,
+             use: 'ts-loader',
+             exclude: /node_modules/,
+           },
+         ],
+       },
+     };
+     ```
+
+4. **What is the difference between using `ts-loader` and `babel-loader` for TypeScript files?**
+
+   **Answer**:
+
+   - **`ts-loader`**:
+
+     - Uses the TypeScript compiler (`tsc`) for transpilation.
+     - Performs type checking during the build process.
+     - Supports all TypeScript features.
+
+   - **`babel-loader`` with `@babel/preset-typescript`**:
+
+     - Uses Babel for transpilation.
+     - Does not perform type checking; type checking must be done separately.
+     - May not support all TypeScript features (e.g., some experimental features).
+
+5. **How can you enable strict type checking in TypeScript, and why is it recommended?**
+
+   **Answer**:
+
+   - Enable the `strict` compiler option in `tsconfig.json`:
+
+     ```json
+     "compilerOptions": {
+       "strict": true
+     }
+     ```
+
+   - This enables all strict type checking options.
+   - It is recommended because it helps catch more errors at compile time, leading to safer and more reliable code.
+
+---
+
+## **Exercises**
+
+### **Exercise 1: Configuring `tsconfig.json`**
+
+**Question**:
+
+Create a `tsconfig.json` file for a project where:
+
+- The target is ES2017.
+- The module system is CommonJS.
+- All strict type checking options are enabled.
+- Source maps are generated.
+- All files in the `src` directory are included, except for test files.
+
+**Answer**:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "module": "CommonJS",
+    "strict": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.test.ts", "node_modules"]
+}
+```
+
+---
+
+### **Exercise 2: Setting Up Webpack with TypeScript**
+
+**Question**:
+
+Set up a basic Webpack configuration to compile TypeScript files from the `src` directory and output a bundled file to the `dist` directory. Use `ts-loader` for handling TypeScript files.
+
+**Answer**:
+
+- **Install Packages**:
+
+  ```bash
+  npm install --save-dev webpack webpack-cli typescript ts-loader
+  ```
+
+- **webpack.config.js**:
+
+  ```javascript
+  const path = require('path');
+
+  module.exports = {
+    entry: './src/index.ts',
+    output: {
+      filename: 'bundle.js',
+      path: path.resolve(__dirname, 'dist'),
+    },
+    resolve: {
+      extensions: ['.ts', '.js'],
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: 'ts-loader',
+          exclude: /node_modules/,
+        },
+      ],
+    },
+    mode: 'development',
+  };
+  ```
+
+---
+
+### **Exercise 3: Integrating Babel with TypeScript**
+
+**Question**:
+
+Configure Babel to transpile TypeScript files using `@babel/preset-typescript`. Write a `babel.config.json` file and provide the command to transpile files from the `src` directory to the `lib` directory.
+
+**Answer**:
+
+- **Install Packages**:
+
+  ```bash
+  npm install --save-dev @babel/core @babel/cli @babel/preset-env @babel/preset-typescript
+  ```
+
+- **babel.config.json**:
+
+  ```json
+  {
+    "presets": ["@babel/preset-env", "@babel/preset-typescript"]
+  }
+  ```
+
+- **Transpile Command**:
+
+  ```bash
+  npx babel src --out-dir lib --extensions ".ts,.tsx"
+  ```
+
+---
+
+### **Exercise 4: Configuring Paths in `tsconfig.json`**
+
+**Question**:
+
+In a project with `src/models` and `src/controllers` directories, configure `tsconfig.json` to use `@models` and `@controllers` as path aliases.
+
+**Answer**:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@models/*": ["src/models/*"],
+      "@controllers/*": ["src/controllers/*"]
+    }
+  }
+}
+```
+
+**Usage in Code**:
+
+```typescript
+import { User } from '@models/User';
+import { UserController } from '@controllers/UserController';
+```
+
+---
+
+### **Exercise 5: Combining `ts-loader` and `babel-loader`**
+
+**Question**:
+
+Configure Webpack to use both `ts-loader` and `babel-loader` to process TypeScript files, where `ts-loader` performs type checking, and `babel-loader` applies transformations.
+
+**Answer**:
+
+- **Install Packages**:
+
+  ```bash
+  npm install --save-dev babel-loader @babel/core @babel/preset-env @babel/preset-typescript ts-loader
+  ```
+
+- **webpack.config.js**:
+
+  ```javascript
+  module.exports = {
+    // ... other config options
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          use: [
+            {
+              loader: 'babel-loader',
+            },
+            {
+              loader: 'ts-loader',
+            },
+          ],
+          exclude: /node_modules/,
+        },
+      ],
+    },
+  };
+  ```
+
+- **babel.config.json**:
+
+  ```json
+  {
+    "presets": ["@babel/preset-env", "@babel/preset-typescript"]
+  }
+  ```
+
+---
+
+## **Conclusion**
+
+Proper project configuration and integration with build tools are crucial aspects of modern TypeScript development. By mastering the `tsconfig.json` options and understanding how to integrate TypeScript with tools like Webpack and Babel, you can optimize your development workflow, ensure compatibility with target environments, and build efficient, scalable applications. This knowledge prepares you for tackling complex projects and technical interviews, enhancing your proficiency as a TypeScript developer.
+
+---
+
+## **Next Steps**
+
+- **Practice**:
+
+  - Set up different project configurations using `tsconfig.json`.
+  - Integrate TypeScript with various build tools in your projects.
+
+- **Explore**:
+
+  - Learn about other build tools like Rollup and Parcel and how they integrate with TypeScript.
+  - Study advanced Webpack configurations for code splitting and optimization.
+
+- **Prepare**:
+
+  - Review additional interview questions on TypeScript project configuration and build tools.
+  - Build projects with complex build setups to reinforce your understanding.
+
+---
+
+**Continue enhancing your TypeScript expertise by mastering project configuration and build tools!**
+
+---
+
+## **Appendix**
+
+### **Glossary**
+
+- **TypeScript Compiler (`tsc`)**: The official TypeScript compiler used to compile TypeScript code to JavaScript.
+- **`tsconfig.json`**: A JSON configuration file that specifies compiler options and files for a TypeScript project.
+- **Webpack**: A module bundler that processes and bundles JavaScript modules and assets.
+- **Babel**: A JavaScript compiler that transpiles modern JavaScript into code compatible with older environments.
+- **Loader**: In Webpack, a module that transforms the source code of a module as it is loaded.
+- **Preset**: In Babel, a set of plugins used to support particular language features.
+- **Module Resolution**: The process by which a module's name is mapped to its actual location on disk.
+- **Source Map**: A file that maps from the transformed source back to the original source, allowing for easier debugging.
+- **Composite Project**: A TypeScript project that references other projects, enabling incremental builds and modularity.
+- **Alias**: An alternate name for a module or path used to simplify imports and improve code readability.
+
+---
+
+**End of Lesson**

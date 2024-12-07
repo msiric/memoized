@@ -82,7 +82,7 @@ console.log(alice.toString()) // Outputs: [object Object]
 
 ## **Inheritance Patterns in JavaScript**
 
-### **1. Constructor Functions and Prototypes**
+### **Constructor Functions and Prototypes**
 
 - **Definition**: Using functions as constructors to create objects with shared properties and methods via the `prototype` property.
 
@@ -105,7 +105,7 @@ dog.eat() // Outputs: Dog is eating.
 
 - Instances of `Animal` share methods defined on `Animal.prototype`.
 
-### **2. Prototypal Inheritance with `Object.create()`**
+### **Prototypal Inheritance with `Object.create()`**
 
 - **Definition**: Creating a new object that directly inherits from an existing object.
 
@@ -128,7 +128,7 @@ cat.eat() // Outputs: Cat is eating.
 - `cat`'s `[[Prototype]]` points to `animal`.
 - Methods and properties are inherited directly from `animal`.
 
-### **3. ES6 Classes and `extends`**
+### **ES6 Classes and `extends`**
 
 - **Definition**: Syntactic sugar over prototypal inheritance introduced in ES6 for easier and cleaner inheritance.
 
@@ -166,7 +166,7 @@ myCar.honk() // Outputs: Toyota Corolla says beep beep!
 - `Car` extends `Vehicle`, inheriting its properties and methods.
 - `super(make)` calls the constructor of the parent class.
 
-### **4. Mixins**
+### **Mixins**
 
 - **Definition**: Copying properties from one object to another to achieve inheritance.
 
@@ -244,7 +244,7 @@ console.log(child.greeting) // Outputs: Hello
 
 ## **Inheritance Patterns Explained**
 
-### **1. Classical Inheritance Emulation**
+### **Classical Inheritance Emulation**
 
 - **Constructor Inheritance**:
 
@@ -282,7 +282,7 @@ child.sayAge() // Outputs: Age: 10
 - **Inheritance of Methods**: Setting `Child.prototype` to an object created from `Parent.prototype`.
 - **Resetting Constructor**: Assigning `Child.prototype.constructor` to `Child` to maintain the correct constructor reference.
 
-### **2. Parasitic Inheritance**
+### **Parasitic Inheritance**
 
 - **Definition**: Creating a new object by augmenting an existing object.
 
@@ -303,7 +303,7 @@ augmented.sayHello() // Outputs: Hello!
 console.log(augmented.name) // Outputs: Grace
 ```
 
-### **3. Combination Inheritance**
+### **Combination Inheritance**
 
 - **Definition**: Combining constructor stealing and prototype chaining.
 
@@ -348,7 +348,7 @@ console.log(instance2.colors) // Outputs: ['red', 'blue', 'green']
 
 ## **Best Practices**
 
-### **1. Prefer ES6 Classes for Inheritance**
+### **Prefer ES6 Classes for Inheritance**
 
 - **Benefits**:
   - Cleaner syntax.
@@ -379,7 +379,7 @@ manager.work() // Outputs: Jack is working.
 manager.manage() // Outputs: Jack is managing.
 ```
 
-### **2. Use `Object.create()` for Simple Inheritance**
+### **Use `Object.create()` for Simple Inheritance**
 
 - **When to Use**:
   - When you need a simple prototype-based inheritance without the need for constructors.
@@ -401,13 +401,13 @@ dog.init('Dog')
 dog.makeSound() // Outputs: Dog makes a sound.
 ```
 
-### **3. Avoid Modifying the `__proto__` Property Directly**
+### **Avoid Modifying the `__proto__` Property Directly**
 
 - **Reason**:
   - Modifying `__proto__` is discouraged due to performance and readability concerns.
   - Use `Object.setPrototypeOf()` or `Object.create()` instead.
 
-### **4. Be Careful with Shared Properties**
+### **Be Careful with Shared Properties**
 
 - **Issue**:
   - Objects sharing the same prototype can inadvertently share mutable properties (like arrays or objects).

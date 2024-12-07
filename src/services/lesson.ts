@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { AccessOptions, ProblemDifficulty } from '@prisma/client'
+import { AccessOptions, ProblemDifficulty, ProblemType } from '@prisma/client'
 
 export type MarkLessonArgs = {
   userId: string
@@ -157,8 +157,11 @@ export const upsertLesson = async (
 export const upsertProblem = async (
   problemHref: string,
   problemTitle: string,
-  lessonId: string,
   problemDifficulty: ProblemDifficulty,
+  problemQuestion: string,
+  problemAnswer: string,
+  problemType: ProblemType,
+  lessonId: string,
 ) => {
   return prisma.problem.upsert({
     where: { href: problemHref },
@@ -166,12 +169,18 @@ export const upsertProblem = async (
       title: problemTitle,
       lessonId: lessonId,
       difficulty: problemDifficulty,
+      question: problemQuestion,
+      answer: problemAnswer,
+      type: problemType,
     },
     create: {
       title: problemTitle,
       href: problemHref,
       lessonId: lessonId,
       difficulty: problemDifficulty,
+      question: problemQuestion,
+      answer: problemAnswer,
+      type: problemType,
     },
   })
 }
@@ -250,6 +259,9 @@ export const getLessonsWithProblems = async () => {
           id: true,
           title: true,
           href: true,
+          question: true,
+          answer: true,
+          type: true,
           difficulty: true,
         },
       },
@@ -288,6 +300,9 @@ export const getLessonsWithResourcesAndProblems = async () => {
           id: true,
           title: true,
           href: true,
+          question: true,
+          answer: true,
+          type: true,
           difficulty: true,
         },
       },

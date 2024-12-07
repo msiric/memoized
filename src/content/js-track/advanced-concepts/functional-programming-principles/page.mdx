@@ -43,9 +43,9 @@ Functional programming is a programming paradigm that treats computation as the 
 
 ---
 
-## **1. Introduction to Functional Programming**
+## **Introduction to Functional Programming**
 
-### **1.1 What is Functional Programming?**
+### **What is Functional Programming?**
 
 - **Definition**: A programming paradigm where programs are constructed by applying and composing functions.
 - **Core Concepts**:
@@ -55,7 +55,7 @@ Functional programming is a programming paradigm that treats computation as the 
   - **Higher-Order Functions**: Functions that can take other functions as arguments or return them as results.
   - **Function Composition**: Combining simple functions to build more complex ones.
 
-### **1.2 Benefits of Functional Programming**
+### **Benefits of Functional Programming**
 
 - **Predictability**: Pure functions with the same inputs always produce the same outputs.
 - **Testability**: Easier to test functions in isolation.
@@ -64,22 +64,22 @@ Functional programming is a programming paradigm that treats computation as the 
 
 ---
 
-## **2. Pure Functions**
+## **Pure Functions**
 
-### **2.1 Definition of Pure Functions**
+### **Definition of Pure Functions**
 
 A **pure function** is a function that:
 
 - **Always returns the same result** given the same input.
 - **Has no side effects**, such as modifying external variables, I/O operations, or changing state.
 
-### **2.2 Characteristics of Pure Functions**
+### **Characteristics of Pure Functions**
 
 - **Deterministic**: The output depends solely on the input parameters.
 - **No Side Effects**: Does not modify any external state or interact with the outside world.
 - **Referential Transparency**: Can be replaced with its output value without changing the program's behavior.
 
-### **2.3 Examples of Pure and Impure Functions**
+### **Examples of Pure and Impure Functions**
 
 **Pure Function Example**:
 
@@ -128,7 +128,7 @@ function sumOfSquares(a, b) {
 
 - **Explanation**: Both functions are pure; they depend only on their inputs.
 
-### **2.4 Benefits of Pure Functions**
+### **Benefits of Pure Functions**
 
 - **Easier to Test**: Predictable outputs make unit testing straightforward.
 - **Parallelism**: Safe to execute in parallel since they don't share state.
@@ -136,20 +136,20 @@ function sumOfSquares(a, b) {
 
 ---
 
-## **3. Immutability**
+## **Immutability**
 
-### **3.1 What is Immutability?**
+### **What is Immutability?**
 
 - **Definition**: An immutable object cannot be modified after it's created.
 - **Immutable Data Structures**: Data structures that cannot be altered after creation.
 
-### **3.2 Advantages of Immutability**
+### **Advantages of Immutability**
 
 - **Predictability**: Prevents unexpected changes, making code more predictable.
 - **Thread Safety**: No side effects from concurrent modifications.
 - **Simplifies Debugging**: Easier to track data flow and state changes.
 
-### **3.3 Implementing Immutability in JavaScript**
+### **Implementing Immutability in JavaScript**
 
 - **Primitive Values**: Strings, numbers, booleans are already immutable.
 - **Objects and Arrays**: By default, are mutable but can be handled immutably.
@@ -199,7 +199,7 @@ function sumOfSquares(a, b) {
     const newArr = [...arr.slice(0, 1), 4, ...arr.slice(1)] // Inserts 4 at index 1
     ```
 
-### **3.4 Example: Immutable Updates**
+### **Example: Immutable Updates**
 
 **Immutable Object Update**:
 
@@ -227,9 +227,9 @@ const newNumbers = [...numbers, 4]
 
 ---
 
-## **4. Side Effects**
+## **Side Effects**
 
-### **4.1 Understanding Side Effects**
+### **Understanding Side Effects**
 
 A **side effect** is any observable effect of a function other than its return value, such as:
 
@@ -239,13 +239,13 @@ A **side effect** is any observable effect of a function other than its return v
 - Throwing exceptions.
 - Mutating the DOM.
 
-### **4.2 Why Avoid Side Effects?**
+### **Why Avoid Side Effects?**
 
 - **Unpredictability**: Makes code harder to understand and reason about.
 - **Testing Difficulty**: Side effects complicate unit testing.
 - **Debugging Complexity**: Side effects can lead to hidden bugs.
 
-### **4.3 Managing Side Effects**
+### **Managing Side Effects**
 
 - **Isolate Side Effects**: Keep side effects at the edges of your application.
 - **Pure Core Logic**: Write the core logic of your application using pure functions.
@@ -290,13 +290,13 @@ A **side effect** is any observable effect of a function other than its return v
 
 ---
 
-## **5. Higher-Order Functions**
+## **Higher-Order Functions**
 
-### **5.1 Functions as First-Class Citizens**
+### **Functions as First-Class Citizens**
 
 - **First-Class Functions**: Functions can be assigned to variables, passed as arguments, and returned from other functions.
 
-### **5.2 Using Higher-Order Functions**
+### **Using Higher-Order Functions**
 
 A **higher-order function** is a function that:
 
@@ -355,9 +355,9 @@ A **higher-order function** is a function that:
 
 ---
 
-## **6. Functional Programming Techniques**
+## **Functional Programming Techniques**
 
-### **6.1 Function Composition**
+### **Function Composition**
 
 - **Definition**: Combining two or more functions to produce a new function.
 
@@ -382,7 +382,7 @@ A **higher-order function** is a function that:
   console.log(addThenMultiply(5)) // Outputs: 12
   ```
 
-### **6.2 Currying and Partial Application**
+### **Currying and Partial Application**
 
 **Currying**:
 
@@ -430,33 +430,33 @@ A **higher-order function** is a function that:
 
 ---
 
-## **7. Best Practices**
+## **Best Practices**
 
-### **7.1 Favor Pure Functions**
+### **Favor Pure Functions**
 
 - **Reason**: Easier to test, debug, and reason about.
 
-### **7.2 Avoid Side Effects**
+### **Avoid Side Effects**
 
 - **Reason**: Reduces unpredictability and hidden dependencies.
 
 - **Solution**: Isolate side effects to specific parts of the code.
 
-### **7.3 Use Immutability**
+### **Use Immutability**
 
 - **Reason**: Prevents unintended data mutations.
 
 - **Solution**: Use immutable data structures or copy data before modifying.
 
-### **7.4 Leverage Higher-Order Functions**
+### **Leverage Higher-Order Functions**
 
 - **Reason**: Promotes code reuse and abstraction.
 
-### **7.5 Keep Functions Small and Focused**
+### **Keep Functions Small and Focused**
 
 - **Reason**: Improves readability and maintainability.
 
-### **7.6 Use Declarative Code**
+### **Use Declarative Code**
 
 - **Reason**: Focuses on what needs to be done rather than how.
 
@@ -481,7 +481,7 @@ A **higher-order function** is a function that:
 
 ---
 
-## **8. Common Interview Questions**
+## **Common Interview Questions**
 
 1. **What is a pure function, and why are pure functions important in functional programming?**
 
@@ -542,7 +542,7 @@ A **higher-order function** is a function that:
 
 ---
 
-## **9. Exercises**
+## **Exercises**
 
 ### **Exercise 1: Identifying Pure Functions**
 
@@ -749,13 +749,13 @@ console.log(doubleThenIncrement(3)) // Outputs: 7
 
 ---
 
-## **10. Conclusion**
+## **Conclusion**
 
 Functional programming principles like pure functions, immutability, and avoiding side effects can greatly enhance the quality of your JavaScript code. By applying these concepts, you write more predictable, maintainable, and testable code. Understanding and utilizing functional programming techniques also prepares you for advanced programming challenges and technical interviews.
 
 ---
 
-## **11. Next Steps**
+## **Next Steps**
 
 - **Practice**:
 
@@ -778,7 +778,7 @@ Functional programming principles like pure functions, immutability, and avoidin
 
 ---
 
-## **12. Appendix**
+## **Appendix**
 
 ### **Glossary**
 
