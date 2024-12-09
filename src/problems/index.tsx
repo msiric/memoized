@@ -5,7 +5,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/valid-word-abbreviation',
       title: 'Valid Word Abbreviation',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given an input string and a valid word, determine if the input string is a correct abbreviation for the word by mapping characters to their corresponding full-word equivalents.',
@@ -15,7 +15,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/longest-substring-without-repeating-characters',
       title: 'Longest Substring Without Repeating Characters',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Write an algorithm to find the longest substring within a given string that contains no repeating characters.',
@@ -25,7 +25,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/group-anagrams',
       title: 'Group Anagrams',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array of strings, group the anagrams together by rearranging the characters in each string to form a unique identifier for grouping purposes.',
@@ -35,7 +35,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/encode-and-decode-strings',
       title: 'Encode and Decode Strings',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Write a program that can both encode and decode a string format using a specific encoding scheme, where the encoded string contains "a" to indicate start of a sequence, followed by the actual string and "e" to end the sequence, while decoding requires reversing this process.',
@@ -45,7 +45,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/generate-parentheses',
       title: 'Generate Parentheses',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The goal is to write a program that generates all possible combinations of well-formed parentheses, given a specified number of pairs.',
@@ -57,7 +57,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/palindrome-number',
       title: 'Palindrome Number',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Determine whether an integer is equal to its reverse, also known as a palindrome number.',
@@ -67,7 +67,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/integer-to-roman',
       title: 'Integer to Roman',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Convert an integer into its corresponding Roman numeral representation using a mapping of numbers to their respective Roman symbols and handling cases where the number is less than 1 or greater than 3999.',
@@ -77,7 +77,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/factorial-trailing-zeroes',
       title: 'Factorial Trailing Zeroes',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the number of trailing zeroes in the factorial of a given integer, which is determined by the count of factors of 5 in the numbers from 1 to that integer.',
@@ -87,7 +87,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/integer-break',
       title: 'Integer Break',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an integer, find the maximum number of ways to break down the integer into a product of two positive integers.',
@@ -97,7 +97,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/super-ugly-number',
       title: 'Super Ugly Number',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a set of ugly numbers, find the smallest number that is not divisible by any of the given numbers.',
@@ -109,7 +109,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/best-time-to-buy-and-sell-stock',
       title: 'Best Time to Buy and Sell Stock',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given the prices of a single stock over time, find the optimal day to buy and sell the stock to maximize profit while avoiding losses.',
@@ -119,7 +119,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/product-of-array-except-self',
       title: 'Product of Array Except Self',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Write an algorithm to calculate the product of all numbers in an array, excluding the number at each index, for a given input array of integers.',
@@ -129,7 +129,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/sort-colors',
       title: 'Sort Colors',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The task is to efficiently sort an array of colored integers, where each integer represents the color with values ranging from 0 (black) to 2 (white), in ascending order of their corresponding colors.',
@@ -139,7 +139,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/container-with-most-water',
       title: 'Container With Most Water',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given two pointers representing the start and end of a container, find the maximum area that can be trapped between the two "walls" represented by the pointer positions.',
@@ -149,7 +149,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/subarray-sum-equals-k',
       title: 'Subarray Sum Equals K',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array and an integer target sum, find all unique subarrays within the array that sum up to the target value.',
@@ -161,7 +161,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-common-characters',
       title: 'Find Common Characters',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Write a program that takes two strings as input and returns all characters that appear in both strings, regardless of frequency or order.',
@@ -171,7 +171,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/single-number',
       title: 'Single Number',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given an array of integers, find the single number that appears only once and is not present in any other position in the array.',
@@ -181,7 +181,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/letter-combinations-of-a-phone-number',
       title: 'Letter Combinations of a Phone Number',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Generate all possible letter combinations that can be formed using the digits of a given phone number, such as "2" mapping to "abc", "3" to "def", etc.',
@@ -191,7 +191,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/group-shifted-strings',
       title: 'Group Shifted Strings',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Given an array of strings, shift each string's characters to the right by a specified number of positions and return the resulting array of shifted strings.",
@@ -203,7 +203,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/intersection-of-two-arrays',
       title: 'Intersection of Two Arrays',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given two arrays, find the elements that are common to both arrays and return them in a single array.',
@@ -213,7 +213,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/unique-email-addresses',
       title: 'Unique Email Addresses',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'The goal is to write an algorithm that filters out duplicate and malformed email addresses from a list, returning the unique ones in the correct format.',
@@ -223,7 +223,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/valid-sudoku',
       title: 'Valid Sudoku',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Determine whether a given Sudoku puzzle is valid, following the standard rules where each row, column, and 3x3 sub-grid must contain the numbers 1-9 without repetition.',
@@ -235,7 +235,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/word-pattern',
       title: 'Word Pattern',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given two patterns and their corresponding strings, determine if the strings follow the same pattern by comparing each string with all possible patterns.',
@@ -245,7 +245,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-index-sum-of-two-lists',
       title: 'Minimum Index Sum of Two Lists',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given two lists of integers, find the pair of numbers with the smallest sum of their indices in the lists when sorted separately.',
@@ -255,7 +255,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/subdomain-visit-count',
       title: 'Subdomain Visit Count',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Count the number of visits for each subdomain given an array of domain names and their corresponding visit counts.',
@@ -267,7 +267,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/detect-capital',
       title: 'Detect Capital',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Write a function to determine if all characters in a given string are capital or not, and return true if they are entirely uppercase or false otherwise.',
@@ -277,7 +277,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/length-of-last-word',
       title: 'Length of Last Word',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Find the length of the last word in a given string, ignoring any trailing whitespace and handling cases where the string ends with whitespace or has only whitespace characters.',
@@ -287,7 +287,7 @@ export const BUILT_IN_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-the-index-of-the-first-occurrence-in-a-string',
       title: 'Find the Index of the First Occurrence in a String',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a target string and an input string, find the starting index of the first occurrence of the target string within the input string.',
@@ -302,7 +302,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/ransom-note',
       title: 'Ransom Note',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Determine if a ransom note can be formed using a given set of codes and their corresponding letters, where each code corresponds to exactly one letter.',
@@ -312,7 +312,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/insert-delete-getrandom-o1',
       title: 'Insert Delete GetRandom O(1)',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Design an O(1) data structure to efficiently insert, delete, and retrieve random elements from a set of unique integers, maintaining constant-time performance for all operations.',
@@ -322,7 +322,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/dot-product-of-two-sparse-vectors',
       title: 'Dot Product of Two Sparse Vectors',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Calculate the dot product of two sparse vectors, which are vectors where most elements are zero, by efficiently identifying and multiplying non-zero elements.',
@@ -332,7 +332,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/time-based-key-value-store',
       title: 'Time Based Key-Value Store',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Implement a time-based key-value store that allows storing, retrieving, and deleting key-value pairs with a timestamp for the value's expiration date.",
@@ -344,7 +344,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/maximum-depth-of-binary-tree',
       title: 'Maximum Depth of Binary Tree',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given the roots of a binary tree, find the maximum depth of the tree by traversing its nodes in a way that explores as far as possible along each branch before backtracking.',
@@ -354,7 +354,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree',
       title: 'Lowest Common Ancestor of a Binary Tree',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the node in a binary tree that is common to all paths from its root to any leaf node, representing the lowest common ancestor.',
@@ -364,7 +364,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/binary-tree-right-side-view',
       title: 'Binary Tree Right Side View',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a binary tree, write a solution to return the rightmost node at each level of the tree, representing the right side view of the tree.',
@@ -374,7 +374,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/binary-search-tree-iterator',
       title: 'Binary Search Tree Iterator',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Design an iterator to efficiently traverse a binary search tree, allowing for recursive and iterative traversal methods.',
@@ -384,7 +384,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/sum-root-to-leaf-numbers',
       title: 'Sum Root to Leaf Numbers',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given the root of a binary tree, calculate the sum of all node values that represent a valid number when traversing from root to leaf.',
@@ -396,7 +396,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/clone-graph',
       title: 'Clone Graph',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Implement an algorithm to create a deep copy of a graph, including all nodes and edges, while preserving the original structure.',
@@ -406,7 +406,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/rotting-oranges',
       title: 'Rotting Oranges',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'In the "Rotting Oranges" challenge, you\'re tasked with determining which oranges will eventually rot in a grid based on their interactions and the boundaries of the grid, using a flood fill algorithm to track the spread of rottenness.',
@@ -416,7 +416,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/cheapest-flights-within-k-stops',
       title: 'Cheapest Flights Within K Stops',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a graph of cities and their direct flights, find the cheapest flights from a starting city to all other cities with at most k stops in between.',
@@ -426,7 +426,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/evaluate-division',
       title: 'Evaluate Division',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This programming challenge requires implementing a function to divide two numbers and handle potential division by zero errors or edge cases.',
@@ -438,7 +438,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/kth-largest-element-in-an-array',
       title: 'Kth Largest Element in an Array',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Find the Kth largest element in an array, where every other element's value is compared to determine its rank.",
@@ -448,7 +448,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/search-suggestions-system',
       title: 'Search Suggestions System',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Implement a system that generates suggestions for a user's search query based on their past searches, with the goal of finding the most relevant and accurate results.",
@@ -458,7 +458,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/k-closest-points-to-origin',
       title: 'K Closest Points to Origin',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the k points with the shortest distances from the origin in a given set of 2D coordinates.',
@@ -468,7 +468,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/sort-characters-by-frequency',
       title: 'Sort Characters By Frequency',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This programming challenge requires writing an algorithm that takes a string as input and returns the characters sorted in ascending order based on their frequency, from most frequent to least frequent.',
@@ -480,7 +480,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/palindrome-linked-list',
       title: 'Palindrome Linked List',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'You are given the task to determine whether a singly linked list is a palindrome, meaning that its contents read the same backward as forward.',
@@ -490,7 +490,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/lru-cache',
       title: 'LRU Cache',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Design an efficient data structure to store and retrieve frequently accessed items while discarding the least recently used ones.',
@@ -500,7 +500,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/add-two-numbers',
       title: 'Add Two Numbers',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'You are given two numbers represented as linked lists, and you must add these numbers together while preserving the original order of digits.',
@@ -510,7 +510,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/copy-list-with-random-pointer',
       title: 'Copy List with Random Pointer',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "You're tasked with creating a function that can copy a linked list, including the random pointers, while preserving their original values and connections.",
@@ -522,7 +522,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/number-of-recent-calls',
       title: 'Number of Recent Calls',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Design an algorithm to efficiently track and retrieve the number of recent calls made to a system, handling cases where multiple calls occur within a certain time frame.',
@@ -532,7 +532,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/design-hit-counter',
       title: 'Design Hit Counter',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The task involves developing an efficient data structure to track the number of times each minute has been accessed within a given time period, allowing for fast lookups and updates.',
@@ -542,7 +542,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/design-circular-queue',
       title: 'Design Circular Queue',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Implement a data structure that supports adding and removing elements in a circular manner, with the ability to track the front and rear indices of the queue.',
@@ -552,7 +552,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/perfect-squares',
       title: 'Perfect Squares',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array of non-negative integers, find the number of perfect square numbers within the array that can be formed by taking the square root of each element and then rounding down to the nearest integer.',
@@ -564,7 +564,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/valid-parentheses',
       title: 'Valid Parentheses',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'The goal is to determine whether a given string of parentheses is balanced and correctly nested, following standard rules for opening and closing brackets.',
@@ -574,7 +574,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses',
       title: 'Minimum Remove to Make Valid Parentheses',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a string of parentheses, find the minimum number of characters that need to be removed to make all parentheses properly nested and balanced.',
@@ -584,7 +584,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/buildings-with-an-ocean-view',
       title: 'Buildings With an Ocean View',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Develop an algorithm to determine which buildings have an ocean view, based on the positions of their bases relative to the coastline.',
@@ -594,7 +594,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/trapping-rain-water',
       title: 'Trapping Rain Water',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'The task involves calculating the amount of water that can be trapped in a given array of integers, which represents the height of bars in a vertical garden, to determine the maximum area that can be trapped between them.',
@@ -606,7 +606,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/implement-trie-prefix-tree',
       title: 'Implement Trie (Prefix Tree)',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Design and implement a data structure that efficiently stores and retrieves words based on their prefixes, allowing for fast lookup and insertion operations.',
@@ -616,7 +616,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/word-break',
       title: 'Word Break',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Determine whether a given string can be segmented into valid words from a predefined list, following the constraints that each word in the list must exactly match a contiguous subsequence within the input string.',
@@ -626,7 +626,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/design-add-and-search-words-data-structure',
       title: 'Design Add and Search Words Data Structure',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Design a data structure that allows for efficient insertion, searching, and retrieval of words while minimizing storage space.',
@@ -636,7 +636,7 @@ export const USER_DEFINED_DATA_STRUCTURES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/design-in-memory-file-system',
       title: 'Design In-Memory File System',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Design an in-memory file system that stores and manages files, handling operations such as creation, deletion, reading, and writing while minimizing memory usage.',
@@ -651,7 +651,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/permutation-in-string',
       title: 'Permutation in String',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a string and an integer k, find all unique permutations of the first k characters that appear in the original string.',
@@ -661,7 +661,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-size-subarray-sum',
       title: 'Minimum Size Subarray Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The goal is to find the minimum length subarray that sums up to a given target value, while potentially allowing for negative numbers and zero.',
@@ -671,7 +671,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/longest-subarray-of-1s-after-deleting-one-element',
       title: "Longest Subarray of 1's After Deleting One Element",
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The task is to find the length of the longest subarray that contains consecutive 1s, after deleting exactly one element from this subarray.',
@@ -681,7 +681,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/fruit-into-baskets',
       title: 'Fruit Into Baskets',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This problem requires writing an efficient algorithm to calculate the number of ways to pick fruits from a given basket, considering constraints on fruit counts and basket sizes.',
@@ -693,7 +693,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/squares-of-a-sorted-array',
       title: 'Squares of a Sorted Array',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Given a sorted array of integers, find the minimum number of operations required to transform it into an array where each element is the square of its index in the original array.',
@@ -703,7 +703,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/3sum',
       title: '3Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array of integers, find all unique triplets that sum to zero.',
@@ -713,7 +713,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/valid-palindrome-ii',
       title: 'Valid Palindrome II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a string, determine if it can be rearranged into a palindrome by removing at most one character.',
@@ -725,7 +725,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/happy-number',
       title: 'Happy Number',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Determine if a given number is a "happy number," defined as a number where the sum of the squares of its digits eventually reaches 1, or remains at 1 in a loop, without descending to a negative value.',
@@ -735,7 +735,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/linked-list-cycle-ii',
       title: 'Linked List Cycle II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'In the Linked List Cycle II challenge, you need to detect and solve a cycle in a linked list that has multiple entry points and returns to its start point, finding the start node of the cycle and the tail node of the cycle if possible.',
@@ -745,7 +745,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-the-duplicate-number',
       title: 'Find the Duplicate Number',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The goal is to identify and return a duplicate number that exists within a list of integers, where each integer appears twice in the list.',
@@ -757,7 +757,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/non-overlapping-intervals',
       title: 'Non-overlapping Intervals',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given two sets of intervals, determine if all intervals can be arranged in such a way that no two overlapping intervals are adjacent to each other.',
@@ -767,7 +767,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/interval-list-intersections',
       title: 'Interval List Intersections',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given two or more intervals, find all overlapping intervals in the list and return them as a sorted list of start-end pairs.',
@@ -777,7 +777,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/employee-free-time',
       title: 'Employee Free Time',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         "Given an employee's schedule and work hours, determine the time blocks in which they are free from work.",
@@ -789,7 +789,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-all-numbers-disappeared-in-an-array',
       title: 'Find All Numbers Disappeared in an Array',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Write a program to identify and return all numbers that are missing from a given sorted array of integers, assuming the range of integers is not specified.',
@@ -799,7 +799,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-all-duplicates-in-an-array',
       title: 'Find All Duplicates in an Array',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array, find and return all duplicate elements, distinguishing between exact matches and occurrences with different indices.',
@@ -809,7 +809,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/first-missing-positive',
       title: 'First Missing Positive',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Given an unsorted array of positive integers, find the smallest missing positive integer from 1 to the length of the array.',
@@ -821,7 +821,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/reverse-linked-list-ii',
       title: 'Reverse Linked List II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Reverse the order of a linked list, where each node has two pointers: one pointing to its previous node and one to its next node, and the goal is to reverse the direction of these pointers while maintaining the list's structure.",
@@ -831,7 +831,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/swap-nodes-in-pairs',
       title: 'Swap Nodes in Pairs',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a linked list, swap the values of adjacent nodes while maintaining the original order.',
@@ -841,7 +841,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/reverse-nodes-in-k-group',
       title: 'Reverse Nodes in k-Group',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         "Reverses the nodes in a linked list in groups of 'k', where each group's nodes are reversed individually.",
@@ -853,7 +853,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/average-of-levels-in-binary-tree',
       title: 'Average of Levels in Binary Tree',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Find the average value of each level in a binary tree, where each node at a given level can have multiple child nodes.',
@@ -863,7 +863,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/binary-tree-level-order-traversal-ii',
       title: 'Binary Tree Level Order Traversal II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Perform a level-order traversal on a binary tree, returning the nodes at each level in a list, from left to right and top to bottom.',
@@ -873,7 +873,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal',
       title: 'Binary Tree Zigzag Level Order Traversal',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a binary tree, traverse its nodes in a zigzag level order traversal pattern, alternating the order of traversal between left-to-right and right-to-left within each level of the tree.',
@@ -885,7 +885,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/path-sum',
       title: 'Path Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'The goal is to write a program that determines whether a path from the root of a binary tree adds up to a target sum, using recursion and/or dynamic programming.',
@@ -895,7 +895,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/validate-binary-search-tree',
       title: 'Validate Binary Search Tree',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Determine whether a given binary search tree is valid, ensuring that all node values are within the correct range relative to its left and right subtrees.',
@@ -905,7 +905,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/binary-tree-maximum-path-sum',
       title: 'Maximum Path Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Find the maximum sum that can be obtained by taking a path through an array of integers, where each step is either up or down, without going below zero.',
@@ -917,7 +917,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-right-interval',
       title: 'Find Right Interval',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The task is to develop an algorithm that determines the range of values within a sorted array that corresponds to a specific target value, identifying all intervals where the target falls between two existing numbers in the array.',
@@ -927,7 +927,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-median-from-data-stream',
       title: 'Find Median from Data Stream',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Write an algorithm to efficiently calculate the median of a continuously streaming sequence of numbers, allowing for insertions and deletions while maintaining an accurate median value.',
@@ -937,7 +937,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/sliding-window-median',
       title: 'Sliding Window Median',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'The goal is to find the median of all elements in an array that are within a certain sliding window, given a set of integers and a target window size.',
@@ -949,7 +949,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/subsets-ii',
       title: 'Subsets II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find all unique subsets of a given set of integers, where each subset must be in lexicographical order and not contain duplicate elements.',
@@ -959,7 +959,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/letter-case-permutation',
       title: 'Letter Case Permutation',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Write a program that generates all possible letter case permutations for a given string, where each character can be either uppercase or lowercase.',
@@ -969,7 +969,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/combination-sum-ii',
       title: 'Combination Sum II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array of integers and a target sum, find all unique combinations of the integers that add up to the target sum, with each integer only used once in each combination.',
@@ -981,7 +981,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-minimum-in-rotated-sorted-array',
       title: 'Find Minimum in Rotated Sorted Array',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a sorted array that has been rotated an unknown number of times, find the minimum element in the array.',
@@ -991,7 +991,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-peak-element',
       title: 'Find Peak Element',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Determine the maximum element in an array and verify that it is indeed the peak by checking both its left and right elements, ensuring the maximum element is not part of a larger peak sequence.',
@@ -1001,7 +1001,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/split-array-largest-sum',
       title: 'Split Array Largest Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Divide an array into segments and determine the segment arrangement that yields the largest possible sum while ensuring all numbers are used exactly once.',
@@ -1013,7 +1013,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/kth-largest-element-in-a-stream',
       title: 'Kth Largest Element in a Stream',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Design an algorithm to efficiently determine the kth largest element from a constantly changing stream of numbers.',
@@ -1023,7 +1023,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/top-k-frequent-elements',
       title: 'Top K Frequent Elements',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the top K elements with the highest frequency in a given array of integers, ranked from most frequent to least.',
@@ -1033,7 +1033,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix',
       title: 'Kth Smallest Element in a Sorted Matrix',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a sorted matrix and a target k, find the kth smallest element within the matrix.',
@@ -1045,7 +1045,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-k-pairs-with-smallest-sums',
       title: 'Find K Pairs with Smallest Sums',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array and an integer k, find the number of pairs in the array that have the smallest sum.',
@@ -1055,7 +1055,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/merge-k-sorted-lists',
       title: 'Merge k Sorted Lists',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Combine multiple sorted lists into a single sorted list, efficiently merging and ordering elements from each input list in O(n log k) time complexity.',
@@ -1065,7 +1065,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/smallest-range-covering-elements-from-k-lists',
       title: 'Smallest Range Covering Elements from K Lists',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Given k sorted lists, find the smallest range that covers all elements across these lists.',
@@ -1077,7 +1077,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/shortest-path-in-binary-matrix',
       title: 'Shortest Path in Binary Matrix',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the shortest path between two points in a binary matrix, where each cell represents a value of either 0 or 1, and movement is restricted to adjacent cells.',
@@ -1087,7 +1087,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-knight-moves',
       title: 'Minimum Knight Moves',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Given the coordinates of a knight's position on a chessboard, determine the minimum number of moves required to reach a specific target position using valid knight movements (two squares in one direction, then one square to the side).",
@@ -1097,7 +1097,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/open-the-lock',
       title: 'Open the Lock',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'In this problem, you need to determine the minimum number of characters that need to be added or removed from a given set of letters to form a new sequence where two adjacent numbers differ by at most 1.',
@@ -1109,7 +1109,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph',
       title: 'Number of Connected Components in an Undirected Graph',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The goal is to write a program that determines the number of separate subgraphs or "connected components" within an undirected graph represented as an adjacency list.',
@@ -1119,7 +1119,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/course-schedule',
       title: 'Course Schedule',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a list of course prerequisites, determine the order in which a student can take the courses to avoid conflicts.',
@@ -1129,7 +1129,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/graph-valid-tree',
       title: 'Graph Valid Tree',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This problem involves determining whether a given directed or undirected graph with multiple nodes and edges is valid by checking if its number of edges matches the maximum possible number for the same number of nodes in a tree structure.',
@@ -1141,7 +1141,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/course-schedule-ii',
       title: 'Course Schedule II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'A program is required to determine the order in which courses must be taken within a semester given a set of prerequisite course constraints, ensuring that all prerequisites are met before taking each subsequent course.',
@@ -1151,7 +1151,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-height-trees',
       title: 'Minimum Height Trees',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an undirected graph, find the minimum height trees that can be formed from a given set of nodes, with all other nodes removed as the only option for each node in the tree.',
@@ -1161,7 +1161,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/alien-dictionary',
       title: 'Alien Dictionary',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         "Create an algorithm to arrange words in the correct order based on their given alphabet, such as 'w' comes before 'z' in the alien dictionary.",
@@ -1173,7 +1173,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/spiral-matrix',
       title: 'Spiral Matrix',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Write an algorithm that traverses and prints all elements in a square matrix in a spiral order, starting from the outermost layer and moving inwards.',
@@ -1183,7 +1183,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/set-matrix-zeroes',
       title: 'Set Matrix Zeroes',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a matrix, modify the elements in such a way that the rows or columns containing zero become completely zeroed out.',
@@ -1193,7 +1193,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/diagonal-traverse',
       title: 'Diagonal Traverse',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Write an efficient algorithm to traverse all elements in a square grid, starting from the top-left corner and moving diagonally down and right, visiting each cell exactly once.',
@@ -1205,7 +1205,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/longest-palindromic-subsequence',
       title: 'Longest Palindromic Subsequence',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the longest subsequence within a given string that reads the same backward as forward.',
@@ -1215,7 +1215,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/palindromic-substrings',
       title: 'Palindromic Substrings',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This challenge involves finding all possible substrings within a given string that read the same backward as forward, also known as palindromes.',
@@ -1225,7 +1225,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/count-different-palindromic-subsequences',
       title: 'Count Different Palindromic Subsequences',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'This problem asks to find the number of unique palindromic subsequences within a given string, where a palindrome is a sequence that reads the same forward and backward.',
@@ -1237,7 +1237,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/longest-common-prefix',
       title: 'Longest Common Prefix',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'Find the longest substring shared by all strings in an input array, assuming they are stored as arrays of characters.',
@@ -1247,7 +1247,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/longest-common-subsequence',
       title: 'Longest Common Subsequence',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The goal is to find the longest sequence that appears in both two given sequences, by identifying overlapping or identical sub-sequences.',
@@ -1257,7 +1257,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/edit-distance',
       title: 'Edit Distance',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'The goal is to develop an algorithm that calculates the minimum number of operations (insertions, deletions, and substitutions) required to transform one string into another.',
@@ -1269,7 +1269,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/climbing-stairs',
       title: 'Climbing Stairs',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.EASY,
       question:
         'You need to find the number of unique paths that can be taken on a staircase with n steps, where at each step you can either take 1 or 2 steps forward.',
@@ -1279,7 +1279,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/house-robber',
       title: 'House Robber',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'In the House Robber problem, you need to find the maximum amount of money that can be stolen from a row of houses while avoiding the risk of being caught by the police.',
@@ -1289,7 +1289,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/target-sum',
       title: 'Target Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'In this challenge, you are tasked with finding all unique combinations of numbers in an array that sum up to a given target value, known as the "target sum."',
@@ -1301,7 +1301,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/combination-sum',
       title: 'Combination Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a set of integers and a target sum, find all unique combinations of numbers that add up to the target sum without repeating any number in a combination.',
@@ -1311,7 +1311,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/n-queens',
       title: 'N-Queens',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         "The N-Queens problem involves placing 'N' queens on an NxN chessboard such that no two queens attack each other, requiring a solution to be found using backtracking algorithms.",
@@ -1321,7 +1321,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/sudoku-solver',
       title: 'Sudoku Solver',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Design an algorithm to solve a Sudoku puzzle, which is a 9x9 grid filled with numbers from 1-9, where each row, column, and 3x3 sub-grid must contain each number only once.',
@@ -1333,7 +1333,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/jump-game',
       title: 'Jump Game',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Given an array of numbers representing the maximum jump distance from each position, determine if it's possible to reach the last index without ever backtracking.",
@@ -1343,7 +1343,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/gas-station',
       title: 'Gas Station',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Determine the minimum number of gas stations that need to be visited in order to return home, given the locations and capacities of various gas stations along a route.',
@@ -1353,7 +1353,7 @@ export const COMMON_TECHNIQUES_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/candy',
       title: 'Candy',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Given an array of integers representing the number of candies each student received on different days, determine how many candies each student should receive at the end of the week based on their daily allocation and the total available candy.',
@@ -1368,7 +1368,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-path-sum',
       title: 'Minimum Path Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The goal is to find the minimum sum of weights in a path from the top-left corner to the bottom-right corner of a rectangular grid while avoiding certain obstacles.',
@@ -1378,7 +1378,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/partition-equal-subset-sum',
       title: 'Partition Equal Subset Sum',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "The task is to determine if it's possible to partition the elements of an array into subsets that sum up to equal target values, with each subset having unique elements.",
@@ -1388,7 +1388,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/burst-balloons',
       title: 'Burst Balloons',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'The goal is to find the maximum number of balloons that can be popped, given a list of balloons where each balloon has a value and two endpoints, with constraints on when a balloon can be popped after it is inflated.',
@@ -1400,7 +1400,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/single-number-ii',
       title: 'Single Number II',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This problem requires finding all single numbers in an array where each number appears only once, and the remaining elements appear twice.',
@@ -1412,7 +1412,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/range-sum-query-mutable',
       title: 'Range Sum Query - Mutable',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This problem requires implementing a data structure to efficiently store and retrieve the cumulative sum of elements within a given range in an array, allowing for updates to be made and queries performed in O(1) time complexity on average.',
@@ -1422,7 +1422,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/the-skyline-problem',
       title: 'The Skyline Problem',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Given a list of buildings with their heights and starting and ending positions, determine the height of the skyline at each point in time, represented by an ordered pair of (x-coordinate, y-coordinate).',
@@ -1434,7 +1434,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/number-of-islands',
       title: 'Number of Islands',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'The goal is to determine the number of islands in a given grid, where an island is defined as a group of adjacent cells with water (0) or land (1) that are connected by land cells.',
@@ -1444,7 +1444,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/redundant-connection',
       title: 'Redundant Connection',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'In the Redundant Connection problem, find the connection between two points in a network of nodes and edges where some connections are redundant and should be ignored.',
@@ -1456,7 +1456,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/connecting-cities-with-minimum-cost',
       title: 'Connecting Cities With Minimum Cost',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This challenge involves finding the most cost-effective way to connect multiple cities by forming a network with the minimum total cost, considering various constraints and optimal routing techniques.',
@@ -1466,7 +1466,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/optimize-water-distribution-in-a-village',
       title: 'Optimize Water Distribution in a Village',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Design an efficient water distribution system for a village by allocating the minimum amount of water to each household while satisfying the demand and minimizing waste, given a set of households with varying water needs.',
@@ -1478,7 +1478,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/path-with-minimum-effort',
       title: 'Path With Minimum Effort',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a graph with non-negative edge weights, find the shortest path from a source node to all other nodes while considering possible obstacles represented by non-negative edge weights.',
@@ -1488,7 +1488,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/network-delay-time',
       title: 'Network Delay Time',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the minimum time by which all nodes in a directed graph must be visited after a given start node, considering possible delays and edge weights.',
@@ -1500,7 +1500,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/find-valid-matrix-given-row-and-column-sums',
       title: 'Find Valid Matrix Given Row and Column Sums',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given the sum of each row and column in a matrix, determine if there exists at least one valid arrangement where the sums match.',
@@ -1512,7 +1512,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/sum-of-two-integers',
       title: 'Sum of Two Integers',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'This problem involves finding the sum of two integers, which could be a positive or negative number, and returning the result as an integer.',
@@ -1522,7 +1522,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/maximum-xor-of-two-numbers-in-an-array',
       title: 'Maximum XOR of Two Numbers in an Array',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array of integers, find the maximum possible bitwise XOR that can be obtained by combining any two numbers from the array.',
@@ -1534,7 +1534,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/random-pick-with-weight',
       title: 'Random Pick with Weight',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Given an array of weights, randomly select an index based on the corresponding weight's probability distribution and return that element.",
@@ -1544,7 +1544,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/random-point-in-non-overlapping-rectangles',
       title: 'Random Point in Non-overlapping Rectangles',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a set of non-overlapping rectangles, determine the probability that a randomly chosen point within these rectangles falls inside at least one rectangle.',
@@ -1556,7 +1556,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/longest-repeating-substring',
       title: 'Longest Repeating Substring',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Find the longest substring that repeats itself within another substring in a given string, returning its length and the substring itself as output.',
@@ -1566,7 +1566,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/stream-of-characters',
       title: 'Stream of Characters',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'The "Stream of Characters" challenge involves processing a continuous stream of characters and performing operations such as insertion, deletion, or updating of characters in a data structure while maintaining efficient performance.',
@@ -1578,7 +1578,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-number-of-taps-to-open-to-water-a-garden',
       title: 'Minimum Number of Taps to Open to Water a Garden',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Given a garden with tap positions and a water pressure reading at each position, find the minimum number of taps that need to be opened to fully water the entire garden.',
@@ -1588,7 +1588,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/best-position-for-a-service-centre',
       title: 'Best Position for a Service Centre',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Given a set of coordinates representing potential locations for a service centre, determine the optimal position that minimizes travel time or distance to all existing locations.',
@@ -1600,7 +1600,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/range-addition',
       title: 'Range Addition',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'You are given two non-negative integers representing the start and end times of events, and you must calculate the total time range after adding or subtracting an arbitrary number within that range.',
@@ -1610,7 +1610,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/count-of-smaller-numbers-after-self',
       title: 'Count of Smaller Numbers After Self',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Write an algorithm to find the count of smaller numbers after each element in a given sorted array, and return them as a new array.',
@@ -1622,7 +1622,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/maximum-students-taking-exam',
       title: 'Maximum Students Taking Exam',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Write an algorithm to determine the maximum number of students that can take an exam without exceeding a given time limit, assuming each student requires a fixed amount of time.',
@@ -1634,7 +1634,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/erect-the-fence',
       title: 'Erect the Fence',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.HARD,
       question:
         'Design an efficient algorithm to determine the minimum cost required to erect a fence around a given rectangular plot of land by selecting the optimal placement of four vertical poles, with each pole connected to two adjacent sections of the fence at specific heights.',
@@ -1646,7 +1646,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-cost-to-connect-sticks',
       title: 'Minimum Cost to Connect Sticks',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given an array of stick lengths, find the minimum cost to connect all sticks by forming two groups of sticks with equal total lengths.',
@@ -1656,7 +1656,7 @@ export const ADVANCED_TOPICS_PROBLEMS = {
     {
       href: 'https://leetcode.com/problems/minimum-number-of-arrows-to-burst-balloons',
       title: 'Minimum Number of Arrows to Burst Balloons',
-      type: ProblemType.ALGORITHM,
+      type: ProblemType.CODING,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Given a list of balloons with distinct pairs of adjacent integers representing their burst point values, find the minimum number of arrows needed to pop all balloons such that no two popped balloons have points within 2 units of each other.',
@@ -1671,7 +1671,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#callback-hell-pitfalls',
       title: 'Callback Hell Pitfalls',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the main issues with using callbacks for asynchronous code in JavaScript?',
@@ -1681,7 +1681,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#improving-asynchronous-programming',
       title: 'Improving Asynchronous Programming',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how promises improve upon callbacks in asynchronous programming.',
@@ -1691,7 +1691,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#promise-comparison-methods',
       title: 'Promise Comparison Methods',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between `Promise.all()` and `Promise.race()`?',
@@ -1701,7 +1701,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#simplifying-promise-handling',
       title: 'Simplifying Promise Handling',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How does `async/await` simplify working with promises?',
       answer:
@@ -1710,7 +1710,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#handling-async-errors',
       title: 'Handling Async Errors',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain how to handle errors when using `async/await`?',
@@ -1722,7 +1722,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#javascript-closures-explained',
       title: 'JavaScript Closures Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a closure in JavaScript, and how does it work?',
       answer:
@@ -1731,7 +1731,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#lexical-scoping-in-javascript',
       title: 'Lexical Scoping in JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain lexical scoping in JavaScript.',
       answer:
@@ -1740,7 +1740,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#closures-for-private-variables',
       title: 'Closures for Private Variables',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can closures be used to create private variables in JavaScript?',
@@ -1750,7 +1750,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#common-pitfalls-in-closures',
       title: 'Common Pitfalls in Closures',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some common pitfalls when using closures, and how can they be avoided?',
@@ -1760,7 +1760,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#how-closures-work',
       title: 'How Closures Work',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain how the scope chain works when dealing with nested functions and closures?',
@@ -1772,7 +1772,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#v8-engine-execution-process',
       title: 'V8 Engine Execution Process',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the process of how JavaScript code is executed in the V8 engine.',
@@ -1782,7 +1782,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#understanding-hidden-classes',
       title: 'Understanding Hidden Classes',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are hidden classes, and how do they affect performance?',
       answer:
@@ -1791,7 +1791,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#garbage-collector-overview',
       title: 'Garbage Collector Overview',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the garbage collector work in JavaScript engines like V8?',
@@ -1801,7 +1801,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#understanding-event-loops',
       title: 'Understanding Event Loops',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the event loop, and how does it handle asynchronous operations?',
@@ -1811,7 +1811,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#understanding-call-stack-vs-queues',
       title: 'Understanding Call Stack vs Queues',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe the difference between the call stack and the task queues.',
@@ -1823,7 +1823,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#purpose-of-try-catch',
       title: 'Purpose of Try Catch',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the purpose of `try...catch` in JavaScript?',
       answer:
@@ -1832,7 +1832,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#how-finally-blocks-work',
       title: 'How Finally Blocks Work',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the `finally` block work in a `try...catch` statement?',
@@ -1842,7 +1842,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#common-javascript-errors',
       title: 'Common JavaScript Errors',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are some common types of errors in JavaScript?',
       answer:
@@ -1851,7 +1851,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#creating-custom-errors-in-js',
       title: 'Creating Custom Errors in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How can you create and throw a custom error in JavaScript?',
       answer:
@@ -1860,7 +1860,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#purpose-of-debugger-statement',
       title: 'Purpose of Debugger Statement',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the purpose of the `debugger` statement in JavaScript?',
@@ -1872,7 +1872,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#javascript-event-loop-explanation',
       title: 'JavaScript Event Loop Explanation',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how the event loop works in JavaScript.',
       answer:
@@ -1881,7 +1881,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#understanding-task-queue-vs-microtask-queue',
       title: 'Understanding Task Queue vs Microtask Queue',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between the task queue and the microtask queue?',
@@ -1891,7 +1891,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#why-zero-delay-delays',
       title: 'Why Zero Delay Delays',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why does `setTimeout` with a delay of zero not execute immediately?',
@@ -1901,7 +1901,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#understanding-async-await-loops',
       title: 'Understanding Async/Await Loops',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do promises and async/await relate to the event loop?',
       answer:
@@ -1910,7 +1910,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#common-pitfalls-in-async-code',
       title: 'Common Pitfalls in Async Code',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some common pitfalls when working with asynchronous JavaScript code?',
@@ -1922,7 +1922,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#understanding-execution-contexts',
       title: 'Understanding Execution Contexts',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is an execution context in JavaScript, and how does it work?',
@@ -1932,7 +1932,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#understanding-javascript-contexts',
       title: 'Understanding JavaScript Contexts',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain the difference between the global execution context and the function execution context?',
@@ -1942,7 +1942,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#javascript-call-stack-management',
       title: 'JavaScript Call Stack Management',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the call stack manage execution contexts in JavaScript?',
@@ -1952,7 +1952,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#temporal-dead-zone-limitation',
       title: 'Temporal Dead Zone Limitation',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the Temporal Dead Zone (TDZ) in JavaScript?',
       answer:
@@ -1961,7 +1961,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#closures-and-execution-contexts',
       title: 'Closures and Execution Contexts',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do closures interact with execution contexts and the call stack?',
@@ -1973,7 +1973,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#execution-context-in-js',
       title: 'Execution Context in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is an execution context in JavaScript?',
       answer:
@@ -1982,7 +1982,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#how-javascript-scope-chain-works',
       title: 'How JavaScript Scope Chain Works',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how the scope chain works in JavaScript.',
       answer:
@@ -1991,7 +1991,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#understanding-variable-shadowing',
       title: 'Understanding Variable Shadowing',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is variable shadowing, and how can it affect your code?',
       answer:
@@ -2000,7 +2000,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#understanding-variable-scope',
       title: 'Understanding Variable Scope',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between `let`, `const`, and `var` in terms of scope?',
@@ -2010,7 +2010,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#understanding-hoisting-in-javascript',
       title: 'Understanding Hoisting in JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How does hoisting work in JavaScript?',
       answer:
@@ -2021,7 +2021,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#function-declarations-vs-expressions',
       title: 'Function Declarations vs Expressions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between function declarations and function expressions in JavaScript?',
@@ -2031,7 +2031,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#iife-in-javascript',
       title: 'IIFE in JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain what an IIFE is and provide a use case for it.',
       answer:
@@ -2040,7 +2040,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#function-call-methods',
       title: 'Function Call Methods',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do `call()`, `apply()`, and `bind()` differ in JavaScript?',
@@ -2050,7 +2050,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#javascript-function-invocation-methods',
       title: 'JavaScript Function Invocation Methods',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the different ways to invoke a function in JavaScript, and how do they affect the value of `this`?',
@@ -2060,7 +2060,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#reasons-to-avoid-arrow-functions',
       title: 'Reasons to Avoid Arrow Functions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why should you avoid using arrow functions as methods in objects?',
@@ -2072,7 +2072,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#differences-between-primitive-and-objects',
       title: 'Differences Between Primitive and Objects',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the differences between primitive data types and objects in JavaScript?',
@@ -2082,7 +2082,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#removing-array-duplicates',
       title: 'Removing Array Duplicates',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you remove duplicates from an array in JavaScript?',
       answer:
@@ -2091,7 +2091,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#javascript-object-vs-map',
       title: 'JavaScript Object vs Map',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the key differences between an object and a Map in JavaScript?',
@@ -2101,7 +2101,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#choosing-between-maps',
       title: 'Choosing Between Maps',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'When would you use a WeakMap over a Map?',
       answer:
@@ -2110,7 +2110,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#how-map-filter-works',
       title: 'How Map Filter Works',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how the `map` and `filter` methods work on arrays.',
       answer:
@@ -2121,7 +2121,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#understanding-memory-leaks-in-js',
       title: 'Understanding Memory Leaks in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a memory leak, and how can it occur in JavaScript applications?',
@@ -2131,7 +2131,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#garbage-collection-algorithms',
       title: 'Garbage Collection Algorithms',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between the mark-and-sweep and reference counting garbage collection algorithms.',
@@ -2141,7 +2141,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#optimizing-garbage-collection',
       title: 'Optimizing Garbage Collection',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do modern JavaScript engines optimize garbage collection?',
       answer:
@@ -2150,7 +2150,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#weak-references-explained',
       title: 'Weak References Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are weak references, and how do they help with memory management?',
@@ -2160,7 +2160,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#detecting-memory-leaks-in-js',
       title: 'Detecting Memory Leaks in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you detect and debug memory leaks in a JavaScript application?',
@@ -2172,7 +2172,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#commonjs-vs-es6-modules',
       title: 'CommonJS vs ES6 Modules',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are the differences between CommonJS and ES6 modules?',
       answer:
@@ -2181,7 +2181,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#using-es6-modules-in-node-js',
       title: 'Using ES6 Modules in Node.js',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how you can use ES6 modules in Node.js.',
       answer:
@@ -2190,7 +2190,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#understanding-module-patterns',
       title: 'Understanding Module Patterns',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the purpose of the UMD module pattern?',
       answer:
@@ -2199,7 +2199,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#exporting-multiple-functions',
       title: 'Exporting Multiple Functions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you export multiple functions from a module using ES6 syntax?',
@@ -2209,7 +2209,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#understanding-dynamic-imports',
       title: 'Understanding Dynamic Imports',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are dynamic imports, and when would you use them?',
       answer:
@@ -2220,7 +2220,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#constructor-vs-regular-functions',
       title: 'Constructor vs Regular Functions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between a constructor function and a regular function in JavaScript?',
@@ -2230,7 +2230,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#inheritance-in-es6-classes',
       title: 'Inheritance in ES6 Classes',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How does inheritance work in ES6 classes?',
       answer:
@@ -2239,7 +2239,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#es6-classes-advantages',
       title: 'ES6 Classes Advantages',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the advantages of using ES6 classes over constructor functions?',
@@ -2249,7 +2249,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#inheritance-role-of-super',
       title: 'Inheritance Role of Super',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain the role of `super()` in class inheritance.',
       answer:
@@ -2258,7 +2258,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#implementing-private-variables-in-es6-classes',
       title: 'Implementing Private Variables in ES6 Classes',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain how to implement private variables in ES6 classes?',
@@ -2270,7 +2270,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#prototypical-inheritance-explained',
       title: 'Prototypical Inheritance Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is prototypal inheritance in JavaScript?',
       answer:
@@ -2279,7 +2279,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#prototype-chain-basics',
       title: 'Prototype Chain Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the prototype chain work when accessing properties on an object?',
@@ -2289,7 +2289,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#understanding-prototype-properties',
       title: 'Understanding Prototype Properties',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between the `__proto__` property and the `prototype` property.',
@@ -2299,7 +2299,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#constructor-property-purpose',
       title: 'Constructor Property Purpose',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "What is the purpose of the `constructor` property in an object's prototype?",
@@ -2309,7 +2309,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#implementing-inheritance-in-es6',
       title: 'Implementing Inheritance in ES6',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you implement inheritance in JavaScript using ES6 classes?',
@@ -2321,7 +2321,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#javascript-context-of-this',
       title: 'JavaScript "Context of this"',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the value of `this` in different contexts in JavaScript?',
@@ -2331,7 +2331,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#impact-on-constructor-variables',
       title: 'Impact on Constructor Variables',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how the `new` keyword affects the value of `this` in a constructor function.',
@@ -2341,7 +2341,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#difference-between-call-and-bind',
       title: 'Difference Between call and bind',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the `.call()` method differ from `.bind()` in setting the value of `this`?',
@@ -2351,7 +2351,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#arrow-function-and-context',
       title: 'Arrow Function and Context',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why does using an arrow function as a method in an object result in `this` being undefined?',
@@ -2361,7 +2361,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#code-execution-outcome',
       title: 'Code Execution Outcome',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the outcome of the following code, and why?',
       answer:
@@ -2372,7 +2372,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#javascript-variable-options',
       title: 'JavaScript Variable Options',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between `var`, `let`, and `const` in JavaScript?',
@@ -2382,7 +2382,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#understanding-hoisting-in-js',
       title: 'Understanding Hoisting in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain hoisting in JavaScript and how it affects variable declarations with `var`, `let`, and `const`.',
@@ -2392,7 +2392,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#temporal-dead-zone-in-js',
       title: 'Temporal Dead Zone in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the Temporal Dead Zone (TDZ) in JavaScript?',
       answer:
@@ -2401,7 +2401,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#reassigning-let-and-const',
       title: 'Reassigning let and Const',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you reassign and redeclare variables declared with `let` and `const`?',
@@ -2411,7 +2411,7 @@ export const CORE_FUNDAMENTALS = {
     {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#understanding-variable-scope',
       title: 'Understanding Variable Scope',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Why should you prefer using `const` and `let` over `var`?',
       answer:
@@ -2425,7 +2425,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#union-types-in-typescript',
       title: 'Union Types in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are union types in TypeScript, and when would you use them?',
@@ -2435,7 +2435,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#intersection-types-explained',
       title: 'Intersection Types Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain intersection types and provide a use case.',
       answer:
@@ -2444,7 +2444,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#type-guards-in-typescript',
       title: 'Type Guards in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are type guards, and how do they help in TypeScript?',
       answer:
@@ -2453,7 +2453,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#typescript-control-flow-analysis',
       title: 'TypeScript Control Flow Analysis',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "How does TypeScript's control flow analysis assist in type narrowing?",
@@ -2463,7 +2463,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#what-are-discriminated-unions',
       title: 'What are Discriminated Unions?',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain what discriminated unions are and their benefits?',
@@ -2475,7 +2475,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#typescript-primitive-types',
       title: 'TypeScript Primitive Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are the basic primitive types in TypeScript?',
       answer:
@@ -2484,7 +2484,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#type-differences-in-ts',
       title: 'Type Differences in TS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between `any` and `unknown` types in TypeScript.',
@@ -2494,7 +2494,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#type-inference-basics',
       title: 'Type Inference Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is type inference in TypeScript, and how does it work?',
       answer:
@@ -2503,7 +2503,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#defining-and-using-tuples',
       title: 'Defining and Using Tuples',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you define a tuple in TypeScript, and when would you use it?',
@@ -2513,7 +2513,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#the-dangers-of-any-type',
       title: 'The Dangers of Any Type',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Why should you avoid overusing the `any` type in TypeScript?',
       answer:
@@ -2524,7 +2524,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#typescript-compiler-api',
       title: 'TypeScript Compiler API',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the TypeScript Compiler API, and why is it useful?',
       answer:
@@ -2533,7 +2533,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#traversing-typescript-asts',
       title: 'Traversing TypeScript ASTs',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how you can traverse and modify the AST in TypeScript.',
@@ -2543,7 +2543,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#custom-transformers-in-typescript',
       title: 'Custom Transformers in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are custom transformers in TypeScript, and how do they work?',
@@ -2553,7 +2553,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#customizing-tsc-transformers',
       title: 'Customizing TSC Transformers',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you use custom transformers with the TypeScript compiler (`tsc`) directly? If not, how can you apply them?',
@@ -2563,7 +2563,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#customizing-typescript-compiler-tools',
       title: 'Customizing TypeScript Compiler Tools',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe a scenario where you would use the TypeScript Compiler API to create a custom tool.',
@@ -2575,7 +2575,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#declaration-files-in-typescript',
       title: 'Declaration Files in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a declaration file in TypeScript, and why is it important?',
@@ -2585,7 +2585,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#typescript-declaration-types',
       title: 'TypeScript Declaration Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between ambient declarations and regular TypeScript declarations.',
@@ -2595,7 +2595,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#consuming-javascript-libraries-without-types',
       title: 'Consuming JavaScript Libraries Without Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you consume a JavaScript library that does not have TypeScript type definitions?',
@@ -2605,7 +2605,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#purpose-of-declare-keyword',
       title: 'Purpose of Declare Keyword',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the purpose of the `declare` keyword in TypeScript?',
       answer:
@@ -2614,7 +2614,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#writing-a-declaration-file',
       title: 'Writing a Declaration File',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain how to write a declaration file for a module-based JavaScript library?',
@@ -2626,7 +2626,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/decorators-and-metadata/page.mdx#typescript-decorator-use-cases',
       title: 'Typescript Decorator Use Cases',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a decorator in TypeScript, and what are its use cases?',
@@ -2636,7 +2636,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/decorators-and-metadata/page.mdx#typescript-decorator-tutorial',
       title: 'TypeScript Decorator Tutorial',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how to create and apply a method decorator in TypeScript.',
@@ -2646,7 +2646,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/decorators-and-metadata/page.mdx#metadata-reflection-api-in-ts',
       title: 'Metadata Reflection API in TS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the Metadata Reflection API in TypeScript, and how is it used with decorators?',
@@ -2656,7 +2656,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/decorators-and-metadata/page.mdx#class-decorators-vs-methods',
       title: 'Class Decorators vs Methods',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe the difference between a class decorator and a method decorator.',
@@ -2666,7 +2666,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/decorators-and-metadata/page.mdx#typescript-dependency-injection',
       title: 'TypeScript Dependency Injection',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can decorators be used to implement dependency injection in TypeScript?',
@@ -2678,7 +2678,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/enums-and-literal-types/page.mdx#enums-in-typescript',
       title: 'Enums in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is an enum in TypeScript, and why would you use one?',
       answer:
@@ -2687,7 +2687,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/enums-and-literal-types/page.mdx#typescript-enum-difference',
       title: 'Typescript Enum Difference',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between numeric enums and string enums in TypeScript.',
@@ -2697,7 +2697,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/enums-and-literal-types/page.mdx#literal-types-in-typescript',
       title: 'Literal Types in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are literal types in TypeScript, and how do they differ from enums?',
@@ -2707,7 +2707,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/enums-and-literal-types/page.mdx#typescript-discriminated-unions-benefits',
       title: 'TypeScript Discriminated Unions Benefits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can discriminated unions be used in TypeScript, and what are their benefits?',
@@ -2717,7 +2717,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/enums-and-literal-types/page.mdx#avoiding-heterogeneous-enums',
       title: 'Avoiding Heterogeneous Enums',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Why might you avoid using heterogeneous enums in TypeScript?',
       answer:
@@ -2728,7 +2728,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#typescript-generics-basics',
       title: 'TypeScript Generics Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are generics in TypeScript, and why are they useful?',
       answer:
@@ -2737,7 +2737,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#applying-constraints-to-types',
       title: 'Applying Constraints to Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you apply constraints to a generic type in TypeScript?',
       answer:
@@ -2746,7 +2746,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#using-keyof-in-generics',
       title: 'Using Keyof in Generics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the use of the `keyof` operator in TypeScript generics.',
@@ -2756,7 +2756,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#typescript-class-with-constraints',
       title: 'TypeScript Class with Constraints',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you provide an example of a generic class with a constraint in TypeScript?',
@@ -2766,7 +2766,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#benefits-of-generics-vs-any',
       title: 'Benefits of Generics vs Any',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the benefits of using generics over the `any` type in TypeScript?',
@@ -2778,7 +2778,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#typescript-interface-vs-aliases',
       title: 'Typescript Interface vs Aliases',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the purpose of interfaces in TypeScript, and how do they differ from type aliases?',
@@ -2788,7 +2788,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#defining-optional-properties',
       title: 'Defining Optional Properties',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you define optional and readonly properties in an interface?',
@@ -2798,7 +2798,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#typescript-multiple-interface-inheritance',
       title: 'TypeScript Multiple Interface Inheritance',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can interfaces extend multiple interfaces in TypeScript? Provide an example.',
@@ -2808,7 +2808,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#type-aliases-vs-interfaces',
       title: 'Type Aliases vs Interfaces',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'When should you use a type alias over an interface in TypeScript?',
@@ -2818,7 +2818,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#enforcing-class-contracts',
       title: 'Enforcing Class Contracts',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can interfaces be used to enforce class contracts in TypeScript?',
@@ -2830,7 +2830,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/mapped-and-conditional-types/page.mdx#understanding-typescript-keyof',
       title: 'Understanding TypeScript Keyof',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the `keyof` operator in TypeScript, and how is it used?',
@@ -2840,7 +2840,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/mapped-and-conditional-types/page.mdx#type-of-operator-explanation',
       title: 'Type of Operator Explanation',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how the `typeof` operator works in a type context.',
       answer:
@@ -2849,7 +2849,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/mapped-and-conditional-types/page.mdx#mapped-types-explained',
       title: 'Mapped Types Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are mapped types, and when would you use them?',
       answer:
@@ -2858,7 +2858,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/mapped-and-conditional-types/page.mdx#conditional-type-usage',
       title: 'Conditional Type Usage',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Describe conditional types and provide a use case.',
       answer:
@@ -2867,7 +2867,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/mapped-and-conditional-types/page.mdx#distributive-conditional-types',
       title: 'Distributive Conditional Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do distributive conditional types work in TypeScript?',
       answer:
@@ -2878,7 +2878,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#migrating-to-typescript',
       title: 'Migrating to TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some strategies for migrating a large JavaScript codebase to TypeScript?',
@@ -2888,7 +2888,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#integrating-typescript-without-disruption',
       title: 'Integrating TypeScript Without Disruption',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you integrate TypeScript into a JavaScript project without disrupting development?',
@@ -2898,7 +2898,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#benefits-of-jsdoc-migration',
       title: 'Benefits of JSDoc Migration',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the benefits of using JSDoc comments during the migration to TypeScript?',
@@ -2908,7 +2908,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#minimizing-any-type-usage',
       title: 'Minimizing Any Type Usage',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how the `any` type affects TypeScript code and how to minimize its usage during migration.',
@@ -2918,7 +2918,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#migrating-third-party-libraries',
       title: 'Migrating Third-Party Libraries',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What challenges might you face when migrating third-party libraries, and how can you address them?',
@@ -2930,7 +2930,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/namespaces-and-modules/page.mdx#typescript-namespace-vs-modules',
       title: 'TypeScript Namespace vs Modules',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the main differences between namespaces and modules in TypeScript?',
@@ -2940,7 +2940,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/namespaces-and-modules/page.mdx#typescript-module-resolution-strategies',
       title: 'TypeScript Module Resolution Strategies',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does TypeScript resolve modules, and what are the module resolution strategies available?',
@@ -2950,7 +2950,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/namespaces-and-modules/page.mdx#choosing-namespaces-vs-modules',
       title: 'Choosing Namespaces vs Modules',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'When should you use namespaces over modules in TypeScript?',
       answer:
@@ -2959,7 +2959,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/namespaces-and-modules/page.mdx#typescript-barrel-files-benefits',
       title: 'TypeScript Barrel Files Benefits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are barrel files in TypeScript, and what are their benefits?',
@@ -2969,7 +2969,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/namespaces-and-modules/page.mdx#configuring-path-aliases-in-typescript',
       title: 'Configuring Path Aliases in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how to configure path aliases in TypeScript and their advantages.',
@@ -2981,7 +2981,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#configuring-typescript-projects',
       title: 'Configuring TypeScript Projects',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the purpose of the `tsconfig.json` file in a TypeScript project?',
@@ -2991,7 +2991,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#configuring-module-resolution',
       title: 'Configuring Module Resolution',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you configure module resolution and path aliases in TypeScript?',
@@ -3001,7 +3001,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#integrating-typescript-with-webpack',
       title: 'Integrating TypeScript with Webpack',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how to integrate TypeScript with Webpack for bundling.',
@@ -3011,7 +3011,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#typescript-loader-comparison',
       title: 'TypeScript Loader Comparison',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between using `ts-loader` and `babel-loader` for TypeScript files?',
@@ -3021,7 +3021,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#enabling-strict-type-checking',
       title: 'Enabling Strict Type Checking',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you enable strict type checking in TypeScript, and why is it recommended?',
@@ -3033,7 +3033,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#type-guard-functions-in-typescript',
       title: 'Type Guard Functions in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a type guard in TypeScript, and how does it differ from a type assertion?',
@@ -3043,7 +3043,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#creating-type-guards-in-typescript',
       title: 'Creating Type Guards in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you create a user-defined type guard in TypeScript?',
       answer:
@@ -3052,7 +3052,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#what-is-discriminated-union',
       title: 'What is Discriminated Union?',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain what discriminated unions are and provide an example.',
       answer:
@@ -3061,7 +3061,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#type-script-never-type-purpose',
       title: 'Type Script Never Type Purpose',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the purpose of the `never` type in TypeScript, and how is it used in exhaustiveness checking?',
@@ -3071,7 +3071,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#type-guarding-with-in-operator',
       title: 'Type Guarding with In Operator',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the `in` operator help in type guarding, and when would you use it?',
@@ -3083,7 +3083,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#type-system-in-typescript',
       title: 'Type System in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is structural typing, and how does TypeScript use it for type compatibility?',
@@ -3093,7 +3093,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#type-inference-in-typescript',
       title: 'Type Inference in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does TypeScript infer types, and what are the benefits of type inference?',
@@ -3103,7 +3103,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#type-variance-in-typescript',
       title: 'Type Variance in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Explain the concept of variance in TypeScript's type compatibility.",
@@ -3113,7 +3113,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#function-type-compatibility-rules',
       title: 'Function Type Compatibility Rules',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the rules for function type compatibility in TypeScript?',
@@ -3123,7 +3123,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#typescript-class-compatibility',
       title: 'TypeScript Class Compatibility',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does TypeScript handle compatibility between classes with private or protected members?',
@@ -3135,7 +3135,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-level-programming/page.mdx#recursive-types-in-typescript',
       title: 'Recursive Types in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a recursive type in TypeScript, and when would you use it?',
@@ -3145,7 +3145,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-level-programming/page.mdx#understanding-typescript-inferences',
       title: 'Understanding TypeScript Inferences',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how the `infer` keyword works in TypeScript.',
       answer:
@@ -3154,7 +3154,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-level-programming/page.mdx#manipulating-string-types',
       title: 'Manipulating String Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you use template literal types to manipulate string types in TypeScript?',
@@ -3164,7 +3164,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-level-programming/page.mdx#variadic-tuple-types-benefits',
       title: 'Variadic Tuple Types Benefits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are variadic tuple types, and how do they benefit type-level programming in TypeScript?',
@@ -3174,7 +3174,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/type-level-programming/page.mdx#creating-deep-partial-types',
       title: 'Creating Deep Partial Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe how you would create a `DeepPartial` type that makes all properties in a type and its sub-types optional.',
@@ -3186,7 +3186,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#typescript-vs-javascript',
       title: 'TypeScript vs JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is TypeScript, and how does it differ from JavaScript?',
       answer:
@@ -3195,7 +3195,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#typescript-advantages-over-javascript',
       title: 'TypeScript Advantages Over JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are the benefits of using TypeScript over JavaScript?',
       answer:
@@ -3204,7 +3204,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#interfaces-in-typescript',
       title: 'Interfaces in TypeScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how interfaces are used in TypeScript.',
       answer:
@@ -3213,7 +3213,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#typescript-generics-basics',
       title: 'TypeScript Generics Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are generics in TypeScript, and why are they useful?',
       answer:
@@ -3222,7 +3222,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#improving-code-maintainability',
       title: 'Improving Code Maintainability',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does TypeScript improve code maintainability in large-scale applications?',
@@ -3234,7 +3234,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/utility-types-deep-dive/page.mdx#purpose-of-partial-type',
       title: 'Purpose of Partial Type',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the purpose of the `Partial` utility type in TypeScript?',
@@ -3244,7 +3244,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/utility-types-deep-dive/page.mdx#differences-in-utility-types',
       title: 'Differences in Utility Types',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the `Pick` utility type differ from the `Omit` utility type?',
@@ -3254,7 +3254,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/utility-types-deep-dive/page.mdx#typescript-record-utility-type',
       title: 'TypeScript Record Utility Type',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the `Record` utility type used for in TypeScript?',
       answer:
@@ -3263,7 +3263,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/utility-types-deep-dive/page.mdx#utility-types-exclude-vs-extract',
       title: 'Utility Types: Exclude vs Extract',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how the `Exclude` and `Extract` utility types are different.',
@@ -3273,7 +3273,7 @@ export const TYPESCRIPT_INTRODUCTION = {
     {
       href: '/js-track/typescript-introduction/utility-types-deep-dive/page.mdx#customizing-type-constraints',
       title: 'Customizing Type Constraints',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you create a custom utility type to make all properties of a type `T` required?',
@@ -3288,7 +3288,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#javascript-module-pattern',
       title: 'JavaScript Module Pattern',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the Module Pattern in JavaScript, and why is it used?',
       answer:
@@ -3297,7 +3297,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#revealing-vs-module-pattern',
       title: 'Revealing vs Module Pattern',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the Revealing Module Pattern and how it differs from the Module Pattern.',
@@ -3307,7 +3307,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#avoiding-global-namespace-pollution',
       title: 'Avoiding Global Namespace Pollution',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the Module Pattern help in avoiding global namespace pollution?',
@@ -3317,7 +3317,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#es6-modules-advantages',
       title: 'ES6 Modules Advantages',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the advantages of using ES6 modules over the traditional Module Pattern?',
@@ -3327,7 +3327,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#revealing-module-pattern-benefits',
       title: 'Revealing Module Pattern Benefits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why might you choose to use the Revealing Module Pattern over the standard Module Pattern?',
@@ -3339,7 +3339,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/async-await-deep-dive/page.mdx#purpose-of-async-keyword',
       title: 'Purpose of Async Keyword',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the purpose of the `async` keyword in JavaScript?',
       answer:
@@ -3348,7 +3348,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/async-await-deep-dive/page.mdx#handling-async-errors',
       title: 'Handling Async Errors',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you handle errors in `async/await` functions?',
       answer:
@@ -3357,7 +3357,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/async-await-deep-dive/page.mdx#sequential-vs-parallel-execution',
       title: 'Sequential vs Parallel Execution',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between sequential and parallel execution in the context of `async/await`.',
@@ -3367,7 +3367,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/async-await-deep-dive/page.mdx#awaiting-inside-loops',
       title: 'Awaiting Inside Loops',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the effect of using `await` inside a loop, and how can you optimize it?',
@@ -3377,7 +3377,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/async-await-deep-dive/page.mdx#differences-in-promise-methods',
       title: 'Differences in Promise Methods',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain how `Promise.allSettled` differs from `Promise.all` and when you might use it?',
@@ -3389,7 +3389,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#difference-between-storage-options',
       title: 'Difference Between Storage Options',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between `localStorage` and `sessionStorage`?',
@@ -3399,7 +3399,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#choosing-db-over-local-storage',
       title: 'Choosing DB Over Local Storage',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'When would you use IndexedDB over `localStorage`?',
       answer:
@@ -3408,7 +3408,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#web-sql-still-relevant',
       title: 'Web SQL Still Relevant',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Is Web SQL still recommended for use in modern web applications?',
@@ -3418,7 +3418,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#same-origin-policy-storage-implications',
       title: 'Same-Origin Policy Storage Implications',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the Same-Origin Policy affect browser storage mechanisms?',
@@ -3428,7 +3428,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#client-side-storage-security',
       title: 'Client-Side Storage Security',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some security considerations when using client-side storage?',
@@ -3440,7 +3440,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/event-handling-and-delegation/page.mdx#event-bubbling-vs-capturing',
       title: 'Event Bubbling vs Capturing',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is event bubbling and event capturing in JavaScript?',
       answer:
@@ -3449,7 +3449,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/event-handling-and-delegation/page.mdx#event-delegation-basics',
       title: 'Event Delegation Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain event delegation and its advantages.',
       answer:
@@ -3458,7 +3458,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/event-handling-and-delegation/page.mdx#preventing-default-action',
       title: 'Preventing Default Action',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you prevent the default action of an event in JavaScript?',
@@ -3468,7 +3468,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/event-handling-and-delegation/page.mdx#understanding-event-propagation-differences',
       title: 'Understanding Event Propagation Differences',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between `event.stopPropagation()` and `event.stopImmediatePropagation()`?',
@@ -3478,7 +3478,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/event-handling-and-delegation/page.mdx#efficient-event-handling-strategies',
       title: 'Efficient Event Handling Strategies',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why should you avoid adding multiple event listeners to individual child elements, and how can you manage events more efficiently?',
@@ -3490,7 +3490,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#pure-functions-in-fp',
       title: 'Pure Functions in FP',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a pure function, and why are pure functions important in functional programming?',
@@ -3500,7 +3500,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#immutability-in-javascript',
       title: 'Immutability in JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the concept of immutability and its benefits in JavaScript.',
@@ -3510,7 +3510,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#side-effects-in-functions',
       title: 'Side Effects in Functions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are side effects in functions, and how can they impact your code?',
@@ -3520,7 +3520,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#higher-order-functions-fundamentals',
       title: 'Higher-Order Functions Fundamentals',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do higher-order functions contribute to functional programming?',
@@ -3530,7 +3530,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#function-composition-in-js',
       title: 'Function Composition in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is function composition, and how is it used in JavaScript?',
@@ -3542,7 +3542,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#purpose-of-symbol-iterator',
       title: 'Purpose of Symbol Iterator',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the purpose of the `Symbol.iterator` in JavaScript?',
       answer:
@@ -3551,7 +3551,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#generator-functions-overview',
       title: 'Generator Functions Overview',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how generator functions differ from regular functions.',
@@ -3561,7 +3561,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#using-generators-for-sequences',
       title: 'Using Generators for Sequences',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How can you use generators to create an infinite sequence?',
       answer:
@@ -3570,7 +3570,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#yield-expression-mechanics',
       title: 'Yield Expression Mechanics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the `yield*` expression used for in generators?',
       answer:
@@ -3579,7 +3579,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#managing-asynchronous-flow',
       title: 'Managing Asynchronous Flow',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do generators help in managing asynchronous code flow?',
       answer:
@@ -3590,7 +3590,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#higher-order-function-overview',
       title: 'Higher-Order Function Overview',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a higher-order function in JavaScript?',
       answer:
@@ -3599,7 +3599,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#map-vs-foreach-method',
       title: 'Map vs ForEach Method',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How does the `map` method differ from `forEach`?',
       answer:
@@ -3608,7 +3608,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#how-reduces-work',
       title: 'How Reduces Work',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Can you explain how the `reduce` method works?',
       answer:
@@ -3617,7 +3617,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#functions-as-citizens',
       title: 'Functions as Citizens',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why are functions considered first-class citizens in JavaScript?',
@@ -3627,7 +3627,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#using-callback-functions',
       title: 'Using Callback Functions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Provide an example of a situation where you would use a callback function.',
@@ -3639,7 +3639,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#understanding-memory-leaks-in-js',
       title: 'Understanding Memory Leaks in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a memory leak in JavaScript, and how does it occur?',
       answer:
@@ -3648,7 +3648,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#identifying-memory-leaks',
       title: 'Identifying Memory Leaks',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How can you identify a memory leak in a web application?',
       answer:
@@ -3657,7 +3657,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#preventing-memory-leaks-in-js',
       title: 'Preventing Memory Leaks in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some best practices to prevent memory leaks in JavaScript?',
@@ -3667,7 +3667,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#closures-and-memory-leaks',
       title: 'Closures and Memory Leaks',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how closures can lead to memory leaks and how to prevent it.',
@@ -3677,7 +3677,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#javascript-map-vs-weakmap',
       title: 'JavaScript Map vs WeakMap',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the difference between WeakMap and Map in JavaScript?',
       answer:
@@ -3688,7 +3688,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#javascript-proxies-explained',
       title: 'JavaScript Proxies Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a Proxy in JavaScript, and how does it work?',
       answer:
@@ -3697,7 +3697,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#reflecting-on-javascript',
       title: 'Reflecting on JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain the purpose of the Reflect API in JavaScript.',
       answer:
@@ -3706,7 +3706,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#using-a-proxy-validator',
       title: 'Using a Proxy Validator',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you use a proxy to validate property assignments on an object?',
@@ -3716,7 +3716,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#javascript-proxy-use-cases',
       title: 'JavaScript Proxy Use Cases',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are some practical use cases for proxies in JavaScript?',
       answer:
@@ -3725,7 +3725,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#proxies-and-traps-example',
       title: 'Proxies and Traps Example',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain how the `apply` and `construct` traps are used in proxies?',
@@ -3737,7 +3737,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#javascript-debounce-vs-throttle',
       title: 'JavaScript Debounce vs Throttle',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between debouncing and throttling in JavaScript?',
@@ -3747,7 +3747,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#optimizing-loops-in-javascript',
       title: 'Optimizing Loops in JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you optimize loops in JavaScript for better performance?',
@@ -3757,7 +3757,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#minimizing-dom-interactions',
       title: 'Minimizing DOM Interactions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Why is minimizing DOM interactions important for performance?',
       answer:
@@ -3766,7 +3766,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#understanding-document-fragments',
       title: 'Understanding Document Fragments',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are Document Fragments, and how do they improve performance?',
@@ -3776,7 +3776,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#event-delegation-improves-performance',
       title: 'Event Delegation Improves Performance',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how event delegation can improve performance in JavaScript.',
@@ -3788,7 +3788,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#understanding-javascript-promises',
       title: 'Understanding JavaScript Promises',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a Promise in JavaScript, and why is it useful?',
       answer:
@@ -3797,7 +3797,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#how-promise-all-works',
       title: 'How Promise.all Works',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how `Promise.all()` works and when you would use it.',
       answer:
@@ -3806,7 +3806,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#difference-between-promises',
       title: 'Difference Between Promises',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between `Promise.all()` and `Promise.race()`?',
@@ -3816,7 +3816,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#handling-promise-chain-errors',
       title: 'Handling Promise Chain Errors',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you handle errors in promise chains?',
       answer:
@@ -3825,7 +3825,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#promise-constructor-anti-pattern',
       title: 'Promise Constructor Anti-Pattern',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Can you explain the Promise constructor anti-pattern?',
       answer:
@@ -3836,7 +3836,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#reflecting-javascript-apis',
       title: 'Reflecting JavaScript APIs',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the Reflect API in JavaScript, and what is its purpose?',
@@ -3846,7 +3846,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#dynamic-property-access-in-js',
       title: 'Dynamic Property Access in JS',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how dynamic property access works in JavaScript and provide an example.',
@@ -3856,7 +3856,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#javascript-proxies-explained',
       title: 'JavaScript Proxies Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are proxies in JavaScript, and how do they relate to metaprogramming?',
@@ -3866,7 +3866,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#reflect-vs-direct-operations',
       title: 'Reflect vs Direct Operations',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How does Reflect differ from direct operations on objects?',
       answer:
@@ -3875,7 +3875,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#using-reflect-with-proxies',
       title: 'Using Reflect with Proxies',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you provide an example of using Reflect and Proxy together to log property access on an object?',
@@ -3887,7 +3887,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#preventing-cross-site-scripting',
       title: 'Preventing Cross-Site Scripting',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is Cross-Site Scripting (XSS), and how can it be prevented?',
@@ -3897,7 +3897,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#preventing-csrf-attacks',
       title: 'Preventing CSRF Attacks',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain Cross-Site Request Forgery (CSRF) and how to prevent it.',
@@ -3907,7 +3907,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#understanding-web-security-policies',
       title: 'Understanding Web Security Policies',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is Content Security Policy (CSP), and how does it enhance web security?',
@@ -3917,7 +3917,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#best-practices-avoid-eval',
       title: 'Best Practices Avoid eval()',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why should you avoid using `eval()` and `innerHTML` in JavaScript?',
@@ -3927,7 +3927,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#same-site-cookie-attribute',
       title: 'Same Site Cookie Attribute',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the `SameSite` cookie attribute, and how does it help prevent CSRF attacks?',
@@ -3939,7 +3939,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#service-workers-explained',
       title: 'Service Workers Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a Service Worker, and how does it enhance web applications?',
@@ -3949,7 +3949,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#cache-first-vs-network',
       title: 'Cache First vs Network',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain the Cache First and Network First caching strategies.',
       answer:
@@ -3958,7 +3958,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#registering-a-service-worker',
       title: 'Registering a Service Worker',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you register a Service Worker in a web application?',
       answer:
@@ -3967,7 +3967,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#pwa-app-manifest-basics',
       title: 'PWA App Manifest Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a Web App Manifest, and why is it important in PWAs?',
       answer:
@@ -3976,7 +3976,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#implementing-offline-fallback-pages',
       title: 'Implementing Offline Fallback Pages',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you implement offline fallback pages using Service Workers?',
@@ -3988,7 +3988,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#understanding-symbols-in-javascript',
       title: 'Understanding Symbols in JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a Symbol in JavaScript, and how does it differ from other primitive types?',
@@ -3998,7 +3998,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#using-symbols-to-avoid-collisions',
       title: 'Using Symbols to Avoid Collisions',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How can you use Symbols to avoid property name collisions in JavaScript objects?',
@@ -4008,7 +4008,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#understanding-well-known-symbols',
       title: 'Understanding Well-Known Symbols',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain what well-known Symbols are and provide an example of how to use one.',
@@ -4018,7 +4018,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#accessing-object-properties',
       title: 'Accessing Object Properties',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Can you explain how to access and enumerate Symbol properties on an object?',
@@ -4028,7 +4028,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#symbols-in-javascript-meta',
       title: 'Symbols in JavaScript Meta',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do Symbols contribute to meta-programming in JavaScript?',
       answer:
@@ -4039,7 +4039,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#understanding-web-workers',
       title: 'Understanding Web Workers',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are Web Workers in JavaScript, and why are they used?',
       answer:
@@ -4048,7 +4048,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#communicating-with-workers',
       title: 'Communicating with Workers',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you communicate with a Web Worker from the main thread?',
@@ -4058,7 +4058,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#differences-in-work-arrangements',
       title: 'Differences in Work Arrangements',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between a Dedicated Worker and a Shared Worker?',
@@ -4068,7 +4068,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#role-of-structured-cloning',
       title: 'Role of Structured Cloning',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the role of the Structured Cloning Algorithm in Web Workers.',
@@ -4078,7 +4078,7 @@ export const ADVANCED_CONCEPTS = {
     {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#handling-web-worker-errors',
       title: 'Handling Web Worker Errors',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How can you handle errors that occur in a Web Worker?',
       answer:
@@ -4092,7 +4092,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#understanding-web-accessibility-features',
       title: 'Understanding Web Accessibility Features',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is ARIA, and how does it improve web accessibility?',
       answer:
@@ -4101,7 +4101,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#using-aria-for-accessibility',
       title: 'Using ARIA for Accessibility',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'When should you use ARIA roles and attributes over native HTML elements?',
@@ -4111,7 +4111,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#understanding-aria-attributes',
       title: 'Understanding ARIA Attributes',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between `aria-label`, `aria-labelledby`, and `aria-describedby`.',
@@ -4121,7 +4121,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#making-accessibility-interactive',
       title: 'Making Accessibility Interactive',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you make a custom interactive element accessible to keyboard users and screen readers?',
@@ -4131,7 +4131,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#web-accessibility-best-practices',
       title: 'Web Accessibility Best Practices',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some best practices for ensuring web accessibility in your projects?',
@@ -4143,7 +4143,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/browser-apis-and-web-standards/page.mdx#understanding-the-dom-with-javascript',
       title: 'Understanding the DOM with JavaScript',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the DOM, and how do you manipulate it using JavaScript?',
@@ -4153,7 +4153,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/browser-apis-and-web-standards/page.mdx#understanding-the-fetch-api',
       title: 'Understanding The Fetch API',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how the Fetch API works and how it differs from XMLHttpRequest.',
@@ -4163,7 +4163,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/browser-apis-and-web-standards/page.mdx#understanding-websockets-basics',
       title: 'Understanding WebSockets Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are WebSockets, and when would you use them over HTTP requests?',
@@ -4173,7 +4173,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/browser-apis-and-web-standards/page.mdx#handling-fetch-api-errors',
       title: 'Handling Fetch API Errors',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you handle errors when making network requests using the Fetch API?',
@@ -4183,7 +4183,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/browser-apis-and-web-standards/page.mdx#differences-between-local-storage',
       title: 'Differences Between Local Storage',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe the differences between localStorage and sessionStorage.',
@@ -4195,7 +4195,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#understanding-webpack-basics',
       title: 'Understanding Webpack Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is Webpack, and why is it used in frontend development?',
       answer:
@@ -4204,7 +4204,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#code-splitting-with-webpack',
       title: 'Code Splitting with Webpack',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how code splitting works in Webpack and its benefits.',
       answer:
@@ -4213,7 +4213,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#tree-shaking-with-webpack',
       title: 'Tree Shaking with Webpack',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is tree shaking, and how does Webpack implement it?',
       answer:
@@ -4222,7 +4222,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#webpack-loaders-and-plugins',
       title: 'Webpack Loaders and Plugins',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Describe the role of loaders and plugins in Webpack.',
       answer:
@@ -4231,7 +4231,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#optimizing-webpack-output',
       title: 'Optimizing Webpack Output',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: "How do you optimize Webpack's output for production?",
       answer:
@@ -4242,7 +4242,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#setting-up-full-stack-application',
       title: 'Setting Up Full Stack Application',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how you would set up a full-stack application with a React frontend and a Node.js backend.',
@@ -4252,7 +4252,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#deploying-node-js-on-heroku',
       title: 'Deploying Node.js on Heroku',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some considerations when deploying a Node.js application to a cloud service like Heroku?',
@@ -4262,7 +4262,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#configuring-full-stack-applications',
       title: 'Configuring Full Stack Applications',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you handle environment-specific configurations in a full-stack application?',
@@ -4272,7 +4272,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#handling-cors-issues',
       title: 'Handling CORS Issues',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is CORS, and how do you handle it in a full-stack application?',
@@ -4282,7 +4282,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#setting-up-continuous-deployment',
       title: 'Setting Up Continuous Deployment',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe the steps to set up continuous deployment for a full-stack application.',
@@ -4294,7 +4294,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#understanding-code-splitting-benefits',
       title: 'Understanding Code Splitting Benefits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is code splitting, and how does it improve web application performance?',
@@ -4304,7 +4304,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#dynamic-javascript-imports',
       title: 'Dynamic JavaScript Imports',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how dynamic imports work in JavaScript.',
       answer:
@@ -4313,7 +4313,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#understanding-lazy-loading-strategies',
       title: 'Understanding Lazy Loading Strategies',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is lazy loading, and when should you use it in a web application?',
@@ -4323,7 +4323,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#code-splitting-vs-lazy-loading',
       title: 'Code Splitting vs Lazy Loading',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How does code splitting differ from lazy loading?',
       answer:
@@ -4332,7 +4332,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#performance-considerations-code-splitting',
       title: 'Performance Considerations Code Splitting',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some performance considerations when implementing code splitting and lazy loading?',
@@ -4344,7 +4344,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/common-interview-questions-and-coding-challenges/page.mdx#reversing-linked-lists',
       title: 'Reversing Linked Lists',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you reverse a linked list? Describe the algorithm and its time complexity.',
@@ -4354,7 +4354,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/common-interview-questions-and-coding-challenges/page.mdx#graph-search-techniques',
       title: 'Graph Search Techniques',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between depth-first search (DFS) and breadth-first search (BFS).',
@@ -4364,7 +4364,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/common-interview-questions-and-coding-challenges/page.mdx#understanding-hash-tables',
       title: 'Understanding Hash Tables',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a hash table, and how does it work?',
       answer:
@@ -4373,7 +4373,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/common-interview-questions-and-coding-challenges/page.mdx#detecting-linked-list-cycles',
       title: 'Detecting Linked List Cycles',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Describe how you would detect a cycle in a linked list.',
       answer:
@@ -4382,7 +4382,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/common-interview-questions-and-coding-challenges/page.mdx#memoization-in-dynamic-programming',
       title: 'Memoization in Dynamic Programming',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is memoization, and how is it used in dynamic programming?',
@@ -4394,7 +4394,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#mvc-vs-mvvm-patterns',
       title: 'MVC vs MVVM Patterns',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the main difference between MVC and MVVM patterns?',
       answer:
@@ -4403,7 +4403,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#predictability-in-flux-architecture',
       title: 'Predictability in Flux Architecture',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does Flux architecture ensure predictable state management?',
@@ -4413,7 +4413,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#benefits-of-component-based-design',
       title: 'Benefits of Component-Based Design',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Why is component-based design preferred in modern frontend development?',
@@ -4423,7 +4423,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#data-binding-in-mvvm',
       title: 'Data Binding in MVVM',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Can you explain how data binding works in MVVM?',
       answer:
@@ -4432,7 +4432,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#benefits-of-using-redux',
       title: 'Benefits of Using Redux',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are the benefits of using Redux in a React application?',
       answer:
@@ -4443,7 +4443,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/continuous-integration-and-deployment/page.mdx#understanding-continuous-integration',
       title: 'Understanding Continuous Integration',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is Continuous Integration, and why is it important?',
       answer:
@@ -4452,7 +4452,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/continuous-integration-and-deployment/page.mdx#continuous-delivery-vs-deployment',
       title: 'Continuous Delivery vs Deployment',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between Continuous Delivery and Continuous Deployment.',
@@ -4462,7 +4462,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/continuous-integration-and-deployment/page.mdx#integrating-automated-testing-pipelines',
       title: 'Integrating Automated Testing Pipelines',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you integrate automated testing into a CI pipeline?',
       answer:
@@ -4471,7 +4471,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/continuous-integration-and-deployment/page.mdx#ci-pipeline-deployment-strategies',
       title: 'CI Pipeline Deployment Strategies',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some deployment strategies you can implement in a CI/CD pipeline?',
@@ -4481,7 +4481,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/continuous-integration-and-deployment/page.mdx#understanding-docker-in-pipelines',
       title: 'Understanding Docker in Pipelines',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the purpose of Docker in a CI/CD pipeline?',
       answer:
@@ -4492,7 +4492,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/cross-origin-communication/page.mdx#same-origin-policy-basics',
       title: 'Same-Origin Policy Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the same-origin policy, and why is it important?',
       answer:
@@ -4501,7 +4501,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/cross-origin-communication/page.mdx#understanding-cors-configurations',
       title: 'Understanding CORS Configurations',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how CORS works and how you can configure it on the server.',
@@ -4511,7 +4511,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/cross-origin-communication/page.mdx#understanding-pre-flight-requests',
       title: 'Understanding Pre-Flight Requests',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is a preflight request in CORS, and when is it used?',
       answer:
@@ -4520,7 +4520,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/cross-origin-communication/page.mdx#cross-origin-message-passing',
       title: 'Cross-Origin Message Passing',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the `postMessage` API help in cross-origin communication, and what are the security considerations?',
@@ -4530,7 +4530,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/cross-origin-communication/page.mdx#cors-troubleshooting-issues',
       title: 'CORS Troubleshooting Issues',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some common issues you might encounter with CORS, and how would you troubleshoot them?',
@@ -4542,7 +4542,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#understanding-micro-frontend-architecture',
       title: 'Understanding Micro-Frontend Architecture',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a micro-frontend, and how does it differ from a monolithic frontend architecture?',
@@ -4552,7 +4552,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#micro-frontend-integration-patterns',
       title: 'Micro-frontend Integration Patterns',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the different integration patterns used in micro-frontend architecture.',
@@ -4562,7 +4562,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#microfrontend-communication-challenges',
       title: 'Microfrontend Communication Challenges',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do micro-frontends communicate with each other, and what are the challenges involved?',
@@ -4572,7 +4572,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#best-practices-for-microfrontends',
       title: 'Best Practices for Microfrontends',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some best practices when implementing micro-frontends in terms of styling and theming?',
@@ -4582,7 +4582,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#handling-micro-frontend-routing',
       title: 'Handling Micro Frontend Routing',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe how routing is handled in a micro-frontend architecture.',
@@ -4594,7 +4594,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#react-fiber-optimization',
       title: 'React Fiber Optimization',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is React Fiber, and how does it improve rendering performance?',
@@ -4604,7 +4604,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#react-fiber-phases-explained',
       title: 'React Fiber Phases Explained',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the difference between the Render Phase and Commit Phase in React Fiber.',
@@ -4614,7 +4614,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#react-scheduling-mechanism',
       title: 'React Scheduling Mechanism',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "How does React's scheduling mechanism prioritize updates, and why is this important?",
@@ -4624,7 +4624,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#benefits-of-suspense-components',
       title: 'Benefits of Suspense Components',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the benefits of using `React.Suspense` and `React.lazy` in an application?',
@@ -4634,7 +4634,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#cooperative-scheduling-overview',
       title: 'Cooperative Scheduling Overview',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Describe how cooperative scheduling works in React Fiber and its impact on application performance.',
@@ -4646,7 +4646,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#owasp-top-web-security',
       title: 'OWASP Top Web Security',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the OWASP Top Ten, and why is it important in web development?',
@@ -4656,7 +4656,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#preventing-sql-injection-attacks',
       title: 'Preventing SQL Injection Attacks',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how you would prevent SQL Injection attacks in a web application.',
@@ -4666,7 +4666,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#best-practices-for-password-storage',
       title: 'Best Practices for Password Storage',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the best practices for securely storing user passwords?',
@@ -4676,7 +4676,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#preventing-cross-site-attacks',
       title: 'Preventing Cross Site Attacks',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does Cross-Site Scripting (XSS) occur, and how can you prevent it?',
@@ -4686,7 +4686,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#principle-of-least-privilege',
       title: 'Principle of Least Privilege',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the principle of least privilege, and why is it important in access control?',
@@ -4698,7 +4698,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/server-side-rendering/page.mdx#server-side-vs-client-side-rendering',
       title: 'Server-Side vs Client-Side Rendering',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is Server-Side Rendering (SSR), and how does it differ from Client-Side Rendering (CSR)?',
@@ -4708,7 +4708,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/server-side-rendering/page.mdx#benefits-of-server-side-rendering',
       title: 'Benefits of Server-Side Rendering',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are the main benefits of using SSR in a web application?',
       answer:
@@ -4717,7 +4717,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/server-side-rendering/page.mdx#implementing-server-side-rendering-challenges',
       title: 'Implementing Server-Side Rendering Challenges',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What challenges might you face when implementing SSR, and how can you address them?',
@@ -4727,7 +4727,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/server-side-rendering/page.mdx#next-js-server-side-rendering',
       title: 'Next.js Server-Side Rendering',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How does Next.js facilitate SSR in React applications?',
       answer:
@@ -4736,7 +4736,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/server-side-rendering/page.mdx#handling-server-side-data-fetching',
       title: 'Handling Server-Side Data Fetching',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain how you would handle data fetching and state synchronization in an SSR application.',
@@ -4748,7 +4748,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/state-management-solutions/page.mdx#redux-core-principles',
       title: 'Redux Core Principles',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are the core principles of Redux, and how do they help in state management?',
@@ -4757,7 +4757,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/state-management-solutions/page.mdx#react-context-api-benefits',
       title: 'React Context API Benefits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does the Context API in React help avoid prop drilling, and what are its limitations?',
@@ -4767,7 +4767,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/state-management-solutions/page.mdx#state-management-frameworks-compared',
       title: 'State Management Frameworks Compared',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Compare and contrast MobX and Redux in terms of their approach to state management.',
@@ -4777,7 +4777,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/state-management-solutions/page.mdx#choosing-between-redux-and-context',
       title: 'Choosing Between Redux and Context',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'When would you choose Redux over the Context API for state management in a React application?',
@@ -4787,7 +4787,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/state-management-solutions/page.mdx#middleware-in-redux',
       title: 'Middleware in Redux',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the role of middleware in Redux and provide an example of its use.',
@@ -4799,7 +4799,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#unit-vs-integration-testing',
       title: 'Unit vs Integration Testing',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the difference between unit tests and integration tests?',
@@ -4809,7 +4809,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#jest-testing-framework-overview',
       title: 'Jest Testing Framework Overview',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does Jest differ from other testing frameworks, and what are its advantages?',
@@ -4819,7 +4819,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#mocking-in-testing-basics',
       title: 'Mocking in Testing Basics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the concept of mocking in testing and provide an example of how to mock a module in Jest.',
@@ -4829,7 +4829,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#writing-tests-with-react',
       title: 'Writing Tests with React',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some best practices when writing tests with React Testing Library?',
@@ -4839,7 +4839,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#testing-asynchronous-code-in-jest',
       title: 'Testing Asynchronous Code in Jest',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How can you test asynchronous code in Jest?',
       answer:
@@ -4850,7 +4850,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#git-merge-vs-rebase',
       title: 'Git Merge vs Rebase',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What is the difference between `git merge` and `git rebase`?',
       answer:
@@ -4859,7 +4859,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#resolving-git-merge-conflicts',
       title: 'Resolving Git Merge Conflicts',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how you would resolve a merge conflict in Git.',
       answer:
@@ -4868,7 +4868,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#understanding-pull-requests',
       title: 'Understanding Pull Requests',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is a pull request, and how does it facilitate collaboration?',
@@ -4878,7 +4878,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#reverting-a-remote-commit',
       title: 'Reverting a Remote Commit',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How do you revert a commit that has already been pushed to a remote repository?',
@@ -4888,7 +4888,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#best-practices-for-commits',
       title: 'Best Practices for Commits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are some best practices when writing commit messages?',
       answer:
@@ -4899,7 +4899,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/virtual-dom-and-rendering/page.mdx#virtual-dom-performance-benefits',
       title: 'Virtual DOM Performance Benefits',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the Virtual DOM, and how does it improve performance in frontend frameworks like React?',
@@ -4909,7 +4909,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/virtual-dom-and-rendering/page.mdx#react-reconciliation-process',
       title: 'React Reconciliation Process',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'Explain the reconciliation process in React. How does React determine which parts of the DOM need to be updated?',
@@ -4919,7 +4919,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/virtual-dom-and-rendering/page.mdx#key-management-in-react',
       title: 'Key Management in React',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "Why are keys important in lists, and what can happen if you don't use them correctly in React?",
@@ -4929,7 +4929,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/virtual-dom-and-rendering/page.mdx#optimizing-react-render-performance',
       title: 'Optimizing React Render Performance',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         "How does React's `shouldComponentUpdate` method or `React.memo` help optimize rendering performance?",
@@ -4939,7 +4939,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/virtual-dom-and-rendering/page.mdx#optimizing-virtual-dom-rendering',
       title: 'Optimizing Virtual DOM Rendering',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What are some best practices for optimizing the Virtual DOM rendering process in a React application?',
@@ -4951,7 +4951,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#understanding-core-web-vitals',
       title: 'Understanding Core Web Vitals',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'What are Core Web Vitals, and why are they important?',
       answer:
@@ -4960,7 +4960,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#lighthouse-performance-metrics',
       title: 'Lighthouse Performance Metrics',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'How does Lighthouse measure performance, and what are some key metrics it reports?',
@@ -4970,7 +4970,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#optimizing-website-load-times',
       title: 'Optimizing Website Load Times',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: "Explain how you would optimize a website's load time.",
       answer:
@@ -4979,7 +4979,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#optimizing-the-critical-path',
       title: 'Optimizing the Critical Path',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question:
         'What is the Critical Rendering Path, and how can you optimize it?',
@@ -4989,7 +4989,7 @@ export const FRONTEND_DEVELOPMENT = {
     {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#improving-web-performance',
       title: 'Improving Web Performance',
-      type: ProblemType.THEORETICAL,
+      type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'How do you use service workers to improve web performance?',
       answer:

@@ -69,7 +69,7 @@ async function migrateQAPairsToProblemTable() {
             title: pair.question,
             question: pair.question,
             answer: pair.answer,
-            type: ProblemType.THEORETICAL,
+            type: ProblemType.THEORY,
             difficulty: ProblemDifficulty.MEDIUM, // Default difficulty
             href,
             lessonId: lesson.id,

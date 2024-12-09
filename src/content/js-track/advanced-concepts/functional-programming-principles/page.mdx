@@ -1,47 +1,10 @@
-**Lesson Title**: **Functional Programming Principles in JavaScript**
-
-**Lesson Description**:  
-Explore the core principles of functional programming and how they apply to JavaScript. Learn about pure functions, immutability, and side effects, and understand how these concepts can lead to more predictable, maintainable, and testable code. This comprehensive lesson will enhance your programming paradigm knowledge, improve your coding practices, and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Functional Programming Principles in JavaScript",   description: "Explore the core principles of functional programming and how they apply to JavaScript. Learn about pure functions, immutability, and side effects, and understand how these concepts can lead to more predictable, maintainable, and testable code. This comprehensive lesson will enhance your programming paradigm knowledge, improve your coding practices, and prepare you for technical interviews by covering these essential topics.", }
 
 # **Functional Programming Principles in JavaScript**
 
 Functional programming is a programming paradigm that treats computation as the evaluation of mathematical functions and avoids changing state and mutable data. JavaScript, while being a multi-paradigm language, supports functional programming techniques. This lesson delves into the principles of functional programming, focusing on pure functions, immutability, and side effects, and how to apply these concepts in JavaScript to write cleaner and more reliable code.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Functional Programming**
-   - What is Functional Programming?
-   - Benefits of Functional Programming
-2. **Pure Functions**
-   - Definition of Pure Functions
-   - Characteristics of Pure Functions
-   - Examples of Pure and Impure Functions
-3. **Immutability**
-   - What is Immutability?
-   - Advantages of Immutability
-   - Implementing Immutability in JavaScript
-4. **Side Effects**
-   - Understanding Side Effects
-   - Why Avoid Side Effects?
-   - Managing Side Effects
-5. **Higher-Order Functions**
-   - Functions as First-Class Citizens
-   - Using Higher-Order Functions
-6. **Functional Programming Techniques**
-   - Function Composition
-   - Currying and Partial Application
-7. **Best Practices**
-8. **Common Interview Questions**
-9. **Exercises**
-10. **Conclusion**
-11. **Next Steps**
-12. **Appendix**
-
----
 
 ## **Introduction to Functional Programming**
 
@@ -61,8 +24,6 @@ Functional programming is a programming paradigm that treats computation as the 
 - **Testability**: Easier to test functions in isolation.
 - **Maintainability**: Code is often more modular and easier to reason about.
 - **Concurrency**: Immutability reduces issues with shared state in concurrent programs.
-
----
 
 ## **Pure Functions**
 
@@ -133,8 +94,6 @@ function sumOfSquares(a, b) {
 - **Easier to Test**: Predictable outputs make unit testing straightforward.
 - **Parallelism**: Safe to execute in parallel since they don't share state.
 - **Caching/Memoization**: Results can be cached since the output is consistent.
-
----
 
 ## **Immutability**
 
@@ -225,8 +184,6 @@ numbers.push(4)
 const newNumbers = [...numbers, 4]
 ```
 
----
-
 ## **Side Effects**
 
 ### **Understanding Side Effects**
@@ -287,8 +244,6 @@ A **side effect** is any observable effect of a function other than its return v
   const message = greet(name) // Pure
   console.log(message) // Side effect
   ```
-
----
 
 ## **Higher-Order Functions**
 
@@ -352,8 +307,6 @@ A **higher-order function** is a function that:
   Calling multiply with arguments: [2, 3]
   Result: 6
   ```
-
----
 
 ## **Functional Programming Techniques**
 
@@ -428,8 +381,6 @@ A **higher-order function** is a function that:
   console.log(double(5)) // Outputs: 10
   ```
 
----
-
 ## **Best Practices**
 
 ### **Favor Pure Functions**
@@ -479,69 +430,6 @@ A **higher-order function** is a function that:
     const doubled = numbers.map((n) => n * 2)
     ```
 
----
-
-## **Common Interview Questions**
-
-1. **What is a pure function, and why are pure functions important in functional programming?**
-
-   **Answer**:
-
-   - A pure function is a function that always returns the same result given the same inputs and has no side effects.
-   - Importance:
-     - Predictability: Easier to reason about.
-     - Testability: Simplifies unit testing.
-     - Reusability: Functions can be reused with confidence.
-     - Parallelism: Safe for concurrent execution since they don't modify shared state.
-
-2. **Explain the concept of immutability and its benefits in JavaScript.**
-
-   **Answer**:
-
-   - Immutability means that once a data structure is created, it cannot be altered.
-   - Benefits:
-     - Prevents unintended side effects.
-     - Easier to reason about state changes.
-     - Improves performance in some contexts (e.g., memoization).
-     - Enhances reliability in concurrent environments.
-
-3. **What are side effects in functions, and how can they impact your code?**
-
-   **Answer**:
-
-   - Side effects are any changes in state or observable interactions with the outside world that occur during function execution, other than the return value.
-   - Impact:
-     - Makes code less predictable and harder to test.
-     - Can introduce bugs due to hidden dependencies.
-     - Increases complexity in understanding the flow of data.
-
-4. **How do higher-order functions contribute to functional programming?**
-
-   **Answer**:
-
-   - Higher-order functions can take functions as arguments or return functions.
-   - Contribution:
-     - Enables function composition and abstraction.
-     - Promotes code reuse and modularity.
-     - Facilitates declarative programming patterns.
-
-5. **What is function composition, and how is it used in JavaScript?**
-
-   **Answer**:
-
-   - Function composition is the process of combining two or more functions to produce a new function.
-   - Usage:
-
-     - Allows building complex functionality by composing simpler functions.
-     - Enhances code readability and reusability.
-     - Example:
-
-       ```javascript
-       const compose = (f, g) => (x) => f(g(x))
-       ```
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Identifying Pure Functions**
@@ -583,8 +471,6 @@ Determine whether each of the following functions is pure or impure. Explain you
 3. **Impure**: Returns different values each time it's called, depends on external system time.
 4. **Pure**: Returns the same output for the same input, no side effects.
 
----
-
 ### **Exercise 2: Implementing Immutability**
 
 **Question**:
@@ -623,8 +509,6 @@ console.log(updatedPerson.address.city) // 'New Wonderland'
 - Used object spread operator to create a shallow copy of `person`.
 - Created a new `address` object by spreading `person.address` and updating `city`.
 
----
-
 ### **Exercise 3: Avoiding Side Effects**
 
 **Question**:
@@ -657,8 +541,6 @@ console.log(newTotal) // 10
 **Explanation**:
 
 - The pure function `add` takes `amount` and `total` as arguments and returns the new total without modifying external variables.
-
----
 
 ### **Exercise 4: Using Higher-Order Functions**
 
@@ -699,8 +581,6 @@ function sayHello() {
 const sayHelloThrice = repeat(sayHello, 3)
 sayHelloThrice()
 ```
-
----
 
 ### **Exercise 5: Function Composition**
 
@@ -747,59 +627,8 @@ const doubleThenIncrement = compose(increment, double)
 console.log(doubleThenIncrement(3)) // Outputs: 7
 ```
 
----
-
-## **Conclusion**
 
 Functional programming principles like pure functions, immutability, and avoiding side effects can greatly enhance the quality of your JavaScript code. By applying these concepts, you write more predictable, maintainable, and testable code. Understanding and utilizing functional programming techniques also prepares you for advanced programming challenges and technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Refactor existing code to use pure functions and immutability.
-  - Implement common algorithms using functional programming techniques.
-
-- **Explore**:
-
-  - Learn about functional programming libraries like **Ramda** or **Lodash/fp**.
-  - Study advanced concepts like monads and functors in functional programming.
-
-- **Prepare**:
-
-  - Review and answer additional interview questions on functional programming.
-  - Explain these concepts to a peer or through writing to reinforce your understanding.
-
----
-
-**Continue enhancing your JavaScript expertise by mastering functional programming principles!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Functional Programming**: A programming paradigm that treats computation as the evaluation of mathematical functions and avoids changing state and mutable data.
-
-- **Pure Function**: A function that always returns the same result given the same inputs and has no side effects.
-
-- **Immutability**: The concept that data cannot be changed after it is created.
-
-- **Side Effect**: Any observable effect of a function other than its return value, such as modifying external variables or performing I/O operations.
-
-- **Higher-Order Function**: A function that takes other functions as arguments or returns them as results.
-
-- **First-Class Function**: Functions that are treated as values that can be assigned to variables, passed as arguments, or returned from other functions.
-
-- **Function Composition**: Combining two or more functions to produce a new function.
-
-- **Currying**: Transforming a function that takes multiple arguments into a sequence of functions each taking a single argument.
-
-- **Partial Application**: Fixing a few arguments of a function, producing another function with smaller arity.
-
----
-
-**End of Lesson**

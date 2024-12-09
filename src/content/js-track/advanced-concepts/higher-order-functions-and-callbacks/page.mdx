@@ -1,47 +1,10 @@
-**Lesson Title**: **Higher-Order Functions and Callbacks in JavaScript**
-
-**Lesson Description**:  
-Discover the power of higher-order functions and callbacks in JavaScript. Learn how functions are first-class citizens in the language and how to leverage built-in higher-order functions like `map`, `filter`, and `reduce` to write cleaner, more expressive code. This comprehensive lesson will enhance your functional programming skills, improve your ability to manipulate arrays and data structures, and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Higher-Order Functions and Callbacks in JavaScript",   description: "Discover the power of higher-order functions and callbacks in JavaScript. Learn how functions are first-class citizens in the language and how to leverage built-in higher-order functions like `map`, `filter`, and `reduce` to write cleaner, more expressive code. This comprehensive lesson will enhance your functional programming skills, improve your ability to manipulate arrays and data structures, and prepare you for technical interviews by covering these essential topics.", }
 
 # **Higher-Order Functions and Callbacks in JavaScript**
 
 JavaScript treats functions as first-class citizens, meaning functions can be assigned to variables, passed as arguments, and returned from other functions. This capability enables the use of higher-order functions and callbacks, which are fundamental concepts in functional programming. In this lesson, we'll explore how to use higher-order functions, understand callbacks, and dive deep into the powerful array methods `map`, `filter`, and `reduce`.
 
----
 
-## **Table of Contents**
-
-1. **Functions as First-Class Citizens**
-   - What Does It Mean?
-   - Examples of Functions as Values
-2. **Higher-Order Functions**
-   - Definition
-   - Examples of Higher-Order Functions
-3. **Callbacks**
-   - Understanding Callbacks
-   - Using Callbacks in JavaScript
-   - Common Use Cases
-4. **Array Methods: Map, Filter, Reduce**
-   - **Map**
-     - Syntax and Usage
-     - Examples
-   - **Filter**
-     - Syntax and Usage
-     - Examples
-   - **Reduce**
-     - Syntax and Usage
-     - Examples
-   - Combining Map, Filter, and Reduce
-5. **Best Practices**
-6. **Common Interview Questions**
-7. **Exercises**
-8. **Conclusion**
-9. **Next Steps**
-10. **Appendix**
-
----
 
 ## **Functions as First-Class Citizens**
 
@@ -114,8 +77,6 @@ const double = createMultiplier(2)
 console.log(double(5)) // Outputs: 10
 ```
 
----
-
 ## **Higher-Order Functions**
 
 ### **Definition**
@@ -170,8 +131,6 @@ function wrapValue(n) {
 const wrap5 = wrapValue(5)
 console.log(wrap5()) // Outputs: 5
 ```
-
----
 
 ## **Callbacks**
 
@@ -238,8 +197,6 @@ setTimeout(function () {
     console.log('Data received:', data)
   })
   ```
-
----
 
 ## **Array Methods: Map, Filter, Reduce**
 
@@ -448,8 +405,6 @@ const totalInStock = products
 console.log(totalInStock) // Outputs: 1750
 ```
 
----
-
 ## **Best Practices**
 
 - **Use Descriptive Function Names:** When passing functions, name them appropriately to enhance readability.
@@ -481,66 +436,6 @@ console.log(totalInStock) // Outputs: 1750
   const sum = numbers.reduce((acc, n) => acc + n, 0) // Initial value 0
   ```
 
----
-
-## **Common Interview Questions**
-
-1. **What is a higher-order function in JavaScript?**
-
-   **Answer:**
-
-   A higher-order function is a function that either takes one or more functions as arguments or returns a function as a result. They are used to abstract over actions and can help create more flexible and reusable code.
-
-2. **How does the `map` method differ from `forEach`?**
-
-   **Answer:**
-
-   - `map` returns a new array containing the results of applying a function to each element of the original array.
-   - `forEach` executes a provided function once for each array element but does not return a new array.
-   - Use `map` when you need to transform data and collect the results; use `forEach` for side effects.
-
-3. **Can you explain how the `reduce` method works?**
-
-   **Answer:**
-
-   The `reduce` method applies a reducer function to each element of an array, resulting in a single output value. The reducer function takes an accumulator and the current value, updates the accumulator, and returns it for the next iteration. An initial value for the accumulator can be provided.
-
-4. **Why are functions considered first-class citizens in JavaScript?**
-
-   **Answer:**
-
-   Because functions in JavaScript can be:
-
-   - Assigned to variables.
-   - Passed as arguments to other functions.
-   - Returned from other functions.
-   - Stored in data structures.
-
-   This allows for higher-order functions and callbacks, enabling functional programming techniques.
-
-5. **Provide an example of a situation where you would use a callback function.**
-
-   **Answer:**
-
-   Callbacks are commonly used for asynchronous operations, such as handling responses from network requests or timers.
-
-   **Example:**
-
-   ```javascript
-   function fetchData(callback) {
-     setTimeout(() => {
-       const data = { id: 1, name: 'Alice' }
-       callback(data)
-     }, 1000)
-   }
-
-   fetchData((data) => {
-     console.log('Data received:', data)
-   })
-   ```
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Using Map**
@@ -558,8 +453,6 @@ const multiplied = numbers.map((n) => n * 10)
 console.log(multiplied) // Outputs: [10, 20, 30, 40, 50]
 ```
 
----
-
 ### **Exercise 2: Using Filter**
 
 **Question:**
@@ -574,8 +467,6 @@ const longFruits = fruits.filter((fruit) => fruit.length > 5)
 
 console.log(longFruits) // Outputs: ['banana', 'cherry']
 ```
-
----
 
 ### **Exercise 3: Using Reduce**
 
@@ -592,8 +483,6 @@ const product = numbers.reduce((acc, n) => acc * n, 1)
 console.log(product) // Outputs: 24
 ```
 
----
-
 ### **Exercise 4: Combining Map and Filter**
 
 **Question:**
@@ -608,8 +497,6 @@ const result = numbers.filter((n) => n % 2 === 0).map((n) => n * n)
 
 console.log(result) // Outputs: [4, 16, 36]
 ```
-
----
 
 ### **Exercise 5: Writing a Higher-Order Function**
 
@@ -630,49 +517,8 @@ const add5 = makeAdder(5)
 console.log(add5(10)) // Outputs: 15
 ```
 
----
-
-## **Conclusion**
 
 Understanding higher-order functions and callbacks is essential for mastering JavaScript and functional programming concepts. By treating functions as first-class citizens, you can write more modular, reusable, and expressive code. Utilizing built-in array methods like `map`, `filter`, and `reduce` allows you to perform complex data transformations with ease. This knowledge will not only improve your coding skills but also prepare you for technical interviews and advanced programming challenges.
 
----
 
-## **Next Steps**
 
-- **Practice:**
-
-  - Rewrite loops using `map`, `filter`, and `reduce`.
-  - Create your own higher-order functions.
-
-- **Explore:**
-
-  - Learn about other array methods like `some`, `every`, `find`, and `findIndex`.
-  - Study function composition and currying.
-
-- **Prepare:**
-
-  - Review additional interview questions on higher-order functions and callbacks.
-  - Explain these concepts to a peer or through writing to reinforce your understanding.
-
----
-
-**Continue enhancing your JavaScript expertise by mastering higher-order functions and callbacks!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **First-Class Functions:** Functions that can be treated like any other variable or object in the language.
-- **Higher-Order Function:** A function that takes one or more functions as arguments or returns a function as its result.
-- **Callback Function:** A function passed into another function as an argument, to be invoked later.
-- **Map:** An array method that creates a new array by applying a function to each element.
-- **Filter:** An array method that creates a new array with all elements that pass the test implemented by the provided function.
-- **Reduce:** An array method that executes a reducer function on each element, resulting in a single output value.
-- **Arrow Function:** A concise syntax for writing function expressions using the `=>` notation.
-
----
-
-**End of Lesson**

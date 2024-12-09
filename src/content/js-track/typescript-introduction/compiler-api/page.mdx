@@ -1,49 +1,10 @@
-**Lesson Title**: **Mastering the TypeScript Compiler API**
-
-**Lesson Description**:  
-Elevate your TypeScript expertise by delving into the TypeScript Compiler API. This lesson focuses on programmatic Abstract Syntax Tree (AST) manipulation and creating custom transformers. By understanding how to interact with the TypeScript compiler programmatically, you will gain the ability to analyze, transform, and generate TypeScript code dynamically. This comprehensive lesson will deepen your understanding of TypeScript's internals and prepare you for advanced development tasks and technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Mastering the TypeScript Compiler API",   description: "Elevate your TypeScript expertise by delving into the TypeScript Compiler API. This lesson focuses on programmatic Abstract Syntax Tree (AST) manipulation and creating custom transformers. By understanding how to interact with the TypeScript compiler programmatically, you will gain the ability to analyze, transform, and generate TypeScript code dynamically. This comprehensive lesson will deepen your understanding of TypeScript's internals and prepare you for advanced development tasks and technical interviews by covering these essential topics.", }
 
 # **Mastering the TypeScript Compiler API**
 
 The TypeScript Compiler API provides powerful tools for programmatically analyzing and transforming TypeScript code. By leveraging the Compiler API, developers can create custom tools, linters, code generators, and more. This lesson explores how to interact with the TypeScript compiler programmatically, manipulate the AST, and implement custom transformers to modify code during the compilation process.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to the TypeScript Compiler API**
-   - What is the TypeScript Compiler API?
-   - Importance and Use Cases
-2. **Setting Up the Environment**
-   - Installing TypeScript Compiler Package
-   - Basic Project Structure
-3. **Understanding the Abstract Syntax Tree (AST)**
-   - What is an AST?
-   - Exploring the TypeScript AST Structure
-4. **Programmatic AST Manipulation**
-   - Parsing TypeScript Code into AST
-   - Traversing the AST
-   - Modifying the AST
-5. **Creating Custom Transformers**
-   - What are Custom Transformers?
-   - Transformer Factory Functions
-   - Implementing Custom Transformers
-6. **Applying Transformers during Compilation**
-   - Using Transformers with `tsc`
-   - Integrating Transformers in Build Tools (e.g., Webpack)
-7. **Practical Examples**
-   - Example 1: Logging Function Calls
-   - Example 2: Automatic Property Binding
-8. **Best Practices**
-9. **Common Interview Questions**
-10. **Exercises**
-11. **Conclusion**
-12. **Next Steps**
-13. **Appendix**
-
----
 
 ## **Introduction to the TypeScript Compiler API**
 
@@ -63,8 +24,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
 - **Code Transformation**: Implement code transformations for optimization, instrumentation, or feature enhancements.
 - **Code Generation**: Generate code based on templates or patterns.
 - **Educational Tools**: Build tools that visualize code structure or behavior for learning purposes.
-
----
 
 ## **Setting Up the Environment**
 
@@ -104,8 +63,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
 
 - **`index.ts`**: Entry point for your compiler tool or transformer.
 
----
-
 ## **Understanding the Abstract Syntax Tree (AST)**
 
 ### **What is an AST?**
@@ -136,8 +93,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
   ```
 
   - **Output**: The `statements` property contains an array of `Node` objects representing the top-level statements in the code.
-
----
 
 ## **Programmatic AST Manipulation**
 
@@ -224,8 +179,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
   const transformedSourceFile = result.transformed[0];
   ```
 
----
-
 ## **Creating Custom Transformers**
 
 ### **What are Custom Transformers?**
@@ -264,8 +217,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
     };
   }
   ```
-
----
 
 ## **Applying Transformers during Compilation**
 
@@ -339,8 +290,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
     return tsProject.src().pipe(tsProject()).js.pipe(gulp.dest('dist'));
   });
   ```
-
----
 
 ## **Practical Examples**
 
@@ -493,8 +442,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
 
   Apply the transformer during compilation.
 
----
-
 ## **Best Practices**
 
 - **Understand the AST Structure**: Familiarize yourself with the TypeScript AST node types and their relationships.
@@ -503,52 +450,6 @@ The TypeScript Compiler API provides powerful tools for programmatically analyzi
 - **Test Thoroughly**: Ensure your transformers work correctly by testing them with various code samples.
 - **Performance Considerations**: Be mindful of the performance impact of your transformers, especially when working with large codebases.
 - **Stay Updated**: Keep up with TypeScript's updates, as the Compiler API may change between versions.
-
----
-
-## **Common Interview Questions**
-
-1. **What is the TypeScript Compiler API, and why is it useful?**
-
-   **Answer**:
-
-   - The TypeScript Compiler API allows developers to interact with the TypeScript compiler programmatically.
-   - It provides access to the compiler's internal processes, enabling code analysis, AST manipulation, code transformation, and code generation.
-   - Useful for creating custom tools like linters, code formatters, code generators, and implementing custom compile-time transformations.
-
-2. **Explain how you can traverse and modify the AST in TypeScript.**
-
-   **Answer**:
-
-   - Traversal is typically done using the visitor pattern, recursively visiting each node using functions like `ts.forEachChild` or `ts.visitEachChild`.
-   - Modification involves creating new nodes or updating existing ones using factory functions provided by `ts.factory`.
-   - By returning new nodes from visitor functions, you can replace nodes in the AST, effectively modifying the code.
-
-3. **What are custom transformers in TypeScript, and how do they work?**
-
-   **Answer**:
-
-   - Custom transformers are functions that receive and return AST nodes, allowing you to modify code during the compilation process.
-   - They are implemented as transformer factory functions that take a `TransformationContext` and return a transformer function.
-   - They are applied during the compilation process, modifying the AST before the code is emitted.
-
-4. **Can you use custom transformers with the TypeScript compiler (`tsc`) directly? If not, how can you apply them?**
-
-   **Answer**:
-
-   - The TypeScript compiler (`tsc`) does not support custom transformers directly via command-line options.
-   - To apply custom transformers, you can use the Compiler API to create a custom compilation script that invokes the compiler programmatically with the transformers.
-   - Alternatively, integrate the transformers into build tools like Webpack (using `ts-loader`) or Gulp.
-
-5. **Describe a scenario where you would use the TypeScript Compiler API to create a custom tool.**
-
-   **Answer**:
-
-   - **Scenario**: Creating a custom linter that enforces specific coding standards or detects code patterns not covered by existing linters.
-   - By parsing the code into an AST and traversing it, you can analyze code structures, detect undesirable patterns, and report them.
-   - Another scenario is generating code documentation by extracting comments and code structures from the AST.
-
----
 
 ## **Exercises**
 
@@ -579,8 +480,6 @@ function logFunctionNames(node: ts.Node) {
 logFunctionNames(sourceFile);
 ```
 
----
-
 ### **Exercise 2: Simple Transformer**
 
 **Question**:
@@ -602,8 +501,6 @@ function varToLetTransformer(): ts.TransformerFactory<ts.SourceFile> {
   };
 }
 ```
-
----
 
 ### **Exercise 3: Identifying Deprecated Functions**
 
@@ -632,8 +529,6 @@ function findDeprecatedFunctions(node: ts.Node) {
 
 findDeprecatedFunctions(sourceFile);
 ```
-
----
 
 ### **Exercise 4: Code Generation**
 
@@ -682,8 +577,6 @@ const result = printer.printNode(ts.EmitHint.Unspecified, sourceFile, sourceFile
 fs.writeFileSync('person.ts', result);
 ```
 
----
-
 ### **Exercise 5: AST Modification**
 
 **Question**:
@@ -731,49 +624,8 @@ function logMethodCalls(): ts.TransformerFactory<ts.SourceFile> {
 }
 ```
 
----
-
-## **Conclusion**
 
 The TypeScript Compiler API empowers developers to analyze, manipulate, and generate TypeScript code programmatically. By mastering programmatic AST manipulation and custom transformers, you can create powerful tools and enhance the capabilities of your TypeScript projects. Understanding the Compiler API opens up opportunities for custom linting, code transformations, and more, preparing you for advanced development challenges and technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-  - Experiment with creating custom transformers for your projects.
-  - Build tools that analyze or modify TypeScript code using the Compiler API.
-
-- **Explore**:
-  - Dive deeper into advanced AST manipulations and learn about symbol tables and type checking.
-  - Study how popular tools like TSLint and ESLint utilize the Compiler API.
-
-- **Prepare**:
-  - Review additional interview questions on TypeScript's Compiler API and code transformation.
-  - Build projects that leverage the Compiler API to reinforce your understanding.
-
----
-
-**Continue enhancing your TypeScript expertise by mastering the Compiler API!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **TypeScript Compiler API**: An API that allows developers to interact with the TypeScript compiler programmatically.
-- **Abstract Syntax Tree (AST)**: A tree representation of the abstract syntactic structure of source code.
-- **Node**: A basic unit in the AST representing a syntactic element.
-- **Visitor Pattern**: A design pattern used to traverse and operate on elements of an object structure, such as an AST.
-- **Transformer**: A function that receives and returns AST nodes, allowing code modification during compilation.
-- **Transformation Context**: Provides methods and information to assist in node transformations.
-- **Factory Functions**: Functions provided by `ts.factory` to create or update AST nodes.
-- **Custom Transformer**: A user-defined transformer applied during the TypeScript compilation process.
-- **Symbol Table**: A data structure used by the compiler to store information about identifiers (variables, functions, classes, etc.).
-- **Emit**: The process of generating output code (e.g., JavaScript) from the AST.
-
----
-
-**End of Lesson**

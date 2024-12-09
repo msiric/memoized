@@ -1,50 +1,10 @@
-**Lesson Title**: **Generics and Constraints in TypeScript**
-
-**Lesson Description**:  
-Enhance your TypeScript expertise by mastering generics and constraints. This lesson focuses on generic functions and classes, allowing you to create reusable components that work with a variety of types. Additionally, learn how to use constraints with `extends` to restrict generic types, enabling you to enforce type requirements and improve type safety. By understanding generics and constraints, you will be able to write more flexible, maintainable, and type-safe code. This comprehensive lesson will deepen your understanding of TypeScript's advanced type system and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Generics and Constraints in TypeScript",   description: "Enhance your TypeScript expertise by mastering generics and constraints. This lesson focuses on generic functions and classes, allowing you to create reusable components that work with a variety of types. Additionally, learn how to use constraints with `extends` to restrict generic types, enabling you to enforce type requirements and improve type safety. By understanding generics and constraints, you will be able to write more flexible, maintainable, and type-safe code. This comprehensive lesson will deepen your understanding of TypeScript's advanced type system and prepare you for technical interviews by covering these essential topics.", }
 
 # **Generics and Constraints in TypeScript**
 
 Generics are a powerful feature in TypeScript that allow developers to create reusable components that can work with a variety of types while maintaining type safety. Constraints enable you to restrict the kinds of types that can be used with generics, ensuring that your code behaves as expected. This lesson delves into how to use generics in functions and classes, and how to apply constraints using the `extends` keyword.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Generics**
-   - What are Generics?
-   - Benefits of Using Generics
-2. **Generic Functions**
-   - Defining Generic Functions
-   - Type Inference with Generics
-   - Generic Constraints in Functions
-3. **Generic Classes**
-   - Defining Generic Classes
-   - Using Generic Classes
-   - Generic Constraints in Classes
-4. **Using Constraints with `extends`**
-   - Applying Type Constraints
-   - Using Multiple Constraints
-   - Bounded Generic Types
-5. **Keyof Constraint**
-   - Using `keyof` Operator
-   - Index Types and Lookup Types
-6. **Generic Interfaces**
-   - Defining Generic Interfaces
-   - Implementing Generic Interfaces
-7. **Generic Constraints and Interfaces**
-   - Extending Interfaces in Constraints
-   - Constrained Generic Functions with Interfaces
-8. **Best Practices**
-9. **Common Interview Questions**
-10. **Exercises**
-11. **Conclusion**
-12. **Next Steps**
-13. **Appendix**
-
----
 
 ## **Introduction to Generics**
 
@@ -62,8 +22,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
 - **Reusability**: Write code once and use it with multiple types.
 - **Clarity**: Makes the intent of code clearer, indicating that a function or class is intended to work with multiple types.
 - **Avoids `any` Type**: Provides a safer alternative to using `any`, which disables type checking.
-
----
 
 ## **Generic Functions**
 
@@ -129,8 +87,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   console.log(getLength([1, 2, 3])) // Outputs: 3
   // console.log(getLength(123)); // Error: Type 'number' does not satisfy the constraint 'HasLength'.
   ```
-
----
 
 ## **Generic Classes**
 
@@ -214,8 +170,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   document.printContent() // Outputs: Article: Generics in TypeScript
   ```
 
----
-
 ## **Using Constraints with `extends`**
 
 ### **Applying Type Constraints**
@@ -293,8 +247,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   // let calcBoolean = new Calculator<boolean>(); // Error: Type 'boolean' does not satisfy the constraint 'number | string'
   ```
 
----
-
 ## **Keyof Constraint**
 
 ### **Using `keyof` Operator**
@@ -343,8 +295,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   setProperty(person, 'age', 31)
   // setProperty(person, 'age', 'thirty-one'); // Error: Type 'string' is not assignable to type 'number'
   ```
-
----
 
 ## **Generic Interfaces**
 
@@ -399,8 +349,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   console.log(rect1.compareTo(rect2)) // Outputs: 50
   ```
 
----
-
 ## **Generic Constraints and Interfaces**
 
 ### **Extending Interfaces in Constraints**
@@ -449,8 +397,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
   console.log(item) // Outputs: { id: 2, name: 'Phone', price: 800 }
   ```
 
----
-
 ## **Best Practices**
 
 - **Use Generics When the Type is Variable**:
@@ -476,81 +422,6 @@ Generics are a powerful feature in TypeScript that allow developers to create re
     - `V` for Value
     - `E` for Element
 
----
-
-## **Common Interview Questions**
-
-1. **What are generics in TypeScript, and why are they useful?**
-
-   **Answer**:
-
-   - Generics allow the creation of components that can work with a variety of types while providing type safety.
-   - They enable writing reusable and flexible code.
-   - Generics provide a way to parameterize types, making code more maintainable and reducing duplication.
-
-2. **How do you apply constraints to a generic type in TypeScript?**
-
-   **Answer**:
-
-   - Constraints are applied using the `extends` keyword.
-   - It restricts the types that can be used as generic parameters.
-
-     ```typescript
-     function functionName<T extends ConstraintType>(param: T): ReturnType {
-       // Function body
-     }
-     ```
-
-   - This ensures that the generic type has certain properties or methods.
-
-3. **Explain the use of the `keyof` operator in TypeScript generics.**
-
-   **Answer**:
-
-   - The `keyof` operator takes an object type and produces a union of its keys.
-   - It is used to constrain generic types to the keys of a given type.
-
-     ```typescript
-     function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
-       return obj[key]
-     }
-     ```
-
-   - This ensures that only valid property keys are used.
-
-4. **Can you provide an example of a generic class with a constraint in TypeScript?**
-
-   **Answer**:
-
-   ```typescript
-   interface Printable {
-     print(): void
-   }
-
-   class Document<T extends Printable> {
-     content: T
-     constructor(content: T) {
-       this.content = content
-     }
-     printContent(): void {
-       this.content.print()
-     }
-   }
-   ```
-
-   - In this example, the generic class `Document` is constrained to types that implement the `Printable` interface.
-
-5. **What are the benefits of using generics over the `any` type in TypeScript?**
-
-   **Answer**:
-
-   - Generics provide type safety by ensuring that the types used are consistent and valid.
-   - They maintain type information, enabling better tooling support, such as autocompletion and type checking.
-   - Using `any` disables type checking, which can lead to runtime errors.
-   - Generics make code more maintainable and self-documenting.
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Generic Function**
@@ -575,8 +446,6 @@ let strings = ['a', 'b', 'c']
 let reversedStrings = reverseArray(strings)
 console.log(reversedStrings) // Outputs: ['c', 'b', 'a']
 ```
-
----
 
 ### **Exercise 2: Generic Class with Constraint**
 
@@ -616,8 +485,6 @@ let user = userRepo.getById(1)
 console.log(user) // Outputs: { id: 1, name: 'Alice' }
 ```
 
----
-
 ### **Exercise 3: Generic Interface**
 
 **Question**:
@@ -643,8 +510,6 @@ console.log(numberPair) // Outputs: { key: 1, value: 'one' }
 let stringPair = createPair<string, boolean>('isValid', true)
 console.log(stringPair) // Outputs: { key: 'isValid', value: true }
 ```
-
----
 
 ### **Exercise 4: Using `keyof` Constraint**
 
@@ -676,8 +541,6 @@ console.log(names) // Outputs: ['Alice', 'Bob']
 let ages = pluck(people, 'age')
 console.log(ages) // Outputs: [30, 25]
 ```
-
----
 
 ### **Exercise 5: Generic Constraint with Interface**
 
@@ -717,49 +580,8 @@ console.log(areEqual(p1, p2)) // Outputs: true
 console.log(areEqual(p1, p3)) // Outputs: false
 ```
 
----
-
-## **Conclusion**
 
 Generics and constraints are powerful features in TypeScript that enable you to write flexible, reusable, and type-safe code. By using generics in functions, classes, and interfaces, you can create components that work with a variety of types while maintaining strong type checking. Constraints with `extends` allow you to enforce type requirements, ensuring that your generic components behave as expected. Mastery of generics and constraints enhances your ability to build robust TypeScript applications and prepares you for advanced development tasks and technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Implement generics in your projects.
-  - Experiment with constraints and the `keyof` operator.
-
-- **Explore**:
-
-  - Learn about advanced type features like conditional types and mapped types.
-  - Study how generics interact with other TypeScript features like decorators.
-
-- **Prepare**:
-
-  - Review additional interview questions on TypeScript generics and type system.
-  - Build projects using generics and constraints to reinforce your understanding.
-
----
-
-**Continue enhancing your TypeScript expertise by mastering generics and constraints!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Generics**: A feature that allows the creation of components that can work with a variety of types while providing type safety.
-- **Constraints**: Restrictions applied to generic types using the `extends` keyword to ensure they meet certain requirements.
-- **Type Parameter**: A variable used in generics to represent types.
-- **Keyof Operator**: An operator that takes an object type and produces a union of its keys.
-- **Index Types**: Types that use keys from another type to index into that type.
-- **Generic Interface**: An interface that uses generics to work with multiple types.
-- **Bounded Type Parameter**: A type parameter constrained by extending another type.
-
----
-
-**End of Lesson**

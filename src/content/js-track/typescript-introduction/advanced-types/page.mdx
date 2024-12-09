@@ -1,54 +1,10 @@
-**Lesson Title**: **Advanced Types in TypeScript**
-
-**Lesson Description**:  
-Elevate your TypeScript skills by mastering advanced types. This lesson delves into union and intersection types, enabling you to create complex and flexible type definitions. Additionally, learn about type guards and type narrowing to refine types at runtime, enhancing type safety and code robustness. By understanding these advanced types and techniques, you will be able to write more expressive and type-safe TypeScript applications. This comprehensive lesson will deepen your knowledge of TypeScript's type system and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Advanced Types in TypeScript",   description: "Elevate your TypeScript skills by mastering advanced types. This lesson delves into union and intersection types, enabling you to create complex and flexible type definitions. Additionally, learn about type guards and type narrowing to refine types at runtime, enhancing type safety and code robustness. By understanding these advanced types and techniques, you will be able to write more expressive and type-safe TypeScript applications. This comprehensive lesson will deepen your knowledge of TypeScript's type system and prepare you for technical interviews by covering these essential topics.", }
 
 # **Advanced Types in TypeScript**
 
 TypeScript's advanced types provide powerful tools for developers to create flexible and precise type definitions. Union and intersection types allow combining multiple types into one, offering greater expressiveness. Type guards and type narrowing enable refining types at runtime, ensuring type safety and preventing errors. This lesson explores how to leverage these advanced types and techniques effectively in TypeScript.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Advanced Types**
-   - Overview of Advanced Types
-   - Importance in TypeScript
-2. **Union Types**
-   - Defining Union Types
-   - Use Cases for Union Types
-   - Working with Union Types
-3. **Intersection Types**
-   - Defining Intersection Types
-   - Use Cases for Intersection Types
-   - Combining Interfaces and Types
-4. **Type Guards**
-   - What are Type Guards?
-   - Using `typeof` and `instanceof`
-   - Custom Type Guards
-5. **Type Narrowing**
-   - Understanding Type Narrowing
-   - Control Flow Based Type Analysis
-   - Discriminated Unions
-6. **Type Predicates**
-   - Defining Type Predicates
-   - Implementing Type Guards with Predicates
-7. **Type Compatibility and Assignability**
-   - Structural Typing in TypeScript
-   - Type Compatibility Rules
-8. **Type Assertions and Casting**
-   - Refreshing Type Assertions
-   - Casting Between Types
-9. **Best Practices**
-10. **Common Interview Questions**
-11. **Exercises**
-12. **Conclusion**
-13. **Next Steps**
-14. **Appendix**
-
----
 
 ## **Introduction to Advanced Types**
 
@@ -67,8 +23,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 - **Type Safety**: Improves error detection and code robustness.
 - **Expressiveness**: Enables precise type definitions that reflect complex data structures.
 - **Code Maintainability**: Facilitates writing cleaner and more maintainable code.
-
----
 
 ## **Union Types**
 
@@ -153,8 +107,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
   - Only access properties and methods common to all types in the union unless type guarding.
 
----
-
 ## **Intersection Types**
 
 ### **Defining Intersection Types**
@@ -223,8 +175,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
     }
   }
   ```
-
----
 
 ## **Type Guards**
 
@@ -301,8 +251,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 - **Using Type Predicates**:
 
   - A type predicate is a return type in the form `parameterName is Type`.
-
----
 
 ## **Type Narrowing**
 
@@ -389,8 +337,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   }
   ```
 
----
-
 ## **Type Predicates**
 
 ### **Defining Type Predicates**
@@ -438,8 +384,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 
   - The `isFish` function checks if `pet` is a `Fish`.
   - The return type `pet is Fish` is a type predicate.
-
----
 
 ## **Type Compatibility and Assignability**
 
@@ -493,8 +437,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
     // numberContainer = stringContainer; // Error: Type 'string' is not assignable to type 'number'
     ```
 
----
-
 ## **Type Assertions and Casting**
 
 ### **Refreshing Type Assertions**
@@ -535,8 +477,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
   - Type assertions do not perform runtime checks.
   - Use with care to avoid runtime errors.
 
----
-
 ## **Best Practices**
 
 - **Use Type Guards to Refine Types**:
@@ -562,81 +502,6 @@ TypeScript's advanced types provide powerful tools for developers to create flex
 - **Combine Union and Intersection Types Appropriately**:
 
   - Use union types for flexibility and intersection types for combining properties.
-
----
-
-## **Common Interview Questions**
-
-1. **What are union types in TypeScript, and when would you use them?**
-
-   **Answer**:
-
-   - Union types allow a variable to be one of several types, defined using the `|` operator.
-   - They are used when a value can be of multiple types and you want to enforce type safety while accommodating different possible types.
-   - **Example**:
-
-     ```typescript
-     type ID = number | string
-     let userId: ID
-     ```
-
-2. **Explain intersection types and provide a use case.**
-
-   **Answer**:
-
-   - Intersection types combine multiple types into one, requiring that a value satisfies all included types, using the `&` operator.
-   - They are useful when you want to merge properties from multiple types or interfaces.
-   - **Example**:
-
-     ```typescript
-     interface Person {
-       name: string
-     }
-     interface Employee {
-       employeeId: number
-     }
-     type Staff = Person & Employee
-     let staffMember: Staff = { name: 'Alice', employeeId: 123 }
-     ```
-
-3. **What are type guards, and how do they help in TypeScript?**
-
-   **Answer**:
-
-   - Type guards are expressions that perform runtime checks to refine the type of a variable within a specific scope.
-   - They help TypeScript understand what type a variable is, enabling safe property access and method calls.
-   - Common type guards include `typeof`, `instanceof`, and custom type guards using type predicates.
-
-4. **How does TypeScript's control flow analysis assist in type narrowing?**
-
-   **Answer**:
-
-   - TypeScript uses control flow analysis to track the types of variables across different code paths.
-   - Based on conditions and type guards, it narrows down the possible types of a variable within specific blocks.
-   - This ensures type safety and allows for more precise type checking.
-
-5. **Can you explain what discriminated unions are and their benefits?**
-
-   **Answer**:
-
-   - Discriminated unions are union types that have a common discriminant property with a literal type.
-   - They allow TypeScript to narrow types based on the value of the discriminant.
-   - Benefits include exhaustive type checking and simplified type guards.
-   - **Example**:
-
-     ```typescript
-     interface Circle {
-       kind: 'circle'
-       radius: number
-     }
-     interface Square {
-       kind: 'square'
-       size: number
-     }
-     type Shape = Circle | Square
-     ```
-
----
 
 ## **Exercises**
 
@@ -680,8 +545,6 @@ handleResult(successResult) // Outputs: Data: Operation completed.
 handleResult(errorResult) // Outputs: Error: An error occurred.
 ```
 
----
-
 ### **Exercise 2: Intersection Types**
 
 **Question**:
@@ -712,8 +575,6 @@ const person: Person = { name: 'Alice', age: 30 }
 greet(person) // Outputs: Hello, my name is Alice, and I am 30 years old.
 ```
 
----
-
 ### **Exercise 3: Type Guards with `typeof`**
 
 **Question**:
@@ -735,8 +596,6 @@ function formatValue(value: string | number): string {
 console.log(formatValue('hello')) // Outputs: HELLO
 console.log(formatValue(3.14159)) // Outputs: 3.14
 ```
-
----
 
 ### **Exercise 4: Custom Type Guards**
 
@@ -779,8 +638,6 @@ const boat: Boat = {
 move(car) // Outputs: Driving on the road.
 move(boat) // Outputs: Sailing on the water.
 ```
-
----
 
 ### **Exercise 5: Discriminated Unions**
 
@@ -825,50 +682,8 @@ makeSound(myDog) // Outputs: Woof!
 makeSound(myCat) // Outputs: Meow!
 ```
 
----
-
-## **Conclusion**
 
 Advanced types in TypeScript, including union and intersection types, type guards, and type narrowing, empower developers to write more expressive and type-safe code. Union and intersection types provide flexibility in defining complex types, while type guards and narrowing enable precise control over type refinement at runtime. By mastering these advanced features, you enhance your ability to build robust TypeScript applications and prepare yourself for tackling complex development challenges and technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Implement advanced types in your projects.
-  - Write custom type guards and explore type narrowing.
-
-- **Explore**:
-
-  - Learn about conditional types and mapped types.
-  - Study how advanced types interact with generics and interfaces.
-
-- **Prepare**:
-
-  - Review additional interview questions on TypeScript's type system.
-  - Build projects using advanced types to reinforce your understanding.
-
----
-
-**Continue enhancing your TypeScript expertise by mastering advanced types!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Union Type**: A type that represents a value that can be one of several types, defined using the `|` operator.
-- **Intersection Type**: A type that combines multiple types into one, requiring the value to satisfy all included types, using the `&` operator.
-- **Type Guard**: A runtime check that allows narrowing the type within a conditional block.
-- **Type Narrowing**: Refining the type of a variable based on control flow analysis.
-- **Type Predicate**: A return type in the form `parameterName is Type`, used in custom type guards.
-- **Discriminated Union**: A union of types that share a common property with a literal type, enabling type-safe narrowing.
-- **Structural Typing**: A type system where compatibility is determined by the structure of types rather than their explicit declarations.
-- **Type Assertion**: A way to override TypeScript's inferred type when the developer has more information, also known as casting.
-
----
-
-**End of Lesson**

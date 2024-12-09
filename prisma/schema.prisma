@@ -31,8 +31,8 @@ enum ProblemDifficulty {
 }
 
 enum ProblemType {
-  ALGORITHM
-  THEORETICAL
+  CODING
+  THEORY
 }
 
 enum BannerType {
@@ -159,11 +159,11 @@ model Section {
 model Problem {
   id              String                @id @default(uuid())
   title           String
-  type            ProblemType           @default(ALGORITHM)
+  type            ProblemType
   question        String                @default("")
   answer          String                @default("")
   href            String                @unique
-  difficulty       ProblemDifficulty
+  difficulty      ProblemDifficulty
   lessonId        String
   lesson          Lesson                @relation(fields: [lessonId], references: [id])
   createdAt       DateTime              @default(now())

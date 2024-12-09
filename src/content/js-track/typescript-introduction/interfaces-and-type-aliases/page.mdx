@@ -1,52 +1,10 @@
-**Lesson Title**: **Interfaces and Type Aliases in TypeScript**
-
-**Lesson Description**:  
-Deepen your understanding of TypeScript by mastering interfaces and type aliases. This lesson focuses on defining object shapes using interfaces, extending interfaces for reusability, and exploring type aliases for creating custom types. Learn how to leverage these powerful features to enforce type safety, enhance code readability, and create more maintainable codebases. By mastering interfaces and type aliases, you will be better equipped to design robust TypeScript applications. This comprehensive lesson will strengthen your grasp of TypeScript's type system and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Interfaces and Type Aliases in TypeScript",   description: "Deepen your understanding of TypeScript by mastering interfaces and type aliases. This lesson focuses on defining object shapes using interfaces, extending interfaces for reusability, and exploring type aliases for creating custom types. Learn how to leverage these powerful features to enforce type safety, enhance code readability, and create more maintainable codebases. By mastering interfaces and type aliases, you will be better equipped to design robust TypeScript applications. This comprehensive lesson will strengthen your grasp of TypeScript's type system and prepare you for technical interviews by covering these essential topics.", }
 
 # **Interfaces and Type Aliases in TypeScript**
 
 Interfaces and type aliases are fundamental features in TypeScript that allow developers to define custom types and object shapes. They provide a way to describe the structure of objects, enforce type contracts, and enhance code reusability. This lesson delves into how to define object shapes using interfaces, extend interfaces for inheritance, and utilize type aliases to create flexible and reusable types.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Interfaces and Type Aliases**
-   - The Role of Interfaces and Type Aliases
-   - Differences Between Interfaces and Type Aliases
-2. **Defining Object Shapes with Interfaces**
-   - Basic Interface Syntax
-   - Optional Properties
-   - Readonly Properties
-3. **Function Types in Interfaces**
-   - Defining Function Interfaces
-   - Using Interfaces to Describe Function Signatures
-4. **Extending Interfaces**
-   - Interface Inheritance
-   - Extending Multiple Interfaces
-5. **Implementing Interfaces in Classes**
-   - Using Interfaces with Classes
-   - Enforcing Class Contracts
-6. **Type Aliases**
-   - Defining Type Aliases
-   - Union and Intersection Types
-   - Type Aliases vs. Interfaces
-7. **Indexable Types and Interfaces**
-   - Defining Index Signatures
-   - Using Indexable Types
-8. **Hybrid Types**
-   - Combining Function and Object Types
-   - Examples of Hybrid Types
-9. **Best Practices**
-10. **Common Interview Questions**
-11. **Exercises**
-12. **Conclusion**
-13. **Next Steps**
-14. **Appendix**
-
----
 
 ## **Introduction to Interfaces and Type Aliases**
 
@@ -75,8 +33,6 @@ Interfaces and type aliases are fundamental features in TypeScript that allow de
   - Can define any type, including primitives, unions, intersections, and tuples.
   - Cannot be re-opened to add new properties.
   - Cannot be implemented or extended in the same way as interfaces.
-
----
 
 ## **Defining Object Shapes with Interfaces**
 
@@ -168,8 +124,6 @@ Interfaces allow you to define the structure of an object by specifying its prop
   // origin.x = 5; // Error: Cannot assign to 'x' because it is a read-only property.
   ```
 
----
-
 ## **Function Types in Interfaces**
 
 Interfaces can be used to define the shape of functions, specifying parameter types and return types.
@@ -216,8 +170,6 @@ Interfaces can be used to define the shape of functions, specifying parameter ty
   const sortedNumbers = sortNumbers([5, 2, 9, 1], ascendingOrder)
   console.log(sortedNumbers) // Outputs: [1, 2, 5, 9]
   ```
-
----
 
 ## **Extending Interfaces**
 
@@ -295,8 +247,6 @@ Interfaces can inherit from other interfaces, allowing for the creation of more 
     color: 'blue',
   }
   ```
-
----
 
 ## **Implementing Interfaces in Classes**
 
@@ -378,8 +328,6 @@ Classes can implement interfaces to ensure they adhere to a specific structure.
   duck.fly() // Outputs: Duck is flying.
   duck.swim() // Outputs: Duck is swimming.
   ```
-
----
 
 ## **Type Aliases**
 
@@ -471,8 +419,6 @@ Type aliases allow you to create new names for types, including primitives, unio
   - Use interfaces to define object shapes and when you need to extend or implement.
   - Use type aliases for primitives, unions, intersections, and when flexibility is required.
 
----
-
 ## **Indexable Types and Interfaces**
 
 Interfaces can define types that can be indexed, similar to arrays or objects with dynamic keys.
@@ -521,8 +467,6 @@ Interfaces can define types that can be indexed, similar to arrays or objects wi
 
   - The type of the index signature must be 'string' or 'number'.
   - All properties must conform to the index signature type.
-
----
 
 ## **Hybrid Types**
 
@@ -587,8 +531,6 @@ Some types can act as both objects and functions.
   clickHandler.type = 'click'
   ```
 
----
-
 ## **Best Practices**
 
 - **Use Interfaces for Object Shapes**:
@@ -615,122 +557,6 @@ Some types can act as both objects and functions.
 
   - Use `?` for optional properties and `readonly` for immutable properties.
 
----
-
-## **Common Interview Questions**
-
-1. **What is the purpose of interfaces in TypeScript, and how do they differ from type aliases?**
-
-   **Answer**:
-
-   - **Interfaces**:
-
-     - Define contracts for objects, functions, and classes.
-     - Describe the structure and types of object properties.
-     - Can be extended and implemented.
-     - Support declaration merging.
-
-   - **Type Aliases**:
-
-     - Create new names for existing types.
-     - Can define primitives, unions, intersections, and other types.
-     - Cannot be reopened to add new properties.
-     - Cannot be implemented or extended in the same way as interfaces.
-
-2. **How do you define optional and readonly properties in an interface?**
-
-   **Answer**:
-
-   - **Optional Properties**:
-
-     - Use the `?` symbol after the property name.
-
-     ```typescript
-     interface User {
-       id: number
-       name?: string // Optional property
-     }
-     ```
-
-   - **Readonly Properties**:
-
-     - Use the `readonly` modifier before the property name.
-
-     ```typescript
-     interface Point {
-       readonly x: number
-       readonly y: number
-     }
-     ```
-
-3. **Can interfaces extend multiple interfaces in TypeScript? Provide an example.**
-
-   **Answer**:
-
-   - Yes, interfaces can extend multiple interfaces.
-
-   - **Example**:
-
-     ```typescript
-     interface A {
-       propertyA: string
-     }
-
-     interface B {
-       propertyB: number
-     }
-
-     interface C extends A, B {
-       propertyC: boolean
-     }
-
-     const obj: C = {
-       propertyA: 'Hello',
-       propertyB: 42,
-       propertyC: true,
-     }
-     ```
-
-4. **When should you use a type alias over an interface in TypeScript?**
-
-   **Answer**:
-
-   - Use type aliases when:
-
-     - Defining primitives, unions, intersections, or tuples.
-     - You need flexibility in type definitions.
-     - You are working with complex types that interfaces cannot represent.
-
-   - Use interfaces when:
-
-     - Defining object shapes.
-     - You need to extend or implement types.
-     - You want to take advantage of declaration merging.
-
-5. **How can interfaces be used to enforce class contracts in TypeScript?**
-
-   **Answer**:
-
-   - Classes can implement interfaces to ensure they provide specific methods and properties.
-
-   - The `implements` keyword is used to indicate that a class adheres to an interface.
-
-   - **Example**:
-
-     ```typescript
-     interface Logger {
-       log(message: string): void
-     }
-
-     class ConsoleLogger implements Logger {
-       log(message: string): void {
-         console.log(message)
-       }
-     }
-     ```
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Defining an Interface**
@@ -755,8 +581,6 @@ function calculateArea(rect: Rectangle): number {
 const myRect: Rectangle = { width: 5, height: 10 }
 console.log(calculateArea(myRect)) // Outputs: 50
 ```
-
----
 
 ### **Exercise 2: Extending Interfaces**
 
@@ -783,8 +607,6 @@ const employee: Employee = {
 }
 ```
 
----
-
 ### **Exercise 3: Function Types in Interfaces**
 
 **Question**:
@@ -806,8 +628,6 @@ const reverseString: StringManipulator = (input: string): string => {
 console.log(reverseString('hello')) // Outputs: olleh
 ```
 
----
-
 ### **Exercise 4: Using Type Aliases**
 
 **Question**:
@@ -828,8 +648,6 @@ logValue('Hello')
 logValue(42)
 logValue(true)
 ```
-
----
 
 ### **Exercise 5: Implementing Interfaces in Classes**
 
@@ -855,51 +673,8 @@ const clock = new DigitalClock()
 clock.tick() // Outputs: beep beep
 ```
 
----
-
-## **Conclusion**
 
 Interfaces and type aliases are powerful tools in TypeScript that enhance code organization, readability, and type safety. By defining object shapes with interfaces and extending them, you can create complex and reusable types that enforce consistent structures across your codebase. Type aliases offer flexibility in defining custom types, including unions and intersections. Mastery of interfaces and type aliases empowers you to write robust, maintainable, and scalable TypeScript applications, preparing you for advanced development challenges and technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Implement interfaces and type aliases in your projects.
-  - Experiment with extending interfaces and creating complex types.
-
-- **Explore**:
-
-  - Learn about advanced type features like mapped types and conditional types.
-  - Study how interfaces and type aliases interact with generics.
-
-- **Prepare**:
-
-  - Review additional interview questions on TypeScript interfaces and type system.
-  - Build projects using interfaces and type aliases to reinforce your understanding.
-
----
-
-**Continue enhancing your TypeScript expertise by mastering interfaces and type aliases!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Interface**: A TypeScript structure that defines a contract for objects, functions, or classes, specifying properties and methods.
-- **Type Alias**: A way to create a new name for a type, which can be a primitive, union, intersection, tuple, or any other type.
-- **Optional Property**: A property in an interface that may or may not be present, denoted by a `?`.
-- **Readonly Property**: A property that cannot be reassigned after initialization, marked with the `readonly` modifier.
-- **Union Type**: A type that represents a value that can be one of several types, using the `|` operator.
-- **Intersection Type**: A type that combines multiple types into one, using the `&` operator.
-- **Index Signature**: A way to define types for properties accessed via dynamic keys, using `[key: type]: valueType`.
-- **Hybrid Type**: A type that combines properties of multiple types, such as an object that is also callable like a function.
-- **Declaration Merging**: A feature where multiple declarations with the same name are merged into a single definition.
-
----
-
-**End of Lesson**

@@ -1,47 +1,10 @@
-**Lesson Title**: **Event Handling and Delegation in JavaScript**
-
-**Lesson Description**:  
-Master the art of event handling in JavaScript by exploring how events propagate through the DOM and how to use event delegation for efficient event management. This lesson delves into the mechanics of event propagation—capturing, targeting, and bubbling phases—and demonstrates how to harness these concepts to write performant and maintainable code. By understanding and applying event delegation, you can optimize event listeners and improve application performance. This comprehensive lesson will deepen your knowledge of DOM events and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Event Handling and Delegation in JavaScript",   description: "Master the art of event handling in JavaScript by exploring how events propagate through the DOM and how to use event delegation for efficient event management. This lesson delves into the mechanics of event propagation—capturing, targeting, and bubbling phases—and demonstrates how to harness these concepts to write performant and maintainable code. By understanding and applying event delegation, you can optimize event listeners and improve application performance. This comprehensive lesson will deepen your knowledge of DOM events and prepare you for technical interviews by covering these essential topics.", }
 
 # **Event Handling and Delegation in JavaScript**
 
 Events are fundamental to interactive web applications, allowing users to interact with web pages through clicks, key presses, mouse movements, and more. Understanding how to handle events efficiently is crucial for building responsive and performant applications. This lesson focuses on event handling mechanisms in JavaScript, with a special emphasis on event propagation and delegation, enabling you to write cleaner and more efficient code.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Event Handling**
-   - What are Events?
-   - Adding Event Listeners
-2. **Event Propagation**
-   - Event Flow in the DOM
-   - Capturing Phase
-   - Target Phase
-   - Bubbling Phase
-3. **Event Delegation**
-   - Understanding Event Delegation
-   - Advantages of Event Delegation
-   - Implementing Event Delegation
-4. **Efficient Event Handling**
-   - Avoiding Memory Leaks
-   - Managing Event Listeners
-   - Best Practices
-5. **Stopping Event Propagation**
-   - `stopPropagation` and `stopImmediatePropagation`
-   - Preventing Default Actions
-6. **Event Object Properties**
-   - Accessing Event Information
-   - Common Event Properties
-7. **Common Interview Questions**
-8. **Exercises**
-9. **Conclusion**
-10. **Next Steps**
-11. **Appendix**
-
----
 
 ## **Introduction to Event Handling**
 
@@ -75,8 +38,6 @@ button.addEventListener('click', function (event) {
   console.log('Button clicked!')
 })
 ```
-
----
 
 ## **Event Propagation**
 
@@ -130,8 +91,6 @@ document.addEventListener('click', function (event) {
 ```
 
 **Note**: Not all events bubble (e.g., `focus`, `blur` do not bubble).
-
----
 
 ## **Event Delegation**
 
@@ -196,8 +155,6 @@ function handleMenuAction(action) {
 - When a `click` event occurs, it checks if the `event.target` is an `LI` element.
 - It retrieves the `data-action` attribute and calls the corresponding function.
 
----
-
 ## **Efficient Event Handling**
 
 ### **Avoiding Memory Leaks**
@@ -245,8 +202,6 @@ function handleMenuAction(action) {
 - **Limit Event Listeners**:
   - Attach listeners at the highest possible level using event delegation.
 
----
-
 ## **Stopping Event Propagation**
 
 ### **`stopPropagation` and `stopImmediatePropagation`**
@@ -281,8 +236,6 @@ document.getElementById('myLink').addEventListener('click', function (event) {
   console.log('Default action prevented')
 })
 ```
-
----
 
 ## **Event Object Properties**
 
@@ -326,73 +279,6 @@ document.addEventListener('click', function (event) {
   console.log('Mouse position:', event.clientX, event.clientY)
 })
 ```
-
----
-
-## **Common Interview Questions**
-
-1. **What is event bubbling and event capturing in JavaScript?**
-
-   **Answer**:
-
-   - **Event Bubbling**:
-     - The event propagates from the target element up to its ancestors (from innermost to outermost).
-     - Default behavior in most event listeners.
-   - **Event Capturing**:
-     - The event propagates from the outermost element down to the target element (from outermost to innermost).
-     - Occurs before the bubbling phase.
-     - To use capturing, set the `useCapture` parameter to `true` in `addEventListener`.
-
-2. **Explain event delegation and its advantages.**
-
-   **Answer**:
-
-   - **Event Delegation**:
-     - A technique where a single event listener is added to a parent element to handle events from its child elements.
-     - Leverages event bubbling to manage events efficiently.
-   - **Advantages**:
-     - Reduces the number of event listeners, improving performance.
-     - Simplifies code by centralizing event handling.
-     - Automatically handles dynamically added elements.
-
-3. **How can you prevent the default action of an event in JavaScript?**
-
-   **Answer**:
-
-   - Use the `event.preventDefault()` method within the event handler.
-   - This method cancels the event's default behavior (e.g., following a link, submitting a form).
-
-   **Example**:
-
-   ```javascript
-   document
-     .getElementById('myForm')
-     .addEventListener('submit', function (event) {
-       event.preventDefault()
-       // Custom form submission logic
-     })
-   ```
-
-4. **What is the difference between `event.stopPropagation()` and `event.stopImmediatePropagation()`?**
-
-   **Answer**:
-
-   - **`event.stopPropagation()`**:
-     - Stops the event from propagating to parent elements.
-     - Other event listeners on the same element will still be executed.
-   - **`event.stopImmediatePropagation()`**:
-     - Stops the event from propagating to parent elements.
-     - Prevents any other event listeners on the same element from being executed.
-
-5. **Why should you avoid adding multiple event listeners to individual child elements, and how can you manage events more efficiently?**
-
-   **Answer**:
-
-   - Adding multiple event listeners to individual child elements can lead to increased memory usage and decreased performance.
-   - To manage events more efficiently, use event delegation by attaching a single event listener to a common parent element.
-   - This approach reduces the number of event listeners and handles events for both existing and future child elements.
-
----
 
 ## **Exercises**
 
@@ -442,8 +328,6 @@ outer.addEventListener('click', function (event) {
 2. Inner button clicked
 3. Outer div clicked (bubbling phase)
 
----
-
 ### **Exercise 2: Implementing Event Delegation**
 
 **Question**:
@@ -478,8 +362,6 @@ itemList.addEventListener('click', function (event) {
 })
 ```
 
----
-
 ### **Exercise 3: Preventing Default Actions**
 
 **Question**:
@@ -500,8 +382,6 @@ link.addEventListener('click', function (event) {
   console.log('Navigation prevented')
 })
 ```
-
----
 
 ### **Exercise 4: Stopping Event Propagation**
 
@@ -541,8 +421,6 @@ outer.addEventListener('click', function (event) {
 1. Outer div clicked (capturing phase)
 2. Inner button clicked
 
----
-
 ### **Exercise 5: Accessing Event Properties**
 
 **Question**:
@@ -563,53 +441,8 @@ textInput.addEventListener('keydown', function (event) {
 })
 ```
 
----
-
-## **Conclusion**
 
 Event handling is a fundamental aspect of JavaScript programming, enabling interactive and dynamic web applications. By understanding event propagation and implementing event delegation, you can write more efficient and maintainable code. Efficient event handling not only improves performance but also simplifies the management of event listeners, especially in applications with dynamic content. Mastery of these concepts equips you with the skills to build responsive applications and prepares you for technical interviews and advanced development challenges.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Implement event delegation in your projects to handle dynamic content.
-  - Experiment with capturing and bubbling phases to understand event flow.
-
-- **Explore**:
-
-  - Learn about custom events and how to create and dispatch them.
-  - Study how event handling differs in frameworks like React or Angular.
-
-- **Prepare**:
-  - Review additional interview questions on event handling and the DOM.
-  - Explain these concepts to a peer or through writing to reinforce your understanding.
-
----
-
-**Continue enhancing your JavaScript expertise by mastering event handling and delegation!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Event**: An action or occurrence recognized by the browser, such as user interactions or browser activities.
-- **Event Listener**: A function that is called in response to an event.
-- **Event Propagation**: The process by which an event moves through the DOM tree.
-- **Capturing Phase**: The phase where the event moves from the outermost element down to the target element.
-- **Target Phase**: The phase where the event reaches the target element.
-- **Bubbling Phase**: The phase where the event bubbles up from the target element to the outermost element.
-- **Event Delegation**: A technique of handling events by attaching a single event listener to a parent element to handle events from its child elements.
-- **`event.target`**: The element that triggered the event.
-- **`event.currentTarget`**: The element to which the event listener is attached.
-- **`event.preventDefault()`**: A method that cancels the event's default action.
-- **`event.stopPropagation()`**: A method that stops the event from propagating to parent elements.
-- **Memory Leak**: A situation where allocated memory is not released, leading to decreased performance over time.
-
----
-
-**End of Lesson**

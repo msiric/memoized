@@ -1,53 +1,10 @@
-**Lesson Title**: **Basic Types and Type Annotations in TypeScript**
-
-**Lesson Description**:  
-Delve into the foundational aspects of TypeScript by exploring basic types and type annotations. This lesson focuses on the primitive data types—number, string, and boolean—as well as complex types like arrays and tuples. Learn how to use type annotations to enforce type safety and understand how TypeScript's type inference works to streamline code writing. By mastering these basic types and annotations, you will enhance your ability to write robust and error-free TypeScript code. This comprehensive lesson will deepen your understanding of TypeScript's type system and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Basic Types and Type Annotations in TypeScript",   description: "Delve into the foundational aspects of TypeScript by exploring basic types and type annotations. This lesson focuses on the primitive data types—number, string, and boolean—as well as complex types like arrays and tuples. Learn how to use type annotations to enforce type safety and understand how TypeScript's type inference works to streamline code writing. By mastering these basic types and annotations, you will enhance your ability to write robust and error-free TypeScript code. This comprehensive lesson will deepen your understanding of TypeScript's type system and prepare you for technical interviews by covering these essential topics.", }
 
 # **Basic Types and Type Annotations in TypeScript**
 
 TypeScript builds upon JavaScript by adding a robust type system, enabling developers to write safer and more maintainable code. Understanding basic types and how to use type annotations is fundamental to leveraging TypeScript's capabilities. This lesson covers the core primitive types, arrays, tuples, and the concept of type inference, providing a solid foundation for your TypeScript journey.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to TypeScript Types**
-   - The Importance of Types
-   - Static Typing vs. Dynamic Typing
-2. **Primitive Types**
-   - Number
-   - String
-   - Boolean
-   - Null and Undefined
-3. **Type Annotations**
-   - Declaring Variables with Type Annotations
-   - Function Parameters and Return Types
-4. **Arrays**
-   - Typed Arrays
-   - Generic Array Types
-5. **Tuples**
-   - Defining Tuples
-   - Accessing Tuple Elements
-6. **Type Inference**
-   - How Type Inference Works
-   - Best Practices with Type Inference
-7. **Any, Unknown, and Void Types**
-   - The `any` Type
-   - The `unknown` Type
-   - The `void` Type
-8. **Type Assertions**
-   - Casting Types
-   - When to Use Type Assertions
-9. **Best Practices**
-10. **Common Interview Questions**
-11. **Exercises**
-12. **Conclusion**
-13. **Next Steps**
-14. **Appendix**
-
----
 
 ## **Introduction to TypeScript Types**
 
@@ -61,8 +18,6 @@ TypeScript builds upon JavaScript by adding a robust type system, enabling devel
 
 - **Static Typing**: Type checking is performed at compile time (e.g., TypeScript, Java).
 - **Dynamic Typing**: Type checking is performed at runtime (e.g., JavaScript, Python).
-
----
 
 ## **Primitive Types**
 
@@ -115,8 +70,6 @@ TypeScript supports the same primitive types as JavaScript, along with type anno
 
 - **Note**: By default, `null` and `undefined` are subtypes of all other types. However, when using the `--strictNullChecks` compiler option, variables of type `null` or `undefined` are not assignable to other types unless explicitly specified.
 
----
-
 ## **Type Annotations**
 
 Type annotations explicitly specify the type of a variable or function.
@@ -158,8 +111,6 @@ Type annotations explicitly specify the type of a variable or function.
     console.log(`Hello, ${name}!`)
   }
   ```
-
----
 
 ## **Arrays**
 
@@ -204,8 +155,6 @@ Arrays can be typed to specify the type of elements they contain.
   let scores: Array<number> = [85, 92, 78]
   ```
 
----
-
 ## **Tuples**
 
 Tuples represent arrays with fixed sizes and known types at each index.
@@ -247,8 +196,6 @@ Tuples represent arrays with fixed sizes and known types at each index.
     'Engineer',
   ]
   ```
-
----
 
 ## **Type Inference**
 
@@ -302,8 +249,6 @@ TypeScript can automatically infer types based on assigned values.
   }
   ```
 
----
-
 ## **Any, Unknown, and Void Types**
 
 ### **The `any` Type**
@@ -345,8 +290,6 @@ TypeScript can automatically infer types based on assigned values.
   }
   ```
 
----
-
 ## **Type Assertions**
 
 Type assertions allow you to override TypeScript's inferred type when you have more information about the type of a value.
@@ -382,8 +325,6 @@ Type assertions allow you to override TypeScript's inferred type when you have m
   - Use type assertions sparingly.
   - Prefer refining types through type guards or proper type declarations.
 
----
-
 ## **Best Practices**
 
 - **Explicit Types for Function Parameters and Return Types**:
@@ -409,76 +350,6 @@ Type assertions allow you to override TypeScript's inferred type when you have m
   - Use `readonly` for properties that should not change.
   - Use `const` for variables that are not reassigned.
 
----
-
-## **Common Interview Questions**
-
-1. **What are the basic primitive types in TypeScript?**
-
-   **Answer**:
-
-   - **Number**: Represents numeric values (both integer and floating-point).
-   - **String**: Represents text data.
-   - **Boolean**: Represents logical values `true` and `false`.
-   - **Null**: Represents the absence of any object value.
-   - **Undefined**: Denotes a variable that has not been assigned a value.
-
-2. **Explain the difference between `any` and `unknown` types in TypeScript.**
-
-   **Answer**:
-
-   - **`any`**:
-
-     - Opts out of type checking.
-     - Allows any operation on the variable without type errors.
-     - Should be used sparingly as it can lead to runtime errors.
-
-   - **`unknown`**:
-
-     - Similar to `any`, but safer.
-     - Requires type checking before performing operations.
-     - Encourages type safety by enforcing type checks.
-
-3. **What is type inference in TypeScript, and how does it work?**
-
-   **Answer**:
-
-   - Type inference is the ability of TypeScript to automatically determine the type of a variable or expression based on its value or context.
-   - It works by analyzing the assigned value and the context in which a variable or function is used.
-   - Type inference reduces the need for explicit type annotations when the type is obvious.
-
-4. **How do you define a tuple in TypeScript, and when would you use it?**
-
-   **Answer**:
-
-   - **Defining a Tuple**:
-
-     ```typescript
-     let tupleName: [type1, type2, ..., typeN] = [value1, value2, ..., valueN];
-     ```
-
-   - **Example**:
-
-     ```typescript
-     let person: [string, number] = ['Alice', 25]
-     ```
-
-   - **Usage**:
-
-     - Tuples are used when you need to represent an array with a fixed number of elements of specific types.
-     - They are useful for representing structured data where the position and type of each element are known.
-
-5. **Why should you avoid overusing the `any` type in TypeScript?**
-
-   **Answer**:
-
-   - Overusing `any` defeats the purpose of TypeScript's type safety.
-   - It disables type checking, allowing for potential runtime errors.
-   - It makes code less readable and maintainable.
-   - Prefer using specific types or `unknown` to maintain type safety.
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Type Annotations**
@@ -499,8 +370,6 @@ let studentAge: number = 21
 let isEnrolled: boolean = true
 ```
 
----
-
 ### **Exercise 2: Typed Arrays**
 
 **Question**:
@@ -513,8 +382,6 @@ Create a typed array `colors` that can only contain strings. Add the colors "red
 let colors: string[] = ['red', 'green', 'blue']
 ```
 
----
-
 ### **Exercise 3: Tuples**
 
 **Question**:
@@ -526,8 +393,6 @@ Define a tuple `userInfo` that contains a user's ID (number) and username (strin
 ```typescript
 let userInfo: [number, string] = [1, 'alice']
 ```
-
----
 
 ### **Exercise 4: Type Inference**
 
@@ -553,8 +418,6 @@ function greet(name: string) {
   - `count`: TypeScript infers `count` as `number`.
   - `greet`: The parameter `name` should be explicitly typed as `string`. The return type is inferred as `string`.
 
----
-
 ### **Exercise 5: Type Assertions**
 
 **Question**:
@@ -568,51 +431,8 @@ let emailInput = document.getElementById('email') as HTMLInputElement
 emailInput.value = 'user@example.com'
 ```
 
----
-
-## **Conclusion**
 
 Understanding basic types and type annotations is essential for writing robust TypeScript code. By leveraging primitive types, arrays, tuples, and type inference, you can enhance code safety and readability. Type annotations enable you to specify exactly what types of data your variables and functions can accept and return, catching errors early in the development process. Mastery of these fundamental concepts lays the groundwork for exploring more advanced TypeScript features and contributes to your growth as a proficient developer.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Write TypeScript code using various types and annotations.
-  - Refactor existing JavaScript code by adding type annotations.
-
-- **Explore**:
-
-  - Learn about advanced types like union, intersection, and literal types.
-  - Study function types and how to type higher-order functions.
-
-- **Prepare**:
-
-  - Review additional interview questions on TypeScript types.
-  - Build small projects to reinforce your understanding of type annotations.
-
----
-
-**Continue enhancing your TypeScript expertise by mastering basic types and type annotations!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Type Annotation**: Explicitly specifying the type of a variable or function parameter.
-- **Type Inference**: The compiler's ability to automatically determine the type of a variable based on its value.
-- **Primitive Types**: Basic data types like number, string, and boolean.
-- **Array Type**: A type that represents a collection of elements of a specific type.
-- **Tuple**: An array with a fixed number of elements of specified types.
-- **Type Assertion**: A way to override TypeScript's inferred type when the developer has more information.
-- **`any` Type**: A type that disables type checking, allowing any value.
-- **`unknown` Type**: Similar to `any`, but requires type checking before usage.
-- **`void` Type**: Represents the absence of a type, typically used for functions that do not return a value.
-
----
-
-**End of Lesson**

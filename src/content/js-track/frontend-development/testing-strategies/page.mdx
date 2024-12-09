@@ -1,46 +1,10 @@
-**Lesson Title**: **Testing Strategies in Modern Frontend Development**
-
-**Lesson Description**:  
-Master the art of testing in modern frontend development by exploring unit testing with Jest and integration testing with React Testing Library. This lesson delves into the importance of testing, how to write effective unit tests, and how to perform integration testing to ensure your application components work together seamlessly. By understanding these testing strategies, you will enhance the reliability and maintainability of your applications and be well-prepared for technical interviews.
-
----
+export const metadata = {   title: "Testing Strategies in Modern Frontend Development",   description: "Master the art of testing in modern frontend development by exploring unit testing with Jest and integration testing with React Testing Library. This lesson delves into the importance of testing, how to write effective unit tests, and how to perform integration testing to ensure your application components work together seamlessly. By understanding these testing strategies, you will enhance the reliability and maintainability of your applications and be well-prepared for technical interviews.", }
 
 # **Testing Strategies in Modern Frontend Development**
 
 Testing is a critical aspect of software development that ensures code quality, reliability, and maintainability. In frontend development, testing helps catch bugs early, verify that components behave as expected, and provide confidence when refactoring code. This lesson focuses on two essential testing strategies: unit testing with Jest and integration testing with React Testing Library.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Testing Strategies**
-   - Importance of Testing in Frontend Development
-   - Types of Tests: Unit, Integration, End-to-End
-2. **Unit Testing with Jest**
-   - Introduction to Jest
-   - Setting Up Jest in a Project
-   - Writing Unit Tests for Functions and Components
-   - Mocking and Spying
-3. **Integration Testing with React Testing Library**
-   - Introduction to React Testing Library
-   - Principles of Testing UI Components
-   - Writing Integration Tests for Components
-   - Testing Asynchronous Behavior
-4. **Best Practices for Testing**
-   - Testing Pyramid
-   - Writing Clean and Maintainable Tests
-   - Avoiding Common Pitfalls
-5. **Practical Examples**
-   - Example 1: Unit Testing a Utility Function with Jest
-   - Example 2: Unit Testing a React Component with Jest and Enzyme
-   - Example 3: Integration Testing a Component with React Testing Library
-6. **Common Interview Questions**
-7. **Exercises**
-8. **Conclusion**
-9. **Next Steps**
-10. **Appendix**
-
----
 
 ## **Introduction to Testing Strategies**
 
@@ -63,8 +27,6 @@ Testing is a critical aspect of software development that ensures code quality, 
 - **End-to-End (E2E) Tests**:
   - Test the entire application flow from the user's perspective.
   - Simulate real user scenarios to validate the application's behavior.
-
----
 
 ## **Unit Testing with Jest**
 
@@ -215,8 +177,6 @@ Testing is a critical aspect of software development that ensures code quality, 
   consoleSpy.mockRestore();
   ```
 
----
-
 ## **Integration Testing with React Testing Library**
 
 ### **Introduction to React Testing Library**
@@ -350,8 +310,6 @@ Testing is a critical aspect of software development that ensures code quality, 
   });
   ```
 
----
-
 ## **Best Practices for Testing**
 
 ### **Testing Pyramid**
@@ -377,8 +335,6 @@ Testing is a critical aspect of software development that ensures code quality, 
 - **Testing Implementation Instead of Behavior**: Test what the code does, not how it does it.
 - **Flaky Tests**: Ensure tests are reliable and produce consistent results.
 - **Ignoring Coverage Gaps**: Aim for high test coverage but focus on meaningful tests.
-
----
 
 ## **Practical Examples**
 
@@ -533,109 +489,6 @@ Testing is a critical aspect of software development that ensures code quality, 
   });
   ```
 
----
-
-## **Common Interview Questions**
-
-1. **What is the difference between unit tests and integration tests?**
-
-   **Answer**:
-
-   - **Unit Tests**:
-     - Test individual units of code in isolation.
-     - Focus on the correctness of a single function or component.
-   - **Integration Tests**:
-     - Test the interaction between multiple units or components.
-     - Ensure that combined units work together as expected.
-
-2. **How does Jest differ from other testing frameworks, and what are its advantages?**
-
-   **Answer**:
-
-   - **Differences**:
-     - Jest is an all-in-one testing framework with built-in assertion library, mocking, and coverage reporting.
-     - It requires minimal configuration and is optimized for React applications.
-   - **Advantages**:
-     - **Ease of Use**: Zero configuration setup.
-     - **Performance**: Runs tests in parallel, intelligent test watching.
-     - **Mocking**: Powerful mocking capabilities for functions and modules.
-     - **Snapshot Testing**: Useful for testing UI components.
-
-3. **Explain the concept of mocking in testing and provide an example of how to mock a module in Jest.**
-
-   **Answer**:
-
-   - **Concept**:
-     - Mocking involves replacing a function or module with a mock implementation to isolate the code under test.
-     - Helps in testing components that rely on external dependencies.
-   - **Example**:
-
-     ```javascript
-     // api.js
-     export const fetchData = () => {
-       return fetch('/data').then((response) => response.json());
-     };
-     ```
-
-     ```javascript
-     // api.test.js
-     import { fetchData } from './api';
-
-     jest.mock('./api');
-
-     test('fetchData returns mock data', async () => {
-       api.fetchData.mockResolvedValue({ data: 'Mock Data' });
-       const data = await fetchData();
-       expect(data).toEqual({ data: 'Mock Data' });
-     });
-     ```
-
-4. **What are some best practices when writing tests with React Testing Library?**
-
-   **Answer**:
-
-   - **Test Behavior, Not Implementation**: Focus on how the user interacts with the component.
-   - **Use Accessible Queries**: Prefer queries like `getByRole`, `getByLabelText`.
-   - **Avoid Testing Internal State**: Don't rely on component internals or state variables.
-   - **Cleanup After Tests**: Ensure the DOM is clean after each test.
-   - **Handle Asynchronous Code Properly**: Use `waitFor`, `findBy` queries for async operations.
-
-5. **How can you test asynchronous code in Jest?**
-
-   **Answer**:
-
-   - **Using `async/await`**:
-
-     ```javascript
-     test('fetches data asynchronously', async () => {
-       const data = await fetchData();
-       expect(data).toBeDefined();
-     });
-     ```
-
-   - **Using Promises**:
-
-     ```javascript
-     test('fetches data using promises', () => {
-       return fetchData().then((data) => {
-         expect(data).toBeDefined();
-       });
-     });
-     ```
-
-   - **Using `done` Callback**:
-
-     ```javascript
-     test('fetches data with done callback', (done) => {
-       fetchData().then((data) => {
-         expect(data).toBeDefined();
-         done();
-       });
-     });
-     ```
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Writing a Unit Test for a Function**
@@ -763,45 +616,8 @@ test('displays user name after fetching data', async () => {
 });
 ```
 
----
-
-## **Conclusion**
 
 Testing is an integral part of modern frontend development, ensuring that applications are reliable, maintainable, and of high quality. Unit testing with Jest allows developers to test individual units of code in isolation, providing quick feedback on code correctness. Integration testing with React Testing Library enables testing of components in a way that closely resembles how users interact with the application. By adopting best practices and writing meaningful tests, developers can confidently build and maintain complex applications.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-  - Write unit and integration tests for components in your projects.
-  - Explore Jest's advanced features like snapshot testing and coverage reporting.
-- **Explore**:
-  - Learn about end-to-end testing tools like Cypress and Selenium.
-  - Investigate other testing libraries and frameworks, such as Mocha and Chai.
-- **Prepare**:
-  - Review additional interview questions on testing strategies.
-  - Stay updated with the latest testing tools and methodologies.
-
----
-
-**Continue enhancing your frontend development expertise by mastering testing strategies!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Unit Test**: A test that verifies the functionality of a specific section of code, usually at the function level.
-- **Integration Test**: A test that verifies the interaction between different pieces of code or components.
-- **End-to-End Test**: A test that simulates user interactions and tests the application flow from start to finish.
-- **Mocking**: Replacing a function or module with a mock implementation to isolate the code under test.
-- **Spying**: Tracking calls to a function and its arguments without replacing its implementation.
-- **Test Coverage**: A measure of how much of the code is executed during testing.
-- **Flaky Test**: A test that sometimes passes and sometimes fails without changes to the code under test.
-- **Arrange-Act-Assert**: A pattern for structuring tests into setup, execution, and verification phases.
-
----
-
-**End of Lesson**

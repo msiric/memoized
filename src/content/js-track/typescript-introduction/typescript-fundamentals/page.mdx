@@ -1,58 +1,10 @@
-**Lesson Title**: **TypeScript Fundamentals**
-
-**Lesson Description**:  
-Begin your journey into TypeScript by understanding its core fundamentals. This lesson introduces TypeScript, a statically typed superset of JavaScript that enhances code quality and developer productivity. Learn how to set up a TypeScript development environment, explore its key features, and discover the benefits it offers over traditional JavaScript. By mastering these fundamentals, you will be equipped to write robust, maintainable, and scalable applications. This comprehensive lesson will deepen your knowledge of type systems in JavaScript and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "TypeScript Fundamentals",   description: "Begin your journey into TypeScript by understanding its core fundamentals. This lesson introduces TypeScript, a statically typed superset of JavaScript that enhances code quality and developer productivity. Learn how to set up a TypeScript development environment, explore its key features, and discover the benefits it offers over traditional JavaScript. By mastering these fundamentals, you will be equipped to write robust, maintainable, and scalable applications. This comprehensive lesson will deepen your knowledge of type systems in JavaScript and prepare you for technical interviews by covering these essential topics.", }
 
 # **TypeScript Fundamentals**
 
 TypeScript is an open-source programming language developed and maintained by Microsoft. It builds upon JavaScript by adding static type definitions, enabling developers to catch errors early, improve code readability, and enhance tooling support. This lesson covers the basics of TypeScript, including how to set it up and the advantages it provides over plain JavaScript.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to TypeScript**
-   - What is TypeScript?
-   - Key Features
-2. **Setting Up TypeScript**
-   - Installing TypeScript
-   - Configuring the TypeScript Compiler
-   - Integrating with Development Environments
-3. **TypeScript vs. JavaScript**
-   - Benefits of TypeScript
-   - Common Misconceptions
-4. **Basic Types and Syntax**
-   - Primitive Types
-   - Arrays and Tuples
-   - Enums
-   - Any, Unknown, and Void
-5. **Interfaces and Type Aliases**
-   - Defining Interfaces
-   - Extending Interfaces
-   - Type Aliases
-6. **Classes and Inheritance**
-   - Class Syntax in TypeScript
-   - Access Modifiers
-   - Inheritance and Abstract Classes
-7. **Generics**
-   - Understanding Generics
-   - Generic Functions and Classes
-8. **Modules and Namespaces**
-   - Exporting and Importing Modules
-   - Namespaces (Legacy)
-9. **TypeScript Compiler Options**
-   - Compiler Flags
-   - Strict Mode
-10. **Best Practices**
-11. **Common Interview Questions**
-12. **Exercises**
-13. **Conclusion**
-14. **Next Steps**
-15. **Appendix**
-
----
 
 ## **Introduction to TypeScript**
 
@@ -73,8 +25,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
 - **Advanced Type System**: Interfaces, generics, type inference, and unions.
 - **Modern JavaScript Features**: Supports ES6 and beyond, including async/await, decorators, and more.
 - **Code Scalability**: Facilitates large-scale application development.
-
----
 
 ## **Setting Up TypeScript**
 
@@ -173,8 +123,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
     }
     ```
 
----
-
 ## **TypeScript vs. JavaScript**
 
 ### **Benefits of TypeScript**
@@ -216,8 +164,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
 - **Reduces Flexibility**:
 
   - **Reality**: TypeScript allows opting into types; you can gradually introduce typing.
-
----
 
 ## **Basic Types and Syntax**
 
@@ -347,8 +293,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
   }
   ```
 
----
-
 ## **Interfaces and Type Aliases**
 
 ### **Defining Interfaces**
@@ -418,8 +362,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
 
   let userId: ID = 'abc123';
   ```
-
----
 
 ## **Classes and Inheritance**
 
@@ -536,8 +478,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
   }
   ```
 
----
-
 ## **Generics**
 
 ### **Understanding Generics**
@@ -588,8 +528,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
 
   let kvp: KeyValuePair<number, string> = { key: 1, value: 'One' };
   ```
-
----
 
 ## **Modules and Namespaces**
 
@@ -646,8 +584,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
   Utilities.log('Logging a message');
   ```
 
----
-
 ## **TypeScript Compiler Options**
 
 ### **Compiler Flags**
@@ -690,8 +626,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
   - Enhances code safety.
   - Catches more errors at compile time.
 
----
-
 ## **Best Practices**
 
 - **Gradual Typing**:
@@ -717,76 +651,6 @@ TypeScript is an open-source programming language developed and maintained by Mi
 - **Leverage Advanced Features**:
 
   - Utilize generics, advanced types, and decorators where appropriate.
-
----
-
-## **Common Interview Questions**
-
-1. **What is TypeScript, and how does it differ from JavaScript?**
-
-   **Answer**:
-
-   - TypeScript is a statically typed superset of JavaScript developed by Microsoft.
-   - It adds optional static typing, classes, interfaces, and other features.
-   - TypeScript code is compiled into plain JavaScript.
-   - It enhances developer productivity by catching errors at compile time and providing better tooling support.
-
-2. **What are the benefits of using TypeScript over JavaScript?**
-
-   **Answer**:
-
-   - **Static Typing**: Detects errors early during development.
-   - **Improved IDE Support**: Better code completion, navigation, and refactoring tools.
-   - **Enhanced Readability**: Explicit types make the code more understandable.
-   - **Scalability**: Facilitates the development of large applications.
-   - **Modern Features**: Supports the latest ECMAScript features and beyond.
-
-3. **Explain how interfaces are used in TypeScript.**
-
-   **Answer**:
-
-   - Interfaces define contracts for objects, specifying the structure they should adhere to.
-   - They can define properties, methods, and their types.
-   - Interfaces support inheritance through the `extends` keyword.
-   - They help in type-checking and ensuring consistent object shapes.
-
-   **Example**:
-
-   ```typescript
-   interface User {
-     id: number;
-     name: string;
-     login(): void;
-   }
-   ```
-
-4. **What are generics in TypeScript, and why are they useful?**
-
-   **Answer**:
-
-   - Generics allow the creation of components that can work with a variety of types while providing type safety.
-   - They enable writing reusable and flexible code.
-   - Generics provide a way to parameterize types.
-
-   **Example**:
-
-   ```typescript
-   function identity<T>(arg: T): T {
-     return arg;
-   }
-   ```
-
-5. **How does TypeScript improve code maintainability in large-scale applications?**
-
-   **Answer**:
-
-   - **Type Safety**: Reduces runtime errors by catching them at compile time.
-   - **Modularity**: Encourages breaking down code into modules and interfaces.
-   - **Self-Documenting Code**: Explicit types make the codebase easier to understand.
-   - **Refactoring Tools**: Enhanced IDE support aids in safely modifying code.
-   - **Consistent Codebase**: Enforces coding standards and practices across teams.
-
----
 
 ## **Exercises**
 
@@ -840,8 +704,6 @@ Initialize a new TypeScript project with `tsconfig.json` configured to compile T
    mkdir src
    ```
 
----
-
 ### **Exercise 2: Using Basic Types**
 
 **Question**:
@@ -858,8 +720,6 @@ function multiply(a: number, b: number): number {
 // Usage
 console.log(multiply(5, 3)); // Outputs: 15
 ```
-
----
 
 ### **Exercise 3: Defining and Implementing Interfaces**
 
@@ -895,8 +755,6 @@ const myCar = new Car('Toyota', 'Corolla');
 myCar.drive(); // Outputs: Driving a Toyota Corolla
 ```
 
----
-
 ### **Exercise 4: Generics in Functions**
 
 **Question**:
@@ -918,8 +776,6 @@ console.log(numberArray); // Outputs: [1, 2, 3]
 let stringArray = getArray<string>(['a', 'b', 'c']);
 console.log(stringArray); // Outputs: ['a', 'b', 'c']
 ```
-
----
 
 ### **Exercise 5: Using Modules**
 
@@ -952,49 +808,7 @@ tsc
 node dist/app.js
 ```
 
----
-
-## **Conclusion**
 
 TypeScript enhances JavaScript development by introducing static typing, advanced language features, and improved tooling support. By understanding TypeScript fundamentals, you can write more reliable, maintainable, and scalable code. Setting up TypeScript involves configuring the compiler and integrating it with your development environment, paving the way for efficient development workflows. Embracing TypeScript's benefits over JavaScript prepares you for modern application development and equips you with valuable skills for technical interviews and professional growth.
 
----
 
-## **Next Steps**
-
-- **Practice**:
-
-  - Convert existing JavaScript code to TypeScript.
-  - Explore advanced TypeScript features like advanced types, decorators, and mixins.
-
-- **Explore**:
-
-  - Integrate TypeScript with popular frameworks like React, Angular, or Node.js.
-  - Learn about type declaration files (`.d.ts`) and how to use third-party libraries with TypeScript.
-
-- **Prepare**:
-
-  - Review additional interview questions on TypeScript and type systems.
-  - Build projects using TypeScript to reinforce your understanding.
-
----
-
-**Continue enhancing your development expertise by mastering TypeScript and type systems!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Static Typing**: A feature where type checking is performed at compile time.
-- **Type Inference**: The compiler automatically determines the type of a variable based on its value.
-- **Interface**: A TypeScript structure that defines the contract in your application.
-- **Generics**: A feature that allows the creation of reusable components that can work with a variety of types.
-- **Module**: A file containing code that is encapsulated and can be exported and imported.
-- **Namespace**: A way to group related code; in TypeScript, it's a way to organize code within the global scope (legacy feature).
-- **Compiler Options**: Settings that configure how the TypeScript compiler (`tsc`) behaves.
-
----
-
-**End of Lesson**

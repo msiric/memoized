@@ -2,7 +2,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import prisma from '@/lib/prisma'
 import { ProblemStatus } from '@/types'
 import { filterAndSortProblems } from '@/utils/helpers'
-import { ProblemDifficulty } from '@prisma/client'
+import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 
 export type MarkProblemArgs = {
@@ -39,6 +39,7 @@ export const markProblemProgress = async ({
 export interface ProblemFilter {
   difficulty?: ProblemDifficulty
   status?: ProblemStatus
+  type?: ProblemType
   lesson?: string
   search?: string
   sortColumn?: string
@@ -48,7 +49,8 @@ export interface ProblemFilter {
 export const getProblems = async (filter: ProblemFilter = {}) => {
   const session = await getServerSession(authOptions)
 
-  const { difficulty, status, lesson, search, sortColumn, sortOrder } = filter
+  const { difficulty, status, lesson, type, search, sortColumn, sortOrder } =
+    filter
 
   const [problems, lessons] = await Promise.all([
     prisma.problem.findMany({
@@ -57,6 +59,9 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
         title: true,
         href: true,
         difficulty: true,
+        question: true,
+        answer: true,
+        type: true,
         lesson: {
           select: {
             title: true,
@@ -84,6 +89,7 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
     difficulty,
     status,
     lesson,
+    type,
     search,
     sortColumn,
     sortOrder,

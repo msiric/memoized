@@ -1,5 +1,5 @@
 import { ProblemList } from '@/components/ProblemList'
-import { ProblemDifficulty } from '@prisma/client'
+import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import { ProblemStatus } from '@/types'
 import { getProblems } from '@/services/problem'
 
@@ -11,17 +11,19 @@ const ProblemsPage = async ({
     difficulty: ProblemDifficulty
     status: ProblemStatus
     lesson: string
+    type: ProblemType
     sortColumn: string
     sortOrder: 'asc' | 'desc'
   }
 }) => {
-  const { search, difficulty, status, lesson, sortColumn, sortOrder } =
+  const { search, difficulty, status, lesson, type, sortColumn, sortOrder } =
     searchParams
 
   const filter = {
     difficulty: difficulty as ProblemDifficulty,
     status: status as ProblemStatus,
     lesson: lesson as string,
+    type: type as ProblemType,
     search: search as string,
     sortColumn: sortColumn || undefined,
     sortOrder: sortOrder || undefined,

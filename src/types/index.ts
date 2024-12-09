@@ -109,6 +109,9 @@ export type ProblemRow = {
   id: string
   title: string
   href: string
+  question: string
+  answer: string
+  type: string
   difficulty: ProblemDifficulty
   lesson: { title: string; slug: string }
   problemProgress: { completed: boolean }[]
@@ -150,7 +153,15 @@ export type EnrichedLesson = Prisma.LessonGetPayload<{
 }>
 
 export type EnrichedProblem = Prisma.ProblemGetPayload<{
-  select: { id: true; title: true; difficulty: true; href: true }
+  select: {
+    id: true
+    title: true
+    difficulty: true
+    href: true
+    question: true
+    answer: true
+    type: true
+  }
 }>
 
 export type EnrichedUser = Prisma.UserGetPayload<{

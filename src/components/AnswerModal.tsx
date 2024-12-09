@@ -3,6 +3,7 @@
 import { MouseEvent } from 'react'
 import { RxCross2 } from 'react-icons/rx'
 import { ProblemRow } from '../types'
+import { MdxRenderer } from './MdxRenderer'
 
 export type AnswerModalProps = {
   isOpen: boolean
@@ -42,9 +43,14 @@ export const AnswerModal = ({ isOpen, onClose, problem }: AnswerModalProps) => {
             {problem.title}
           </h2>
 
-          {/* <div className="prose max-w-none dark:prose-invert">
-            <MdxRenderer content={problem.answer} />
-          </div> */}
+          <div className="overflow-hidden">
+            {problem.question && (
+              <p className="color-white m-0 mb-5 mt-3 font-bold">
+                {problem.question}
+              </p>
+            )}
+            {problem.answer && <MdxRenderer content={problem.answer} />}
+          </div>
         </div>
       </div>
     </div>

@@ -1,57 +1,10 @@
-**Lesson Title**: **Utility Types Deep Dive in TypeScript**
-
-**Lesson Description**:  
-Enhance your TypeScript expertise by diving deep into utility types. This lesson focuses on understanding and effectively using built-in utility types such as `Partial`, `Readonly`, `Pick`, `Omit`, `Record`, `Exclude`, and `Extract`. These utility types leverage advanced TypeScript features like mapped types and conditional types to perform common type transformations. By mastering these utility types, you will be able to write more concise, flexible, and type-safe code. This comprehensive lesson will deepen your understanding of TypeScript's type system and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Utility Types Deep Dive in TypeScript",   description: "Enhance your TypeScript expertise by diving deep into utility types. This lesson focuses on understanding and effectively using built-in utility types such as `Partial`, `Readonly`, `Pick`, `Omit`, `Record`, `Exclude`, and `Extract`. These utility types leverage advanced TypeScript features like mapped types and conditional types to perform common type transformations. By mastering these utility types, you will be able to write more concise, flexible, and type-safe code. This comprehensive lesson will deepen your understanding of TypeScript's type system and prepare you for technical interviews by covering these essential topics.", }
 
 # **Utility Types Deep Dive in TypeScript**
 
 Utility types are built-in types provided by TypeScript that facilitate common type transformations. They are powerful tools that help you manipulate and transform types, making your code more robust and maintainable. This lesson explores the most commonly used utility types in TypeScript, providing detailed explanations and practical examples.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Utility Types**
-   - What are Utility Types?
-   - Importance in TypeScript
-2. **Partial**
-   - Understanding `Partial<T>`
-   - Practical Examples
-3. **Readonly**
-   - Understanding `Readonly<T>`
-   - Practical Examples
-4. **Pick**
-   - Understanding `Pick<T, K>`
-   - Practical Examples
-5. **Omit**
-   - Understanding `Omit<T, K>`
-   - Practical Examples
-6. **Record**
-   - Understanding `Record<K, T>`
-   - Practical Examples
-7. **Exclude**
-   - Understanding `Exclude<T, U>`
-   - Practical Examples
-8. **Extract**
-   - Understanding `Extract<T, U>`
-   - Practical Examples
-9. **Other Utility Types**
-   - NonNullable
-   - ReturnType
-   - InstanceType
-10. **Creating Custom Utility Types**
-    - Combining Utility Types
-    - Building Custom Types
-11. **Best Practices**
-12. **Common Interview Questions**
-13. **Exercises**
-14. **Conclusion**
-15. **Next Steps**
-16. **Appendix**
-
----
 
 ## **Introduction to Utility Types**
 
@@ -68,8 +21,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 - **Efficiency**: Streamline the process of creating new types based on existing ones.
 - **Consistency**: Ensure consistent type transformations across the codebase.
 - **Expressiveness**: Provide powerful tools to express complex type relationships.
-
----
 
 ## **Partial**
 
@@ -124,8 +75,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   }
   ```
 
----
-
 ## **Readonly**
 
 ### **Understanding `Readonly<T>`**
@@ -167,8 +116,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   const user = freezeObject({ id: 1, name: 'Bob' })
   // user.name = 'Robert'; // Error
   ```
-
----
 
 ## **Pick**
 
@@ -221,8 +168,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   }
   ```
 
----
-
 ## **Omit**
 
 ### **Understanding `Omit<T, K>`**
@@ -274,8 +219,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
     theme: 'dark',
   }
   ```
-
----
 
 ## **Record**
 
@@ -330,8 +273,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   }
   ```
 
----
-
 ## **Exclude**
 
 ### **Understanding `Exclude<T, U>`**
@@ -371,8 +312,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   // key = 'password'; // Error
   ```
 
----
-
 ## **Extract**
 
 ### **Understanding `Extract<T, U>`**
@@ -411,8 +350,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   let action: WriteActions = 'UPDATE' // Valid
   // action = 'READ'; // Error
   ```
-
----
 
 ## **Other Utility Types**
 
@@ -488,8 +425,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   const person: PersonInstance = new Person('Alice', 30)
   ```
 
----
-
 ## **Creating Custom Utility Types**
 
 ### **Combining Utility Types**
@@ -563,8 +498,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
   } // All properties are required
   ```
 
----
-
 ## **Best Practices**
 
 - **Leverage Built-in Utility Types**:
@@ -585,109 +518,6 @@ Utility types are built-in types provided by TypeScript that facilitate common t
 
 - **Test Type Transformations**:
   - Validate custom types with test cases to ensure they behave as expected.
-
----
-
-## **Common Interview Questions**
-
-1. **What is the purpose of the `Partial` utility type in TypeScript?**
-
-   **Answer**:
-
-   - The `Partial` utility type constructs a type with all properties of a given type `T` set to optional.
-   - It is useful when you want to create a function or object that doesn't require all properties to be specified.
-   - **Example**:
-
-     ```typescript
-     interface User {
-       id: number
-       name: string
-       email: string
-     }
-
-     type PartialUser = Partial<User>
-     ```
-
-2. **How does the `Pick` utility type differ from the `Omit` utility type?**
-
-   **Answer**:
-
-   - `Pick<T, K>` constructs a type by selecting a set of properties `K` from type `T`.
-   - `Omit<T, K>` constructs a type by excluding a set of properties `K` from type `T`.
-   - **Example**:
-
-     ```typescript
-     interface User {
-       id: number
-       name: string
-       email: string
-       password: string
-     }
-
-     type UserPreview = Pick<User, 'id' | 'name'> // Includes 'id' and 'name'
-
-     type SafeUser = Omit<User, 'password'> // Excludes 'password'
-     ```
-
-3. **What is the `Record` utility type used for in TypeScript?**
-
-   **Answer**:
-
-   - The `Record` utility type constructs a type with a set of properties `K` of type `T`.
-   - It is useful for creating a type that maps keys to values of a specific type.
-   - **Example**:
-
-     ```typescript
-     type Roles = 'admin' | 'editor' | 'viewer'
-
-     type Permissions = Record<Roles, boolean>
-
-     const permissions: Permissions = {
-       admin: true,
-       editor: false,
-       viewer: true,
-     }
-     ```
-
-4. **Explain how the `Exclude` and `Extract` utility types are different.**
-
-   **Answer**:
-
-   - `Exclude<T, U>` constructs a type by excluding from `T` all types that are assignable to `U`.
-   - `Extract<T, U>` constructs a type by extracting from `T` all types that are assignable to `U`.
-   - **Example**:
-
-     ```typescript
-     type AllKeys = 'id' | 'name' | 'email' | 'password'
-
-     type PublicKeys = Exclude<AllKeys, 'password'> // 'id' | 'name' | 'email'
-
-     type SensitiveKeys = Extract<AllKeys, 'password' | 'email'> // 'email' | 'password'
-     ```
-
-5. **How can you create a custom utility type to make all properties of a type `T` required?**
-
-   **Answer**:
-
-   - You can create a custom utility type `Required<T>` using mapped types.
-   - The `-?` operator removes the optional modifier from properties.
-   - **Example**:
-
-     ```typescript
-     type Required<T> = {
-       [P in keyof T]-?: T[P]
-     }
-
-     interface OptionalUser {
-       id?: number
-       name?: string
-       email?: string
-     }
-
-     type CompleteUser = Required<OptionalUser>
-     ```
-
----
 
 ## **Exercises**
 
@@ -718,8 +548,6 @@ function updateTask(id: number, updates: Partial<Task>): Task {
 updateTask(1, { title: 'New Title', completed: true })
 ```
 
----
-
 ### **Exercise 2: Creating a `Readonly` Array**
 
 **Question**:
@@ -733,8 +561,6 @@ const fruits: ReadonlyArray<string> = ['apple', 'banana', 'orange']
 
 // fruits.push('grape'); // Error: Property 'push' does not exist on type 'readonly string[]'.
 ```
-
----
 
 ### **Exercise 3: Using `Pick`**
 
@@ -763,8 +589,6 @@ const preview: ArticlePreview = {
 }
 ```
 
----
-
 ### **Exercise 4: Using `Omit`**
 
 **Question**:
@@ -783,8 +607,6 @@ const content: ArticleContent = {
   author: 'John Doe',
 }
 ```
-
----
 
 ### **Exercise 5: Combining Utility Types**
 
@@ -815,32 +637,7 @@ const profile: ProfileWithRequiredId = {
 }
 ```
 
----
-
-## **Conclusion**
 
 Utility types in TypeScript are powerful tools that enhance your ability to manipulate and transform types effectively. By mastering utility types like `Partial`, `Readonly`, `Pick`, `Omit`, `Record`, `Exclude`, and `Extract`, you can write more concise, flexible, and type-safe code. These utility types simplify common type transformations, reduce boilerplate code, and improve code maintainability. Understanding and utilizing utility types will significantly enhance your TypeScript development skills and prepare you for advanced programming challenges and technical interviews.
 
----
 
-## **Next Steps**
-
-- **Practice**:
-
-  - Implement utility types in your projects.
-  - Create custom utility types to solve specific problems.
-
-- **Explore**:
-
-  - Learn about advanced utility types like `Awaited`, `ThisType`, and `Uppercase`.
-  - Study how utility types interact with mapped and conditional types.
-
-- **Prepare**:
-  - Review additional interview questions on TypeScript utility types.
-  - Build projects using utility types to reinforce your understanding.
-
----
-
-**Continue enhancing your TypeScript expertise by mastering utility types!**
-
----

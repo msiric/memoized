@@ -15,6 +15,7 @@ import {
 import {
   AccessOptions,
   ProblemDifficulty,
+  ProblemType,
   Subscription,
   SubscriptionPlan,
   SubscriptionStatus,
@@ -25,6 +26,7 @@ import Stripe from 'stripe'
 export interface ProblemFilter {
   difficulty?: ProblemDifficulty
   status?: ProblemStatus
+  type?: ProblemType
   lesson?: string
   search?: string
   sortColumn?: string
@@ -100,7 +102,8 @@ export const filterAndSortProblems = (
   problems: ProblemRow[],
   filter: ProblemFilter,
 ) => {
-  const { difficulty, status, lesson, search, sortColumn, sortOrder } = filter
+  const { difficulty, status, lesson, type, search, sortColumn, sortOrder } =
+    filter
 
   let filteredProblems = [...problems]
 
@@ -131,6 +134,12 @@ export const filterAndSortProblems = (
     )
   }
 
+  if (type) {
+    filteredProblems = filteredProblems.filter(
+      (problem) => problem.type.toLowerCase() === type.toLowerCase(),
+    )
+  }
+
   if (sortColumn) {
     filteredProblems.sort((a, b) => {
       if (sortColumn === 'title') {
@@ -147,6 +156,11 @@ export const filterAndSortProblems = (
         return sortOrder === 'asc'
           ? a.lesson.title.localeCompare(b.lesson.title)
           : b.lesson.title.localeCompare(a.lesson.title)
+      }
+      if (sortColumn === 'type') {
+        return sortOrder === 'asc'
+          ? a.type.localeCompare(b.type)
+          : b.type.localeCompare(a.type)
       }
       return 0
     })

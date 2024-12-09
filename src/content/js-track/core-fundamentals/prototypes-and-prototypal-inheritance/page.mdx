@@ -1,15 +1,8 @@
-**Lesson Title**: **Prototypes and Prototypal Inheritance in JavaScript**
-
-**Lesson Description**:  
-Delve into the foundational concepts of prototypes and prototypal inheritance in JavaScript. Understand how objects inherit properties and methods through the prototype chain, and explore different inheritance patterns used in JavaScript programming. This comprehensive lesson will deepen your understanding of object-oriented programming in JavaScript, help you write more efficient code, and prepare you for technical interviews by exploring these essential topics.
-
----
+export const metadata = {   title: "Prototypes and Prototypal Inheritance in JavaScript",   description: "Delve into the foundational concepts of prototypes and prototypal inheritance in JavaScript. Understand how objects inherit properties and methods through the prototype chain, and explore different inheritance patterns used in JavaScript programming. This comprehensive lesson will deepen your understanding of object-oriented programming in JavaScript, help you write more efficient code, and prepare you for technical interviews by exploring these essential topics.", }
 
 # **Prototypes and Prototypal Inheritance in JavaScript**
 
 Prototypes are a core feature of JavaScript's object system. Unlike classical inheritance found in languages like Java or C++, JavaScript uses prototypal inheritance, where objects inherit from other objects directly. This lesson provides an in-depth exploration of prototypes, the prototype chain, and various inheritance patterns, enabling you to harness the power of JavaScript's flexible object model.
-
----
 
 ## **Understanding Prototypes**
 
@@ -44,8 +37,6 @@ alice.sayHello() // Outputs: Hello, my name is Alice.
 - `Person.prototype` is the prototype object for all instances created by `new Person()`.
 - `alice.__proto__` points to `Person.prototype`.
 
----
-
 ## **The Prototype Chain**
 
 ### **How Does the Prototype Chain Work?**
@@ -77,8 +68,6 @@ console.log(alice.toString()) // Outputs: [object Object]
 
 - `toString` is not defined on `alice` or `Person.prototype`.
 - JavaScript looks up the prototype chain and finds `toString` on `Object.prototype`.
-
----
 
 ## **Inheritance Patterns in JavaScript**
 
@@ -193,8 +182,6 @@ eagle.fly() // Outputs: Eagle is flying.
 
 - `Object.assign` copies properties from `canFly` to `Bird.prototype`.
 
----
-
 ## **Prototype Chain in Detail**
 
 ### **Object Creation and Prototypes**
@@ -239,8 +226,6 @@ const child = {}
 Object.setPrototypeOf(child, parent)
 console.log(child.greeting) // Outputs: Hello
 ```
-
----
 
 ## **Inheritance Patterns Explained**
 
@@ -344,8 +329,6 @@ console.log(instance2.colors) // Outputs: ['red', 'blue', 'green']
 - Each instance has its own copy of properties, preventing shared state issues.
 - Methods are shared via the prototype chain.
 
----
-
 ## **Best Practices**
 
 ### **Prefer ES6 Classes for Inheritance**
@@ -429,72 +412,6 @@ console.log(person2.hobbies) // Outputs: ['Reading']
 
 - Define properties inside the constructor function to ensure each instance has its own copy.
 
----
-
-## **Common Interview Questions**
-
-1. **What is prototypal inheritance in JavaScript?**
-
-   **Answer:**
-
-   Prototypal inheritance is a feature in JavaScript where objects inherit properties and methods from other objects through the prototype chain. Each object has a `[[Prototype]]` reference to another object, allowing it to access properties and methods defined on its prototype. This inheritance model is more flexible than classical inheritance found in other languages, enabling objects to inherit directly from other objects.
-
-2. **How does the prototype chain work when accessing properties on an object?**
-
-   **Answer:**
-
-   When accessing a property on an object, JavaScript first looks for the property on the object itself. If the property is not found, it looks up the `[[Prototype]]` chain, checking each prototype object in turn until it finds the property or reaches the end of the chain (`null`). This process allows objects to inherit properties and methods from their prototypes.
-
-3. **Explain the difference between the `__proto__` property and the `prototype` property.**
-
-   **Answer:**
-
-   - **`__proto__`**: An object's internal `[[Prototype]]` reference, pointing to its prototype object. It is used at runtime to resolve property lookups.
-   - **`prototype`**: A property of constructor functions (functions intended to be used with `new`) that defines the prototype for instances created by that constructor. When an object is created using `new Constructor()`, its `__proto__` is set to `Constructor.prototype`.
-
-4. **What is the purpose of the `constructor` property in an object's prototype?**
-
-   **Answer:**
-
-   The `constructor` property in an object's prototype refers back to the constructor function that created the object. It allows instances to identify their constructor and is useful for type checking and inheritance. When manually setting an object's prototype, it's common practice to reset the `constructor` property to maintain the correct reference.
-
-5. **How can you implement inheritance in JavaScript using ES6 classes?**
-
-   **Answer:**
-
-   In ES6, you can use the `class` syntax along with the `extends` keyword to implement inheritance.
-
-   **Example:**
-
-   ```javascript
-   class Parent {
-     constructor(name) {
-       this.name = name
-     }
-
-     greet() {
-       console.log(`Hello, ${this.name}`)
-     }
-   }
-
-   class Child extends Parent {
-     constructor(name, age) {
-       super(name)
-       this.age = age
-     }
-
-     displayAge() {
-       console.log(`I am ${this.age} years old.`)
-     }
-   }
-
-   const child = new Child('Alice', 10)
-   child.greet() // Outputs: Hello, Alice
-   child.displayAge() // Outputs: I am 10 years old.
-   ```
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Understanding the Prototype Chain**
@@ -524,8 +441,6 @@ bar
 - `foo` does not have its own `bar` property.
 - JavaScript looks up the prototype chain and finds `bar` on `Foo.prototype`.
 - `baz` is assigned the value `'bar'`.
-
----
 
 ### **Exercise 2: Using `Object.create()`**
 
@@ -560,8 +475,6 @@ car.drive() // Outputs: Toyota is driving.
 - `car`'s prototype is set to `vehicle` using `Object.create(vehicle)`.
 - `car` gains access to `drive` method from `vehicle`.
 
----
-
 ### **Exercise 3: Fixing Constructor Reference**
 
 **Question:**
@@ -594,8 +507,6 @@ console.log(child.constructor === Child) // Outputs: true
 
 - After setting `Child.prototype` to a new object, the `constructor` property points to `Parent`.
 - Resetting `Child.prototype.constructor` to `Child` corrects this.
-
----
 
 ### **Exercise 4: ES6 Class Inheritance**
 
@@ -663,8 +574,6 @@ myDog.bark() // Outputs: Buddy barks.
 - The `class` syntax simplifies inheritance.
 - `extends` is used for inheritance, and `super()` calls the parent constructor.
 
----
-
 ### **Exercise 5: Shared Properties Issue**
 
 **Question:**
@@ -710,170 +619,5 @@ console.log(student1.grades) // Outputs: [90]
 console.log(student2.grades) // Outputs: []
 ```
 
----
-
-## **Additional Interview Questions**
-
-6. **What are the drawbacks of prototypal inheritance compared to classical inheritance?**
-
-   **Answer:**
-
-   - **Complexity**: Understanding the prototype chain can be more complex due to dynamic property lookup.
-   - **Shared Properties**: Mutable properties on the prototype can lead to unintended side effects across instances.
-   - **Lack of Encapsulation**: All properties on the prototype are accessible, making it harder to enforce privacy.
-   - **Less Familiarity**: Developers coming from class-based languages may find prototypal inheritance less intuitive.
-
-7. **How can you check if an object is an instance of a particular constructor function?**
-
-   **Answer:**
-
-   - Use the `instanceof` operator.
-
-   **Example:**
-
-   ```javascript
-   const date = new Date()
-   console.log(date instanceof Date) // Outputs: true
-   console.log(date instanceof Object) // Outputs: true
-   ```
-
-8. **What is the `hasOwnProperty()` method used for?**
-
-   **Answer:**
-
-   - The `hasOwnProperty()` method checks if an object has a property defined on itself (not inherited through the prototype chain).
-
-   **Example:**
-
-   ```javascript
-   const obj = { a: 1 }
-   console.log(obj.hasOwnProperty('a')) // Outputs: true
-   console.log(obj.hasOwnProperty('toString')) // Outputs: false
-   ```
-
-9. **Explain how you would implement multiple inheritance in JavaScript.**
-
-   **Answer:**
-
-   - JavaScript does not support multiple inheritance directly, but you can mimic it using mixins by copying properties from multiple source objects into a target object.
-
-   **Example:**
-
-   ```javascript
-   const canWalk = {
-     walk: function () {
-       console.log(`${this.name} is walking.`)
-     },
-   }
-
-   const canSwim = {
-     swim: function () {
-       console.log(`${this.name} is swimming.`)
-     },
-   }
-
-   function Person(name) {
-     this.name = name
-   }
-
-   Object.assign(Person.prototype, canWalk, canSwim)
-
-   const person = new Person('John')
-   person.walk() // Outputs: John is walking.
-   person.swim() // Outputs: John is swimming.
-   ```
-
-10. **What is the difference between `Object.create()` and the `new` keyword in object creation?**
-
-    **Answer:**
-
-    - **`Object.create(proto)`**: Creates a new object with the specified prototype object and properties. It does not run any constructor function.
-    - **`new Constructor()`**: Creates a new object, sets its `[[Prototype]]` to `Constructor.prototype`, and executes the constructor function to initialize the object.
-
-    **Example:**
-
-    ```javascript
-    const proto = {
-      greet: function () {
-        console.log('Hello')
-      },
-    }
-    const obj1 = Object.create(proto)
-    obj1.greet() // Outputs: Hello
-
-    function Constructor() {
-      this.name = 'Alice'
-    }
-    Constructor.prototype.greet = function () {
-      console.log(`Hello, ${this.name}`)
-    }
-
-    const obj2 = new Constructor()
-    obj2.greet() // Outputs: Hello, Alice
-    ```
-
----
-
-## **Additional Resources**
-
-- **Books**:
-
-  - _JavaScript: The Good Parts_ by Douglas Crockford.
-  - _You Don't Know JS Yet_ series by Kyle Simpson.
-
-- **Articles**:
-
-  - [MDN Web Docs: Inheritance and the Prototype Chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain)
-  - [Understanding Prototypes in JavaScript](https://www.smashingmagazine.com/2014/01/understanding-javascript-prototypes/)
-
-- **Videos**:
-  - [JavaScript Prototypes in Plain Language](https://www.youtube.com/watch?v=sKpA8dX1Z1Q) by Kyle Robinson Young.
-  - [Prototype, Prototype Chain & **proto** in JavaScript](https://www.youtube.com/watch?v=sWOXYDBbzj4) by Akshay Saini.
-
----
-
-## **Conclusion**
 
 Prototypes and prototypal inheritance are central to understanding JavaScript's object model. By mastering the prototype chain and various inheritance patterns, you can write more efficient and maintainable code. This knowledge also prepares you for technical interviews, where a deep understanding of JavaScript's inheritance mechanisms is essential.
-
----
-
-## **Next Steps**
-
-- **Practice**:
-
-  - Implement different inheritance patterns in your projects.
-  - Experiment with prototypes and the prototype chain.
-
-- **Explore**:
-
-  - Learn about symbols and how they can be used with prototypes.
-  - Study how built-in JavaScript objects like Arrays and Functions utilize prototypes.
-
-- **Prepare**:
-  - Review and answer additional interview questions on prototypes.
-  - Explain prototypes and inheritance to a peer to reinforce your understanding.
-
----
-
-**Keep exploring and mastering the powerful features of JavaScript prototypes and inheritance!**
-
----
-
-# **Appendix**
-
-## **Glossary**
-
-- **Prototype**: An object from which other objects inherit properties and methods.
-- **Prototype Chain**: A chain of objects connected through their `[[Prototype]]`, used to resolve property lookups.
-- **`__proto__`**: The internal `[[Prototype]]` reference of an object.
-- **`prototype` Property**: A property of constructor functions that determines the prototype of instances created using `new`.
-- **Constructor Function**: A function intended to create new objects using the `new` keyword.
-- **Inheritance**: The mechanism by which objects can access properties and methods of other objects.
-- **ES6 Classes**: Syntactic sugar over JavaScript's prototypal inheritance, providing a cleaner syntax for creating objects and inheritance.
-- **Mixins**: A technique to add properties and methods from one object to another, enabling multiple inheritance.
-- **Object.create()**: A method to create a new object with a specified prototype.
-
----
-
-**End of Lesson**

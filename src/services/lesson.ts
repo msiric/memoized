@@ -220,7 +220,15 @@ export const getLessonsAndProblems = async () => {
       orderBy: { order: 'asc' },
     }),
     prisma.problem.findMany({
-      select: { id: true, title: true, difficulty: true, href: true },
+      select: {
+        id: true,
+        title: true,
+        difficulty: true,
+        href: true,
+        question: true,
+        answer: true,
+        type: true,
+      },
     }),
   ])
   return { allLessons, allProblems }

@@ -1,6 +1,6 @@
 import { getProblems } from '@/services/problem'
 import { ProblemStatus } from '@/types'
-import { ProblemDifficulty } from '@prisma/client'
+import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import { render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ProblemsPage from './page'
@@ -35,6 +35,7 @@ describe('ProblemsPage component', () => {
       difficulty: ProblemDifficulty.EASY,
       status: 'COMPLETED' as ProblemStatus,
       lesson: 'Lesson 1',
+      type: ProblemType.THEORY,
       sortColumn: 'title',
       sortOrder: 'asc' as const,
     }
@@ -62,6 +63,7 @@ describe('ProblemsPage component', () => {
       difficulty: ProblemDifficulty.MEDIUM,
       status: 'TODO' as ProblemStatus,
       lesson: 'Lesson 2',
+      type: ProblemType.CODING,
       sortColumn: 'difficulty',
       sortOrder: 'desc' as const,
     }
@@ -73,6 +75,7 @@ describe('ProblemsPage component', () => {
       difficulty: ProblemDifficulty.MEDIUM,
       status: 'TODO' as ProblemStatus,
       lesson: 'Lesson 2',
+      type: ProblemType.CODING,
       sortColumn: 'difficulty',
       sortOrder: 'desc',
     })

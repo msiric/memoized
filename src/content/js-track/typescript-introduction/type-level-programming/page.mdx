@@ -1,52 +1,10 @@
-**Lesson Title**: **Type-Level Programming in TypeScript**
-
-**Lesson Description**:  
-Advance your TypeScript expertise by mastering type-level programming. This lesson explores recursive types and advanced type manipulations, empowering you to harness the full potential of TypeScript's type system. By understanding how to create and manipulate types at an advanced level, you will be able to write more expressive, type-safe, and maintainable code. This comprehensive lesson will deepen your understanding of TypeScript's capabilities and prepare you for complex development tasks and technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Type-Level Programming in TypeScript",   description: "Advance your TypeScript expertise by mastering type-level programming. This lesson explores recursive types and advanced type manipulations, empowering you to harness the full potential of TypeScript's type system. By understanding how to create and manipulate types at an advanced level, you will be able to write more expressive, type-safe, and maintainable code. This comprehensive lesson will deepen your understanding of TypeScript's capabilities and prepare you for complex development tasks and technical interviews by covering these essential topics.", }
 
 # **Type-Level Programming in TypeScript**
 
 Type-level programming in TypeScript involves writing code that operates on types rather than values, allowing you to perform computations and transformations at the type level. This powerful feature enables the creation of complex and dynamic types that can enhance type safety and expressiveness in your applications. This lesson focuses on recursive types and advanced type manipulations, providing you with the tools to push the boundaries of what is possible with TypeScript's type system.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Type-Level Programming**
-   - What is Type-Level Programming?
-   - Importance in TypeScript
-2. **Recursive Types**
-   - Understanding Recursive Types
-   - Examples of Recursive Types
-   - Practical Use Cases
-3. **Advanced Type Manipulations**
-   - Conditional Types Revisited
-   - Mapped Types with Modifiers
-   - Infer Keyword and Type Inference
-4. **Template Literal Types**
-   - Introduction to Template Literal Types
-   - String Manipulation at the Type Level
-5. **Key Remapping in Mapped Types**
-   - Changing Property Names
-   - Filtering and Transforming Keys
-6. **Variadic Tuple Types**
-   - Working with Tuple Types
-   - Manipulating Tuples with Type-Level Functions
-7. **Creating Complex Types**
-   - Composing Types
-   - Building Utility Types
-8. **Practical Examples**
-   - DeepReadonly and DeepPartial
-   - JSON Validation Types
-9. **Best Practices**
-10. **Common Interview Questions**
-11. **Exercises**
-12. **Conclusion**
-13. **Next Steps**
-14. **Appendix**
-
----
 
 ## **Introduction to Type-Level Programming**
 
@@ -63,8 +21,6 @@ Type-level programming in TypeScript involves writing code that operates on type
 - **Type Safety**: Improves the robustness of code by catching errors at compile time.
 - **Expressiveness**: Allows for more precise type definitions that can model complex data structures and patterns.
 - **Maintainability**: Reduces runtime errors and enhances code clarity, making it easier to maintain and scale applications.
-
----
 
 ## **Recursive Types**
 
@@ -113,8 +69,6 @@ Type-level programming in TypeScript involves writing code that operates on type
 - **Nested Data Structures**: Defining types for nested objects, trees, or graphs.
 - **Parsing and Serialization**: Validating data structures that can be serialized to or from formats like JSON or XML.
 - **Complex Data Modeling**: Representing hierarchical relationships and self-referential types.
-
----
 
 ## **Advanced Type Manipulations**
 
@@ -210,8 +164,6 @@ Type-level programming in TypeScript involves writing code that operates on type
   // Params is [number, string]
   ```
 
----
-
 ## **Template Literal Types**
 
 ### **Introduction to Template Literal Types**
@@ -267,8 +219,6 @@ Type-level programming in TypeScript involves writing code that operates on type
   ```
 
 - **Validation of String Formats**: Enforce specific string patterns at the type level.
-
----
 
 ## **Key Remapping in Mapped Types**
 
@@ -328,8 +278,6 @@ Type-level programming in TypeScript involves writing code that operates on type
   // { ID: number; NAME: string; }
   ```
 
----
-
 ## **Variadic Tuple Types**
 
 ### **Working with Tuple Types**
@@ -369,8 +317,6 @@ Type-level programming in TypeScript involves writing code that operates on type
 
   type Reversed = Reverse<[1, 2, 3]> // [3, 2, 1]
   ```
-
----
 
 ## **Creating Complex Types**
 
@@ -443,8 +389,6 @@ Type-level programming in TypeScript involves writing code that operates on type
   // user.address.city = 'Oz'; // Error
   ```
 
----
-
 ## **Practical Examples**
 
 ### **Recursive Type Example: JSON Validation**
@@ -503,8 +447,6 @@ Type-level programming in TypeScript involves writing code that operates on type
   }
   ```
 
----
-
 ## **Best Practices**
 
 - **Use Type Inference Wisely**: Leverage TypeScript's type inference to simplify type definitions.
@@ -513,79 +455,6 @@ Type-level programming in TypeScript involves writing code that operates on type
 - **Document Advanced Types**: Provide documentation and comments for complex type-level code.
 - **Leverage Built-in Utility Types**: Use TypeScript's built-in types before creating custom ones.
 - **Stay Updated**: Keep abreast of the latest TypeScript features and enhancements.
-
----
-
-## **Common Interview Questions**
-
-1. **What is a recursive type in TypeScript, and when would you use it?**
-
-   **Answer**:
-
-   - A recursive type is a type that references itself in its definition.
-   - It's used to model recursive data structures like trees, linked lists, and nested objects.
-   - **Example**:
-
-     ```typescript
-     type JSONValue =
-       | string
-       | number
-       | boolean
-       | null
-       | JSONValue[]
-       | { [key: string]: JSONValue }
-     ```
-
-2. **Explain how the `infer` keyword works in TypeScript.**
-
-   **Answer**:
-
-   - The `infer` keyword is used within conditional types to introduce a type variable that can be referenced in the true branch of the conditional type.
-   - It allows for extracting and manipulating types based on the structure of other types.
-   - **Example**:
-
-     ```typescript
-     type ReturnType<T> = T extends (...args: any[]) => infer R ? R : any
-     ```
-
-3. **How can you use template literal types to manipulate string types in TypeScript?**
-
-   **Answer**:
-
-   - Template literal types allow you to create new string literal types by combining string literals and unions.
-   - They can be used to generate new types based on patterns.
-   - **Example**:
-
-     ```typescript
-     type EventHandlerName<E extends string> = `on${Capitalize<E>}`
-     ```
-
-4. **What are variadic tuple types, and how do they benefit type-level programming in TypeScript?**
-
-   **Answer**:
-
-   - Variadic tuple types allow for the representation and manipulation of tuples with varying lengths.
-   - They enable operations like tuple concatenation, slicing, and transformations at the type level.
-   - **Example**:
-
-     ```typescript
-     type Concat<T extends any[], U extends any[]> = [...T, ...U]
-     ```
-
-5. **Describe how you would create a `DeepPartial` type that makes all properties in a type and its sub-types optional.**
-
-   **Answer**:
-
-   - By using recursive mapped types and conditional types.
-   - **Example**:
-
-     ```typescript
-     type DeepPartial<T> = {
-       [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
-     }
-     ```
-
----
 
 ## **Exercises**
 
@@ -616,8 +485,6 @@ const tree: TreeNode<number> = {
 }
 ```
 
----
-
 ### **Exercise 2: Type Inference with `infer`**
 
 **Question**:
@@ -639,8 +506,6 @@ type Func = (name: string, age: number) => void
 type Param1 = FirstParameter<Func> // string
 ```
 
----
-
 ### **Exercise 3: Template Literal Types for Event Names**
 
 **Question**:
@@ -655,8 +520,6 @@ type Events = 'start' | 'stop' | 'pause'
 type EventHandlers = `on${Capitalize<Events>}`
 // EventHandlers is 'onStart' | 'onStop' | 'onPause'
 ```
-
----
 
 ### **Exercise 4: Key Remapping to Remove Properties**
 
@@ -680,8 +543,6 @@ type PersonWithoutId = {
 // PersonWithoutId is { name: string; age: number; }
 ```
 
----
-
 ### **Exercise 5: Variadic Tuple Types for Function Composition**
 
 **Question**:
@@ -700,51 +561,8 @@ type ComposedFunc = Compose<[number, string], boolean>
 // ComposedFunc is (a: number, b: string) => boolean
 ```
 
----
-
-## **Conclusion**
 
 Type-level programming in TypeScript opens up a world of possibilities for creating complex, expressive, and type-safe applications. By mastering recursive types, advanced type manipulations, template literal types, and variadic tuple types, you can harness the full power of TypeScript's type system. Understanding these advanced concepts will enhance your ability to build robust applications and prepare you for tackling complex development challenges and technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Implement recursive types in your projects.
-  - Experiment with advanced type manipulations and type-level functions.
-
-- **Explore**:
-
-  - Learn about TypeScript's support for nominal typing and branded types.
-  - Study advanced topics like higher-kinded types and type-level computations.
-
-- **Prepare**:
-  - Review additional interview questions on TypeScript's type system.
-  - Build projects that leverage type-level programming to reinforce your understanding.
-
----
-
-**Continue enhancing your TypeScript expertise by mastering type-level programming!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Type-Level Programming**: Writing code that operates on types rather than values.
-- **Recursive Type**: A type that references itself in its definition.
-- **Conditional Type**: A type that selects one of two possible types based on a condition.
-- **Mapped Type**: A type that creates a new type by transforming each property of an existing type.
-- **Infer Keyword**: A keyword used in conditional types to infer a type variable.
-- **Template Literal Type**: A type that uses template literal syntax to manipulate string types.
-- **Variadic Tuple Type**: A tuple type that can have a variable number of elements.
-- **Type Inference**: The compiler's ability to automatically determine the type of a variable or expression.
-- **Utility Type**: A predefined generic type in TypeScript that provides common type transformations.
-- **Distributive Conditional Type**: A conditional type that distributes over a union type, applying the conditional to each member.
-
----
-
-**End of Lesson**

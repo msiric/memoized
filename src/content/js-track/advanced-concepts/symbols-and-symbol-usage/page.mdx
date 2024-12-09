@@ -1,42 +1,10 @@
-**Lesson Title**: **Symbols and Symbol Usage in JavaScript**
-
-**Lesson Description**:  
-Delve into the unique and powerful world of Symbols in JavaScript. Learn how to use Symbols as unique property keys to avoid naming collisions and enhance object property management. Explore well-known symbols provided by JavaScript to customize and extend the behavior of objects and built-in operations. This comprehensive lesson will deepen your understanding of advanced object properties, improve code robustness, and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Symbols and Symbol Usage in JavaScript",   description: "Delve into the unique and powerful world of Symbols in JavaScript. Learn how to use Symbols as unique property keys to avoid naming collisions and enhance object property management. Explore well-known symbols provided by JavaScript to customize and extend the behavior of objects and built-in operations. This comprehensive lesson will deepen your understanding of advanced object properties, improve code robustness, and prepare you for technical interviews by covering these essential topics.", }
 
 # **Symbols and Symbol Usage in JavaScript**
 
 Symbols were introduced in ECMAScript 2015 (ES6) as a new primitive data type. They provide a way to create unique identifiers that can be used as property keys, avoiding naming collisions and enabling advanced programming patterns. Symbols also play a crucial role in meta-programming by allowing developers to customize object behavior through well-known symbols.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Symbols**
-   - What is a Symbol?
-   - Characteristics of Symbols
-   - Why Use Symbols?
-2. **Creating and Using Symbols**
-   - Creating Symbols
-   - Using Symbols as Unique Property Keys
-   - Accessing Symbol Properties
-3. **Well-Known Symbols**
-   - Overview of Well-Known Symbols
-   - Customizing Object Behavior
-   - Examples of Well-Known Symbols
-4. **Practical Applications of Symbols**
-   - Avoiding Property Name Collisions
-   - Implementing Private Properties (Simulated)
-   - Enhancing Libraries and Frameworks
-5. **Best Practices**
-6. **Common Interview Questions**
-7. **Exercises**
-8. **Conclusion**
-9. **Next Steps**
-10. **Appendix**
-
----
 
 ## **Introduction to Symbols**
 
@@ -58,8 +26,6 @@ Symbols were introduced in ECMAScript 2015 (ES6) as a new primitive data type. T
 - **Unique Property Keys**: Symbols can be used as property keys to ensure uniqueness, preventing naming collisions.
 - **Meta-Programming**: Well-known Symbols allow developers to customize object behavior and interact with internal JavaScript mechanisms.
 - **Encapsulation**: Symbols can simulate private properties by making them less accessible.
-
----
 
 ## **Creating and Using Symbols**
 
@@ -142,8 +108,6 @@ console.log(JSON.stringify(user)) // Outputs: '{"name":"Alice"}'
   const keys = Reflect.ownKeys(user)
   console.log(keys) // Outputs: ['name', Symbol(id)]
   ```
-
----
 
 ## **Well-Known Symbols**
 
@@ -266,8 +230,6 @@ const result = arr1.concat(arr2, arr3)
 console.log(result) // Outputs: [1, 2, 3, 4, 5, 6]
 ```
 
----
-
 ## **Practical Applications of Symbols**
 
 ### **Avoiding Property Name Collisions**
@@ -340,8 +302,6 @@ console.log(+num) // Outputs: 2
 console.log(`${num}`) // Outputs: '2 + 3i'
 ```
 
----
-
 ## **Best Practices**
 
 ### **Use Symbols for Unique Property Keys**
@@ -363,77 +323,6 @@ console.log(`${num}`) // Outputs: '2 + 3i'
 
 - **Customization**: Leverage well-known Symbols to customize object behavior.
 - **Compatibility**: Ensure that overriding default behaviors does not break expected functionality.
-
----
-
-## **Common Interview Questions**
-
-1. **What is a Symbol in JavaScript, and how does it differ from other primitive types?**
-
-   **Answer**:
-
-   - A Symbol is a unique and immutable primitive data type introduced in ES6.
-   - Symbols are used as unique identifiers, primarily as property keys on objects.
-   - Unlike other primitive types like strings or numbers, Symbols are guaranteed to be unique, even if they have the same description.
-
-2. **How can you use Symbols to avoid property name collisions in JavaScript objects?**
-
-   **Answer**:
-
-   - By using Symbols as property keys, you ensure that the property is unique and does not conflict with other properties.
-   - This is particularly useful when adding properties to objects that may be extended by other code or libraries.
-   - Symbols prevent accidental overwriting or interference with existing properties.
-
-3. **Explain what well-known Symbols are and provide an example of how to use one.**
-
-   **Answer**:
-
-   - Well-known Symbols are predefined Symbols in JavaScript that represent internal behaviors of objects.
-   - They allow customization of how objects interact with language features.
-   - Example: Using `Symbol.iterator` to make an object iterable.
-
-     ```javascript
-     const iterableObj = {
-       [Symbol.iterator]: function* () {
-         yield 1
-         yield 2
-         yield 3
-       },
-     }
-
-     for (const value of iterableObj) {
-       console.log(value) // Outputs: 1, 2, 3
-     }
-     ```
-
-4. **Can you explain how to access and enumerate Symbol properties on an object?**
-
-   **Answer**:
-
-   - Symbol properties are not included in standard property enumerations like `Object.keys()` or `for...in` loops.
-   - To access Symbol properties:
-
-     - Use `Object.getOwnPropertySymbols(obj)` to retrieve an array of Symbol properties.
-     - Use `Reflect.ownKeys(obj)` to retrieve all property keys, including Symbols.
-
-   - Example:
-
-     ```javascript
-     const sym = Symbol('key')
-     const obj = { [sym]: 'value' }
-     const symbols = Object.getOwnPropertySymbols(obj)
-     console.log(symbols) // Outputs: [Symbol(key)]
-     ```
-
-5. **How do Symbols contribute to meta-programming in JavaScript?**
-
-   **Answer**:
-
-   - Symbols enable meta-programming by allowing developers to interact with and customize the internal behaviors of objects.
-   - Well-known Symbols represent internal object methods that can be overridden to change how objects respond to operations like property access, iteration, type conversion, etc.
-   - This allows for advanced programming patterns and customization of built-in behaviors.
-
----
 
 ## **Exercises**
 
@@ -458,8 +347,6 @@ const obj = {
 console.log(obj[sym1]) // Outputs: 'Symbol property value'
 console.log(obj[sym2]) // Outputs: undefined (different Symbol)
 ```
-
----
 
 ### **Exercise 2: Using `Symbol.iterator`**
 
@@ -491,8 +378,6 @@ for (const num of range) {
 // 5
 ```
 
----
-
 ### **Exercise 3: Customizing `toString` with `Symbol.toStringTag`**
 
 **Question**:
@@ -515,8 +400,6 @@ class Person {
 const alice = new Person('Alice')
 console.log(Object.prototype.toString.call(alice)) // Outputs: [object Person]
 ```
-
----
 
 ### **Exercise 4: Accessing Symbol Properties**
 
@@ -548,8 +431,6 @@ keys.forEach((key) => {
 // Key: Symbol(secret), Value: hidden
 ```
 
----
-
 ### **Exercise 5: Using `Symbol.toPrimitive`**
 
 **Question**:
@@ -578,57 +459,8 @@ console.log(+dateObj) // Outputs: timestamp (number)
 console.log(`${dateObj}`) // Outputs: '2021-12-31'
 ```
 
----
-
-## **Conclusion**
 
 Symbols in JavaScript provide a powerful mechanism for creating unique property keys and customizing object behavior. By leveraging Symbols, you can prevent property name collisions, simulate private properties, and interact with JavaScript's internal mechanisms through well-known Symbols. Understanding Symbols and their usage enhances your ability to write robust, flexible, and maintainable code, and prepares you for advanced programming challenges and technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Implement custom iterables using `Symbol.iterator`.
-  - Explore other well-known Symbols and their effects on object behavior.
-
-- **Explore**:
-
-  - Learn about how Symbols are used in modern JavaScript frameworks.
-  - Study the role of Symbols in meta-programming and advanced design patterns.
-
-- **Prepare**:
-
-  - Review additional interview questions on Symbols and object property management.
-  - Explain these concepts to a peer or through writing to reinforce your understanding.
-
----
-
-**Continue enhancing your JavaScript expertise by mastering Symbols and their usage!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Symbol**: A unique and immutable primitive data type used as identifiers for object properties.
-
-- **Well-Known Symbols**: Predefined Symbols in JavaScript that represent internal object behaviors and can be used to customize operations.
-
-- **Primitive Type**: A basic data type that is not an object and has no methods (e.g., Number, String, Symbol).
-
-- **Meta-Programming**: Programming techniques that involve writing code that can manipulate other code or itself at runtime.
-
-- **Iterator**: An object that implements the `Symbol.iterator` method, allowing it to be iterated over with `for...of` loops.
-
-- **Encapsulation**: A principle of hiding the internal state and implementation details of an object.
-
-- **Reflect API**: A built-in object that provides methods for interceptable JavaScript operations, similar to those of the proxy handlers.
-
-- **Type Conversion**: The process of converting a value from one data type to another (e.g., object to primitive).
-
----
-
-**End of Lesson**

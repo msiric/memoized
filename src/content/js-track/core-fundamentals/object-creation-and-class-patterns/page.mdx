@@ -1,15 +1,8 @@
-**Lesson Title**: **Object Creation and Class Patterns in JavaScript**
-
-**Lesson Description**:  
-Explore the different ways of creating objects in JavaScript and understand class patterns used for object-oriented programming. Dive into constructor functions, learn about ES6 classes, and see how inheritance is implemented in modern JavaScript. This comprehensive lesson will deepen your understanding of JavaScript's object model, help you write more efficient code, and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Object Creation and Class Patterns in JavaScript",   description: "Explore the different ways of creating objects in JavaScript and understand class patterns used for object-oriented programming. Dive into constructor functions, learn about ES6 classes, and see how inheritance is implemented in modern JavaScript. This comprehensive lesson will deepen your understanding of JavaScript's object model, help you write more efficient code, and prepare you for technical interviews by covering these essential topics.", }
 
 # **Object Creation and Class Patterns in JavaScript**
 
 Objects are a fundamental part of JavaScript, providing a way to store and manipulate data in a structured manner. JavaScript is a prototype-based language, but with the introduction of ES6 classes, it has become easier to implement object-oriented programming patterns. In this lesson, we will explore different methods of creating objects, understand constructor functions, and learn about ES6 classes and inheritance.
-
----
 
 ## **Object Creation in JavaScript**
 
@@ -127,8 +120,6 @@ bob.greet() // Outputs: Hi, I'm Bob and I'm 25 years old.
 
 - `Person` is a class with a constructor and a method `greet`.
 
----
-
 ## **Constructor Functions in Detail**
 
 ### **Understanding Constructor Functions**
@@ -198,8 +189,6 @@ function Circle(radius) {
   this.radius = radius
 }
 ```
-
----
 
 ## **ES6 Classes and Inheritance**
 
@@ -368,8 +357,6 @@ counter.increment() // Outputs: Count: 1
 
 - `#count` is not accessible outside the class.
 
----
-
 ## **Combining Constructor Functions and Prototypes**
 
 - Before ES6 classes, inheritance was achieved using constructor functions and manipulating prototypes.
@@ -406,8 +393,6 @@ myCar.honk() // Outputs: Toyota Corolla says beep beep!
 
 - `Car` inherits from `Vehicle` both properties and methods.
 
----
-
 ## **Advantages of ES6 Classes**
 
 - **Cleaner Syntax**: More readable and familiar to those from class-based OOP languages.
@@ -415,8 +400,6 @@ myCar.honk() // Outputs: Toyota Corolla says beep beep!
 - **Static Methods**: Conveniently define methods on the class.
 - **Getters and Setters**: Easily define property accessors.
 - **Private Fields**: With the introduction of private fields, data encapsulation is improved.
-
----
 
 ## **Best Practices**
 
@@ -452,63 +435,6 @@ class UserAccount {
 
 - In classes and constructor functions, `this` refers to the instance.
 - Arrow functions do not have their own `this`; be cautious when using them as methods.
-
----
-
-## **Common Interview Questions**
-
-1. **What is the difference between a constructor function and a regular function in JavaScript?**
-
-   **Answer:**
-
-   - A constructor function is intended to be used with the `new` keyword to create new objects.
-   - When called with `new`, a constructor function creates a new object, sets `this` to that object, and returns it.
-   - Regular functions are called without `new` and `this` depends on how the function is called.
-
-2. **How does inheritance work in ES6 classes?**
-
-   **Answer:**
-
-   - Inheritance is achieved using the `extends` keyword.
-   - A subclass extends a parent class and inherits its properties and methods.
-   - The `super()` function is used within the subclass constructor to call the parent class constructor.
-
-3. **What are the advantages of using ES6 classes over constructor functions?**
-
-   **Answer:**
-
-   - Cleaner and more concise syntax.
-   - Easier to read and maintain.
-   - Simplifies inheritance with `extends` and `super`.
-   - Supports static methods, getters, setters, and private fields.
-
-4. **Explain the role of `super()` in class inheritance.**
-
-   **Answer:**
-
-   - `super()` calls the constructor of the parent class.
-   - It is necessary to use `super()` before accessing `this` in a subclass constructor.
-   - Allows access to parent class methods and properties.
-
-5. **Can you explain how to implement private variables in ES6 classes?**
-
-   **Answer:**
-
-   - Use the `#` prefix to declare private fields.
-   - Private fields are only accessible within the class body.
-   - Example:
-
-     ```javascript
-     class Example {
-       #privateField = 'secret'
-
-       getSecret() {
-         return this.#privateField
-       }
-     }
-     ```
-
----
 
 ## **Exercises**
 
@@ -695,163 +621,5 @@ console.log(Calculator.multiply(3, 4)) // Outputs: 12
 console.log(Calculator.divide(10, 2)) // Outputs: 5
 ```
 
----
 
-## **Additional Interview Questions**
-
-6. **What happens if you try to extend multiple classes in JavaScript?**
-
-   **Answer:**
-
-   - JavaScript classes do not support multiple inheritance directly.
-   - A class can only `extend` one parent class.
-   - To achieve similar functionality, you can use mixins or composition.
-
-7. **How can you implement a singleton pattern using ES6 classes?**
-
-   **Answer:**
-
-   - Use a static method that checks if an instance already exists.
-   - If it does, return the existing instance; otherwise, create a new one.
-
-   **Example:**
-
-   ```javascript
-   class Singleton {
-     constructor(data) {
-       if (Singleton.instance) {
-         return Singleton.instance
-       }
-       this.data = data
-       Singleton.instance = this
-     }
-   }
-
-   const instance1 = new Singleton('First')
-   const instance2 = new Singleton('Second')
-
-   console.log(instance1 === instance2) // Outputs: true
-   console.log(instance1.data) // Outputs: First
-   ```
-
-8. **Explain the difference between class declarations and class expressions.**
-
-   **Answer:**
-
-   - **Class Declarations**:
-
-     - Defined using the `class` keyword followed by a class name.
-     - Hoisted but not initialized (cannot be used before declaration).
-
-     ```javascript
-     class MyClass {
-       // ...
-     }
-     ```
-
-   - **Class Expressions**:
-
-     - Classes can be assigned to variables.
-     - Can be named or anonymous.
-
-     ```javascript
-     const MyClass = class {
-       // ...
-     }
-
-     const NamedClass = class Named {
-       // ...
-     }
-     ```
-
-9. **Can you explain how methods are added to a class's prototype?**
-
-   **Answer:**
-
-   - In class syntax, methods defined within the class body are added to the prototype.
-   - Static methods are added to the class itself.
-
-   **Example:**
-
-   ```javascript
-   class MyClass {
-     method() {
-       // Instance method on the prototype
-     }
-
-     static staticMethod() {
-       // Static method on the class
-     }
-   }
-
-   console.log(MyClass.prototype.method) // Function
-   console.log(MyClass.staticMethod) // Function
-   ```
-
-10. **How does JavaScript handle inheritance with prototypes behind the scenes when using classes?**
-
-    **Answer:**
-
-    - Classes in JavaScript are syntactic sugar over the existing prototype-based inheritance.
-    - When a class extends another, the subclass's prototype's `[[Prototype]]` is set to the parent class's prototype.
-    - The `super()` call initializes the parent class's properties.
-    - Method lookups happen through the prototype chain.
-
----
-
-## **Conclusion**
-
-Understanding object creation and class patterns in JavaScript is essential for writing efficient and maintainable code. Constructor functions and ES6 classes provide powerful ways to create objects and implement inheritance. By mastering these concepts, you can leverage object-oriented programming in JavaScript and be well-prepared for technical interviews.
-
----
-
-## **Next Steps**
-
-- **Practice**:
-
-  - Write classes and constructor functions to solidify your understanding.
-  - Implement inheritance hierarchies using both ES6 classes and constructor functions.
-
-- **Explore**:
-
-  - Learn about mixins and composition for code reuse.
-  - Study how built-in JavaScript objects like `Array` and `Date` use prototypes.
-
-- **Prepare**:
-
-  - Review and answer additional interview questions on object-oriented programming in JavaScript.
-  - Explain these concepts to a peer to reinforce your understanding.
-
----
-
-**Keep enhancing your JavaScript skills by mastering object creation and class patterns!**
-
----
-
-# **Appendix**
-
-## **Glossary**
-
-- **Constructor Function**: A function used to create objects with similar properties and methods, invoked with the `new` keyword.
-
-- **ES6 Classes**: A syntactic sugar introduced in ES6 that provides a more familiar syntax for creating objects and implementing inheritance.
-
-- **Inheritance**: The mechanism by which one class (subclass) can inherit properties and methods from another class (superclass).
-
-- **Prototype**: An object from which other objects inherit properties and methods.
-
-- **Prototype Chain**: A chain of prototypes used to resolve property and method lookups.
-
-- **`extends`**: A keyword used in class declarations to create a subclass that inherits from a parent class.
-
-- **`super`**: A keyword used to call functions on an object's parent class.
-
-- **Static Methods**: Methods defined on the class itself, not on instances.
-
-- **Getters and Setters**: Special methods that provide controlled access to an object's properties.
-
-- **Private Fields**: Class properties that are not accessible outside the class body, denoted with a `#` prefix.
-
----
-
-**End of Lesson**
+Understanding the various ways to create and work with objects in JavaScript, from constructor functions to modern ES6 classes, is essential for writing well-structured and maintainable code. By mastering these patterns and their nuances, you'll be better equipped to implement object-oriented programming concepts effectively and handle related technical interview questions with confidence.

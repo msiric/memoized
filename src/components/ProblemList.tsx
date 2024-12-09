@@ -11,7 +11,7 @@ import {
   filterAndSortProblems,
 } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
-import { Lesson, ProblemDifficulty } from '@prisma/client'
+import { Lesson, ProblemDifficulty, ProblemType } from '@prisma/client'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -25,6 +25,7 @@ const TABLE_COLUMNS = [
   { key: 'title', title: 'Title', sortable: true },
   { key: 'difficulty', title: 'Difficulty', sortable: true },
   { key: 'lesson', title: 'Lesson', sortable: true },
+  { key: 'type', title: 'Type', sortable: true },
   { key: 'answer', title: 'Answer', sortable: false },
   { key: 'completed', title: 'Completed', sortable: false },
 ]
@@ -68,6 +69,9 @@ export const ProblemList = ({
   const [lesson, setLesson] = useState<string | null>(
     searchParams?.get('lesson')?.toLowerCase() || '',
   )
+  const [type, setType] = useState<string | null>(
+    searchParams?.get('type')?.toLowerCase() || '',
+  )
   const [sortColumn, setSortColumn] = useState<string | null>(
     searchParams?.get('sortColumn')?.toLowerCase() || null,
   )
@@ -82,13 +86,23 @@ export const ProblemList = ({
       difficulty: difficulty as ProblemDifficulty,
       status: status as ProblemStatus,
       lesson: lesson as string,
+      type: type as ProblemType,
       sortColumn: sortColumn as string,
       sortOrder: sortOrder as 'asc' | 'desc',
     }
 
     const newProblems = filterAndSortProblems(allProblems, filter)
     setProblems(newProblems)
-  }, [allProblems, search, difficulty, status, lesson, sortColumn, sortOrder])
+  }, [
+    allProblems,
+    search,
+    difficulty,
+    status,
+    lesson,
+    type,
+    sortColumn,
+    sortOrder,
+  ])
 
   useEffect(() => {
     filterAndSortProblemsClient()
@@ -97,6 +111,7 @@ export const ProblemList = ({
     difficulty,
     status,
     lesson,
+    type,
     sortColumn,
     sortOrder,
     filterAndSortProblemsClient,
@@ -107,6 +122,7 @@ export const ProblemList = ({
     setDifficulty(searchParams?.get('difficulty') || '')
     setStatus(searchParams?.get('status') || '')
     setLesson(searchParams?.get('lesson') || '')
+    setType(searchParams?.get('type') || '')
     setSortColumn(searchParams?.get('sortColumn') || null)
     setSortOrder(
       (searchParams?.get('sortOrder') as 'asc' | 'desc' | null) || null,
@@ -129,6 +145,10 @@ export const ProblemList = ({
 
   const handleLessonChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setLesson(event.target.value || null)
+  }
+
+  const handleTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setType(event.target.value || null)
   }
 
   const handleSort = (column: string) => {
@@ -156,6 +176,7 @@ export const ProblemList = ({
     setDifficulty(null)
     setStatus(null)
     setLesson(null)
+    setType(null)
     setSortColumn(null)
     setSortOrder(null)
 
@@ -224,6 +245,7 @@ export const ProblemList = ({
       difficulty,
       status,
       lesson,
+      type,
       sortColumn,
       sortOrder,
     }
@@ -250,6 +272,7 @@ export const ProblemList = ({
     difficulty,
     status,
     lesson,
+    type,
     sortColumn,
     sortOrder,
     router,
@@ -331,6 +354,20 @@ export const ProblemList = ({
               ]}
             />
           </div>
+          <div className="w-full p-1 sm:w-2/4 lg:p-0">
+            <Select
+              value={type || ''}
+              onChange={handleTypeChange}
+              variant="primary"
+              size="medium"
+              className="w-full"
+              options={[
+                { value: '', label: 'All types' },
+                { value: 'coding', label: 'Coding' },
+                { value: 'theory', label: 'Theory' },
+              ]}
+            />
+          </div>
           <button
             onClick={handleResetFilters}
             className="mt-2 w-full min-w-[100px] rounded text-sm text-zinc-900 lg:mt-0 lg:w-auto dark:text-white"
@@ -384,21 +421,30 @@ export const ProblemList = ({
                     key={problem.id}
                     className="border-b border-zinc-300 bg-white last:border-b-0 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:bg-zinc-600"
                   >
-                    <td className="whitespace-nowrap px-6 py-4 font-medium text-zinc-900 dark:text-white">
-                      <a
-                        href={problem.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-lime-500 hover:underline"
-                      >
-                        {problem.title}
-                      </a>
+                    <td className="max-w-[300px] whitespace-nowrap px-6 py-4 font-medium text-zinc-900 dark:text-white">
+                      {problem.type === ProblemType.THEORY ? (
+                        <span className="whitespace-pre-wrap text-lime-500">
+                          {problem.title}
+                        </span>
+                      ) : (
+                        <a
+                          href={problem.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="whitespace-pre-wrap text-lime-500 hover:underline"
+                        >
+                          {problem.title}
+                        </a>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {capitalizeFirstLetter(problem.difficulty)}
                     </td>
                     <td className="px-6 py-4 text-center">
                       {problem.lesson.title}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {capitalizeFirstLetter(problem.type)}
                     </td>
                     <td className="cursor-pointer px-6 py-4 text-center font-bold">
                       <span

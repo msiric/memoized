@@ -1,49 +1,10 @@
-**Lesson Title**: **Fundamental Data Types and Structures in JavaScript**
-
-**Lesson Description**:  
-Gain a deep understanding of the fundamental data types and structures in JavaScript. Learn the differences between primitive types and objects, and explore the built-in data structures like arrays, sets, and maps. Understand their methods and how to use them effectively in your code. This comprehensive lesson will enhance your ability to manipulate data structures, write efficient code, and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Fundamental Data Types and Structures in JavaScript",   description: "Gain a deep understanding of the fundamental data types and structures in JavaScript. Learn the differences between primitive types and objects, and explore the built-in data structures like arrays, sets, and maps. Understand their methods and how to use them effectively in your code. This comprehensive lesson will enhance your ability to manipulate data structures, write efficient code, and prepare you for technical interviews by covering these essential topics.", }
 
 # **Fundamental Data Types and Structures in JavaScript**
 
 JavaScript provides a variety of data types and structures to help developers manage and manipulate data efficiently. Understanding the differences between primitive types and objects, as well as how to use arrays, sets, and maps, is crucial for writing effective JavaScript code. This lesson delves into the fundamental data types, explores the built-in data structures, and teaches you how to utilize their methods to solve common programming problems.
 
----
 
-## **Table of Contents**
-
-1. **Primitive Data Types**
-   - Overview of Primitives
-   - Characteristics of Primitives
-2. **Objects**
-   - Understanding Objects
-   - Primitives vs. Objects
-3. **Arrays**
-   - Creating Arrays
-   - Array Methods
-   - Iterating Over Arrays
-4. **Sets**
-   - Introduction to Sets
-   - Creating Sets
-   - Set Methods
-   - Use Cases for Sets
-5. **Maps**
-   - Introduction to Maps
-   - Creating Maps
-   - Map Methods
-   - Use Cases for Maps
-6. **WeakSet and WeakMap**
-   - Understanding WeakSet
-   - Understanding WeakMap
-7. **Best Practices**
-8. **Common Interview Questions**
-9. **Exercises**
-10. **Conclusion**
-11. **Next Steps**
-12. **Appendix**
-
----
 
 ## **Primitive Data Types**
 
@@ -83,8 +44,6 @@ JavaScript has seven primitive data types:
   console.log(b) // Outputs: 20
   ```
 
----
-
 ## **Objects**
 
 ### **Understanding Objects**
@@ -123,8 +82,6 @@ JavaScript has seven primitive data types:
   obj2.value = 2
   console.log(obj1.value) // Outputs: 2
   ```
-
----
 
 ## **Arrays**
 
@@ -294,8 +251,6 @@ JavaScript has seven primitive data types:
   fruits.forEach((fruit) => console.log(fruit))
   ```
 
----
-
 ## **Sets**
 
 ### **Introduction to Sets**
@@ -389,8 +344,6 @@ JavaScript has seven primitive data types:
 - **Efficient Membership Testing**:
 
   - Faster than arrays for checking the existence of a value.
-
----
 
 ## **Maps**
 
@@ -522,8 +475,6 @@ JavaScript has seven primitive data types:
   // wordCount: Map { 'apple' => 3, 'banana' => 2, 'cherry' => 1 }
   ```
 
----
-
 ## **WeakSet and WeakMap**
 
 ### **Understanding WeakSet**
@@ -573,8 +524,6 @@ JavaScript has seven primitive data types:
   wm.set(element, { eventHandlers: [] })
   // If element is removed from the DOM and there are no other references, it can be garbage collected.
   ```
-
----
 
 ## **Best Practices**
 
@@ -658,93 +607,6 @@ JavaScript has seven primitive data types:
   }
   ```
 
----
-
-## **Common Interview Questions**
-
-1. **What are the differences between primitive data types and objects in JavaScript?**
-
-   **Answer**:
-
-   - **Primitives**:
-
-     - Immutable values (Number, String, Boolean, Null, Undefined, Symbol, BigInt).
-     - Stored directly in the variable's memory location.
-     - Passed by value; copying a primitive creates a new value.
-
-   - **Objects**:
-
-     - Mutable collections of properties.
-     - Stored as references; variables hold a reference to the object's memory location.
-     - Passed by reference; copying an object copies the reference, not the object itself.
-
-2. **How do you remove duplicates from an array in JavaScript?**
-
-   **Answer**:
-
-   - Using a `Set`:
-
-     ```javascript
-     let numbers = [1, 2, 2, 3, 4, 4, 5]
-     let uniqueNumbers = [...new Set(numbers)] // [1, 2, 3, 4, 5]
-     ```
-
-3. **What are the key differences between an object and a Map in JavaScript?**
-
-   **Answer**:
-
-   - **Object**:
-
-     - Keys are strings or symbols.
-     - Not ordered; property order is not guaranteed.
-     - Prototypes can affect key lookup.
-     - Limited built-in methods for manipulation.
-
-   - **Map**:
-
-     - Keys can be of any type, including objects and functions.
-     - Maintains the insertion order of keys.
-     - No prototype chain affecting key lookup.
-     - Provides methods like `set`, `get`, `has`, `delete`, and is iterable.
-
-4. **When would you use a WeakMap over a Map?**
-
-   **Answer**:
-
-   - Use a `WeakMap` when you need to associate data with objects without preventing their garbage collection.
-   - Ideal for storing metadata or private data related to an object.
-   - Keys are held weakly; if there are no other references to the key object, it can be garbage collected.
-
-5. **Explain how the `map` and `filter` methods work on arrays.**
-
-   **Answer**:
-
-   - **`map(callback)`**:
-
-     - Creates a new array by applying the callback function to each element of the original array.
-     - The original array is not modified.
-
-     **Example**:
-
-     ```javascript
-     let numbers = [1, 2, 3]
-     let squares = numbers.map((n) => n * n) // [1, 4, 9]
-     ```
-
-   - **`filter(callback)`**:
-
-     - Creates a new array with all elements that pass the test implemented by the callback function.
-     - The original array is not modified.
-
-     **Example**:
-
-     ```javascript
-     let numbers = [1, 2, 3, 4, 5]
-     let evenNumbers = numbers.filter((n) => n % 2 === 0) // [2, 4]
-     ```
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Primitives vs. Objects**
@@ -790,8 +652,6 @@ console.log(obj2.value) // ?
   - `obj1` and `obj2` reference the same object.
   - Modifying `obj2.value` affects `obj1.value` because they point to the same object.
 
----
-
 ### **Exercise 2: Array Methods**
 
 **Question**:
@@ -824,8 +684,6 @@ let squares = nums.map((n) => n * n) // [0, 4, 100, 16, 25]
 let filteredNums = nums.filter((n) => n >= 3) // [10, 4, 5]
 ```
 
----
-
 ### **Exercise 3: Using Sets**
 
 **Question**:
@@ -853,8 +711,6 @@ let intersection = [...set1].filter((item) => set2.has(item)) // [3, 4]
 - Convert arrays to sets to utilize efficient membership testing.
 - Use `filter` to collect elements that are present in both sets.
 
----
-
 ### **Exercise 4: Working with Maps**
 
 **Question**:
@@ -878,8 +734,6 @@ for (let char of str) {
 // charCount: Map { 'h' => 1, 'e' => 1, 'l' => 3, 'o' => 2, 'w' => 1, 'r' => 1, 'd' => 1 }
 ```
 
----
-
 ### **Exercise 5: Understanding WeakMaps**
 
 **Question**:
@@ -894,63 +748,5 @@ Explain why a `WeakMap` is suitable for associating metadata with DOM elements i
   - This prevents memory leaks as the metadata associated with the element in the `WeakMap` will also be garbage collected.
   - A regular `Map` would prevent the element from being garbage collected because it holds a strong reference to the key.
 
----
-
-## **Conclusion**
 
 Understanding fundamental data types and structures in JavaScript is essential for writing efficient and effective code. By mastering primitives, objects, arrays, sets, and maps, you can manipulate data more effectively, optimize performance, and solve complex programming challenges. This knowledge also prepares you for technical interviews and real-world development tasks.
-
----
-
-## **Next Steps**
-
-- **Practice**:
-
-  - Implement common algorithms using arrays, sets, and maps.
-  - Experiment with different data structures to solve problems.
-
-- **Explore**:
-
-  - Learn about other data structures like linked lists, stacks, and queues.
-  - Study how JavaScript's built-in methods are implemented under the hood.
-
-- **Prepare**:
-
-  - Review and answer additional interview questions on data types and structures.
-  - Explain these concepts to a peer or through writing to reinforce your understanding.
-
----
-
-**Continue enhancing your JavaScript expertise by mastering fundamental data types and structures!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Primitive Data Types**: Basic data types that are not objects and have no methods (Number, String, Boolean, Null, Undefined, Symbol, BigInt).
-
-- **Object**: A collection of properties (key-value pairs) and methods.
-
-- **Array**: An ordered collection of elements, indexed by non-negative integers.
-
-- **Set**: A collection of unique values.
-
-- **Map**: A collection of key-value pairs where keys can be of any type.
-
-- **WeakSet**: A set of objects where the objects are held weakly, allowing for garbage collection.
-
-- **WeakMap**: A map where keys are objects held weakly, preventing memory leaks.
-
-- **Immutable**: Cannot be changed after creation.
-
-- **Mutable**: Can be changed after creation.
-
-- **Shallow Copy**: A copy of an object where only the top-level properties are copied.
-
-- **Deep Copy**: A copy of an object where all nested objects are recursively copied.
-
----
-
-**End of Lesson**

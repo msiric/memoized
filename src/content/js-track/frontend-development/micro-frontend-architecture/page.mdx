@@ -1,56 +1,10 @@
-**Lesson Title**: **Micro-Frontend Architecture in Modern Web Development**
-
-**Lesson Description**:  
-Discover the principles and practices of Micro-Frontend Architecture, a modern approach to building scalable and maintainable web applications. This lesson delves into how micro-frontends enable teams to build, deploy, and manage frontend applications independently. You will explore various integration patterns, learn how to decompose monolithic frontends into manageable pieces, and understand the challenges and best practices associated with this architecture. By mastering micro-frontend concepts, you will be equipped to design scalable frontends and be well-prepared for technical interviews.
-
----
+export const metadata = {   title: "Micro-Frontend Architecture in Modern Web Development",   description: "Discover the principles and practices of Micro-Frontend Architecture, a modern approach to building scalable and maintainable web applications. This lesson delves into how micro-frontends enable teams to build, deploy, and manage frontend applications independently. You will explore various integration patterns, learn how to decompose monolithic frontends into manageable pieces, and understand the challenges and best practices associated with this architecture. By mastering micro-frontend concepts, you will be equipped to design scalable frontends and be well-prepared for technical interviews.", }
 
 # **Micro-Frontend Architecture in Modern Web Development**
 
 As web applications grow in complexity, maintaining a monolithic frontend codebase becomes increasingly challenging. Micro-Frontend Architecture offers a solution by decomposing the frontend into smaller, manageable pieces that can be developed, tested, and deployed independently. This lesson explores the core concepts of micro-frontends, their benefits, integration patterns, and how to implement them effectively.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Micro-Frontends**
-   - What are Micro-Frontends?
-   - Benefits of Micro-Frontend Architecture
-2. **Building Scalable Frontends**
-   - Challenges of Monolithic Frontends
-   - Principles of Scalability
-   - Decomposing Applications into Micro-Frontends
-3. **Integration Patterns**
-   - Composition Strategies
-   - Client-Side Integration
-   - Server-Side Integration
-   - Build-Time Integration
-4. **Communication Between Micro-Frontends**
-   - Sharing State and Data
-   - Event Bus and Pub/Sub Patterns
-   - Using Custom Events and APIs
-5. **Deployment Strategies**
-   - Independent Deployment
-   - Continuous Integration and Continuous Deployment (CI/CD)
-   - Versioning and Dependency Management
-6. **Routing and Navigation**
-   - Global vs. Local Routing
-   - Handling Navigation Between Micro-Frontends
-7. **Styling and Theming**
-   - Consistent Look and Feel
-   - CSS Isolation Techniques
-   - Shared Style Libraries
-8. **Testing Micro-Frontends**
-   - Unit and Integration Testing
-   - End-to-End Testing Across Micro-Frontends
-9. **Best Practices**
-10. **Common Interview Questions**
-11. **Exercises**
-12. **Conclusion**
-13. **Next Steps**
-14. **Appendix**
-
----
 
 ## **Introduction to Micro-Frontends**
 
@@ -70,8 +24,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
 - **Deployability**: Individual micro-frontends can be deployed independently.
 - **Flexibility**: Freedom to choose the best technology for each micro-frontend.
 - **Resilience**: Failure in one micro-frontend does not necessarily affect others.
-
----
 
 ## **Building Scalable Frontends**
 
@@ -95,8 +47,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
 - **Define Interfaces**: Establish clear interfaces for communication between micro-frontends.
 - **Separate Concerns**: Keep shared functionality minimal and well-defined.
 - **Organize Teams**: Align teams with micro-frontend boundaries for ownership.
-
----
 
 ## **Integration Patterns**
 
@@ -135,8 +85,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
 - **Static Composition**:
   - Build all micro-frontends into a single bundle during the build process.
 
----
-
 ## **Communication Between Micro-Frontends**
 
 ### **Sharing State and Data**
@@ -159,8 +107,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
   - Use the browser's CustomEvent API for communication.
 - **Shared APIs**:
   - Expose functions or services that other micro-frontends can consume.
-
----
 
 ## **Deployment Strategies**
 
@@ -185,8 +131,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
 - **Shared Libraries**:
   - Use shared libraries for common functionality but manage versions explicitly.
 
----
-
 ## **Routing and Navigation**
 
 ### **Global vs. Local Routing**
@@ -204,8 +148,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
   - Use query parameters or URL fragments to pass data.
 - **History API**:
   - Utilize the HTML5 History API for seamless navigation.
-
----
 
 ## **Styling and Theming**
 
@@ -232,8 +174,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
 - **Package Management**:
   - Distribute styles via NPM packages.
 
----
-
 ## **Testing Micro-Frontends**
 
 ### **Unit and Integration Testing**
@@ -250,8 +190,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
 - **Tools**:
   - Use tools like Cypress or Selenium.
 
----
-
 ## **Best Practices**
 
 - **Define Clear Contracts**:
@@ -266,84 +204,6 @@ As web applications grow in complexity, maintaining a monolithic frontend codeba
   - Implement robust CI/CD pipelines.
 - **Monitor and Observe**:
   - Use logging and monitoring to track performance and issues.
-
----
-
-## **Common Interview Questions**
-
-1. **What is a micro-frontend, and how does it differ from a monolithic frontend architecture?**
-
-   **Answer**:
-
-   - **Micro-Frontend**:
-     - An architectural style where the frontend is divided into smaller, independent applications.
-     - Each micro-frontend can be developed, tested, and deployed separately.
-   - **Differences from Monolithic Architecture**:
-     - **Modularity**: Micro-frontends are modular, whereas monolithic frontends are single codebases.
-     - **Team Autonomy**: Teams can work independently on micro-frontends.
-     - **Technology Diversity**: Different micro-frontends can use different technologies.
-     - **Deployment**: Micro-frontends can be deployed independently.
-
-2. **Explain the different integration patterns used in micro-frontend architecture.**
-
-   **Answer**:
-
-   - **Client-Side Integration**:
-     - **Iframe Integration**: Embedding micro-frontends using iframes.
-     - **JavaScript Includes**: Dynamically loading scripts.
-     - **Micro Frontend Frameworks**: Using frameworks like single-spa.
-   - **Server-Side Integration**:
-     - **Edge-Side Includes (ESI)**: Assembling micro-frontends at the CDN level.
-     - **Server-Side Includes (SSI)**: Server combines micro-frontends before sending.
-     - **Backend for Frontend (BFF)**: Orchestrating micro-frontends through a backend layer.
-   - **Build-Time Integration**:
-     - **Monorepo Approach**: All code in one repository, built together.
-     - **Static Composition**: Combining micro-frontends during the build process.
-
-3. **How do micro-frontends communicate with each other, and what are the challenges involved?**
-
-   **Answer**:
-
-   - **Communication Methods**:
-     - **Event Bus**: Using a global event bus for decoupled communication.
-     - **Custom Events**: Leveraging browser events.
-     - **Shared APIs**: Exposing functions or services.
-   - **Challenges**:
-     - **State Management**: Ensuring consistent state across micro-frontends.
-     - **Coupling**: Avoiding tight coupling that undermines independence.
-     - **Performance**: Overhead of communication mechanisms.
-     - **Security**: Preventing unauthorized access or data leaks.
-
-4. **What are some best practices when implementing micro-frontends in terms of styling and theming?**
-
-   **Answer**:
-
-   - **Consistent Design System**:
-     - Use shared style libraries or component libraries.
-   - **CSS Isolation**:
-     - Techniques like CSS Modules, Shadow DOM, or CSS-in-JS to prevent style leakage.
-   - **Avoid Global Styles**:
-     - Encapsulate styles within micro-frontends.
-   - **Shared Assets**:
-     - Manage shared assets carefully to avoid conflicts.
-
-5. **Describe how routing is handled in a micro-frontend architecture.**
-
-   **Answer**:
-
-   - **Global Routing**:
-     - A central router controls navigation across all micro-frontends.
-     - Pros: Unified navigation, easier to manage global routes.
-     - Cons: Potential coupling between micro-frontends.
-   - **Local Routing**:
-     - Each micro-frontend handles its own routing.
-     - Pros: Independence, encapsulation.
-     - Cons: Complexity in coordinating navigation between micro-frontends.
-   - **Hybrid Approaches**:
-     - Combining global and local routing.
-     - Use URL patterns or query parameters to manage navigation.
-
----
 
 ## **Exercises**
 
@@ -467,45 +327,7 @@ Describe how you can prevent CSS conflicts between micro-frontends.
 - **Namespace Styles**:
   - Prefix class names with unique identifiers for each micro-frontend.
 
----
-
-## **Conclusion**
 
 Micro-Frontend Architecture provides a powerful approach to building scalable, maintainable, and flexible frontend applications. By decomposing applications into smaller, independent micro-frontends, teams can work autonomously, adopt different technologies, and deploy features rapidly. Understanding the integration patterns, communication mechanisms, and best practices is essential for successfully implementing micro-frontends. Mastery of these concepts enables developers to tackle complex projects and excel in technical interviews.
 
----
 
-## **Next Steps**
-
-- **Practice**:
-  - Experiment with micro-frontend frameworks like single-spa or Webpack Module Federation.
-  - Build a sample application using micro-frontends.
-- **Explore**:
-  - Learn about Web Components and how they can be used in micro-frontends.
-  - Investigate security considerations in micro-frontend architectures.
-- **Prepare**:
-  - Review additional interview questions on micro-frontends and scalable architectures.
-  - Stay updated with the latest trends and tools in micro-frontend development.
-
----
-
-**Continue enhancing your frontend development expertise by mastering Micro-Frontend Architecture!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Micro-Frontend**: An architectural style where the frontend is divided into smaller, independent fragments.
-- **Monolithic Frontend**: A single, large frontend application where all code resides in one codebase.
-- **Integration Patterns**: Methods for combining micro-frontends into a cohesive application.
-- **Event Bus**: A communication system that allows different parts of an application to send and receive messages.
-- **Shadow DOM**: A web standard that encapsulates the DOM and CSS of a component.
-- **Module Federation**: A feature in Webpack 5 that allows loading code from another webpack build at runtime.
-- **Backend for Frontend (BFF)**: A backend layer tailored to the needs of a frontend application.
-- **CI/CD**: Continuous Integration and Continuous Deployment; practices that automate the integration and deployment processes.
-
----
-
-**End of Lesson**

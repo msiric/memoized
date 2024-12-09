@@ -312,7 +312,7 @@ describe('Lesson services', () => {
         difficulty: ProblemDifficulty.MEDIUM,
         question: 'Problem Question',
         answer: 'Problem Answer',
-        type: ProblemType.ALGORITHM,
+        type: ProblemType.CODING,
       }
       ;(prisma.problem.upsert as Mock).mockResolvedValue(mockProblem)
 
@@ -322,7 +322,7 @@ describe('Lesson services', () => {
         ProblemDifficulty.MEDIUM,
         'Problem Question',
         'Problem Answer',
-        ProblemType.ALGORITHM,
+        ProblemType.CODING,
         'lesson-id',
       )
       expect(problem).toEqual(mockProblem)
@@ -334,7 +334,7 @@ describe('Lesson services', () => {
           lessonId: 'lesson-id',
           question: 'Problem Question',
           answer: 'Problem Answer',
-          type: ProblemType.ALGORITHM,
+          type: ProblemType.CODING,
         },
         create: {
           title: 'Problem Title',
@@ -343,7 +343,7 @@ describe('Lesson services', () => {
           difficulty: ProblemDifficulty.MEDIUM,
           question: 'Problem Question',
           answer: 'Problem Answer',
-          type: ProblemType.ALGORITHM,
+          type: ProblemType.CODING,
         },
       })
     })
@@ -424,7 +424,15 @@ describe('Lesson services', () => {
         orderBy: { order: 'asc' },
       })
       expect(prisma.problem.findMany).toHaveBeenCalledWith({
-        select: { id: true, title: true, difficulty: true, href: true },
+        select: {
+          id: true,
+          title: true,
+          difficulty: true,
+          href: true,
+          question: true,
+          answer: true,
+          type: true,
+        },
       })
     })
   })

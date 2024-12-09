@@ -1,36 +1,10 @@
-**Lesson Title**: **Async/Await Deep Dive in JavaScript**
-
-**Lesson Description**:  
-Master the advanced aspects of asynchronous programming in JavaScript with a deep dive into `async/await`. Learn how to handle errors effectively using `try/catch`, and understand the differences between sequential and parallel execution of asynchronous functions. This comprehensive lesson will enhance your ability to write clean, efficient, and maintainable asynchronous code, and prepare you for technical interviews by covering these essential topics.
-
----
+export const metadata = {   title: "Async/Await Deep Dive in JavaScript",   description: "Master the advanced aspects of asynchronous programming in JavaScript with a deep dive into `async/await`. Learn how to handle errors effectively using `try/catch`, and understand the differences between sequential and parallel execution of asynchronous functions. This comprehensive lesson will enhance your ability to write clean, efficient, and maintainable asynchronous code, and prepare you for technical interviews by covering these essential topics.", }
 
 # **Async/Await Deep Dive in JavaScript**
 
 Asynchronous programming is a fundamental aspect of JavaScript, enabling non-blocking operations and efficient handling of tasks like network requests and file I/O. The `async/await` syntax, introduced in ES2017, provides a cleaner and more readable way to work with promises. In this lesson, we'll delve deep into `async/await`, explore error handling with `try/catch`, and examine how to manage sequential and parallel execution of asynchronous functions.
 
----
 
-## **Table of Contents**
-
-1. **Introduction to Async/Await**
-   - What is Async/Await?
-   - How Async/Await Works
-2. **Error Handling with Try/Catch**
-   - Using Try/Catch with Async/Await
-   - Common Pitfalls and Solutions
-3. **Sequential vs. Parallel Execution**
-   - Sequential Execution with Async/Await
-   - Parallel Execution Techniques
-   - Combining Sequential and Parallel Operations
-4. **Best Practices**
-5. **Common Interview Questions**
-6. **Exercises**
-7. **Conclusion**
-8. **Next Steps**
-9. **Appendix**
-
----
 
 ## **Introduction to Async/Await**
 
@@ -67,8 +41,6 @@ fetchData().then((data) => {
 - The `fetchData` function is declared with `async`.
 - `await` pauses execution until the promise returned by `fetch` is fulfilled.
 - The function ultimately returns a promise that resolves to `data`.
-
----
 
 ## **Error Handling with Try/Catch**
 
@@ -182,8 +154,6 @@ async function processData() {
 #### **2.2.3 Mixing `try/catch` and `.catch()`**
 
 - **Best Practice**: Be consistent in error handling; prefer using `try/catch` within `async` functions.
-
----
 
 ## **Sequential vs. Parallel Execution**
 
@@ -304,8 +274,6 @@ async function mixedExecution() {
 - `task3` runs sequentially and must complete before proceeding.
 - Results are combined afterward.
 
----
-
 ## **Best Practices**
 
 ### **Use `try/catch` for Error Handling**
@@ -404,58 +372,6 @@ async function processArray(array) {
 - **Readability**: `async/await` makes asynchronous code look synchronous, improving readability.
 - **Error Handling**: Easier to handle errors with `try/catch`.
 
----
-
-## **Common Interview Questions**
-
-1. **What is the purpose of the `async` keyword in JavaScript?**
-
-   **Answer**:
-
-   - The `async` keyword is used to declare an asynchronous function.
-   - An `async` function returns a promise.
-   - It allows the use of `await` within the function to pause execution until a promise is settled.
-
-2. **How do you handle errors in `async/await` functions?**
-
-   **Answer**:
-
-   - Use `try/catch` blocks within the `async` function to catch errors from `await` expressions.
-   - Alternatively, attach a `.catch()` method when calling the `async` function.
-
-3. **Explain the difference between sequential and parallel execution in the context of `async/await`.**
-
-   **Answer**:
-
-   - **Sequential Execution**:
-
-     - Tasks are executed one after another.
-     - Each `await` waits for the previous promise to resolve before proceeding.
-     - Can lead to longer total execution time if tasks are independent.
-
-   - **Parallel Execution**:
-
-     - Multiple tasks are initiated without awaiting immediately.
-     - Promises are started concurrently, and `await` is used to retrieve their results later.
-     - Reduces total execution time when tasks are independent.
-
-4. **What is the effect of using `await` inside a loop, and how can you optimize it?**
-
-   **Answer**:
-
-   - Using `await` inside a loop causes each iteration to wait for the previous one to complete, resulting in sequential execution.
-   - To optimize, initiate all promises first and then use `Promise.all` to wait for their completion, allowing parallel execution.
-
-5. **Can you explain how `Promise.allSettled` differs from `Promise.all` and when you might use it?**
-
-   **Answer**:
-
-   - `Promise.allSettled` waits for all promises to settle (either fulfilled or rejected) and returns an array of their results.
-   - Unlike `Promise.all`, it does not short-circuit if a promise rejects.
-   - Use `Promise.allSettled` when you want to handle all results, regardless of whether some operations fail.
-
----
-
 ## **Exercises**
 
 ### **Exercise 1: Error Handling with Try/Catch**
@@ -495,8 +411,6 @@ getJSONData('https://api.example.com/data')
 
 - The function uses `try/catch` to handle errors from `fetch` and `response.json()`.
 - Errors are logged, and you can decide how to handle them (e.g., rethrow, return default value).
-
----
 
 ### **Exercise 2: Sequential vs. Parallel Execution**
 
@@ -587,8 +501,6 @@ Parallel: ~2000 ms
 - `runParallel` runs tasks concurrently, total time ~2 seconds.
 - `console.time` and `console.timeEnd` are used to measure execution time.
 
----
-
 ### **Exercise 3: Error Handling in Parallel Execution**
 
 **Question**:
@@ -628,8 +540,6 @@ runParallelWithErrorHandling()
 - Processes each result, logging successes and errors accordingly.
 - Ensures that all task outcomes are handled.
 
----
-
 ### **Exercise 4: Avoiding Sequential Execution in Loops**
 
 **Question**:
@@ -665,8 +575,6 @@ fetchAllData(urls).then((data) => {
 - `Promise.all` runs the fetch operations in parallel.
 - Avoids using `await` inside a loop.
 
----
-
 ### **Exercise 5: Combining Sequential and Parallel Operations**
 
 **Question**:
@@ -699,52 +607,8 @@ async function executeTasks() {
 - `task2` and `task3` start concurrently after `task1` completes.
 - Results are combined after both tasks finish.
 
----
-
-## **Conclusion**
 
 Understanding `async/await` is essential for modern JavaScript development, providing a cleaner and more intuitive way to handle asynchronous operations. By mastering error handling with `try/catch` and effectively managing sequential and parallel execution, you can write efficient, maintainable, and robust asynchronous code. These skills are invaluable for building responsive applications and preparing for advanced technical interviews.
 
----
 
-## **Next Steps**
 
-- **Practice**:
-
-  - Refactor existing promise-based code to use `async/await`.
-  - Implement complex asynchronous workflows combining sequential and parallel operations.
-
-- **Explore**:
-
-  - Learn about advanced topics like cancellation of asynchronous tasks.
-  - Study the impact of `async/await` on performance in different contexts.
-
-- **Prepare**:
-
-  - Review and answer additional interview questions on `async/await`.
-  - Explain these concepts to a peer or through writing to reinforce your understanding.
-
----
-
-**Continue enhancing your JavaScript expertise by mastering `async/await` and advanced asynchronous patterns!**
-
----
-
-## **Appendix**
-
-### **Glossary**
-
-- **Async Function**: A function declared with the `async` keyword that returns a promise.
-- **Await**: An operator used inside an `async` function to pause execution until a promise is settled.
-- **Promise**: An object representing the eventual completion or failure of an asynchronous operation.
-- **Try/Catch**: A block of code used to handle exceptions and errors.
-- **Sequential Execution**: Running tasks one after another, where each task waits for the previous one to complete.
-- **Parallel Execution**: Running tasks concurrently without waiting for other tasks to complete.
-- **Event Loop**: The mechanism that handles asynchronous callbacks in JavaScript.
-- **Unhandled Promise Rejection**: An error that occurs when a promise is rejected, and no error handler is attached.
-- **Promise.all**: A method that waits for all promises in an iterable to fulfill or any to reject.
-- **Promise.allSettled**: A method that waits for all promises to settle (either fulfilled or rejected) and returns their results.
-
----
-
-**End of Lesson**

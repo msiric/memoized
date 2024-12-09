@@ -6,7 +6,7 @@ import { useContentStore } from '@/contexts/progress'
 import { CustomError, handleError } from '@/utils/error'
 import { capitalizeFirstLetter } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
-import { Problem } from '@prisma/client'
+import { Problem, ProblemType } from '@prisma/client'
 import { useSession } from 'next-auth/react'
 import { enqueueSnackbar } from 'notistack'
 import { ChangeEvent, useState } from 'react'
@@ -67,14 +67,18 @@ export const ExpandableAnswer = ({ problem }: ExpandableAnswerProps) => {
     >
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col items-start justify-center">
-          <a
-            href={problem.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-bold text-lime-500 hover:underline"
-          >
-            {problem.title}
-          </a>
+          {problem.type === ProblemType.THEORY ? (
+            <span className="font-bold text-lime-500">{problem.title}</span>
+          ) : (
+            <a
+              href={problem.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-lime-500 hover:underline"
+            >
+              {problem.title}
+            </a>
+          )}
           <span className="text-sm text-zinc-600 dark:text-zinc-300">
             Difficulty:{' '}
             <span className="font-bold">
