@@ -26,7 +26,7 @@ const nextConfig = {
     esmExternals: 'loose',
     optimizePackageImports: ['shiki'],
   },
-  transpilePackages: ['next-mdx-remote'],
+  transpilePackages: ['next-mdx-remote', "shiki"],
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,

@@ -6,6 +6,7 @@ import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
 import { getActiveBanners } from '@/services/banner'
+import { highlightCode } from '@/utils/helpers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { BsNvidia } from 'react-icons/bs'
@@ -30,7 +31,6 @@ import {
 } from 'react-icons/md'
 import { RiJavascriptLine } from 'react-icons/ri'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
-import { codeToHtml } from 'shiki'
 import { HomepageBackground } from '../components/icons/HomepageBackground'
 import { ThemeToggle } from '../components/ThemeToggle'
 
@@ -186,10 +186,7 @@ const codeSnippets = [
 export default async function Home() {
   const [activeBanners, initialSnippet] = await Promise.all([
     getActiveBanners(),
-    codeToHtml(codeSnippets[0]?.code, {
-      lang: 'ts',
-      theme: 'nord',
-    }),
+    highlightCode(codeSnippets[0].code),
   ])
 
   return (

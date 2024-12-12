@@ -22,6 +22,7 @@ import {
 } from '@prisma/client'
 import { format, fromUnixTime, isBefore, parseISO } from 'date-fns'
 import Stripe from 'stripe'
+import { createHighlighter, Highlighter } from 'shiki'
 
 export interface ProblemFilter {
   difficulty?: ProblemDifficulty
@@ -522,4 +523,20 @@ export const resourcesToNavigation = (
 
 export const formatPercentage = (value: number) => {
   return value % 1 === 0 ? value.toString() : value.toFixed(2)
+}
+
+export async function getShikiHighlighter(
+  lang: string = 'js',
+  theme: string = 'nord',
+) {
+  return await createHighlighter({ themes: [theme], langs: [lang] })
+}
+
+export async function highlightCode(
+  code: string,
+  lang: string = 'js',
+  theme: string = 'nord',
+) {
+  const highlighter = await getShikiHighlighter(lang, theme)
+  return highlighter.codeToHtml(code, { lang, theme })
 }

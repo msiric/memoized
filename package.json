@@ -23,7 +23,8 @@
     "test:check": "vitest run",
     "prebuild": "yarn run migrate",
     "postinstall": "yarn run generate",
-    "extract": "tsx src/scripts/extract-questions.ts"
+    "extract": "tsx src/scripts/extract-questions.ts",
+    "install:clean": "tsx src/scripts/clean-dependencies.ts && yarn install"
   },
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
@@ -66,7 +67,7 @@
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.0",
     "resend": "^3.4.0",
-    "shiki": "^1.23.1",
+    "shiki": "^1.24.2",
     "shiki-magic-move": "^0.5.0",
     "simple-functional-loader": "^1.2.1",
     "slugify": "^1.6.6",
@@ -88,7 +89,7 @@
     "@types/node": "^20.10.8",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/react-highlight-words": "^0.16.4",
+    "@types/react-highlight-words": "^0.20.0",
     "@types/uuid": "^9.0.8",
     "@vitejs/plugin-react": "^4.3.1",
     "eslint": "^8.56.0",
