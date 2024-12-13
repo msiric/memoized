@@ -13,7 +13,6 @@ import { createCustomResponse } from '@/utils/response'
 import { SubscriptionStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 
-// Create tests for this method using Vitest. AI!
 export async function createCheckout(
   product: ProductWithCoupon,
   redirectPath: string = `/courses?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
