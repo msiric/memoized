@@ -14,6 +14,7 @@ export type MarkProblemArgs = {
   completed: boolean
 }
 
+// Create tests for this method using Vitest. AI!
 export async function markProblem({ problemId, completed }: MarkProblemArgs) {
   try {
     const session = await getServerSession(authOptions)
