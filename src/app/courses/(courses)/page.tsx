@@ -1,5 +1,3 @@
-// Create tests for this Next.js page using Vitest. AI!
-
 import { CourseCard } from '../../../components/CourseCard'
 import { PremiumModal } from '../../../components/PremiumModal'
 import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '../../../constants'
