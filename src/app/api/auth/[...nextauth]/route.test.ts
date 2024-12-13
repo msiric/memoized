@@ -1,13 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { authOptions } from '../[...nextauth]/route'
 import { sendEmail } from '@/lib/resend'
 import {
   createUserWithAccount,
   findAccount,
   findAccountWithUserByProviderAccountId,
 } from '@/services/account'
-import * as Sentry from '@sentry/nextjs'
 import { AuthProvider } from '@/types'
+import * as Sentry from '@sentry/nextjs'
+import { Session } from 'next-auth'
+import { AdapterUser } from 'next-auth/adapters'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { authOptions } from './route'
 
 vi.mock('@/lib/resend')
 vi.mock('@/services/account')
@@ -22,7 +24,7 @@ describe('NextAuth Configuration', () => {
     email: 'test@example.com',
     name: 'Test User',
     image: 'https://example.com/avatar.jpg',
-  }
+  } as AdapterUser
 
   const mockAccount = {
     id: 'account_123',
@@ -54,10 +56,12 @@ describe('NextAuth Configuration', () => {
         provider: 'github',
       }
 
-      const result = await authOptions.callbacks.session({
-        session,
+      const result = await authOptions?.callbacks?.session?.({
+        session: session as Session,
         token,
         user: mockUser,
+        newSession: false,
+        trigger: 'update',
       })
 
       expect(result).toEqual({
@@ -73,7 +77,7 @@ describe('NextAuth Configuration', () => {
 
   describe('signIn callback', () => {
     it('should return false if required data is missing', async () => {
-      const result = await authOptions.callbacks.signIn({
+      const result = await authOptions?.callbacks?.signIn?.({
         user: { email: null },
         account: { providerAccountId: null, provider: null },
       } as any)
@@ -84,7 +88,7 @@ describe('NextAuth Configuration', () => {
     it('should return true for existing accounts', async () => {
       vi.mocked(findAccount).mockResolvedValue(mockAccount)
 
-      const result = await authOptions.callbacks.signIn({
+      const result = await authOptions?.callbacks?.signIn?.({
         user: mockUser,
         account: {
           providerAccountId: 'github_123',
@@ -101,11 +105,13 @@ describe('NextAuth Configuration', () => {
       vi.mocked(createUserWithAccount).mockResolvedValue({
         id: 'new_user_123',
         email: mockUser.email,
-        name: mockUser.name,
-        image: mockUser.image,
+        name: mockUser.name as string,
+        image: mockUser.image as string,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
 
-      const result = await authOptions.callbacks.signIn({
+      const result = await authOptions?.callbacks?.signIn?.({
         user: mockUser,
         account: {
           providerAccountId: 'github_123',
@@ -119,7 +125,7 @@ describe('NextAuth Configuration', () => {
         mockUser.name,
         mockUser.image,
         'github',
-        'github_123'
+        'github_123',
       )
       expect(sendEmail).toHaveBeenCalledWith({
         name: mockUser.name ?? '',
@@ -131,10 +137,12 @@ describe('NextAuth Configuration', () => {
 
   describe('jwt callback', () => {
     it('should enhance token with user data', async () => {
-      vi.mocked(findAccountWithUserByProviderAccountId).mockResolvedValue(mockAccount)
+      vi.mocked(findAccountWithUserByProviderAccountId).mockResolvedValue(
+        mockAccount,
+      )
 
       const token = {}
-      const result = await authOptions.callbacks.jwt({
+      const result = await authOptions?.callbacks?.jwt?.({
         token,
         user: mockUser,
       } as any)
@@ -151,7 +159,7 @@ describe('NextAuth Configuration', () => {
 
     it('should return unchanged token if no user provided', async () => {
       const token = { someKey: 'someValue' }
-      const result = await authOptions.callbacks.jwt({
+      const result = await authOptions?.callbacks?.jwt?.({
         token,
       } as any)
 
