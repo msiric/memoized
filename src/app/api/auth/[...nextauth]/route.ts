@@ -1,3 +1,5 @@
+// Create tests for this route using Vitest. AI!
+
 import { sendEmail } from '@/lib/resend'
 import {
   createUserWithAccount,
