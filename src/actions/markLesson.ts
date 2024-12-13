@@ -14,6 +14,7 @@ export type MarkLessonArgs = {
   completed: boolean
 }
 
+// Create tests for this method using Vitest. AI!
 export async function markLesson({ lessonId, completed }: MarkLessonArgs) {
   try {
     const session = await getServerSession(authOptions)
