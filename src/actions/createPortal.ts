@@ -10,6 +10,7 @@ import { createCustomError } from '@/utils/error'
 import { createCustomResponse } from '@/utils/response'
 import { getServerSession } from 'next-auth'
 
+// Create tests for this method using Vitest. AI!
 export async function createPortal() {
   try {
     const session = await getServerSession(authOptions)
