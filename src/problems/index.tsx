@@ -1672,7 +1672,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#callback-hell-pitfalls',
       title: 'Callback Hell Pitfalls',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What are the main issues with using callbacks for asynchronous code in JavaScript?',
       answer:
@@ -1682,7 +1682,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#improving-asynchronous-programming',
       title: 'Improving Asynchronous Programming',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Explain how promises improve upon callbacks in asynchronous programming.',
       answer:
@@ -1692,7 +1692,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#promise-comparison-methods',
       title: 'Promise Comparison Methods',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between `Promise.all()` and `Promise.race()`?',
       answer:
@@ -1702,7 +1702,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#simplifying-promise-handling',
       title: 'Simplifying Promise Handling',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How does `async/await` simplify working with promises?',
       answer:
         '- **Synchronous-like Syntax**: Makes asynchronous code look like synchronous code.\n- **Improved Readability**: Reduces the need for chaining `.then()` methods.\n- **Error Handling**: Use `try...catch` blocks for error handling, similar to synchronous code.\n- **Conditional Logic**: Easier to write conditional and looping logic with asynchronous operations.',
@@ -1723,7 +1723,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#javascript-closures-explained',
       title: 'JavaScript Closures Explained',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'What is a closure in JavaScript, and how does it work?',
       answer:
         "A closure is a function that has access to its own scope, the outer function's scope, and the global scope. It allows an inner function to access variables from an outer function even after the outer function has returned. This is possible because functions in JavaScript form closures around the scope in which they were declared, preserving the lexical environment.",
@@ -1732,7 +1732,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#lexical-scoping-in-javascript',
       title: 'Lexical Scoping in JavaScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'Explain lexical scoping in JavaScript.',
       answer:
         'Lexical scoping means that the accessibility of variables is determined by the physical structure of the code. Functions are executed using the scope chain that was in effect when they were defined, not when they are executed. This means that inner functions have access to variables declared in their outer scopes.',
@@ -1741,7 +1741,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#closures-for-private-variables',
       title: 'Closures for Private Variables',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How can closures be used to create private variables in JavaScript?',
       answer:
@@ -1802,7 +1802,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#understanding-event-loops',
       title: 'Understanding Event Loops',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the event loop, and how does it handle asynchronous operations?',
       answer:
@@ -1824,7 +1824,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#purpose-of-try-catch',
       title: 'Purpose of Try Catch',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is the purpose of `try...catch` in JavaScript?',
       answer:
         'The `try...catch` statement allows you to handle exceptions that occur in your code. Code that may throw an error is placed inside the `try` block, and if an error occurs, control is passed to the `catch` block, where you can handle the error. This prevents the program from crashing and allows for graceful error handling.',
@@ -1852,7 +1852,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#creating-custom-errors-in-js',
       title: 'Creating Custom Errors in JS',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How can you create and throw a custom error in JavaScript?',
       answer:
         "You can create a custom error by creating an instance of the `Error` class or by extending it to create a custom error type. Use the `throw` statement to throw the error.\n\n   **Example**:\n\n   ```javascript\n   class CustomError extends Error {\n     constructor(message) {\n       super(message)\n       this.name = 'CustomError'\n     }\n   }\n\n   throw new CustomError('This is a custom error')\n   ```",
@@ -1882,7 +1882,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#understanding-task-queue-vs-microtask-queue',
       title: 'Understanding Task Queue vs Microtask Queue',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between the task queue and the microtask queue?',
       answer:
@@ -1892,7 +1892,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#why-zero-delay-delays',
       title: 'Why Zero Delay Delays',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Why does `setTimeout` with a delay of zero not execute immediately?',
       answer:
@@ -1933,7 +1933,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#understanding-javascript-contexts',
       title: 'Understanding JavaScript Contexts',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Can you explain the difference between the global execution context and the function execution context?',
       answer:
@@ -1962,7 +1962,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#closures-and-execution-contexts',
       title: 'Closures and Execution Contexts',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How do closures interact with execution contexts and the call stack?',
       answer:
@@ -1974,7 +1974,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#execution-context-in-js',
       title: 'Execution Context in JS',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is an execution context in JavaScript?',
       answer:
         '- An execution context is an abstract concept that contains information about the environment within which the current code is being executed.\n- It includes the variable environment, lexical environment, and `this` binding.\n- Types include the global execution context and function execution contexts.',
@@ -2001,7 +2001,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#understanding-variable-scope',
       title: 'Understanding Variable Scope',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between `let`, `const`, and `var` in terms of scope?',
       answer:
@@ -2022,7 +2022,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#function-declarations-vs-expressions',
       title: 'Function Declarations vs Expressions',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between function declarations and function expressions in JavaScript?',
       answer:
@@ -2073,7 +2073,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#differences-between-primitive-and-objects',
       title: 'Differences Between Primitive and Objects',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What are the differences between primitive data types and objects in JavaScript?',
       answer:
@@ -2102,7 +2102,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#choosing-between-maps',
       title: 'Choosing Between Maps',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'When would you use a WeakMap over a Map?',
       answer:
         '- Use a `WeakMap` when you need to associate data with objects without preventing their garbage collection.\n- Ideal for storing metadata or private data related to an object.\n- Keys are held weakly; if there are no other references to the key object, it can be garbage collected.',
@@ -2111,7 +2111,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#how-map-filter-works',
       title: 'How Map Filter Works',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'Explain how the `map` and `filter` methods work on arrays.',
       answer:
         '- **`map(callback)`**:\n\n     - Creates a new array by applying the callback function to each element of the original array.\n     - The original array is not modified.\n\n     **Example**:\n\n     ```javascript\n     let numbers = [1, 2, 3]\n     let squares = numbers.map((n) => n * n) // [1, 4, 9]\n     ```\n\n- **`filter(callback)`**:\n\n     - Creates a new array with all elements that pass the test implemented by the callback function.\n     - The original array is not modified.\n\n     **Example**:\n\n     ```javascript\n     let numbers = [1, 2, 3, 4, 5]\n     let evenNumbers = numbers.filter((n) => n % 2 === 0) // [2, 4]\n     ```',
@@ -2142,7 +2142,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#optimizing-garbage-collection',
       title: 'Optimizing Garbage Collection',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'How do modern JavaScript engines optimize garbage collection?',
       answer:
         '- Use generational garbage collection, categorizing objects into young and old generations.\n- Implement incremental and concurrent garbage collection to minimize pause times.\n- Optimize for short-lived objects by frequently collecting the young generation.',
@@ -2161,7 +2161,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#detecting-memory-leaks-in-js',
       title: 'Detecting Memory Leaks in JS',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How can you detect and debug memory leaks in a JavaScript application?',
       answer:
@@ -2185,13 +2185,13 @@ export const CORE_FUNDAMENTALS = {
       difficulty: ProblemDifficulty.MEDIUM,
       question: 'Explain how you can use ES6 modules in Node.js.',
       answer:
-        '- Use the `.mjs` file extension for modules.\n     - Example: `import { myFunction } from \'./module.mjs\';`\n- Set `"type": "module"` in the `package.json` file.\n     - Then you can use ES6 module syntax in `.js` files.\n- Alternatively, use a transpiler like Babel to convert ES6 modules to CommonJS.',
+        '- Use the `.mjs` file extension for modules.\n     - Example: `import { myFunction } from \\\'./module.mjs\\\';`\n- Set `"type": "module"` in the `package.json` file.\n     - Then you can use ES6 module syntax in `.js` files.\n- Alternatively, use a transpiler like Babel to convert ES6 modules to CommonJS.',
     },
     {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#understanding-module-patterns',
       title: 'Understanding Module Patterns',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is the purpose of the UMD module pattern?',
       answer:
         '- UMD (Universal Module Definition) is designed to create modules that are compatible with both CommonJS (Node.js) and AMD (browser) module systems.\n- It allows a module to work in multiple environments, ensuring broader compatibility.',
@@ -2200,7 +2200,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#exporting-multiple-functions',
       title: 'Exporting Multiple Functions',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How do you export multiple functions from a module using ES6 syntax?',
       answer:
@@ -2210,7 +2210,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#understanding-dynamic-imports',
       title: 'Understanding Dynamic Imports',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are dynamic imports, and when would you use them?',
       answer:
         "- Dynamic imports allow you to load modules asynchronously at runtime using the `import()` function, which returns a promise.\n- Useful for code splitting, lazy loading modules, and loading modules based on conditions or user interactions.\n\n   **Example**:\n\n   ```javascript\n   import('./module.js').then((module) => {\n     module.doSomething()\n   })\n   ```",
@@ -2221,7 +2221,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#constructor-vs-regular-functions',
       title: 'Constructor vs Regular Functions',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between a constructor function and a regular function in JavaScript?',
       answer:
@@ -2231,7 +2231,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#inheritance-in-es6-classes',
       title: 'Inheritance in ES6 Classes',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How does inheritance work in ES6 classes?',
       answer:
         '- Inheritance is achieved using the `extends` keyword.\n- A subclass extends a parent class and inherits its properties and methods.\n- The `super()` function is used within the subclass constructor to call the parent class constructor.',
@@ -2240,7 +2240,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#es6-classes-advantages',
       title: 'ES6 Classes Advantages',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What are the advantages of using ES6 classes over constructor functions?',
       answer:
@@ -2250,7 +2250,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#inheritance-role-of-super',
       title: 'Inheritance Role of Super',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'Explain the role of `super()` in class inheritance.',
       answer:
         '- `super()` calls the constructor of the parent class.\n- It is necessary to use `super()` before accessing `this` in a subclass constructor.\n- Allows access to parent class methods and properties.',
@@ -2271,7 +2271,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#prototypical-inheritance-explained',
       title: 'Prototypical Inheritance Explained',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'What is prototypal inheritance in JavaScript?',
       answer:
         'Prototypal inheritance is a feature in JavaScript where objects inherit properties and methods from other objects through the prototype chain. Each object has a `[[Prototype]]` reference to another object, allowing it to access properties and methods defined on its prototype. This inheritance model is more flexible than classical inheritance found in other languages, enabling objects to inherit directly from other objects.',
@@ -2300,7 +2300,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#constructor-property-purpose',
       title: 'Constructor Property Purpose',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         "What is the purpose of the `constructor` property in an object's prototype?",
       answer:
@@ -2332,7 +2332,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#impact-on-constructor-variables',
       title: 'Impact on Constructor Variables',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain how the `new` keyword affects the value of `this` in a constructor function.',
       answer:
@@ -2342,7 +2342,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#difference-between-call-and-bind',
       title: 'Difference Between call and bind',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How does the `.call()` method differ from `.bind()` in setting the value of `this`?',
       answer:
@@ -2362,7 +2362,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#code-execution-outcome',
       title: 'Code Execution Outcome',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'What is the outcome of the following code, and why?',
       answer:
         '**Output:**\n\n   ```\n   4\n   ```\n\n   **Explanation:**\n\n- `callback()` is invoked without any context, so `this` refers to the global object.\n- The global `length` variable is `4`.\n- Therefore, `console.log(this.length);` outputs `4`.',
@@ -2373,7 +2373,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#javascript-variable-options',
       title: 'JavaScript Variable Options',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between `var`, `let`, and `const` in JavaScript?',
       answer:
@@ -2412,7 +2412,7 @@ export const CORE_FUNDAMENTALS = {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#understanding-variable-scope',
       title: 'Understanding Variable Scope',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'Why should you prefer using `const` and `let` over `var`?',
       answer:
         'Using `const` and `let` helps prevent common pitfalls associated with `var`, such as accidental redeclarations and scope leakage due to function scoping. `let` and `const` provide block-level scoping, which aligns more closely with other programming languages and helps maintain cleaner, more predictable code. Additionally, `const` enforces immutability for primitive values, promoting better coding practices.',
@@ -2426,7 +2426,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#union-types-in-typescript',
       title: 'Union Types in TypeScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What are union types in TypeScript, and when would you use them?',
       answer:
@@ -2436,7 +2436,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#intersection-types-explained',
       title: 'Intersection Types Explained',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'Explain intersection types and provide a use case.',
       answer:
         "- Intersection types combine multiple types into one, requiring that a value satisfies all included types, using the `&` operator.\n- They are useful when you want to merge properties from multiple types or interfaces.\n- **Example**:\n\n     ```typescript\n     interface Person {\n       name: string\n     }\n     interface Employee {\n       employeeId: number\n     }\n     type Staff = Person & Employee\n     let staffMember: Staff = { name: 'Alice', employeeId: 123 }\n     ```",
@@ -2464,7 +2464,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/advanced-types/page.mdx#what-are-discriminated-unions',
       title: 'What are Discriminated Unions?',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Can you explain what discriminated unions are and their benefits?',
       answer:
@@ -2476,7 +2476,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#typescript-primitive-types',
       title: 'TypeScript Primitive Types',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are the basic primitive types in TypeScript?',
       answer:
         '- **Number**: Represents numeric values (both integer and floating-point).\n- **String**: Represents text data.\n- **Boolean**: Represents logical values `true` and `false`.\n- **Null**: Represents the absence of any object value.\n- **Undefined**: Denotes a variable that has not been assigned a value.',
@@ -2485,7 +2485,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#type-differences-in-ts',
       title: 'Type Differences in TS',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain the difference between `any` and `unknown` types in TypeScript.',
       answer:
@@ -2495,7 +2495,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#type-inference-basics',
       title: 'Type Inference Basics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'What is type inference in TypeScript, and how does it work?',
       answer:
         '- Type inference is the ability of TypeScript to automatically determine the type of a variable or expression based on its value or context.\n- It works by analyzing the assigned value and the context in which a variable or function is used.\n- Type inference reduces the need for explicit type annotations when the type is obvious.',
@@ -2504,7 +2504,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#defining-and-using-tuples',
       title: 'Defining and Using Tuples',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How do you define a tuple in TypeScript, and when would you use it?',
       answer:
@@ -2514,7 +2514,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#the-dangers-of-any-type',
       title: 'The Dangers of Any Type',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'Why should you avoid overusing the `any` type in TypeScript?',
       answer:
         "- Overusing `any` defeats the purpose of TypeScript's type safety.\n- It disables type checking, allowing for potential runtime errors.\n- It makes code less readable and maintainable.\n- Prefer using specific types or `unknown` to maintain type safety.",
@@ -2525,7 +2525,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#typescript-compiler-api',
       title: 'TypeScript Compiler API',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'What is the TypeScript Compiler API, and why is it useful?',
       answer:
         "- The TypeScript Compiler API allows developers to interact with the TypeScript compiler programmatically.\n- It provides access to the compiler's internal processes, enabling code analysis, AST manipulation, code transformation, and code generation.\n- Useful for creating custom tools like linters, code formatters, code generators, and implementing custom compile-time transformations.",
@@ -2554,7 +2554,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#customizing-tsc-transformers',
       title: 'Customizing TSC Transformers',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Can you use custom transformers with the TypeScript compiler (`tsc`) directly? If not, how can you apply them?',
       answer:
@@ -2586,7 +2586,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#typescript-declaration-types',
       title: 'TypeScript Declaration Types',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain the difference between ambient declarations and regular TypeScript declarations.',
       answer:
@@ -2606,7 +2606,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#purpose-of-declare-keyword',
       title: 'Purpose of Declare Keyword',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is the purpose of the `declare` keyword in TypeScript?',
       answer:
         '- The `declare` keyword is used to indicate that the variable, function, class, or module exists and is provided by external code.\n- It tells the TypeScript compiler about the existence and type of an entity without providing an implementation.',
@@ -2688,7 +2688,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/enums-and-literal-types/page.mdx#typescript-enum-difference',
       title: 'Typescript Enum Difference',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Explain the difference between numeric enums and string enums in TypeScript.',
       answer:
@@ -2729,7 +2729,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#typescript-generics-basics',
       title: 'TypeScript Generics Basics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are generics in TypeScript, and why are they useful?',
       answer:
         '- Generics allow the creation of components that can work with a variety of types while providing type safety.\n- They enable writing reusable and flexible code.\n- Generics provide a way to parameterize types, making code more maintainable and reducing duplication.',
@@ -2767,7 +2767,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#benefits-of-generics-vs-any',
       title: 'Benefits of Generics vs Any',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What are the benefits of using generics over the `any` type in TypeScript?',
       answer:
@@ -2789,7 +2789,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#defining-optional-properties',
       title: 'Defining Optional Properties',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How do you define optional and readonly properties in an interface?',
       answer:
@@ -2809,7 +2809,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#type-aliases-vs-interfaces',
       title: 'Type Aliases vs Interfaces',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'When should you use a type alias over an interface in TypeScript?',
       answer:
@@ -2868,7 +2868,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/mapped-and-conditional-types/page.mdx#distributive-conditional-types',
       title: 'Distributive Conditional Types',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'How do distributive conditional types work in TypeScript?',
       answer:
         "- Distributive conditional types automatically distribute over union types, applying the conditional type to each member of the union individually.\n- This behavior is utilized in utility types like `Exclude` and `Extract`.\n- **Example**:\n\n     ```typescript\n     type T0 = Exclude<'a' | 'b' | 'c', 'a' | 'f'> // 'b' | 'c'\n     ```",
@@ -2889,7 +2889,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#integrating-typescript-without-disruption',
       title: 'Integrating TypeScript Without Disruption',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How can you integrate TypeScript into a JavaScript project without disrupting development?',
       answer:
@@ -2899,7 +2899,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#benefits-of-jsdoc-migration',
       title: 'Benefits of JSDoc Migration',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What are the benefits of using JSDoc comments during the migration to TypeScript?',
       answer:
@@ -2919,7 +2919,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/migration-strategies/page.mdx#migrating-third-party-libraries',
       title: 'Migrating Third-Party Libraries',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What challenges might you face when migrating third-party libraries, and how can you address them?',
       answer:
@@ -2941,7 +2941,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/namespaces-and-modules/page.mdx#typescript-module-resolution-strategies',
       title: 'TypeScript Module Resolution Strategies',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How does TypeScript resolve modules, and what are the module resolution strategies available?',
       answer:
@@ -2960,7 +2960,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/namespaces-and-modules/page.mdx#typescript-barrel-files-benefits',
       title: 'TypeScript Barrel Files Benefits',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What are barrel files in TypeScript, and what are their benefits?',
       answer:
@@ -2982,7 +2982,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#configuring-typescript-projects',
       title: 'Configuring TypeScript Projects',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the purpose of the `tsconfig.json` file in a TypeScript project?',
       answer:
@@ -2992,7 +2992,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#configuring-module-resolution',
       title: 'Configuring Module Resolution',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How can you configure module resolution and path aliases in TypeScript?',
       answer:
@@ -3002,7 +3002,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#integrating-typescript-with-webpack',
       title: 'Integrating TypeScript with Webpack',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain how to integrate TypeScript with Webpack for bundling.',
       answer:
@@ -3034,7 +3034,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#type-guard-functions-in-typescript',
       title: 'Type Guard Functions in TypeScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is a type guard in TypeScript, and how does it differ from a type assertion?',
       answer:
@@ -3072,7 +3072,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#type-guarding-with-in-operator',
       title: 'Type Guarding with In Operator',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How does the `in` operator help in type guarding, and when would you use it?',
       answer:
@@ -3114,7 +3114,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#function-type-compatibility-rules',
       title: 'Function Type Compatibility Rules',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What are the rules for function type compatibility in TypeScript?',
       answer:
@@ -3136,7 +3136,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/type-level-programming/page.mdx#recursive-types-in-typescript',
       title: 'Recursive Types in TypeScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is a recursive type in TypeScript, and when would you use it?',
       answer:
@@ -3175,7 +3175,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/type-level-programming/page.mdx#creating-deep-partial-types',
       title: 'Creating Deep Partial Types',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Describe how you would create a `DeepPartial` type that makes all properties in a type and its sub-types optional.',
       answer:
@@ -3196,7 +3196,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#typescript-advantages-over-javascript',
       title: 'TypeScript Advantages Over JavaScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are the benefits of using TypeScript over JavaScript?',
       answer:
         '- **Static Typing**: Detects errors early during development.\n- **Improved IDE Support**: Better code completion, navigation, and refactoring tools.\n- **Enhanced Readability**: Explicit types make the code more understandable.\n- **Scalability**: Facilitates the development of large applications.\n- **Modern Features**: Supports the latest ECMAScript features and beyond.',
@@ -3214,7 +3214,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#typescript-generics-basics',
       title: 'TypeScript Generics Basics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are generics in TypeScript, and why are they useful?',
       answer:
         '- Generics allow the creation of components that can work with a variety of types while providing type safety.\n- They enable writing reusable and flexible code.\n- Generics provide a way to parameterize types.\n\n   **Example**:\n\n   ```typescript\n   function identity<T>(arg: T): T {\n     return arg;\n   }\n   ```',
@@ -3274,7 +3274,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       href: '/js-track/typescript-introduction/utility-types-deep-dive/page.mdx#customizing-type-constraints',
       title: 'Customizing Type Constraints',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How can you create a custom utility type to make all properties of a type `T` required?',
       answer:
@@ -3308,7 +3308,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#avoiding-global-namespace-pollution',
       title: 'Avoiding Global Namespace Pollution',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How does the Module Pattern help in avoiding global namespace pollution?',
       answer:
@@ -3328,7 +3328,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#revealing-module-pattern-benefits',
       title: 'Revealing Module Pattern Benefits',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Why might you choose to use the Revealing Module Pattern over the standard Module Pattern?',
       answer:
@@ -3400,7 +3400,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#choosing-db-over-local-storage',
       title: 'Choosing DB Over Local Storage',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'When would you use IndexedDB over `localStorage`?',
       answer:
         '- Use IndexedDB when you need to store significant amounts of structured data.\n- IndexedDB supports complex data types, transactions, and is asynchronous.\n- It is suitable for applications that require offline capabilities, caching large datasets, or handling files/blobs.',
@@ -3419,7 +3419,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#same-origin-policy-storage-implications',
       title: 'Same-Origin Policy Storage Implications',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How does the Same-Origin Policy affect browser storage mechanisms?',
       answer:
@@ -3429,7 +3429,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#client-side-storage-security',
       title: 'Client-Side Storage Security',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What are some security considerations when using client-side storage?',
       answer:
@@ -3469,7 +3469,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/event-handling-and-delegation/page.mdx#understanding-event-propagation-differences',
       title: 'Understanding Event Propagation Differences',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between `event.stopPropagation()` and `event.stopImmediatePropagation()`?',
       answer:
@@ -3491,7 +3491,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#pure-functions-in-fp',
       title: 'Pure Functions in FP',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is a pure function, and why are pure functions important in functional programming?',
       answer:
@@ -3501,7 +3501,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#immutability-in-javascript',
       title: 'Immutability in JavaScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Explain the concept of immutability and its benefits in JavaScript.',
       answer:
@@ -3511,7 +3511,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#side-effects-in-functions',
       title: 'Side Effects in Functions',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What are side effects in functions, and how can they impact your code?',
       answer:
@@ -3543,7 +3543,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#purpose-of-symbol-iterator',
       title: 'Purpose of Symbol Iterator',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is the purpose of the `Symbol.iterator` in JavaScript?',
       answer:
         '- `Symbol.iterator` is a built-in symbol that specifies the default iterator for an object.\n- When an object has a `[Symbol.iterator]` method, it becomes iterable and can be used in constructs like `for...of` loops.\n- The method should return an iterator object that adheres to the iterator protocol.',
@@ -3552,7 +3552,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#generator-functions-overview',
       title: 'Generator Functions Overview',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Explain how generator functions differ from regular functions.',
       answer:
@@ -3562,7 +3562,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#using-generators-for-sequences',
       title: 'Using Generators for Sequences',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How can you use generators to create an infinite sequence?',
       answer:
         '- By writing a generator function with a loop that never terminates (e.g., `while (true)`), you can yield values indefinitely.\n- The caller can control how many values to consume by calling `.next()` or using a loop with a break condition.\n\n   **Example**:\n\n   ```javascript\n   function* infiniteNumbers() {\n     let num = 0\n     while (true) {\n       yield num++\n     }\n   }\n   ```',
@@ -3571,7 +3571,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#yield-expression-mechanics',
       title: 'Yield Expression Mechanics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is the `yield*` expression used for in generators?',
       answer:
         '- The `yield*` expression is used to delegate to another generator or iterable.\n- It effectively yields all values from the delegated generator or iterable.\n\n   **Example**:\n\n   ```javascript\n   function* genA() {\n     yield 1\n     yield 2\n   }\n\n   function* genB() {\n     yield* genA()\n     yield 3\n   }\n   ```',
@@ -3580,7 +3580,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#managing-asynchronous-flow',
       title: 'Managing Asynchronous Flow',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How do generators help in managing asynchronous code flow?',
       answer:
         '- Generators can pause execution, making them useful for controlling asynchronous operations.\n- By yielding promises and resuming execution when promises resolve, generators can sequence asynchronous tasks in a synchronous-looking manner.\n- Libraries like **co** used generators to simplify async control flow before `async/await` was introduced.',
@@ -3591,7 +3591,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#higher-order-function-overview',
       title: 'Higher-Order Function Overview',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is a higher-order function in JavaScript?',
       answer:
         'A higher-order function is a function that either takes one or more functions as arguments or returns a function as a result. They are used to abstract over actions and can help create more flexible and reusable code.',
@@ -3600,7 +3600,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#map-vs-foreach-method',
       title: 'Map vs ForEach Method',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How does the `map` method differ from `forEach`?',
       answer:
         '- `map` returns a new array containing the results of applying a function to each element of the original array.\n- `forEach` executes a provided function once for each array element but does not return a new array.\n- Use `map` when you need to transform data and collect the results; use `forEach` for side effects.',
@@ -3618,7 +3618,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#functions-as-citizens',
       title: 'Functions as Citizens',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Why are functions considered first-class citizens in JavaScript?',
       answer:
@@ -3628,7 +3628,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#using-callback-functions',
       title: 'Using Callback Functions',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Provide an example of a situation where you would use a callback function.',
       answer:
@@ -3668,7 +3668,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#closures-and-memory-leaks',
       title: 'Closures and Memory Leaks',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain how closures can lead to memory leaks and how to prevent it.',
       answer:
@@ -3678,7 +3678,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#javascript-map-vs-weakmap',
       title: 'JavaScript Map vs WeakMap',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is the difference between WeakMap and Map in JavaScript?',
       answer:
         '- **WeakMap**:\n     - Keys must be objects.\n     - Holds weak references to keys, allowing garbage collection if there are no other references.\n     - Does not prevent garbage collection of keys.\n- **Map**:\n     - Keys can be any value.\n     - Holds strong references to keys, preventing garbage collection.\n     - Suitable for storing data where keys need to persist.',
@@ -3689,7 +3689,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#javascript-proxies-explained',
       title: 'JavaScript Proxies Explained',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is a Proxy in JavaScript, and how does it work?',
       answer:
         '- A Proxy is an object that wraps another object (the target) and intercepts fundamental operations through handler functions (traps).\n- It allows customization of operations like property access, assignment, enumeration, function invocation, etc.\n- The `new Proxy(target, handler)` syntax is used to create a proxy.',
@@ -3698,7 +3698,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#reflecting-on-javascript',
       title: 'Reflecting on JavaScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'Explain the purpose of the Reflect API in JavaScript.',
       answer:
         '- The Reflect API provides methods for interceptable JavaScript operations, mirroring the methods available as proxy traps.\n- It allows developers to perform default operations within proxy handlers, ensuring consistent behavior.\n- Reflect makes operations more explicit and provides utility methods for common object operations.',
@@ -3726,7 +3726,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#proxies-and-traps-example',
       title: 'Proxies and Traps Example',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Can you explain how the `apply` and `construct` traps are used in proxies?',
       answer:
@@ -3738,7 +3738,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#javascript-debounce-vs-throttle',
       title: 'JavaScript Debounce vs Throttle',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between debouncing and throttling in JavaScript?',
       answer:
@@ -3748,7 +3748,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#optimizing-loops-in-javascript',
       title: 'Optimizing Loops in JavaScript',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How can you optimize loops in JavaScript for better performance?',
       answer:
@@ -3758,7 +3758,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#minimizing-dom-interactions',
       title: 'Minimizing DOM Interactions',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'Why is minimizing DOM interactions important for performance?',
       answer:
         '- DOM manipulation is slow compared to JavaScript operations.\n- Frequent DOM updates can cause reflows and repaints, which are expensive rendering operations.\n- Minimizing and batching DOM interactions reduces the performance overhead.',
@@ -3789,7 +3789,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#understanding-javascript-promises',
       title: 'Understanding JavaScript Promises',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is a Promise in JavaScript, and why is it useful?',
       answer:
         '- A Promise is an object representing the eventual completion or failure of an asynchronous operation.\n- It provides a cleaner, more manageable way to handle asynchronous code compared to callbacks.\n- Promises help avoid callback hell, improve error handling, and allow for chaining and composing asynchronous operations.',
@@ -3817,7 +3817,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#handling-promise-chain-errors',
       title: 'Handling Promise Chain Errors',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How do you handle errors in promise chains?',
       answer:
         "- Errors in a promise chain can be handled using the `.catch()` method.\n- If any promise in the chain rejects or throws an error, the control passes to the nearest `.catch()` handler.\n- It's good practice to place a `.catch()` at the end of the chain to handle any errors that may occur.",
@@ -3826,7 +3826,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#promise-constructor-anti-pattern',
       title: 'Promise Constructor Anti-Pattern',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'Can you explain the Promise constructor anti-pattern?',
       answer:
         '- The Promise constructor anti-pattern involves creating a new Promise and unnecessarily wrapping code that already returns a promise.\n- This results in more complex code without any benefit.\n- Instead, you should return the existing promise directly.\n\n   **Anti-Pattern Example:**\n\n   ```javascript\n   function badFunction() {\n     return new Promise((resolve, reject) => {\n       existingPromise.then(resolve).catch(reject)\n     })\n   }\n   ```\n\n   **Correct Approach:**\n\n   ```javascript\n   function goodFunction() {\n     return existingPromise\n   }\n   ```',
@@ -3857,7 +3857,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#javascript-proxies-explained',
       title: 'JavaScript Proxies Explained',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What are proxies in JavaScript, and how do they relate to metaprogramming?',
       answer:
@@ -3867,7 +3867,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#reflect-vs-direct-operations',
       title: 'Reflect vs Direct Operations',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How does Reflect differ from direct operations on objects?',
       answer:
         '- Reflect provides methods that mirror the behavior of operators and other internal methods but in a function form.\n- Using Reflect methods ensures consistent behavior, especially when used with proxies.\n- Direct operations may have inconsistent behavior or throw errors, whereas Reflect methods return boolean values indicating success or failure.\n- Reflect methods can simplify exception handling and provide more control over operations.',
@@ -3880,7 +3880,7 @@ export const ADVANCED_CONCEPTS = {
       question:
         'Can you provide an example of using Reflect and Proxy together to log property access on an object?',
       answer:
-        '```javascript\n   const target = { name: \'Alice\', age: 30 }\n   const handler = {\n     get(target, property, receiver) {\n       console.log(`Property "${property}" accessed`)\n       return Reflect.get(target, property, receiver)\n     },\n   }\n   const proxy = new Proxy(target, handler)\n   console.log(proxy.name) // Logs: Property "name" accessed\n   // Outputs: Alice\n   ```\n\n- In this example, the proxy intercepts property access and logs the property name.\n- Reflect is used to perform the default get operation on the target object.',
+        '```javascript\n   const target = { name: \\\'Alice\\\', age: 30 }\n   const handler = {\n     get(target, property, receiver) {\n       console.log(`Property "${property}" accessed`)\n       return Reflect.get(target, property, receiver)\n     },\n   }\n   const proxy = new Proxy(target, handler)\n   console.log(proxy.name) // Logs: Property "name" accessed\n   // Outputs: Alice\n   ```\n\n- In this example, the proxy intercepts property access and logs the property name.\n- Reflect is used to perform the default get operation on the target object.',
     },
   ],
   securityBestPractices: [
@@ -3888,7 +3888,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#preventing-cross-site-scripting',
       title: 'Preventing Cross-Site Scripting',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is Cross-Site Scripting (XSS), and how can it be prevented?',
       answer:
@@ -3928,7 +3928,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#same-site-cookie-attribute',
       title: 'Same Site Cookie Attribute',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the `SameSite` cookie attribute, and how does it help prevent CSRF attacks?',
       answer:
@@ -3940,7 +3940,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#service-workers-explained',
       title: 'Service Workers Explained',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is a Service Worker, and how does it enhance web applications?',
       answer:
@@ -3950,7 +3950,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#cache-first-vs-network',
       title: 'Cache First vs Network',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'Explain the Cache First and Network First caching strategies.',
       answer:
         '- **Cache First**:\n     - The Service Worker attempts to fetch the resource from the cache.\n     - If the resource is not in the cache, it fetches it from the network and caches it for future use.\n     - Best for static assets that rarely change.\n- **Network First**:\n     - The Service Worker tries to fetch the resource from the network.\n     - If the network is unavailable, it serves the resource from the cache.\n     - Ideal for dynamic content that needs to be up-to-date.',
@@ -3959,7 +3959,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#registering-a-service-worker',
       title: 'Registering a Service Worker',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'How do you register a Service Worker in a web application?',
       answer:
         "- Check if the browser supports Service Workers using `'serviceWorker' in navigator`.\n- Call `navigator.serviceWorker.register('/service-worker.js')` to register the Service Worker script.\n- Handle the registration promise to confirm successful registration or catch errors.\n\n   **Example**:\n\n   ```javascript\n   if ('serviceWorker' in navigator) {\n     navigator.serviceWorker\n       .register('/service-worker.js')\n       .then((registration) => {\n         console.log('Service Worker registered:', registration)\n       })\n       .catch((error) => {\n         console.error('Service Worker registration failed:', error)\n       })\n   }\n   ```",
@@ -3968,7 +3968,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#pwa-app-manifest-basics',
       title: 'PWA App Manifest Basics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is a Web App Manifest, and why is it important in PWAs?',
       answer:
         "- A Web App Manifest is a JSON file that provides metadata about the web application.\n- It includes information like the app's name, icons, start URL, display mode, and theme colors.\n- Important for PWAs because it controls how the app appears to the user and how it can be launched, enabling features like adding to the home screen.",
@@ -4009,7 +4009,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#understanding-well-known-symbols',
       title: 'Understanding Well-Known Symbols',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Explain what well-known Symbols are and provide an example of how to use one.',
       answer:
@@ -4019,7 +4019,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#accessing-object-properties',
       title: 'Accessing Object Properties',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Can you explain how to access and enumerate Symbol properties on an object?',
       answer:
@@ -4049,7 +4049,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#communicating-with-workers',
       title: 'Communicating with Workers',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How do you communicate with a Web Worker from the main thread?',
       answer:
@@ -4059,7 +4059,7 @@ export const ADVANCED_CONCEPTS = {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#differences-in-work-arrangements',
       title: 'Differences in Work Arrangements',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between a Dedicated Worker and a Shared Worker?',
       answer:
@@ -4093,7 +4093,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#understanding-web-accessibility-features',
       title: 'Understanding Web Accessibility Features',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is ARIA, and how does it improve web accessibility?',
       answer:
         '- **ARIA (Accessible Rich Internet Applications)** is a set of attributes that define ways to make web content and applications more accessible to people with disabilities.\n- **Improves Accessibility** by:\n     - Providing additional semantics to assistive technologies.\n     - Enhancing accessibility of custom widgets and complex UI components.\n     - Informing assistive technologies about dynamic content changes.',
@@ -4102,7 +4102,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#using-aria-for-accessibility',
       title: 'Using ARIA for Accessibility',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'When should you use ARIA roles and attributes over native HTML elements?',
       answer:
@@ -4112,7 +4112,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#understanding-aria-attributes',
       title: 'Understanding ARIA Attributes',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Explain the difference between `aria-label`, `aria-labelledby`, and `aria-describedby`.',
       answer:
@@ -4122,11 +4122,11 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#making-accessibility-interactive',
       title: 'Making Accessibility Interactive',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How do you make a custom interactive element accessible to keyboard users and screen readers?',
       answer:
-        '- **Add Appropriate ARIA Roles**:\n     - Define the element\'s role (e.g., `role="button"`).\n- **Manage Keyboard Focus**:\n     - Make the element focusable using `tabindex="0"`.\n     - Handle keyboard events (e.g., `Enter`, `Space` keys).\n- **Update ARIA States**:\n     - Reflect changes in the UI using ARIA states (e.g., `aria-pressed`).\n- **Example**:\n\n     ```html\n     <div role="button" tabindex="0" aria-pressed="false">Toggle</div>\n     ```',
+        '- **Add Appropriate ARIA Roles**:\n     - Define the element\\\'s role (e.g., `role="button"`).\n- **Manage Keyboard Focus**:\n     - Make the element focusable using `tabindex="0"`.\n     - Handle keyboard events (e.g., `Enter`, `Space` keys).\n- **Update ARIA States**:\n     - Reflect changes in the UI using ARIA states (e.g., `aria-pressed`).\n- **Example**:\n\n     ```html\n     <div role="button" tabindex="0" aria-pressed="false">Toggle</div>\n     ```',
     },
     {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#web-accessibility-best-practices',
@@ -4164,7 +4164,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/browser-apis-and-web-standards/page.mdx#understanding-websockets-basics',
       title: 'Understanding WebSockets Basics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What are WebSockets, and when would you use them over HTTP requests?',
       answer:
@@ -4196,7 +4196,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#understanding-webpack-basics',
       title: 'Understanding Webpack Basics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is Webpack, and why is it used in frontend development?',
       answer:
         '- **Webpack** is a module bundler that processes and bundles JavaScript modules along with their dependencies.\n- **Uses**:\n     - Bundles multiple modules into a few output files, reducing HTTP requests.\n     - Allows the use of modern JavaScript features by transpiling code.\n     - Supports code splitting and lazy loading for performance optimization.\n     - Manages assets like images and stylesheets through loaders.',
@@ -4214,7 +4214,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#tree-shaking-with-webpack',
       title: 'Tree Shaking with Webpack',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question: 'What is tree shaking, and how does Webpack implement it?',
       answer:
         "- **Tree Shaking** is a dead-code elimination technique that removes unused code from the final bundle.\n- **Implementation in Webpack**:\n     - Relies on ES6 module syntax (`import` and `export`) for static analysis.\n     - During the build process, Webpack marks unused exports.\n     - Uses minification tools like Terser to remove the dead code.\n     - Requires setting `mode` to `'production'` and ensuring code is side-effect-free.",
@@ -4243,7 +4243,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#setting-up-full-stack-application',
       title: 'Setting Up Full Stack Application',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain how you would set up a full-stack application with a React frontend and a Node.js backend.',
       answer:
@@ -4263,7 +4263,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#configuring-full-stack-applications',
       title: 'Configuring Full Stack Applications',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How do you handle environment-specific configurations in a full-stack application?',
       answer:
@@ -4273,7 +4273,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#handling-cors-issues',
       title: 'Handling CORS Issues',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is CORS, and how do you handle it in a full-stack application?',
       answer:
@@ -4295,7 +4295,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#understanding-code-splitting-benefits',
       title: 'Understanding Code Splitting Benefits',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is code splitting, and how does it improve web application performance?',
       answer:
@@ -4305,7 +4305,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#dynamic-javascript-imports',
       title: 'Dynamic JavaScript Imports',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'Explain how dynamic imports work in JavaScript.',
       answer:
         "- **Dynamic Imports** use the `import()` function to load modules asynchronously at runtime.\n- **Syntax**:\n     ```javascript\n     import('./module').then(module => {\n       // Use the imported module\n     });\n     ```\n- **Behavior**:\n     - Returns a Promise that resolves to the module.\n     - Allows code to be split and loaded only when needed.",
@@ -4314,7 +4314,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#understanding-lazy-loading-strategies',
       title: 'Understanding Lazy Loading Strategies',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is lazy loading, and when should you use it in a web application?',
       answer:
@@ -4365,7 +4365,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/common-interview-questions-and-coding-challenges/page.mdx#understanding-hash-tables',
       title: 'Understanding Hash Tables',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What is a hash table, and how does it work?',
       answer:
         '- **Definition**:\n     - A data structure that maps keys to values using a hash function.\n- **Mechanism**:\n     - The hash function computes an index into an array of buckets.\n     - Ideally, the hash function distributes keys uniformly to minimize collisions.\n- **Operations**:\n     - **Insert**, **Delete**, **Search** operations have average time complexity of O(1).',
@@ -4424,7 +4424,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#data-binding-in-mvvm',
       title: 'Data Binding in MVVM',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'Can you explain how data binding works in MVVM?',
       answer:
         "- In MVVM, data binding automatically synchronizes the View with the ViewModel. Changes in the ViewModel's properties reflect in the View, and user interactions in the View update the ViewModel, often facilitated by two-way binding mechanisms.",
@@ -4433,7 +4433,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#benefits-of-using-redux',
       title: 'Benefits of Using Redux',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are the benefits of using Redux in a React application?',
       answer:
         '- Redux provides a predictable state container with a strict unidirectional data flow. It simplifies state management, makes debugging easier through tools like Redux DevTools, and enforces best practices in organizing application state.',
@@ -4502,7 +4502,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/cross-origin-communication/page.mdx#understanding-cors-configurations',
       title: 'Understanding CORS Configurations',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain how CORS works and how you can configure it on the server.',
       answer:
@@ -4543,7 +4543,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#understanding-micro-frontend-architecture',
       title: 'Understanding Micro-Frontend Architecture',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What is a micro-frontend, and how does it differ from a monolithic frontend architecture?',
       answer:
@@ -4553,7 +4553,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#micro-frontend-integration-patterns',
       title: 'Micro-frontend Integration Patterns',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain the different integration patterns used in micro-frontend architecture.',
       answer:
@@ -4563,7 +4563,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#microfrontend-communication-challenges',
       title: 'Microfrontend Communication Challenges',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How do micro-frontends communicate with each other, and what are the challenges involved?',
       answer:
@@ -4583,7 +4583,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#handling-micro-frontend-routing',
       title: 'Handling Micro Frontend Routing',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Describe how routing is handled in a micro-frontend architecture.',
       answer:
@@ -4595,7 +4595,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#react-fiber-optimization',
       title: 'React Fiber Optimization',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is React Fiber, and how does it improve rendering performance?',
       answer:
@@ -4635,7 +4635,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#cooperative-scheduling-overview',
       title: 'Cooperative Scheduling Overview',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Describe how cooperative scheduling works in React Fiber and its impact on application performance.',
       answer:
@@ -4657,7 +4657,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#preventing-sql-injection-attacks',
       title: 'Preventing SQL Injection Attacks',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'Explain how you would prevent SQL Injection attacks in a web application.',
       answer:
@@ -4667,7 +4667,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#best-practices-for-password-storage',
       title: 'Best Practices for Password Storage',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What are the best practices for securely storing user passwords?',
       answer:
@@ -4687,7 +4687,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#principle-of-least-privilege',
       title: 'Principle of Least Privilege',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What is the principle of least privilege, and why is it important in access control?',
       answer:
@@ -4749,7 +4749,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/state-management-solutions/page.mdx#redux-core-principles',
       title: 'Redux Core Principles',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What are the core principles of Redux, and how do they help in state management?',
       answer: '- The core principles of Redux are:',
@@ -4800,7 +4800,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#unit-vs-integration-testing',
       title: 'Unit vs Integration Testing',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is the difference between unit tests and integration tests?',
       answer:
@@ -4820,7 +4820,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#mocking-in-testing-basics',
       title: 'Mocking in Testing Basics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'Explain the concept of mocking in testing and provide an example of how to mock a module in Jest.',
       answer:
@@ -4869,7 +4869,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#understanding-pull-requests',
       title: 'Understanding Pull Requests',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'What is a pull request, and how does it facilitate collaboration?',
       answer:
@@ -4879,7 +4879,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#reverting-a-remote-commit',
       title: 'Reverting a Remote Commit',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'How do you revert a commit that has already been pushed to a remote repository?',
       answer:
@@ -4889,7 +4889,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#best-practices-for-commits',
       title: 'Best Practices for Commits',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are some best practices when writing commit messages?',
       answer:
         '- **Format**:\n     - **Subject Line**:\n       - Brief summary (50 characters or less).\n       - Use imperative mood (e.g., "Fix bug" not "Fixed bug").\n     - **Body**:\n       - Detailed explanation if necessary.\n       - Explain the "what" and "why", not the "how".\n     - **Separate Subject and Body with a Blank Line**.\n- **Consistency**:\n     - Follow team or project guidelines.\n- **Clarity**:\n     - Be clear and concise.\n- **Avoid**:\n     - Vague messages like "Misc updates" or "Fix stuff".',
@@ -4920,7 +4920,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/virtual-dom-and-rendering/page.mdx#key-management-in-react',
       title: 'Key Management in React',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         "Why are keys important in lists, and what can happen if you don't use them correctly in React?",
       answer:
@@ -4952,7 +4952,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#understanding-core-web-vitals',
       title: 'Understanding Core Web Vitals',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question: 'What are Core Web Vitals, and why are they important?',
       answer:
         '- **Core Web Vitals** are a set of performance metrics defined by Google focusing on user experience aspects like loading, interactivity, and visual stability.\n- **Importance**:\n     - Impact search rankings as Google uses them in its ranking algorithm.\n     - Provide a standardized way to measure user-centric performance.',
@@ -4961,7 +4961,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#lighthouse-performance-metrics',
       title: 'Lighthouse Performance Metrics',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.EASY,
       question:
         'How does Lighthouse measure performance, and what are some key metrics it reports?',
       answer:
@@ -4980,7 +4980,7 @@ export const FRONTEND_DEVELOPMENT = {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#optimizing-the-critical-path',
       title: 'Optimizing the Critical Path',
       type: ProblemType.THEORY,
-      difficulty: ProblemDifficulty.MEDIUM,
+      difficulty: ProblemDifficulty.HARD,
       question:
         'What is the Critical Rendering Path, and how can you optimize it?',
       answer:
