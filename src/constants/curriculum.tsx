@@ -61,7 +61,7 @@ export const completeCurriculum = [
     id: DSA_TRACK_PREFIX,
     title: 'DSA Track',
     description:
-      'Master algorithmic problem solving through practical examples and real interview questions',
+      'Master algorithmic problem solving through practical examples and real interview challenges',
     href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}`,
     icon: CodingIcon,
     sections: [
@@ -167,7 +167,7 @@ export const completeCurriculum = [
     id: JS_TRACK_PREFIX,
     title: 'JS Track',
     description:
-      'Master algorithmic problem solving through practical examples and real interview questions',
+      'Master JavaScript concepts and principles through theoretical foundations and interview questions',
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}`,
     icon: AngleBracketsIcon,
     sections: [
