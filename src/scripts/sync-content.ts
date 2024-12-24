@@ -46,7 +46,7 @@ const ACTIVE_DISCOUNT = {
 }
 
 export const syncContent = async () => {
-  const contentDir = path.join(process.cwd(), `src/${CONTENT_FOLDER}`)
+  const contentDir = path.join(process.cwd(), 'src', CONTENT_FOLDER)
 
   for (const [courseOrder, course] of completeCurriculum.entries()) {
     const {
@@ -78,6 +78,7 @@ export const syncContent = async () => {
       const sectionSlug = slugify(sectionTitle, { lower: true })
 
       const sectionPath = path.join(contentDir, courseId, sectionId, 'page.mdx')
+
       if (!fs.existsSync(sectionPath)) {
         console.error(`File not found: ${sectionPath}`)
         continue
