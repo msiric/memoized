@@ -1,0 +1,414 @@
+export const metadata = {
+  title: 'Advanced Generics in TypeScript',
+  description:
+    'Master advanced generic patterns including constrained generics, recursive types, higher-order types, and variance in TypeScript.',
+}
+
+# **Advanced Generics**
+
+Advanced generics enable creating highly reusable and type-safe abstractions in TypeScript. Understanding these patterns is crucial for building flexible and maintainable type systems.
+
+## **Core Concepts**
+
+**Key Areas:**
+
+1. **Constrained Generics**: Type bounds
+2. **Higher-Order Types**: Type generators
+3. **Recursive Types**: Self-referential types
+4. **Variance**: Type relationships
+5. **Generic Utils**: Reusable patterns
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Constrained Generics
+namespace ConstrainedGenerics {
+  // Multiple constraints
+  interface HasId {
+    id: string | number
+  }
+
+  interface HasName {
+    name: string
+  }
+
+  function processEntity<T extends HasId & HasName>(
+    entity: T
+  ): string {
+    return `${entity.id}: ${entity.name}`
+  }
+
+  // Constrained property access
+  function getProperty<T, K extends keyof T>(
+    obj: T,
+    key: K
+  ): T[K] {
+    return obj[key]
+  }
+
+  // Constructor constraints
+  function createInstance<T extends new (...args: any[]) => any>(
+    ctor: T,
+    ...args: ConstructorParameters<T>
+  ): InstanceType<T> {
+    return new ctor(...args)
+  }
+}
+
+// Higher-Order Types
+namespace HigherOrderTypes {
+  // Type factory
+  type Container<T> = {
+    value: T
+    map: <U>(fn: (value: T) => U) => Container<U>
+  }
+
+  function createContainer<T>(value: T): Container<T> {
+    return {
+      value,
+      map: (fn) => createContainer(fn(value))
+    }
+  }
+
+  // Higher-kinded types simulation
+  interface HKT<T> {
+    type: T
+  }
+
+  interface List<T> extends HKT<T> {
+    map<U>(fn: (value: T) => U): List<U>
+    filter(fn: (value: T) => boolean): List<T>
+  }
+
+  // Type composition
+  type Compose<F extends HKT<any>, G extends HKT<any>> = {
+    type: F extends HKT<infer T> ? G extends HKT<T> ? G['type'] : never : never
+  }
+}
+
+// Recursive Types
+namespace RecursiveTypes {
+  // Tree structure
+  type TreeNode<T> = {
+    value: T
+    children: TreeNode<T>[]
+  }
+
+  // JSON value
+  type JSONValue =
+    | string
+    | number
+    | boolean
+    | null
+    | JSONValue[]
+    | { [key: string]: JSONValue }
+
+  // Linked list
+  interface LinkedList<T> {
+    value: T
+    next: LinkedList<T> | null
+  }
+
+  // Deep partial
+  type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object
+      ? DeepPartial<T[P]>
+      : T[P]
+  }
+}
+
+// Variance Patterns
+namespace VariancePatterns {
+  // Covariant container
+  interface ReadOnlyContainer<out T> {
+    readonly value: T
+    getValue(): T
+  }
+
+  // Contravariant container
+  interface WriteOnlyContainer<in T> {
+    setValue(value: T): void
+  }
+
+  // Invariant container
+  interface Container<T> {
+    value: T
+    getValue(): T
+    setValue(value: T): void
+  }
+
+  // Bivariant function type
+  type BiFn<T> = (arg: T) => T
+}
+
+// Generic Type Utils
+namespace GenericUtils {
+  // Type assertions
+  function assertType<T>(
+    value: unknown,
+    check: (value: unknown) => value is T
+  ): asserts value is T {
+    if (!check(value)) {
+      throw new Error('Type assertion failed')
+    }
+  }
+
+  // Type safe event emitter
+  type EventMap = Record<string, any>
+  type EventKey<T extends EventMap> = string & keyof T
+  type EventReceiver<T> = (params: T) => void
+
+  interface Emitter<T extends EventMap> {
+    on<K extends EventKey<T>>(
+      eventName: K,
+      fn: EventReceiver<T[K]>
+    ): void
+    emit<K extends EventKey<T>>(
+      eventName: K,
+      params: T[K]
+    ): void
+  }
+
+  // Type predicates with generics
+  function isOfType<T>(
+    value: unknown,
+    propertyName: keyof T
+  ): value is T {
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      propertyName in value
+    )
+  }
+}
+
+// Advanced Generic Patterns
+class AdvancedPatterns {
+  // Builder pattern with generics
+  interface Builder<T> {
+    build(): T
+  }
+
+  class QueryBuilder<T> implements Builder<string> {
+    private query: string = ''
+
+    where(key: keyof T, value: T[keyof T]): this {
+      this.query += ` WHERE ${String(key)} = ${String(value)}`
+      return this
+    }
+
+    orderBy(key: keyof T): this {
+      this.query += ` ORDER BY ${String(key)}`
+      return this
+    }
+
+    build(): string {
+      return this.query.trim()
+    }
+  }
+
+  // Factory with dynamic types
+  class DynamicFactory<T> {
+    private registry = new Map<string, new (...args: any[]) => T>()
+
+    register<U extends T>(
+      type: string,
+      ctor: new (...args: any[]) => U
+    ): void {
+      this.registry.set(type, ctor)
+    }
+
+    create<U extends T>(
+      type: string,
+      ...args: ConstructorParameters<new (...args: any[]) => U>
+    ): U {
+      const ctor = this.registry.get(type)
+      if (!ctor) {
+        throw new Error(`Type ${type} not registered`)
+      }
+      return new ctor(...args) as U
+    }
+  }
+
+  // State machine with generics
+  type State = string
+  type Event = string
+
+  interface StateMachine<S extends State, E extends Event> {
+    currentState: S
+    transition(event: E): void
+    addTransition(
+      from: S,
+      to: S,
+      event: E,
+      guard?: () => boolean
+    ): void
+  }
+
+  // Generic middleware system
+  type Middleware<T> = (
+    context: T,
+    next: (context: T) => Promise<void>
+  ) => Promise<void>
+
+  class MiddlewareChain<T> {
+    private middlewares: Middleware<T>[] = []
+
+    use(middleware: Middleware<T>): this {
+      this.middlewares.push(middleware)
+      return this
+    }
+
+    async execute(context: T): Promise<void> {
+      const dispatch = async (
+        index: number,
+        ctx: T
+      ): Promise<void> => {
+        if (index >= this.middlewares.length) {
+          return
+        }
+
+        await this.middlewares[index](ctx, (newCtx) =>
+          dispatch(index + 1, newCtx)
+        )
+      }
+
+      await dispatch(0, context)
+    }
+  }
+}
+
+// Example Usage
+async function example() {
+  // Constrained generics
+  interface User extends HasId, HasName {
+    email: string
+  }
+
+  const user: User = {
+    id: 1,
+    name: 'John',
+    email: 'john@example.com'
+  }
+
+  console.log(ConstrainedGenerics.processEntity(user))
+
+  // Higher-order types
+  const container = HigherOrderTypes.createContainer(5)
+    .map(x => x * 2)
+    .map(x => `Value: ${x}`)
+
+  // Tree structure
+  const tree: RecursiveTypes.TreeNode<number> = {
+    value: 1,
+    children: [
+      { value: 2, children: [] },
+      { value: 3, children: [] }
+    ]
+  }
+
+  // Generic event emitter
+  type AppEvents = {
+    'user:login': { userId: string }
+    'user:logout': { userId: string }
+    'error': Error
+  }
+
+  const emitter: GenericUtils.Emitter<AppEvents> = {
+    on(eventName, fn) {
+      // Implementation
+    },
+    emit(eventName, params) {
+      // Implementation
+    }
+  }
+
+  // Query builder
+  interface Person {
+    id: number
+    name: string
+    age: number
+  }
+
+  const queryBuilder = new AdvancedPatterns.QueryBuilder<Person>()
+    .where('age', 30)
+    .orderBy('name')
+
+  console.log(queryBuilder.build())
+
+  // Middleware chain
+  interface RequestContext {
+    url: string
+    method: string
+    body?: unknown
+  }
+
+  const chain = new AdvancedPatterns.MiddlewareChain<RequestContext>()
+    .use(async (ctx, next) => {
+      console.log('Before request')
+      await next(ctx)
+      console.log('After request')
+    })
+    .use(async (ctx, next) => {
+      ctx.body = { success: true }
+      await next(ctx)
+    })
+
+  await chain.execute({
+    url: '/api',
+    method: 'GET'
+  })
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various advanced generic patterns:
+
+1. **Constrained Generics**:
+
+   - Multiple constraints
+   - Constructor constraints
+   - Property constraints
+
+2. **Higher-Order Types**:
+
+   - Type factories
+   - Type composition
+   - Higher-kinded types
+
+3. **Recursive Types**:
+
+   - Tree structures
+   - Linked lists
+   - Deep transformations
+
+4. **Variance**:
+
+   - Covariance
+   - Contravariance
+   - Bivariance
+
+5. **Generic Utils**:
+
+   - Type assertions
+   - Event systems
+   - Type predicates
+
+6. **Advanced Patterns**:
+   - Builder pattern
+   - Factory pattern
+   - State machines
+   - Middleware systems
+
+Each implementation shows advanced generic usage while maintaining:
+
+- Type safety
+- Code reusability
+- Flexibility
+- Maintainability
+- Developer experience
+
+These patterns help create sophisticated type systems that enhance code quality and reliability.

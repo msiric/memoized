@@ -1,0 +1,417 @@
+export const metadata = {
+  title: 'Understanding Rate Limiting Patterns',
+  description:
+    'Deep dive into rate limiting techniques including debouncing, throttling, and their practical applications.',
+}
+
+# **Rate Limiting Patterns**
+
+Rate limiting patterns help control the frequency of function execution, improving performance and preventing resource overuse. Understanding these patterns is crucial for building responsive applications.
+
+## **Core Concepts**
+
+**Key Areas:**
+
+1. **Debouncing**: Delay execution
+2. **Throttling**: Limit frequency
+3. **Rate Control**: API request limiting
+4. **Backoff**: Progressive delays
+5. **Queue Management**: Request queuing
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Advanced Debounce Implementation
+class Debouncer {
+  // Basic debounce with type safety
+  static debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number,
+    options: {
+      leading?: boolean
+      trailing?: boolean
+      maxWait?: number
+    } = {},
+  ): (...args: Parameters<T>) => void {
+    let timeoutId: NodeJS.Timeout | undefined
+    let lastCallTime: number | undefined
+    let lastArgs: Parameters<T> | undefined
+
+    return function (this: any, ...args: Parameters<T>): void {
+      const now = Date.now()
+
+      // Handle leading edge
+      if (options.leading && !timeoutId) {
+        func.apply(this, args)
+        lastCallTime = now
+      }
+
+      // Save latest args
+      lastArgs = args
+
+      // Clear existing timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+
+      // Set new timeout
+      timeoutId = setTimeout(() => {
+        if (options.trailing !== false && lastArgs) {
+          func.apply(this, lastArgs)
+        }
+        timeoutId = undefined
+        lastCallTime = undefined
+        lastArgs = undefined
+      }, wait)
+
+      // Handle maxWait
+      if (
+        options.maxWait &&
+        lastCallTime &&
+        now - lastCallTime >= options.maxWait
+      ) {
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+        }
+        func.apply(this, lastArgs!)
+        timeoutId = undefined
+        lastCallTime = now
+        lastArgs = undefined
+      }
+    }
+  }
+
+  // Cancelable debounce
+  static debounceCancelable<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number,
+  ): {
+    execute: (...args: Parameters<T>) => void
+    cancel: () => void
+  } {
+    let timeoutId: NodeJS.Timeout | undefined
+
+    return {
+      execute: function (this: any, ...args: Parameters<T>): void {
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+        }
+        timeoutId = setTimeout(() => {
+          func.apply(this, args)
+        }, wait)
+      },
+      cancel: () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId)
+        }
+      },
+    }
+  }
+}
+
+// Advanced Throttle Implementation
+class Throttler {
+  // Basic throttle with type safety
+  static throttle<T extends (...args: any[]) => any>(
+    func: T,
+    limit: number,
+    options: {
+      leading?: boolean
+      trailing?: boolean
+    } = {},
+  ): (...args: Parameters<T>) => void {
+    let timeoutId: NodeJS.Timeout | undefined
+    let lastRun = 0
+    let lastArgs: Parameters<T> | undefined
+
+    return function (this: any, ...args: Parameters<T>): void {
+      const now = Date.now()
+
+      // Handle leading edge
+      if (options.leading !== false && lastRun === 0) {
+        func.apply(this, args)
+        lastRun = now
+        return
+      }
+
+      // Save latest args
+      lastArgs = args
+
+      if (!timeoutId) {
+        timeoutId = setTimeout(
+          () => {
+            if (options.trailing !== false && lastArgs) {
+              func.apply(this, lastArgs)
+            }
+            lastRun = now
+            timeoutId = undefined
+            lastArgs = undefined
+          },
+          Math.max(0, limit - (now - lastRun)),
+        )
+      }
+    }
+  }
+
+  // Request throttling with queue
+  static createThrottledQueue(limit: number, interval: number) {
+    const queue: Array<() => Promise<any>> = []
+    let running = false
+
+    async function processQueue() {
+      if (running || queue.length === 0) return
+
+      running = true
+      const batch = queue.splice(0, limit)
+
+      try {
+        await Promise.all(batch.map((task) => task()))
+      } catch (error) {
+        console.error('Queue processing error:', error)
+      }
+
+      running = false
+      setTimeout(processQueue, interval)
+    }
+
+    return {
+      add<T>(task: () => Promise<T>): Promise<T> {
+        return new Promise((resolve, reject) => {
+          queue.push(async () => {
+            try {
+              const result = await task()
+              resolve(result)
+            } catch (error) {
+              reject(error)
+            }
+          })
+          processQueue()
+        })
+      },
+    }
+  }
+}
+
+// Rate Limiter Implementation
+class RateLimiter {
+  private tokens: number
+  private lastRefill: number
+  private readonly refillRate: number
+  private readonly maxTokens: number
+
+  constructor(
+    maxRequestsPerSecond: number,
+    burstSize: number = maxRequestsPerSecond,
+  ) {
+    this.tokens = burstSize
+    this.lastRefill = Date.now()
+    this.refillRate = maxRequestsPerSecond
+    this.maxTokens = burstSize
+  }
+
+  async acquire(): Promise<boolean> {
+    this.refill()
+
+    if (this.tokens > 0) {
+      this.tokens--
+      return true
+    }
+
+    return false
+  }
+
+  private refill(): void {
+    const now = Date.now()
+    const timePassed = (now - this.lastRefill) / 1000
+    const tokensToAdd = timePassed * this.refillRate
+
+    this.tokens = Math.min(this.maxTokens, this.tokens + tokensToAdd)
+    this.lastRefill = now
+  }
+}
+
+// Exponential Backoff Implementation
+class ExponentialBackoff {
+  constructor(
+    private initialDelay: number,
+    private maxDelay: number,
+    private factor: number = 2,
+    private jitter: boolean = true,
+  ) {}
+
+  async retry<T>(
+    operation: () => Promise<T>,
+    maxAttempts: number = 5,
+  ): Promise<T> {
+    let attempts = 0
+    let delay = this.initialDelay
+
+    while (true) {
+      try {
+        return await operation()
+      } catch (error) {
+        attempts++
+
+        if (attempts >= maxAttempts) {
+          throw error
+        }
+
+        await this.wait(delay)
+        delay = Math.min(delay * this.factor, this.maxDelay)
+
+        if (this.jitter) {
+          delay = delay * (0.5 + Math.random())
+        }
+      }
+    }
+  }
+
+  private wait(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms))
+  }
+}
+
+// API Rate Limiter
+class APIRateLimiter {
+  private queues = new Map<
+    string,
+    {
+      queue: Array<{
+        resolve: (value: any) => void
+        reject: (error: any) => void
+        task: () => Promise<any>
+      }>
+      running: boolean
+    }
+  >()
+
+  constructor(
+    private limitPerEndpoint: Map<
+      string,
+      {
+        limit: number
+        interval: number
+      }
+    >,
+  ) {}
+
+  async execute<T>(endpoint: string, task: () => Promise<T>): Promise<T> {
+    const limits = this.limitPerEndpoint.get(endpoint)
+    if (!limits) {
+      return task()
+    }
+
+    return new Promise((resolve, reject) => {
+      if (!this.queues.has(endpoint)) {
+        this.queues.set(endpoint, {
+          queue: [],
+          running: false,
+        })
+      }
+
+      const queue = this.queues.get(endpoint)!
+      queue.queue.push({ resolve, reject, task })
+      this.processQueue(endpoint)
+    })
+  }
+
+  private async processQueue(endpoint: string): Promise<void> {
+    const queue = this.queues.get(endpoint)!
+    if (queue.running || queue.queue.length === 0) return
+
+    queue.running = true
+    const limits = this.limitPerEndpoint.get(endpoint)!
+    const batch = queue.queue.splice(0, limits.limit)
+
+    try {
+      const results = await Promise.all(
+        batch.map(({ task, resolve, reject }) =>
+          task().then(resolve).catch(reject),
+        ),
+      )
+      queue.running = false
+      setTimeout(() => this.processQueue(endpoint), limits.interval)
+    } catch (error) {
+      queue.running = false
+      console.error('Queue processing error:', error)
+    }
+  }
+}
+
+// Example Usage
+async function example() {
+  // Debounce usage
+  const debouncedSearch = Debouncer.debounce(
+    (query: string) => {
+      console.log('Searching:', query)
+    },
+    300,
+    { leading: true, trailing: true },
+  )
+
+  // Throttle usage
+  const throttledScroll = Throttler.throttle(() => {
+    console.log('Scroll event')
+  }, 1000)
+
+  // Rate limiter usage
+  const rateLimiter = new RateLimiter(10) // 10 requests per second
+  const callAPI = async () => {
+    if (await rateLimiter.acquire()) {
+      // Make API call
+    } else {
+      throw new Error('Rate limit exceeded')
+    }
+  }
+
+  // Exponential backoff usage
+  const backoff = new ExponentialBackoff(1000, 30000)
+  try {
+    const result = await backoff.retry(async () => {
+      const response = await fetch('https://api.example.com')
+      if (!response.ok) throw new Error('API error')
+      return response.json()
+    })
+  } catch (error) {
+    console.error('Operation failed after retries:', error)
+  }
+
+  // API rate limiter usage
+  const apiLimiter = new APIRateLimiter(
+    new Map([
+      ['/users', { limit: 5, interval: 1000 }],
+      ['/posts', { limit: 2, interval: 1000 }],
+    ]),
+  )
+
+  await apiLimiter.execute('/users', async () => {
+    const response = await fetch('/users')
+    return response.json()
+  })
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various rate limiting patterns:
+
+1. **Debouncing**: Delayed execution control
+2. **Throttling**: Frequency limitation
+3. **Rate Limiting**: Token bucket algorithm
+4. **Backoff**: Exponential retry delays
+5. **Queue Management**: Request queuing
+6. **API Rate Limiting**: Endpoint-specific limits
+7. **Cancelable Operations**: Control flow management
+8. **Type Safety**: Full TypeScript support
+
+Each implementation shows advanced rate limiting techniques while maintaining:
+
+- Performance optimization
+- Resource management
+- Error handling
+- Type safety
+- Clean code practices
+
+These patterns help create responsive and efficient applications by controlling execution frequency and managing resource utilization.

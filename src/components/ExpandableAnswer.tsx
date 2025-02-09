@@ -108,7 +108,7 @@ export const ExpandableAnswer = ({ problem }: ExpandableAnswerProps) => {
               >
                 <BiChevronDown className="h-5 w-5" />
               </div>
-              Answer
+              Expand
             </button>
           )}
         </div>

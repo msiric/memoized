@@ -1,0 +1,328 @@
+export const metadata = {
+  title: 'Understanding JavaScript Inheritance Patterns',
+  description:
+    'Master various inheritance patterns: pseudoclassical, prototypal, functional, and ES6 classes.',
+}
+
+# **Inheritance Patterns**
+
+JavaScript offers multiple approaches to inheritance, each with its own benefits and trade-offs. Understanding these patterns is crucial for choosing the right approach for your needs.
+
+## **Core Patterns**
+
+**Key Approaches:**
+
+1. **Pseudoclassical**: Constructor functions
+2. **Prototypal**: Object.create
+3. **Functional**: Factory functions
+4. **Class-based**: ES6 classes
+5. **Mixins**: Composition patterns
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Pseudoclassical Inheritance
+function Vehicle(this: any, type: string) {
+  this.type = type
+  this.isRunning = false
+}
+
+Vehicle.prototype.start = function () {
+  this.isRunning = true
+  return `${this.type} is starting`
+}
+
+Vehicle.prototype.stop = function () {
+  this.isRunning = false
+  return `${this.type} is stopping`
+}
+
+function Car(this: any, make: string, model: string) {
+  Vehicle.call(this, 'car')
+  this.make = make
+  this.model = model
+}
+
+// Set up inheritance
+Car.prototype = Object.create(Vehicle.prototype)
+Car.prototype.constructor = Car
+
+Car.prototype.honk = function () {
+  return `${this.make} ${this.model} honks!`
+}
+
+// Prototypal Inheritance
+const vehicleProto = {
+  start() {
+    this.isRunning = true
+    return `${this.type} is starting`
+  },
+  stop() {
+    this.isRunning = false
+    return `${this.type} is stopping`
+  },
+}
+
+const carProto = Object.create(vehicleProto, {
+  honk: {
+    value: function () {
+      return `${this.make} ${this.model} honks!`
+    },
+    writable: true,
+    configurable: true,
+  },
+})
+
+function createCar(make: string, model: string) {
+  return Object.create(carProto, {
+    type: { value: 'car', writable: true },
+    make: { value: make, writable: true },
+    model: { value: model, writable: true },
+    isRunning: { value: false, writable: true },
+  })
+}
+
+// Functional Inheritance
+function createVehicle(type: string) {
+  let isRunning = false
+
+  return {
+    getType: () => type,
+    isRunning: () => isRunning,
+    start() {
+      isRunning = true
+      return `${type} is starting`
+    },
+    stop() {
+      isRunning = false
+      return `${type} is stopping`
+    },
+  }
+}
+
+function createFunctionalCar(make: string, model: string) {
+  const vehicle = createVehicle('car')
+
+  return {
+    ...vehicle,
+    getMake: () => make,
+    getModel: () => model,
+    honk() {
+      return `${make} ${model} honks!`
+    },
+  }
+}
+
+// Class-based Inheritance
+class ModernVehicle {
+  protected type: string
+  private _isRunning: boolean = false
+
+  constructor(type: string) {
+    this.type = type
+  }
+
+  start(): string {
+    this._isRunning = true
+    return `${this.type} is starting`
+  }
+
+  stop(): string {
+    this._isRunning = false
+    return `${this.type} is stopping`
+  }
+
+  get isRunning(): boolean {
+    return this._isRunning
+  }
+}
+
+class ModernCar extends ModernVehicle {
+  constructor(
+    private make: string,
+    private model: string,
+  ) {
+    super('car')
+  }
+
+  honk(): string {
+    return `${this.make} ${this.model} honks!`
+  }
+
+  // Override with super call
+  start(): string {
+    const result = super.start()
+    return `${result} - ${this.make} ${this.model}`
+  }
+}
+
+// Mixin Pattern
+type Constructor<T = {}> = new (...args: any[]) => T
+
+function ElectricVehicle<TBase extends Constructor>(Base: TBase) {
+  return class extends Base {
+    charge(): string {
+      return 'Charging...'
+    }
+
+    get isElectric(): boolean {
+      return true
+    }
+  }
+}
+
+function Autonomous<TBase extends Constructor>(Base: TBase) {
+  return class extends Base {
+    selfDrive(): string {
+      return 'Self-driving mode activated'
+    }
+
+    get isAutonomous(): boolean {
+      return true
+    }
+  }
+}
+
+// Apply mixins
+class SmartCar extends ElectricVehicle(Autonomous(ModernCar)) {
+  constructor(make: string, model: string) {
+    super(make, model)
+  }
+}
+
+// Composition Pattern
+interface Engine {
+  start(): string
+  stop(): string
+}
+
+interface Radio {
+  turnOn(): string
+  turnOff(): string
+}
+
+class CarEngine implements Engine {
+  start(): string {
+    return 'Engine starts'
+  }
+
+  stop(): string {
+    return 'Engine stops'
+  }
+}
+
+class CarRadio implements Radio {
+  turnOn(): string {
+    return 'Radio turns on'
+  }
+
+  turnOff(): string {
+    return 'Radio turns off'
+  }
+}
+
+class ComposedCar {
+  constructor(
+    private engine: Engine,
+    private radio: Radio,
+  ) {}
+
+  startCar(): string {
+    return this.engine.start()
+  }
+
+  stopCar(): string {
+    return this.engine.stop()
+  }
+
+  startRadio(): string {
+    return this.radio.turnOn()
+  }
+
+  stopRadio(): string {
+    return this.radio.turnOff()
+  }
+}
+
+// Factory Pattern with Inheritance
+interface VehicleFactory {
+  createVehicle(): ModernVehicle
+}
+
+class CarFactory implements VehicleFactory {
+  constructor(
+    private make: string,
+    private model: string,
+  ) {}
+
+  createVehicle(): ModernCar {
+    return new ModernCar(this.make, this.model)
+  }
+}
+
+// Example Usage
+function example() {
+  // Pseudoclassical
+  const classicalCar = new Car('Toyota', 'Camry')
+  console.log(classicalCar.start())
+  console.log(classicalCar.honk())
+
+  // Prototypal
+  const prototypalCar = createCar('Honda', 'Civic')
+  console.log(prototypalCar.start())
+  console.log(prototypalCar.honk())
+
+  // Functional
+  const functionalCar = createFunctionalCar('Tesla', 'Model 3')
+  console.log(functionalCar.start())
+  console.log(functionalCar.honk())
+
+  // Class-based
+  const modernCar = new ModernCar('BMW', 'M3')
+  console.log(modernCar.start())
+  console.log(modernCar.honk())
+
+  // Mixins
+  const smartCar = new SmartCar('Tesla', 'Model S')
+  console.log(smartCar.start())
+  console.log(smartCar.charge())
+  console.log(smartCar.selfDrive())
+
+  // Composition
+  const composedCar = new ComposedCar(new CarEngine(), new CarRadio())
+  console.log(composedCar.startCar())
+  console.log(composedCar.startRadio())
+
+  // Factory
+  const factory = new CarFactory('Mercedes', 'C-Class')
+  const factoryCar = factory.createVehicle()
+  console.log(factoryCar.start())
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various inheritance patterns:
+
+1. **Pseudoclassical**: Traditional constructor approach
+2. **Prototypal**: Direct object inheritance
+3. **Functional**: Factory-based inheritance
+4. **Class-based**: Modern ES6+ approach
+5. **Mixins**: Multiple inheritance simulation
+6. **Composition**: Object composition pattern
+7. **Factory**: Creation patterns with inheritance
+8. **TypeScript Integration**: Type-safe inheritance
+
+Each implementation shows different inheritance strategies with their own benefits:
+
+- **Pseudoclassical**: Traditional JavaScript approach
+- **Prototypal**: Direct and flexible object relations
+- **Functional**: Better encapsulation and privacy
+- **Class-based**: Familiar OOP syntax
+- **Mixins**: Flexible behavior sharing
+- **Composition**: Favoring composition over inheritance
+- **Factory**: Encapsulated object creation
+
+These patterns help create maintainable and flexible object-oriented JavaScript applications.

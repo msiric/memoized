@@ -1,0 +1,351 @@
+export const metadata = {
+  title: 'Understanding Type Inference and Narrowing',
+  description:
+    'Deep dive into how TypeScript infers types, type narrowing techniques, and user-defined type guards.',
+}
+
+# **Type Inference and Narrowing**
+
+TypeScript's type inference and narrowing capabilities are powerful features that help write type-safe code with less explicit type annotations. Understanding these mechanisms is crucial for effective TypeScript development.
+
+## **Core Concepts**
+
+**Key Areas:**
+
+1. **Type Inference**: Automatic type determination
+2. **Type Narrowing**: Refining types
+3. **Type Guards**: Custom type checks
+4. **Flow Analysis**: Control flow based typing
+5. **Discriminated Unions**: Tagged unions
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Type Inference Patterns
+namespace TypeInference {
+  // Return type inference
+  function createUser(name: string, age: number) {
+    return { name, age, createdAt: new Date() }
+  }
+  // TypeScript infers:
+  // { name: string; age: number; createdAt: Date }
+
+  // Array inference
+  const numbers = [1, 2, 3] // number[]
+  const mixed = [1, 'hello', true] // (string | number | boolean)[]
+
+  // Generic inference
+  function first<T>(arr: T[]) {
+    return arr[0]
+  }
+  const value = first([1, 2, 3]) // Inferred as number
+
+  // Object literal inference
+  const config = {
+    api: {
+      baseUrl: 'https://api.example.com',
+      timeout: 5000,
+      retries: 3,
+    },
+    features: {
+      darkMode: true,
+      notifications: {
+        email: true,
+        push: false,
+      },
+    },
+  }
+  // TypeScript infers complete object structure
+}
+
+// Type Narrowing Techniques
+namespace TypeNarrowing {
+  // Type guards
+  function processValue(value: string | number) {
+    if (typeof value === 'string') {
+      // value is narrowed to string
+      return value.toLowerCase()
+    } else {
+      // value is narrowed to number
+      return value.toFixed(2)
+    }
+  }
+
+  // Instance checks
+  class Customer {
+    constructor(public name: string) {}
+  }
+  class Employee {
+    constructor(public id: number) {}
+  }
+
+  function processPerson(person: Customer | Employee) {
+    if (person instanceof Customer) {
+      // person is narrowed to Customer
+      return person.name
+    } else {
+      // person is narrowed to Employee
+      return person.id
+    }
+  }
+
+  // Property checks
+  interface Circle {
+    kind: 'circle'
+    radius: number
+  }
+  interface Square {
+    kind: 'square'
+    size: number
+  }
+
+  function processShape(shape: Circle | Square) {
+    if (shape.kind === 'circle') {
+      // shape is narrowed to Circle
+      return Math.PI * shape.radius ** 2
+    } else {
+      // shape is narrowed to Square
+      return shape.size * shape.size
+    }
+  }
+
+  // Truthiness checks
+  function processString(value: string | null | undefined) {
+    if (value) {
+      // value is narrowed to string (non-empty)
+      return value.length
+    }
+    return 0
+  }
+}
+
+// Custom Type Guards
+namespace TypeGuards {
+  // User-defined type guard
+  interface ApiResponse<T> {
+    data?: T
+    error?: {
+      message: string
+      code: number
+    }
+  }
+
+  function isError<T>(
+    response: ApiResponse<T>,
+  ): response is { error: { message: string; code: number } } {
+    return 'error' in response
+  }
+
+  function isSuccess<T>(response: ApiResponse<T>): response is { data: T } {
+    return 'data' in response && response.data !== undefined
+  }
+
+  // Complex type guard
+  type JSONValue =
+    | string
+    | number
+    | boolean
+    | null
+    | JSONValue[]
+    | { [key: string]: JSONValue }
+
+  function isJSONValue(value: unknown): value is JSONValue {
+    if (value === null) return true
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      return true
+    }
+    if (Array.isArray(value)) {
+      return value.every(isJSONValue)
+    }
+    if (typeof value === 'object') {
+      return Object.values(value as object).every(isJSONValue)
+    }
+    return false
+  }
+
+  // Branded type guards
+  type Brand<T, B> = T & { __brand: B }
+  type ValidEmail = Brand<string, 'Email'>
+  type ValidUrl = Brand<string, 'URL'>
+
+  function isValidEmail(value: string): value is ValidEmail {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+  }
+
+  function isValidUrl(value: string): value is ValidUrl {
+    try {
+      new URL(value)
+      return true
+    } catch {
+      return false
+    }
+  }
+}
+
+// Flow Analysis
+namespace FlowAnalysis {
+  // Discriminated union
+  type Result<T> =
+    | { kind: 'success'; value: T }
+    | { kind: 'error'; error: Error }
+    | { kind: 'loading' }
+
+  function processResult<T>(result: Result<T>) {
+    switch (result.kind) {
+      case 'success':
+        return `Success: ${result.value}`
+      case 'error':
+        return `Error: ${result.error.message}`
+      case 'loading':
+        return 'Loading...'
+    }
+  }
+
+  // Exhaustiveness checking
+  type State =
+    | { type: 'idle' }
+    | { type: 'loading' }
+    | { type: 'success'; data: string }
+    | { type: 'error'; error: Error }
+
+  function assertNever(x: never): never {
+    throw new Error('Unexpected object: ' + x)
+  }
+
+  function processState(state: State) {
+    switch (state.type) {
+      case 'idle':
+        return 'Idle'
+      case 'loading':
+        return 'Loading'
+      case 'success':
+        return state.data
+      case 'error':
+        return state.error.message
+      default:
+        return assertNever(state)
+    }
+  }
+}
+
+// Advanced Inference Examples
+namespace AdvancedInference {
+  // Inference in higher-order functions
+  function pipe<T>(...fns: Array<(arg: T) => T>) {
+    return (value: T) => fns.reduce((acc, fn) => fn(acc), value)
+  }
+
+  // Inference with generics and constraints
+  interface HasLength {
+    length: number
+  }
+
+  function longest<T extends HasLength>(a: T, b: T) {
+    return a.length >= b.length ? a : b
+  }
+
+  // Inference in async functions
+  async function fetchData<T>(
+    url: string,
+    transform: (data: any) => T,
+  ): Promise<T> {
+    const response = await fetch(url)
+    const data = await response.json()
+    return transform(data)
+  }
+
+  // Conditional type inference
+  type InferPromise<T> = T extends Promise<infer U> ? U : T
+
+  type InferArray<T> = T extends Array<infer U> ? U : T
+
+  type InferReturnType<T> = T extends (...args: any[]) => infer R ? R : never
+}
+
+// Example Usage
+function example() {
+  // Type guard usage
+  const response: ApiResponse<string> = {
+    error: { message: 'Failed', code: 500 },
+  }
+
+  if (TypeGuards.isError(response)) {
+    console.log(response.error.message)
+  }
+
+  // Branded types
+  function sendEmail(email: ValidEmail) {
+    // Send email...
+  }
+
+  const email = 'user@example.com'
+  if (TypeGuards.isValidEmail(email)) {
+    sendEmail(email) // Type-safe!
+  }
+
+  // Flow analysis
+  const state: State = { type: 'loading' }
+  console.log(FlowAnalysis.processState(state))
+
+  // Advanced inference
+  const numbers = [1, 2, 3, 4, 5]
+  const transformed = AdvancedInference.pipe(
+    (x: number[]) => x.map((n) => n * 2),
+    (x) => x.filter((n) => n > 5),
+  )(numbers)
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various type inference and narrowing patterns:
+
+1. **Type Inference**:
+
+   - Return type inference
+   - Generic inference
+   - Array and object inference
+   - Context-based inference
+
+2. **Type Narrowing**:
+
+   - Type guards
+   - Instance checks
+   - Property checks
+   - Truthiness narrowing
+
+3. **Type Guards**:
+
+   - User-defined type guards
+   - Complex type guards
+   - Branded type guards
+   - Runtime type checks
+
+4. **Flow Analysis**:
+
+   - Discriminated unions
+   - Exhaustiveness checking
+   - Switch statement analysis
+   - Control flow based typing
+
+5. **Advanced Patterns**:
+   - Higher-order function inference
+   - Generic constraints
+   - Conditional type inference
+   - Async function inference
+
+Each implementation shows advanced type inference and narrowing while maintaining:
+
+- Type safety
+- Code clarity
+- Runtime safety
+- Developer experience
+- Maintainability
+
+These patterns help create robust TypeScript applications with strong type guarantees and excellent IDE support.

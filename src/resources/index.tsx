@@ -1,6 +1,6 @@
 import { RESOURCES_PREFIX } from '@/constants'
 
-export const USER_DEFINED_DATA_STRUCTURES_RESOURCES = {
+export const DSA_TRACK_RESOURCES = {
   linkedLists: [
     {
       id: '/singly-linked-list',
@@ -145,6 +145,110 @@ export const USER_DEFINED_DATA_STRUCTURES_RESOURCES = {
       title: 'Trie',
       description: 'Implementation of Trie in JavaScript/TypeScript.',
       about: 'Learn to implement a Trie using JavaScript/TypeScript.',
+    },
+  ],
+}
+
+export const JS_TRACK_RESOURCES = {
+  coreFundamentals: [
+    {
+      id: '/closures',
+      href: `${RESOURCES_PREFIX}/closures`,
+      title: 'Closures',
+      description: 'Understanding closures and lexical scope in JavaScript.',
+      about:
+        'Master closures, scope chains, and practical applications in modern JavaScript.',
+    },
+    {
+      id: '/promises',
+      href: `${RESOURCES_PREFIX}/promises`,
+      title: 'Promises',
+      description: 'Deep dive into JavaScript Promises and async programming.',
+      about:
+        'Learn to handle asynchronous operations effectively using Promises and async/await.',
+    },
+    {
+      id: '/prototypes',
+      href: `${RESOURCES_PREFIX}/prototypes`,
+      title: 'Prototypes',
+      description: 'Understanding prototype inheritance in JavaScript.',
+      about: `Master JavaScript's prototype-based inheritance and object creation patterns.`,
+    },
+  ],
+  advancedConcepts: [
+    {
+      id: '/event-loop',
+      href: `${RESOURCES_PREFIX}/event-loop`,
+      title: 'Event Loop',
+      description: `Understanding JavaScript's event loop and concurrency model.`,
+      about:
+        'Deep dive into how JavaScript handles asynchronous operations under the hood.',
+    },
+    {
+      id: '/generators',
+      href: `${RESOURCES_PREFIX}/generators`,
+      title: 'Generators',
+      description: 'Implementation of Generators and Iterators in JavaScript.',
+      about:
+        'Master generator functions and iterators for better async flow control.',
+    },
+    {
+      id: '/memory-management',
+      href: `${RESOURCES_PREFIX}/memory-management`,
+      title: 'Memory Management',
+      description:
+        'Understanding JavaScript memory management and garbage collection.',
+      about:
+        'Learn how JavaScript manages memory and avoid common memory leaks.',
+    },
+  ],
+  typescript: [
+    {
+      id: '/type-system',
+      href: `${RESOURCES_PREFIX}/type-system`,
+      title: 'Type System',
+      description: `Understanding TypeScript's type system fundamentals.`,
+      about: `Master TypeScript's type system, interfaces, and type manipulation.`,
+    },
+    {
+      id: '/generics',
+      href: `${RESOURCES_PREFIX}/generics`,
+      title: 'Generics',
+      description: 'Implementation of Generic types in TypeScript.',
+      about: 'Learn to write flexible, reusable code with TypeScript generics.',
+    },
+    {
+      id: '/advanced-types',
+      href: `${RESOURCES_PREFIX}/advanced-types`,
+      title: 'Advanced Types',
+      description: `Deep dive into TypeScript's advanced type features.`,
+      about:
+        'Master mapped types, conditional types, and type inference in TypeScript.',
+    },
+  ],
+  frontend: [
+    {
+      id: '/dom-manipulation',
+      href: `${RESOURCES_PREFIX}/dom-manipulation`,
+      title: 'DOM Manipulation',
+      description: 'Efficient DOM manipulation techniques and best practices.',
+      about:
+        'Learn to manipulate the DOM efficiently and handle browser events.',
+    },
+    {
+      id: '/web-apis',
+      href: `${RESOURCES_PREFIX}/web-apis`,
+      title: 'Web APIs',
+      description: 'Working with modern Web APIs and browser features.',
+      about: 'Master essential Web APIs for building modern web applications.',
+    },
+    {
+      id: '/performance',
+      href: `${RESOURCES_PREFIX}/performance`,
+      title: 'Performance',
+      description: 'Frontend performance optimization techniques.',
+      about:
+        'Learn to optimize JavaScript code and improve application performance.',
     },
   ],
 }

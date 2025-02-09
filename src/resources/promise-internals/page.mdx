@@ -1,0 +1,316 @@
+export const metadata = {
+  title: 'Understanding Promise Internals',
+  description:
+    'Deep dive into Promise states, transitions, microtask queuing, and the Promise resolution procedure.',
+}
+
+# **Promise Internals**
+
+Understanding how Promises work internally is crucial for mastering asynchronous programming in JavaScript. This includes Promise states, transitions, and the resolution procedure.
+
+## **Core Concepts**
+
+**Key Components:**
+
+1. **Promise States**: Pending, Fulfilled, Rejected
+2. **State Transitions**: Resolution process
+3. **Microtask Queue**: Promise scheduling
+4. **Resolution Procedure**: Value unwrapping
+5. **Error Handling**: Rejection mechanics
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Basic Promise Implementation
+class MyPromise<T> {
+  private state: 'pending' | 'fulfilled' | 'rejected' = 'pending'
+  private value: T | null = null
+  private error: any = null
+  private thenCallbacks: Array<(value: T) => void> = []
+  private catchCallbacks: Array<(error: any) => void> = []
+  private finallyCallbacks: Array<() => void> = []
+
+  constructor(
+    executor: (
+      resolve: (value: T) => void,
+      reject: (error: any) => void,
+    ) => void,
+  ) {
+    try {
+      executor(this.resolve.bind(this), this.reject.bind(this))
+    } catch (error) {
+      this.reject(error)
+    }
+  }
+
+  private resolve(value: T): void {
+    queueMicrotask(() => {
+      if (this.state === 'pending') {
+        this.state = 'fulfilled'
+        this.value = value
+        this.thenCallbacks.forEach((callback) => callback(value))
+        this.finallyCallbacks.forEach((callback) => callback())
+      }
+    })
+  }
+
+  private reject(error: any): void {
+    queueMicrotask(() => {
+      if (this.state === 'pending') {
+        this.state = 'rejected'
+        this.error = error
+        this.catchCallbacks.forEach((callback) => callback(error))
+        this.finallyCallbacks.forEach((callback) => callback())
+      }
+    })
+  }
+
+  then(onFulfilled: (value: T) => void): MyPromise<T> {
+    return new MyPromise<T>((resolve, reject) => {
+      const handleFulfilled = (value: T) => {
+        try {
+          const result = onFulfilled(value)
+          resolve(result)
+        } catch (error) {
+          reject(error)
+        }
+      }
+
+      if (this.state === 'fulfilled') {
+        queueMicrotask(() => handleFulfilled(this.value!))
+      } else {
+        this.thenCallbacks.push(handleFulfilled)
+      }
+    })
+  }
+
+  catch(onRejected: (error: any) => void): MyPromise<T> {
+    return new MyPromise<T>((resolve, reject) => {
+      const handleRejected = (error: any) => {
+        try {
+          onRejected(error)
+          resolve(this.value!)
+        } catch (error) {
+          reject(error)
+        }
+      }
+
+      if (this.state === 'rejected') {
+        queueMicrotask(() => handleRejected(this.error))
+      } else {
+        this.catchCallbacks.push(handleRejected)
+      }
+    })
+  }
+
+  finally(onFinally: () => void): MyPromise<T> {
+    if (this.state !== 'pending') {
+      queueMicrotask(onFinally)
+    } else {
+      this.finallyCallbacks.push(onFinally)
+    }
+    return this
+  }
+
+  // Static methods
+  static resolve<T>(value: T): MyPromise<T> {
+    return new MyPromise<T>((resolve) => resolve(value))
+  }
+
+  static reject<T>(error: any): MyPromise<T> {
+    return new MyPromise<T>((_, reject) => reject(error))
+  }
+
+  static all<T>(promises: MyPromise<T>[]): MyPromise<T[]> {
+    return new MyPromise<T[]>((resolve, reject) => {
+      const results: T[] = []
+      let completed = 0
+
+      promises.forEach((promise, index) => {
+        promise
+          .then((value) => {
+            results[index] = value
+            completed++
+            if (completed === promises.length) {
+              resolve(results)
+            }
+          })
+          .catch(reject)
+      })
+    })
+  }
+
+  static race<T>(promises: MyPromise<T>[]): MyPromise<T> {
+    return new MyPromise<T>((resolve, reject) => {
+      promises.forEach((promise) => {
+        promise.then(resolve).catch(reject)
+      })
+    })
+  }
+}
+
+// Promise Resolution Procedure
+class PromiseResolution {
+  static resolve<T>(value: any): Promise<T> {
+    // Handle promise-like objects
+    if (value && typeof value.then === 'function') {
+      return new Promise((resolve, reject) => {
+        value.then(resolve, reject)
+      })
+    }
+    return Promise.resolve(value)
+  }
+
+  static unwrap<T>(value: any): Promise<T> {
+    return Promise.resolve(value).then((val) => {
+      if (val && typeof val.then === 'function') {
+        return this.unwrap(val)
+      }
+      return val
+    })
+  }
+}
+
+// Promise State Machine
+class PromiseState<T> {
+  private currentState: 'pending' | 'fulfilled' | 'rejected'
+  private value: T | null = null
+  private error: any = null
+
+  constructor() {
+    this.currentState = 'pending'
+  }
+
+  fulfill(value: T): boolean {
+    if (this.currentState === 'pending') {
+      this.currentState = 'fulfilled'
+      this.value = value
+      return true
+    }
+    return false
+  }
+
+  reject(error: any): boolean {
+    if (this.currentState === 'pending') {
+      this.currentState = 'rejected'
+      this.error = error
+      return true
+    }
+    return false
+  }
+
+  getState(): { state: string; value?: T; error?: any } {
+    return {
+      state: this.currentState,
+      ...(this.value !== null && { value: this.value }),
+      ...(this.error !== null && { error: this.error }),
+    }
+  }
+}
+
+// Microtask Queue Demonstration
+class MicrotaskDemo {
+  static async demonstrate() {
+    console.log('Start')
+
+    // Promise microtask
+    Promise.resolve().then(() => console.log('Promise microtask'))
+
+    // queueMicrotask
+    queueMicrotask(() => console.log('Direct microtask'))
+
+    // setTimeout macrotask
+    setTimeout(() => console.log('Timeout macrotask'), 0)
+
+    console.log('End')
+
+    // Output:
+    // Start
+    // End
+    // Promise microtask
+    // Direct microtask
+    // Timeout macrotask
+  }
+}
+
+// Promise Chain Analysis
+class PromiseChainAnalysis {
+  static async analyze() {
+    console.log('Chain start')
+
+    const chain = Promise.resolve('Initial')
+      .then((val) => {
+        console.log('First then:', val)
+        return 'Modified'
+      })
+      .then((val) => {
+        console.log('Second then:', val)
+        throw new Error('Error in chain')
+      })
+      .catch((error) => {
+        console.log('Catch:', error.message)
+        return 'Recovered'
+      })
+      .finally(() => {
+        console.log('Finally')
+      })
+
+    await chain
+    console.log('Chain complete')
+  }
+}
+
+// Example Usage
+async function example() {
+  // Basic Promise Usage
+  const promise = new MyPromise<string>((resolve, reject) => {
+    setTimeout(() => resolve('Success'), 1000)
+  })
+
+  promise
+    .then((result) => console.log(result))
+    .catch((error) => console.error(error))
+    .finally(() => console.log('Done'))
+
+  // Promise Resolution
+  const value = { then: (resolve: any) => resolve(42) }
+  const resolved = await PromiseResolution.resolve(value)
+  console.log(resolved) // 42
+
+  // State Machine
+  const state = new PromiseState<number>()
+  state.fulfill(123)
+  console.log(state.getState()) // { state: 'fulfilled', value: 123 }
+
+  // Microtask Demonstration
+  await MicrotaskDemo.demonstrate()
+
+  // Chain Analysis
+  await PromiseChainAnalysis.analyze()
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various aspects of Promise internals:
+
+1. **Promise Implementation**: Complete Promise class
+2. **State Management**: Promise state transitions
+3. **Resolution Procedure**: Value unwrapping
+4. **Microtask Handling**: Queue management
+5. **Chain Mechanics**: Promise chain behavior
+6. **Error Propagation**: Rejection handling
+7. **Static Methods**: all, race, resolve, reject
+8. **Type Safety**: Full TypeScript support
+
+Each implementation shows the internal mechanics of Promises while maintaining:
+
+- Proper state transitions
+- Microtask scheduling
+- Error handling
+- Type safety
+- Resolution procedures
+
+These patterns help understand how Promises work under the hood and how to use them effectively in JavaScript applications.

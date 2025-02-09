@@ -1667,9 +1667,9 @@ export const ADVANCED_TOPICS_PROBLEMS = {
 }
 
 export const CORE_FUNDAMENTALS = {
-  asynchronousJavascript: [
+  asyncJs: [
     {
-      href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#callback-hell-pitfalls',
+      href: '/js-track/core-fundamentals/async-js/page.mdx#callback-hell-pitfalls',
       title: 'Callback Hell Pitfalls',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.HARD,
@@ -1679,7 +1679,7 @@ export const CORE_FUNDAMENTALS = {
         "- **Callback Hell**: Nested callbacks leading to code that's hard to read and maintain.\n- **Inversion of Control**: Loss of control over when and how the callback is executed.\n- **Error Handling Complexity**: Errors must be handled at every level of the callback chain.\n- **Lack of Composability**: Difficult to compose multiple asynchronous operations cleanly.",
     },
     {
-      href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#improving-asynchronous-programming',
+      href: '/js-track/core-fundamentals/async-js/page.mdx#improving-asynchronous-programming',
       title: 'Improving Asynchronous Programming',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1689,7 +1689,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Chaining**: Promises can be chained, allowing for sequential execution of asynchronous operations.\n- **Error Propagation**: Errors automatically propagate down the promise chain to a single `.catch()` block.\n- **Avoid Callback Hell**: Flatten the code structure, making it more readable.\n- **Composability**: Promise methods like `Promise.all()` and `Promise.race()` allow combining multiple promises.',
     },
     {
-      href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#promise-comparison-methods',
+      href: '/js-track/core-fundamentals/async-js/page.mdx#promise-comparison-methods',
       title: 'Promise Comparison Methods',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1699,7 +1699,7 @@ export const CORE_FUNDAMENTALS = {
         '- **`Promise.all()`**:\n\n     - Waits for all promises to fulfill.\n     - Resolves with an array of results if all promises fulfill.\n     - Rejects immediately if any promise rejects.\n\n- **`Promise.race()`**:\n\n     - Resolves or rejects as soon as one promise resolves or rejects.\n     - Returns the result or error of the first settled promise.',
     },
     {
-      href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#simplifying-promise-handling',
+      href: '/js-track/core-fundamentals/async-js/page.mdx#simplifying-promise-handling',
       title: 'Simplifying Promise Handling',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1708,7 +1708,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Synchronous-like Syntax**: Makes asynchronous code look like synchronous code.\n- **Improved Readability**: Reduces the need for chaining `.then()` methods.\n- **Error Handling**: Use `try...catch` blocks for error handling, similar to synchronous code.\n- **Conditional Logic**: Easier to write conditional and looping logic with asynchronous operations.',
     },
     {
-      href: '/js-track/core-fundamentals/asynchronous-javascript/page.mdx#handling-async-errors',
+      href: '/js-track/core-fundamentals/async-js/page.mdx#handling-async-errors',
       title: 'Handling Async Errors',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1718,9 +1718,9 @@ export const CORE_FUNDAMENTALS = {
         "- Use `try...catch` blocks around `await` expressions to catch errors.\n- Alternatively, attach a `.catch()` method to the returned promise if not using `try...catch`.\n\n   **Example**:\n\n   ```javascript\n   async function getData() {\n     try {\n       const data = await fetchData()\n       return data\n     } catch (error) {\n       console.error('Error:', error)\n     }\n   }\n   ```",
     },
   ],
-  closuresAndLexicalEnvironment: [
+  closures: [
     {
-      href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#javascript-closures-explained',
+      href: '/js-track/core-fundamentals/closures/page.mdx#javascript-closures-explained',
       title: 'JavaScript Closures Explained',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.HARD,
@@ -1729,7 +1729,7 @@ export const CORE_FUNDAMENTALS = {
         "A closure is a function that has access to its own scope, the outer function's scope, and the global scope. It allows an inner function to access variables from an outer function even after the outer function has returned. This is possible because functions in JavaScript form closures around the scope in which they were declared, preserving the lexical environment.",
     },
     {
-      href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#lexical-scoping-in-javascript',
+      href: '/js-track/core-fundamentals/closures/page.mdx#lexical-scoping-in-javascript',
       title: 'Lexical Scoping in JavaScript',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.HARD,
@@ -1738,7 +1738,7 @@ export const CORE_FUNDAMENTALS = {
         'Lexical scoping means that the accessibility of variables is determined by the physical structure of the code. Functions are executed using the scope chain that was in effect when they were defined, not when they are executed. This means that inner functions have access to variables declared in their outer scopes.',
     },
     {
-      href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#closures-for-private-variables',
+      href: '/js-track/core-fundamentals/closures/page.mdx#closures-for-private-variables',
       title: 'Closures for Private Variables',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1748,7 +1748,7 @@ export const CORE_FUNDAMENTALS = {
         "Closures can encapsulate variables within a function scope, exposing only specific functions that can access or modify those variables. By returning an object with methods that interact with the private variables, you can emulate private state.\n\n   **Example:**\n\n   ```javascript\n   function secretHolder() {\n     let secret = 'hidden'\n\n     return {\n       getSecret: function () {\n         return secret\n       },\n       setSecret: function (newSecret) {\n         secret = newSecret\n       },\n     }\n   }\n\n   const mySecret = secretHolder()\n   console.log(mySecret.getSecret()) // Outputs: 'hidden'\n   mySecret.setSecret('revealed')\n   console.log(mySecret.getSecret()) // Outputs: 'revealed'\n   ```",
     },
     {
-      href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#common-pitfalls-in-closures',
+      href: '/js-track/core-fundamentals/closures/page.mdx#common-pitfalls-in-closures',
       title: 'Common Pitfalls in Closures',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1758,7 +1758,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Memory Leaks**: Closures can lead to memory leaks if they retain references to unused variables or large data structures.\n     - **Avoidance**: Nullify references to variables that are no longer needed.\n- **Unexpected Variable Sharing**: When using loops with `var`, all closures might share the same variable.\n     - **Avoidance**: Use `let` for block scoping or IIFEs to create new scopes.\n- **Performance Overhead**: Excessive use of closures can consume more memory.\n     - **Avoidance**: Optimize by limiting the number of closures and releasing resources when possible.',
     },
     {
-      href: '/js-track/core-fundamentals/closures-and-lexical-environment/page.mdx#how-closures-work',
+      href: '/js-track/core-fundamentals/closures/page.mdx#how-closures-work',
       title: 'How Closures Work',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1768,9 +1768,9 @@ export const CORE_FUNDAMENTALS = {
         'The scope chain is a series of references to outer lexical environments. When a variable is accessed, the JavaScript engine starts from the innermost scope and moves outward, looking for the variable in each lexical environment. In nested functions, each function adds a layer to the scope chain. Closures retain access to their outer scopes through this chain, even after the outer functions have completed execution.',
     },
   ],
-  engineAndRuntimeEnvironment: [
+  engineAndRuntime: [
     {
-      href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#v8-engine-execution-process',
+      href: '/js-track/core-fundamentals/js-engine-and-runtime/page.mdx#v8-engine-execution-process',
       title: 'V8 Engine Execution Process',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1780,7 +1780,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Parsing**: Source code is parsed into an AST.\n- **Compilation**: AST is compiled into bytecode by Ignition (interpreter).\n- **Execution**: Bytecode is executed.\n- **Profiling**: Hot code is identified through profiling.\n- **Optimization**: TurboFan (optimizing compiler) recompiles hot code into optimized machine code.\n- **Deoptimization**: If assumptions fail, code is deoptimized back to bytecode execution.',
     },
     {
-      href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#understanding-hidden-classes',
+      href: '/js-track/core-fundamentals/js-engine-and-runtime/page.mdx#understanding-hidden-classes',
       title: 'Understanding Hidden Classes',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1789,7 +1789,7 @@ export const CORE_FUNDAMENTALS = {
         "- Hidden classes are internal representations of object shapes.\n- Objects with the same hidden class allow the engine to optimize property access.\n- Changing an object's structure (adding/removing properties) creates new hidden classes, hindering optimization.\n- Consistent object structures improve performance.",
     },
     {
-      href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#garbage-collector-overview',
+      href: '/js-track/core-fundamentals/js-engine-and-runtime/page.mdx#garbage-collector-overview',
       title: 'Garbage Collector Overview',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1799,7 +1799,7 @@ export const CORE_FUNDAMENTALS = {
         '- Uses algorithms like mark-and-sweep and generational collection.\n- **Mark-and-Sweep**:\n     - Marks all reachable objects starting from root references.\n     - Sweeps and collects unmarked objects.\n- **Generational Collection**:\n     - Divides heap into young and old generations.\n     - Young generation collects short-lived objects frequently.\n     - Old generation collects long-lived objects less often.\n- Aims to reclaim memory while minimizing pause times.',
     },
     {
-      href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#understanding-event-loops',
+      href: '/js-track/core-fundamentals/js-engine-and-runtime/page.mdx#understanding-event-loops',
       title: 'Understanding Event Loops',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1809,7 +1809,7 @@ export const CORE_FUNDAMENTALS = {
         '- The event loop is a mechanism that manages the execution of multiple chunks of code over time.\n- **Mechanism**:\n     - Executes tasks from the call stack.\n     - When the call stack is empty, it processes microtasks (e.g., Promises).\n     - Then processes tasks from the macrotask queue (e.g., `setTimeout` callbacks).\n- Allows asynchronous operations to be executed without blocking the main thread.',
     },
     {
-      href: '/js-track/core-fundamentals/engine-and-runtime-environment/page.mdx#understanding-call-stack-vs-queues',
+      href: '/js-track/core-fundamentals/js-engine-and-runtime/page.mdx#understanding-call-stack-vs-queues',
       title: 'Understanding Call Stack vs Queues',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1819,9 +1819,9 @@ export const CORE_FUNDAMENTALS = {
         '- **Call Stack**:\n\n     - Executes function calls.\n     - Operates in a LIFO manner.\n     - Holds execution contexts.\n\n- **Task Queues**:\n\n     - **Microtask Queue**:\n       - Holds microtasks like Promise callbacks.\n       - Processed after the current call stack is empty.\n     - **Macrotask Queue**:\n       - Holds tasks like `setTimeout` callbacks, I/O events.\n       - Processed after microtasks are cleared.\n\n- The event loop manages the flow between the call stack and task queues.',
     },
   ],
-  errorHandlingAndDebugging: [
+  errorHandling: [
     {
-      href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#purpose-of-try-catch',
+      href: '/js-track/core-fundamentals/error-handling/page.mdx#purpose-of-try-catch',
       title: 'Purpose of Try Catch',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1830,7 +1830,7 @@ export const CORE_FUNDAMENTALS = {
         'The `try...catch` statement allows you to handle exceptions that occur in your code. Code that may throw an error is placed inside the `try` block, and if an error occurs, control is passed to the `catch` block, where you can handle the error. This prevents the program from crashing and allows for graceful error handling.',
     },
     {
-      href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#how-finally-blocks-work',
+      href: '/js-track/core-fundamentals/error-handling/page.mdx#how-finally-blocks-work',
       title: 'How Finally Blocks Work',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1840,7 +1840,7 @@ export const CORE_FUNDAMENTALS = {
         "The `finally` block contains code that will always execute after the `try` and `catch` blocks, regardless of whether an error was thrown or caught. It's typically used for cleanup operations, such as closing files or releasing resources.",
     },
     {
-      href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#common-javascript-errors',
+      href: '/js-track/core-fundamentals/error-handling/page.mdx#common-javascript-errors',
       title: 'Common JavaScript Errors',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1849,7 +1849,7 @@ export const CORE_FUNDAMENTALS = {
         '- **SyntaxError**: Errors in the code syntax.\n- **ReferenceError**: Accessing an undeclared variable.\n- **TypeError**: Using a value in an inappropriate way.\n- **RangeError**: A number is outside the allowable range.\n- **URIError**: Errors in encoding or decoding URIs.\n- **EvalError**: Errors related to the `eval()` function (rare).',
     },
     {
-      href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#creating-custom-errors-in-js',
+      href: '/js-track/core-fundamentals/error-handling/page.mdx#creating-custom-errors-in-js',
       title: 'Creating Custom Errors in JS',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1858,7 +1858,7 @@ export const CORE_FUNDAMENTALS = {
         "You can create a custom error by creating an instance of the `Error` class or by extending it to create a custom error type. Use the `throw` statement to throw the error.\n\n   **Example**:\n\n   ```javascript\n   class CustomError extends Error {\n     constructor(message) {\n       super(message)\n       this.name = 'CustomError'\n     }\n   }\n\n   throw new CustomError('This is a custom error')\n   ```",
     },
     {
-      href: '/js-track/core-fundamentals/error-handling-and-debugging/page.mdx#purpose-of-debugger-statement',
+      href: '/js-track/core-fundamentals/error-handling/page.mdx#purpose-of-debugger-statement',
       title: 'Purpose of Debugger Statement',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1868,9 +1868,9 @@ export const CORE_FUNDAMENTALS = {
         'The `debugger` statement acts like a breakpoint in the code. When the JavaScript engine encounters `debugger`, it pauses execution if a debugging session is active. This allows developers to inspect variables, the call stack, and step through code.',
     },
   ],
-  eventLoopAndAsynchronousProgramming: [
+  eventLoop: [
     {
-      href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#javascript-event-loop-explanation',
+      href: '/js-track/core-fundamentals/event-loop/page.mdx#javascript-event-loop-explanation',
       title: 'JavaScript Event Loop Explanation',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1879,7 +1879,7 @@ export const CORE_FUNDAMENTALS = {
         '- The event loop is a mechanism that coordinates the execution of code by continuously checking the call stack and task queues.\n- When the call stack is empty, the event loop processes all microtasks in the microtask queue.\n- After microtasks are processed, the event loop processes one task from the task queue.\n- This cycle repeats indefinitely, allowing JavaScript to handle asynchronous operations efficiently.',
     },
     {
-      href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#understanding-task-queue-vs-microtask-queue',
+      href: '/js-track/core-fundamentals/event-loop/page.mdx#understanding-task-queue-vs-microtask-queue',
       title: 'Understanding Task Queue vs Microtask Queue',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1889,7 +1889,7 @@ export const CORE_FUNDAMENTALS = {
         '- The task queue (macrotask queue) holds tasks scheduled by `setTimeout`, `setInterval`, and DOM events.\n- The microtask queue holds microtasks such as promise callbacks (`.then()`, `.catch()`), `MutationObserver` callbacks, and tasks scheduled with `queueMicrotask()`.\n- The event loop prioritizes the microtask queue over the task queue, executing all microtasks before processing the next task.',
     },
     {
-      href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#why-zero-delay-delays',
+      href: '/js-track/core-fundamentals/event-loop/page.mdx#why-zero-delay-delays',
       title: 'Why Zero Delay Delays',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1899,7 +1899,7 @@ export const CORE_FUNDAMENTALS = {
         '- Even with a delay of zero, `setTimeout` schedules the callback to be executed after all current code execution and microtasks are completed.\n- The callback is placed in the task queue and will only be executed when the call stack is empty and after the microtask queue has been processed.',
     },
     {
-      href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#understanding-async-await-loops',
+      href: '/js-track/core-fundamentals/event-loop/page.mdx#understanding-async-await-loops',
       title: 'Understanding Async/Await Loops',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1908,7 +1908,7 @@ export const CORE_FUNDAMENTALS = {
         "- Promises' `.then()` and `.catch()` callbacks are scheduled as microtasks.\n- When using `async/await`, the `await` keyword pauses the function execution until the awaited promise is resolved or rejected.\n- The continuation of the async function after `await` is scheduled as a microtask.",
     },
     {
-      href: '/js-track/core-fundamentals/event-loop-and-asynchronous-programming/page.mdx#common-pitfalls-in-async-code',
+      href: '/js-track/core-fundamentals/event-loop/page.mdx#common-pitfalls-in-async-code',
       title: 'Common Pitfalls in Async Code',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1918,7 +1918,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Callback Hell**: Nesting multiple callbacks leading to hard-to-read code.\n- **Uncaught Promise Rejections**: Failing to handle promise rejections can cause unhandled exceptions.\n- **Race Conditions**: Not properly managing the order of asynchronous operations.\n- **Blocking the Event Loop**: Running heavy computations on the main thread, preventing the event loop from processing other tasks.',
     },
   ],
-  executionContextAndCallStack: [
+  contextAndCallStack: [
     {
       href: '/js-track/core-fundamentals/execution-context-and-call-stack/page.mdx#understanding-execution-contexts',
       title: 'Understanding Execution Contexts',
@@ -1969,9 +1969,9 @@ export const CORE_FUNDAMENTALS = {
         "A **closure** is created when a function retains access to its outer (enclosing) function's variables even after the outer function has returned. When a function is created, it captures the variables from its surrounding execution context. This allows the inner function to access these variables whenever it is invoked, regardless of the current state of the call stack. Closures are essential for data encapsulation and creating private variables.",
     },
   ],
-  executionContextAndScopeChain: [
+  scopeChain: [
     {
-      href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#execution-context-in-js',
+      href: '/js-track/core-fundamentals/scope-chain/page.mdx#execution-context-in-js',
       title: 'Execution Context in JS',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -1980,7 +1980,7 @@ export const CORE_FUNDAMENTALS = {
         '- An execution context is an abstract concept that contains information about the environment within which the current code is being executed.\n- It includes the variable environment, lexical environment, and `this` binding.\n- Types include the global execution context and function execution contexts.',
     },
     {
-      href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#how-javascript-scope-chain-works',
+      href: '/js-track/core-fundamentals/scope-chain/page.mdx#how-javascript-scope-chain-works',
       title: 'How JavaScript Scope Chain Works',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1989,7 +1989,7 @@ export const CORE_FUNDAMENTALS = {
         '- The scope chain is a list of objects that JavaScript uses to resolve variable identifiers.\n- When a variable is accessed, JavaScript looks in the current scope.\n- If not found, it moves up to the outer (parent) scope, continuing up the chain until it reaches the global scope.\n- If the variable is not found in any scope, a `ReferenceError` is thrown.',
     },
     {
-      href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#understanding-variable-shadowing',
+      href: '/js-track/core-fundamentals/scope-chain/page.mdx#understanding-variable-shadowing',
       title: 'Understanding Variable Shadowing',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -1998,7 +1998,7 @@ export const CORE_FUNDAMENTALS = {
         '- Variable shadowing occurs when a variable declared in a local scope has the same name as a variable in an outer scope.\n- The inner variable shadows the outer one, making the outer variable inaccessible in that scope.\n- It can lead to confusion or bugs if not managed carefully.',
     },
     {
-      href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#understanding-variable-scope',
+      href: '/js-track/core-fundamentals/scope-chain/page.mdx#understanding-variable-scope',
       title: 'Understanding Variable Scope',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2008,7 +2008,7 @@ export const CORE_FUNDAMENTALS = {
         '- `var` is function-scoped or globally scoped if declared outside a function.\n- `let` and `const` are block-scoped, meaning they are only accessible within the block `{}` they are declared in.\n- Variables declared with `let` and `const` are not hoisted in the same way as `var`.',
     },
     {
-      href: '/js-track/core-fundamentals/execution-context-and-scope-chain/page.mdx#understanding-hoisting-in-javascript',
+      href: '/js-track/core-fundamentals/scope-chain/page.mdx#understanding-hoisting-in-javascript',
       title: 'Understanding Hoisting in JavaScript',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2017,9 +2017,9 @@ export const CORE_FUNDAMENTALS = {
         "- Hoisting is JavaScript's behavior of moving variable and function declarations to the top of their containing scope during the compilation phase.\n- Variables declared with `var` are hoisted but initialized with `undefined`.\n- Functions declared using function declarations are hoisted with their definitions.\n- Variables declared with `let` and `const` are hoisted but not initialized, leading to a Temporal Dead Zone (TDZ) until they are assigned.",
     },
   ],
-  functionTypesAndInvocationPatterns: [
+  functionTypes: [
     {
-      href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#function-declarations-vs-expressions',
+      href: '/js-track/core-fundamentals/function-types/page.mdx#function-declarations-vs-expressions',
       title: 'Function Declarations vs Expressions',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2029,7 +2029,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Function Declarations**:\n\n     - Defined with the `function` keyword followed by a name.\n     - Hoisted entirely, allowing them to be called before their definition.\n     - Example:\n\n       ```javascript\n       function foo() {\n         // function body\n       }\n       ```\n\n- **Function Expressions**:\n\n     - Defined by assigning a function to a variable.\n     - Only the variable declaration is hoisted, not the assignment.\n     - Can be anonymous or named.\n     - Example:\n\n       ```javascript\n       const bar = function () {\n         // function body\n       }\n       ```',
     },
     {
-      href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#iife-in-javascript',
+      href: '/js-track/core-fundamentals/function-types/page.mdx#iife-in-javascript',
       title: 'IIFE in JavaScript',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2038,7 +2038,7 @@ export const CORE_FUNDAMENTALS = {
         'An IIFE (Immediately Invoked Function Expression) is a function expression that is executed immediately after its definition. It creates a private scope, preventing variable collisions and keeping the global namespace clean.\n\n   **Use Case:**\n\n- Encapsulating code to avoid polluting the global scope.\n- Creating a module pattern to expose only specific functions or variables.',
     },
     {
-      href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#function-call-methods',
+      href: '/js-track/core-fundamentals/function-types/page.mdx#function-call-methods',
       title: 'Function Call Methods',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2048,7 +2048,7 @@ export const CORE_FUNDAMENTALS = {
         '- **`call()`**:\n\n     - Invokes a function immediately.\n     - Arguments are passed individually.\n     - Syntax: `functionName.call(thisArg, arg1, arg2, ...)`\n\n- **`apply()`**:\n\n     - Invokes a function immediately.\n     - Arguments are passed as an array.\n     - Syntax: `functionName.apply(thisArg, [argsArray])`\n\n- **`bind()`**:\n\n     - Returns a new function with `this` and optional arguments bound.\n     - Does not invoke the function immediately.\n     - Syntax: `const boundFunction = functionName.bind(thisArg, arg1, arg2, ...)`',
     },
     {
-      href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#javascript-function-invocation-methods',
+      href: '/js-track/core-fundamentals/function-types/page.mdx#javascript-function-invocation-methods',
       title: 'JavaScript Function Invocation Methods',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2058,7 +2058,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Regular Function Invocation**:\n\n     - Called as a standalone function.\n     - `this` is the global object (non-strict mode) or `undefined` (strict mode).\n\n- **Method Invocation**:\n\n     - Called as a method of an object.\n     - `this` refers to the object invoking the method.\n\n- **Constructor Invocation**:\n\n     - Called with the `new` keyword.\n     - `this` refers to the newly created object.\n\n- **Indirect Invocation**:\n\n     - Using `call()`, `apply()`, or `bind()`.\n     - `this` is explicitly set to the provided value.\n\n- **Arrow Functions**:\n\n     - `this` is lexically bound to the enclosing scope.',
     },
     {
-      href: '/js-track/core-fundamentals/function-types-and-invocation-patterns/page.mdx#reasons-to-avoid-arrow-functions',
+      href: '/js-track/core-fundamentals/function-types/page.mdx#reasons-to-avoid-arrow-functions',
       title: 'Reasons to Avoid Arrow Functions',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2068,9 +2068,9 @@ export const CORE_FUNDAMENTALS = {
         'Arrow functions do not have their own `this` binding. Instead, they inherit `this` from the enclosing lexical scope. When used as methods in objects, `this` does not refer to the object itself but to the surrounding scope, which can lead to unexpected behavior.\n\n   **Example:**\n\n   ```javascript\n   const obj = {\n     value: 10,\n     getValue: () => {\n       return this.value\n     },\n   }\n\n   console.log(obj.getValue()) // Outputs: undefined\n   ```',
     },
   ],
-  fundamentalDataTypesAndStructures: [
+  dataTypes: [
     {
-      href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#differences-between-primitive-and-objects',
+      href: '/js-track/core-fundamentals/data-types/page.mdx#differences-between-primitive-and-objects',
       title: 'Differences Between Primitive and Objects',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2080,7 +2080,7 @@ export const CORE_FUNDAMENTALS = {
         "- **Primitives**:\n\n     - Immutable values (Number, String, Boolean, Null, Undefined, Symbol, BigInt).\n     - Stored directly in the variable's memory location.\n     - Passed by value; copying a primitive creates a new value.\n\n- **Objects**:\n\n     - Mutable collections of properties.\n     - Stored as references; variables hold a reference to the object's memory location.\n     - Passed by reference; copying an object copies the reference, not the object itself.",
     },
     {
-      href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#removing-array-duplicates',
+      href: '/js-track/core-fundamentals/data-types/page.mdx#removing-array-duplicates',
       title: 'Removing Array Duplicates',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2089,7 +2089,7 @@ export const CORE_FUNDAMENTALS = {
         '- Using a `Set`:\n\n     ```javascript\n     let numbers = [1, 2, 2, 3, 4, 4, 5]\n     let uniqueNumbers = [...new Set(numbers)] // [1, 2, 3, 4, 5]\n     ```',
     },
     {
-      href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#javascript-object-vs-map',
+      href: '/js-track/core-fundamentals/data-types/page.mdx#javascript-object-vs-map',
       title: 'JavaScript Object vs Map',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2099,7 +2099,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Object**:\n\n     - Keys are strings or symbols.\n     - Not ordered; property order is not guaranteed.\n     - Prototypes can affect key lookup.\n     - Limited built-in methods for manipulation.\n\n- **Map**:\n\n     - Keys can be of any type, including objects and functions.\n     - Maintains the insertion order of keys.\n     - No prototype chain affecting key lookup.\n     - Provides methods like `set`, `get`, `has`, `delete`, and is iterable.',
     },
     {
-      href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#choosing-between-maps',
+      href: '/js-track/core-fundamentals/data-types/page.mdx#choosing-between-maps',
       title: 'Choosing Between Maps',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.HARD,
@@ -2108,7 +2108,7 @@ export const CORE_FUNDAMENTALS = {
         '- Use a `WeakMap` when you need to associate data with objects without preventing their garbage collection.\n- Ideal for storing metadata or private data related to an object.\n- Keys are held weakly; if there are no other references to the key object, it can be garbage collected.',
     },
     {
-      href: '/js-track/core-fundamentals/fundamental-data-types-and-structures/page.mdx#how-map-filter-works',
+      href: '/js-track/core-fundamentals/data-types/page.mdx#how-map-filter-works',
       title: 'How Map Filter Works',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2117,9 +2117,9 @@ export const CORE_FUNDAMENTALS = {
         '- **`map(callback)`**:\n\n     - Creates a new array by applying the callback function to each element of the original array.\n     - The original array is not modified.\n\n     **Example**:\n\n     ```javascript\n     let numbers = [1, 2, 3]\n     let squares = numbers.map((n) => n * n) // [1, 4, 9]\n     ```\n\n- **`filter(callback)`**:\n\n     - Creates a new array with all elements that pass the test implemented by the callback function.\n     - The original array is not modified.\n\n     **Example**:\n\n     ```javascript\n     let numbers = [1, 2, 3, 4, 5]\n     let evenNumbers = numbers.filter((n) => n % 2 === 0) // [2, 4]\n     ```',
     },
   ],
-  memoryManagementAndGarbageCollection: [
+  memoryManagement: [
     {
-      href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#understanding-memory-leaks-in-js',
+      href: '/js-track/core-fundamentals/memory-management/page.mdx#understanding-memory-leaks-in-js',
       title: 'Understanding Memory Leaks in JS',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2129,7 +2129,7 @@ export const CORE_FUNDAMENTALS = {
         '- A memory leak occurs when memory that is no longer needed is not released, leading to increasing memory usage over time.\n- In JavaScript, memory leaks can happen due to unintended global variables, unreleased references in closures, detached DOM nodes, timers, and event listeners not properly cleaned up.',
     },
     {
-      href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#garbage-collection-algorithms',
+      href: '/js-track/core-fundamentals/memory-management/page.mdx#garbage-collection-algorithms',
       title: 'Garbage Collection Algorithms',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2139,7 +2139,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Reference Counting**:\n     - Keeps track of the number of references to each object.\n     - Objects are collected when their reference count reaches zero.\n     - Cannot handle circular references.\n- **Mark-and-Sweep**:\n     - Starts from root objects and marks all reachable objects.\n     - Collects unmarked objects during the sweep phase.\n     - Can handle circular references effectively.',
     },
     {
-      href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#optimizing-garbage-collection',
+      href: '/js-track/core-fundamentals/memory-management/page.mdx#optimizing-garbage-collection',
       title: 'Optimizing Garbage Collection',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.HARD,
@@ -2148,7 +2148,7 @@ export const CORE_FUNDAMENTALS = {
         '- Use generational garbage collection, categorizing objects into young and old generations.\n- Implement incremental and concurrent garbage collection to minimize pause times.\n- Optimize for short-lived objects by frequently collecting the young generation.',
     },
     {
-      href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#weak-references-explained',
+      href: '/js-track/core-fundamentals/memory-management/page.mdx#weak-references-explained',
       title: 'Weak References Explained',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2158,7 +2158,7 @@ export const CORE_FUNDAMENTALS = {
         "- Weak references (`WeakMap`, `WeakSet`) allow you to hold references to objects without preventing them from being garbage collected.\n- If the object has no other references, it can be collected even if it's still in a `WeakMap` or `WeakSet`.\n- Useful for caches or storing metadata about objects without affecting their life cycle.",
     },
     {
-      href: '/js-track/core-fundamentals/memory-management-and-garbage-collection/page.mdx#detecting-memory-leaks-in-js',
+      href: '/js-track/core-fundamentals/memory-management/page.mdx#detecting-memory-leaks-in-js',
       title: 'Detecting Memory Leaks in JS',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.HARD,
@@ -2168,9 +2168,9 @@ export const CORE_FUNDAMENTALS = {
         "- Use memory profiling tools like Chrome DevTools' Memory tab to take heap snapshots and monitor memory usage over time.\n- Look for patterns of increasing memory usage.\n- Identify detached DOM nodes, unreleased references, and large objects that persist unexpectedly.\n- Use allocation timelines to see where memory allocations occur.",
     },
   ],
-  modulesAndModuleSystems: [
+  modules: [
     {
-      href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#commonjs-vs-es6-modules',
+      href: '/js-track/core-fundamentals/modules/page.mdx#commonjs-vs-es6-modules',
       title: 'CommonJS vs ES6 Modules',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2179,7 +2179,7 @@ export const CORE_FUNDAMENTALS = {
         '- **Syntax**:\n     - CommonJS uses `require()` for importing and `module.exports` for exporting.\n     - ES6 modules use `import` and `export` keywords.\n- **Execution**:\n     - CommonJS modules are loaded synchronously; ideal for server-side Node.js.\n     - ES6 modules can be loaded asynchronously; suitable for both client-side and server-side.\n- **Exports**:\n     - CommonJS modules export a single object (`module.exports`).\n     - ES6 modules support multiple named exports and default exports.\n- **Native Support**:\n     - CommonJS is natively supported in Node.js.\n     - ES6 modules are natively supported in modern browsers and Node.js (with `"type": "module"`).',
     },
     {
-      href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#using-es6-modules-in-node-js',
+      href: '/js-track/core-fundamentals/modules/page.mdx#using-es6-modules-in-node-js',
       title: 'Using ES6 Modules in Node.js',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2188,7 +2188,7 @@ export const CORE_FUNDAMENTALS = {
         '- Use the `.mjs` file extension for modules.\n     - Example: `import { myFunction } from \\\'./module.mjs\\\';`\n- Set `"type": "module"` in the `package.json` file.\n     - Then you can use ES6 module syntax in `.js` files.\n- Alternatively, use a transpiler like Babel to convert ES6 modules to CommonJS.',
     },
     {
-      href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#understanding-module-patterns',
+      href: '/js-track/core-fundamentals/modules/page.mdx#understanding-module-patterns',
       title: 'Understanding Module Patterns',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2197,7 +2197,7 @@ export const CORE_FUNDAMENTALS = {
         '- UMD (Universal Module Definition) is designed to create modules that are compatible with both CommonJS (Node.js) and AMD (browser) module systems.\n- It allows a module to work in multiple environments, ensuring broader compatibility.',
     },
     {
-      href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#exporting-multiple-functions',
+      href: '/js-track/core-fundamentals/modules/page.mdx#exporting-multiple-functions',
       title: 'Exporting Multiple Functions',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2207,7 +2207,7 @@ export const CORE_FUNDAMENTALS = {
         '- Use named exports:\n\n     ```javascript\n     export function functionOne() {\n       /* ... */\n     }\n     export function functionTwo() {\n       /* ... */\n     }\n     ```\n\n- Or export at the end:\n\n     ```javascript\n     function functionOne() {\n       /* ... */\n     }\n     function functionTwo() {\n       /* ... */\n     }\n\n     export { functionOne, functionTwo }\n     ```',
     },
     {
-      href: '/js-track/core-fundamentals/modules-and-module-systems/page.mdx#understanding-dynamic-imports',
+      href: '/js-track/core-fundamentals/modules/page.mdx#understanding-dynamic-imports',
       title: 'Understanding Dynamic Imports',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2216,9 +2216,9 @@ export const CORE_FUNDAMENTALS = {
         "- Dynamic imports allow you to load modules asynchronously at runtime using the `import()` function, which returns a promise.\n- Useful for code splitting, lazy loading modules, and loading modules based on conditions or user interactions.\n\n   **Example**:\n\n   ```javascript\n   import('./module.js').then((module) => {\n     module.doSomething()\n   })\n   ```",
     },
   ],
-  objectCreationAndClassPatterns: [
+  objectAndClassPatterns: [
     {
-      href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#constructor-vs-regular-functions',
+      href: '/js-track/core-fundamentals/object-patterns/page.mdx#constructor-vs-regular-functions',
       title: 'Constructor vs Regular Functions',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2228,7 +2228,7 @@ export const CORE_FUNDAMENTALS = {
         '- A constructor function is intended to be used with the `new` keyword to create new objects.\n- When called with `new`, a constructor function creates a new object, sets `this` to that object, and returns it.\n- Regular functions are called without `new` and `this` depends on how the function is called.',
     },
     {
-      href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#inheritance-in-es6-classes',
+      href: '/js-track/core-fundamentals/object-patterns/page.mdx#inheritance-in-es6-classes',
       title: 'Inheritance in ES6 Classes',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2237,7 +2237,7 @@ export const CORE_FUNDAMENTALS = {
         '- Inheritance is achieved using the `extends` keyword.\n- A subclass extends a parent class and inherits its properties and methods.\n- The `super()` function is used within the subclass constructor to call the parent class constructor.',
     },
     {
-      href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#es6-classes-advantages',
+      href: '/js-track/core-fundamentals/object-patterns/page.mdx#es6-classes-advantages',
       title: 'ES6 Classes Advantages',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2247,7 +2247,7 @@ export const CORE_FUNDAMENTALS = {
         '- Cleaner and more concise syntax.\n- Easier to read and maintain.\n- Simplifies inheritance with `extends` and `super`.\n- Supports static methods, getters, setters, and private fields.',
     },
     {
-      href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#inheritance-role-of-super',
+      href: '/js-track/core-fundamentals/object-patterns/page.mdx#inheritance-role-of-super',
       title: 'Inheritance Role of Super',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.EASY,
@@ -2256,7 +2256,7 @@ export const CORE_FUNDAMENTALS = {
         '- `super()` calls the constructor of the parent class.\n- It is necessary to use `super()` before accessing `this` in a subclass constructor.\n- Allows access to parent class methods and properties.',
     },
     {
-      href: '/js-track/core-fundamentals/object-creation-and-class-patterns/page.mdx#implementing-private-variables-in-es6-classes',
+      href: '/js-track/core-fundamentals/object-patterns/page.mdx#implementing-private-variables-in-es6-classes',
       title: 'Implementing Private Variables in ES6 Classes',
       type: ProblemType.THEORY,
       difficulty: ProblemDifficulty.MEDIUM,
@@ -2266,7 +2266,7 @@ export const CORE_FUNDAMENTALS = {
         "- Use the `#` prefix to declare private fields.\n- Private fields are only accessible within the class body.\n- Example:\n\n     ```javascript\n     class Example {\n       #privateField = 'secret'\n\n       getSecret() {\n         return this.#privateField\n       }\n     }\n     ```",
     },
   ],
-  prototypesAndPrototypalInheritance: [
+  prototypes: [
     {
       href: '/js-track/core-fundamentals/prototypes-and-prototypal-inheritance/page.mdx#prototypical-inheritance-explained',
       title: 'Prototypical Inheritance Explained',
@@ -2317,7 +2317,7 @@ export const CORE_FUNDAMENTALS = {
         "In ES6, you can use the `class` syntax along with the `extends` keyword to implement inheritance.\n\n   **Example:**\n\n   ```javascript\n   class Parent {\n     constructor(name) {\n       this.name = name\n     }\n\n     greet() {\n       console.log(`Hello, ${this.name}`)\n     }\n   }\n\n   class Child extends Parent {\n     constructor(name, age) {\n       super(name)\n       this.age = age\n     }\n\n     displayAge() {\n       console.log(`I am ${this.age} years old.`)\n     }\n   }\n\n   const child = new Child('Alice', 10)\n   child.greet() // Outputs: Hello, Alice\n   child.displayAge() // Outputs: I am 10 years old.\n   ```",
     },
   ],
-  thisKeywordAndBindingRules: [
+  thisAndBinding: [
     {
       href: '/js-track/core-fundamentals/this-keyword-and-binding-rules/page.mdx#javascript-context-of-this',
       title: 'JavaScript "Context of this"',
@@ -2368,7 +2368,7 @@ export const CORE_FUNDAMENTALS = {
         '**Output:**\n\n   ```\n   4\n   ```\n\n   **Explanation:**\n\n- `callback()` is invoked without any context, so `this` refers to the global object.\n- The global `length` variable is `4`.\n- Therefore, `console.log(this.length);` outputs `4`.',
     },
   ],
-  variableScopeAndHoisting: [
+  scopeAndHoisting: [
     {
       href: '/js-track/core-fundamentals/variable-scope-and-hoisting/page.mdx#javascript-variable-options',
       title: 'JavaScript Variable Options',
@@ -2471,7 +2471,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         "- Discriminated unions are union types that have a common discriminant property with a literal type.\n- They allow TypeScript to narrow types based on the value of the discriminant.\n- Benefits include exhaustive type checking and simplified type guards.\n- **Example**:\n\n     ```typescript\n     interface Circle {\n       kind: 'circle'\n       radius: number\n     }\n     interface Square {\n       kind: 'square'\n       size: number\n     }\n     type Shape = Circle | Square\n     ```",
     },
   ],
-  basicTypesAndTypeAnnotations: [
+  basicTypes: [
     {
       href: '/js-track/typescript-introduction/basic-types-and-type-annotations/page.mdx#typescript-primitive-types',
       title: 'TypeScript Primitive Types',
@@ -2520,7 +2520,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         "- Overusing `any` defeats the purpose of TypeScript's type safety.\n- It disables type checking, allowing for potential runtime errors.\n- It makes code less readable and maintainable.\n- Prefer using specific types or `unknown` to maintain type safety.",
     },
   ],
-  compilerApi: [
+  compiler: [
     {
       href: '/js-track/typescript-introduction/compiler-api/page.mdx#typescript-compiler-api',
       title: 'TypeScript Compiler API',
@@ -2571,7 +2571,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- **Scenario**: Creating a custom linter that enforces specific coding standards or detects code patterns not covered by existing linters.\n- By parsing the code into an AST and traversing it, you can analyze code structures, detect undesirable patterns, and report them.\n- Another scenario is generating code documentation by extracting comments and code structures from the AST.',
     },
   ],
-  declarationFilesAndAmbientDeclarations: [
+  declarations: [
     {
       href: '/js-track/typescript-introduction/declaration-files-and-ambient-declarations/page.mdx#declaration-files-in-typescript',
       title: 'Declaration Files in TypeScript',
@@ -2622,7 +2622,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         "- **Steps**:\n\n     - Create a `.d.ts` file named after the library (e.g., `library-name.d.ts`).\n     - Use a `declare module 'library-name'` block.\n     - Inside the module block, declare exported functions, classes, interfaces, etc.\n     - Use `export` statements to match the library's API.\n\n- **Example**:\n\n     ```typescript\n     // library-name.d.ts\n     declare module 'library-name' {\n       export function functionName(param: ParamType): ReturnType\n       export class ClassName {\n         // Declarations\n       }\n     }\n     ```",
     },
   ],
-  decoratorsAndMetadata: [
+  decorators: [
     {
       href: '/js-track/typescript-introduction/decorators-and-metadata/page.mdx#typescript-decorator-use-cases',
       title: 'Typescript Decorator Use Cases',
@@ -2674,7 +2674,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- Decorators can be used to annotate classes and constructor parameters with metadata about dependencies.\n- For example, an `@injectable` decorator can mark a class as available for injection, and an `@inject` decorator can specify which dependencies to inject.\n- At runtime, a dependency injection framework can use the metadata to resolve and inject the required instances.',
     },
   ],
-  enumsAndLiteralTypes: [
+  enums: [
     {
       href: '/js-track/typescript-introduction/enums-and-literal-types/page.mdx#enums-in-typescript',
       title: 'Enums in TypeScript',
@@ -2724,7 +2724,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         "- Heterogeneous enums mix numeric and string values.\n- They can lead to confusion and inconsistency.\n- May introduce unexpected behavior or bugs.\n- It's generally better to stick to either numeric or string enums for clarity and maintainability.",
     },
   ],
-  genericsAndConstraints: [
+  generics: [
     {
       href: '/js-track/typescript-introduction/generics-and-constraints/page.mdx#typescript-generics-basics',
       title: 'TypeScript Generics Basics',
@@ -2774,7 +2774,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- Generics provide type safety by ensuring that the types used are consistent and valid.\n- They maintain type information, enabling better tooling support, such as autocompletion and type checking.\n- Using `any` disables type checking, which can lead to runtime errors.\n- Generics make code more maintainable and self-documenting.',
     },
   ],
-  interfacesAndTypeAliases: [
+  interfaces: [
     {
       href: '/js-track/typescript-introduction/interfaces-and-type-aliases/page.mdx#typescript-interface-vs-aliases',
       title: 'Typescript Interface vs Aliases',
@@ -2826,7 +2826,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- Classes can implement interfaces to ensure they provide specific methods and properties.\n\n- The `implements` keyword is used to indicate that a class adheres to an interface.\n\n- **Example**:\n\n     ```typescript\n     interface Logger {\n       log(message: string): void\n     }\n\n     class ConsoleLogger implements Logger {\n       log(message: string): void {\n         console.log(message)\n       }\n     }\n     ```',
     },
   ],
-  mappedAndConditionalTypes: [
+  conditionalTypes: [
     {
       href: '/js-track/typescript-introduction/mapped-and-conditional-types/page.mdx#understanding-typescript-keyof',
       title: 'Understanding TypeScript Keyof',
@@ -2977,7 +2977,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- **Configuring Path Aliases**:\n     - Use the `baseUrl` and `paths` options in `tsconfig.json`.\n     - Example:\n\n       ```json\n       {\n         "compilerOptions": {\n           "baseUrl": "./",\n           "paths": {\n             "@models/*": ["src/models/*"],\n             "@controllers/*": ["src/controllers/*"]\n           }\n         }\n       }\n       ```\n\n- **Advantages**:\n     - Simplifies import paths, avoiding long relative paths like `../../../`.\n     - Improves code readability.\n     - Makes refactoring easier, as the alias abstracts the physical file path.',
     },
   ],
-  projectConfigurationAndBuildTools: [
+  projectConfiguration: [
     {
       href: '/js-track/typescript-introduction/project-configuration-and-build-tools/page.mdx#configuring-typescript-projects',
       title: 'Configuring TypeScript Projects',
@@ -3029,7 +3029,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- Enable the `strict` compiler option in `tsconfig.json`:\n\n     ```json\n     "compilerOptions": {\n       "strict": true\n     }\n     ```\n\n- This enables all strict type checking options.\n- It is recommended because it helps catch more errors at compile time, leading to safer and more reliable code.',
     },
   ],
-  typeGuardsAndTypeNarrowing: [
+  typeGuards: [
     {
       href: '/js-track/typescript-introduction/type-guards-and-type-narrowing/page.mdx#type-guard-functions-in-typescript',
       title: 'Type Guard Functions in TypeScript',
@@ -3079,7 +3079,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         "- The `in` operator checks if an object has a specific property.\n- It helps in type guarding by narrowing the variable to types that have that property.\n- It's useful when dealing with union types that share some properties but differ in others.\n- **Example**:\n\n     ```typescript\n     if ('startDate' in staff) {\n       // staff is narrowed to types that have 'startDate'\n     }\n     ```",
     },
   ],
-  typeInferenceAndCompatibility: [
+  typeInference: [
     {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#type-system-in-typescript',
       title: 'Type System in TypeScript',
@@ -3182,7 +3182,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- By using recursive mapped types and conditional types.\n- **Example**:\n\n     ```typescript\n     type DeepPartial<T> = {\n       [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]\n     }\n     ```',
     },
   ],
-  typescriptFundamentals: [
+  tsBasics: [
     {
       href: '/js-track/typescript-introduction/typescript-fundamentals/page.mdx#typescript-vs-javascript',
       title: 'TypeScript vs JavaScript',
@@ -3230,7 +3230,7 @@ export const TYPESCRIPT_INTRODUCTION = {
         '- **Type Safety**: Reduces runtime errors by catching them at compile time.\n- **Modularity**: Encourages breaking down code into modules and interfaces.\n- **Self-Documenting Code**: Explicit types make the codebase easier to understand.\n- **Refactoring Tools**: Enhanced IDE support aids in safely modifying code.\n- **Consistent Codebase**: Enforces coding standards and practices across teams.',
     },
   ],
-  utilityTypesDeepDive: [
+  utilityTypes: [
     {
       href: '/js-track/typescript-introduction/utility-types-deep-dive/page.mdx#purpose-of-partial-type',
       title: 'Purpose of Partial Type',
@@ -3284,7 +3284,7 @@ export const TYPESCRIPT_INTRODUCTION = {
 }
 
 export const ADVANCED_CONCEPTS = {
-  advancedPatternsAndBestPractices: [
+  designPatterns: [
     {
       href: '/js-track/advanced-concepts/advanced-patterns-and-best-practices/page.mdx#javascript-module-pattern',
       title: 'JavaScript Module Pattern',
@@ -3335,7 +3335,7 @@ export const ADVANCED_CONCEPTS = {
         '- The Revealing Module Pattern improves code clarity by having all members defined in the private scope and explicitly revealing public members.\n- It avoids the repetition of specifying public methods and properties, making the code easier to maintain.\n- It helps in clearly understanding which parts of the module are exposed and which are private.',
     },
   ],
-  asyncAwaitDeepDive: [
+  asyncAwait: [
     {
       href: '/js-track/advanced-concepts/async-await-deep-dive/page.mdx#purpose-of-async-keyword',
       title: 'Purpose of Async Keyword',
@@ -3385,7 +3385,7 @@ export const ADVANCED_CONCEPTS = {
         '- `Promise.allSettled` waits for all promises to settle (either fulfilled or rejected) and returns an array of their results.\n- Unlike `Promise.all`, it does not short-circuit if a promise rejects.\n- Use `Promise.allSettled` when you want to handle all results, regardless of whether some operations fail.',
     },
   ],
-  browserStorageMechanisms: [
+  browserStorage: [
     {
       href: '/js-track/advanced-concepts/browser-storage-mechanisms/page.mdx#difference-between-storage-options',
       title: 'Difference Between Storage Options',
@@ -3436,7 +3436,7 @@ export const ADVANCED_CONCEPTS = {
         '- Avoid storing sensitive information (e.g., passwords, personal data) without proper encryption.\n- Stored data can be accessed by scripts running in the browser, including potentially malicious ones.\n- Be cautious of Cross-Site Scripting (XSS) attacks that could expose stored data.',
     },
   ],
-  eventHandlingAndDelegation: [
+  eventHandling: [
     {
       href: '/js-track/advanced-concepts/event-handling-and-delegation/page.mdx#event-bubbling-vs-capturing',
       title: 'Event Bubbling vs Capturing',
@@ -3486,7 +3486,7 @@ export const ADVANCED_CONCEPTS = {
         '- Adding multiple event listeners to individual child elements can lead to increased memory usage and decreased performance.\n- To manage events more efficiently, use event delegation by attaching a single event listener to a common parent element.\n- This approach reduces the number of event listeners and handles events for both existing and future child elements.',
     },
   ],
-  functionalProgrammingPrinciples: [
+  functionalProgramming: [
     {
       href: '/js-track/advanced-concepts/functional-programming-principles/page.mdx#pure-functions-in-fp',
       title: 'Pure Functions in FP',
@@ -3538,7 +3538,7 @@ export const ADVANCED_CONCEPTS = {
         '- Function composition is the process of combining two or more functions to produce a new function.\n- Usage:\n\n     - Allows building complex functionality by composing simpler functions.\n     - Enhances code readability and reusability.\n     - Example:\n\n       ```javascript\n       const compose = (f, g) => (x) => f(g(x))\n       ```',
     },
   ],
-  generatorsAndIterators: [
+  generators: [
     {
       href: '/js-track/advanced-concepts/generators-and-iterators/page.mdx#purpose-of-symbol-iterator',
       title: 'Purpose of Symbol Iterator',
@@ -3586,7 +3586,7 @@ export const ADVANCED_CONCEPTS = {
         '- Generators can pause execution, making them useful for controlling asynchronous operations.\n- By yielding promises and resuming execution when promises resolve, generators can sequence asynchronous tasks in a synchronous-looking manner.\n- Libraries like **co** used generators to simplify async control flow before `async/await` was introduced.',
     },
   ],
-  higherOrderFunctionsAndCallbacks: [
+  higherOrderFunctions: [
     {
       href: '/js-track/advanced-concepts/higher-order-functions-and-callbacks/page.mdx#higher-order-function-overview',
       title: 'Higher-Order Function Overview',
@@ -3635,7 +3635,7 @@ export const ADVANCED_CONCEPTS = {
         "Callbacks are commonly used for asynchronous operations, such as handling responses from network requests or timers.\n\n   **Example:**\n\n   ```javascript\n   function fetchData(callback) {\n     setTimeout(() => {\n       const data = { id: 1, name: 'Alice' }\n       callback(data)\n     }, 1000)\n   }\n\n   fetchData((data) => {\n     console.log('Data received:', data)\n   })\n   ```",
     },
   ],
-  memoryLeaksAndPrevention: [
+  memoryLeaks: [
     {
       href: '/js-track/advanced-concepts/memory-leaks-and-prevention/page.mdx#understanding-memory-leaks-in-js',
       title: 'Understanding Memory Leaks in JS',
@@ -3684,7 +3684,7 @@ export const ADVANCED_CONCEPTS = {
         '- **WeakMap**:\n     - Keys must be objects.\n     - Holds weak references to keys, allowing garbage collection if there are no other references.\n     - Does not prevent garbage collection of keys.\n- **Map**:\n     - Keys can be any value.\n     - Holds strong references to keys, preventing garbage collection.\n     - Suitable for storing data where keys need to persist.',
     },
   ],
-  metaProgrammingWithProxiesAndReflect: [
+  metaProgramming: [
     {
       href: '/js-track/advanced-concepts/meta-programming-with-proxies-and-reflect/page.mdx#javascript-proxies-explained',
       title: 'JavaScript Proxies Explained',
@@ -3733,7 +3733,7 @@ export const ADVANCED_CONCEPTS = {
         "- **`apply` Trap**:\n\n     - Intercepts function invocation on callable targets (functions).\n     - Allows customization of function calls, including arguments and `this` context.\n\n     **Example**:\n\n     ```javascript\n     const handler = {\n       apply: function (target, thisArg, argumentsList) {\n         console.log('Function called')\n         return target.apply(thisArg, argumentsList)\n       },\n     }\n     ```\n\n- **`construct` Trap**:\n\n     - Intercepts object creation using the `new` operator on constructor functions.\n     - Allows customization of instance creation, including arguments.\n\n     **Example**:\n\n     ```javascript\n     const handler = {\n       construct: function (target, args, newTarget) {\n         console.log('Constructor called')\n         return new target(...args)\n       },\n     }\n     ```",
     },
   ],
-  performanceOptimizationTechniques: [
+  performanceOptimization: [
     {
       href: '/js-track/advanced-concepts/performance-optimization-techniques/page.mdx#javascript-debounce-vs-throttle',
       title: 'JavaScript Debounce vs Throttle',
@@ -3784,7 +3784,7 @@ export const ADVANCED_CONCEPTS = {
         '- Event delegation involves adding a single event listener to a parent element instead of multiple listeners to individual child elements.\n- It reduces the number of event listeners in the application, lowering memory usage and improving performance.\n- Events bubble up from child elements to parent elements, allowing the parent to handle events from its children.',
     },
   ],
-  promisesAndAsynchronousPatterns: [
+  promisePatterns: [
     {
       href: '/js-track/advanced-concepts/promises-and-asynchronous-patterns/page.mdx#understanding-javascript-promises',
       title: 'Understanding JavaScript Promises',
@@ -3832,7 +3832,7 @@ export const ADVANCED_CONCEPTS = {
         '- The Promise constructor anti-pattern involves creating a new Promise and unnecessarily wrapping code that already returns a promise.\n- This results in more complex code without any benefit.\n- Instead, you should return the existing promise directly.\n\n   **Anti-Pattern Example:**\n\n   ```javascript\n   function badFunction() {\n     return new Promise((resolve, reject) => {\n       existingPromise.then(resolve).catch(reject)\n     })\n   }\n   ```\n\n   **Correct Approach:**\n\n   ```javascript\n   function goodFunction() {\n     return existingPromise\n   }\n   ```',
     },
   ],
-  reflectionAndMetaProgramming: [
+  reflection: [
     {
       href: '/js-track/advanced-concepts/reflection-and-meta-programming/page.mdx#reflecting-javascript-apis',
       title: 'Reflecting JavaScript APIs',
@@ -3883,7 +3883,7 @@ export const ADVANCED_CONCEPTS = {
         '```javascript\n   const target = { name: \\\'Alice\\\', age: 30 }\n   const handler = {\n     get(target, property, receiver) {\n       console.log(`Property "${property}" accessed`)\n       return Reflect.get(target, property, receiver)\n     },\n   }\n   const proxy = new Proxy(target, handler)\n   console.log(proxy.name) // Logs: Property "name" accessed\n   // Outputs: Alice\n   ```\n\n- In this example, the proxy intercepts property access and logs the property name.\n- Reflect is used to perform the default get operation on the target object.',
     },
   ],
-  securityBestPractices: [
+  security: [
     {
       href: '/js-track/advanced-concepts/security-best-practices/page.mdx#preventing-cross-site-scripting',
       title: 'Preventing Cross-Site Scripting',
@@ -3935,7 +3935,7 @@ export const ADVANCED_CONCEPTS = {
         '- **Definition**: The `SameSite` attribute instructs browsers on whether to send cookies along with cross-site requests.\n- **Prevention**:\n     - Setting `SameSite=Strict` or `SameSite=Lax` limits the circumstances under which cookies are sent, reducing the risk of CSRF.\n     - By not sending cookies with cross-site requests, the server will not authenticate unintended requests from other sites.',
     },
   ],
-  serviceWorkersAndPwas: [
+  serviceWorkers: [
     {
       href: '/js-track/advanced-concepts/service-workers-and-pwas/page.mdx#service-workers-explained',
       title: 'Service Workers Explained',
@@ -3984,7 +3984,7 @@ export const ADVANCED_CONCEPTS = {
         "- Cache an offline fallback page during the Service Worker's `install` event.\n- In the `fetch` event, try to fetch the requested resource from the network.\n- If the network request fails, serve the cached offline page instead.\n- Ensures that users receive meaningful content even when offline.",
     },
   ],
-  symbolsAndSymbolUsage: [
+  symbols: [
     {
       href: '/js-track/advanced-concepts/symbols-and-symbol-usage/page.mdx#understanding-symbols-in-javascript',
       title: 'Understanding Symbols in JavaScript',
@@ -4035,7 +4035,7 @@ export const ADVANCED_CONCEPTS = {
         '- Symbols enable meta-programming by allowing developers to interact with and customize the internal behaviors of objects.\n- Well-known Symbols represent internal object methods that can be overridden to change how objects respond to operations like property access, iteration, type conversion, etc.\n- This allows for advanced programming patterns and customization of built-in behaviors.',
     },
   ],
-  webWorkersAndMultithreading: [
+  webWorkers: [
     {
       href: '/js-track/advanced-concepts/web-workers-and-multithreading/page.mdx#understanding-web-workers',
       title: 'Understanding Web Workers',
@@ -4088,7 +4088,7 @@ export const ADVANCED_CONCEPTS = {
 }
 
 export const FRONTEND_DEVELOPMENT = {
-  accessibilityImplementation: [
+  accessibility: [
     {
       href: '/js-track/frontend-development/accessibility-implementation/page.mdx#understanding-web-accessibility-features',
       title: 'Understanding Web Accessibility Features',
@@ -4139,7 +4139,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Use Semantic HTML**:\n     - Utilize appropriate HTML elements.\n- **Implement ARIA Wisely**:\n     - Use ARIA when necessary, avoid overusing.\n- **Ensure Keyboard Accessibility**:\n     - All interactive elements should be operable via keyboard.\n- **Provide Alternative Text**:\n     - Describe images and media using `alt` attributes.\n- **Maintain Color Contrast**:\n     - Ensure sufficient contrast between text and background.\n- **Test for Accessibility**:\n     - Use automated tools and manual testing techniques.\n- **Consider All Users in Design**:\n     - Incorporate accessibility from the beginning.',
     },
   ],
-  browserApisAndWebStandards: [
+  webApis: [
     {
       href: '/js-track/frontend-development/browser-apis-and-web-standards/page.mdx#understanding-the-dom-with-javascript',
       title: 'Understanding the DOM with JavaScript',
@@ -4191,7 +4191,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **localStorage**:\n     - **Persistence**: Data persists even after the browser is closed and reopened.\n     - **Scope**: Data is shared across all tabs and windows in the same origin.\n     - **Use Cases**: Storing user preferences, tokens, or data that needs to persist.\n- **sessionStorage**:\n     - **Persistence**: Data is cleared when the tab or window is closed.\n     - **Scope**: Data is specific to the tab or window where it was created.\n     - **Use Cases**: Temporary data storage for a single session, like form data.',
     },
   ],
-  buildToolsAndBundlers: [
+  buildTools: [
     {
       href: '/js-track/frontend-development/build-tools-and-bundlers/page.mdx#understanding-webpack-basics',
       title: 'Understanding Webpack Basics',
@@ -4238,7 +4238,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Set Mode to Production**:\n     - Enables built-in optimizations like minification and tree shaking.\n- **Code Splitting**:\n     - Use dynamic imports and `SplitChunksPlugin` to split code.\n- **Minification**:\n     - Use tools like Terser (default in production mode) to minify code.\n- **Caching and Hashing**:\n     - Use content hashes in filenames (`[contenthash]`) to enable browser caching.\n- **Tree Shaking**:\n     - Ensure code is written in a tree-shakeable way using ES6 modules.\n- **Analyzing Bundle Size**:\n     - Use tools like `webpack-bundle-analyzer` to identify and reduce large dependencies.\n- **Loaders and Plugins**:\n     - Optimize assets with loaders (e.g., image compression).\n     - Use plugins to clean up and manage the output directory.',
     },
   ],
-  buildingAndDeployingApplications: [
+  deployment: [
     {
       href: '/js-track/frontend-development/building-and-deploying-applications/page.mdx#setting-up-full-stack-application',
       title: 'Setting Up Full Stack Application',
@@ -4290,7 +4290,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Version Control Integration**:\n     - Connect your repository to the deployment platforms (Heroku, Netlify).\n- **Automated Builds**:\n     - Configure the platforms to build the application upon new commits.\n- **Deployment Scripts**:\n     - Set up scripts for building and testing before deployment.\n- **Environment Variables**:\n     - Ensure that deployment environments have the necessary variables configured.\n- **Monitoring and Rollback**:\n     - Implement monitoring to catch issues early.\n     - Set up the ability to roll back to previous versions if necessary.',
     },
   ],
-  codeSplittingAndLazyLoading: [
+  codeSplitting: [
     {
       href: '/js-track/frontend-development/code-splitting-and-lazy-loading/page.mdx#understanding-code-splitting-benefits',
       title: 'Understanding Code Splitting Benefits',
@@ -4340,7 +4340,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Bundle Size**:\n     - Smaller chunks can improve load times.\n     - Over-splitting can lead to too many requests.\n- **Network Overhead**:\n     - Each chunk requires an HTTP request.\n     - HTTP/2 mitigates some issues with parallel requests.\n- **Caching**:\n     - Proper caching strategies can enhance performance.\n     - Use content hashes to enable long-term caching.\n- **User Experience**:\n     - Ensure that loading indicators or placeholders are used.\n     - Avoid delays in critical interactions.\n- **Error Handling**:\n     - Handle failures in loading chunks gracefully.',
     },
   ],
-  commonInterviewQuestionsAndCodingChallenges: [
+  frontendInterviews: [
     {
       href: '/js-track/frontend-development/common-interview-questions-and-coding-challenges/page.mdx#reversing-linked-lists',
       title: 'Reversing Linked Lists',
@@ -4439,7 +4439,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- Redux provides a predictable state container with a strict unidirectional data flow. It simplifies state management, makes debugging easier through tools like Redux DevTools, and enforces best practices in organizing application state.',
     },
   ],
-  continuousIntegrationAndDeployment: [
+  ciCd: [
     {
       href: '/js-track/frontend-development/continuous-integration-and-deployment/page.mdx#understanding-continuous-integration',
       title: 'Understanding Continuous Integration',
@@ -4488,7 +4488,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Consistent Environments**:\n     - Ensures that applications run the same way in development, testing, and production.\n- **Isolation**:\n     - Containers isolate applications from each other and the underlying infrastructure.\n- **Portability**:\n     - Docker images can be deployed on any system that runs Docker.\n- **Efficiency**:\n     - Containers are lightweight and start quickly.',
     },
   ],
-  crossOriginCommunication: [
+  cors: [
     {
       href: '/js-track/frontend-development/cross-origin-communication/page.mdx#same-origin-policy-basics',
       title: 'Same-Origin Policy Basics',
@@ -4538,7 +4538,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Common Issues**:\n     - Missing or incorrect `Access-Control-Allow-Origin` header.\n     - Server not handling preflight `OPTIONS` requests.\n     - Using `*` with credentials, which is disallowed.\n     - Not specifying allowed methods or headers.\n- **Troubleshooting Steps**:\n     - Inspect network requests and responses using browser developer tools.\n     - Check server logs for errors.\n     - Ensure server is configured to send correct CORS headers.\n     - Verify that the client request aligns with what the server expects.',
     },
   ],
-  microFrontendArchitecture: [
+  microFrontends: [
     {
       href: '/js-track/frontend-development/micro-frontend-architecture/page.mdx#understanding-micro-frontend-architecture',
       title: 'Understanding Micro-Frontend Architecture',
@@ -4590,7 +4590,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Global Routing**:\n     - A central router controls navigation across all micro-frontends.\n     - Pros: Unified navigation, easier to manage global routes.\n     - Cons: Potential coupling between micro-frontends.\n- **Local Routing**:\n     - Each micro-frontend handles its own routing.\n     - Pros: Independence, encapsulation.\n     - Cons: Complexity in coordinating navigation between micro-frontends.\n- **Hybrid Approaches**:\n     - Combining global and local routing.\n     - Use URL patterns or query parameters to manage navigation.',
     },
   ],
-  renderingAndReconciliation: [
+  reconciliation: [
     {
       href: '/js-track/frontend-development/rendering-and-reconciliation/page.mdx#react-fiber-optimization',
       title: 'React Fiber Optimization',
@@ -4642,7 +4642,7 @@ export const FRONTEND_DEVELOPMENT = {
         "- **Cooperative Scheduling**:\n     - React breaks down rendering work into small units.\n     - After processing each unit, React checks if it should yield control back to the browser.\n- **Impact on Performance**:\n     - **Prevents Blocking**: Allows the browser to handle user input and other high-priority tasks.\n     - **Smooth UI**: Maintains responsiveness even during intensive rendering.\n     - **Adaptive Rendering**: Adjusts rendering work based on the application's current needs.",
     },
   ],
-  securityBestPractices: [
+  security: [
     {
       href: '/js-track/frontend-development/security-best-practices/page.mdx#owasp-top-web-security',
       title: 'OWASP Top Web Security',
@@ -4744,7 +4744,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Data Fetching on the Server**:\n\n     - Fetch data during server rendering.\n\n- **Passing Data to Client**:\n\n     - Embed serialized data in the HTML.\n\n- **State Hydration**:\n\n     - On the client, initialize state with the data from the server.\n\n- **Avoid Duplicate Requests**:\n\n     - Use techniques like `TransferState` in Angular or data hydration in React to prevent re-fetching data on the client.',
     },
   ],
-  stateManagementSolutions: [
+  stateManagement: [
     {
       href: '/js-track/frontend-development/state-management-solutions/page.mdx#redux-core-principles',
       title: 'Redux Core Principles',
@@ -4795,7 +4795,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- Middleware in Redux provides an extension point between dispatching an action and the moment it reaches the reducer.\n- It can intercept actions to perform side effects, such as logging, crash reporting, or handling asynchronous operations.\n- **Example**: The Redux Thunk middleware allows writing action creators that return a function instead of an action, enabling asynchronous dispatching.',
     },
   ],
-  testingStrategies: [
+  testing: [
     {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#unit-vs-integration-testing',
       title: 'Unit vs Integration Testing',
@@ -4846,7 +4846,7 @@ export const FRONTEND_DEVELOPMENT = {
         "- **Using `async/await`**:\n\n     ```javascript\n     test('fetches data asynchronously', async () => {\n       const data = await fetchData();\n       expect(data).toBeDefined();\n     });\n     ```\n\n- **Using Promises**:\n\n     ```javascript\n     test('fetches data using promises', () => {\n       return fetchData().then((data) => {\n         expect(data).toBeDefined();\n       });\n     });\n     ```\n\n- **Using `done` Callback**:\n\n     ```javascript\n     test('fetches data with done callback', (done) => {\n       fetchData().then((data) => {\n         expect(data).toBeDefined();\n         done();\n       });\n     });\n     ```",
     },
   ],
-  versionControlAndCollaboration: [
+  git: [
     {
       href: '/js-track/frontend-development/version-control-and-collaboration/page.mdx#git-merge-vs-rebase',
       title: 'Git Merge vs Rebase',
@@ -4895,7 +4895,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Format**:\n     - **Subject Line**:\n       - Brief summary (50 characters or less).\n       - Use imperative mood (e.g., "Fix bug" not "Fixed bug").\n     - **Body**:\n       - Detailed explanation if necessary.\n       - Explain the "what" and "why", not the "how".\n     - **Separate Subject and Body with a Blank Line**.\n- **Consistency**:\n     - Follow team or project guidelines.\n- **Clarity**:\n     - Be clear and concise.\n- **Avoid**:\n     - Vague messages like "Misc updates" or "Fix stuff".',
     },
   ],
-  virtualDomAndRendering: [
+  virtualDom: [
     {
       href: '/js-track/frontend-development/virtual-dom-and-rendering/page.mdx#virtual-dom-performance-benefits',
       title: 'Virtual DOM Performance Benefits',
@@ -4947,7 +4947,7 @@ export const FRONTEND_DEVELOPMENT = {
         "- **Use Keys Properly**: Assign unique and stable keys to list items.\n- **Avoid Inline Functions in Render**: Define functions outside of the render method to prevent new function references.\n- **Optimize Component Updates**:\n     - Use `React.memo` or `PureComponent` to prevent unnecessary re-renders.\n     - Implement `shouldComponentUpdate` for fine-grained control.\n- **Minimize State and Props Changes**: Only update state when necessary.\n- **Split Components**: Break down large components into smaller, manageable pieces.\n- **Avoid Deeply Nested Objects in State**: Use immutable data structures or libraries like Immutable.js.\n- **Batch Updates**: Leverage React's batching mechanism to group state updates.",
     },
   ],
-  webPerformanceMetrics: [
+  performance: [
     {
       href: '/js-track/frontend-development/web-performance-metrics/page.mdx#understanding-core-web-vitals',
       title: 'Understanding Core Web Vitals',

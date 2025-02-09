@@ -1,0 +1,291 @@
+export const metadata = {
+  title: 'Understanding Closure Fundamentals',
+  description:
+    'Master closure creation, variable capture mechanics, and memory implications in JavaScript.',
+}
+
+# **Closure Fundamentals**
+
+Closures are functions that have access to variables in their outer scope, even after the outer function has returned. They form the basis for data privacy, state management, and partial application in JavaScript.
+
+## **Core Concepts**
+
+**Key Components:**
+
+1. **Variable Capture**: Preserving outer scope variables
+2. **Memory Management**: Closure lifecycle
+3. **Data Privacy**: Information hiding
+4. **Partial Application**: Function transformation
+5. **State Encapsulation**: Maintaining state
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Basic Closure Pattern
+function createCounter(initialValue: number = 0) {
+  let count = initialValue
+
+  return {
+    increment(): number {
+      return ++count
+    },
+    decrement(): number {
+      return --count
+    },
+    getValue(): number {
+      return count
+    },
+  }
+}
+
+// Data Privacy with Closures
+class BankAccount {
+  private static createAccount(initialBalance: number) {
+    let balance = initialBalance
+
+    return {
+      deposit(amount: number): number {
+        if (amount > 0) {
+          balance += amount
+        }
+        return balance
+      },
+      withdraw(amount: number): number {
+        if (amount > 0 && amount <= balance) {
+          balance -= amount
+        }
+        return balance
+      },
+      getBalance(): number {
+        return balance
+      },
+    }
+  }
+
+  static openAccount(initialBalance: number = 0) {
+    return this.createAccount(initialBalance)
+  }
+}
+
+// Function Currying with Closures
+function curry<T extends any[], R>(fn: (...args: T) => R): (...args: T) => R {
+  return function curried(...args: any[]): any {
+    if (args.length >= fn.length) {
+      return fn.apply(null, args)
+    }
+
+    return function (...moreArgs: any[]) {
+      return curried.apply(null, args.concat(moreArgs))
+    }
+  }
+}
+
+// Memoization Pattern
+function memoize<T extends (...args: any[]) => any>(
+  fn: T,
+  resolver?: (...args: Parameters<T>) => string,
+): T {
+  const cache = new Map<string, ReturnType<T>>()
+
+  return function (...args: Parameters<T>): ReturnType<T> {
+    const key = resolver ? resolver(...args) : JSON.stringify(args)
+
+    if (cache.has(key)) {
+      return cache.get(key)!
+    }
+
+    const result = fn.apply(this, args)
+    cache.set(key, result)
+    return result
+  } as T
+}
+
+// Event Handler with Cleanup
+function createEventManager() {
+  const handlers = new Map<string, Set<Function>>()
+
+  return {
+    on(event: string, handler: Function): void {
+      if (!handlers.has(event)) {
+        handlers.set(event, new Set())
+      }
+      handlers.get(event)!.add(handler)
+    },
+    off(event: string, handler: Function): void {
+      handlers.get(event)?.delete(handler)
+      if (handlers.get(event)?.size === 0) {
+        handlers.delete(event)
+      }
+    },
+    emit(event: string, data?: any): void {
+      handlers.get(event)?.forEach((handler) => handler(data))
+    },
+    cleanup(): void {
+      handlers.clear()
+    },
+  }
+}
+
+// Async State Management
+function createAsyncState<T>() {
+  let state: T
+  let listeners: ((value: T) => void)[] = []
+
+  return {
+    async setState(newState: T | Promise<T>): Promise<void> {
+      state = await newState
+      listeners.forEach((listener) => listener(state))
+    },
+    getState(): T {
+      return state
+    },
+    subscribe(listener: (value: T) => void): () => void {
+      listeners.push(listener)
+      return () => {
+        listeners = listeners.filter((l) => l !== listener)
+      }
+    },
+  }
+}
+
+// Partial Application
+function partial<T extends (...args: any[]) => any>(
+  fn: T,
+  ...args: Parameters<T>
+): (...remainingArgs: any[]) => ReturnType<T> {
+  return function (...remainingArgs: any[]) {
+    return fn.apply(this, [...args, ...remainingArgs])
+  }
+}
+
+// Module Pattern with Private Methods
+function createModule() {
+  // Private methods
+  function privateHelper() {
+    return 'helper result'
+  }
+
+  function privateCalculation(x: number) {
+    return x * 2
+  }
+
+  // Public API
+  return {
+    publicMethod(x: number) {
+      const helperResult = privateHelper()
+      return privateCalculation(x) + helperResult
+    },
+  }
+}
+
+// Throttle Implementation
+function throttle<T extends (...args: any[]) => any>(
+  fn: T,
+  wait: number,
+): (...args: Parameters<T>) => void {
+  let lastCall = 0
+  let timeout: NodeJS.Timeout | null = null
+
+  return function (...args: Parameters<T>): void {
+    const now = Date.now()
+
+    if (lastCall && now < lastCall + wait) {
+      // If the function is being called too soon
+      if (timeout) clearTimeout(timeout)
+      timeout = setTimeout(() => {
+        lastCall = now
+        fn.apply(this, args)
+      }, wait)
+    } else {
+      lastCall = now
+      fn.apply(this, args)
+    }
+  }
+}
+
+// Observer Pattern with Closures
+function createObservable<T>() {
+  const observers = new Set<(value: T) => void>()
+  let currentValue: T | undefined
+
+  return {
+    subscribe(observer: (value: T) => void): () => void {
+      observers.add(observer)
+      if (currentValue !== undefined) {
+        observer(currentValue)
+      }
+      return () => observers.delete(observer)
+    },
+    notify(value: T): void {
+      currentValue = value
+      observers.forEach((observer) => observer(value))
+    },
+  }
+}
+
+// Example Usage
+function example() {
+  // Counter
+  const counter = createCounter(10)
+  console.log(counter.getValue()) // 10
+  counter.increment() // 11
+  counter.increment() // 12
+  console.log(counter.getValue()) // 12
+
+  // Bank Account
+  const account = BankAccount.openAccount(1000)
+  account.deposit(500)
+  account.withdraw(200)
+  console.log(account.getBalance()) // 1300
+
+  // Currying
+  const add = (a: number, b: number, c: number) => a + b + c
+  const curriedAdd = curry(add)
+  console.log(curriedAdd(1)(2)(3)) // 6
+
+  // Memoization
+  const expensiveOperation = memoize((n: number) => {
+    // Simulate expensive calculation
+    return new Promise((resolve) => setTimeout(() => resolve(n * 2), 1000))
+  })
+
+  // Event Management
+  const events = createEventManager()
+  events.on('update', (data) => console.log('Updated:', data))
+  events.emit('update', { id: 1 })
+  events.cleanup()
+
+  // Async State
+  const state = createAsyncState<number>()
+  const unsubscribe = state.subscribe((value) =>
+    console.log('State updated:', value),
+  )
+  state.setState(42)
+  unsubscribe()
+
+  // Observable
+  const observable = createObservable<string>()
+  const unsubscribeObserver = observable.subscribe((value) =>
+    console.log('Received:', value),
+  )
+  observable.notify('Hello')
+  unsubscribeObserver()
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various closure patterns:
+
+1. **Basic Closure**: Counter implementation
+2. **Data Privacy**: Private state management
+3. **Function Transformation**: Currying and partial application
+4. **Memoization**: Caching with closures
+5. **Event Handling**: Event system implementation
+6. **State Management**: Async state handling
+7. **Module Pattern**: Private methods and state
+8. **Observable Pattern**: Reactive programming basics
+
+Each implementation shows proper closure usage while maintaining clean state management and memory efficiency. These patterns help create robust and maintainable JavaScript applications.

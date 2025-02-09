@@ -1,0 +1,272 @@
+export const metadata = {
+  title: 'Advanced Type Manipulation in TypeScript',
+  description:
+    'Master type manipulation using utility types, mapped types, conditional types, and type operators.',
+}
+
+# **Type Manipulation**
+
+Advanced type manipulation in TypeScript enables the creation of complex, reusable type definitions. Understanding these concepts is crucial for building type-safe and maintainable applications.
+
+## **Core Concepts**
+
+**Key Areas:**
+
+1. **Utility Types**: Built-in type transformations
+2. **Mapped Types**: Property transformations
+3. **Conditional Types**: Type logic
+4. **Template Literals**: String manipulation
+5. **Type Inference**: Type deduction
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Advanced Utility Types
+namespace AdvancedUtilities {
+  // Deep Partial implementation
+  type DeepPartial<T> = {
+    [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P]
+  }
+
+  // Deep Required implementation
+  type DeepRequired<T> = {
+    [P in keyof T]-?: T[P] extends object ? DeepRequired<T[P]> : T[P]
+  }
+
+  // Deep Readonly implementation
+  type DeepReadonly<T> = {
+    readonly [P in keyof T]: T[P] extends object ? DeepReadonly<T[P]> : T[P]
+  }
+
+  // Pick with deep paths
+  type PathKeys<T> = T extends object
+    ? {
+        [K in keyof T]: K extends string
+          ? T[K] extends object
+            ? K | `${K}.${PathKeys<T[K]>}`
+            : K
+          : never
+      }[keyof T]
+    : never
+
+  // Deep Pick implementation
+  type DeepPick<T, Path extends PathKeys<T>> = Path extends keyof T
+    ? { [K in Path]: T[K] }
+    : Path extends `${infer K}.${infer Rest}`
+      ? K extends keyof T
+        ? { [P in K]: DeepPick<T[K], Rest & PathKeys<T[K]>> }
+        : never
+      : never
+}
+
+// Advanced Mapped Types
+namespace MappedTypes {
+  // Mutable version of a type
+  type Mutable<T> = {
+    -readonly [P in keyof T]: T[P]
+  }
+
+  // Optional version of a type
+  type Optional<T> = {
+    [P in keyof T]?: T[P]
+  }
+
+  // Type with transformed property names
+  type PrefixKeys<T, P extends string> = {
+    [K in keyof T as `${P}${string & K}`]: T[K]
+  }
+
+  // Filter properties by type
+  type FilterByType<T, U> = {
+    [P in keyof T as T[P] extends U ? P : never]: T[P]
+  }
+
+  // Rename properties
+  type RenameProps<T, R extends { [K in keyof T]: string }> = {
+    [P in keyof T as R[P]]: T[P]
+  }
+}
+
+// Advanced Conditional Types
+namespace ConditionalTypes {
+  // Extract function parameters
+  type Parameters<T> = T extends (...args: infer P) => any ? P : never
+
+  // Extract function return type
+  type ReturnType<T> = T extends (...args: any[]) => infer R ? R : never
+
+  // Extract promise type
+  type Awaited<T> =
+    T extends Promise<infer R> ? (R extends Promise<any> ? Awaited<R> : R) : T
+
+  // Extract array element type
+  type ElementType<T> = T extends (infer E)[] ? E : T
+
+  // Exclude null and undefined
+  type NonNullable<T> = T extends null | undefined ? never : T
+}
+
+// Template Literal Types
+namespace TemplateLiterals {
+  // String literal combinations
+  type EventName<T extends string> =
+    | `${T}Changed`
+    | `${T}Updated`
+    | `${T}Deleted`
+
+  // URL path parameters
+  type PathParams<T extends string> =
+    T extends `${infer Start}/:${infer Param}/${infer Rest}`
+      ? { [K in Param | keyof PathParams<Rest>]: string }
+      : T extends `${infer Start}/:${infer Param}`
+        ? { [K in Param]: string }
+        : {}
+
+  // Object property paths
+  type PropertyPath<T> = T extends object
+    ? {
+        [K in keyof T]: K extends string | number
+          ? T[K] extends object
+            ? K | `${K}.${PropertyPath<T[K]>}`
+            : K
+          : never
+      }[keyof T]
+    : never
+}
+
+// Type Inference Patterns
+namespace TypeInference {
+  // Infer tuple elements
+  type Head<T extends any[]> = T extends [infer H, ...any[]] ? H : never
+
+  type Tail<T extends any[]> = T extends [any, ...infer R] ? R : never
+
+  // Infer function overloads
+  type Overloads<T> = T extends {
+    (...args: infer A1): infer R1
+    (...args: infer A2): infer R2
+  }
+    ? [(...args: A1) => R1, (...args: A2) => R2]
+    : T
+
+  // Infer constructor parameters
+  type ConstructorParameters<T extends new (...args: any[]) => any> =
+    T extends new (...args: infer P) => any ? P : never
+
+  // Infer instance type
+  type InstanceType<T extends new (...args: any[]) => any> = T extends new (
+    ...args: any[]
+  ) => infer R
+    ? R
+    : any
+}
+
+// Advanced Type Examples
+// Complex data structure type
+interface ComplexData {
+  users: {
+    [id: string]: {
+      profile: {
+        name: string
+        age: number
+      }
+      settings: {
+        theme: 'light' | 'dark'
+        notifications: boolean
+      }
+    }
+  }
+  posts: {
+    [id: string]: {
+      title: string
+      content: string
+      author: string
+      tags: string[]
+    }
+  }
+}
+
+// Example Usage
+type UserProfile = AdvancedUtilities.DeepPick<ComplexData, 'users.profile'>
+
+type UserSettings = AdvancedUtilities.DeepPick<ComplexData, 'users.settings'>
+
+type PostData = AdvancedUtilities.DeepPartial<ComplexData['posts']>
+
+// Function type extraction
+type AsyncFunction = (input: string) => Promise<number>
+
+type InputType = Parameters<AsyncFunction>[0] // string
+type OutputType = Awaited<ReturnType<AsyncFunction>> // number
+
+// Property path generation
+type DataPaths = TemplateLiterals.PropertyPath<ComplexData>
+
+// Example type transformations
+interface User {
+  id: string
+  name: string
+  email: string
+}
+
+type AdminUser = PrefixKeys<User, 'admin'>
+// { adminId: string, adminName: string, adminEmail: string }
+
+type UserMethods = FilterByType<User, string>
+// { id: string, name: string, email: string }
+
+type RenamedUser = RenameProps<
+  User,
+  {
+    id: 'userId'
+    name: 'userName'
+    email: 'userEmail'
+  }
+>
+// { userId: string, userName: string, userEmail: string }
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various type manipulation patterns:
+
+1. **Utility Types**:
+
+   - Deep transformations
+   - Property access
+   - Type modifications
+
+2. **Mapped Types**:
+
+   - Property transformations
+   - Key modifications
+   - Type filtering
+
+3. **Conditional Types**:
+
+   - Type inference
+   - Type extraction
+   - Type conditions
+
+4. **Template Literals**:
+
+   - String manipulation
+   - Pattern matching
+   - Path generation
+
+5. **Type Inference**:
+   - Tuple manipulation
+   - Function types
+   - Constructor types
+
+Each implementation shows advanced type manipulation while maintaining:
+
+- Type safety
+- Code clarity
+- Reusability
+- Maintainability
+- Flexibility
+
+These patterns help create robust type systems that enhance code quality and developer experience.

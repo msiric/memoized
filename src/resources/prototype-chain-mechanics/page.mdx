@@ -1,0 +1,279 @@
+export const metadata = {
+  title: 'Understanding Prototype Chain Mechanics',
+  description:
+    'Deep dive into how the prototype chain works, property lookup process, and the relationship between __proto__ and prototype.',
+}
+
+# **Prototype Chain Mechanics**
+
+The prototype chain is JavaScript's mechanism for inheritance. Understanding how objects are linked and how property lookup works is fundamental to mastering JavaScript's object-oriented capabilities.
+
+## **Core Concepts**
+
+**Key Components:**
+
+1. **Property Lookup**: Traversing the chain
+2. **Object Creation**: Prototypal inheritance
+3. **Property Shadowing**: Override behavior
+4. **Chain Manipulation**: Modifying prototypes
+5. **Performance**: Lookup optimization
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Basic Prototype Chain
+class PrototypeBasics {
+  // Standard object creation
+  static createObjectDemo() {
+    const parent = {
+      parentMethod() {
+        return 'parent method'
+      },
+    }
+
+    // Create object with specific prototype
+    const child = Object.create(parent)
+    child.childMethod = function () {
+      return 'child method'
+    }
+
+    // Property lookup traverses the chain
+    return child.parentMethod() // 'parent method'
+  }
+
+  // Prototype chain inspection
+  static inspectChain(obj: any): any[] {
+    const chain = []
+    let current = obj
+
+    while (current !== null) {
+      chain.push(current)
+      current = Object.getPrototypeOf(current)
+    }
+
+    return chain
+  }
+}
+
+// Property Descriptor Management
+class PropertyManagement {
+  static createWithDescriptors() {
+    return Object.create(Object.prototype, {
+      readOnlyProp: {
+        value: 42,
+        writable: false,
+        enumerable: true,
+        configurable: false,
+      },
+      computedProp: {
+        get() {
+          return this._value * 2
+        },
+        set(value: number) {
+          this._value = value
+        },
+        enumerable: true,
+        configurable: true,
+      },
+      _value: {
+        value: 0,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+      },
+    })
+  }
+
+  static getDescriptor(obj: any, prop: string) {
+    return Object.getOwnPropertyDescriptor(obj, prop)
+  }
+}
+
+// Multiple Inheritance Simulation
+class MultipleInheritance {
+  static mixin(target: any, ...sources: any[]): any {
+    sources.forEach((source) => {
+      Object.getOwnPropertyNames(source).forEach((name) => {
+        if (name !== 'constructor' && name !== 'prototype') {
+          Object.defineProperty(
+            target,
+            name,
+            Object.getOwnPropertyDescriptor(source, name)!,
+          )
+        }
+      })
+    })
+    return target
+  }
+}
+
+// Constructor Function Pattern
+function Animal(this: any, name: string) {
+  this.name = name
+}
+
+Animal.prototype.speak = function () {
+  return `${this.name} makes a sound`
+}
+
+function Dog(this: any, name: string) {
+  Animal.call(this, name)
+}
+
+// Set up inheritance
+Dog.prototype = Object.create(Animal.prototype)
+Dog.prototype.constructor = Dog
+
+Dog.prototype.bark = function () {
+  return `${this.name} barks!`
+}
+
+// Modern Class Implementation
+class ModernAnimal {
+  protected name: string
+
+  constructor(name: string) {
+    this.name = name
+  }
+
+  speak(): string {
+    return `${this.name} makes a sound`
+  }
+}
+
+class ModernDog extends ModernAnimal {
+  bark(): string {
+    return `${this.name} barks!`
+  }
+
+  // Override parent method
+  speak(): string {
+    return `${super.speak()} - overridden`
+  }
+}
+
+// Prototype Chain Performance
+class PerformancePatterns {
+  // Optimize property lookup
+  static createOptimizedChain() {
+    const proto = {
+      sharedMethod() {
+        return 'shared'
+      },
+    }
+
+    // Create multiple objects sharing the same prototype
+    const instances = Array.from({ length: 1000 }, () => Object.create(proto))
+
+    return instances
+  }
+
+  // Measure lookup performance
+  static measureLookup() {
+    const instances = this.createOptimizedChain()
+
+    console.time('property-lookup')
+    instances.forEach((instance) => {
+      instance.sharedMethod()
+    })
+    console.timeEnd('property-lookup')
+  }
+}
+
+// Dynamic Prototype Manipulation
+class DynamicPrototypes {
+  static extend(target: any, source: any) {
+    // Add properties to prototype at runtime
+    Object.getOwnPropertyNames(source).forEach((name) => {
+      Object.defineProperty(
+        target.prototype,
+        name,
+        Object.getOwnPropertyDescriptor(source, name)!,
+      )
+    })
+  }
+
+  static addMethod(constructor: any, name: string, fn: Function) {
+    constructor.prototype[name] = fn
+  }
+}
+
+// Proxy-based Prototype Access
+class ProtoProxy {
+  static createProxyChain(target: any) {
+    return new Proxy(target, {
+      get(target, property) {
+        // Custom property lookup logic
+        let value = target[property]
+
+        if (value === undefined) {
+          const proto = Object.getPrototypeOf(target)
+          if (proto !== null) {
+            value = proto[property]
+          }
+        }
+
+        return typeof value === 'function' ? value.bind(target) : value
+      },
+    })
+  }
+}
+
+// Method Borrowing and Function Context
+class MethodBorrowing {
+  static borrow(method: Function, context: any, ...args: any[]) {
+    return method.apply(context, args)
+  }
+
+  static installMethod(target: any, name: string, source: any) {
+    target[name] = function (...args: any[]) {
+      return source[name].apply(this, args)
+    }
+  }
+}
+
+// Example Usage
+function example() {
+  // Basic prototype chain
+  const basics = PrototypeBasics.createObjectDemo()
+  console.log(basics)
+
+  // Property descriptors
+  const obj = PropertyManagement.createWithDescriptors()
+  console.log(PropertyManagement.getDescriptor(obj, 'readOnlyProp'))
+
+  // Modern class inheritance
+  const dog = new ModernDog('Rex')
+  console.log(dog.speak()) // "Rex makes a sound - overridden"
+  console.log(dog.bark()) // "Rex barks!"
+
+  // Dynamic prototypes
+  DynamicPrototypes.addMethod(ModernDog, 'jump', function () {
+    return `${this.name} jumps!`
+  })
+
+  // Proxy chain
+  const proxy = ProtoProxy.createProxyChain(new ModernDog('Proxy'))
+  console.log(proxy.speak())
+
+  // Performance measurement
+  PerformancePatterns.measureLookup()
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various prototype chain concepts:
+
+1. **Basic Chain**: Property lookup mechanism
+2. **Property Management**: Descriptor handling
+3. **Multiple Inheritance**: Mixin patterns
+4. **Constructor Functions**: Traditional patterns
+5. **Modern Classes**: ES6+ inheritance
+6. **Performance**: Optimization techniques
+7. **Dynamic Manipulation**: Runtime modifications
+8. **Proxy Patterns**: Custom lookup behavior
+
+Each implementation shows proper handling of prototype chain mechanics while maintaining performance and clarity. These patterns help create efficient object-oriented JavaScript applications.

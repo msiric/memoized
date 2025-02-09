@@ -1,0 +1,298 @@
+export const metadata = {
+  title: 'Understanding this Binding Rules in JavaScript',
+  description:
+    'Master the four rules of this binding: default, implicit, explicit, and new binding.',
+}
+
+# **this Binding Rules**
+
+The `this` keyword in JavaScript is dynamically bound based on how a function is called. Understanding these binding rules is crucial for writing reliable JavaScript code.
+
+## **Core Binding Rules**
+
+**Key Rules:**
+
+1. **Default Binding**: Standalone function calls
+2. **Implicit Binding**: Method calls
+3. **Explicit Binding**: call, apply, bind
+4. **new Binding**: Constructor calls
+5. **Arrow Functions**: Lexical this
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Default Binding Demonstration
+class DefaultBinding {
+  static demonstrate() {
+    function standalone() {
+      // 'this' is undefined in strict mode
+      // 'this' is global object in non-strict mode
+      console.log(this)
+    }
+
+    standalone() // undefined or window/global
+  }
+}
+
+// Implicit Binding
+class ImplicitBinding {
+  name: string
+
+  constructor(name: string) {
+    this.name = name
+  }
+
+  greet() {
+    return `Hello, ${this.name}!`
+  }
+
+  // Lost binding example
+  delayedGreet() {
+    setTimeout(function () {
+      console.log(this.name) // undefined - this binding is lost
+    }, 100)
+
+    // Fix with arrow function
+    setTimeout(() => {
+      console.log(this.name) // works correctly
+    }, 100)
+  }
+}
+
+// Explicit Binding Utilities
+class BindingUtils {
+  static callExample<T>(
+    fn: (this: T, ...args: any[]) => any,
+    thisArg: T,
+    ...args: any[]
+  ) {
+    return fn.call(thisArg, ...args)
+  }
+
+  static applyExample<T>(
+    fn: (this: T, ...args: any[]) => any,
+    thisArg: T,
+    args: any[],
+  ) {
+    return fn.apply(thisArg, args)
+  }
+
+  static bindExample<T>(fn: (this: T, ...args: any[]) => any, thisArg: T) {
+    return fn.bind(thisArg)
+  }
+}
+
+// Constructor Binding
+class ConstructorBinding {
+  private value: number
+
+  constructor(value: number) {
+    // 'this' is bound to the new object
+    this.value = value
+  }
+
+  getValue(): number {
+    return this.value
+  }
+
+  // Factory function demonstrating manual binding
+  static create(value: number) {
+    if (!(this instanceof ConstructorBinding)) {
+      return new ConstructorBinding(value)
+    }
+    this.value = value
+    return this
+  }
+}
+
+// Event Handler Binding
+class EventHandlerBinding {
+  private element: HTMLElement
+  private clickCount: number = 0
+
+  constructor(elementId: string) {
+    this.element = document.getElementById(elementId)!
+    this.setupHandlers()
+  }
+
+  private setupHandlers() {
+    // Wrong way - loses 'this' binding
+    this.element.addEventListener('click', function () {
+      this.clickCount++ // this is undefined
+    })
+
+    // Correct way 1 - bind
+    this.element.addEventListener('click', this.handleClick.bind(this))
+
+    // Correct way 2 - arrow function
+    this.element.addEventListener('click', () => {
+      this.clickCount++
+    })
+  }
+
+  private handleClick() {
+    this.clickCount++
+  }
+}
+
+// Method Borrowing
+class MethodBorrowing {
+  static borrow() {
+    const person = {
+      name: 'John',
+      greet() {
+        return `Hello, ${this.name}!`
+      },
+    }
+
+    const anotherPerson = {
+      name: 'Jane',
+    }
+
+    // Borrow the greet method
+    const greet = person.greet.bind(anotherPerson)
+    return greet() // "Hello, Jane!"
+  }
+}
+
+// Context Preservation
+class ContextPreservation {
+  private value: number = 0
+
+  increment() {
+    this.value++
+    return this
+  }
+
+  decrement() {
+    this.value--
+    return this
+  }
+
+  getValue(): number {
+    return this.value
+  }
+
+  // Method that loses context
+  async asyncOperation() {
+    try {
+      await this.someAsyncTask()
+      this.value++ // 'this' might be undefined
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // Fixed version
+  async asyncOperationFixed() {
+    const boundOperation = async () => {
+      try {
+        await this.someAsyncTask()
+        this.value++ // 'this' is preserved
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    return boundOperation()
+  }
+
+  private async someAsyncTask() {
+    return new Promise((resolve) => setTimeout(resolve, 100))
+  }
+}
+
+// Bound Function Properties
+class BoundMethods {
+  private value: number = 0
+
+  // Auto-bound method using property initializer
+  increment = () => {
+    this.value++
+    return this.value
+  }
+
+  // Regular method - needs binding
+  decrement() {
+    this.value--
+    return this.value
+  }
+
+  static demonstrate() {
+    const instance = new BoundMethods()
+    const inc = instance.increment // remains bound
+    const dec = instance.decrement // loses binding
+
+    inc() // works
+    dec() // throws error
+  }
+}
+
+// Dynamic Context
+class DynamicContext {
+  private static registry = new Map<string, Function>()
+
+  static register(name: string, fn: Function) {
+    this.registry.set(name, fn)
+  }
+
+  static execute(name: string, context: any, ...args: any[]) {
+    const fn = this.registry.get(name)
+    if (fn) {
+      return fn.apply(context, args)
+    }
+    throw new Error(`No function registered with name: ${name}`)
+  }
+}
+
+// Example Usage
+function example() {
+  // Implicit Binding
+  const person = new ImplicitBinding('John')
+  console.log(person.greet()) // "Hello, John!"
+
+  // Explicit Binding
+  const greet = function (this: { name: string }) {
+    return `Hello, ${this.name}!`
+  }
+
+  const context = { name: 'Jane' }
+  console.log(BindingUtils.callExample(greet, context))
+  console.log(BindingUtils.applyExample(greet, context, []))
+
+  // Constructor Binding
+  const instance = new ConstructorBinding(42)
+  console.log(instance.getValue()) // 42
+
+  // Method Borrowing
+  console.log(MethodBorrowing.borrow()) // "Hello, Jane!"
+
+  // Context Preservation
+  const counter = new ContextPreservation()
+  counter.increment().increment() // Chaining works
+  console.log(counter.getValue()) // 2
+
+  // Dynamic Context
+  DynamicContext.register('test', function () {
+    return this.value
+  })
+  console.log(DynamicContext.execute('test', { value: 42 })) // 42
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various 'this' binding patterns:
+
+1. **Default Binding**: Standalone function behavior
+2. **Implicit Binding**: Method calls and context
+3. **Explicit Binding**: Using call, apply, bind
+4. **Constructor Binding**: new operator behavior
+5. **Event Handlers**: DOM event binding patterns
+6. **Method Borrowing**: Sharing methods between objects
+7. **Context Preservation**: Maintaining this in callbacks
+8. **Bound Methods**: Auto-binding techniques
+
+Each implementation shows proper handling of 'this' binding while maintaining code clarity and reliability. These patterns help create robust JavaScript applications with predictable behavior.

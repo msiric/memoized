@@ -1,0 +1,364 @@
+export const metadata = {
+  title: 'Understanding Async/Await',
+  description:
+    'Deep dive into async/await mechanics, error handling patterns, and advanced usage with loops and parallel execution.',
+}
+
+# **Async/Await**
+
+Async/await provides a synchronous-looking way to handle asynchronous operations. Understanding advanced patterns is crucial for writing efficient and maintainable asynchronous code.
+
+## **Core Concepts**
+
+**Key Areas:**
+
+1. **Error Handling**: Try-catch patterns
+2. **Control Flow**: Sequential vs parallel
+3. **Loop Handling**: Async iterations
+4. **Performance**: Optimization techniques
+5. **Advanced Patterns**: Complex scenarios
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Error Handling Patterns
+class AsyncErrorHandler {
+  // Structured error handling
+  static async withErrorBoundary<T>(
+    operation: () => Promise<T>,
+    errorHandler?: (error: Error) => Promise<T> | T,
+  ): Promise<T> {
+    try {
+      return await operation()
+    } catch (error) {
+      if (errorHandler) {
+        return errorHandler(error as Error)
+      }
+      throw error
+    }
+  }
+
+  // Multiple error types
+  static async withTypedErrors<T>(operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation()
+    } catch (error) {
+      if (error instanceof NetworkError) {
+        // Handle network errors
+        throw new Error('Network error occurred')
+      } else if (error instanceof ValidationError) {
+        // Handle validation errors
+        throw new Error('Validation failed')
+      } else {
+        // Handle unknown errors
+        throw new Error('Unknown error occurred')
+      }
+    }
+  }
+}
+
+// Control Flow Patterns
+class AsyncFlow {
+  // Sequential execution with dependencies
+  static async sequence<T>(
+    tasks: Array<(previous: T) => Promise<T>>,
+    initial: T,
+  ): Promise<T> {
+    let result = initial
+    for (const task of tasks) {
+      result = await task(result)
+    }
+    return result
+  }
+
+  // Parallel execution with limit
+  static async parallel<T>(
+    tasks: Array<() => Promise<T>>,
+    concurrency: number = Infinity,
+  ): Promise<T[]> {
+    const results: T[] = []
+    const executing = new Set<Promise<void>>()
+
+    for (const [i, task] of tasks.entries()) {
+      const execution = task().then((result) => {
+        results[i] = result
+        executing.delete(execution)
+      })
+
+      executing.add(execution)
+
+      if (executing.size >= concurrency) {
+        await Promise.race(Array.from(executing))
+      }
+    }
+
+    await Promise.all(executing)
+    return results
+  }
+}
+
+// Async Loop Patterns
+class AsyncLoops {
+  // Async forEach with controlled concurrency
+  static async forEach<T>(
+    items: T[],
+    operation: (item: T) => Promise<void>,
+    concurrency: number = Infinity,
+  ): Promise<void> {
+    const active = new Set<Promise<void>>()
+
+    for (const item of items) {
+      const execution = operation(item).then(() => active.delete(execution))
+
+      active.add(execution)
+
+      if (active.size >= concurrency) {
+        await Promise.race(active)
+      }
+    }
+
+    await Promise.all(active)
+  }
+
+  // Async map with batching
+  static async map<T, U>(
+    items: T[],
+    operation: (item: T) => Promise<U>,
+    batchSize: number = 1,
+  ): Promise<U[]> {
+    const results: U[] = []
+
+    for (let i = 0; i < items.length; i += batchSize) {
+      const batch = items.slice(i, i + batchSize)
+      const batchResults = await Promise.all(batch.map(operation))
+      results.push(...batchResults)
+    }
+
+    return results
+  }
+
+  // Async reduce
+  static async reduce<T, U>(
+    items: T[],
+    operation: (acc: U, item: T) => Promise<U>,
+    initial: U,
+  ): Promise<U> {
+    let result = initial
+    for (const item of items) {
+      result = await operation(result, item)
+    }
+    return result
+  }
+}
+
+// Performance Optimization Patterns
+class AsyncOptimization {
+  // Memoization with TTL
+  static memoize<T>(
+    fn: (...args: any[]) => Promise<T>,
+    ttl: number = 5000,
+  ): (...args: any[]) => Promise<T> {
+    const cache = new Map<
+      string,
+      {
+        value: T
+        timestamp: number
+      }
+    >()
+
+    return async (...args: any[]): Promise<T> => {
+      const key = JSON.stringify(args)
+      const cached = cache.get(key)
+
+      if (cached && Date.now() - cached.timestamp < ttl) {
+        return cached.value
+      }
+
+      const result = await fn(...args)
+      cache.set(key, {
+        value: result,
+        timestamp: Date.now(),
+      })
+      return result
+    }
+  }
+
+  // Resource pooling
+  static createPool<T>(
+    factory: () => Promise<T>,
+    destroy: (resource: T) => Promise<void>,
+    size: number,
+  ) {
+    const available: T[] = []
+    const inUse = new Set<T>()
+
+    async function initialize() {
+      for (let i = 0; i < size; i++) {
+        available.push(await factory())
+      }
+    }
+
+    return {
+      async acquire(): Promise<T> {
+        if (available.length === 0) {
+          await new Promise((resolve) => setImmediate(resolve))
+          return this.acquire()
+        }
+        const resource = available.pop()!
+        inUse.add(resource)
+        return resource
+      },
+
+      async release(resource: T): Promise<void> {
+        inUse.delete(resource)
+        available.push(resource)
+      },
+
+      async cleanup(): Promise<void> {
+        await Promise.all([...available, ...inUse].map(destroy))
+        available.length = 0
+        inUse.clear()
+      },
+    }
+  }
+}
+
+// Advanced Patterns
+class AdvancedAsyncPatterns {
+  // Async composition
+  static compose<T>(...fns: Array<(x: T) => Promise<T>>) {
+    return async (x: T): Promise<T> => {
+      let result = x
+      for (const fn of fns) {
+        result = await fn(result)
+      }
+      return result
+    }
+  }
+
+  // Async pipeline with error boundaries
+  static async pipeline<T>(
+    initial: T,
+    ...stages: Array<{
+      operation: (x: T) => Promise<T>
+      cleanup?: (x: T) => Promise<void>
+    }>
+  ): Promise<T> {
+    let result = initial
+
+    for (let i = 0; i < stages.length; i++) {
+      const { operation, cleanup } = stages[i]
+      try {
+        result = await operation(result)
+      } catch (error) {
+        // Run cleanup for completed stages in reverse
+        for (let j = i - 1; j >= 0; j--) {
+          if (stages[j].cleanup) {
+            await stages[j].cleanup!(result)
+          }
+        }
+        throw error
+      }
+    }
+
+    return result
+  }
+
+  // Async generator pipeline
+  static async *transform<T, U>(
+    source: AsyncIterable<T>,
+    ...transformers: Array<(x: T) => Promise<U>>
+  ): AsyncGenerator<U> {
+    for await (const item of source) {
+      for (const transformer of transformers) {
+        yield await transformer(item)
+      }
+    }
+  }
+}
+
+// Example Usage
+async function example() {
+  // Error handling
+  const result = await AsyncErrorHandler.withErrorBoundary(
+    async () => {
+      const response = await fetch('https://api.example.com')
+      if (!response.ok) throw new Error('API error')
+      return response.json()
+    },
+    async (error) => {
+      console.error('Error occurred:', error)
+      return { fallback: true }
+    },
+  )
+
+  // Sequential flow
+  const tasks = [
+    async (x: number) => x + 1,
+    async (x: number) => x * 2,
+    async (x: number) => x - 3,
+  ]
+  const flowResult = await AsyncFlow.sequence(tasks, 5)
+
+  // Parallel with concurrency
+  const parallelTasks = [
+    () => Promise.resolve(1),
+    () => Promise.resolve(2),
+    () => Promise.resolve(3),
+  ]
+  const parallelResults = await AsyncFlow.parallel(parallelTasks, 2)
+
+  // Async forEach
+  await AsyncLoops.forEach(
+    [1, 2, 3],
+    async (item) => {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      console.log(item)
+    },
+    2,
+  )
+
+  // Memoized function
+  const memoizedFetch = AsyncOptimization.memoize(async (url: string) => {
+    const response = await fetch(url)
+    return response.json()
+  })
+
+  // Async pipeline
+  const pipelineResult = await AdvancedAsyncPatterns.pipeline(
+    'initial',
+    {
+      operation: async (x) => x.toUpperCase(),
+      cleanup: async (x) => console.log('Cleanup:', x),
+    },
+    {
+      operation: async (x) => `${x}!`,
+    },
+  )
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various async/await patterns:
+
+1. **Error Handling**: Structured error boundaries
+2. **Control Flow**: Sequential and parallel execution
+3. **Loop Handling**: Async iterations with control
+4. **Performance**: Memoization and pooling
+5. **Advanced Patterns**: Composition and pipelines
+6. **Resource Management**: Cleanup and pooling
+7. **Type Safety**: Full TypeScript support
+8. **Optimization**: Concurrency and batching
+
+Each implementation shows advanced async/await usage while maintaining:
+
+- Error handling
+- Resource management
+- Performance optimization
+- Type safety
+- Clean code practices
+
+These patterns help create robust asynchronous operations in modern JavaScript applications.

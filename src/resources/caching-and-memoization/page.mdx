@@ -1,0 +1,374 @@
+export const metadata = {
+  title: 'Advanced Caching and Memoization Techniques',
+  description:
+    'Master function memoization, implementing caching strategies, and optimizing expensive computations in JavaScript.',
+}
+
+# **Caching and Memoization**
+
+Caching and memoization are powerful optimization techniques that can significantly improve application performance by storing and reusing previously computed results.
+
+## **Core Concepts**
+
+**Key Areas:**
+
+1. **Function Memoization**: Result caching
+2. **Cache Strategies**: LRU, TTL, etc.
+3. **Memory Management**: Cache cleanup
+4. **Async Caching**: Promise caching
+5. **Advanced Patterns**: Complex scenarios
+
+## **Implementation Patterns and Best Practices**
+
+<CodeGroup>
+
+```ts
+// Basic Memoization
+class Memoizer {
+  // Simple memoize function
+  static memoize<T extends (...args: any[]) => any>(
+    fn: T,
+    resolver?: (...args: Parameters<T>) => string,
+  ): T {
+    const cache = new Map<string, ReturnType<T>>()
+
+    return function (this: any, ...args: Parameters<T>): ReturnType<T> {
+      const key = resolver ? resolver(...args) : JSON.stringify(args)
+
+      if (cache.has(key)) {
+        return cache.get(key)!
+      }
+
+      const result = fn.apply(this, args)
+      cache.set(key, result)
+      return result
+    } as T
+  }
+
+  // Memoize with TTL (Time To Live)
+  static memoizeWithTTL<T extends (...args: any[]) => any>(
+    fn: T,
+    ttl: number,
+    resolver?: (...args: Parameters<T>) => string,
+  ): T {
+    const cache = new Map<
+      string,
+      {
+        value: ReturnType<T>
+        timestamp: number
+      }
+    >()
+
+    return function (this: any, ...args: Parameters<T>): ReturnType<T> {
+      const key = resolver ? resolver(...args) : JSON.stringify(args)
+      const now = Date.now()
+      const cached = cache.get(key)
+
+      if (cached && now - cached.timestamp < ttl) {
+        return cached.value
+      }
+
+      const result = fn.apply(this, args)
+      cache.set(key, {
+        value: result,
+        timestamp: now,
+      })
+      return result
+    } as T
+  }
+}
+
+// LRU Cache Implementation
+class LRUCache<K, V> {
+  private cache: Map<K, V>
+  private keyOrder: K[]
+
+  constructor(private capacity: number) {
+    this.cache = new Map()
+    this.keyOrder = []
+  }
+
+  get(key: K): V | undefined {
+    const value = this.cache.get(key)
+
+    if (value !== undefined) {
+      // Move key to most recently used position
+      this.keyOrder = this.keyOrder.filter((k) => k !== key)
+      this.keyOrder.push(key)
+    }
+
+    return value
+  }
+
+  set(key: K, value: V): void {
+    if (this.cache.has(key)) {
+      // Update existing key
+      this.cache.set(key, value)
+      this.keyOrder = this.keyOrder.filter((k) => k !== key)
+      this.keyOrder.push(key)
+    } else {
+      // Add new key
+      if (this.cache.size >= this.capacity) {
+        const lruKey = this.keyOrder.shift()!
+        this.cache.delete(lruKey)
+      }
+      this.cache.set(key, value)
+      this.keyOrder.push(key)
+    }
+  }
+
+  clear(): void {
+    this.cache.clear()
+    this.keyOrder = []
+  }
+}
+
+// Async Cache with Promise Memoization
+class AsyncCache<T> {
+  private cache: Map<
+    string,
+    {
+      promise: Promise<T>
+      timestamp: number
+      ttl: number
+    }
+  > = new Map()
+
+  async get(
+    key: string,
+    factory: () => Promise<T>,
+    ttl: number = Infinity,
+  ): Promise<T> {
+    const now = Date.now()
+    const cached = this.cache.get(key)
+
+    if (cached && now - cached.timestamp < cached.ttl) {
+      return cached.promise
+    }
+
+    const promise = factory().catch((error) => {
+      this.cache.delete(key)
+      throw error
+    })
+
+    this.cache.set(key, {
+      promise,
+      timestamp: now,
+      ttl,
+    })
+
+    return promise
+  }
+
+  clear(): void {
+    this.cache.clear()
+  }
+}
+
+// Computed Property Cache
+class ComputedCache<T extends object> {
+  private cache = new Map<string, any>()
+  private dependencies = new Map<string, Set<string>>()
+
+  constructor(private target: T) {}
+
+  compute<R>(key: string, computer: (target: T) => R, deps: Array<keyof T>): R {
+    // Track dependencies
+    this.dependencies.set(key, new Set(deps as string[]))
+
+    // Check if cache is valid
+    if (this.isCacheValid(key)) {
+      return this.cache.get(key)
+    }
+
+    // Compute and cache result
+    const result = computer(this.target)
+    this.cache.set(key, result)
+    return result
+  }
+
+  private isCacheValid(key: string): boolean {
+    const deps = this.dependencies.get(key)
+    if (!deps || !this.cache.has(key)) return false
+
+    // Check if any dependencies have changed
+    const cachedTarget = new Map<string, any>()
+    deps.forEach((dep) => {
+      cachedTarget.set(dep, (this.target as any)[dep])
+    })
+
+    return Array.from(deps).every(
+      (dep) => cachedTarget.get(dep) === (this.target as any)[dep],
+    )
+  }
+
+  invalidate(key: string): void {
+    this.cache.delete(key)
+  }
+
+  invalidateAll(): void {
+    this.cache.clear()
+  }
+}
+
+// Multi-Level Cache
+class MultiLevelCache<T> {
+  constructor(
+    private levels: Array<{
+      get: (key: string) => Promise<T | null>
+      set: (key: string, value: T) => Promise<void>
+      ttl?: number
+    }>,
+  ) {}
+
+  async get(key: string): Promise<T | null> {
+    for (let i = 0; i < this.levels.length; i++) {
+      const value = await this.levels[i].get(key)
+      if (value !== null) {
+        // Write back to higher levels
+        for (let j = 0; j < i; j++) {
+          await this.levels[j].set(key, value)
+        }
+        return value
+      }
+    }
+    return null
+  }
+
+  async set(key: string, value: T): Promise<void> {
+    await Promise.all(this.levels.map((level) => level.set(key, value)))
+  }
+}
+
+// Resource Pool with Cache
+class ResourcePool<T> {
+  private available: T[] = []
+  private inUse = new Map<T, number>()
+  private factory: () => Promise<T>
+  private cleanup?: (resource: T) => Promise<void>
+
+  constructor(
+    factory: () => Promise<T>,
+    private minSize: number,
+    private maxSize: number,
+    cleanup?: (resource: T) => Promise<void>,
+  ) {
+    this.factory = factory
+    this.cleanup = cleanup
+  }
+
+  async acquire(): Promise<T> {
+    if (this.available.length === 0 && this.inUse.size < this.maxSize) {
+      const resource = await this.factory()
+      this.available.push(resource)
+    }
+
+    while (this.available.length === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+
+    const resource = this.available.pop()!
+    this.inUse.set(resource, Date.now())
+    return resource
+  }
+
+  async release(resource: T): Promise<void> {
+    this.inUse.delete(resource)
+
+    if (this.available.length < this.minSize) {
+      this.available.push(resource)
+    } else {
+      if (this.cleanup) {
+        await this.cleanup(resource)
+      }
+    }
+  }
+}
+
+// Example Usage
+async function example() {
+  // Basic memoization
+  const fibonacci = Memoizer.memoize((n: number): number => {
+    if (n <= 1) return n
+    return fibonacci(n - 1) + fibonacci(n - 2)
+  })
+
+  console.log(fibonacci(40)) // Fast!
+
+  // LRU Cache
+  const lru = new LRUCache<string, number>(3)
+  lru.set('a', 1)
+  lru.set('b', 2)
+  lru.set('c', 3)
+  lru.set('d', 4) // 'a' is evicted
+
+  // Async cache
+  const asyncCache = new AsyncCache<any>()
+  const data = await asyncCache.get(
+    'key',
+    async () => {
+      const response = await fetch('https://api.example.com')
+      return response.json()
+    },
+    5000,
+  ) // 5 second TTL
+
+  // Computed cache
+  const user = {
+    firstName: 'John',
+    lastName: 'Doe',
+  }
+
+  const computed = new ComputedCache(user)
+  const fullName = computed.compute(
+    'fullName',
+    (target) => `${target.firstName} ${target.lastName}`,
+    ['firstName', 'lastName'],
+  )
+
+  // Multi-level cache
+  const multiLevel = new MultiLevelCache([
+    {
+      // Memory cache
+      get: async (key) => localStorage.getItem(key),
+      set: async (key, value) => localStorage.setItem(key, value),
+    },
+    {
+      // API cache
+      get: async (key) => {
+        const response = await fetch(`/api/cache/${key}`)
+        return response.ok ? response.json() : null
+      },
+      set: async (key, value) => {
+        await fetch(`/api/cache/${key}`, {
+          method: 'PUT',
+          body: JSON.stringify(value),
+        })
+      },
+    },
+  ])
+}
+```
+
+</CodeGroup>
+
+The implementations above demonstrate various caching and memoization patterns:
+
+1. **Basic Memoization**: Simple result caching
+2. **LRU Cache**: Least Recently Used strategy
+3. **Async Cache**: Promise memoization
+4. **Computed Cache**: Dependency tracking
+5. **Multi-Level Cache**: Hierarchical caching
+6. **Resource Pool**: Resource reuse
+7. **TTL Caching**: Time-based invalidation
+8. **Memory Management**: Cache cleanup
+
+Each implementation shows proper caching strategies while maintaining:
+
+- Memory efficiency
+- Type safety
+- Performance optimization
+- Resource management
+- Clean code practices
+
+These patterns help create performant applications by efficiently managing computed results and resources.
