@@ -147,13 +147,33 @@ describe('Lesson services', () => {
         where: { slug: 'lesson-slug' },
         select: {
           id: true,
-          problems: true,
           title: true,
           access: true,
+          problems: {
+            orderBy: {
+              difficulty: 'asc',
+            },
+            select: {
+              id: true,
+              difficulty: true,
+              href: true,
+              title: true,
+              createdAt: true,
+              updatedAt: true,
+              lessonId: true,
+              type: true,
+              question: true,
+              answer: true,
+            },
+          },
           section: {
             select: {
               slug: true,
-              course: { select: { slug: true } },
+              course: {
+                select: {
+                  slug: true,
+                },
+              },
             },
           },
         },
@@ -170,13 +190,33 @@ describe('Lesson services', () => {
         where: { slug: 'invalid-slug' },
         select: {
           id: true,
-          problems: true,
           title: true,
           access: true,
+          problems: {
+            orderBy: {
+              difficulty: 'asc',
+            },
+            select: {
+              id: true,
+              difficulty: true,
+              href: true,
+              title: true,
+              createdAt: true,
+              updatedAt: true,
+              lessonId: true,
+              type: true,
+              question: true,
+              answer: true,
+            },
+          },
           section: {
             select: {
               slug: true,
-              course: { select: { slug: true } },
+              course: {
+                select: {
+                  slug: true,
+                },
+              },
             },
           },
         },

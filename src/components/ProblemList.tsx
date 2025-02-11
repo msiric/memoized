@@ -3,13 +3,9 @@
 import { markProblem } from '@/actions/markProblem'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
-import { ProblemRow, ProblemStatus } from '@/types'
+import { ProblemFilter, ProblemRow, ProblemStatus } from '@/types'
 import { CustomError, handleError } from '@/utils/error'
-import {
-  ProblemFilter,
-  capitalizeFirstLetter,
-  filterAndSortProblems,
-} from '@/utils/helpers'
+import { capitalizeFirstLetter, filterAndSortProblems } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
 import { Lesson, ProblemDifficulty, ProblemType } from '@prisma/client'
 import clsx from 'clsx'

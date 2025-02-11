@@ -14,6 +14,8 @@ import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
 
+slugify.extend({ '/': '-' })
+
 const ACTIVE_DISCOUNT = {
   name: 'Memoized Beta Launch',
   percent_off: 50,
@@ -48,26 +50,37 @@ const ACTIVE_DISCOUNT = {
 export const syncContent = async () => {
   const contentDir = path.join(process.cwd(), 'src', CONTENT_FOLDER)
 
-  for (const [courseOrder, course] of completeCurriculum.entries()) {
+  let courseOrder = 0
+  let sectionOrder = 0
+  let lessonOrder = 0
+  let resourceOrder = 0
+
+  for (const course of completeCurriculum.values()) {
     const {
       id: courseId,
       title: courseTitle,
       description: courseDescription,
       href: courseHref,
     } = course
-    const courseSlug = slugify(courseTitle, { lower: true })
+    const courseSlug = slugify(courseTitle, {
+      replacement: '-', // replace spaces with -
+      lower: true, // convert to lower case
+      strict: true, // strip special characters except replacement
+      trim: true, // trim leading and trailing replacement chars
+      // No need to use charmap since the forward slash will be replaced by default
+    })
 
     const courseRecord = await upsertCourse(
       courseSlug,
       courseTitle,
       courseDescription,
       courseHref,
-      courseOrder,
+      courseOrder++,
     )
 
     console.log(`Synced course: ${courseTitle}`)
 
-    for (const [sectionOrder, section] of course.sections.entries()) {
+    for (const section of course.sections.values()) {
       const {
         title: sectionTitle,
         description: sectionDescription,
@@ -91,14 +104,14 @@ export const syncContent = async () => {
         sectionTitle,
         sectionDescription,
         sectionContent,
-        sectionOrder,
+        sectionOrder++,
         sectionHref,
         courseRecord.id,
       )
 
       console.log(`Synced section: ${sectionTitle}`)
 
-      for (const [lessonOrder, lesson] of courseLessons.entries()) {
+      for (const lesson of courseLessons.values()) {
         const {
           title: lessonTitle,
           description: lessonDescription,
@@ -127,7 +140,7 @@ export const syncContent = async () => {
           lessonTitle,
           lessonDescription,
           lessonContent,
-          lessonOrder,
+          lessonOrder++,
           lessonAccess,
           lessonHref,
           sectionRecord.id,
@@ -156,7 +169,7 @@ export const syncContent = async () => {
             `src/${RESOURCES_FOLDER}`,
           )
 
-          for (const [resourceOrder, resource] of lesson.resources.entries()) {
+          for (const resource of lesson.resources.values()) {
             const {
               title: resourceTitle,
               description: resourceDescription,
@@ -178,7 +191,7 @@ export const syncContent = async () => {
               resourceTitle,
               resourceDescription,
               resourceContent,
-              resourceOrder,
+              resourceOrder++,
               resourceHref,
               lessonAccess,
               lessonRecord.id,

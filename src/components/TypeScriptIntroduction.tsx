@@ -7,6 +7,7 @@ import {
   JS_TRACK_PREFIX,
   TYPESCRIPT_INTRODUCTION_PREFIX,
 } from '../constants'
+import { JS_TRACK_RESOURCES } from '../resources'
 import { LessonConfig } from '../types'
 
 export const typescriptIntroduction: LessonConfig[] = [
@@ -57,6 +58,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     description: 'Learn union types, intersections, and type guards.',
     access: AccessOptions.PREMIUM,
     problems: TYPESCRIPT_INTRODUCTION.advancedTypes,
+    resources: JS_TRACK_RESOURCES.typescriptAdvanced,
   },
   {
     id: '/conditional-types',

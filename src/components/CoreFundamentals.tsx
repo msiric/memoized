@@ -7,6 +7,7 @@ import {
   COURSES_PREFIX,
   JS_TRACK_PREFIX,
 } from '../constants'
+import { JS_TRACK_RESOURCES } from '../resources'
 import { LessonConfig } from '../types'
 
 export const coreFundamentals: LessonConfig[] = [
@@ -24,7 +25,7 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/context-and-call-stack`,
     title: 'Context & Call Stack',
     description: 'Understand execution contexts and call stack management.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.contextAndCallStack,
   },
   {
@@ -32,7 +33,7 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/scope-and-hoisting`,
     title: 'Scope & Hoisting',
     description: 'Master variable scope and hoisting mechanisms in JavaScript.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.scopeAndHoisting,
   },
   {
@@ -40,47 +41,50 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/closures`,
     title: 'Closures',
     description: 'Learn about closures and lexical scoping in JavaScript.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.closures,
+    resources: JS_TRACK_RESOURCES.closures,
   },
   {
     id: '/this-and-binding',
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/this-and-binding`,
     title: 'this & Binding',
     description: 'Master the this keyword and various binding mechanisms.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.thisAndBinding,
+    resources: JS_TRACK_RESOURCES.thisKeyword,
   },
   {
     id: '/prototypes',
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/prototypes`,
     title: 'Prototypes',
     description: 'Understand prototypal inheritance and prototype chains.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.prototypes,
+    resources: JS_TRACK_RESOURCES.prototypes,
   },
   {
     id: '/function-types',
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/function-types`,
     title: 'Function Types',
     description: 'Explore different function types and invocation patterns.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.functionTypes,
   },
   {
-    id: '/object-and-class-patterns',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/object-and-class-patterns`,
-    title: 'Object and Class Patterns',
+    id: '/objects-and-classes',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/objects-and-classes`,
+    title: 'Objects and Classes',
     description: 'Learn common object creation and class patterns.',
-    access: AccessOptions.PREMIUM,
-    problems: CORE_FUNDAMENTALS.objectAndClassPatterns,
+    access: AccessOptions.FREE,
+    problems: CORE_FUNDAMENTALS.objectsAndClasses,
   },
   {
     id: '/error-handling',
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/error-handling`,
     title: 'Error Handling',
     description: 'Master error handling and debugging techniques.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.errorHandling,
   },
   {
@@ -88,7 +92,7 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/memory-management`,
     title: 'Memory Management',
     description: 'Understand memory management and garbage collection.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.memoryManagement,
   },
   {
@@ -96,7 +100,7 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/modules`,
     title: 'Modules',
     description: 'Learn about module systems and modular code organization.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.modules,
   },
   {
@@ -104,15 +108,15 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/event-loop`,
     title: 'Event Loop',
     description: 'Master the event loop and asynchronous programming concepts.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.eventLoop,
   },
   {
-    id: '/async-js',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/async-js`,
+    id: '/async-javascript',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/async-javascript`,
     title: 'Async JavaScript',
     description: 'Deep dive into asynchronous JavaScript patterns.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.asyncJs,
   },
   {
@@ -120,7 +124,7 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/scope-chain`,
     title: 'Scope Chain',
     description: 'Understand scope chain and lexical scoping.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.scopeChain,
   },
   {
@@ -128,7 +132,7 @@ export const coreFundamentals: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}/data-types`,
     title: 'Data Types',
     description: 'Master JavaScript data types and structures.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: CORE_FUNDAMENTALS.dataTypes,
   },
 ]

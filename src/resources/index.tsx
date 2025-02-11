@@ -150,105 +150,136 @@ export const DSA_TRACK_RESOURCES = {
 }
 
 export const JS_TRACK_RESOURCES = {
-  coreFundamentals: [
+  closures: [
     {
-      id: '/closures',
-      href: `${RESOURCES_PREFIX}/closures`,
-      title: 'Closures',
-      description: 'Understanding closures and lexical scope in JavaScript.',
+      id: '/lexical-scope',
+      href: `${RESOURCES_PREFIX}/lexical-scope`,
+      title: 'Lexical Scope',
+      description: 'Deep dive into lexical scope and the scope chain.',
       about:
-        'Master closures, scope chains, and practical applications in modern JavaScript.',
+        'Master how JavaScript handles variable scope, scope chain creation, and lexical scope determination at compile time.',
     },
     {
-      id: '/promises',
-      href: `${RESOURCES_PREFIX}/promises`,
-      title: 'Promises',
-      description: 'Deep dive into JavaScript Promises and async programming.',
+      id: '/closure-fundamentals',
+      href: `${RESOURCES_PREFIX}/closure-fundamentals`,
+      title: 'Closure Fundamentals',
+      description: 'Understanding closure creation and behavior.',
       about:
-        'Learn to handle asynchronous operations effectively using Promises and async/await.',
-    },
-    {
-      id: '/prototypes',
-      href: `${RESOURCES_PREFIX}/prototypes`,
-      title: 'Prototypes',
-      description: 'Understanding prototype inheritance in JavaScript.',
-      about: `Master JavaScript's prototype-based inheritance and object creation patterns.`,
+        'Learn how closures work, variable capture mechanics, and memory implications of closure creation.',
     },
   ],
-  advancedConcepts: [
+  thisKeyword: [
     {
-      id: '/event-loop',
-      href: `${RESOURCES_PREFIX}/event-loop`,
-      title: 'Event Loop',
-      description: `Understanding JavaScript's event loop and concurrency model.`,
+      id: '/binding-rules',
+      href: `${RESOURCES_PREFIX}/binding-rules`,
+      title: 'Binding Rules',
+      description: 'Comprehensive guide to this binding in JavaScript.',
       about:
-        'Deep dive into how JavaScript handles asynchronous operations under the hood.',
+        'Master the four rules of this binding: default, implicit, explicit, and new binding. Understand binding precedence and edge cases.',
     },
     {
-      id: '/generators',
-      href: `${RESOURCES_PREFIX}/generators`,
-      title: 'Generators',
-      description: 'Implementation of Generators and Iterators in JavaScript.',
+      id: '/this-patterns',
+      href: `${RESOURCES_PREFIX}/this-patterns`,
+      title: 'this Patterns',
+      description: 'Common patterns and gotchas with this keyword.',
       about:
-        'Master generator functions and iterators for better async flow control.',
-    },
-    {
-      id: '/memory-management',
-      href: `${RESOURCES_PREFIX}/memory-management`,
-      title: 'Memory Management',
-      description:
-        'Understanding JavaScript memory management and garbage collection.',
-      about:
-        'Learn how JavaScript manages memory and avoid common memory leaks.',
+        'Learn practical this patterns in methods, callbacks, and classes. Master solutions to common this-related problems in arrow functions, event handlers, and more.',
     },
   ],
-  typescript: [
+  prototypes: [
     {
-      id: '/type-system',
-      href: `${RESOURCES_PREFIX}/type-system`,
-      title: 'Type System',
-      description: `Understanding TypeScript's type system fundamentals.`,
-      about: `Master TypeScript's type system, interfaces, and type manipulation.`,
-    },
-    {
-      id: '/generics',
-      href: `${RESOURCES_PREFIX}/generics`,
-      title: 'Generics',
-      description: 'Implementation of Generic types in TypeScript.',
-      about: 'Learn to write flexible, reusable code with TypeScript generics.',
-    },
-    {
-      id: '/advanced-types',
-      href: `${RESOURCES_PREFIX}/advanced-types`,
-      title: 'Advanced Types',
-      description: `Deep dive into TypeScript's advanced type features.`,
+      id: '/prototype-chain',
+      href: `${RESOURCES_PREFIX}/prototype-chain`,
+      title: 'Prototype Chain',
+      description: 'In-depth look at the prototype chain.',
       about:
-        'Master mapped types, conditional types, and type inference in TypeScript.',
+        'Deep dive into how the prototype chain works, property lookup process, and the relationship between __proto__ and prototype.',
+    },
+    {
+      id: '/inheritance-patterns',
+      href: `${RESOURCES_PREFIX}/inheritance-patterns`,
+      title: 'Inheritance Patterns',
+      description: 'Advanced inheritance patterns in JavaScript.',
+      about:
+        'Master various inheritance patterns: pseudoclassical, prototypal, functional, and ES6 classes. Understand their trade-offs and best use cases.',
     },
   ],
-  frontend: [
+  promises: [
     {
-      id: '/dom-manipulation',
-      href: `${RESOURCES_PREFIX}/dom-manipulation`,
-      title: 'DOM Manipulation',
-      description: 'Efficient DOM manipulation techniques and best practices.',
+      id: '/promise-internals',
+      href: `${RESOURCES_PREFIX}/promise-internals`,
+      title: 'Promise Internals',
+      description: 'Understanding Promise mechanics and states.',
       about:
-        'Learn to manipulate the DOM efficiently and handle browser events.',
+        'Deep dive into Promise states, transitions, microtask queuing, and the Promise resolution procedure.',
     },
     {
-      id: '/web-apis',
-      href: `${RESOURCES_PREFIX}/web-apis`,
-      title: 'Web APIs',
-      description: 'Working with modern Web APIs and browser features.',
-      about: 'Master essential Web APIs for building modern web applications.',
+      id: '/promise-patterns',
+      href: `${RESOURCES_PREFIX}/promise-patterns`,
+      title: 'Promise Patterns',
+      description: 'Advanced Promise patterns and compositions.',
+      about:
+        'Master complex Promise patterns including parallel execution, sequencing, error handling strategies, and cancellation patterns.',
     },
     {
-      id: '/performance',
-      href: `${RESOURCES_PREFIX}/performance`,
-      title: 'Performance',
-      description: 'Frontend performance optimization techniques.',
+      id: '/async-await',
+      href: `${RESOURCES_PREFIX}/async-await`,
+      title: 'Async/Await',
+      description: 'Deep dive into async/await mechanics.',
       about:
-        'Learn to optimize JavaScript code and improve application performance.',
+        'Understand how async/await works under the hood, error handling patterns, and advanced usage with loops, parallel execution, and more.',
+    },
+  ],
+  performanceOptimization: [
+    {
+      id: '/caching-and-memoization',
+      href: `${RESOURCES_PREFIX}/caching-and-memoization`,
+      title: 'Caching and Memoization',
+      description: 'Advanced caching and memoization techniques.',
+      about:
+        'Master function memoization, implementing caching strategies, and optimizing expensive computations. Learn when and how to effectively use memoization.',
+    },
+    {
+      id: '/rate-limiting',
+      href: `${RESOURCES_PREFIX}/rate-limiting`,
+      title: 'Rate Limiting',
+      description: 'Implementation of debouncing and throttling.',
+      about:
+        'Deep dive into rate limiting techniques including debouncing, throttling, and their practical applications in performance-critical scenarios.',
+    },
+    {
+      id: '/optimization-patterns',
+      href: `${RESOURCES_PREFIX}/optimization-patterns`,
+      title: 'Optimization Patterns',
+      description: 'Common JavaScript optimization patterns.',
+      about:
+        'Learn advanced optimization techniques including loop optimization, DOM manipulation efficiency, and memory management best practices.',
+    },
+  ],
+  typescriptAdvanced: [
+    {
+      id: '/type-manipulation',
+      href: `${RESOURCES_PREFIX}/type-manipulation`,
+      title: 'Type Manipulation',
+      description: 'Advanced type transformation techniques.',
+      about:
+        'Master type manipulation using utility types, mapped types, conditional types, and type operators like keyof and typeof.',
+    },
+    {
+      id: '/type-inference',
+      href: `${RESOURCES_PREFIX}/type-inference`,
+      title: 'Type Inference',
+      description: 'Understanding TypeScript type inference system.',
+      about:
+        'Deep dive into how TypeScript infers types, type narrowing techniques, and user-defined type guards.',
+    },
+    {
+      id: '/advanced-generics',
+      href: `${RESOURCES_PREFIX}/advanced-generics`,
+      title: 'Advanced Generics',
+      description: 'Complex generic patterns and techniques.',
+      about:
+        'Master advanced generic patterns including constrained generics, recursive types, higher-order types, and variance in TypeScript.',
     },
   ],
 }

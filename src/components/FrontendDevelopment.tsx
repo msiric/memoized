@@ -11,12 +11,12 @@ import { LessonConfig } from '../types'
 
 export const frontendDevelopment: LessonConfig[] = [
   {
-    id: '/component-architecture-patterns',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/component-architecture-patterns`,
-    title: 'Component Architecture Patterns',
+    id: '/component-architecture',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/component-architecture`,
+    title: 'Component Architecture',
     description: 'Master modern component architecture patterns.',
     access: AccessOptions.FREE,
-    problems: FRONTEND_DEVELOPMENT.componentArchitecturePatterns,
+    problems: FRONTEND_DEVELOPMENT.componentArchitecture,
   },
   {
     id: '/state-management',
@@ -59,12 +59,12 @@ export const frontendDevelopment: LessonConfig[] = [
     problems: FRONTEND_DEVELOPMENT.cors,
   },
   {
-    id: '/testing',
-    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/testing`,
-    title: 'Testing',
+    id: '/testing-strategies',
+    href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/testing-strategies`,
+    title: 'Testing Strategies',
     description: 'Learn frontend testing strategies and tools.',
     access: AccessOptions.PREMIUM,
-    problems: FRONTEND_DEVELOPMENT.testing,
+    problems: FRONTEND_DEVELOPMENT.testingStrategies,
   },
   {
     id: '/build-tools',

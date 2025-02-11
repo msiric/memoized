@@ -1,9 +1,8 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import prisma from '@/lib/prisma'
-import { ProblemStatus } from '@/types'
 import { filterAndSortProblems } from '@/utils/helpers'
-import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import { getServerSession } from 'next-auth'
+import { ProblemFilter } from '../types'
 
 export type MarkProblemArgs = {
   userId: string
@@ -34,16 +33,6 @@ export const markProblemProgress = async ({
       completedAt: new Date(),
     },
   })
-}
-
-export interface ProblemFilter {
-  difficulty?: ProblemDifficulty
-  status?: ProblemStatus
-  type?: ProblemType
-  lesson?: string
-  search?: string
-  sortColumn?: string
-  sortOrder?: 'asc' | 'desc'
 }
 
 export const getProblems = async (filter: ProblemFilter = {}) => {

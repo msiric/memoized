@@ -7,6 +7,7 @@ import {
   COURSES_PREFIX,
   JS_TRACK_PREFIX,
 } from '../constants'
+import { JS_TRACK_RESOURCES } from '../resources'
 import { LessonConfig } from '../types'
 
 export const advancedConcepts: LessonConfig[] = [
@@ -36,6 +37,7 @@ export const advancedConcepts: LessonConfig[] = [
       'Master advanced Promise patterns and asynchronous flow control.',
     access: AccessOptions.PREMIUM,
     problems: ADVANCED_CONCEPTS.promisePatterns,
+    resources: JS_TRACK_RESOURCES.promises,
   },
   {
     id: '/async-await',
@@ -101,6 +103,7 @@ export const advancedConcepts: LessonConfig[] = [
     description: 'Master advanced performance optimization techniques.',
     access: AccessOptions.PREMIUM,
     problems: ADVANCED_CONCEPTS.performanceOptimization,
+    resources: JS_TRACK_RESOURCES.performanceOptimization,
   },
   {
     id: '/browser-storage',

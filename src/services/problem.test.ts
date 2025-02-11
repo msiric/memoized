@@ -1,13 +1,10 @@
 import prisma from '@/lib/prisma'
-import {
-  ProblemFilter,
-  getProblems,
-  markProblemProgress,
-} from '@/services/problem'
+import { getProblems, markProblemProgress } from '@/services/problem'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemDifficulty } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
+import { ProblemFilter } from '../types'
 
 // Mocking the Prisma client and getServerSession
 vi.mock('@/lib/prisma', () => {

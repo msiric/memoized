@@ -2216,7 +2216,7 @@ export const CORE_FUNDAMENTALS = {
         "- Dynamic imports allow you to load modules asynchronously at runtime using the `import()` function, which returns a promise.\n- Useful for code splitting, lazy loading modules, and loading modules based on conditions or user interactions.\n\n   **Example**:\n\n   ```javascript\n   import('./module.js').then((module) => {\n     module.doSomething()\n   })\n   ```",
     },
   ],
-  objectAndClassPatterns: [
+  objectsAndClasses: [
     {
       href: '/js-track/core-fundamentals/object-patterns/page.mdx#constructor-vs-regular-functions',
       title: 'Constructor vs Regular Functions',
@@ -4390,7 +4390,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- **Definition**:\n     - An optimization technique that stores the results of expensive function calls.\n- **Usage**:\n     - Avoids redundant calculations by caching results.\n     - Commonly used in recursive algorithms to improve efficiency.\n- **Example**:\n     - Calculating Fibonacci numbers using a cache to store previously computed values.',
     },
   ],
-  componentArchitecturePatterns: [
+  componentArchitecture: [
     {
       href: '/js-track/frontend-development/component-architecture-patterns/page.mdx#mvc-vs-mvvm-patterns',
       title: 'MVC vs MVVM Patterns',
@@ -4795,7 +4795,7 @@ export const FRONTEND_DEVELOPMENT = {
         '- Middleware in Redux provides an extension point between dispatching an action and the moment it reaches the reducer.\n- It can intercept actions to perform side effects, such as logging, crash reporting, or handling asynchronous operations.\n- **Example**: The Redux Thunk middleware allows writing action creators that return a function instead of an action, enabling asynchronous dispatching.',
     },
   ],
-  testing: [
+  testingStrategies: [
     {
       href: '/js-track/frontend-development/testing-strategies/page.mdx#unit-vs-integration-testing',
       title: 'Unit vs Integration Testing',

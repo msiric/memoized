@@ -324,3 +324,13 @@ export type PromotionCodeConfig = {
 }
 
 export type CompletedKey = 'completedLessons' | 'completedProblems'
+
+export type ProblemFilter = {
+  difficulty?: ProblemDifficulty
+  status?: ProblemStatus
+  type?: ProblemType
+  lesson?: string
+  search?: string
+  sortColumn?: string
+  sortOrder?: 'asc' | 'desc'
+}

@@ -8,6 +8,7 @@ import {
 import { USER_DEFINED_DATA_STRUCTURES_PROBLEMS } from '@/problems'
 import { LessonConfig } from '@/types'
 import { AccessOptions } from '@prisma/client'
+import { DSA_TRACK_RESOURCES } from '../resources'
 
 export const userDefinedDataStructures: LessonConfig[] = [
   {
@@ -18,6 +19,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
       'Learn about the various types of linked lists and their operations.',
     access: AccessOptions.FREE,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.linkedLists,
+    resources: DSA_TRACK_RESOURCES.linkedLists,
   },
   {
     id: '/stacks',
@@ -27,6 +29,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
       'Explore stack operations and their applications in computer science.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.stacks,
+    resources: DSA_TRACK_RESOURCES.stacks,
   },
   {
     id: '/queues',
@@ -36,6 +39,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
       'Understand the FIFO principle and how queues are implemented.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.queues,
+    resources: DSA_TRACK_RESOURCES.queues,
   },
   {
     id: '/hash-tables',
@@ -45,6 +49,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
       'Delve into hash table implementation and its various use cases.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.hashTables,
+    resources: DSA_TRACK_RESOURCES.hashTables,
   },
   {
     id: '/trees',
@@ -53,6 +58,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description: 'Study tree structures and their traversal algorithms.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.trees,
+    resources: DSA_TRACK_RESOURCES.trees,
   },
   {
     id: '/graphs',
@@ -62,6 +68,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
       'Learn about graph representations and graph traversal methods.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.graphs,
+    resources: DSA_TRACK_RESOURCES.graphs,
   },
   {
     id: '/heaps',
@@ -70,6 +77,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     description: 'Discover heap structures and their use in priority queues.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.heaps,
+    resources: DSA_TRACK_RESOURCES.heaps,
   },
   {
     id: '/tries',
@@ -79,6 +87,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
       'Understand trie data structures and their use in efficient searching.',
     access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.tries,
+    resources: DSA_TRACK_RESOURCES.tries,
   },
 ]
 

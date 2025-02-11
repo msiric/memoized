@@ -8,31 +8,19 @@ import {
   LessonWithProblems,
   LessonWithResourcesAndProblems,
   NavigationContent,
+  ProblemFilter,
   ProblemRow,
-  ProblemStatus,
   UserWithSubscriptionsAndProgress,
 } from '@/types'
 import {
   AccessOptions,
-  ProblemDifficulty,
-  ProblemType,
   Subscription,
   SubscriptionPlan,
   SubscriptionStatus,
 } from '@prisma/client'
 import { format, fromUnixTime, isBefore, parseISO } from 'date-fns'
+import { createHighlighter } from 'shiki'
 import Stripe from 'stripe'
-import { createHighlighter, Highlighter } from 'shiki'
-
-export interface ProblemFilter {
-  difficulty?: ProblemDifficulty
-  status?: ProblemStatus
-  type?: ProblemType
-  lesson?: string
-  search?: string
-  sortColumn?: string
-  sortOrder?: 'asc' | 'desc'
-}
 
 export const formatter = new Intl.NumberFormat('sfb', {
   style: 'currency',
