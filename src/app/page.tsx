@@ -310,10 +310,9 @@ export default async function Home() {
                       Depth and Practical Insights
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
-                      The curriculum goes beyond surface-level knowledge,
-                      offering in-depth explanations and real-world applications
-                      to ensure you have a comprehensive understanding of each
-                      topic.
+                      Go beyond basics with in-depth explanations and real-world
+                      applications that ensure comprehensive understanding of
+                      each topic.
                     </p>
                   </li>
                   <li className="rounded-2xl border border-zinc-400 p-8">
@@ -322,10 +321,9 @@ export default async function Home() {
                       Focus on JavaScript
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
-                      Tailored specifically for JavaScript and TypeScript
-                      developers. This means you‘ll be learning in the context
-                      of the language you’ll be using, making the material more
-                      relevant and easier to apply.
+                      Tailored for JavaScript and TypeScript developers, making
+                      concepts more relevant and immediately applicable to your
+                      work.
                     </p>
                   </li>
                   <li className="rounded-2xl border border-zinc-400 p-8">
@@ -334,9 +332,8 @@ export default async function Home() {
                       Interview-Ready
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
-                      Designed to help you ace technical interviews. Includes
-                      common interview techniques and strategies, so you‘ll be
-                      well-prepared to tackle any challenge.
+                      Equips you with techniques and strategies to confidently
+                      tackle technical interviews and common coding challenges.
                     </p>
                   </li>
                   <li className="rounded-2xl border border-zinc-400 p-8">
@@ -345,9 +342,9 @@ export default async function Home() {
                       Expert Tips and Tricks
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
-                      Gain insights from an industry expert, with practical tips
-                      and tricks that can give you an edge in your interviews.
-                      Covers common gotchas to help you avoid pitfalls.
+                      Gain insider knowledge from an industry expert, with
+                      practical tips and common pitfalls to avoid during
+                      interviews.
                     </p>
                   </li>
                   <li className="rounded-2xl border border-zinc-400 p-8">
@@ -356,9 +353,9 @@ export default async function Home() {
                       Interactive Learning
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
-                      Engage with real-world coding challenges to reinforce your
-                      learning. Ensures that you not only understand the
-                      concepts but can also apply them in practical scenarios.
+                      Reinforce concepts through hands-on coding challenges that
+                      build practical application skills for real-world
+                      scenarios.
                     </p>
                   </li>
                   <li className="rounded-2xl border border-zinc-400 p-8">
@@ -368,8 +365,7 @@ export default async function Home() {
                     </h3>
                     <p className="mt-2 text-zinc-500 dark:text-zinc-300">
                       Dive deep into sophisticated algorithms and modern
-                      frontend architectures. Master advanced concepts and their
-                      practical applications to stand out in technical
+                      frontend architectures to stand out in technical
                       interviews.
                     </p>
                   </li>
@@ -382,8 +378,9 @@ export default async function Home() {
                 Content overview
               </h2>
               <p className="mt-2 text-lg text-zinc-500 dark:text-zinc-300">
-                Comprehensive interview preparation covering both algorithmic
-                challenges and advanced frontend techniques
+                Comprehensive interview preparation covering algorithmic
+                problem-solving and advanced JavaScript/TypeScript concepts for
+                modern development
               </p>
             </header>
             <div className="prose-zinc prose-headings:font-display prose mx-auto max-w-7xl max-w-none dark:prose-invert prose-headings:scroll-mt-28 prose-headings:font-normal prose-a:font-semibold prose-a:no-underline prose-a:shadow-[inset_0_-2px_0_0_var(--tw-prose-background,#fff),inset_0_calc(-1*(var(--tw-prose-underline-size,4px)+2px))_0_0_var(--tw-prose-underline,theme(colors.lime.300))] hover:prose-a:[--tw-prose-underline-size:6px] prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:shadow-lg prose-lead:text-zinc-500 lg:px-8 lg:prose-headings:scroll-mt-[8.5rem] dark:text-zinc-400 dark:[--tw-prose-background:theme(colors.slate.900)] dark:prose-a:text-lime-400 dark:prose-a:shadow-[inset_0_calc(-1*var(--tw-prose-underline-size,2px))_0_0_var(--tw-prose-underline,theme(colors.lime.800))] dark:hover:prose-a:[--tw-prose-underline-size:6px] dark:prose-pre:bg-zinc-800/60 dark:prose-pre:shadow-none dark:prose-pre:ring-1 dark:prose-pre:ring-zinc-300/10 dark:prose-hr:border-zinc-800 dark:prose-lead:text-zinc-400">
@@ -438,15 +435,12 @@ export default async function Home() {
             >
               <div className="mx-auto text-lg tracking-tight text-zinc-700 md:max-w-3xl lg:max-w-4xl lg:px-12 dark:text-zinc-400">
                 <p className="font-display text-left text-2xl font-bold tracking-tight text-zinc-900 xs:text-3xl md:text-4xl dark:text-white">
-                  A Unique Approach to Interview Preparation
+                  What makes this approach different
                 </p>
                 <p className="mt-4 text-left text-zinc-500 dark:text-zinc-300">
-                  Tired of interview prep courses that don’t align with
-                  real-world engineering challenges? Frustrated with platforms
-                  that don’t address both algorithmic and practical frontend
-                  development needs? {APP_NAME} offers two specialized tracks
-                  designed to cover the full spectrum of technical interview
-                  scenarios:
+                  I built this platform to address what I found lacking in my
+                  own interview preparation journey. The curriculum covers both
+                  data structures & algorithms and advanced JavaScript concepts
                 </p>
                 <ul role="list" className="mt-8 space-y-3">
                   <li className="flex">
@@ -458,10 +452,9 @@ export default async function Home() {
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
                     <span className="ml-4 text-zinc-500 dark:text-zinc-300">
-                      Practical Insights and Common Pitfalls: Every lesson is
-                      packed with practical tips and tricks, along with insights
-                      into common pitfalls that often cause trouble for
-                      engineers.
+                      Practical insights from experience - Each lesson includes
+                      real-world examples and common pitfalls I’ve encountered
+                      in my own development and interviewing journey.
                     </span>
                   </li>
                   <li className="flex">
@@ -473,9 +466,9 @@ export default async function Home() {
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
                     <span className="ml-4 text-zinc-500 dark:text-zinc-300">
-                      Interview Tips and Tricks: Each lesson includes specific
-                      strategies and tips for technical interviews, ensuring
-                      you‘re well-prepared to showcase your skills effectively.
+                      Interview-focused approach - Content is designed with
+                      technical interviews in mind, helping you explain complex
+                      concepts clearly and showcase your skills effectively.
                     </span>
                   </li>
                   <li className="flex">
@@ -487,9 +480,9 @@ export default async function Home() {
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
                     <span className="ml-4 text-zinc-500 dark:text-zinc-300">
-                      Common Mistakes: Identify and avoid common mistakes that
-                      can hinder your performance. Each lesson highlights
-                      typical pitfalls and how to overcome them.
+                      Learn from mistakes - I’ve documented common errors that
+                      trip up candidates, helping you avoid these same pitfalls
+                      during your interviews.
                     </span>
                   </li>
                   <li className="flex">
@@ -501,9 +494,9 @@ export default async function Home() {
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
                     <span className="ml-4 text-zinc-500 dark:text-zinc-300">
-                      When to Use: Understand the practical applications of each
-                      data structure and algorithm. Learn when and why to use
-                      them in real-world scenarios.
+                      Practical application context - Understand not just how
+                      algorithms and JavaScript features work, but when and why
+                      to apply them in actual development scenarios.
                     </span>
                   </li>
                   <li className="flex">
@@ -515,9 +508,9 @@ export default async function Home() {
                       <path d="M11.83 15.795a1 1 0 0 0-1.66 1.114l1.66-1.114Zm9.861-4.072a1 1 0 1 0-1.382-1.446l1.382 1.446ZM14.115 21l-.83.557a1 1 0 0 0 1.784-.258L14.115 21Zm.954.3c1.29-4.11 3.539-6.63 6.622-9.577l-1.382-1.446c-3.152 3.013-5.704 5.82-7.148 10.424l1.908.598Zm-4.9-4.391 3.115 4.648 1.661-1.114-3.114-4.648-1.662 1.114Z" />
                     </svg>
                     <span className="ml-4 text-zinc-500 dark:text-zinc-300">
-                      Advanced Topics: From network flow algorithms to
-                      micro-frontend architecture, master advanced concepts that
-                      set you apart.
+                      Beyond the basics - Covering advanced topics from
+                      sophisticated algorithms to modern JavaScript patterns and
+                      TypeScript features that most courses overlook.
                     </span>
                   </li>
                 </ul>
@@ -531,16 +524,16 @@ export default async function Home() {
           <article>
             <header className="mb-9 space-y-1">
               <h2 className="font-display text-center text-2xl text-white xs:text-3xl md:text-4xl">
-                Leading Tech Companies Use Algorithmic Interviews
+                Modern Technical Interviews Require Both Skills
               </h2>
             </header>
             <div>
               <p className="mt-3 text-center text-zinc-300 dark:text-zinc-300">
-                Top tech companies evaluate candidates on both algorithmic
-                problem-solving and practical frontend development skills. This
-                platfrom prepares you for the full spectrum of technical
-                interviews, ensuring you can tackle both algorithmic challenges
-                and real-world engineering problems with confidence.
+                Whether you’re interviewing at tech giants or growing startups,
+                you’ll need to demonstrate both algorithmic problem-solving
+                abilities and deep JavaScript knowledge. This platform helps you
+                master both aspects, preparing you for the complete interview
+                experience at companies like:
               </p>
               <div className="mt-8 grid grid-cols-3 gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
                 <div className="flex items-center justify-center">
@@ -606,7 +599,7 @@ export default async function Home() {
             <div>
               <h2 className="mb-4 text-2xl font-bold">Practice Problems</h2>
               <p className="mb-4 text-lg text-zinc-500 dark:text-zinc-300">
-                Access over 150 diverse practice problems and questions. Each
+                Access over 450 diverse practice problems and questions. Each
                 problem is categorized by topic and aligned with the lessons,
                 ensuring targeted and effective practice.
               </p>
@@ -692,25 +685,26 @@ export default async function Home() {
               <ul role="list" className="space-y-10">
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    Why offer both DSA and Frontend tracks?
+                    Why these two tracks?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Modern technical interviews often assess both algorithmic
-                    problem-solving and practical frontend development skills.
-                    This dual-track approach ensures you’re prepared for all
-                    types of technical interviews, from DSA challenges to
-                    frontend system design discussions.
+                    Modern technical interviews require both strong algorithmic
+                    problem-solving skills and deep JavaScript knowledge. These
+                    tracks help you master both aspects, preparing you for
+                    everything from coding challenges to in-depth JavaScript
+                    discussions.
                   </p>
                 </li>
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    Which track should I choose?
+                    Which track should I focus on?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
                     You can study both tracks or focus on one based on your
-                    goals. The DSA track is essential for algorithmic
-                    interviews, while the Frontend track is ideal for senior
-                    frontend positions. Complete both to be fully prepared.
+                    interview timeline. The DSA track is crucial for coding
+                    interviews, while the JS track helps you master JavaScript
+                    concepts and patterns that often come up in technical
+                    discussions.
                   </p>
                 </li>
                 <li>
@@ -718,10 +712,11 @@ export default async function Home() {
                     How are the lessons structured?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Each track begins with foundational concepts and progresses
-                    to advanced topics. The DSA track includes coding
-                    challenges, while the Frontend track combines theoretical
-                    knowledge with practical questions.
+                    Both tracks follow a natural progression: the DSA track
+                    takes you from basic data structures through advanced
+                    algorithms, while the JS track starts with JavaScript
+                    mechanics and builds up to advanced patterns and TypeScript
+                    features.
                   </p>
                 </li>
               </ul>
@@ -730,37 +725,37 @@ export default async function Home() {
               <ul role="list" className="space-y-10">
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    What makes this platform unique?
+                    What makes this platform different?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    {APP_NAME} is the only platform offering comprehensive
-                    JavaScript-focused preparation for both algorithmic and
-                    frontend interviews. The content is tailored specifically
-                    for JavaScript and TypeScript engineers, covering everything
-                    from data structures to advanced frontend architecture.
+                    Most platforms focus on either algorithms or JavaScript, but
+                    rarely both. I’ve designed this platform to cover both
+                    aspects comprehensively, with all content specifically
+                    tailored for JavaScript developers. Plus, it reflects my
+                    real-world experience with both giving and taking technical
+                    interviews.
                   </p>
                 </li>
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    What does Premium unlock?
+                    What does Premium include?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Premium gives you complete access to everything on the
-                    platform. This includes both the full DSA and Frontend
-                    tracks, all practice problems, practical questions, and any
-                    future courses or content updates. You’ll have unlimited
-                    access to every feature and resource available.
+                    Premium gives you full access to both tracks, including all
+                    practice problems, deep-dives into JavaScript internals,
+                    advanced TypeScript features, and algorithm implementations.
+                    You’ll also get access to all future updates and content.
                   </p>
                 </li>
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    Are there any prerequisites?
+                    What knowledge do I need to start?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Basic JavaScript knowledge is helpful but not required. The
-                    DSA track starts with fundamentals, while the Frontend track
-                    assumes basic React knowledge. Both tracks provide resources
-                    to help you catch up on prerequisites.
+                    Basic JavaScript familiarity is helpful but not required.
+                    Both tracks start from fundamentals and gradually progress
+                    to advanced topics. I’ve included resources to help you get
+                    up to speed where needed.
                   </p>
                 </li>
               </ul>
@@ -769,33 +764,35 @@ export default async function Home() {
               <ul role="list" className="space-y-10">
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    What if I get stuck?
+                    What if I need help?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    If you encounter any issues or have questions, you can reach
-                    out for support. I’m here to help you succeed and ensure you
-                    have a smooth learning experience.
+                    You can reach out to me directly with any questions or if
+                    you get stuck. As the creator and maintainer of this
+                    platform, I’m committed to helping you succeed in your
+                    interview preparation.
                   </p>
                 </li>
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    Is there any interactive content?
+                    Is the content practical?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    Yes, each lesson includes real-world coding challenges or
-                    practical questions to reinforce your learning and ensure
-                    you can apply the concepts in real-life scenarios.
+                    Yes, each lesson includes hands-on challenges and real-world
+                    examples. You’ll work through actual coding problems and
+                    learn how to apply JavaScript patterns in practical
+                    scenarios.
                   </p>
                 </li>
                 <li>
                   <h3 className="text-lg font-semibold leading-6 text-zinc-900 dark:text-white">
-                    How can I track my progress?
+                    Can I track my progress?
                   </h3>
                   <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-300">
-                    The platform tracks your progress across both tracks
-                    independently. You can monitor your completion status,
-                    practice problem statistics, and identify areas for
-                    improvement in each specialization.
+                    Yes, you can track your progress through both tracks
+                    independently. This helps you stay organized and ensures
+                    you’re making steady progress toward your interview
+                    preparation goals.
                   </p>
                 </li>
               </ul>
@@ -833,22 +830,24 @@ export default async function Home() {
                 <span className="text-lime-500">{APP_NAME}</span>.
               </p>
               <p className="mt-4 text-lg tracking-tight text-zinc-300">
-                With years of experience in software engineering and a passion
-                for teaching, I created this platform to help JavaScript and
-                TypeScript engineers excel in their technical interviews. My
-                goal is to provide comprehensive, practical, and insightful
-                content that empowers you to become a better software engineer.
+                After spending years interviewing candidates and mentoring
+                developers, I noticed a gap in how engineers prepare for
+                technical interviews. Most platforms focus on either algorithms
+                or JavaScript concepts, but rarely both. That’s why I created
+                this platform.
               </p>
               <p className="mt-4 text-lg tracking-tight text-zinc-300">
-                I‘ve worked in various tech industries, where I‘ve honed my
-                skills in problem-solving and software design. I‘ve faced the
-                challenges of technical interviews firsthand, and now I‘m here
-                to share my knowledge and experience to help you succeed.
+                Through my experience both giving and taking technical
+                interviews, I’ve learned what makes candidates successful. I’ve
+                structured this platform to focus on what actually matters:
+                strong algorithmic thinking and deep JavaScript knowledge.
               </p>
               <p className="mt-4 text-lg tracking-tight text-zinc-300">
-                Join me on this journey to deepen your understanding of
-                JavaScript and TypeScript, and let‘s work together to achieve
-                your career goals.
+                Whether you’re preparing for your next interview or simply want
+                to deepen your understanding of algorithms and JavaScript, I’m
+                here to help you succeed. This isn’t just another course
+                platform — it’s the resource I wish I had when I was preparing
+                for interviews.
               </p>
               <p className="mt-8 flex flex-wrap items-center gap-8">
                 <a

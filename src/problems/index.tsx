@@ -3088,7 +3088,7 @@ export const TYPESCRIPT_INTRODUCTION = {
       question:
         'What is structural typing, and how does TypeScript use it for type compatibility?',
       answer:
-        '- Structural typing is a type system where compatibility is determined by the actual structure (members) of the types, not their explicit names.\n- In TypeScript, types are compatible if their structures are compatible—if one type has at least the same members as another.\n- This allows for flexible assignment and interoperability between types with similar structures.',
+        '- Structural typing is a type system where compatibility is determined by the actual structure (members) of the types, not their explicit names.\n- In TypeScript, types are compatible if their structures are compatible — if one type has at least the same members as another.\n- This allows for flexible assignment and interoperability between types with similar structures.',
     },
     {
       href: '/js-track/typescript-introduction/type-inference-and-compatibility/page.mdx#type-inference-in-typescript',
