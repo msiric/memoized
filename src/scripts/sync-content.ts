@@ -10,6 +10,7 @@ import {
 import { upsertResource } from '@/services/resource'
 import { createStripeCoupon, getActiveProducts } from '@/services/stripe'
 import { BannerType } from '@prisma/client'
+import { isPast } from 'date-fns'
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
@@ -24,7 +25,7 @@ const ACTIVE_DISCOUNT = {
   duration: 'once' as const,
   duration_in_months: undefined, // Set if duration is 'repeating'
   max_redemptions: undefined, // Set to restrict the number of times the coupon can be redeemed before it’s no longer valid
-  redeem_by: new Date('2025-01-15T00:00:00Z'),
+  redeem_by: new Date('2025-06-01T00:00:00Z'),
   applies_to: {
     products: ['Annual', 'Monthly'], // Product names to which this discount applies
   },
@@ -233,41 +234,67 @@ export const syncContent = async () => {
   )
 
   try {
-    const { coupon, promotionCode } = await createStripeCoupon(
-      couponConfig,
-      ACTIVE_DISCOUNT.promotion_code,
-    )
-    console.log(`Created Memoized Launch discount: ${coupon.id}`)
-    console.log(`Discount applies to products:`, productIds)
+    const isDiscountExpired = ACTIVE_DISCOUNT.redeem_by
+      ? isPast(new Date(ACTIVE_DISCOUNT.redeem_by))
+      : false
 
-    if (promotionCode) {
-      console.log(`Promotion code created: ${promotionCode.code}`)
-    }
+    if (isDiscountExpired) {
+      console.log(
+        `Skipping discount creation: "${ACTIVE_DISCOUNT.name}" has expired (redeem_by: ${ACTIVE_DISCOUNT.redeem_by})`,
+      )
 
-    if (ACTIVE_DISCOUNT.banner) {
-      const bannerData = {
-        ...ACTIVE_DISCOUNT.banner,
-        isActive: true,
-        startDate: new Date(),
-        endDate: ACTIVE_DISCOUNT.redeem_by,
-        priority: 1,
+      if (ACTIVE_DISCOUNT.banner) {
+        const existingBanner = await prisma.banner.findUnique({
+          where: { title: ACTIVE_DISCOUNT.banner.title },
+        })
+
+        if (existingBanner && existingBanner.isActive) {
+          await prisma.banner.update({
+            where: { title: ACTIVE_DISCOUNT.banner.title },
+            data: { isActive: false },
+          })
+          console.log(
+            `Deactivated banner: ${ACTIVE_DISCOUNT.banner.title} (discount expired)`,
+          )
+        }
+      }
+    } else {
+      const { coupon, promotionCode } = await createStripeCoupon(
+        couponConfig,
+        ACTIVE_DISCOUNT.promotion_code,
+      )
+      console.log(`Created Memoized Launch discount: ${coupon.id}`)
+      console.log(`Discount applies to products:`, productIds)
+
+      if (promotionCode) {
+        console.log(`Promotion code created: ${promotionCode.code}`)
       }
 
-      const existingBanner = await prisma.banner.findUnique({
-        where: { title: bannerData.title },
-      })
+      if (ACTIVE_DISCOUNT.banner) {
+        const bannerData = {
+          ...ACTIVE_DISCOUNT.banner,
+          isActive: true,
+          startDate: new Date(),
+          endDate: ACTIVE_DISCOUNT.redeem_by,
+          priority: 1,
+        }
 
-      if (!existingBanner) {
-        await prisma.banner.create({
-          data: bannerData,
-        })
-        console.log(`Created new Banner: ${bannerData.title}`)
-      } else {
-        await prisma.banner.update({
+        const existingBanner = await prisma.banner.findUnique({
           where: { title: bannerData.title },
-          data: bannerData,
         })
-        console.log(`Updated existing Banner: ${bannerData.title}`)
+
+        if (!existingBanner) {
+          await prisma.banner.create({
+            data: bannerData,
+          })
+          console.log(`Created new Banner: ${bannerData.title}`)
+        } else {
+          await prisma.banner.update({
+            where: { title: bannerData.title },
+            data: bannerData,
+          })
+          console.log(`Updated existing Banner: ${bannerData.title}`)
+        }
       }
     }
   } catch (error) {
