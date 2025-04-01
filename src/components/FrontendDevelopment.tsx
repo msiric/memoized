@@ -15,7 +15,7 @@ export const frontendDevelopment: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}/component-architecture`,
     title: 'Component Architecture',
     description: 'Master modern component architecture patterns.',
-    access: AccessOptions.FREE,
+    access: AccessOptions.PREMIUM,
     problems: FRONTEND_DEVELOPMENT.componentArchitecture,
   },
   {

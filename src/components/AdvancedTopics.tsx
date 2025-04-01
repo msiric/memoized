@@ -16,7 +16,7 @@ export const advancedTopics: LessonConfig[] = [
     title: 'Dynamic Programming',
     description:
       'Solve complex problems by breaking them into simpler subproblems.',
-    access: AccessOptions.FREE,
+    access: AccessOptions.PREMIUM,
     problems: ADVANCED_TOPICS_PROBLEMS.dynamicProgramming,
   },
   {

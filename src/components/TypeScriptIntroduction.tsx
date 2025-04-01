@@ -16,7 +16,7 @@ export const typescriptIntroduction: LessonConfig[] = [
     href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${TYPESCRIPT_INTRODUCTION_PREFIX}/ts-basics`,
     title: 'TS Basics',
     description: 'Learn TypeScript fundamentals and setup.',
-    access: AccessOptions.FREE,
+    access: AccessOptions.PREMIUM,
     problems: TYPESCRIPT_INTRODUCTION.tsBasics,
   },
   {

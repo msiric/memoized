@@ -15,7 +15,7 @@ export const builtInDataStructures: LessonConfig[] = [
     href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/strings`,
     title: 'Strings',
     description: 'Explore string methods and their usage in JavaScript.',
-    access: AccessOptions.FREE,
+    access: AccessOptions.PREMIUM,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.strings,
   },
   {

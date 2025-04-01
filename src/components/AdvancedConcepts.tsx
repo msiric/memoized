@@ -17,7 +17,7 @@ export const advancedConcepts: LessonConfig[] = [
     title: 'Functional Programming',
     description:
       'Learn about pure functions, immutability, and managing side effects.',
-    access: AccessOptions.FREE,
+    access: AccessOptions.PREMIUM,
     problems: ADVANCED_CONCEPTS.functionalProgramming,
   },
   {

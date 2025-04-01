@@ -17,7 +17,7 @@ export const userDefinedDataStructures: LessonConfig[] = [
     title: 'Linked Lists',
     description:
       'Learn about the various types of linked lists and their operations.',
-    access: AccessOptions.FREE,
+    access: AccessOptions.PREMIUM,
     problems: USER_DEFINED_DATA_STRUCTURES_PROBLEMS.linkedLists,
     resources: DSA_TRACK_RESOURCES.linkedLists,
   },

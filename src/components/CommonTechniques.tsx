@@ -15,7 +15,7 @@ export const commonTechniques: LessonConfig[] = [
     href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${COMMON_TECHNIQUES_PREFIX}/sliding-window`,
     title: 'Sliding Window',
     description: 'Optimize window-based computations for arrays and strings.',
-    access: AccessOptions.FREE,
+    access: AccessOptions.PREMIUM,
     problems: COMMON_TECHNIQUES_PROBLEMS.slidingWindow,
   },
   {
