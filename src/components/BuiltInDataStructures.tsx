@@ -15,7 +15,7 @@ export const builtInDataStructures: LessonConfig[] = [
     href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/strings`,
     title: 'Strings',
     description: 'Explore string methods and their usage in JavaScript.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.strings,
   },
   {
@@ -24,7 +24,7 @@ export const builtInDataStructures: LessonConfig[] = [
     title: 'Numbers',
     description:
       'Understand numerical operations and the Number object in JavaScript.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.numbers,
   },
   {
@@ -32,7 +32,7 @@ export const builtInDataStructures: LessonConfig[] = [
     href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/arrays`,
     title: 'Arrays',
     description: 'Learn about array methods and how to manipulate arrays.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.arrays,
   },
   {
@@ -41,7 +41,7 @@ export const builtInDataStructures: LessonConfig[] = [
     title: 'Objects',
     description:
       'Discover object properties and how to work with objects in JavaScript.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.objects,
   },
   {
@@ -49,7 +49,7 @@ export const builtInDataStructures: LessonConfig[] = [
     href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/sets`,
     title: 'Sets',
     description: 'Understand the Set object and its unique element storage.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.sets,
   },
   {
@@ -57,7 +57,7 @@ export const builtInDataStructures: LessonConfig[] = [
     href: `${COURSES_PREFIX}${DSA_TRACK_PREFIX}${BUILT_IN_DATA_STRUCTURES_PREFIX}/maps`,
     title: 'Maps',
     description: 'Learn about the Map object and key-value pair management.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.maps,
   },
   {
@@ -66,7 +66,7 @@ export const builtInDataStructures: LessonConfig[] = [
     title: 'Remaining Primitives',
     description:
       'Explore other JavaScript primitives such as boolean, null, and undefined.',
-    access: AccessOptions.PREMIUM,
+    access: AccessOptions.FREE,
     problems: BUILT_IN_DATA_STRUCTURES_PROBLEMS.remainingPrimitives,
   },
 ]

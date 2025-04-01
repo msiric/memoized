@@ -13,15 +13,6 @@ vi.mock('@/services/stripe')
 vi.mock('@/components/Footer', () => ({
   Footer: () => <div data-testid="footer">Mocked Footer</div>,
 }))
-vi.mock('@/components/Header', () => ({
-  Header: ({ fullWidth, withAuth, withSearch, withSubheader }: any) => (
-    <div data-testid="header">
-      Mocked Header (fullWidth: {String(fullWidth)}, withAuth:{' '}
-      {String(withAuth)}, withSearch: {String(withSearch)}, withSubheader:{' '}
-      {String(withSubheader)})
-    </div>
-  ),
-}))
 vi.mock('@/components/PricingTable', () => ({
   PricingTable: ({ products, user }: { products: any[]; user: any }) => (
     <div data-testid="pricing-table">
@@ -56,27 +47,11 @@ describe('Premium page', () => {
       render(await Premium())
     })
 
-    expect(screen.getByTestId('header')).toBeDefined()
-    expect(screen.getByTestId('header').textContent).toContain(
-      'fullWidth: true',
-    )
-    expect(screen.getByTestId('header').textContent).toContain(
-      'withAuth: false',
-    )
-    expect(screen.getByTestId('header').textContent).toContain(
-      'withSearch: false',
-    )
-    expect(screen.getByTestId('header').textContent).toContain(
-      'withSubheader: true',
-    )
-
     expect(screen.getByTestId('pricing-table')).toBeDefined()
-    expect(screen.getByTestId('footer')).toBeDefined()
 
     const heading = screen.getByRole('heading', { level: 2 })
-    expect(heading.textContent).toBe(
-      'The ultimate JavaScript platform for mastering coding interviews',
-    )
+    expect(heading.textContent).toContain('Dominate JavaScript Interviews')
+    expect(heading.textContent).toContain('From Basics to Offer Letters ⚡')
 
     const description = screen.getByText(/Invest in your future/i)
     expect(description).toBeDefined()
@@ -94,11 +69,9 @@ describe('Premium page', () => {
       render(await Premium())
     })
 
-    expect(screen.getByTestId('header')).toBeDefined()
     const pricingTable = screen.getByTestId('pricing-table')
     expect(pricingTable).toBeDefined()
     expect(pricingTable.textContent).toContain('Logged In')
-    expect(screen.getByTestId('footer')).toBeDefined()
   })
 
   it('correctly applies coupons to products', async () => {

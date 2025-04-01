@@ -1,10 +1,9 @@
-import React from 'react'
-import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { getServerSession } from 'next-auth'
 import { getResourceBySlug } from '@/services/resource'
 import { getUserWithSubscriptions } from '@/services/user'
 import { userHasAccess } from '@/utils/helpers'
+import { render, screen } from '@testing-library/react'
+import { getServerSession } from 'next-auth'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import Resource from './page'
 
 // Mock the imported modules
@@ -45,13 +44,13 @@ describe('Resource component', () => {
 
     render(await Resource({ params: { resourceSlug: 'test-resource' } }))
 
-    expect(screen.getByText('Upgrade to Premium')).toBeDefined()
+    expect(screen.getByText(/Unlock Your Full Potential/)).toBeDefined()
     expect(
-      screen.getByText(
-        /Unlock access to Test Resource and all the other content/,
-      ),
+      screen.getByText(/Get access to Test Resource and all the other content/),
     ).toBeDefined()
-    expect(screen.getByRole('link', { name: 'Upgrade' })).toBeDefined()
+    expect(
+      screen.getByRole('link', { name: 'Upgrade to Premium' }),
+    ).toBeDefined()
   })
 
   it('renders dynamic Page component when user has access', async () => {

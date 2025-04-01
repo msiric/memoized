@@ -1,10 +1,8 @@
-import { Footer } from '@/components/Footer'
 import { getActiveCoupons, getActiveProducts } from '@/services/stripe'
 import { getUserWithSubscriptions } from '@/services/user'
 import { ProductWithCoupon, UserWithSubscriptionsAndProgress } from '@/types'
 import { getServerSession } from 'next-auth'
 import Stripe from 'stripe'
-import { Header } from '../../components/Header'
 import { PricingTable } from '../../components/PricingTable'
 import { authOptions } from '../api/auth/[...nextauth]/route'
 
@@ -42,13 +40,24 @@ export default async function Premium() {
 
   return (
     <section className="bg-white dark:bg-zinc-900">
-      <Header fullWidth withAuth={false} withSearch={false} withSubheader />
-      <div className="mx-auto mt-6 max-w-screen-xl px-4 py-4 xs:py-8 md:py-16 lg:px-6">
+      <div className="mx-auto mt-4 max-w-screen-xl px-4 py-4 xs:py-8 md:mt-0 md:py-16 lg:px-6">
         <div className="mx-auto mb-8 max-w-screen-md text-center lg:mb-12">
           <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-zinc-900 xs:text-3xl md:text-4xl dark:text-white">
-            The ultimate JavaScript platform for mastering coding interviews
+            Dominate JavaScript Interviews:
+            <br className="hidden md:block" />
+            <span className="mt-1 inline-block md:mt-2">
+              From{' '}
+              <span className="bg-gradient-to-r from-indigo-500 to-indigo-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-indigo-500">
+                Basics
+              </span>{' '}
+              to{' '}
+              <span className="bg-gradient-to-r from-lime-500 to-lime-600 bg-clip-text text-transparent dark:from-lime-400 dark:to-lime-500">
+                Offer Letters
+              </span>{' '}
+              ⚡
+            </span>
           </h2>
-          <p className="mb-5 font-light text-zinc-600 sm:text-xl dark:text-zinc-400">
+          <p className="mb-5 font-light text-zinc-700 sm:text-xl dark:text-zinc-300">
             Invest in your future, enhance your skills and land your dream job
             with confidence
           </p>
@@ -58,7 +67,6 @@ export default async function Premium() {
           user={user as UserWithSubscriptionsAndProgress | null}
         />
       </div>
-      <Footer />
     </section>
   )
 }

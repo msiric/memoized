@@ -1,9 +1,9 @@
-import { render, screen, cleanup } from '@testing-library/react'
-import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
-import Courses from './page'
+import { cleanup, render, screen } from '@testing-library/react'
+import Stripe from 'stripe'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getActiveCoursesWithProgress } from '../../../services/course'
 import { retrieveStripeSession } from '../../../services/stripe'
-import Stripe from 'stripe'
+import Courses from './page'
 
 // Mock the imported modules
 vi.mock('../../../services/course')
@@ -178,7 +178,9 @@ describe('Courses page', () => {
     render(await Courses({ searchParams: {} }))
 
     expect(
-      screen.getByText('Level Up Your Software Engineering Skills'),
+      screen.getByText(
+        'Structured Learning Paths for Modern JavaScript Engineers',
+      ),
     ).toBeDefined()
     expect(screen.getAllByTestId('course-card')).toHaveLength(2)
     expect(screen.getByText('Course 1')).toBeDefined()
@@ -197,7 +199,9 @@ describe('Courses page', () => {
 
     expect(screen.queryAllByTestId('course-card')).toHaveLength(0)
     expect(
-      screen.getByText('Level Up Your Software Engineering Skills'),
+      screen.getByText(
+        'Structured Learning Paths for Modern JavaScript Engineers',
+      ),
     ).toBeDefined()
   })
 

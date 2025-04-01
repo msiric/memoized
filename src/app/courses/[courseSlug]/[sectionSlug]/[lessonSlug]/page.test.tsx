@@ -53,13 +53,13 @@ describe('Lesson component', () => {
       }),
     )
 
-    expect(screen.getByText('Upgrade to Premium')).toBeDefined()
+    expect(screen.getByText(/Unlock Your Full Potential/)).toBeDefined()
     expect(
-      screen.getByText(
-        /Unlock access to Test Lesson and all the other content/,
-      ),
+      screen.getByText(/Get access to Test Lesson and all the other content/),
     ).toBeDefined()
-    expect(screen.getByRole('link', { name: 'Upgrade' })).toBeDefined()
+    expect(
+      screen.getByRole('link', { name: 'Upgrade to Premium' }),
+    ).toBeDefined()
   })
 
   it('renders dynamic Page component when user has access', async () => {

@@ -92,7 +92,7 @@ function SectionLink({
       )}
       ref={sectionRef}
     >
-      <span className={clsx('truncate', active && 'border-b border-lime-500')}>
+      <span className={clsx('truncate', active && 'border-b border-lime-600')}>
         {children}
       </span>
       {isCompleted ? <IconWrapper icon={CheckIcon} /> : null}

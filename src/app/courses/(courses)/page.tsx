@@ -30,14 +30,15 @@ export default async function Courses({ searchParams }: CoursesProps) {
   return (
     <>
       <section className="mx-auto max-w-[66rem] bg-white dark:bg-zinc-900">
-        <div className="mx-auto mt-6 max-w-screen-xl px-4 py-4 xs:py-8 md:py-16 lg:px-6">
-          <div className="mx-auto mb-8 max-w-screen-md text-center lg:mb-12">
+        <div className="mx-auto max-w-screen-xl px-4 py-4 xs:py-8 md:py-16 lg:px-6">
+          <div className="mx-auto mb-8 mt-4 max-w-screen-md text-center md:mt-0 lg:mb-12">
             <h2 className="mb-4 text-2xl font-extrabold tracking-tight text-zinc-900 xs:text-3xl md:text-4xl dark:text-white">
-              Level Up Your Software Engineering Skills
+              Structured Learning Paths for Modern JavaScript Engineers
             </h2>
             <p className="mb-5 font-light text-zinc-600 sm:text-xl dark:text-zinc-400">
-              Structured learning paths to master technical interviews at top
-              tech companies through hands-on practice and expert guidance
+              Master technical concepts through expertly crafted courses with
+              hands-on practice, real-world examples and interview-ready
+              techniques
             </p>
           </div>
           <div className="not-prose mt-4 grid grid-cols-1 gap-8 border-t border-zinc-900/5 pt-10 sm:grid-cols-2 dark:border-white/5">
