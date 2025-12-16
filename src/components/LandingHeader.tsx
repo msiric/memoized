@@ -18,7 +18,7 @@ export const LandingHeader = () => {
         <a
           className="group flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 transition-all duration-200 hover:bg-zinc-200 hover:scale-105 dark:bg-zinc-800 dark:hover:bg-zinc-700"
           aria-label="GitHub"
-          href="https://github.com/msiric"
+          href="https://github.com/msiric/memoized"
           target="_blank"
           rel="noopener noreferrer"
         >
