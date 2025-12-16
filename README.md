@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://memoized.io" target="_blank">
+  <a href="https://www.memoized.io" target="_blank">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="public/images/brand/logo-light.svg">
       <source media="(prefers-color-scheme: light)" srcset="public/images/brand/logo-dark.svg">
@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://memoized.io">Website</a> •
+  <a href="https://www.memoized.io">Website</a> •
   <a href="#features">Features</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#architecture">Architecture</a>
