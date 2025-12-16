@@ -1,0 +1,11 @@
+{
+  "lessons": [
+    {
+      "id": "/ts-basics",
+      "title": "TypeScript Basics",
+      "description": "Learn TypeScript fundamentals and setup - PREMIUM SAMPLE",
+      "order": 1,
+      "access": "PREMIUM"
+    }
+  ]
+}

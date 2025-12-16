@@ -1,0 +1,181 @@
+---
+title: "Variables"
+description: "Learn about variable declarations, scoping, and hoisting in JavaScript"
+access: "FREE"
+order: 1
+---
+
+# Variables
+
+Variables are fundamental to any programming language, and JavaScript offers several ways to declare them. Understanding the differences between `var`, `let`, and `const` is crucial for writing modern, maintainable code.
+
+## Variable Declarations
+
+### `let` - Block Scoped Variable
+```javascript
+let name = "John";
+let age = 25;
+
+// Block scoped
+if (true) {
+  let blockVariable = "I exist only in this block";
+}
+// blockVariable is not accessible here
+```
+
+### `const` - Block Scoped Constant
+```javascript
+const PI = 3.14159;
+const API_URL = "https://api.example.com";
+
+// For objects and arrays, the contents can be modified
+const person = { name: "Alice" };
+person.age = 30; // This is allowed
+person.name = "Bob"; // This is also allowed
+```
+
+### `var` - Function Scoped (Legacy)
+```javascript
+var oldStyle = "avoid using var in modern JavaScript";
+
+// Function scoped, not block scoped
+if (true) {
+  var functionScoped = "I'm accessible outside the block";
+}
+console.log(functionScoped); // This works (but shouldn't!)
+```
+
+## Scoping Rules
+
+### Block Scope
+Variables declared with `let` and `const` are block-scoped:
+
+```javascript
+function example() {
+  if (true) {
+    let blockScoped = "only accessible here";
+    const alsoBlockScoped = "me too";
+  }
+  
+  // console.log(blockScoped); // ReferenceError
+  // console.log(alsoBlockScoped); // ReferenceError
+}
+```
+
+### Function Scope
+Variables declared with `var` are function-scoped:
+
+```javascript
+function example() {
+  if (true) {
+    var functionScoped = "accessible throughout the function";
+  }
+  
+  console.log(functionScoped); // "accessible throughout the function"
+}
+```
+
+## Hoisting
+
+JavaScript "hoists" variable declarations to the top of their scope:
+
+```javascript
+// What you write:
+console.log(hoistedVar); // undefined (not an error!)
+var hoistedVar = "Hello";
+
+// What JavaScript sees:
+var hoistedVar; // undefined
+console.log(hoistedVar); // undefined
+hoistedVar = "Hello";
+
+// let and const are also hoisted, but in a "temporal dead zone"
+console.log(letVar); // ReferenceError: Cannot access 'letVar' before initialization
+let letVar = "World";
+```
+
+## Best Practices
+
+### 1. Use `const` by Default
+```javascript
+// Good
+const userName = "alice123";
+const userPreferences = { theme: "dark", language: "en" };
+
+// Only use let when you need to reassign
+let counter = 0;
+counter++; // This requires let
+```
+
+### 2. Use Descriptive Names
+```javascript
+// Bad
+const d = new Date();
+const u = users.filter(x => x.active);
+
+// Good
+const currentDate = new Date();
+const activeUsers = users.filter(user => user.isActive);
+```
+
+### 3. Initialize Variables
+```javascript
+// Avoid
+let uninitializedValue;
+
+// Prefer
+let counter = 0;
+let message = "";
+let items = [];
+```
+
+## Common Gotchas
+
+### 1. Loop Variables
+```javascript
+// Problem: all functions log 3
+const functions = [];
+for (var i = 0; i < 3; i++) {
+  functions.push(function() {
+    console.log(i); // Always logs 3
+  });
+}
+
+// Solution: use let
+const functions = [];
+for (let i = 0; i < 3; i++) {
+  functions.push(function() {
+    console.log(i); // Logs 0, 1, 2 correctly
+  });
+}
+```
+
+### 2. Const with Objects
+```javascript
+const config = { api: "v1", timeout: 5000 };
+
+// This is allowed - modifying contents
+config.timeout = 10000;
+config.retries = 3;
+
+// This is not allowed - reassigning
+// config = { api: "v2" }; // TypeError
+```
+
+## Interview Questions
+
+**Q: What's the difference between `var`, `let`, and `const`?**
+
+A: `var` is function-scoped and hoisted with undefined. `let` and `const` are block-scoped and hoisted but in a temporal dead zone. `const` cannot be reassigned, but objects/arrays can be mutated.
+
+**Q: Explain hoisting with an example.**
+
+A: Hoisting moves declarations to the top of their scope. `var` declarations are hoisted and initialized with `undefined`. `let`/`const` are hoisted but remain uninitialized until their declaration line.
+
+## Practice Exercise
+
+Create variables for a user profile:
+- Use `const` for data that won't change (like user ID)
+- Use `let` for data that might change (like login count)
+- Demonstrate block scoping with a conditional statement
+- Show the difference between `var` and `let` in a loop

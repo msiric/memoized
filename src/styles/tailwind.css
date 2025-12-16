@@ -1,0 +1,125 @@
+@layer base {
+  :root {
+    --shiki-color-text: theme('colors.white');
+    --shiki-token-constant: theme('colors.lime.300');
+    --shiki-token-string: theme('colors.lime.300');
+    --shiki-token-comment: theme('colors.zinc.500');
+    --shiki-token-keyword: theme('colors.sky.300');
+    --shiki-token-parameter: theme('colors.pink.300');
+    --shiki-token-function: theme('colors.violet.300');
+    --shiki-token-string-expression: theme('colors.lime.300');
+    --shiki-token-punctuation: theme('colors.zinc.200');
+  }
+
+  [inert] ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.shiki.github-dark {
+  background: transparent !important;
+}
+
+.shiki-magic-move-container,
+.shiki.nord {
+  background: transparent !important;
+  overflow-x: auto !important;
+}
+
+.notistack-MuiContent {
+  @apply rounded-md p-4 shadow-md;
+}
+
+.notistack-MuiContent-success {
+  background-color: #3f3f46 !important;
+  color: white !important;
+}
+
+.notistack-MuiContent-success svg > path {
+  fill: #84cc16 !important;
+}
+
+.notistack-MuiContent-error {
+  background-color: #3f3f46 !important;
+  color: white !important;
+}
+
+.notistack-MuiContent-error svg > path {
+  fill: #991b1b !important;
+}
+
+/* Countdown timer animations */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes expand-in {
+  from {
+    opacity: 0;
+    max-width: 0;
+  }
+  to {
+    opacity: 1;
+    max-width: 200px;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+.animate-fade-out {
+  animation: fade-out 0.4s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out both;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.5s ease-out both;
+}
+
+.animate-expand-in {
+  animation: expand-in 0.6s ease-out both;
+}

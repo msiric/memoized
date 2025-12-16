@@ -1,0 +1,45 @@
+# Memoized.io - Master Technical Interviews the JavaScript Way
+
+Memoized.io is an educational platform dedicated to helping JavaScript and TypeScript engineers master technical interviews and improve their programming skills.
+
+## About
+A comprehensive learning platform offering:
+- Structured learning paths for modern JavaScript engineers
+- In-depth courses covering data structures, algorithms, and advanced JavaScript concepts
+- Hands-on practice with real-world examples
+- Interview-ready techniques and strategies
+- Premium resources and personalized learning tracks
+
+## Course Tracks
+### JavaScript Track
+- Core Fundamentals: Engine, runtime, closures, prototypes, asynchronous JavaScript
+- TypeScript Introduction: Types, interfaces, generics, advanced concepts
+- Frontend Development: Component architecture, state management, performance
+- Advanced Concepts: Functional programming, meta-programming, design patterns
+
+### Data Structures & Algorithms Track
+- Built-in Data Structures: Strings, arrays, objects, sets, maps
+- User-defined Data Structures: Linked lists, trees, graphs, heaps
+- Common Techniques: Sliding window, two pointers, binary search, dynamic programming
+- Advanced Topics: Bloom filters, segment trees, network flow algorithms
+
+## Features
+- Interactive code examples and practice problems
+- Progress tracking and learning analytics
+- Premium subscription with advanced content
+- Mobile-responsive learning experience
+- Dark/light theme support
+
+## Contact
+- Website: https://www.memoized.io
+- GitHub: https://github.com/msiric
+- Platform: Next.js-based educational platform
+
+## Content Types
+- Interactive lessons with code examples
+- Practice problems and solutions
+- Technical interview preparation materials
+- Algorithm implementations and explanations
+- Real-world application examples
+
+Last updated: November 2025

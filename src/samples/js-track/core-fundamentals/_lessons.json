@@ -1,0 +1,11 @@
+{
+  "lessons": [
+    {
+      "id": "/variables",
+      "title": "Variables",
+      "description": "Learn about variable declarations, scoping, and hoisting in JavaScript",
+      "order": 1,
+      "access": "FREE"
+    }
+  ]
+}

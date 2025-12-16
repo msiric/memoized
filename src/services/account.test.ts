@@ -1,0 +1,181 @@
+import prisma from '@/lib/prisma'
+import {
+  createUserWithAccount,
+  findAccount,
+  findAccountWithUserByProviderAccountId,
+} from '@/services/account'
+import { createOrRetrieveCustomer } from '@/services/stripe'
+import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
+
+vi.mock('next/cache', () => ({
+  revalidateTag: vi.fn(),
+  revalidatePath: vi.fn(),
+}))
+
+// Mock external dependencies
+vi.mock('@/lib/prisma', () => {
+  const actualPrisma = vi.importActual('@/lib/prisma')
+  return {
+    ...actualPrisma,
+    default: { account: { findUnique: vi.fn() }, user: { create: vi.fn() } },
+  }
+})
+vi.mock('@/lib/resend')
+vi.mock('@/services/stripe', () => ({ createOrRetrieveCustomer: vi.fn() }))
+
+describe('Account services', () => {
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('findAccount', () => {
+    it('should find an account by provider and providerAccountId', async () => {
+      const mockAccount = { userId: '1', user: { id: '1' } }
+      ;(prisma.account.findUnique as Mock).mockResolvedValue(mockAccount)
+
+      const account = await findAccount('github', '123')
+      expect(account).toEqual(mockAccount)
+      expect(prisma.account.findUnique).toHaveBeenCalledWith({
+        where: {
+          provider_providerAccountId: {
+            provider: 'github',
+            providerAccountId: '123',
+          },
+        },
+        select: { userId: true, user: { select: { id: true } } },
+      })
+    })
+
+    it('should return null if account is not found', async () => {
+      ;(prisma.account.findUnique as Mock).mockResolvedValue(null)
+
+      const account = await findAccount('github', '123')
+      expect(account).toBeNull()
+      expect(prisma.account.findUnique).toHaveBeenCalledWith({
+        where: {
+          provider_providerAccountId: {
+            provider: 'github',
+            providerAccountId: '123',
+          },
+        },
+        select: { userId: true, user: { select: { id: true } } },
+      })
+    })
+  })
+
+  describe('createUserWithAccount', () => {
+    it('should create a user with account and Stripe customer', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test User',
+        image: null,
+        accounts: [{ provider: 'github', providerAccountId: '123' }],
+      }
+      ;(prisma.user.create as Mock).mockResolvedValue(mockUser)
+      ;(createOrRetrieveCustomer as Mock).mockResolvedValue('cus_test123')
+
+      const user = await createUserWithAccount(
+        'test@example.com',
+        'Test User',
+        null,
+        'github',
+        '123',
+      )
+      expect(user).toEqual(mockUser)
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: {
+          email: 'test@example.com',
+          name: 'Test User',
+          image: null,
+          accounts: {
+            create: { provider: 'github', providerAccountId: '123' },
+          },
+        },
+      })
+      expect(createOrRetrieveCustomer).toHaveBeenCalledWith({
+        userId: '1',
+        userEmail: 'test@example.com',
+      })
+    })
+
+    it('should create user even if Stripe customer creation fails', async () => {
+      const mockUser = {
+        id: '1',
+        email: 'test@example.com',
+        name: 'Test User',
+        image: null,
+        accounts: [{ provider: 'github', providerAccountId: '123' }],
+      }
+      ;(prisma.user.create as Mock).mockResolvedValue(mockUser)
+      ;(createOrRetrieveCustomer as Mock).mockRejectedValue(
+        new Error('Stripe error'),
+      )
+
+      // Mock console.error to avoid test output noise
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const user = await createUserWithAccount(
+        'test@example.com',
+        'Test User',
+        null,
+        'github',
+        '123',
+      )
+
+      expect(user).toEqual(mockUser)
+
+      consoleSpy.mockRestore()
+    })
+  })
+
+  describe('findAccountWithUserByProviderAccountId', () => {
+    it('should find an account with user by providerAccountId', async () => {
+      const mockAccount = {
+        id: '1',
+        providerAccountId: '123',
+        provider: 'github',
+        user: { id: '1', customer: { stripeCustomerId: 'cus_123' } },
+      }
+      ;(prisma.account.findUnique as Mock).mockResolvedValue(mockAccount)
+
+      const account = await findAccountWithUserByProviderAccountId('123')
+      expect(account).toEqual(mockAccount)
+      expect(prisma.account.findUnique).toHaveBeenCalledWith({
+        where: { providerAccountId: '123' },
+        select: {
+          id: true,
+          providerAccountId: true,
+          provider: true,
+          user: {
+            select: {
+              id: true,
+              customer: { select: { stripeCustomerId: true } },
+            },
+          },
+        },
+      })
+    })
+
+    it('should return null if account is not found', async () => {
+      ;(prisma.account.findUnique as Mock).mockResolvedValue(null)
+
+      const account = await findAccountWithUserByProviderAccountId('123')
+      expect(account).toBeNull()
+      expect(prisma.account.findUnique).toHaveBeenCalledWith({
+        where: { providerAccountId: '123' },
+        select: {
+          id: true,
+          providerAccountId: true,
+          provider: true,
+          user: {
+            select: {
+              id: true,
+              customer: { select: { stripeCustomerId: true } },
+            },
+          },
+        },
+      })
+    })
+  })
+})

@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccessOptions {
+  FREE
+  PREMIUM
+}
+
+enum SubscriptionPlan {
+  MONTHLY
+  YEARLY
+  LIFETIME
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+}
+
+enum ProblemDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum ProblemType {
+  CODING
+  THEORY
+}
+
+enum BannerType {
+  INFO
+  WARNING
+  SUCCESS
+  DISCOUNT
+}
+
+model User {
+  id              String                @id @default(uuid())
+  name            String?
+  email           String                @unique
+  image           String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @default(now())
+  accounts        Account[]
+  customer        Customer?
+  lessonProgress  UserLessonProgress[]
+  problemProgress UserProblemProgress[]
+
+  @@index([createdAt(sort: Desc)], name: "user_created_at_idx")
+}
+
+model Customer {
+  id               String         @id @default(uuid())
+  stripeCustomerId String         @unique
+  userId           String         @unique
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now())
+  subscriptions    Subscription[]
+}
+
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  provider          String
+  providerAccountId String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId], name: "account_user_id_idx")
+}
+
+model Lesson {
+  id             String               @id @default(uuid())
+  order          Int
+  href           String
+  title          String
+  description    String?
+  slug           String               @unique
+  body           String
+  serializedBody Json?
+  access         AccessOptions        @default(FREE)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @default(now())
+  sectionId      String
+  section        Section              @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  problems       Problem[]
+  resources      Resource[]
+  lessonProgress UserLessonProgress[]
+
+  @@index([order], name: "lesson_order_idx")
+  @@index([access], name: "lesson_access_idx")
+  @@index([sectionId, order], name: "lesson_section_order_idx")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  customerId           String
+  stripeSubscriptionId String             @unique
+  plan                 SubscriptionPlan
+  status               SubscriptionStatus
+  startDate            DateTime
+  endDate              DateTime?
+  metadata             Json?
+  priceId              String?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  cancelAt             DateTime?
+  canceledAt           DateTime?
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @default(now())
+  customer             Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([status], name: "subscription_status_idx")
+  @@index([plan], name: "subscription_plan_idx")
+  @@index([endDate], name: "subscription_end_date_idx")
+  @@index([customerId, status], name: "subscription_customer_status_idx")
+}
+
+model UserLessonProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  lessonId    String
+  completed   Boolean  @default(false)
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, completed], name: "user_lesson_user_completed_idx")
+}
+
+model Course {
+  id             String    @id @default(uuid())
+  order          Int
+  title          String
+  description    String?
+  href           String
+  body           String?
+  serializedBody Json?
+  slug           String    @unique
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  sections       Section[]
+
+  @@index([order], name: "course_order_idx")
+  @@index([isActive], name: "course_is_active_idx")
+  @@index([slug], name: "course_slug_idx")
+}
+
+model Section {
+  id             String   @id @default(uuid())
+  order          Int
+  title          String
+  description    String?
+  href           String
+  body           String
+  serializedBody Json?
+  slug           String   @unique
+  courseId       String
+  course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons        Lesson[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+
+  @@index([order], name: "section_order_idx")
+  @@index([courseId, order], name: "section_course_order_idx")
+  @@index([slug], name: "section_slug_idx")
+  @@index([courseId], name: "section_course_idx")
+}
+
+model Problem {
+  id               String                @id @default(uuid())
+  title            String
+  type             ProblemType
+  question         String                @default("")
+  answer           String                @default("")
+  serializedAnswer Json?
+  href             String
+  link             String
+  slug             String                @unique
+  difficulty       ProblemDifficulty
+  lessonId         String
+  lesson           Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @default(now())
+  problemProgress  UserProblemProgress[]
+
+  @@index([type], name: "problem_type_idx")
+  @@index([difficulty], name: "problem_difficulty_idx")
+  @@index([lessonId, difficulty], name: "problem_lesson_difficulty_idx")
+}
+
+model UserProblemProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  problemId   String
+  completed   Boolean  @default(false)
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem     Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+  @@index([completed], name: "user_problem_completed_idx")
+  @@index([completedAt], name: "user_problem_completed_at_idx")
+}
+
+model Banner {
+  id        String     @id @default(uuid())
+  title     String     @unique
+  message   String
+  type      BannerType
+  linkText  String?
+  linkUrl   String?
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  startDate DateTime
+  endDate   DateTime
+  priority  Int        @default(0)
+
+  @@index([isActive, startDate, endDate], name: "banner_is_active_start_date_end_date_idx")
+  @@index([priority], name: "banner_priority_idx")
+}
+
+model Resource {
+  id             String        @id @default(uuid())
+  order          Int
+  href           String
+  title          String
+  description    String?
+  slug           String        @unique
+  body           String
+  serializedBody Json?
+  access         AccessOptions @default(FREE)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now())
+  lessonId       String?
+  lesson         Lesson?       @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  @@index([order], name: "resource_order_idx")
+  @@index([access], name: "resource_access_idx")
+  @@index([lessonId, order], name: "resource_lesson_order_idx")
+}
