@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <strong>An open-source learning platform for programming education</strong>
+  <strong>An open-source JavaScript/TypeScript interview prep platform</strong>
 </p>
 
 <p align="center">
