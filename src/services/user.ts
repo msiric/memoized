@@ -5,6 +5,7 @@ import {
   buildCurriculum,
   calculateProgress,
   checkSubscriptionStatus,
+  isOwnerByEmail,
   sortCurriculum,
   sortProblemList,
   sortResources,
@@ -14,6 +15,7 @@ import {
   getLessonsWithProblems,
   getLessonsWithResourcesAndProblems,
 } from './lesson'
+import { SubscriptionStatus } from '@prisma/client'
 
 export const getUserById = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -76,6 +78,8 @@ export const getUserWithSubscriptionDetails = async (userId: string) => {
     return null
   }
 
+  const isOwner = isOwnerByEmail(user?.email)
+
   const currentSubscription = user.customer?.subscriptions[0] ?? null
   const currentSubscriptionPlan = currentSubscription?.plan ?? null
   const currentSubscriptionStatus = currentSubscription
@@ -86,6 +90,7 @@ export const getUserWithSubscriptionDetails = async (userId: string) => {
     ...user,
     currentSubscriptionPlan,
     currentSubscriptionStatus,
+    isOwner,
   }
 }
 
@@ -180,4 +185,16 @@ export const getUserProgressWithProblems = async (userId?: string) => {
     lessons: allLessons,
     problems,
   }
+}
+
+/**
+ * Check if a user has premium access (via subscription or owner status).
+ */
+export const checkPremiumAccess = async (userId?: string): Promise<boolean> => {
+  if (!userId) return false
+
+  const user = await getUserWithSubscriptionDetails(userId)
+  if (!user) return false
+
+  return user.isOwner || user.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import prisma from '@/lib/prisma'
+import { checkPremiumAccess } from '@/services/user'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { meiliSearch } from '@/lib/meili'
 import {
@@ -19,12 +19,8 @@ vi.mock('next-auth/next', () => ({
   getServerSession: vi.fn(),
 }))
 
-vi.mock('@/lib/prisma', () => ({
-  default: {
-    user: {
-      findUnique: vi.fn(),
-    },
-  },
+vi.mock('@/services/user', () => ({
+  checkPremiumAccess: vi.fn(),
 }))
 
 vi.mock('@/lib/meili', () => ({
@@ -57,17 +53,17 @@ describe('Search API Route', () => {
   it('should perform search for non-premium user', async () => {
     mockRequest = createMockRequest('test')
     vi.mocked(getServerSession).mockResolvedValue({
+      userId: 'user1',
       user: { email: 'user@example.com' },
     } as any)
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({
-      customer: { subscriptions: [] },
-    } as any)
+    vi.mocked(checkPremiumAccess).mockResolvedValue(false)
     const mockSearch = vi.fn().mockResolvedValue({ hits: [] })
     vi.mocked(meiliSearch.index).mockReturnValue({ search: mockSearch } as any)
 
     const response = await GET(mockRequest)
 
     expect(response.status).toBe(200)
+    expect(checkPremiumAccess).toHaveBeenCalledWith('user1')
     expect(mockSearch).toHaveBeenCalledWith(
       'test',
       expect.objectContaining({
@@ -79,11 +75,33 @@ describe('Search API Route', () => {
   it('should perform search for premium user', async () => {
     mockRequest = createMockRequest('test')
     vi.mocked(getServerSession).mockResolvedValue({
+      userId: 'user2',
       user: { email: 'premium@example.com' },
     } as any)
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({
-      customer: { subscriptions: [{ status: 'ACTIVE' }] },
+    vi.mocked(checkPremiumAccess).mockResolvedValue(true)
+    const mockSearch = vi.fn().mockResolvedValue({ hits: [] })
+    vi.mocked(meiliSearch.index).mockReturnValue({ search: mockSearch } as any)
+
+    const response = await GET(mockRequest)
+
+    expect(response.status).toBe(200)
+    expect(checkPremiumAccess).toHaveBeenCalledWith('user2')
+    expect(mockSearch).toHaveBeenCalledWith(
+      'test',
+      expect.objectContaining({
+        filter: undefined,
+      }),
+    )
+  })
+
+  it('should perform search for owner without subscription', async () => {
+    mockRequest = createMockRequest('test')
+    vi.mocked(getServerSession).mockResolvedValue({
+      userId: 'owner1',
+      user: { email: 'owner@example.com' },
     } as any)
+    // Owner has premium access even without subscription
+    vi.mocked(checkPremiumAccess).mockResolvedValue(true)
     const mockSearch = vi.fn().mockResolvedValue({ hits: [] })
     vi.mocked(meiliSearch.index).mockReturnValue({ search: mockSearch } as any)
 
@@ -101,11 +119,10 @@ describe('Search API Route', () => {
   it('should handle search errors', async () => {
     mockRequest = createMockRequest('test')
     vi.mocked(getServerSession).mockResolvedValue({
+      userId: 'user1',
       user: { email: 'user@example.com' },
     } as any)
-    vi.mocked(prisma.user.findUnique).mockResolvedValue({
-      customer: { subscriptions: [] },
-    } as any)
+    vi.mocked(checkPremiumAccess).mockResolvedValue(false)
     const mockSearch = vi.fn().mockRejectedValue(new Error('Search failed'))
     vi.mocked(meiliSearch.index).mockReturnValue({ search: mockSearch } as any)
 
@@ -120,47 +137,29 @@ describe('Search API Route', () => {
   it('should handle no session (anonymous user)', async () => {
     mockRequest = createMockRequest('test')
     vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(checkPremiumAccess).mockResolvedValue(false)
     const mockSearch = vi.fn().mockResolvedValue({ hits: [] })
     vi.mocked(meiliSearch.index).mockReturnValue({ search: mockSearch } as any)
 
     const response = await GET(mockRequest)
 
     expect(response.status).toBe(200)
+    expect(checkPremiumAccess).toHaveBeenCalledWith(undefined)
     expect(mockSearch).toHaveBeenCalledWith(
       'test',
       expect.objectContaining({
         filter: 'access = FREE',
       }),
     )
-    expect(prisma.user.findUnique).not.toHaveBeenCalled()
-  })
-
-  it('should handle session without email', async () => {
-    mockRequest = createMockRequest('test')
-    vi.mocked(getServerSession).mockResolvedValue({
-      user: { email: null },
-    } as any)
-    const mockSearch = vi.fn().mockResolvedValue({ hits: [] })
-    vi.mocked(meiliSearch.index).mockReturnValue({ search: mockSearch } as any)
-
-    const response = await GET(mockRequest)
-
-    expect(response.status).toBe(200)
-    expect(mockSearch).toHaveBeenCalledWith(
-      'test',
-      expect.objectContaining({
-        filter: 'access = FREE',
-      }),
-    )
-    expect(prisma.user.findUnique).not.toHaveBeenCalled()
   })
 
   it('should handle user not found in database', async () => {
     mockRequest = createMockRequest('test')
     vi.mocked(getServerSession).mockResolvedValue({
+      userId: 'notfound',
       user: { email: 'notfound@example.com' },
     } as any)
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(null)
+    vi.mocked(checkPremiumAccess).mockResolvedValue(false)
     const mockSearch = vi.fn().mockResolvedValue({ hits: [] })
     vi.mocked(meiliSearch.index).mockReturnValue({ search: mockSearch } as any)
 

@@ -4,7 +4,6 @@ import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useDebounce } from '@/hooks/useDebounce'
 import { Dialog, Transition } from '@headlessui/react'
-import { SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
@@ -19,6 +18,7 @@ import {
 } from 'react'
 import Highlighter from 'react-highlight-words'
 import { PREMIUM_PREFIX } from '../constants'
+import { isPremiumUser } from '@/utils/helpers'
 
 interface SearchResultItem {
   id: string
@@ -318,9 +318,7 @@ function SearchDialog({
   className?: string
 }) {
   const user = useAuthStore((state) => state.user)
-
-  const isPremiumUser =
-    user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
+  const hasPremiumAccess = isPremiumUser(user)
 
   const formRef = useRef<React.ElementRef<'form'>>(null)
   const panelRef = useRef<React.ElementRef<'div'>>(null)
@@ -399,7 +397,7 @@ function SearchDialog({
                     ref={panelRef}
                     className="border-t border-zinc-200 bg-white empty:hidden dark:border-zinc-100/5 dark:bg-white/2.5"
                   >
-                    {!isPremiumUser && (
+                    {!hasPremiumAccess && (
                       <div className="bg-zinc-50 px-4 py-2 text-xs text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
                         Free users can only search free content.{' '}
                         <a

@@ -277,6 +277,7 @@ export type UserWithSubscriptionsAndProgress = EnrichedUser & {
   currentSubscriptionStatus: SubscriptionStatus | null
   currentLessonProgress: number
   currentProblemProgress: number
+  isOwner: boolean
 }
 
 export type ActiveCoupon = {

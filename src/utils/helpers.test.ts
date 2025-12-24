@@ -21,6 +21,8 @@ import {
   getPlanFromStripePlan,
   getStatusFromStripeStatus,
   getURL,
+  isOwner,
+  isOwnerByEmail,
   remToPx,
   sortCurriculum,
   toDateTime,
@@ -83,6 +85,17 @@ describe('Helper functions', () => {
   })
 
   describe('userHasAccess', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      process.env = { ...originalEnv }
+      delete process.env.OWNER_EMAIL
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+    })
+
     it('should return true for free access', () => {
       expect(userHasAccess(null, AccessOptions.FREE)).toBe(true)
     })
@@ -136,6 +149,87 @@ describe('Helper functions', () => {
       expect(
         userHasAccess(user as UserWithSubscriptionsAndProgress, undefined),
       ).toBe(true)
+    })
+
+    it('should return true for owner even without active subscription', () => {
+      const user = {
+        email: 'owner@example.com',
+        currentSubscriptionStatus: null,
+        isOwner: true,
+      }
+      expect(
+        userHasAccess(
+          user as UserWithSubscriptionsAndProgress,
+          AccessOptions.PREMIUM,
+        ),
+      ).toBe(true)
+    })
+  })
+
+  describe('isOwner', () => {
+    it('should return false when user is null', () => {
+      expect(isOwner(null)).toBe(false)
+    })
+
+    it('should return false when user is undefined', () => {
+      expect(isOwner(undefined)).toBe(false)
+    })
+
+    it('should return false when user.isOwner is false', () => {
+      const user = { email: 'test@example.com', isOwner: false }
+      expect(isOwner(user as UserWithSubscriptionsAndProgress)).toBe(false)
+    })
+
+    it('should return false when user.isOwner is undefined', () => {
+      const user = { email: 'test@example.com' }
+      expect(isOwner(user as UserWithSubscriptionsAndProgress)).toBe(false)
+    })
+
+    it('should return true when user.isOwner is true', () => {
+      const user = { email: 'test@example.com', isOwner: true }
+      expect(isOwner(user as UserWithSubscriptionsAndProgress)).toBe(true)
+    })
+  })
+
+  describe('isOwnerByEmail', () => {
+    const originalEnv = process.env
+
+    beforeEach(() => {
+      process.env = { ...originalEnv }
+      delete process.env.OWNER_EMAIL
+    })
+
+    afterEach(() => {
+      process.env = originalEnv
+    })
+
+    it('should return false when OWNER_EMAIL is not set', () => {
+      expect(isOwnerByEmail('test@example.com')).toBe(false)
+    })
+
+    it('should return false when email is null', () => {
+      process.env.OWNER_EMAIL = 'owner@example.com'
+      expect(isOwnerByEmail(null)).toBe(false)
+    })
+
+    it('should return false when email is undefined', () => {
+      process.env.OWNER_EMAIL = 'owner@example.com'
+      expect(isOwnerByEmail(undefined)).toBe(false)
+    })
+
+    it('should return false when email does not match', () => {
+      process.env.OWNER_EMAIL = 'owner@example.com'
+      expect(isOwnerByEmail('other@example.com')).toBe(false)
+    })
+
+    it('should return true when email matches OWNER_EMAIL', () => {
+      process.env.OWNER_EMAIL = 'owner@example.com'
+      expect(isOwnerByEmail('owner@example.com')).toBe(true)
+    })
+
+    it('should be case-sensitive', () => {
+      process.env.OWNER_EMAIL = 'owner@example.com'
+      expect(isOwnerByEmail('Owner@example.com')).toBe(false)
     })
   })
 

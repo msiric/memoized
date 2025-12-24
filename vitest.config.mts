@@ -9,6 +9,12 @@ export default defineConfig({
     setupFiles: ['./src/test-setup.ts'],
     testTimeout: 120000, // 2 minutes for compiling all MDX files
     maxConcurrency: 5, // Reduce concurrency for MDX compilation (resource intensive)
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      'src/resources/**', // Symlinked to memoized-content, no tests here
+      'src/content/**', // Symlinked to memoized-content, no tests here
+    ],
   },
   resolve: {
     alias: {

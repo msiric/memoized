@@ -182,13 +182,15 @@ async function syncWithJsonStructure(contentInfo: {
       courseFilePath,
     )
 
+    const courseOrderValue = courseOrder++
+
     const courseRecord = await upsertCourse(
       courseSlug,
       courseTitle,
       courseDescription,
       courseBody,
       courseHref,
-      courseOrder++,
+      courseOrderValue,
       serializedContent as InputJsonValue,
     )
 
@@ -216,12 +218,14 @@ async function syncWithJsonStructure(contentInfo: {
         sectionFilePath,
       )
 
+      const sectionOrderValue = sectionOrder++
+
       const sectionRecord = await upsertSection(
         sectionSlug,
         sectionTitle,
         sectionDescription,
         sectionContent,
-        sectionOrder++,
+        sectionOrderValue,
         sectionHref,
         courseRecord.id,
         serializedSectionContent as InputJsonValue,
@@ -251,13 +255,15 @@ async function syncWithJsonStructure(contentInfo: {
         // Convert access level from string to enum
         const accessLevel = lesson.access === 'FREE' ? 'FREE' : 'PREMIUM'
 
+        const lessonOrderValue = lessonOrder++
+
         const lessonRecord = await upsertLesson(
           lessonSlug,
           lesson.title,
           lesson.description,
           lessonContent,
           serializedLessonContent as InputJsonValue,
-          lessonOrder++,
+          lessonOrderValue,
           accessLevel,
           lessonHref,
           sectionRecord.id,

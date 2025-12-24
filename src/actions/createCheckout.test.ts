@@ -36,6 +36,7 @@ describe('createCheckout', () => {
     currentSubscriptionStatus: SubscriptionStatus.ACTIVE,
     name: 'User',
     image: null,
+    isOwner: false,
     lessonProgress: [],
     problemProgress: [],
   }

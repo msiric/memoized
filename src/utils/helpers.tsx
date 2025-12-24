@@ -52,6 +52,35 @@ export const toDateTime = (secs: number) => {
   return t
 }
 
+/**
+ * Check if a user is the platform owner.
+ * The isOwner flag is computed server-side when the user data is fetched.
+ */
+export const isOwner = (
+  user: UserWithSubscriptionsAndProgress | null | undefined,
+): boolean => !!user?.isOwner
+
+/**
+ * Server-side helper to check if an email matches the owner email.
+ */
+export const isOwnerByEmail = (email: string | null | undefined): boolean => {
+  const ownerEmail = process.env.OWNER_EMAIL
+  if (!ownerEmail || !email) return false
+  return email === ownerEmail
+}
+
+/**
+ * Check if a user has premium access (owner or active subscription).
+ */
+export const isPremiumUser = (
+  user: UserWithSubscriptionsAndProgress | null | undefined,
+): boolean =>
+  isOwner(user) || user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE
+
+/**
+ * Check if a user can access content with a specific access level.
+ * Uses isPremiumUser internally to determine premium access.
+ */
 export const userHasAccess = (
   user: UserWithSubscriptionsAndProgress | null | undefined,
   access: AccessOptions | undefined,
@@ -59,8 +88,7 @@ export const userHasAccess = (
   user === undefined ||
   access === undefined ||
   access === AccessOptions.FREE ||
-  (access === AccessOptions.PREMIUM &&
-    user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE)
+  (access === AccessOptions.PREMIUM && isPremiumUser(user))
 
 export const capitalizeFirstLetter = (str: string) => {
   if (typeof str !== 'string' || str.length === 0) {

@@ -1,7 +1,7 @@
 import { meiliSearch } from '@/lib/meili'
+import { checkPremiumAccess } from '@/services/user'
 import { getServerSession } from 'next-auth/next'
 import { NextResponse } from 'next/server'
-import prisma from '../../../lib/prisma' 
 import { authOptions } from '../auth/[...nextauth]/route'
 
 export async function GET(request: Request) {
@@ -18,19 +18,8 @@ export async function GET(request: Request) {
   // Get the user's session
   const session = await getServerSession(authOptions)
 
-  // Check if the user has an active premium subscription
-  let isPremiumUser = false
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: {
-        customer: { select: { subscriptions: { select: { status: true } } } },
-      },
-    })
-    isPremiumUser =
-      user?.customer?.subscriptions.some((sub) => sub.status === 'ACTIVE') ??
-      false
-  }
+  // Check if the user has premium access (subscription or owner)
+  const isPremiumUser = await checkPremiumAccess(session?.userId)
 
   try {
     const results = await meiliSearch.index('lessons').search(query, {

@@ -117,9 +117,13 @@ Integrations   → Stripe (Payments) · Resend (Email) · Sentry (Monitoring)
 5. **Content setup**:
 
    ```bash
-   yarn setup:content    # Copies sample content
+   yarn setup:content    # Auto-detects content source (see below)
    yarn sync:all:dev     # Syncs all content to database
    ```
+
+   > **Content Sources** (auto-detected by `setup:content`):
+   > - **Premium content**: If `../memoized-content` exists as a sibling directory, symlinks are created automatically. Changes are instantly reflected - just run `yarn sync:all:dev` after editing.
+   > - **Sample content**: If no premium content is found, sample content from `src/samples/` is copied for open-source development.
 
 6. **Start development**:
    ```bash
