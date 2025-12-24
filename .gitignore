@@ -1,7 +1,7 @@
-# Premium content (synced from private repo)
-src/content/js-track/
-src/content/dsa-track/
-src/resources/
+# Premium content (synced from private repo via symlinks)
+src/content/js-track
+src/content/dsa-track
+src/resources
 
 # Logs
 logs
