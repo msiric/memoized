@@ -119,7 +119,7 @@ const createCustomerInStripe = async (userId: string, userEmail: string) => {
       throw new ServiceError('Failed to create customer in Stripe')
 
     return newCustomer.id
-  } catch (error) {
+  } catch (_error) {
     throw new ServiceError('Failed to create customer in Stripe')
   }
 }
@@ -181,7 +181,7 @@ export const createOrRetrieveCustomer = async ({
 
       return upsertedCustomer
     }
-  } catch (error) {
+  } catch (_error) {
     throw new ServiceError('Failed to retrieve or create customer')
   }
 }
@@ -190,7 +190,7 @@ export const retrieveStripeSession = async (sessionId: string) => {
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId)
     return session
-  } catch (error) {
+  } catch (_error) {
     throw new ServiceError('Failed to retrieve Stripe checkout session')
   }
 }
@@ -242,7 +242,7 @@ export const createStripeSession = async (
     revalidatePath('/', 'layout')
 
     return checkoutSession
-  } catch (error) {
+  } catch (_error) {
     throw new ServiceError('Failed to create Stripe checkout session')
   }
 }
@@ -254,7 +254,7 @@ export const createBillingPortalSession = async (customer: string) => {
       return_url: getURL(COURSES_PREFIX),
     })
     return billingSession
-  } catch (error) {
+  } catch (_error) {
     throw new ServiceError('Failed to create Stripe billing portal link')
   }
 }

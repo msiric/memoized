@@ -10,7 +10,6 @@ import { useAccess } from '@/hooks/useAccess'
 import { useNavigationLinks } from '@/hooks/useNavigationLinks'
 import {
   CompletedKey,
-  NavigationContent,
   NavigationLink,
   NavigationProps,
   NavigationSection,
@@ -35,9 +34,8 @@ import { CheckIcon } from './icons/CheckIcon'
 import { LockIcon } from './icons/LockIcon'
 import { ChevronLeftIcon } from './icons'
 import { IconWrapper } from './IconWrapper'
-import { PREMIUM_BUTTON_STYLES } from './PremiumButton'
 import { PREMIUM_PREFIX } from '../constants'
-import { HiOutlineDocumentText, HiOutlineBookOpen, HiSparkles } from 'react-icons/hi2'
+import { HiSparkles } from 'react-icons/hi2'
 
 export const useInitialValue = <T,>(value: T, condition = true) => {
   const initialValue = useRef(value).current

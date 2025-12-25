@@ -2,11 +2,8 @@ import { APP_NAME } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
 import { FaBookOpen } from 'react-icons/fa'
-import { LiaChalkboardTeacherSolid } from 'react-icons/lia'
 import {
   MdInsights,
-  MdOutlineTipsAndUpdates,
-  MdOutlineTouchApp,
 } from 'react-icons/md'
 import { RiJavascriptLine } from 'react-icons/ri'
 import Image from 'next/image'
@@ -16,7 +13,6 @@ import { SectionHeader } from './SectionHeader'
 import { Badge } from './Badge'
 import {
   TerminalIcon,
-  CheckIcon,
   BadgeCheckIcon,
   LightBulbIcon,
   CheckCircleIcon,
@@ -25,7 +21,7 @@ import {
   LinkIcon,
   LightningIcon,
 } from './icons'
-import { SPACING, GRID, TYPOGRAPHY } from '@/constants/designTokens'
+import { SPACING, TYPOGRAPHY } from '@/constants/designTokens'
 
 export const ContentOverview = () => {
   return (

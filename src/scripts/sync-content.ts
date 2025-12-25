@@ -18,7 +18,7 @@ import path from 'path'
 import slugify from 'slugify'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
-import { serialize, SerializeResult } from 'next-mdx-remote-client/serialize'
+import { serialize } from 'next-mdx-remote-client/serialize'
 
 slugify.extend({ '/': '-' })
 

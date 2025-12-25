@@ -121,7 +121,7 @@ describe('Stripe Library', () => {
     it('should create Stripe instance with empty secret when not provided', async () => {
       delete process.env.STRIPE_SECRET
 
-      const { stripe } = await import('@/lib/stripe')
+      await import('@/lib/stripe')
 
       expect(Stripe).toHaveBeenCalledWith('', {
         apiVersion: '2024-04-10',
@@ -131,7 +131,7 @@ describe('Stripe Library', () => {
     it('should use correct API version', async () => {
       process.env.STRIPE_SECRET = 'sk_test_123456789'
 
-      const { stripe } = await import('@/lib/stripe')
+      await import('@/lib/stripe')
 
       const MockedStripe = vi.mocked(Stripe)
       const callArgs = MockedStripe.mock.calls[0]
@@ -217,7 +217,7 @@ describe('Stripe Library', () => {
         vi.resetModules()
         process.env.STRIPE_SECRET = secretKey
 
-        const { stripe } = await import('@/lib/stripe')
+        await import('@/lib/stripe')
 
         expect(Stripe).toHaveBeenCalledWith(secretKey, {
           apiVersion: '2024-04-10',
@@ -300,7 +300,7 @@ describe('Stripe Library', () => {
         .mockImplementation(() => {})
 
       try {
-        const { STRIPE_SECRET } = await import('@/lib/stripe')
+        await import('@/lib/stripe')
 
         expect(consoleSpy).not.toHaveBeenCalledWith(
           expect.stringContaining('sk_test_secret_key_123456789'),
@@ -330,7 +330,7 @@ describe('Stripe Library', () => {
         'sk_test_51234567890123456789012345678901234567890123456789012345678901234'
       process.env.STRIPE_WEBHOOK = 'whsec_test_webhook_secret'
 
-      const { stripe, STRIPE_SECRET, STRIPE_WEBHOOK } = await import(
+      const { STRIPE_SECRET, STRIPE_WEBHOOK } = await import(
         '@/lib/stripe'
       )
 
@@ -346,13 +346,13 @@ describe('Stripe Library', () => {
         'sk_live_51234567890123456789012345678901234567890123456789012345678901234'
       process.env.STRIPE_WEBHOOK = 'whsec_live_webhook_secret'
 
-      const { stripe, STRIPE_SECRET, STRIPE_WEBHOOK } = await import(
+      const { STRIPE_SECRET: STRIPE_SECRET2, STRIPE_WEBHOOK: STRIPE_WEBHOOK2 } = await import(
         '@/lib/stripe'
       )
 
-      expect(STRIPE_SECRET.startsWith('sk_live_')).toBe(true)
-      expect(STRIPE_WEBHOOK.startsWith('whsec_')).toBe(true)
-      expect(Stripe).toHaveBeenCalledWith(STRIPE_SECRET, {
+      expect(STRIPE_SECRET2.startsWith('sk_live_')).toBe(true)
+      expect(STRIPE_WEBHOOK2.startsWith('whsec_')).toBe(true)
+      expect(Stripe).toHaveBeenCalledWith(STRIPE_SECRET2, {
         apiVersion: '2024-04-10',
       })
     })
@@ -361,10 +361,10 @@ describe('Stripe Library', () => {
       process.env.STRIPE_SECRET =
         'rk_test_51234567890123456789012345678901234567890123456789012345678901234'
 
-      const { stripe, STRIPE_SECRET } = await import('@/lib/stripe')
+      const { STRIPE_SECRET: STRIPE_SECRET3 } = await import('@/lib/stripe')
 
-      expect(STRIPE_SECRET.startsWith('rk_test_')).toBe(true)
-      expect(Stripe).toHaveBeenCalledWith(STRIPE_SECRET, {
+      expect(STRIPE_SECRET3.startsWith('rk_test_')).toBe(true)
+      expect(Stripe).toHaveBeenCalledWith(STRIPE_SECRET3, {
         apiVersion: '2024-04-10',
       })
     })
@@ -374,7 +374,7 @@ describe('Stripe Library', () => {
     it('should use the correct Stripe API version', async () => {
       process.env.STRIPE_SECRET = 'sk_test_123456789'
 
-      const { stripe } = await import('@/lib/stripe')
+      await import('@/lib/stripe')
 
       const MockedStripe = vi.mocked(Stripe)
       const config = MockedStripe.mock.calls[0][1]!

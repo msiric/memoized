@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi, afterEach } from 'vitest'
-import { Highlighter, getSingletonHighlighter } from 'shiki'
+import { getSingletonHighlighter } from 'shiki'
 
 const mockHighlighter = {
   codeToHtml: vi.fn(),
@@ -125,7 +125,7 @@ describe('Shiki Highlighter Library', () => {
     it('should highlight code with only language specified', async () => {
       const code = 'const x = 42'
 
-      const result = await highlightCode(code, 'typescript')
+      await highlightCode(code, 'typescript')
 
       expect(mockHighlighter.codeToHtml).toHaveBeenCalledWith(code, {
         lang: 'typescript',
@@ -134,7 +134,7 @@ describe('Shiki Highlighter Library', () => {
     })
 
     it('should handle empty code', async () => {
-      const result = await highlightCode('')
+      await highlightCode('')
 
       expect(mockHighlighter.codeToHtml).toHaveBeenCalledWith('', {
         lang: 'js',
@@ -148,7 +148,7 @@ describe('Shiki Highlighter Library', () => {
   return true
 }`
 
-      const result = await highlightCode(code, 'javascript')
+      await highlightCode(code, 'javascript')
 
       expect(mockHighlighter.codeToHtml).toHaveBeenCalledWith(code, {
         lang: 'javascript',

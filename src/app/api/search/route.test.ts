@@ -1,12 +1,8 @@
-import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { checkPremiumAccess } from '@/services/user'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { meiliSearch } from '@/lib/meili'
 import {
-  MockedFunction,
   beforeEach,
-  afterEach,
   describe,
   expect,
   it,

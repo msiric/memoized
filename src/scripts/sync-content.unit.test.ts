@@ -64,7 +64,7 @@ describe('Sync Content Script - Unit Tests', () => {
       let result
       try {
         result = JSON.parse(malformedJson)
-      } catch (error) {
+      } catch (_error) {
         result = { lessons: [] }
       }
 

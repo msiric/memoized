@@ -6,7 +6,7 @@ const indexLessons = async () => {
   try {
     await meiliSearch.deleteIndex('lessons')
     console.log('Existing index deleted')
-  } catch (error) {
+  } catch (_error) {
     console.log('No existing index to delete, or deletion failed')
   }
 

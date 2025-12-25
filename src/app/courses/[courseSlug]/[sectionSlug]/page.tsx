@@ -1,10 +1,8 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { APP_NAME, COURSES_PREFIX } from '@/constants'
 import { PreserializedMdxRenderer } from '@/components/PreserializedMdxRenderer'
 import { completeCurriculum } from '@/constants/curriculum'
 import { getSectionBySlug, getSectionsSlugs } from '@/services/lesson'
 import { type Metadata } from 'next'
-import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {

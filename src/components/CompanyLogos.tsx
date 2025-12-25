@@ -10,7 +10,6 @@ import {
 } from 'react-icons/fa'
 import { FaMeta } from 'react-icons/fa6'
 import { SiNetflix, SiTesla, SiUber } from 'react-icons/si'
-import { Badge } from './Badge'
 import { GradientText } from './GradientText'
 import { DecorativeBlur } from './DecorativeBlur'
 import { AcademicCapIcon } from './icons'

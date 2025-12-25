@@ -19,7 +19,6 @@ export const ExpandableAnswer = ({ problem }: ExpandableAnswerProps) => {
   return (
     <ProblemCard
       problem={problem}
-      variant="inline"
       defaultExpanded={false}
     />
   )

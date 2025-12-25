@@ -71,7 +71,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = 'http://localhost:7700'
       delete process.env.MEILISEARCH_MASTER_KEY
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: 'http://localhost:7700',
@@ -85,7 +85,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = 'https://ms-abc123-456.fra.meilisearch.io'
       process.env.MEILISEARCH_MASTER_KEY = 'prod-master-key-xyz789'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: 'https://ms-abc123-456.fra.meilisearch.io',
@@ -97,7 +97,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = 'http://localhost:7700'
       process.env.MEILISEARCH_MASTER_KEY = 'dev-key'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: 'http://localhost:7700',
@@ -109,7 +109,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = 'http://localhost:8080'
       process.env.MEILISEARCH_MASTER_KEY = 'custom-port-key'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: 'http://localhost:8080',
@@ -160,7 +160,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = undefined as any
       process.env.MEILISEARCH_MASTER_KEY = undefined as any
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: '',
@@ -172,7 +172,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = ''
       process.env.MEILISEARCH_MASTER_KEY = ''
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: '',
@@ -184,7 +184,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = '  http://localhost:7700  '
       process.env.MEILISEARCH_MASTER_KEY = '  test-key  '
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: '  http://localhost:7700  ',
@@ -198,7 +198,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = 'https://search.example.com'
       process.env.MEILISEARCH_MASTER_KEY = 'super-secret-key'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       const MockedMeiliSearch = vi.mocked(MeiliSearch)
       const callArgs = MockedMeiliSearch.mock.calls[0][0]
@@ -215,7 +215,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = 'http://localhost:7700'
       process.env.MEILISEARCH_MASTER_KEY = 'test-key'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       const MockedMeiliSearch = vi.mocked(MeiliSearch)
       const callArgs = MockedMeiliSearch.mock.calls[0][0]
@@ -294,7 +294,7 @@ describe('MeiliSearch Library', () => {
       process.env.MEILISEARCH_HOST = 'http://meilisearch:7700'
       process.env.MEILISEARCH_MASTER_KEY = 'docker-master-key'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: 'http://meilisearch:7700',
@@ -307,7 +307,7 @@ describe('MeiliSearch Library', () => {
         'http://meilisearch-service.default.svc.cluster.local:7700'
       process.env.MEILISEARCH_MASTER_KEY = 'k8s-secret-key'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: 'http://meilisearch-service.default.svc.cluster.local:7700',
@@ -320,7 +320,7 @@ describe('MeiliSearch Library', () => {
         'https://ms-abc123def-456.usc.meilisearch.io'
       process.env.MEILISEARCH_MASTER_KEY = 'msc_xyz789abc456def'
 
-      const { meiliSearch } = await import('@/lib/meili')
+      await import('@/lib/meili')
 
       expect(MeiliSearch).toHaveBeenCalledWith({
         host: 'https://ms-abc123def-456.usc.meilisearch.io',

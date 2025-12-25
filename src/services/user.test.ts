@@ -8,8 +8,6 @@ import {
 } from '@/services/user'
 import {
   EnrichedLesson,
-  LessonWithProblems,
-  LessonWithResourcesAndProblems,
   Problem,
 } from '@/types'
 import { ServiceError } from '@/lib/error-tracking'

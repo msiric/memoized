@@ -25,7 +25,7 @@ import {
   FlaskIcon
 } from '@/components/icons'
 import { HiSparkles } from 'react-icons/hi2'
-import { CONTAINER, SPACING } from '@/constants/designTokens'
+import { CONTAINER } from '@/constants/designTokens'
 
 export default async function Premium() {
   const session = await getServerSession(authOptions)

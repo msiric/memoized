@@ -65,7 +65,7 @@ export const TimeLimitedOffer = ({ products }: TimeLimitedOfferProps) => {
         <span className="bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent dark:from-amber-400 dark:to-amber-500">
           {validCoupon.name}
         </span>
-        {' '}discount
+        {' '}sale
       </h2>
       
       <p className="mx-auto mb-4 sm:mb-6 max-w-2xl text-sm sm:text-base lg:text-lg text-zinc-600 dark:text-zinc-400">

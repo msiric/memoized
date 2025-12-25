@@ -23,7 +23,7 @@ export const SignIn = () => {
       setLoading(true)
       setError(null)
       await signIn(provider)
-    } catch (error) {
+    } catch (_error) {
       setLoading(false)
       setError('Something went wrong while trying to authenticate you')
     }

@@ -234,7 +234,7 @@ describe('setup-dev.ts (Simplified)', () => {
       if (hasSubmodule) {
         try {
           await execAsync('git submodule update --init --recursive')
-        } catch (error) {
+        } catch (_error) {
           if (hasSampleContent) {
             await execAsync('yarn setup:content')
           } else {

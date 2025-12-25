@@ -7,7 +7,7 @@ export const SnackbarNotification = forwardRef<
   HTMLDivElement,
   CustomContentProps
 >((props, ref) => {
-  const { id, message, variant, ...other } = props
+  const { id: _id, message, variant, ...other } = props
 
   return (
     <SnackbarContent

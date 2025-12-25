@@ -143,7 +143,7 @@ describe('Prisma Singleton', () => {
     it('should reuse instance in development via global', async () => {
       vi.stubEnv('NODE_ENV', 'development')
 
-      const prisma1 = await import('@/lib/prisma')
+      const _prisma1 = await import('@/lib/prisma')
       const firstGlobal = (globalThis as any).prismaGlobal
 
       const prisma2 = await import('@/lib/prisma')
@@ -207,7 +207,7 @@ describe('Prisma Singleton', () => {
 
     it('should properly clean up between test environments', async () => {
       vi.stubEnv('NODE_ENV', 'development')
-      const devPrisma = await import('@/lib/prisma')
+      const _devPrisma = await import('@/lib/prisma')
       expect((globalThis as any).prismaGlobal).toBeDefined()
 
       delete (globalThis as any).prismaGlobal

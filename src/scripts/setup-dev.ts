@@ -175,7 +175,7 @@ async function setupContent(): Promise<void> {
     try {
       await execAsync('git submodule update --init --recursive')
       log.info('Updated submodule content')
-    } catch (error) {
+    } catch (_error) {
       log.info('Submodule update failed, falling back to samples')
       if (hasSampleContent) {
         await execAsync('yarn setup:content')

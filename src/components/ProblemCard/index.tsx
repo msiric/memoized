@@ -27,7 +27,6 @@ export type RevealStage = 'collapsed' | 'question' | 'answer'
 
 export type ProblemCardProps = {
   problem: Problem
-  variant?: 'inline' | 'panel'
   defaultExpanded?: boolean
   showLesson?: boolean
   lessonTitle?: string
@@ -35,7 +34,6 @@ export type ProblemCardProps = {
 
 export const ProblemCard = ({
   problem,
-  variant = 'inline',
   defaultExpanded = false,
   showLesson = false,
   lessonTitle,

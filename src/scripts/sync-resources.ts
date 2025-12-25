@@ -4,7 +4,7 @@ import { upsertResource } from '@/services/resource'
 import prisma from '@/lib/prisma'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
-import { serialize, SerializeResult } from 'next-mdx-remote-client/serialize'
+import { serialize } from 'next-mdx-remote-client/serialize'
 import {
   CONTENT_FOLDER,
   RESOURCES_FOLDER,

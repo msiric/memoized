@@ -222,10 +222,6 @@ describe('Stripe Webhook Handler', () => {
 
   it('should log unhandled relevant events', async () => {
     const consoleSpy = vi.spyOn(console, 'log')
-    const mockEvent = {
-      type: 'customer.subscription.trial_will_end',
-      data: { object: {} },
-    }
     mockRequest = createMockRequest('customer.subscription.trial_will_end', {})
 
     const response = await POST(mockRequest)

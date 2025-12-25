@@ -213,7 +213,6 @@ describe('Sync Content Script - JSON Structure', () => {
       const { upsertCourse, upsertSection, upsertLesson } = await import(
         '@/services/lesson'
       )
-      const { serialize } = await import('next-mdx-remote-client/serialize')
 
       await syncContent()
 

@@ -168,7 +168,7 @@ export async function sendEmail({
       subject,
       html,
     })
-  } catch (error) {
+  } catch (_error) {
     throw new ServiceError(`Failed to send email`)
   }
 }

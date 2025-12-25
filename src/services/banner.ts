@@ -62,7 +62,7 @@ export const getUnifiedBanners = async (): Promise<UnifiedBanner[]> => {
 
         return {
           id: `coupon-${coupon.id}`,
-          title: coupon.name || 'Special Offer',
+          title: `${coupon.name || 'Special Offer'} Sale`,
           message,
           type: 'DISCOUNT' as BannerType,
           linkText: 'Get Premium',

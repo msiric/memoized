@@ -50,7 +50,7 @@ export const createUserWithAccount = async (
       userId: result.id,
       userEmail: result.email,
     })
-  } catch (error) {
+  } catch (_error) {
     // Don't fail user creation if Stripe customer creation fails
     // The customer will be created later when they attempt a purchase
   }
