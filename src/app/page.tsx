@@ -5,6 +5,9 @@ import dynamic from 'next/dynamic'
 import { ContentOverview } from '../components/ContentOverview'
 import { FreeOfferingHighlight } from '../components/FreeOfferingHighlight'
 
+// Revalidate every 60 seconds to pick up new coupons/banners
+export const revalidate = 60
+
 const TopBanner = dynamic(
   () => import('../components/TopBanner').then((mod) => mod.TopBanner),
   {
