@@ -562,3 +562,12 @@ export async function highlightCode(
   return sharedHighlightCode(code, lang, theme)
 }
 
+export function isPrismaUniqueConstraintError(error: unknown): boolean {
+  return (
+    error !== null &&
+    typeof error === 'object' &&
+    'code' in error &&
+    error.code === 'P2002'
+  )
+}
+

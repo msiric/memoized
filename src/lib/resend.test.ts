@@ -72,12 +72,15 @@ describe('Email Service', () => {
         name: 'John Doe',
       })
 
-      expect(mockSend).toHaveBeenCalledWith({
-        from: 'info@memoized.io',
-        to: 'test@example.com',
-        subject: 'Welcome to TestApp',
-        html: expect.stringContaining('Hi John Doe,'),
-      })
+      expect(mockSend).toHaveBeenCalledWith(
+        {
+          from: 'info@memoized.io',
+          to: 'test@example.com',
+          subject: 'Welcome to TestApp',
+          html: expect.stringContaining('Hi John Doe,'),
+        },
+        undefined,
+      )
     })
 
     it('should send subscription email with correct parameters', async () => {
@@ -89,12 +92,15 @@ describe('Email Service', () => {
         name: 'Jane Smith',
       })
 
-      expect(mockSend).toHaveBeenCalledWith({
-        from: 'info@memoized.io',
-        to: 'test@example.com',
-        subject: 'Thank you for subscribing to premium',
-        html: expect.stringContaining('Hi Jane Smith,'),
-      })
+      expect(mockSend).toHaveBeenCalledWith(
+        {
+          from: 'info@memoized.io',
+          to: 'test@example.com',
+          subject: 'Thank you for subscribing to premium',
+          html: expect.stringContaining('Hi Jane Smith,'),
+        },
+        undefined,
+      )
     })
 
     it('should send purchase email with correct parameters', async () => {
@@ -106,12 +112,15 @@ describe('Email Service', () => {
         name: 'Bob Wilson',
       })
 
-      expect(mockSend).toHaveBeenCalledWith({
-        from: 'info@memoized.io',
-        to: 'test@example.com',
-        subject: 'Thank you for purchasing lifetime access',
-        html: expect.stringContaining('Hi Bob Wilson,'),
-      })
+      expect(mockSend).toHaveBeenCalledWith(
+        {
+          from: 'info@memoized.io',
+          to: 'test@example.com',
+          subject: 'Thank you for purchasing lifetime access',
+          html: expect.stringContaining('Hi Bob Wilson,'),
+        },
+        undefined,
+      )
     })
 
     it('should use custom from address when provided', async () => {
@@ -124,12 +133,36 @@ describe('Email Service', () => {
         name: 'Test User',
       })
 
-      expect(mockSend).toHaveBeenCalledWith({
-        from: 'custom@example.com',
+      expect(mockSend).toHaveBeenCalledWith(
+        {
+          from: 'custom@example.com',
+          to: 'test@example.com',
+          subject: 'Welcome to TestApp',
+          html: expect.any(String),
+        },
+        undefined,
+      )
+    })
+
+    it('should pass idempotency key when provided', async () => {
+      mockSend.mockResolvedValue({ id: 'email-id' })
+
+      await sendEmail({
         to: 'test@example.com',
-        subject: 'Welcome to TestApp',
-        html: expect.any(String),
+        type: 'subscription',
+        name: 'Test User',
+        idempotencyKey: 'subscription-welcome/sub_123',
       })
+
+      expect(mockSend).toHaveBeenCalledWith(
+        {
+          from: 'info@memoized.io',
+          to: 'test@example.com',
+          subject: 'Thank you for subscribing to premium',
+          html: expect.any(String),
+        },
+        { idempotencyKey: 'subscription-welcome/sub_123' },
+      )
     })
 
     it('should throw ServiceError when resend fails', async () => {
@@ -477,12 +510,15 @@ describe('Email Service', () => {
         name: 'Test User',
       })
 
-      expect(mockSend).toHaveBeenCalledWith({
-        from: 'info@memoized.io',
-        to: 'test@example.com',
-        subject: 'Welcome to TestApp',
-        html: expect.any(String),
-      })
+      expect(mockSend).toHaveBeenCalledWith(
+        {
+          from: 'info@memoized.io',
+          to: 'test@example.com',
+          subject: 'Welcome to TestApp',
+          html: expect.any(String),
+        },
+        undefined,
+      )
     })
   })
 })

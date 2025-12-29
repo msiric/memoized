@@ -39,7 +39,7 @@ describe('Webhook services', () => {
   })
 
   describe('markWebhookEventProcessed', () => {
-    it('should create a webhook event record', async () => {
+    it('should create a webhook event record and return true', async () => {
       vi.spyOn(prisma.webhookEvent, 'create').mockResolvedValue({
         id: '1',
         stripeEventId: 'evt_123',
@@ -47,14 +47,33 @@ describe('Webhook services', () => {
         processedAt: new Date(),
       })
 
-      await markWebhookEventProcessed('evt_123', 'checkout.session.completed')
+      const result = await markWebhookEventProcessed('evt_123', 'checkout.session.completed')
 
+      expect(result).toBe(true)
       expect(prisma.webhookEvent.create).toHaveBeenCalledWith({
         data: {
           stripeEventId: 'evt_123',
           eventType: 'checkout.session.completed',
         },
       })
+    })
+
+    it('should return false on unique constraint violation (P2002)', async () => {
+      const uniqueError = { code: 'P2002', message: 'Unique constraint failed' }
+      vi.spyOn(prisma.webhookEvent, 'create').mockRejectedValue(uniqueError)
+
+      const result = await markWebhookEventProcessed('evt_123', 'checkout.session.completed')
+
+      expect(result).toBe(false)
+    })
+
+    it('should rethrow non-P2002 errors', async () => {
+      const genericError = new Error('Database connection failed')
+      vi.spyOn(prisma.webhookEvent, 'create').mockRejectedValue(genericError)
+
+      await expect(
+        markWebhookEventProcessed('evt_123', 'checkout.session.completed')
+      ).rejects.toThrow('Database connection failed')
     })
   })
 })

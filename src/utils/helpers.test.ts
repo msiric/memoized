@@ -21,6 +21,7 @@ import {
   getPlanFromStripePlan,
   getStatusFromStripeStatus,
   getURL,
+  isPrismaUniqueConstraintError,
   isOwner,
   isOwnerByEmail,
   remToPx,
@@ -886,5 +887,35 @@ describe('calculateProgress', () => {
 
     expect(progress.currentLessonProgress).toBe(0)
     expect(progress.currentProblemProgress).toBe(0)
+  })
+})
+
+describe('isPrismaUniqueConstraintError', () => {
+  it('should return true for P2002 error', () => {
+    const error = { code: 'P2002', message: 'Unique constraint failed' }
+    expect(isPrismaUniqueConstraintError(error)).toBe(true)
+  })
+
+  it('should return false for other Prisma error codes', () => {
+    const error = { code: 'P2003', message: 'Foreign key constraint failed' }
+    expect(isPrismaUniqueConstraintError(error)).toBe(false)
+  })
+
+  it('should return false for null', () => {
+    expect(isPrismaUniqueConstraintError(null)).toBe(false)
+  })
+
+  it('should return false for undefined', () => {
+    expect(isPrismaUniqueConstraintError(undefined)).toBe(false)
+  })
+
+  it('should return false for non-object errors', () => {
+    expect(isPrismaUniqueConstraintError('error')).toBe(false)
+    expect(isPrismaUniqueConstraintError(123)).toBe(false)
+  })
+
+  it('should return false for objects without code property', () => {
+    const error = { message: 'Some error' }
+    expect(isPrismaUniqueConstraintError(error)).toBe(false)
   })
 })

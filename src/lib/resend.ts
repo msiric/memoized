@@ -149,6 +149,7 @@ export type SendEmailArgs = {
   to: string
   type: 'welcome' | 'subscription' | 'purchase'
   name: string
+  idempotencyKey?: string
 }
 
 export async function sendEmail({
@@ -156,18 +157,22 @@ export async function sendEmail({
   to,
   type,
   name,
+  idempotencyKey,
 }: SendEmailArgs) {
   const { subject, renderContent } = emailTypeToContent[type]
 
   const html = renderContent(name)
 
   try {
-    await resend.emails.send({
-      from,
-      to,
-      subject,
-      html,
-    })
+    await resend.emails.send(
+      {
+        from,
+        to,
+        subject,
+        html,
+      },
+      idempotencyKey ? { idempotencyKey } : undefined,
+    )
   } catch (_error) {
     throw new ServiceError(`Failed to send email`)
   }

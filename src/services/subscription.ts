@@ -47,7 +47,9 @@ export const handleFailedRecurringSubscription = async (
       throw new ServiceError(`Failed to retrieve failed recurring subscription`)
     }
 
-    await stripe.subscriptions.cancel(subscription.id)
+    await stripe.subscriptions.cancel(subscription.id, {
+      idempotencyKey: `cancel-subscription-${subscription.id}`,
+    })
 
     if (!subscription?.latest_invoice)
       throw new ServiceError(
@@ -72,7 +74,10 @@ export const handleFailedRecurringSubscription = async (
         `Failed to refund payment intent with subscription id: ${subscriptionId}`,
       )
 
-    await stripe.refunds.create({ payment_intent: paymentIntent.id })
+    await stripe.refunds.create(
+      { payment_intent: paymentIntent.id },
+      { idempotencyKey: `refund-${paymentIntent.id}` },
+    )
     return
   } catch (err) {
     if (err instanceof ServiceError) {
@@ -113,7 +118,10 @@ export const handleFailedOneTimePayment = async (sessionId?: string | null) => {
         `Payment intent status is not succeeded: ${paymentIntent.status}`,
       )
 
-    await stripe.refunds.create({ payment_intent: paymentIntent.id })
+    await stripe.refunds.create(
+      { payment_intent: paymentIntent.id },
+      { idempotencyKey: `refund-${paymentIntent.id}` },
+    )
     return
   } catch (err) {
     if (err instanceof ServiceError) {
@@ -223,6 +231,7 @@ export const updateSubscriptionDetails = async ({
         to: customer.user.email,
         type: 'subscription',
         name: customer.user.name,
+        idempotencyKey: `subscription-welcome/${subscription.id}`,
       })
     }
 
@@ -335,6 +344,7 @@ export const createLifetimeAccess = async ({
         to: customer.user.email,
         type: 'purchase',
         name: customer.user.name,
+        idempotencyKey: `purchase-welcome/${session.id}`,
       })
     }
 

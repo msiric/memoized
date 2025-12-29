@@ -187,6 +187,7 @@ describe('Subscription services', () => {
         to: 'test@mail.com',
         type: 'subscription',
         name: 'Test',
+        idempotencyKey: 'subscription-welcome/sub_123',
       })
     })
 
@@ -367,10 +368,13 @@ describe('Subscription services', () => {
 
       await handleFailedRecurringSubscription('sub_123')
 
-      expect(stripe.subscriptions.cancel).toHaveBeenCalledWith('sub_123')
-      expect(stripe.refunds.create).toHaveBeenCalledWith({
-        payment_intent: 'pi_123',
+      expect(stripe.subscriptions.cancel).toHaveBeenCalledWith('sub_123', {
+        idempotencyKey: 'cancel-subscription-sub_123',
       })
+      expect(stripe.refunds.create).toHaveBeenCalledWith(
+        { payment_intent: 'pi_123' },
+        { idempotencyKey: 'refund-pi_123' },
+      )
     })
 
     it('should throw ServiceError if cancellation fails', async () => {
@@ -507,10 +511,13 @@ describe('Subscription services', () => {
         }),
       ).rejects.toThrow('Failed to update subscription: Upsert failed')
 
-      expect(stripe.subscriptions.cancel).toHaveBeenCalledWith('sub_123')
-      expect(stripe.refunds.create).toHaveBeenCalledWith({
-        payment_intent: 'pi_123',
+      expect(stripe.subscriptions.cancel).toHaveBeenCalledWith('sub_123', {
+        idempotencyKey: 'cancel-subscription-sub_123',
       })
+      expect(stripe.refunds.create).toHaveBeenCalledWith(
+        { payment_intent: 'pi_123' },
+        { idempotencyKey: 'refund-pi_123' },
+      )
     })
   })
 
@@ -629,6 +636,7 @@ describe('Subscription services', () => {
         to: 'test@mail.com',
         type: 'purchase',
         name: 'Test',
+        idempotencyKey: 'purchase-welcome/cs_123',
       })
     })
 
@@ -743,9 +751,10 @@ describe('Subscription services', () => {
         }),
       ).rejects.toThrow('Failed to create lifetime access: Upsert failed')
 
-      expect(stripe.refunds.create).toHaveBeenCalledWith({
-        payment_intent: 'pi_123',
-      })
+      expect(stripe.refunds.create).toHaveBeenCalledWith(
+        { payment_intent: 'pi_123' },
+        { idempotencyKey: 'refund-pi_123' },
+      )
     })
 
     it('should throw compound error when both create and refund fail', async () => {
@@ -801,9 +810,10 @@ describe('Subscription services', () => {
 
       await handleFailedOneTimePayment('cs_123')
 
-      expect(stripe.refunds.create).toHaveBeenCalledWith({
-        payment_intent: 'pi_123',
-      })
+      expect(stripe.refunds.create).toHaveBeenCalledWith(
+        { payment_intent: 'pi_123' },
+        { idempotencyKey: 'refund-pi_123' },
+      )
     })
 
     it('should throw ServiceError if refund fails', async () => {

@@ -37,7 +37,7 @@ describe('Stripe Webhook Handler', () => {
     vi.stubEnv('NODE_ENV', 'test')
     // Set up webhook idempotency mocks - event not yet processed
     vi.mocked(webhookService.isWebhookEventProcessed).mockResolvedValue(false)
-    vi.mocked(webhookService.markWebhookEventProcessed).mockResolvedValue()
+    vi.mocked(webhookService.markWebhookEventProcessed).mockResolvedValue(true)
   })
 
   afterEach(() => {
@@ -231,15 +231,14 @@ describe('Stripe Webhook Handler', () => {
     )
   })
 
-  it('should return unsupported event type for non-relevant events', async () => {
+  it('should return 200 for non-relevant events per Stripe best practices', async () => {
     mockRequest = createMockRequest('customer.subscription.trial_will_end', {})
 
     const response = await POST(mockRequest)
 
-    expect(response?.status).toBe(400)
-    expect(await response?.text()).toBe(
-      'Unsupported event type: customer.subscription.trial_will_end',
-    )
+    expect(response?.status).toBe(200)
+    const body = await response?.json()
+    expect(body).toEqual({ received: true, ignored: true })
   })
 
   it('should handle requests with empty body', async () => {

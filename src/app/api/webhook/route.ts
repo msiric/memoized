@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return new Response(`Webhook Error: ${(err as Error)?.message}`, { status: 400 })
   }
 
-  // Idempotency check - skip if already processed
+  // Idempotency check - skip if already successfully processed
   if (await isWebhookEventProcessed(event.id)) {
     return new Response(JSON.stringify({ received: true, skipped: true }))
   }
@@ -70,8 +70,10 @@ export async function POST(req: Request) {
           // Unhandled relevant event - should not reach here
           break
       }
-      
-      // Mark event as processed after successful handling
+
+      // Mark as processed AFTER successful handling
+      // Uses atomic insert - if another request already marked it, this is a no-op
+      // (the work was already done successfully above, so duplicate marking is fine)
       await markWebhookEventProcessed(event.id, event.type)
     } catch (error) {
       reportError(error, {
@@ -90,9 +92,8 @@ export async function POST(req: Request) {
       )
     }
   } else {
-    return new Response(`Unsupported event type: ${event.type}`, {
-      status: 400,
-    })
+    // Return 200 for unsupported events to prevent Stripe retries
+    return new Response(JSON.stringify({ received: true, ignored: true }))
   }
 
   return new Response(JSON.stringify({ received: true }))
