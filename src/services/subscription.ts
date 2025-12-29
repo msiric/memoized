@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { sendEmail } from '@/lib/resend'
 import { stripe } from '@/lib/stripe'
 import { ServiceError, getErrorMessage } from '@/lib/error-tracking'
+import { revalidateSubscription } from '@/lib/cache'
 import {
   formatDate,
   getPlanFromStripePlan,
@@ -10,8 +11,26 @@ import {
 } from '@/utils/helpers'
 import { SubscriptionStatus } from '@prisma/client'
 import { format } from 'date-fns'
-import { revalidateTag } from 'next/cache'
 import Stripe from 'stripe'
+import { CustomerWithUser } from '../types'
+
+export const getCustomerWithUserOrThrow = async (
+  stripeCustomerId: string,
+): Promise<CustomerWithUser> => {
+  const customer = await prisma.customer.findUnique({
+    where: { stripeCustomerId },
+    select: {
+      id: true,
+      user: { select: { id: true, name: true, email: true } },
+    },
+  })
+
+  if (!customer?.user?.name || !customer?.user?.email) {
+    throw new ServiceError('Failed to retrieve customer details')
+  }
+
+  return customer as CustomerWithUser
+}
 
 export const handleFailedRecurringSubscription = async (
   subscriptionId?: string | Stripe.Subscription | null,
@@ -29,7 +48,6 @@ export const handleFailedRecurringSubscription = async (
     }
 
     await stripe.subscriptions.cancel(subscription.id)
-    console.log(`Successfully canceled Stripe subscription: ${subscription.id}`)
 
     if (!subscription?.latest_invoice)
       throw new ServiceError(
@@ -55,14 +73,17 @@ export const handleFailedRecurringSubscription = async (
       )
 
     await stripe.refunds.create({ payment_intent: paymentIntent.id })
-    console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
     return
   } catch (err) {
     if (err instanceof ServiceError) {
       throw err
     }
-    console.error(err)
-    throw new ServiceError(`Failed to handle failed recurring subscription`)
+    throw new ServiceError(
+      `Failed to handle failed recurring subscription`,
+      true,
+      { feature: 'subscription', action: 'handle-failed-subscription' },
+      err,
+    )
   }
 }
 
@@ -93,14 +114,17 @@ export const handleFailedOneTimePayment = async (sessionId?: string | null) => {
       )
 
     await stripe.refunds.create({ payment_intent: paymentIntent.id })
-    console.log(`Successfully refunded payment intent: ${paymentIntent.id}`)
     return
   } catch (err) {
-    console.error('Error caught in handleFailedOneTimePayment:', err)
     if (err instanceof ServiceError) {
       throw err
     }
-    throw new ServiceError(`Failed to handle failed one-time payment`)
+    throw new ServiceError(
+      `Failed to handle failed one-time payment`,
+      true,
+      { feature: 'subscription', action: 'handle-failed-payment' },
+      err,
+    )
   }
 }
 
@@ -116,34 +140,14 @@ export const updateSubscriptionDetails = async ({
   updateAction = false,
 }: SubscriptionManagerArgs) => {
   try {
-    const customerId =
+    const stripeCustomerId =
       typeof stripeCustomer === 'string'
         ? stripeCustomer
         : (stripeCustomer?.id ?? '')
 
-    const customer = await prisma.customer.findUnique({
-      where: { stripeCustomerId: customerId ?? '' },
-      select: { id: true, user: true },
-    })
+    const customer = await getCustomerWithUserOrThrow(stripeCustomerId)
 
-    if (!customer?.user?.name || !customer?.user?.email)
-      throw new ServiceError(`Failed to retrieve customer details`)
-
-    const existingActiveSubscription = await prisma.subscription.findFirst({
-      where: {
-        customerId: customer.id,
-        status: SubscriptionStatus.ACTIVE,
-        NOT: {
-          stripeSubscriptionId: subscriptionId?.toString() ?? '',
-        },
-      },
-      select: { id: true },
-    })
-
-    if (existingActiveSubscription?.id && !updateAction) {
-      throw new ServiceError(`User already has an active subscription`)
-    }
-
+    // Retrieve Stripe subscription (external call, outside transaction)
     const subscription = await stripe.subscriptions.retrieve(
       subscriptionId?.toString() ?? '',
       {
@@ -183,19 +187,36 @@ export const updateSubscriptionDetails = async ({
       updatedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
     }
 
-    const result = await prisma.subscription.upsert({
-      where: { stripeSubscriptionId: subscriptionData.stripeSubscriptionId },
-      update: subscriptionData,
-      create: subscriptionData,
+    // Use transaction for atomic check + upsert
+    const result = await prisma.$transaction(async (tx) => {
+      const existingActiveSubscription = await tx.subscription.findFirst({
+        where: {
+          customerId: customer.id,
+          status: SubscriptionStatus.ACTIVE,
+          NOT: {
+            stripeSubscriptionId: subscriptionId?.toString() ?? '',
+          },
+        },
+        select: { id: true },
+      })
+
+      if (existingActiveSubscription?.id && !updateAction) {
+        throw new ServiceError(`User already has an active subscription`)
+      }
+
+      return tx.subscription.upsert({
+        where: { stripeSubscriptionId: subscriptionData.stripeSubscriptionId },
+        update: subscriptionData,
+        create: subscriptionData,
+      })
     })
 
-    revalidateTag('subscription')
-    revalidateTag(`subscription-${subscription.id}`)
-    revalidateTag(`customer-${customer.id}`)
-    revalidateTag(`user-${customer.user.id}`)
-    revalidateTag('user-subscription')
-    revalidateTag('user')
-    revalidateTag('account')
+    // Revalidation and email AFTER transaction commits
+    revalidateSubscription({
+      customerId: customer.id,
+      userId: customer.user.id,
+      subscriptionId: subscription.id,
+    })
 
     if (isProduction() && !updateAction) {
       await sendEmail({
@@ -207,16 +228,15 @@ export const updateSubscriptionDetails = async ({
 
     return result
   } catch (err: unknown) {
-    console.error('Error in updateSubscriptionDetails:', err)
-
     try {
       await handleFailedRecurringSubscription(subscriptionId)
     } catch (refundErr: unknown) {
-      console.error('Error while handling failed subscription:', refundErr)
-
       throw new ServiceError(
         `Failed to update subscription and handle failure: ${getErrorMessage(err)}. ` +
           `Refund error: ${getErrorMessage(refundErr)}`,
+        true,
+        { feature: 'subscription', action: 'update-subscription' },
+        err,
       )
     }
 
@@ -225,6 +245,9 @@ export const updateSubscriptionDetails = async ({
     }
     throw new ServiceError(
       `Failed to update subscription: ${getErrorMessage(err)}`,
+      true,
+      { feature: 'subscription', action: 'update-subscription' },
+      err,
     )
   }
 }
@@ -239,31 +262,11 @@ export const createLifetimeAccess = async ({
   sessionId,
 }: OneTimePurchaseManagerArgs) => {
   try {
-    const customerId = stripeCustomer ?? ''
+    const stripeCustomerId = stripeCustomer ?? ''
 
-    const customer = await prisma.customer.findUnique({
-      where: { stripeCustomerId: customerId },
-      select: {
-        id: true,
-        user: { select: { id: true, name: true, email: true } },
-      },
-    })
+    const customer = await getCustomerWithUserOrThrow(stripeCustomerId)
 
-    if (!customer?.user?.name || !customer?.user?.email)
-      throw new ServiceError(`Failed to retrieve customer details`)
-
-    const existingSubscription = await prisma.subscription.findFirst({
-      where: {
-        customerId: customer.id,
-        status: SubscriptionStatus.ACTIVE,
-      },
-      select: { id: true },
-    })
-
-    if (existingSubscription?.id) {
-      throw new ServiceError(`User already has an active subscription`)
-    }
-
+    // Retrieve Stripe session (external call, outside transaction)
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
       expand: ['line_items'],
     })
@@ -299,19 +302,33 @@ export const createLifetimeAccess = async ({
       updatedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
     }
 
-    const result = await prisma.subscription.upsert({
-      where: { stripeSubscriptionId: subscriptionData.stripeSubscriptionId },
-      update: subscriptionData,
-      create: subscriptionData,
+    // Use transaction for atomic check + upsert
+    const result = await prisma.$transaction(async (tx) => {
+      const existingSubscription = await tx.subscription.findFirst({
+        where: {
+          customerId: customer.id,
+          status: SubscriptionStatus.ACTIVE,
+        },
+        select: { id: true },
+      })
+
+      if (existingSubscription?.id) {
+        throw new ServiceError(`User already has an active subscription`)
+      }
+
+      return tx.subscription.upsert({
+        where: { stripeSubscriptionId: subscriptionData.stripeSubscriptionId },
+        update: subscriptionData,
+        create: subscriptionData,
+      })
     })
 
-    revalidateTag('subscription')
-    revalidateTag(`subscription-${session.id}`)
-    revalidateTag(`customer-${customer.id}`)
-    revalidateTag(`user-${customer.user.id}`)
-    revalidateTag('user-subscription')
-    revalidateTag('user')
-    revalidateTag('account')
+    // Revalidation and email AFTER transaction commits
+    revalidateSubscription({
+      customerId: customer.id,
+      userId: customer.user.id,
+      subscriptionId: session.id,
+    })
 
     if (isProduction()) {
       await sendEmail({
@@ -323,16 +340,15 @@ export const createLifetimeAccess = async ({
 
     return result
   } catch (err: unknown) {
-    console.error('Error in createLifetimeAccess:', err)
-
     try {
       await handleFailedOneTimePayment(sessionId)
     } catch (refundErr: unknown) {
-      console.error('Error while handling failed payment:', refundErr)
-
       throw new ServiceError(
         `Failed to create lifetime access and handle failure: ${getErrorMessage(err)}. ` +
           `Refund error: ${getErrorMessage(refundErr)}`,
+        true,
+        { feature: 'subscription', action: 'create-lifetime-access' },
+        err,
       )
     }
 
@@ -341,6 +357,9 @@ export const createLifetimeAccess = async ({
     }
     throw new ServiceError(
       `Failed to create lifetime access: ${getErrorMessage(err)}`,
+      true,
+      { feature: 'subscription', action: 'create-lifetime-access' },
+      err,
     )
   }
 }

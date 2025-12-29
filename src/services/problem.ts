@@ -2,9 +2,8 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import prisma from '@/lib/prisma'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { getServerSession } from 'next-auth'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidateProblemProgress } from '@/lib/cache'
 import { ProblemFilter } from '../types'
-import { COURSES_PREFIX } from '../constants'
 
 export type MarkProblemArgs = {
   userId: string
@@ -36,9 +35,7 @@ export const markProblemProgress = async ({
     },
   })
 
-  revalidatePath(COURSES_PREFIX, 'layout')
-  revalidateTag(`user-${userId}`)
-  revalidateTag(`problem-${problemId}`)
+  revalidateProblemProgress({ userId, problemId })
 
   return result
 }
@@ -47,15 +44,8 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
   const session = await getServerSession(authOptions)
   const userId = session?.userId
 
-  const {
-    difficulty,
-    status,
-    lesson,
-    type,
-    search,
-    sortColumn,
-    sortOrder,
-  } = filter
+  const { difficulty, status, lesson, type, search, sortColumn, sortOrder } =
+    filter
 
   const [problems, lessons] = await Promise.all([
     prisma.problem.findMany({

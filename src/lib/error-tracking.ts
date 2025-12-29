@@ -173,8 +173,9 @@ export class ServiceError extends Error {
     public message: string,
     public showSnackbar: boolean = true,
     context?: Omit<ErrorContext, 'showSnackbar'>,
+    cause?: unknown,
   ) {
-    super(message)
+    super(message, { cause })
     this.name = 'ServiceError'
 
     // Report to centralized error tracking (async, fire-and-forget)

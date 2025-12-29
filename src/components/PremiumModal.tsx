@@ -3,6 +3,7 @@
 import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '@/constants'
 import { useGAConversion } from '@/hooks/useGAConversion'
 import clsx from 'clsx'
+import { useRouter } from 'next/navigation'
 import { MouseEvent, useEffect, useState } from 'react'
 import { IoCheckmark, IoClose } from 'react-icons/io5'
 
@@ -17,12 +18,20 @@ export const PremiumModal = ({
 }: PremiumModalProps) => {
   const [isOpen, setIsOpen] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
+  const router = useRouter()
 
   const reportConversion = useGAConversion()
 
   useEffect(() => {
     setTimeout(() => setIsVisible(true), 10)
   }, [])
+
+  // Refresh server data when upgrade is successful to update header/UI
+  useEffect(() => {
+    if (upgradedSuccessfully) {
+      router.refresh()
+    }
+  }, [upgradedSuccessfully, router])
 
   useEffect(() => {
     if (upgradedSuccessfully && stripeSessionId) {

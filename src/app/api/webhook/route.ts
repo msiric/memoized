@@ -3,6 +3,10 @@ import {
   createLifetimeAccess,
   updateSubscriptionDetails,
 } from '@/services/subscription'
+import {
+  isWebhookEventProcessed,
+  markWebhookEventProcessed,
+} from '@/services/webhook'
 import { reportError } from '@/lib/error-tracking'
 import Stripe from 'stripe'
 
@@ -27,13 +31,14 @@ export async function POST(req: Request) {
       // Mock event for testing
       event = JSON.parse(body)
     }
-    console.log(`🔔  Webhook received: ${event.type}`)
   } catch (err: unknown) {
-    console.log(`❌ Error message: ${(err as Error)?.message}`)
     return new Response(`Webhook Error: ${(err as Error)?.message}`, { status: 400 })
   }
 
-  console.log('event type', event.type)
+  // Idempotency check - skip if already processed
+  if (await isWebhookEventProcessed(event.id)) {
+    return new Response(JSON.stringify({ received: true, skipped: true }))
+  }
 
   if (relevantEvents.has(event.type)) {
     try {
@@ -62,11 +67,13 @@ export async function POST(req: Request) {
           break
         }
         default:
-          return console.log('Unhandled relevant event')
+          // Unhandled relevant event - should not reach here
+          break
       }
-    } catch (error) {
-      console.log(error)
       
+      // Mark event as processed after successful handling
+      await markWebhookEventProcessed(event.id, event.type)
+    } catch (error) {
       reportError(error, {
         feature: 'webhook',
         action: 'stripe-webhook',

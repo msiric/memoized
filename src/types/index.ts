@@ -360,3 +360,8 @@ export interface UnifiedBanner {
   countdownTo?: number
   discountPercent?: number
 }
+
+export type CustomerWithUser = {
+  id: string
+  user: { id: string; name: string; email: string }
+}

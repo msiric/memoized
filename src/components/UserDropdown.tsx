@@ -13,7 +13,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useEffect, useRef, useState } from 'react'
-import { HiArrowTopRightOnSquare, HiPower } from 'react-icons/hi2'
+import { HiArrowTopRightOnSquare, HiPower, HiSparkles } from 'react-icons/hi2'
 import { IoChevronDown } from 'react-icons/io5'
 import { Button } from './Button'
 
@@ -122,9 +122,9 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
       <div className="py-1">
         {user?.currentSubscriptionStatus &&
           (user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
-            <div className="flex items-center justify-between px-4 py-2">
-              <span className="text-sm text-lime-400">Lifetime</span>
-              <span className="text-lime-400">✨</span>
+            <div className="flex w-full items-center gap-2 px-4 py-2 text-sm text-zinc-400">
+              <HiSparkles className="h-4 w-4 text-indigo-500" />
+              <span>Lifetime access</span>
             </div>
           ) : (
             <button
@@ -238,9 +238,9 @@ export const UserDropdown = ({ isMobile = false, ...props }) => {
               <div className="p-2">
                 {user?.currentSubscriptionStatus &&
                   (user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
-                    <div className="flex items-center justify-between rounded-lg bg-lime-500/10 px-3 py-2.5">
-                      <span className="text-sm font-medium text-lime-400">Lifetime Member</span>
-                      <span className="text-lg">✨</span>
+                    <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-300">
+                      <HiSparkles className="h-4 w-4 text-indigo-400" />
+                      <span>Lifetime access</span>
                     </div>
                   ) : (
                     <button

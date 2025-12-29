@@ -1,4 +1,5 @@
 import { meiliSearch } from '@/lib/meili'
+import { reportError } from '@/lib/error-tracking'
 import { checkPremiumAccess } from '@/services/user'
 import { getServerSession } from 'next-auth/next'
 import { NextResponse } from 'next/server'
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(results)
   } catch (error) {
-    console.error('Search error:', error)
+    reportError(error, { feature: 'search', action: 'search-lessons' })
     return NextResponse.json(
       { error: 'An error occurred while searching' },
       { status: 500 },

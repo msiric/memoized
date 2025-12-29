@@ -227,7 +227,7 @@ export const getPlanFromStripePlan = async (
   const prices = await fetchPricesFromStripe()
   const price = prices[priceId]
 
-  if (!price) return console.log(`Unknown price ID`)
+  if (!price) return
 
   switch (price.nickname) {
     case 'Monthly':
@@ -237,7 +237,7 @@ export const getPlanFromStripePlan = async (
     case 'Lifetime':
       return SubscriptionPlan.LIFETIME
     default:
-      return console.log(`Unknown price nickname`)
+      return
   }
 }
 

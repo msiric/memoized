@@ -5,8 +5,7 @@ import {
   ProblemType,
   Prisma,
 } from '@prisma/client'
-import { revalidatePath, revalidateTag } from 'next/cache'
-import { COURSES_PREFIX } from '../constants'
+import { revalidateLessonProgress } from '@/lib/cache'
 
 export type MarkLessonArgs = {
   userId: string
@@ -38,9 +37,7 @@ export const markLessonProgress = async ({
     },
   })
 
-  revalidatePath(COURSES_PREFIX, 'layout')
-  revalidateTag(`user-${userId}`)
-  revalidateTag(`lesson-${lessonId}`)
+  revalidateLessonProgress({ userId, lessonId })
 
   return result
 }

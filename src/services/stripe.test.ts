@@ -164,6 +164,7 @@ describe('Stripe services', () => {
           customer: 'cus_123',
           line_items: [{ price: 'price_123', quantity: 1 }],
         }),
+        expect.objectContaining({ idempotencyKey: expect.any(String) }),
       )
     })
 
@@ -192,6 +193,7 @@ describe('Stripe services', () => {
           customer: 'cus_123',
           line_items: [{ price: 'price_123', quantity: 1 }],
         }),
+        expect.objectContaining({ idempotencyKey: expect.any(String) }),
       )
     })
 
@@ -615,6 +617,11 @@ describe('Stripe services', () => {
         duration: 'once' as const,
       }
 
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({ data: [] } as any)
+      vi.spyOn(stripe.coupons, 'create').mockRejectedValue(
+        new Error('You may only specify one of percent_off or amount_off'),
+      )
+
       await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
         new ServiceError('Failed to manage Stripe coupon'),
       )
@@ -626,6 +633,11 @@ describe('Stripe services', () => {
         amount_off: 1000,
         duration: 'once' as const,
       }
+
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({ data: [] } as any)
+      vi.spyOn(stripe.coupons, 'create').mockRejectedValue(
+        new Error('currency is required when amount_off is specified'),
+      )
 
       await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
         new ServiceError('Failed to manage Stripe coupon'),
@@ -639,6 +651,11 @@ describe('Stripe services', () => {
         duration: 'repeating' as const,
       }
 
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({ data: [] } as any)
+      vi.spyOn(stripe.coupons, 'create').mockRejectedValue(
+        new Error('duration_in_months is required when duration is repeating'),
+      )
+
       await expect(createStripeCoupon(couponConfig)).rejects.toThrow(
         new ServiceError('Failed to manage Stripe coupon'),
       )
@@ -651,8 +668,8 @@ describe('Stripe services', () => {
         duration: 'once' as const,
       }
 
-      vi.spyOn(stripe.coupons, 'retrieve').mockResolvedValue({
-        id: 'existing_coupon',
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({
+        data: [{ id: 'existing_coupon', name: 'Existing Coupon', valid: true }],
       } as any)
       vi.spyOn(stripe.coupons, 'del').mockRejectedValue(
         new Error('Deletion failed'),

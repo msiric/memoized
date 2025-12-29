@@ -13,99 +13,9 @@ import {
 } from '@/types'
 import { ServiceError } from '@/lib/error-tracking'
 import { getURL } from '@/utils/helpers'
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidateCustomer } from '@/lib/cache'
+import { revalidatePath } from 'next/cache'
 import Stripe from 'stripe'
-
-// const upsertProductRecord = async (product: Stripe.Product) => {
-//   const productData = {
-//     id: product.id,
-//     active: product.active,
-//     name: product.name,
-//     description: product.description ?? null,
-//     image: product.images?.[0] ?? null,
-//     metadata: product.metadata,
-//   }
-
-//   await prisma.product.upsert({
-//     where: { id: product.id },
-//     update: productData,
-//     create: productData,
-//   })
-
-//   console.log(`Product inserted/updated: ${product.id}`)
-// }
-
-// const upsertPriceRecord = async (
-//   price: Stripe.Price,
-//   retryCount = 0,
-//   maxRetries = 3,
-// ) => {
-//   const priceData = {
-//     id: price.id,
-//     productId: typeof price.product === 'string' ? price.product : '',
-//     active: price.active,
-//     currency: price.currency,
-//     type: price.type,
-//     unitAmount: price.unit_amount ?? null,
-//     interval: price.recurring?.interval ?? null,
-//     intervalCount: price.recurring?.interval_count ?? null,
-//   }
-
-//   try {
-//     await prisma.price.upsert({
-//       where: { id: price.id },
-//       update: priceData,
-//       create: priceData,
-//     })
-
-//     console.log(`Price inserted/updated: ${price.id}`)
-//   } catch (error: any) {
-//     if (
-//       error.message.includes('foreign key constraint') &&
-//       retryCount < maxRetries
-//     ) {
-//       console.log(`Retry attempt ${retryCount + 1} for price ID: ${price.id}`)
-//       await new Promise((resolve) => setTimeout(resolve, 2000))
-//       await upsertPriceRecord(price, retryCount + 1, maxRetries)
-//     } else {
-//       throw new Error(
-//         `Price insert/update failed after ${maxRetries} retries: ${error.message}`,
-//       )
-//     }
-//   }
-// }
-
-// const deleteProductRecord = async (product: Stripe.Product) => {
-//   await prisma.product.delete({
-//     where: { id: product.id },
-//   })
-
-//   console.log(`Product deleted: ${product.id}`)
-// }
-
-// const deletePriceRecord = async (price: Stripe.Price) => {
-//   await prisma.price.delete({
-//     where: { id: price.id },
-//   })
-
-//   console.log(`Price deleted: ${price.id}`)
-// }
-
-const upsertCustomerToDatabase = async (
-  userId: string,
-  stripeCustomerId: string,
-) => {
-  await prisma.customer.upsert({
-    where: { userId },
-    update: { stripeCustomerId },
-    create: { userId, stripeCustomerId },
-  })
-
-  revalidateTag(`user-${userId}`)
-  revalidateTag(`customer-${stripeCustomerId}`)
-
-  return stripeCustomerId
-}
 
 const createCustomerInStripe = async (userId: string, userEmail: string) => {
   try {
@@ -113,14 +23,22 @@ const createCustomerInStripe = async (userId: string, userEmail: string) => {
       metadata: { databaseUUID: userId },
       email: userEmail,
     }
-    const newCustomer = await stripe.customers.create(customerData)
+    // Use userId as idempotency key to prevent duplicate customers on retry
+    const newCustomer = await stripe.customers.create(customerData, {
+      idempotencyKey: `create-customer-${userId}`,
+    })
 
     if (!newCustomer)
       throw new ServiceError('Failed to create customer in Stripe')
 
     return newCustomer.id
-  } catch (_error) {
-    throw new ServiceError('Failed to create customer in Stripe')
+  } catch (error) {
+    throw new ServiceError(
+      'Failed to create customer in Stripe',
+      true,
+      { feature: 'stripe', action: 'create-customer' },
+      error,
+    )
   }
 }
 
@@ -132,57 +50,42 @@ export const createOrRetrieveCustomer = async ({
   userEmail: string
 }) => {
   try {
-    const getExistingCustomer = async (id: string) => {
-      return prisma.customer.findUnique({
-        where: { userId: id },
-        select: { stripeCustomerId: true },
-      })
-    }
-
-    const existingCustomer = await getExistingCustomer(userId)
-    let stripeCustomerId: string | undefined
+    const existingCustomer = await prisma.customer.findUnique({
+      where: { userId },
+      select: { stripeCustomerId: true },
+    })
 
     if (existingCustomer?.stripeCustomerId) {
-      const existingStripeCustomer = await stripe.customers.retrieve(
-        existingCustomer.stripeCustomerId,
-      )
-      stripeCustomerId = existingStripeCustomer.id
-    } else {
-      const stripeCustomers = await stripe.customers.list({ email: userEmail })
-      stripeCustomerId =
-        stripeCustomers.data.length > 0 ? stripeCustomers.data[0].id : undefined
+      return existingCustomer.stripeCustomerId
     }
 
-    const stripeIdToInsert = stripeCustomerId
-      ? stripeCustomerId
-      : await createCustomerInStripe(userId, userEmail)
+    const stripeCustomers = await stripe.customers.list({
+      email: userEmail,
+      limit: 1,
+    })
 
-    if (existingCustomer && stripeCustomerId) {
-      if (existingCustomer.stripeCustomerId !== stripeCustomerId) {
-        await prisma.customer.update({
-          where: { userId },
-          data: { stripeCustomerId },
-        })
+    let stripeCustomerId = stripeCustomers.data[0]?.id
 
-        revalidateTag(`user-${userId}`)
-        revalidateTag(`customer-${stripeCustomerId}`)
-
-        return stripeCustomerId
-      }
-      return stripeCustomerId
-    } else {
-      const upsertedCustomer = await upsertCustomerToDatabase(
-        userId,
-        stripeIdToInsert,
-      )
-
-      if (!upsertedCustomer)
-        throw new ServiceError('Failed to create customer in Stripe')
-
-      return upsertedCustomer
+    if (!stripeCustomerId) {
+      stripeCustomerId = await createCustomerInStripe(userId, userEmail)
     }
-  } catch (_error) {
-    throw new ServiceError('Failed to retrieve or create customer')
+
+    await prisma.customer.upsert({
+      where: { userId },
+      update: { stripeCustomerId },
+      create: { userId, stripeCustomerId },
+    })
+
+    revalidateCustomer({ userId, stripeCustomerId })
+
+    return stripeCustomerId
+  } catch (error) {
+    throw new ServiceError(
+      'Failed to retrieve or create customer',
+      true,
+      { feature: 'stripe', action: 'create-or-retrieve-customer' },
+      error,
+    )
   }
 }
 
@@ -190,8 +93,13 @@ export const retrieveStripeSession = async (sessionId: string) => {
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId)
     return session
-  } catch (_error) {
-    throw new ServiceError('Failed to retrieve Stripe checkout session')
+  } catch (error) {
+    throw new ServiceError(
+      'Failed to retrieve Stripe checkout session',
+      true,
+      { feature: 'stripe', action: 'retrieve-session' },
+      error,
+    )
   }
 }
 
@@ -237,13 +145,23 @@ export const createStripeSession = async (
       }
     }
 
-    const checkoutSession = await stripe.checkout.sessions.create(params)
+    // Use customer + product + timestamp (rounded to minute) as idempotency key
+    // This allows retries within the same minute but blocks rapid duplicates
+    const timestamp = Math.floor(Date.now() / 60000)
+    const checkoutSession = await stripe.checkout.sessions.create(params, {
+      idempotencyKey: `checkout-${customer}-${product.id}-${timestamp}`,
+    })
 
     revalidatePath('/', 'layout')
 
     return checkoutSession
-  } catch (_error) {
-    throw new ServiceError('Failed to create Stripe checkout session')
+  } catch (error) {
+    throw new ServiceError(
+      'Failed to create Stripe checkout session',
+      true,
+      { feature: 'stripe', action: 'create-session' },
+      error,
+    )
   }
 }
 
@@ -254,8 +172,13 @@ export const createBillingPortalSession = async (customer: string) => {
       return_url: getURL(COURSES_PREFIX),
     })
     return billingSession
-  } catch (_error) {
-    throw new ServiceError('Failed to create Stripe billing portal link')
+  } catch (error) {
+    throw new ServiceError(
+      'Failed to create Stripe billing portal link',
+      true,
+      { feature: 'stripe', action: 'create-billing-portal' },
+      error,
+    )
   }
 }
 
@@ -292,11 +215,14 @@ export const listStripeCoupons = async (
     )
 
     const coupons = await stripe.coupons.list(listParams)
-    console.log(`Retrieved ${coupons.data.length} coupons`)
     return coupons
   } catch (error) {
-    console.error(`Failed to list Stripe coupons:`, error)
-    throw new ServiceError('Failed to list Stripe coupons')
+    throw new ServiceError(
+      'Failed to list Stripe coupons',
+      true,
+      { feature: 'stripe', action: 'list-coupons' },
+      error,
+    )
   }
 }
 
@@ -311,8 +237,12 @@ export const retrieveStripeCoupon = async (
     }
     return coupon
   } catch (error) {
-    console.error(`Failed to retrieve Stripe coupon:`, error)
-    throw new ServiceError('Failed to retrieve Stripe coupon')
+    throw new ServiceError(
+      'Failed to retrieve Stripe coupon',
+      true,
+      { feature: 'stripe', action: 'retrieve-coupon' },
+      error,
+    )
   }
 }
 
@@ -321,12 +251,14 @@ export const deleteStripeCoupon = async (
 ): Promise<Stripe.DeletedCoupon> => {
   try {
     const deletedCoupon = await stripe.coupons.del(couponId)
-    console.log(`Deleted Stripe coupon: ${deletedCoupon.id}`)
-
     return deletedCoupon
   } catch (error) {
-    console.error(`Failed to delete Stripe coupon:`, error)
-    throw new ServiceError('Failed to delete Stripe coupon')
+    throw new ServiceError(
+      'Failed to delete Stripe coupon',
+      true,
+      { feature: 'stripe', action: 'delete-coupon' },
+      error,
+    )
   }
 }
 
@@ -338,26 +270,21 @@ export const createStripeCoupon = async (
     let existingCoupon: Stripe.Coupon | null = null
     try {
       existingCoupon = await retrieveStripeCoupon(couponConfig.name)
-      console.log('Existing coupon found:', existingCoupon)
-    } catch (error) {
-      console.log(
-        'No existing coupon found, or error retrieving coupon:',
-        error,
-      )
+    } catch {
+      // No existing coupon found - proceed to create new one
     }
 
     if (existingCoupon?.valid) {
-      console.log('Deleting existing valid coupon')
       try {
         await deleteStripeCoupon(existingCoupon.id)
       } catch (error) {
-        console.error('Error deleting existing coupon:', error)
-        throw new ServiceError('Failed to delete existing coupon')
+        throw new ServiceError(
+          'Failed to delete existing coupon',
+          true,
+          { feature: 'stripe', action: 'create-coupon' },
+          error,
+        )
       }
-    } else if (existingCoupon && !existingCoupon.valid) {
-      console.log(
-        'Existing coupon found but it is not valid. Proceeding to create a new one.',
-      )
     }
 
     const couponParams: Stripe.CouponCreateParams = {
@@ -372,7 +299,6 @@ export const createStripeCoupon = async (
     }
 
     const coupon = await stripe.coupons.create(couponParams)
-    console.log(`Created new Stripe coupon: ${coupon.id}`)
 
     let promotionCode: Stripe.PromotionCode | null = null
 
@@ -386,12 +312,15 @@ export const createStripeCoupon = async (
       }
 
       promotionCode = await stripe.promotionCodes.create(promoCodeParams)
-      console.log(`Created new promotion code: ${promotionCode.code}`)
     }
 
     return { coupon, promotionCode }
   } catch (error) {
-    console.error(`Failed to manage Stripe coupon:`, error)
-    throw new ServiceError('Failed to manage Stripe coupon')
+    throw new ServiceError(
+      'Failed to manage Stripe coupon',
+      true,
+      { feature: 'stripe', action: 'create-coupon' },
+      error,
+    )
   }
 }

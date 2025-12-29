@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
-import { revalidateTag } from 'next/cache'
+import { revalidateAccount } from '@/lib/cache'
 import { createOrRetrieveCustomer } from '@/services/stripe'
+import { reportError } from '@/lib/error-tracking'
 
 export const findAccount = async (
   provider: string,
@@ -50,15 +51,17 @@ export const createUserWithAccount = async (
       userId: result.id,
       userEmail: result.email,
     })
-  } catch (_error) {
+  } catch (error) {
     // Don't fail user creation if Stripe customer creation fails
     // The customer will be created later when they attempt a purchase
+    reportError(error, {
+      feature: 'account',
+      action: 'deferred-customer-creation',
+      metadata: { userId: result.id, email: result.email },
+    })
   }
 
-  revalidateTag('account')
-  revalidateTag(`account-${providerAccountId}`)
-  revalidateTag('user')
-  revalidateTag(`user-${result.id}`)
+  revalidateAccount({ userId: result.id, providerAccountId })
 
   return result
 }

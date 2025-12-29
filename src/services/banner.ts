@@ -1,8 +1,8 @@
 import prisma from '@/lib/prisma'
-import { ServiceError } from '@/lib/error-tracking'
+import { reportError, ServiceError } from '@/lib/error-tracking'
 import { BannerType } from '@prisma/client'
 import { isAfter, isBefore, parseISO } from 'date-fns'
-import { revalidateTag } from 'next/cache'
+import { revalidateBanners } from '@/lib/cache'
 import { getActiveCoupons } from './stripe'
 import { UnifiedBanner } from '../types'
 
@@ -42,7 +42,7 @@ export const getActiveBanners = async () => {
 
     return activeBanners.sort((a, b) => b.priority - a.priority)
   } catch (error) {
-    console.error('Failed to fetch banners:', error)
+    reportError(error, { feature: 'banner', action: 'get-active-banners' })
     return []
   }
 }
@@ -81,7 +81,7 @@ export const getUnifiedBanners = async (): Promise<UnifiedBanner[]> => {
     const allBanners = [...databaseBanners, ...discountBanners]
     return allBanners.sort((a, b) => b.priority - a.priority)
   } catch (error) {
-    console.error('Failed to fetch unified banners:', error)
+    reportError(error, { feature: 'banner', action: 'get-unified-banners' })
     return []
   }
 }
@@ -137,12 +137,16 @@ export const upsertBanner = async ({
         priority,
       },
     })
-    
-    revalidateTag('banners')
-    
+
+    revalidateBanners()
+
     return result
   } catch (error) {
-    console.error('Failed to upsert banner:', error)
-    throw new ServiceError('Failed to upsert banner')
+    throw new ServiceError(
+      'Failed to upsert banner',
+      true,
+      { feature: 'banner', action: 'upsert-banner' },
+      error,
+    )
   }
 }

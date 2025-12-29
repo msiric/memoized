@@ -258,3 +258,12 @@ model Resource {
   @@index([access], name: "resource_access_idx")
   @@index([lessonId, order], name: "resource_lesson_order_idx")
 }
+
+model WebhookEvent {
+  id            String   @id @default(uuid())
+  stripeEventId String   @unique
+  eventType     String
+  processedAt   DateTime @default(now())
+
+  @@index([processedAt], name: "webhook_event_processed_at_idx")
+}

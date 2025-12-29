@@ -204,10 +204,6 @@ describe('Banner services', () => {
         new Error('Database error'),
       )
 
-      const consoleErrorSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {})
-
       await expect(
         upsertBanner({
           title: 'Error Banner',
@@ -219,13 +215,6 @@ describe('Banner services', () => {
           priority: 1,
         }),
       ).rejects.toThrow(ServiceError)
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to upsert banner:',
-        expect.any(Error),
-      )
-
-      consoleErrorSpy.mockRestore()
     })
   })
 })

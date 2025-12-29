@@ -30,6 +30,10 @@ vi.mock('@/utils/helpers')
 describe('Subscription services', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    // Mock $transaction to execute the callback with prisma as the transaction client
+    vi.spyOn(prisma, '$transaction').mockImplementation(async (fn: any) => {
+      return fn(prisma)
+    })
   })
 
   afterEach(() => {
@@ -95,9 +99,34 @@ describe('Subscription services', () => {
         id: 'sub_existing',
         status: SubscriptionStatus.ACTIVE,
       }
+      const mockSubscription = {
+        id: 'sub_new',
+        items: { data: [{ price: { id: 'price_123' } }] },
+        status: 'active',
+        metadata: {},
+        cancel_at_period_end: false,
+        cancel_at: null,
+        canceled_at: null,
+        current_period_start: 1625097600,
+        current_period_end: 1627776000,
+        created: 1625097600,
+        ended_at: null,
+      }
 
       vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
         mockCustomer as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(
+        mockSubscription as any,
+      )
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.LIFETIME,
+      )
+      vi.mocked(getStatusFromStripeStatus).mockReturnValue(
+        SubscriptionStatus.ACTIVE,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
       )
       vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
         mockExistingSubscription as any,
@@ -208,6 +237,110 @@ describe('Subscription services', () => {
       expect(prisma.subscription.upsert).toHaveBeenCalled()
       expect(sendEmail).not.toHaveBeenCalled()
     })
+
+    it('should throw an error when Stripe subscription retrieval fails', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(null as any)
+
+      await expect(
+        updateSubscriptionDetails({
+          stripeCustomer: 'cus_123',
+          subscriptionId: 'sub_123',
+        }),
+      ).rejects.toThrow('Failed to retrieve subscription details')
+    })
+
+    it('should throw an error when subscription plan cannot be determined', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSubscription = {
+        id: 'sub_123',
+        items: { data: [{ price: { id: 'unknown_price' } }] },
+        status: 'active',
+        metadata: {},
+        cancel_at_period_end: false,
+        cancel_at: null,
+        canceled_at: null,
+        current_period_start: 1625097600,
+        current_period_end: 1627776000,
+        created: 1625097600,
+        ended_at: null,
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(
+        mockSubscription as any,
+      )
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(undefined)
+
+      await expect(
+        updateSubscriptionDetails({
+          stripeCustomer: 'cus_123',
+          subscriptionId: 'sub_123',
+        }),
+      ).rejects.toThrow('Failed to determine subscription plan')
+    })
+
+    it('should throw compound error when both update and refund fail', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSubscription = {
+        id: 'sub_123',
+        items: { data: [{ price: { id: 'price_123' } }] },
+        status: 'active',
+        metadata: {},
+        cancel_at_period_end: false,
+        cancel_at: null,
+        canceled_at: null,
+        current_period_start: 1625097600,
+        current_period_end: 1627776000,
+        created: 1625097600,
+        ended_at: null,
+        latest_invoice: 'inv_123',
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(
+        mockSubscription as any,
+      )
+      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(
+        new Error('Database error'),
+      )
+      vi.spyOn(stripe.subscriptions, 'cancel').mockRejectedValue(
+        new Error('Stripe cancel failed'),
+      )
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.MONTHLY,
+      )
+      vi.mocked(getStatusFromStripeStatus).mockReturnValue(
+        SubscriptionStatus.ACTIVE,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+
+      await expect(
+        updateSubscriptionDetails({
+          stripeCustomer: 'cus_123',
+          subscriptionId: 'sub_123',
+        }),
+      ).rejects.toThrow(/Failed to update subscription and handle failure/)
+    })
   })
 
   describe('handleFailedRecurringSubscription', () => {
@@ -317,7 +450,10 @@ describe('Subscription services', () => {
 
       expect(prisma.customer.findUnique).toHaveBeenCalledWith({
         where: { stripeCustomerId: 'cus_123' },
-        select: { id: true, user: true },
+        select: {
+          id: true,
+          user: { select: { id: true, name: true, email: true } },
+        },
       })
     })
 
@@ -425,9 +561,24 @@ describe('Subscription services', () => {
         id: 'sub_existing',
         status: SubscriptionStatus.ACTIVE,
       }
+      const mockSession = {
+        id: 'cs_123',
+        created: 1625097600,
+        metadata: {},
+        line_items: { data: [{ price: { id: 'price_123' } }] },
+      }
 
       vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
         mockCustomer as any,
+      )
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.LIFETIME,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
       )
       vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
         mockExistingSubscription as any,
@@ -479,6 +630,159 @@ describe('Subscription services', () => {
         type: 'purchase',
         name: 'Test',
       })
+    })
+
+    it('should throw an error when customer details are missing', async () => {
+      const mockCustomer = { id: 'cus_123', user: { email: null, name: null } }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+
+      await expect(
+        createLifetimeAccess({
+          sessionId: 'cs_123',
+          stripeCustomer: 'cus_123',
+        }),
+      ).rejects.toThrow('Failed to retrieve customer details')
+    })
+
+    it('should throw an error when session line items are missing', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSession = {
+        id: 'cs_123',
+        created: 1625097600,
+        metadata: {},
+        line_items: null,
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+
+      await expect(
+        createLifetimeAccess({
+          sessionId: 'cs_123',
+          stripeCustomer: 'cus_123',
+        }),
+      ).rejects.toThrow('Failed to retrieve subscription details')
+    })
+
+    it('should throw an error when subscription plan cannot be determined', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSession = {
+        id: 'cs_123',
+        created: 1625097600,
+        metadata: {},
+        line_items: { data: [{ price: { id: 'unknown_price' } }] },
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(undefined)
+
+      await expect(
+        createLifetimeAccess({
+          sessionId: 'cs_123',
+          stripeCustomer: 'cus_123',
+        }),
+      ).rejects.toThrow('Failed to determine subscription plan')
+    })
+
+    it('should handle failed one-time payment with successful refund', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSession = {
+        id: 'cs_123',
+        created: 1625097600,
+        metadata: {},
+        line_items: { data: [{ price: { id: 'price_123' } }] },
+        payment_intent: 'pi_123',
+      }
+      const mockPaymentIntent = { id: 'pi_123', status: 'succeeded' }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(
+        new Error('Upsert failed'),
+      )
+      vi.spyOn(stripe.paymentIntents, 'retrieve').mockResolvedValue(
+        mockPaymentIntent as any,
+      )
+      vi.spyOn(stripe.refunds, 'create').mockResolvedValue({} as any)
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.LIFETIME,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+
+      await expect(
+        createLifetimeAccess({
+          sessionId: 'cs_123',
+          stripeCustomer: 'cus_123',
+        }),
+      ).rejects.toThrow('Failed to create lifetime access: Upsert failed')
+
+      expect(stripe.refunds.create).toHaveBeenCalledWith({
+        payment_intent: 'pi_123',
+      })
+    })
+
+    it('should throw compound error when both create and refund fail', async () => {
+      const mockCustomer = {
+        id: 'cus_123',
+        user: { email: 'test@mail.com', name: 'Test' },
+      }
+      const mockSession = {
+        id: 'cs_123',
+        created: 1625097600,
+        metadata: {},
+        line_items: { data: [{ price: { id: 'price_123' } }] },
+        payment_intent: null, // No payment intent means refund will fail
+      }
+
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        mockCustomer as any,
+      )
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
+        mockSession as any,
+      )
+      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(
+        new Error('Database error'),
+      )
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(
+        SubscriptionPlan.LIFETIME,
+      )
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+
+      await expect(
+        createLifetimeAccess({
+          sessionId: 'cs_123',
+          stripeCustomer: 'cus_123',
+        }),
+      ).rejects.toThrow(/Failed to create lifetime access and handle failure/)
     })
   })
 

@@ -1,4 +1,5 @@
 import { stripe } from '@/lib/stripe'
+import * as webhookService from '@/services/webhook'
 import * as subscriptionService from '@/services/subscription'
 import Stripe from 'stripe'
 import type { MockedFunction } from 'vitest'
@@ -7,6 +8,11 @@ import { POST } from './route'
 
 const mockFn = <T extends (...args: any[]) => any>(fn: T) =>
   fn as unknown as MockedFunction<T>
+
+vi.mock('@/services/webhook', () => ({
+  isWebhookEventProcessed: vi.fn(),
+  markWebhookEventProcessed: vi.fn(),
+}))
 
 vi.mock('@/services/subscription', () => ({
   updateSubscriptionDetails: vi.fn(),
@@ -29,6 +35,9 @@ describe('Stripe Webhook Handler', () => {
   beforeEach(() => {
     vi.resetAllMocks()
     vi.stubEnv('NODE_ENV', 'test')
+    // Set up webhook idempotency mocks - event not yet processed
+    vi.mocked(webhookService.isWebhookEventProcessed).mockResolvedValue(false)
+    vi.mocked(webhookService.markWebhookEventProcessed).mockResolvedValue()
   })
 
   afterEach(() => {
@@ -39,6 +48,7 @@ describe('Stripe Webhook Handler', () => {
     eventType: string,
     eventData: any,
     signature = 'mock-signature',
+    eventId = 'evt_test_123',
   ) => {
     return new Request('http://localhost/api/webhook', {
       method: 'POST',
@@ -47,6 +57,7 @@ describe('Stripe Webhook Handler', () => {
         'stripe-signature': signature,
       },
       body: JSON.stringify({
+        id: eventId,
         type: eventType,
         data: {
           object: eventData,
@@ -220,22 +231,14 @@ describe('Stripe Webhook Handler', () => {
     )
   })
 
-  it('should log unhandled relevant events', async () => {
-    const consoleSpy = vi.spyOn(console, 'log')
+  it('should return unsupported event type for non-relevant events', async () => {
     mockRequest = createMockRequest('customer.subscription.trial_will_end', {})
 
     const response = await POST(mockRequest)
 
     expect(response?.status).toBe(400)
-    expect(consoleSpy).toHaveBeenCalledTimes(2)
-    expect(consoleSpy).toHaveBeenNthCalledWith(
-      1,
-      '🔔  Webhook received: customer.subscription.trial_will_end',
-    )
-    expect(consoleSpy).toHaveBeenNthCalledWith(
-      2,
-      'event type',
-      'customer.subscription.trial_will_end',
+    expect(await response?.text()).toBe(
+      'Unsupported event type: customer.subscription.trial_will_end',
     )
   })
 
