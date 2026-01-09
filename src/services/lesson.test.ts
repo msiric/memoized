@@ -20,6 +20,7 @@ import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
   revalidatePath: vi.fn(),
+  unstable_cache: vi.fn((fn) => fn),
 }))
 
 // Mocking the Prisma client
@@ -463,14 +464,6 @@ describe('Lesson services', () => {
       expect(prisma.problem.findMany).toHaveBeenCalledWith({
         select: {
           id: true,
-          title: true,
-          difficulty: true,
-          href: true,
-          link: true,
-          question: true,
-          serializedAnswer: true,
-          type: true,
-          slug: true,
         },
       })
     })

@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { getSectionsByCoursePath, getSectionsByLessonSlug } from './section'
 import prisma from '@/lib/prisma'
 
+vi.mock('next/cache', () => ({
+  unstable_cache: vi.fn((fn) => fn),
+}))
+
 vi.mock('@/lib/prisma', () => ({
   default: {
     lesson: {

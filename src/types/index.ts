@@ -15,7 +15,7 @@ export type LessonConfig = {
   title: string
   description: string
   access: AccessOptions
-  problems?: PracticeProblem[]
+  problems?: LeanProblem[]
   resources?: LessonResource[]
 }
 
@@ -31,7 +31,7 @@ export type LessonResult = {
   description: string | null
   order: number
   access: AccessOptions
-  problems?: PracticeProblem[]
+  problems?: LeanProblem[]
 }
 
 export type NavigationLink = {
@@ -95,6 +95,15 @@ export type PracticeProblem = {
   question: string
   serializedAnswer: string
   type: ProblemType
+}
+
+export type LeanProblem = {
+  id: string
+  title: string
+  href: string
+  difficulty: ProblemDifficulty
+  slug: string
+  link: string
 }
 
 export type LessonResource = {
@@ -220,12 +229,9 @@ export type LessonWithProblems = Prisma.LessonGetPayload<{
         id: true
         title: true
         href: true
-        link: true
-        question: true
-        serializedAnswer: true
-        type: true
         difficulty: true
         slug: true
+        link: true
       }
     }
   }
@@ -260,12 +266,9 @@ export type LessonWithResourcesAndProblems = Prisma.LessonGetPayload<{
         id: true
         title: true
         href: true
-        link: true
-        question: true
-        serializedAnswer: true
-        type: true
         difficulty: true
         slug: true
+        link: true
       }
     }
   }

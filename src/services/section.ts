@@ -27,27 +27,31 @@ function extractSectionsFromCompiledSource(compiledSource: string): Section[] {
   }
 }
 
-export async function getSectionsByCoursePath(
-  courseSlug: string,
-): Promise<Record<string, Section[]>> {
+export const getSectionsByCoursePath = async (
+  courseSlug: string
+): Promise<Record<string, Section[]>> => {
   const lessons = await prisma.lesson.findMany({
     where: {
       section: {
         course: { slug: courseSlug },
       },
     },
-    include: {
-      section: true,
+    select: {
+      slug: true,
+      serializedBody: true,
+      section: {
+        select: {
+          slug: true,
+        },
+      },
     },
   })
 
   const sectionsMap: Record<string, Section[]> = {}
 
   for (const lesson of lessons) {
-    // Create the path that matches the URL structure
     const path = `/${lesson.section.slug}/${lesson.slug}`
 
-    // Extract sections from the serialized content
     if (lesson.serializedBody) {
       const serialized = lesson.serializedBody as { compiledSource: string }
 

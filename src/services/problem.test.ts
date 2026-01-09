@@ -9,6 +9,7 @@ import { ProblemFilter } from '../types'
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
   revalidatePath: vi.fn(),
+  unstable_cache: vi.fn((fn) => fn),
 }))
 
 // Mocking the Prisma client and getServerSession
