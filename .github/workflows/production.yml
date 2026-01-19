@@ -1,5 +1,8 @@
 name: Deploy Next.js app to Vercel
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ master ]
