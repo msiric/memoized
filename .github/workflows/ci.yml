@@ -62,5 +62,8 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://memoized.dev
           MEILISEARCH_HOST: http://localhost:7700
           MEILISEARCH_MASTER_KEY: dummy-key-for-ci-build
+          RESEND_TOKEN: re_dummy_key_for_ci_build
+          NEXTAUTH_SECRET: dummy-nextauth-secret-for-ci
+          NEXTAUTH_URL: https://memoized.dev
           SENTRY_DISABLE: true
           CI: true
