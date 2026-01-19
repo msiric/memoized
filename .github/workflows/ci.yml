@@ -1,0 +1,69 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run linter
+        run: yarn lint
+
+      - name: Run type check
+        run: yarn typecheck
+
+      - name: Run tests
+        run: yarn test:check
+        env:
+          RESEND_TOKEN: ${{ secrets.RESEND_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: yarn generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Build
+        run: yarn build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_SITE_URL: https://memoized.dev
+          MEILISEARCH_HOST: http://localhost:7700
+          MEILISEARCH_MASTER_KEY: dummy-key-for-ci-build
+          RESEND_TOKEN: re_dummy_key_for_ci_build
+          NEXTAUTH_SECRET: dummy-nextauth-secret-for-ci
+          NEXTAUTH_URL: https://memoized.dev
+          SENTRY_DISABLE: true
+          CI: true
