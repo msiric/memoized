@@ -2,10 +2,12 @@ import prisma from '@/lib/prisma'
 import {
   getResourceBySlug,
   getResources,
-  upsertResource,
 } from '@/services/resource'
 import { AccessOptions } from '@prisma/client'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
+
+// Note: upsertResource was moved into sync-resources.ts as part of the
+// two-phase transactional sync refactor. Its tests now live in sync-resources.test.ts.
 
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
@@ -18,7 +20,7 @@ vi.mock('@/lib/prisma', () => {
   return {
     ...actualPrisma,
     default: {
-      resource: { findUnique: vi.fn(), upsert: vi.fn(), findMany: vi.fn() },
+      resource: { findUnique: vi.fn(), findMany: vi.fn() },
     },
   }
 })
@@ -56,55 +58,6 @@ describe('Resource services', () => {
       expect(prisma.resource.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
         select: { id: true, title: true, serializedBody: true, access: true },
-      })
-    })
-  })
-
-  describe('upsertResource', () => {
-    it('should upsert a resource', async () => {
-      const mockResource = {
-        id: '1',
-        slug: 'resource-slug',
-        title: 'Resource Title',
-        access: AccessOptions.FREE,
-      }
-      ;(prisma.resource.upsert as Mock).mockResolvedValue(mockResource)
-
-      const resource = await upsertResource(
-        'resource-slug',
-        'Resource Title',
-        'Resource Description',
-        'Resource Content',
-        1,
-        'resource-href',
-        AccessOptions.FREE,
-        '1',
-        { compiledSource: 'compiled' } as any,
-      )
-      expect(resource).toEqual(mockResource)
-      expect(prisma.resource.upsert).toHaveBeenCalledWith({
-        where: { slug: 'resource-slug' },
-        update: {
-          title: 'Resource Title',
-          description: 'Resource Description',
-          order: 1,
-          body: 'Resource Content',
-          href: 'resource-href',
-          access: AccessOptions.FREE,
-          lessonId: '1',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-        create: {
-          title: 'Resource Title',
-          description: 'Resource Description',
-          order: 1,
-          slug: 'resource-slug',
-          body: 'Resource Content',
-          href: 'resource-href',
-          access: AccessOptions.FREE,
-          lessonId: '1',
-          serializedBody: { compiledSource: 'compiled' },
-        },
       })
     })
   })

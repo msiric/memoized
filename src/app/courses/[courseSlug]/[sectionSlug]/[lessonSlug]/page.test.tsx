@@ -1,10 +1,10 @@
-import { getLessonBySlug } from '@/services/lesson'
+import { getLessonBySlug, getLessonMetadataBySlug } from '@/services/lesson'
 import { getUserWithSubscriptionDetails } from '@/services/user'
 import { userHasAccess } from '@/utils/helpers'
 import { render, screen } from '@testing-library/react'
 import { getServerSession } from 'next-auth'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import Lesson from './page'
+import Lesson, { generateMetadata } from './page'
 
 // Mock the imported modules
 vi.mock('next-auth')
@@ -84,6 +84,41 @@ describe('Lesson component', () => {
     )
 
     expect(screen.getByText('Mocked MDX Renderer')).toBeDefined()
+  })
+
+  describe('generateMetadata', () => {
+    it('should return lesson title from focused metadata query', async () => {
+      vi.mocked(getLessonMetadataBySlug).mockResolvedValue({
+        title: 'Variables',
+        description: 'Learn about variable declarations',
+      })
+
+      const metadata = await generateMetadata({
+        params: {
+          lessonSlug: 'variables',
+          sectionSlug: 'test-section',
+          courseSlug: 'test-course',
+        },
+      })
+
+      expect(metadata.title).toContain('Variables')
+      expect(getLessonMetadataBySlug).toHaveBeenCalledWith('variables')
+      expect(getLessonBySlug).not.toHaveBeenCalled()
+    })
+
+    it('should return fallback title when lesson not found', async () => {
+      vi.mocked(getLessonMetadataBySlug).mockResolvedValue(null)
+
+      const metadata = await generateMetadata({
+        params: {
+          lessonSlug: 'nonexistent',
+          sectionSlug: 'test-section',
+          courseSlug: 'test-course',
+        },
+      })
+
+      expect(metadata.title).toBe('Lesson not found')
+    })
   })
 
   it('renders notFound when lesson is not found', async () => {

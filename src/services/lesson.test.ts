@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import {
   getLessonBySlug,
+  getLessonMetadataBySlug,
   getLessonsAndProblems,
   getLessonsAndProblemsCounts,
   getLessonsWithProblems,
@@ -8,14 +9,14 @@ import {
   getProblemsCounts,
   getSectionBySlug,
   markLessonProgress,
-  upsertCourse,
-  upsertLesson,
-  upsertProblem,
-  upsertSection,
 } from '@/services/lesson'
-import { AccessOptions, ProblemDifficulty, ProblemType } from '@prisma/client'
-import { InputJsonValue } from '@prisma/client/runtime/library'
+import { ServiceError } from '@/lib/error-tracking'
+import { AccessOptions, ProblemDifficulty } from '@prisma/client'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
+
+// Note: upsert functions (upsertCourse, upsertSection, upsertLesson, upsertProblem)
+// were moved into sync-content.ts as part of the two-phase transactional sync refactor.
+// Their tests now live in sync-content.test.ts.
 
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
@@ -30,15 +31,13 @@ vi.mock('@/lib/prisma', () => {
     ...actualPrisma,
     default: {
       userLessonProgress: { upsert: vi.fn() },
-      section: { findUnique: vi.fn(), upsert: vi.fn() },
+      section: { findUnique: vi.fn() },
       lesson: {
         findUnique: vi.fn(),
         findMany: vi.fn(),
-        upsert: vi.fn(),
         count: vi.fn(),
       },
-      course: { upsert: vi.fn() },
-      problem: { upsert: vi.fn(), findMany: vi.fn(), count: vi.fn() },
+      problem: { findMany: vi.fn(), count: vi.fn() },
     },
   }
 })
@@ -49,7 +48,8 @@ describe('Lesson services', () => {
   })
 
   describe('markLessonProgress', () => {
-    it('should mark lesson progress', async () => {
+    it('should mark lesson progress when lesson exists', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue({ id: '1' })
       const mockProgress = {
         userId: '1',
         lessonId: '1',
@@ -66,6 +66,10 @@ describe('Lesson services', () => {
         completed: true,
       })
       expect(progress).toEqual(mockProgress)
+      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+        select: { id: true },
+      })
       expect(prisma.userLessonProgress.upsert).toHaveBeenCalledWith({
         where: { userId_lessonId: { userId: '1', lessonId: '1' } },
         update: { completed: true, completedAt: expect.any(Date) },
@@ -76,6 +80,44 @@ describe('Lesson services', () => {
           completedAt: expect.any(Date),
         },
       })
+    })
+
+    it('should throw ServiceError when lesson does not exist', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
+
+      await expect(
+        markLessonProgress({ userId: '1', lessonId: 'nonexistent', completed: true }),
+      ).rejects.toThrow(ServiceError)
+
+      expect(prisma.userLessonProgress.upsert).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('getLessonMetadataBySlug', () => {
+    it('should return title and description for existing lesson', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue({
+        title: 'Variables',
+        description: 'Learn about variable declarations',
+      })
+
+      const result = await getLessonMetadataBySlug('variables')
+
+      expect(result).toEqual({
+        title: 'Variables',
+        description: 'Learn about variable declarations',
+      })
+      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
+        where: { slug: 'variables' },
+        select: { title: true, description: true },
+      })
+    })
+
+    it('should return null for non-existent lesson', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
+
+      const result = await getLessonMetadataBySlug('nonexistent')
+
+      expect(result).toBeNull()
     })
   })
 
@@ -201,187 +243,6 @@ describe('Lesson services', () => {
           section: {
             select: { slug: true, course: { select: { slug: true } } },
           },
-        },
-      })
-    })
-  })
-
-  describe('upsertCourse', () => {
-    it('should upsert a course', async () => {
-      const mockCourse = { id: '1', slug: 'course-slug', title: 'Course Title' }
-      ;(prisma.course.upsert as Mock).mockResolvedValue(mockCourse)
-
-      const course = await upsertCourse(
-        'course-slug',
-        'Course Title',
-        'Course Description',
-        'Course body content',
-        '/course',
-        1,
-        { compiledSource: 'compiled' } as InputJsonValue,
-      )
-      expect(course).toEqual(mockCourse)
-      expect(prisma.course.upsert).toHaveBeenCalledWith({
-        where: { slug: 'course-slug' },
-        update: {
-          title: 'Course Title',
-          description: 'Course Description',
-          body: 'Course body content',
-          order: 1,
-          href: '/course',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-        create: {
-          title: 'Course Title',
-          description: 'Course Description',
-          body: 'Course body content',
-          order: 1,
-          slug: 'course-slug',
-          href: '/course',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-      })
-    })
-  })
-
-  describe('upsertSection', () => {
-    it('should upsert a section', async () => {
-      const mockSection = {
-        id: '1',
-        slug: 'section-slug',
-        title: 'Section Title',
-      }
-      ;(prisma.section.upsert as Mock).mockResolvedValue(mockSection)
-
-      const section = await upsertSection(
-        'section-slug',
-        'Section Title',
-        'Section Description',
-        'Section Content',
-        1,
-        'section-href',
-        'course-id',
-        { compiledSource: 'compiled' } as InputJsonValue,
-      )
-      expect(section).toEqual(mockSection)
-      expect(prisma.section.upsert).toHaveBeenCalledWith({
-        where: { slug: 'section-slug' },
-        update: {
-          title: 'Section Title',
-          description: 'Section Description',
-          body: 'Section Content',
-          order: 1,
-          href: 'section-href',
-          courseId: 'course-id',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-        create: {
-          title: 'Section Title',
-          description: 'Section Description',
-          body: 'Section Content',
-          slug: 'section-slug',
-          order: 1,
-          href: 'section-href',
-          courseId: 'course-id',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-      })
-    })
-  })
-
-  describe('upsertLesson', () => {
-    it('should upsert a lesson', async () => {
-      const mockLesson = { id: '1', slug: 'lesson-slug', title: 'Lesson Title' }
-      ;(prisma.lesson.upsert as Mock).mockResolvedValue(mockLesson)
-
-      const lesson = await upsertLesson(
-        'lesson-slug',
-        'Lesson Title',
-        'Lesson Description',
-        'Lesson Content',
-        {} as InputJsonValue,
-        1,
-        AccessOptions.PREMIUM,
-        'lesson-href',
-        'section-id',
-      )
-      expect(lesson).toEqual(mockLesson)
-      expect(prisma.lesson.upsert).toHaveBeenCalledWith({
-        where: { slug: 'lesson-slug' },
-        update: {
-          title: 'Lesson Title',
-          description: 'Lesson Description',
-          order: 1,
-          body: 'Lesson Content',
-          serializedBody: {},
-          access: AccessOptions.PREMIUM,
-          href: 'lesson-href',
-          sectionId: 'section-id',
-        },
-        create: {
-          title: 'Lesson Title',
-          description: 'Lesson Description',
-          order: 1,
-          slug: 'lesson-slug',
-          body: 'Lesson Content',
-          serializedBody: {},
-          access: AccessOptions.PREMIUM,
-          href: 'lesson-href',
-          sectionId: 'section-id',
-        },
-      })
-    })
-  })
-
-  describe('upsertProblem', () => {
-    it('should upsert a problem', async () => {
-      const mockProblem = {
-        id: '1',
-        href: 'problem-href',
-        link: 'problem-link',
-        title: 'Problem Title',
-        difficulty: ProblemDifficulty.MEDIUM,
-        question: 'Problem Question',
-        answer: 'Problem Answer',
-        type: ProblemType.CODING,
-        slug: 'problem-title',
-      }
-      ;(prisma.problem.upsert as Mock).mockResolvedValue(mockProblem)
-
-      const problem = await upsertProblem(
-        'problem-title',
-        'problem-href',
-        'problem-link',
-        'Problem Title',
-        ProblemDifficulty.MEDIUM,
-        'Problem Question',
-        'Problem Answer',
-        ProblemType.CODING,
-        'lesson-id',
-      )
-      expect(problem).toEqual(mockProblem)
-      expect(prisma.problem.upsert).toHaveBeenCalledWith({
-        where: { slug: 'problem-title' },
-        update: {
-          title: 'Problem Title',
-          difficulty: ProblemDifficulty.MEDIUM,
-          lessonId: 'lesson-id',
-          question: 'Problem Question',
-          answer: 'Problem Answer',
-          type: ProblemType.CODING,
-          href: 'problem-href',
-          link: 'problem-link',
-        },
-        create: {
-          title: 'Problem Title',
-          href: 'problem-href',
-          link: 'problem-link',
-          lessonId: 'lesson-id',
-          difficulty: ProblemDifficulty.MEDIUM,
-          question: 'Problem Question',
-          answer: 'Problem Answer',
-          type: ProblemType.CODING,
-          slug: 'problem-title',
         },
       })
     })
