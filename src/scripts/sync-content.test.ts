@@ -178,9 +178,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const { syncContent } = await import('./sync-content')
       const prisma = (await import('@/lib/prisma')).default
 
-      let transactionCallback: any = null
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        transactionCallback = fn
         const tx = {
           course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
           section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
