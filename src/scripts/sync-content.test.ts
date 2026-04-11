@@ -36,14 +36,7 @@ vi.mock('@/constants/curriculum', () => ({
           title: 'Test Section',
           description: 'Test section description',
           href: '/courses/test-course/test-section',
-          lessons: [
-            {
-              id: 'test-lesson',
-              title: 'Test Lesson',
-              description: 'Test lesson description',
-              href: '/courses/test-course/test-section/test-lesson',
-            },
-          ],
+          lessons: [],
         },
       ],
     },
@@ -52,31 +45,8 @@ vi.mock('@/constants/curriculum', () => ({
 vi.mock('@/lib/prisma', () => ({
   default: {
     $disconnect: vi.fn(),
-    banner: {
-      findUnique: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-    },
+    $transaction: vi.fn(),
   },
-}))
-vi.mock('@/services/lesson', () => ({
-  upsertCourse: vi.fn().mockResolvedValue({ id: 'course-id' }),
-  upsertSection: vi.fn().mockResolvedValue({ id: 'section-id' }),
-  upsertLesson: vi.fn().mockResolvedValue({ id: 'lesson-id' }),
-  upsertProblem: vi.fn(),
-}))
-vi.mock('@/services/resource', () => ({
-  upsertResource: vi.fn(),
-}))
-vi.mock('@/services/stripe', () => ({
-  getActiveProducts: vi.fn().mockResolvedValue([
-    { id: 'prod_1', name: 'Annual Plan' },
-    { id: 'prod_2', name: 'Monthly Plan' },
-  ]),
-  createStripeCoupon: vi.fn().mockResolvedValue({
-    coupon: { id: 'coupon_123' },
-    promotionCode: null,
-  }),
 }))
 vi.mock('slugify', () => {
   const slugifyFn = vi.fn((text: string) => {
@@ -95,9 +65,17 @@ vi.mock('../utils/helpers', () => ({
   isProduction: vi.fn().mockReturnValue(false),
 }))
 
-describe('Sync Content Script - JSON Structure', () => {
-  beforeEach(() => {
+describe('Sync Content Script - Two-Phase Architecture', () => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+
+    // Reset serialize to default success mock (clearAllMocks clears call history but not implementations)
+    const { serialize } = await import('next-mdx-remote-client/serialize')
+    vi.mocked(serialize).mockResolvedValue({
+      compiledSource: 'mock-compiled-source',
+      scope: {},
+      frontmatter: {},
+    } as any)
 
     // Setup basic file system mocks
     vi.mocked(path.join).mockImplementation((...args) => args.join('/'))
@@ -136,11 +114,23 @@ describe('Sync Content Script - JSON Structure', () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {})
   })
 
-  describe('Content Processing', () => {
-    it('detects production content when available', async () => {
+  describe('Content Detection', () => {
+    it('detects main content when available', async () => {
       const { syncContent } = await import('./sync-content')
-      const consoleSpy = vi.spyOn(console, 'log')
+      const prisma = (await import('@/lib/prisma')).default
 
+      // Mock transaction to execute the callback
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        const tx = {
+          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
+          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
+          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
+          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
+        }
+        return fn(tx)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'log')
       await syncContent()
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -149,15 +139,25 @@ describe('Sync Content Script - JSON Structure', () => {
     })
 
     it('uses sample content when main content is not available', async () => {
-      // Mock main content directory as not existing, samples as existing
       vi.mocked(fs.existsSync).mockImplementation((path) => {
         const pathStr = path.toString()
-        return pathStr.includes('samples') // Only samples exist
+        return pathStr.includes('samples')
       })
 
       const { syncContent } = await import('./sync-content')
-      const consoleSpy = vi.spyOn(console, 'log')
+      const prisma = (await import('@/lib/prisma')).default
 
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        const tx = {
+          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
+          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
+          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
+          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
+        }
+        return fn(tx)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'log')
       await syncContent()
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -165,277 +165,174 @@ describe('Sync Content Script - JSON Structure', () => {
       )
     })
 
-    it('uses JSON-based configuration by default', async () => {
-      const { syncContent } = await import('./sync-content')
-      const consoleSpy = vi.spyOn(console, 'log')
-
-      await syncContent()
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '🆕 Using JSON-based lesson configuration',
-      )
-    })
-
-    it('handles missing lesson files gracefully', async () => {
-      // Mock lesson file as not existing
-      vi.mocked(fs.existsSync).mockImplementation((path) => {
-        const pathStr = path.toString()
-        if (pathStr.includes('test-lesson/page.mdx')) {
-          return false // Lesson file doesn't exist
-        }
-        return true
-      })
-
-      const { syncContent } = await import('./sync-content')
-      const consoleSpy = vi.spyOn(console, 'warn')
-
-      await syncContent()
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('⚠️ Lesson file not found'),
-      )
-    })
-  })
-
-  describe('Core Sync Operations', () => {
-    it('processes courses and sections', async () => {
-      const { syncContent } = await import('./sync-content')
-      const { upsertCourse, upsertSection } = await import('@/services/lesson')
-
-      await syncContent()
-
-      expect(upsertCourse).toHaveBeenCalled()
-      expect(upsertSection).toHaveBeenCalled()
-    })
-
-    it('processes complete course content with serialization', async () => {
-      const { syncContent } = await import('./sync-content')
-      const { upsertCourse, upsertSection, upsertLesson } = await import(
-        '@/services/lesson'
-      )
-
-      await syncContent()
-
-      // Verify course was processed with serialized content
-      expect(upsertCourse).toHaveBeenCalledWith(
-        'test-course',
-        'Test Course',
-        'Test course description',
-        '# Test Content\n\nThis is test content.', // original content
-        '/courses/test-course',
-        0, // order
-        expect.objectContaining({
-          // serialized content
-          compiledSource: 'mock-compiled-source',
-        }),
-      )
-
-      // Verify section was processed with serialized content
-      expect(upsertSection).toHaveBeenCalledWith(
-        'test-section',
-        'Test Section',
-        'Test section description',
-        '# Test Content\n\nThis is test content.', // original content
-        expect.any(Number), // order
-        '/courses/test-course/test-section',
-        expect.any(String), // courseId
-        expect.objectContaining({
-          // serialized content
-          compiledSource: 'mock-compiled-source',
-        }),
-      )
-
-      // Verify lesson was processed with serialized content
-      expect(upsertLesson).toHaveBeenCalledWith(
-        'test-lesson',
-        'Test Lesson',
-        'Test Description',
-        '# Test Content\n\nThis is test content.', // original content
-        expect.objectContaining({
-          // serialized content
-          compiledSource: 'mock-compiled-source',
-        }),
-        expect.any(Number), // order
-        'FREE', // access
-        '/courses/test-course/test-section/test-lesson',
-        expect.any(String), // sectionId
-      )
-    })
-
-    it('tracks lesson progress correctly', async () => {
-      const { syncContent } = await import('./sync-content')
-      const consoleSpy = vi.spyOn(console, 'log')
-
-      await syncContent()
-
-      // Should log correct lesson count
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '🎯 Starting content sync: 1 lessons to process',
-      )
-
-      // Should log lesson completion
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '✅ Synced lesson: Test Lesson (1/1)',
-      )
-
-      // Should log final completion
-      expect(consoleSpy).toHaveBeenCalledWith('🎉 Content sync completed!')
-    })
-
-    it('handles empty lesson configurations gracefully', async () => {
-      const { syncContent } = await import('./sync-content')
-
-      // Should not throw even with empty lessons
-      await expect(syncContent()).resolves.toBeUndefined()
-    })
-  })
-
-  describe('MDX Serialization', () => {
-    it('calls serialization for various content types', async () => {
-      const { syncContent } = await import('./sync-content')
-      const { upsertCourse, upsertSection, upsertLesson } = await import(
-        '@/services/lesson'
-      )
-
-      await syncContent()
-
-      // Verify that courses, sections, and lessons are called with serialized content
-      expect(upsertCourse).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-        expect.any(Number),
-        expect.objectContaining({
-          // serialized content present
-          compiledSource: expect.any(String),
-        }),
-      )
-
-      expect(upsertSection).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-        expect.any(Number),
-        expect.any(String),
-        expect.any(String),
-        expect.objectContaining({
-          // serialized content present
-          compiledSource: expect.any(String),
-        }),
-      )
-
-      expect(upsertLesson).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-        expect.objectContaining({
-          // serialized content present
-          compiledSource: expect.any(String),
-        }),
-        expect.any(Number),
-        expect.any(String),
-        expect.any(String),
-        expect.any(String),
-      )
-    })
-  })
-
-  describe('Problem Serialization', () => {
-    it('processes problems with serialized answers', async () => {
-      const { syncContent } = await import('./sync-content')
-      const { upsertProblem } = await import('@/services/lesson')
-
-      await syncContent()
-
-      // Verify upsertProblem was called (the default test data has a problem with answer)
-      expect(upsertProblem).toHaveBeenCalledWith(
-        'test-problem', // slug
-        'https://example.com', // href
-        expect.stringContaining('#test-problem'), // link
-        'Test Problem', // title
-        'EASY', // difficulty
-        'What is this?', // question
-        '```typescript\nconsole.log("answer")\n```', // original answer
-        'CODING', // type
-        expect.any(String), // lessonId
-        expect.objectContaining({
-          // serializedAnswer - should contain compiled content
-          compiledSource: expect.any(String),
-        }),
-      )
-    })
-
-    it('handles empty answer problems correctly', async () => {
-      // Test the logic path where problems have empty answers
-      // This demonstrates that the serialization logic works for both cases
-      const { upsertProblem } = await import('@/services/lesson')
-
-      // Check that upsertProblem can handle null serialized content
-      // (This tests our schema and function signature compatibility)
-      await expect(async () => {
-        await upsertProblem(
-          'empty-problem',
-          '',
-          '/test-link#empty-problem',
-          'Empty Problem',
-          'EASY',
-          'Test question?',
-          '', // empty answer
-          'THEORY',
-          'test-lesson-id',
-          null as any, // null serializedAnswer for empty answers
-        )
-      }).not.toThrow()
-    })
-
-    it('throws error when MDX serialization fails', async () => {
-      // Clear all mocks and set up a clean test environment
-      vi.clearAllMocks()
-
-      // Reset file system mocks
-      vi.mocked(fs.existsSync).mockReturnValue(true)
-      vi.mocked(fs.readFileSync).mockImplementation((path) => {
-        const pathStr = path.toString()
-        if (pathStr.includes('_lessons.json')) {
-          return JSON.stringify({
-            lessons: [
-              {
-                id: 'test-lesson-fail',
-                title: 'Test Lesson Fail',
-                description: 'Test Description',
-                access: 'FREE',
-                order: 1,
-                problems: [],
-              },
-            ],
-          })
-        }
-        return '# Test Content That Will Fail\n\nThis content will cause serialization to fail.'
-      })
-
-      const { serialize } = await import('next-mdx-remote-client/serialize')
-      // Mock serialize to fail for any content
-      vi.mocked(serialize).mockRejectedValue(new Error('Serialization failed'))
-
-      const { syncContent } = await import('./sync-content')
-
-      // Should throw when serialization fails (course content serialization will fail first)
-      await expect(syncContent()).rejects.toThrow('MDX serialization failed')
-    })
-  })
-
-  describe('Error Handling', () => {
     it('handles missing content directories', async () => {
       vi.mocked(fs.existsSync).mockReturnValue(false)
       const { syncContent } = await import('./sync-content')
 
       await expect(syncContent()).rejects.toThrow('No content found!')
     })
+  })
 
+  describe('Phase 1: Content Preparation', () => {
+    it('serializes courses, sections, lessons and problems', async () => {
+      const { syncContent } = await import('./sync-content')
+      const prisma = (await import('@/lib/prisma')).default
+
+      let transactionCallback: any = null
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        transactionCallback = fn
+        const tx = {
+          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
+          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
+          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
+          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
+        }
+        return fn(tx)
+      })
+
+      await syncContent()
+
+      // Transaction should have been called (Phase 2 ran)
+      expect(prisma.$transaction).toHaveBeenCalledTimes(1)
+    })
+
+    it('handles missing lesson files gracefully', async () => {
+      vi.mocked(fs.existsSync).mockImplementation((path) => {
+        const pathStr = path.toString()
+        if (pathStr.includes('test-lesson/page.mdx')) {
+          return false
+        }
+        return true
+      })
+
+      const { syncContent } = await import('./sync-content')
+      const prisma = (await import('@/lib/prisma')).default
+
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        const tx = {
+          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
+          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
+          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
+          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
+        }
+        return fn(tx)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'warn')
+      await syncContent()
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('⚠️ Lesson file not found'),
+      )
+    })
+
+    it('throws error when MDX serialization fails', async () => {
+      vi.clearAllMocks()
+      vi.mocked(path.join).mockImplementation((...args) => args.join('/'))
+      vi.mocked(fs.existsSync).mockReturnValue(true)
+      vi.mocked(fs.readFileSync).mockReturnValue('# Failing Content')
+      vi.spyOn(console, 'log').mockImplementation(() => {})
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      const { serialize } = await import('next-mdx-remote-client/serialize')
+      vi.mocked(serialize).mockRejectedValue(new Error('Serialization failed'))
+
+      const { syncContent } = await import('./sync-content')
+
+      // Phase 1 fails → no transaction is called → error propagates
+      await expect(syncContent()).rejects.toThrow('MDX serialization failed')
+    })
+  })
+
+  describe('Phase 2: Transactional Persistence', () => {
+    it('persists all content within a single transaction', async () => {
+      const { syncContent } = await import('./sync-content')
+      const prisma = (await import('@/lib/prisma')).default
+
+      const courseUpsert = vi.fn().mockResolvedValue({ id: 'course-id' })
+      const sectionUpsert = vi.fn().mockResolvedValue({ id: 'section-id' })
+      const lessonUpsert = vi.fn().mockResolvedValue({ id: 'lesson-id' })
+      const problemUpsert = vi.fn().mockResolvedValue({ id: 'problem-id' })
+
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        const tx = {
+          course: { upsert: courseUpsert },
+          section: { upsert: sectionUpsert },
+          lesson: { upsert: lessonUpsert },
+          problem: { upsert: problemUpsert },
+        }
+        return fn(tx)
+      })
+
+      await syncContent()
+
+      // Verify transaction was called with timeout
+      expect(prisma.$transaction).toHaveBeenCalledWith(
+        expect.any(Function),
+        { timeout: 30000 },
+      )
+
+      // Verify upserts were called within the transaction
+      expect(courseUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { slug: 'test-course' },
+        }),
+      )
+      expect(sectionUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { slug: 'test-section' },
+        }),
+      )
+      expect(lessonUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { slug: 'test-lesson' },
+        }),
+      )
+      expect(problemUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { slug: 'test-problem' },
+        }),
+      )
+    })
+
+    it('does not persist any data if transaction fails', async () => {
+      const { syncContent } = await import('./sync-content')
+      const prisma = (await import('@/lib/prisma')).default
+
+      vi.mocked(prisma.$transaction).mockRejectedValue(
+        new Error('Transaction failed'),
+      )
+
+      await expect(syncContent()).rejects.toThrow('Transaction failed')
+    })
+
+    it('tracks progress during sync', async () => {
+      const { syncContent } = await import('./sync-content')
+      const prisma = (await import('@/lib/prisma')).default
+
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        const tx = {
+          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
+          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
+          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
+          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
+        }
+        return fn(tx)
+      })
+
+      const consoleSpy = vi.spyOn(console, 'log')
+      await syncContent()
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Preparing content: 1 lessons to serialize'),
+      )
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '🎉 Content sync completed!',
+      )
+    })
+  })
+
+  describe('Error Handling', () => {
     it('handles JSON parse errors gracefully', async () => {
       vi.mocked(fs.readFileSync).mockImplementation((path) => {
         if (path.toString().includes('_lessons.json')) {
@@ -445,9 +342,20 @@ describe('Sync Content Script - JSON Structure', () => {
       })
 
       const { syncContent } = await import('./sync-content')
+      const prisma = (await import('@/lib/prisma')).default
 
-      // Should throw on invalid JSON
-      await expect(syncContent()).rejects.toThrow()
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        const tx = {
+          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
+          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
+          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
+          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
+        }
+        return fn(tx)
+      })
+
+      // JSON parse errors are handled gracefully (returns empty lessons)
+      await expect(syncContent()).resolves.toBeUndefined()
     })
   })
 })

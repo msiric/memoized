@@ -1,11 +1,6 @@
 import prisma from '@/lib/prisma'
-import {
-  AccessOptions,
-  ProblemDifficulty,
-  ProblemType,
-  Prisma,
-} from '@prisma/client'
 import { revalidateLessonProgress } from '@/lib/cache'
+import { ServiceError } from '@/lib/error-tracking'
 
 export type MarkLessonArgs = {
   userId: string
@@ -18,6 +13,18 @@ export const markLessonProgress = async ({
   lessonId,
   completed,
 }: MarkLessonArgs) => {
+  const lesson = await prisma.lesson.findUnique({
+    where: { id: lessonId },
+    select: { id: true },
+  })
+
+  if (!lesson) {
+    throw new ServiceError('Lesson not found', true, {
+      feature: 'lesson',
+      action: 'mark-progress',
+    })
+  }
+
   const result = await prisma.userLessonProgress.upsert({
     where: {
       userId_lessonId: {
@@ -40,6 +47,15 @@ export const markLessonProgress = async ({
   revalidateLessonProgress({ userId, lessonId })
 
   return result
+}
+
+export const getLessonMetadataBySlug = async (lessonSlug: string) => {
+  const lesson = await prisma.lesson.findUnique({
+    where: { slug: lessonSlug },
+    select: { title: true, description: true },
+  })
+
+  return lesson
 }
 
 export const getSectionBySlug = async (sectionSlug: string) => {
@@ -134,160 +150,6 @@ export const getLessonsSlugs = async () => {
   }
 
   return lessons
-}
-
-export const upsertCourse = async (
-  courseSlug: string,
-  courseTitle: string,
-  courseDescription: string,
-  courseBody: string | null,
-  courseHref: string,
-  courseOrder: number,
-  serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
-) => {
-  const result = await prisma.course.upsert({
-    where: { slug: courseSlug },
-    update: {
-      title: courseTitle,
-      description: courseDescription,
-      body: courseBody,
-      serializedBody: serializedContent,
-      order: courseOrder,
-      href: courseHref,
-    },
-    create: {
-      title: courseTitle,
-      description: courseDescription,
-      body: courseBody,
-      serializedBody: serializedContent,
-      order: courseOrder,
-      slug: courseSlug,
-      href: courseHref,
-    },
-  })
-
-  return result
-}
-
-export const upsertSection = async (
-  sectionSlug: string,
-  sectionTitle: string,
-  sectionDescription: string,
-  sectionContent: string,
-  sectionOrder: number,
-  sectionHref: string,
-  courseId: string,
-  serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
-) => {
-  const result = await prisma.section.upsert({
-    where: { slug: sectionSlug },
-    update: {
-      title: sectionTitle,
-      description: sectionDescription,
-      body: sectionContent,
-      order: sectionOrder,
-      href: sectionHref,
-      courseId: courseId,
-      ...(serializedContent !== undefined && {
-        serializedBody: serializedContent,
-      }),
-    },
-    create: {
-      title: sectionTitle,
-      description: sectionDescription,
-      body: sectionContent,
-      slug: sectionSlug,
-      order: sectionOrder,
-      href: sectionHref,
-      courseId: courseId,
-      ...(serializedContent !== undefined && {
-        serializedBody: serializedContent,
-      }),
-    },
-  })
-
-  return result
-}
-
-export const upsertLesson = async (
-  lessonSlug: string,
-  lessonTitle: string,
-  lessonDescription: string,
-  lessonContent: string,
-  serializedContent: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
-  lessonOrder: number,
-  lessonAccess: AccessOptions,
-  lessonHref: string,
-  sectionId: string,
-) => {
-  const result = await prisma.lesson.upsert({
-    where: { slug: lessonSlug },
-    update: {
-      title: lessonTitle,
-      description: lessonDescription,
-      order: lessonOrder,
-      body: lessonContent,
-      serializedBody: serializedContent,
-      access: lessonAccess,
-      href: lessonHref,
-      sectionId: sectionId,
-    },
-    create: {
-      title: lessonTitle,
-      description: lessonDescription,
-      order: lessonOrder,
-      slug: lessonSlug,
-      body: lessonContent,
-      serializedBody: serializedContent,
-      access: lessonAccess,
-      href: lessonHref,
-      sectionId: sectionId,
-    },
-  })
-
-  return result
-}
-
-export const upsertProblem = async (
-  problemSlug: string,
-  problemHref: string,
-  problemLink: string,
-  problemTitle: string,
-  problemDifficulty: ProblemDifficulty,
-  problemQuestion: string,
-  problemAnswer: string,
-  problemType: ProblemType,
-  lessonId: string,
-  serializedAnswer?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
-) => {
-  const result = await prisma.problem.upsert({
-    where: { slug: problemSlug },
-    update: {
-      href: problemHref,
-      link: problemLink,
-      title: problemTitle,
-      lessonId: lessonId,
-      difficulty: problemDifficulty,
-      question: problemQuestion,
-      answer: problemAnswer,
-      type: problemType,
-      serializedAnswer: serializedAnswer,
-    },
-    create: {
-      title: problemTitle,
-      slug: problemSlug,
-      href: problemHref,
-      link: problemLink,
-      lessonId: lessonId,
-      difficulty: problemDifficulty,
-      question: problemQuestion,
-      answer: problemAnswer,
-      type: problemType,
-      serializedAnswer: serializedAnswer,
-    },
-  })
-
-  return result
 }
 
 export const getLessonsAndProblems = async () => {

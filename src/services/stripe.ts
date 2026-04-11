@@ -183,16 +183,34 @@ export const createBillingPortalSession = async (customer: string) => {
 }
 
 export const getActiveCoupons = async () => {
-  const coupons = await stripe.coupons.list({ expand: ['data.applies_to'] })
-  return coupons.data
+  try {
+    const coupons = await stripe.coupons.list({ expand: ['data.applies_to'] })
+    return coupons.data
+  } catch (error) {
+    throw new ServiceError(
+      'Failed to retrieve active coupons',
+      true,
+      { feature: 'stripe', action: 'get-active-coupons' },
+      error,
+    )
+  }
 }
 
 export const getActiveProducts = async () => {
-  const products = await stripe.products.list({
-    active: true,
-    expand: ['data.default_price'],
-  })
-  return products.data
+  try {
+    const products = await stripe.products.list({
+      active: true,
+      expand: ['data.default_price'],
+    })
+    return products.data
+  } catch (error) {
+    throw new ServiceError(
+      'Failed to retrieve active products',
+      true,
+      { feature: 'stripe', action: 'get-active-products' },
+      error,
+    )
+  }
 }
 
 export const listStripeCoupons = async (

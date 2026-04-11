@@ -62,12 +62,13 @@ export function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname
   
-  // Skip rate limiting for static assets, API routes and known safe paths
+  // Skip rate limiting for static assets and trusted API routes
   if (
     path.startsWith('/_next') ||
     path.startsWith('/images') ||
     path.startsWith('/media') ||
-    path.startsWith('/api') ||
+    path.startsWith('/api/auth') ||
+    path.startsWith('/api/webhook') ||
     path.endsWith('.ico') ||
     path.endsWith('.xml') ||
     path.endsWith('.txt')
