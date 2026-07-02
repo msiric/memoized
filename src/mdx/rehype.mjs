@@ -1542,6 +1542,7 @@ function rehypeShiki() {
         'python',
         'dockerfile',
         'json',
+        'jsonc',
         'yaml',
         'http',
         'html',
@@ -1550,6 +1551,12 @@ function rehypeShiki() {
         'typescript',
         'jsx',
         'tsx',
+        'sql',
+        'markdown',
+        'nginx',
+        'vue',
+        'svelte',
+        'astro',
       ],
     })
 
@@ -1561,8 +1568,15 @@ function rehypeShiki() {
         node.properties.code = textNode.value
 
         if (node.properties.language) {
+          // Fall back to plain text for any language not loaded into the
+          // highlighter, so an unregistered fence can never throw and abort
+          // the whole content sync (see rehypeShiki langs above).
+          const requested = node.properties.language
+          const lang = highlighter.getLoadedLanguages().includes(requested)
+            ? requested
+            : 'text'
           textNode.value = highlighter.codeToHtml(textNode.value, {
-            lang: node.properties.language,
+            lang,
             theme: 'github-dark',
             elements: {
               pre: ({ children }) => children,
