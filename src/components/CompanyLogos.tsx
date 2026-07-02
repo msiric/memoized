@@ -43,7 +43,7 @@ export const CompanyLogos = () => {
           <DecorativeBlur position="inset" gradient="lime" size="lg" />
           <div className="relative rounded-2xl sm:rounded-3xl bg-zinc-800/50 p-4 sm:p-6 lg:p-8 backdrop-blur-sm ring-1 ring-zinc-700/50">
             <p className={`mb-6 sm:mb-8 text-center ${TYPOGRAPHY.body.small} font-medium text-zinc-400`}>
-              Trusted by engineers at companies like:
+              Prepare for interviews at companies like:
             </p>
             <div className="grid grid-cols-4 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
