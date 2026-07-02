@@ -49,8 +49,8 @@ export const TrackProgress = () => {
             <div className="space-y-4 sm:space-y-6">
               <FeaturePoint
                 icon={<CheckCircleIcon />}
-                title="Achievement Tracking"
-                description="See your achievements and identify areas for improvement with detailed progress insights."
+                title="Completion Tracking"
+                description="See what you've completed and identify areas to focus on with detailed progress insights."
                 variant="lime"
               />
 
