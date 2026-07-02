@@ -33,7 +33,7 @@ export const SolveProblems = () => {
           {/* Enhanced Content */}
           <div className="md:order-1">
             <Badge variant="indigo" icon={<CheckCircleIcon />} className={SPACING.margin.md}>
-              450+ Problems
+              500 Problems
             </Badge>
 
             <h2 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} ${TYPOGRAPHY.color.primary}`}>
@@ -41,7 +41,7 @@ export const SolveProblems = () => {
             </h2>
 
             <p className={`${SPACING.descriptionMargin.large} ${TYPOGRAPHY.body.large} ${TYPOGRAPHY.color.secondary}`}>
-              Access over 450 diverse practice problems and questions designed to prepare you for real interview scenarios.
+              Access all 500 diverse practice problems and questions designed to prepare you for real interview scenarios.
             </p>
 
             {/* Feature Points */}
