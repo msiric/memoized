@@ -64,7 +64,7 @@ export const ContentOverview = () => {
                     {/* Quick Stats */}
                     <div className="grid grid-cols-3 gap-3 text-center sm:gap-6 lg:gap-8">
                       <StatCard
-                        value="500"
+                        value="500+"
                         label="JS Problems"
                         variant="lime"
                       />
