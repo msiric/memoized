@@ -199,7 +199,7 @@ const CODE_SNIPPETS = [
     tab: `are-anagrams.${EXTENSION}`,
   },
   {
-    code: `function validParantheses(s) {
+    code: `function validParentheses(s) {
   const stack = [];
   const pairs = { '(': ')', '{': '}', '[': ']' };
   for (let char of s) {
@@ -214,7 +214,7 @@ const CODE_SNIPPETS = [
   }
   return stack.length === 0;
 }`,
-    tab: `valid-parantheses.${EXTENSION}`,
+    tab: `valid-parentheses.${EXTENSION}`,
   },
 ]
 
