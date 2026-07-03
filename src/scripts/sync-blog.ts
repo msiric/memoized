@@ -118,39 +118,29 @@ async function serializeMdxContent(content: string, filePath?: string) {
 function getBlogPath(): { path: string; isSample: boolean } {
   const mainBlogPath = path.join(process.cwd(), 'src', BLOG_FOLDER)
   const sampleBlogPath = path.join(process.cwd(), 'src', SAMPLES_FOLDER, SAMPLE_BLOG_FOLDER)
+  // Sample content is DEV-ONLY and opt-in, so it can never sync to production.
+  const allowSample = process.env.SYNC_ALLOW_SAMPLE_BLOG === 'true'
 
-  // Check if main blog folder has content (subdirectories with posts)
-  if (fs.existsSync(mainBlogPath)) {
-    const entries = fs.readdirSync(mainBlogPath, { withFileTypes: true })
-    const hasPostDirs = entries.some(
-      (entry) => entry.isDirectory() && !entry.name.startsWith('.')
-    )
-    
-    if (hasPostDirs) {
-      console.log('📂 Using blog content from main directory')
-      return { path: mainBlogPath, isSample: false }
-    }
+  const hasPosts = (dir: string) =>
+    fs.existsSync(dir) &&
+    fs
+      .readdirSync(dir, { withFileTypes: true })
+      .some((e) => e.isDirectory() && !e.name.startsWith('.'))
+
+  // 1. Real content (copied from the private repo in CI).
+  if (hasPosts(mainBlogPath)) {
+    console.log('📂 Using blog content from main directory')
+    return { path: mainBlogPath, isSample: false }
   }
 
-  // Fall back to sample blog content
-  if (fs.existsSync(sampleBlogPath)) {
-    const entries = fs.readdirSync(sampleBlogPath, { withFileTypes: true })
-    const hasPostDirs = entries.some(
-      (entry) => entry.isDirectory() && !entry.name.startsWith('.')
-    )
-    
-    if (hasPostDirs) {
-      console.log('📂 Using sample blog content for development')
-      return { path: sampleBlogPath, isSample: true }
-    }
+  // 2. Sample content — dev only, requires SYNC_ALLOW_SAMPLE_BLOG=true.
+  if (allowSample && hasPosts(sampleBlogPath)) {
+    console.log('📂 Using sample blog content (dev; SYNC_ALLOW_SAMPLE_BLOG=true)')
+    return { path: sampleBlogPath, isSample: true }
   }
 
-  // No blog content available - create empty main directory
-  console.log('📂 No blog content found, creating empty directory')
-  if (!fs.existsSync(mainBlogPath)) {
-    fs.mkdirSync(mainBlogPath, { recursive: true })
-  }
-  
+  // 3. No content — sync zero posts. No sample fallback, no side effects.
+  console.log('📭 No blog content found — syncing zero posts')
   return { path: mainBlogPath, isSample: false }
 }
 
@@ -276,6 +266,13 @@ async function syncBlogPosts(): Promise<string[]> {
  * Clean up unpublished or deleted blog posts
  */
 async function cleanupBlogPosts(currentSlugs: string[]) {
+  // Safety: if nothing was synced (empty src/blog / misconfigured content copy),
+  // refuse to delete — otherwise every existing post would be wiped.
+  if (currentSlugs.length === 0) {
+    console.log('\n🛟 Skipping cleanup — 0 posts synced (refusing to delete existing posts).')
+    return
+  }
+
   const existingPosts = await prisma.blogPost.findMany({
     select: { slug: true },
   })

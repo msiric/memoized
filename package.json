@@ -39,7 +39,7 @@
     "sync:resources": "cross-env tsx src/scripts/sync-resources.ts",
     "sync:resources:dev": "cross-env tsx --env-file .env src/scripts/sync-resources.ts",
     "sync:blog": "cross-env tsx src/scripts/sync-blog.ts",
-    "sync:blog:dev": "cross-env tsx --env-file .env src/scripts/sync-blog.ts",
+    "sync:blog:dev": "cross-env SYNC_ALLOW_SAMPLE_BLOG=true tsx --env-file .env src/scripts/sync-blog.ts",
     "sync:all": "yarn sync && yarn sync:resources && yarn sync:blog",
     "sync:all:dev": "yarn sync:dev && yarn sync:resources:dev && yarn sync:blog:dev",
     "clean": "cross-env tsx --env-file .env src/scripts/clean-database.ts",

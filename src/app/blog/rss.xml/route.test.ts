@@ -251,7 +251,7 @@ describe('RSS Feed', () => {
       const body = await response.text()
 
       expect(body).toContain('<image>')
-      expect(body).toContain('<url>https://test.memoized.io/images/logo.png</url>')
+      expect(body).toContain('<url>https://test.memoized.io/images/brand/logo-dark.png</url>')
     })
 
     it('includes items for each post', async () => {

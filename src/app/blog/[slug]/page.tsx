@@ -45,7 +45,7 @@ function generateArticleJsonLd(post: {
       name: APP_NAME,
       logo: {
         '@type': 'ImageObject',
-        url: `${siteUrl}/images/logo.png`,
+        url: `${siteUrl}/images/brand/logo-dark.png`,
       },
     },
     datePublished: post.publishedAt?.toISOString(),

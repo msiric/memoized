@@ -80,7 +80,7 @@ export async function GET() {
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${safeSiteUrl}/blog/rss.xml" rel="self" type="application/rss+xml"/>
     <image>
-      <url>${safeSiteUrl}/images/logo.png</url>
+      <url>${safeSiteUrl}/images/brand/logo-dark.png</url>
       <title>${escapeXml(APP_NAME)} Blog</title>
       <link>${safeSiteUrl}/blog</link>
     </image>
