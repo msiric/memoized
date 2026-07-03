@@ -11,7 +11,7 @@ import {
   ProductWithCoupon,
   PromotionCodeConfig,
 } from '@/types'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import { getURL } from '@/utils/helpers'
 import { revalidateCustomer } from '@/lib/cache'
 import { revalidatePath } from 'next/cache'

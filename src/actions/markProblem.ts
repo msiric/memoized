@@ -5,7 +5,7 @@ import {
   markProblemProgress,
   MarkProblemArgs as ServiceMarkProblemArgs,
 } from '@/services/problem'
-import { createCustomError } from '@/lib/error-tracking'
+import { createCustomError } from '@/lib/sentry'
 import { createCustomResponse } from '@/utils/response'
 import { getServerSession } from 'next-auth'
 

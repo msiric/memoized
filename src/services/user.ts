@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { UserWithSubscriptionsAndProgress } from '@/types'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import {
   buildCurriculum,
   calculateProgress,

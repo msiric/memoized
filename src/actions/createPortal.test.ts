@@ -6,7 +6,7 @@ import {
   createOrRetrieveCustomer,
   createBillingPortalSession,
 } from '@/services/stripe'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import Stripe from 'stripe'
 import { CustomResponse } from '@/utils/response'
 import { User } from '@prisma/client'

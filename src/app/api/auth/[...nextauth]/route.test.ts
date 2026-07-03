@@ -1,4 +1,4 @@
-import { sendEmail } from '@/lib/resend'
+import { sendEmail } from '@/services/email'
 import {
   createUserWithAccount,
   findAccount,
@@ -11,7 +11,7 @@ import { AdapterUser } from 'next-auth/adapters'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { authOptions } from './route'
 
-vi.mock('@/lib/resend')
+vi.mock('@/services/email')
 vi.mock('@/services/account')
 vi.mock('@sentry/nextjs')
 vi.mock('@/utils/helpers', () => ({

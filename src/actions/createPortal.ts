@@ -6,7 +6,7 @@ import {
   createOrRetrieveCustomer,
 } from '@/services/stripe'
 import { getUserById } from '@/services/user'
-import { createCustomError } from '@/lib/error-tracking'
+import { createCustomError } from '@/lib/sentry'
 import { createCustomResponse } from '@/utils/response'
 import { getServerSession } from 'next-auth'
 

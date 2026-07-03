@@ -39,7 +39,7 @@ describe('Error Tracking System', () => {
       callback(mockScope)
     })
 
-    const errorTrackingModule = await import('./error-tracking')
+    const errorTrackingModule = await import('./sentry')
     reportError = errorTrackingModule.reportError
     reportErrorSafely = errorTrackingModule.reportErrorSafely
     ServiceError = errorTrackingModule.ServiceError

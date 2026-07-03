@@ -12,7 +12,7 @@ import {
 } from '@/services/stripe'
 import { getUserWithSubscriptionDetails } from '@/services/user'
 import { ProductWithCoupon } from '@/types'
-import { ServiceError, createCustomError } from '@/lib/error-tracking'
+import { ServiceError, createCustomError } from '@/lib/sentry'
 import { createCustomResponse } from '@/utils/response'
 import { SubscriptionStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth'

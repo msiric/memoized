@@ -3,7 +3,7 @@
 import { createCheckout } from '@/actions/createCheckout'
 import { useAuthStore } from '@/contexts/auth'
 import { ProductWithCoupon, UserWithSubscriptionsAndProgress } from '@/types'
-import { CustomError, handleError } from '@/lib/error-tracking'
+import { CustomError, handleError } from '@/lib/sentry'
 import { calculateDiscountedPrice, formatPrice } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionStatus } from '@prisma/client'

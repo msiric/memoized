@@ -11,7 +11,7 @@ import {
   retrieveStripeSession,
 } from '@/services/stripe'
 import { ProductWithCoupon } from '@/types'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import { getURL } from '@/utils/helpers'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 

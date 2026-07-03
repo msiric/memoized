@@ -11,7 +11,7 @@ import {
   SubscriptionPlan,
   SubscriptionStatus,
 } from '@prisma/client'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import Stripe from 'stripe'
 import { ProductWithCoupon } from '@/types'
 import { CustomResponse } from '@/utils/response'

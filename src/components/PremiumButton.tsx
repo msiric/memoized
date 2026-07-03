@@ -2,7 +2,7 @@
 
 import { createPortal } from '@/actions/createPortal'
 import { useAuthStore } from '@/contexts/auth'
-import { CustomError, handleError } from '@/lib/error-tracking'
+import { CustomError, handleError } from '@/lib/sentry'
 import { capitalizeFirstLetter } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'

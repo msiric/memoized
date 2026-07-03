@@ -10,7 +10,7 @@ import {
   EnrichedLesson,
   Problem,
 } from '@/types'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import {
   buildCurriculum,
   calculateProgress,

@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { reportError, ServiceError } from '@/lib/error-tracking'
+import { reportError, ServiceError } from '@/lib/sentry'
 import { BannerType } from '@prisma/client'
 import { isAfter, isBefore, parseISO } from 'date-fns'
 import { revalidateBanners } from '@/lib/cache'

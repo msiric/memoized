@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { markLesson } from './markLesson'
 import { getServerSession } from 'next-auth'
 import { markLessonProgress } from '@/services/lesson'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 
 vi.mock('next-auth')
 vi.mock('@/services/lesson')

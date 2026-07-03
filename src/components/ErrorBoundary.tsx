@@ -30,7 +30,7 @@ class ErrorBoundary extends Component<Props, State> {
     
     // Report to error tracking service with proper context
     if (typeof window !== 'undefined') {
-      import('@/lib/error-tracking').then(({ reportReactError }) => {
+      import('@/lib/sentry').then(({ reportReactError }) => {
         reportReactError(error, {
           componentStack: errorInfo.componentStack || '',
           errorBoundary: 'global',

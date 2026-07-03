@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
-import { sendEmail } from '@/lib/resend'
+import { sendEmail } from '@/services/email'
 import { stripe } from '@/lib/stripe'
-import { ServiceError, getErrorMessage } from '@/lib/error-tracking'
+import { ServiceError, getErrorMessage } from '@/lib/sentry'
 import { revalidateSubscription } from '@/lib/cache'
 import {
   formatDate,
