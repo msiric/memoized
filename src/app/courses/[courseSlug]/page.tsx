@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
   const courses = await getCoursesSlugs()
-  return courses?.map((course) => ({ courseSlug: course.slug }))
+  return courses?.map((course) => ({ courseSlug: course.slug })) ?? []
 }
 
 export default async function Course({

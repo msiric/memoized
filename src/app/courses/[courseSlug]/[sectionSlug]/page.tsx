@@ -7,10 +7,12 @@ import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
   const sections = await getSectionsSlugs()
-  return sections?.map((section) => ({
-    sectionSlug: section.slug,
-    courseSlug: section.course.slug,
-  }))
+  return (
+    sections?.map((section) => ({
+      sectionSlug: section.slug,
+      courseSlug: section.course.slug,
+    })) ?? []
+  )
 }
 
 export async function generateMetadata({
