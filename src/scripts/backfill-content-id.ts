@@ -17,15 +17,11 @@
  *   tsx src/scripts/backfill-content-id.ts --apply
  *   tsx src/scripts/backfill-content-id.ts --content <dir>
  */
-import { CONTENT_FOLDER, SLUGIFY_OPTIONS } from '@/constants'
-import { completeCurriculum } from '@/constants/curriculum'
+import { CONTENT_FOLDER } from '@/constants'
+import { buildContentIdMaps } from '@/lib/content-identity'
 import prisma from '@/lib/prisma'
 import fs from 'fs'
 import path from 'path'
-import slugify from 'slugify'
-
-slugify.extend({ '/': '-' })
-const slug = (t: string) => slugify(t, SLUGIFY_OPTIONS)
 
 function arg(name: string, def?: string) {
   const i = process.argv.indexOf(`--${name}`)
@@ -34,33 +30,6 @@ function arg(name: string, def?: string) {
 
 type SlugToContentId = Record<string, string>
 let apply = false
-
-// slug -> contentId per entity, traversing content like the sync
-// (course.id / course.id+section.id / +lesson.id / lessonCid+/+problem.id).
-function buildMaps(contentDir: string) {
-  const course: SlugToContentId = {}
-  const section: SlugToContentId = {}
-  const lesson: SlugToContentId = {}
-  const problem: SlugToContentId = {}
-  const resource: SlugToContentId = { intro: 'intro' }
-  for (const c of completeCurriculum) {
-    course[slug(c.title)] = c.id
-    for (const s of c.sections) {
-      const sectionCid = `${c.id}${s.id}`
-      section[slug(s.title)] = sectionCid
-      const cfgPath = path.join(contentDir, c.id, s.id, '_lessons.json')
-      if (!fs.existsSync(cfgPath)) continue
-      const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
-      for (const l of cfg.lessons || []) {
-        const lessonCid = `${c.id}${s.id}${l.id}`
-        lesson[slug(l.title)] = lessonCid
-        for (const p of l.problems || []) problem[slug(p.title)] = `${lessonCid}/${p.id ?? slug(p.title)}`
-        for (const r of l.resources || []) if (r.id) resource[slug(r.title)] = r.id
-      }
-    }
-  }
-  return { course, section, lesson, problem, resource }
-}
 
 async function backfillEntity(
   name: string,
@@ -93,7 +62,7 @@ async function main() {
   if (!fs.existsSync(path.join(contentDir, 'js-track')) && !fs.existsSync(path.join(contentDir, 'dsa-track'))) {
     console.error(`No js-track/dsa-track under ${contentDir}`); process.exit(1)
   }
-  const maps = buildMaps(contentDir)
+  const maps = buildContentIdMaps(contentDir)
 
   console.log(`${apply ? '🚀 APPLYING' : '🔎 DRY RUN'} — backfilling contentId (direct slug match only)\n`)
   let unresolved = 0

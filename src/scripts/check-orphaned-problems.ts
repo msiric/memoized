@@ -1,52 +1,44 @@
 /**
- * Pre-flight guardrail for the content sync. For every content entity (Course,
- * Section, Lesson, Problem, Resource) it checks whether any DB row would be
- * orphaned by a sync — i.e. NEITHER its contentId NOR its slug matches the
- * current content. Since the sync's upsert matches on contentId-or-slug, such a
- * row would create a duplicate and (for Lesson/Problem) strand user progress.
+ * Manual diagnostic: for every content entity (Course, Section, Lesson, Problem,
+ * Resource) it reports DB rows that match NEITHER a current contentId NOR a
+ * current slug — i.e. rows the content no longer defines (a removed entry, or an
+ * edited `id`). Read-only; never mutates.
  *
- * Exits non-zero if orphans-to-be are found, blocking the sync until they are
- * reconciled (backfill-content-id.ts) or confirmed intentional (--allow <n>).
- * Read-only; never mutates.
+ * NOTE: this is intentionally NOT in the sync pipeline. With stable, explicit-id
+ * contentIds, title renames are handled in place by the sync (progress
+ * preserved), and the removal-aware prune (prune-stale-content.ts) keeps
+ * DB == content automatically under a hard sanity cap. Use this script ad hoc to
+ * inspect what prune would remove, or to investigate identity drift.
+ *
+ * Exits non-zero when orphans are found (beyond --allow), so it can still gate a
+ * manual sync if you choose to run it.
  *
  * Usage: tsx src/scripts/check-orphaned-problems.ts [--content <dir>] [--allow <n>]
  */
-import { CONTENT_FOLDER, SLUGIFY_OPTIONS } from '@/constants'
-import { completeCurriculum } from '@/constants/curriculum'
+import { CONTENT_FOLDER } from '@/constants'
+import { buildContentIdMaps, validContentIds, type EntityName } from '@/lib/content-identity'
 import prisma from '@/lib/prisma'
 import fs from 'fs'
 import path from 'path'
-import slugify from 'slugify'
-
-slugify.extend({ '/': '-' })
-const slug = (t: string) => slugify(t, SLUGIFY_OPTIONS)
 
 function arg(name: string, def?: string) {
   const i = process.argv.indexOf(`--${name}`)
   return i >= 0 ? process.argv[i + 1] : def
 }
 
+// Valid contentIds + legacy slugs per entity, from the shared identity module.
+// A DB row is an orphan only if it matches NEITHER — see orphans().
 function buildContent(contentDir: string) {
-  const mk = () => ({ ids: new Set<string>(), slugs: new Set<string>() })
-  const e = { course: mk(), section: mk(), lesson: mk(), problem: mk(), resource: mk() }
-  e.resource.ids.add('intro'); e.resource.slugs.add('intro')
-  for (const c of completeCurriculum) {
-    e.course.ids.add(c.id); e.course.slugs.add(slug(c.title))
-    for (const s of c.sections) {
-      const sectionCid = `${c.id}${s.id}`
-      e.section.ids.add(sectionCid); e.section.slugs.add(slug(s.title))
-      const cfgPath = path.join(contentDir, c.id, s.id, '_lessons.json')
-      if (!fs.existsSync(cfgPath)) continue
-      const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
-      for (const l of cfg.lessons || []) {
-        const lessonCid = `${c.id}${s.id}${l.id}`
-        e.lesson.ids.add(lessonCid); e.lesson.slugs.add(slug(l.title))
-        for (const p of l.problems || []) { e.problem.ids.add(`${lessonCid}/${p.id ?? slug(p.title)}`); e.problem.slugs.add(slug(p.title)) }
-        for (const r of l.resources || []) { if (r.id) e.resource.ids.add(r.id); e.resource.slugs.add(slug(r.title)) }
-      }
-    }
+  const maps = buildContentIdMaps(contentDir)
+  const ids = validContentIds(maps)
+  const mk = (name: EntityName) => ({ ids: ids[name], slugs: new Set(Object.keys(maps[name])) })
+  return {
+    course: mk('course'),
+    section: mk('section'),
+    lesson: mk('lesson'),
+    problem: mk('problem'),
+    resource: mk('resource'),
   }
-  return e
 }
 
 function orphans(rows: Array<{ slug: string; contentId: string | null; title: string }>, content: { ids: Set<string>; slugs: Set<string> }) {

@@ -1,113 +1,168 @@
 /**
- * Prune stale content rows left in the DB that are no longer in the content
- * (removed problems, and pre-stable-id renamed-away duplicates). After the
- * stable-id sync, every LIVE entity has a contentId; stale rows have
- * contentId = NULL. Removing them keeps the DB equal to the content so
- * completion percentages are accurate (users can reach 100%).
+ * Prune stale content rows so the database always equals the content.
  *
- * Deletes cascade to child rows + user progress on those (removed) problems —
- * which is correct: you cannot complete a problem that no longer exists.
+ * A row is stale when its `contentId` is not among the contentIds the content
+ * currently defines — i.e. the entity was removed (or is a pre-stable-id
+ * renamed-away duplicate whose slug no longer matches anything). Keeping the DB
+ * == the content is what makes completion percentages correct: a user can only
+ * reach 100% when the DB contains exactly the problems the content ships.
  *
- * Guardrails: refuses to run before the sync (if NO rows have a contentId), and
- * refuses if it would delete more than HALF of an entity (sanity vs accidents).
- * Dry-run by default.
+ * Deletes cascade to child rows and to user progress on removed problems — which
+ * is correct: you cannot have completed a problem that no longer exists.
+ *
+ * Guardrails (a content-copy failure must never wipe the DB):
+ *   - Refuses to run before the sync/backfill has populated any contentIds.
+ *   - Refuses if the content defines zero problems (a failed content copy).
+ *   - HARD SANITY CAP: refuses if it would delete more than `--max` of any
+ *     entity's rows (default 10%). Large, deliberate removals require a human to
+ *     re-run with a raised cap.
+ *
+ * Dry-run by default. Runs automatically (with --apply) after `sync:all` in the
+ * content pipeline so "DB == content" is a self-maintaining invariant.
  *
  * Usage:
- *   tsx src/scripts/prune-stale-content.ts            # DRY RUN
+ *   tsx src/scripts/prune-stale-content.ts                     # DRY RUN
  *   tsx src/scripts/prune-stale-content.ts --apply
+ *   tsx src/scripts/prune-stale-content.ts --content <dir> --max 0.1
  */
+import { CONTENT_FOLDER } from '@/constants'
+import { buildContentIdMaps, validContentIds, type EntityName } from '@/lib/content-identity'
 import prisma from '@/lib/prisma'
+import path from 'path'
 
 const apply = process.argv.includes('--apply')
+function arg(name: string, def: string) {
+  const i = process.argv.indexOf(`--${name}`)
+  return i >= 0 ? process.argv[i + 1] : def
+}
+const contentDir = arg('content', path.join('src', CONTENT_FOLDER))
+const MAX_FRACTION = Number(arg('max', '0.1'))
 
-type Entity = {
-  name: string
-  countNull: () => Promise<number>
-  countTotal: () => Promise<number>
-  countProgress: () => Promise<number>
-  sampleNull: () => Promise<{ slug: string }[]>
-  deleteNull: () => Promise<{ count: number }>
+type EntityOps = {
+  name: EntityName
+  findAll: () => Promise<{ id: string; contentId: string | null }[]>
+  deleteByIds: (ids: string[]) => Promise<unknown>
+  // How many user-progress rows the deletion would cascade away (reporting only).
+  cascadedProgress: (ids: string[]) => Promise<number>
 }
 
-const entities: Entity[] = [
+// Leaf-to-root order: deleting problems before their lessons keeps counts exact
+// (a parent delete can't cascade away rows we are separately about to delete).
+const entities: EntityOps[] = [
   {
     name: 'problem',
-    countNull: () => prisma.problem.count({ where: { contentId: null } }),
-    countTotal: () => prisma.problem.count(),
-    countProgress: () =>
-      prisma.userProblemProgress.count({ where: { problem: { contentId: null } } }),
-    sampleNull: () => prisma.problem.findMany({ where: { contentId: null }, select: { slug: true }, take: 15 }),
-    deleteNull: () => prisma.problem.deleteMany({ where: { contentId: null } }),
-  },
-  {
-    name: 'lesson',
-    countNull: () => prisma.lesson.count({ where: { contentId: null } }),
-    countTotal: () => prisma.lesson.count(),
-    countProgress: () =>
-      prisma.userLessonProgress.count({ where: { lesson: { contentId: null } } }),
-    sampleNull: () => prisma.lesson.findMany({ where: { contentId: null }, select: { slug: true }, take: 15 }),
-    deleteNull: () => prisma.lesson.deleteMany({ where: { contentId: null } }),
-  },
-  {
-    name: 'section',
-    countNull: () => prisma.section.count({ where: { contentId: null } }),
-    countTotal: () => prisma.section.count(),
-    countProgress: async () => 0,
-    sampleNull: () => prisma.section.findMany({ where: { contentId: null }, select: { slug: true }, take: 15 }),
-    deleteNull: () => prisma.section.deleteMany({ where: { contentId: null } }),
-  },
-  {
-    name: 'course',
-    countNull: () => prisma.course.count({ where: { contentId: null } }),
-    countTotal: () => prisma.course.count(),
-    countProgress: async () => 0,
-    sampleNull: () => prisma.course.findMany({ where: { contentId: null }, select: { slug: true }, take: 15 }),
-    deleteNull: () => prisma.course.deleteMany({ where: { contentId: null } }),
+    findAll: () => prisma.problem.findMany({ select: { id: true, contentId: true } }),
+    deleteByIds: (ids) => prisma.problem.deleteMany({ where: { id: { in: ids } } }),
+    cascadedProgress: (ids) =>
+      prisma.userProblemProgress.count({ where: { problemId: { in: ids } } }),
   },
   {
     name: 'resource',
-    countNull: () => prisma.resource.count({ where: { contentId: null } }),
-    countTotal: () => prisma.resource.count(),
-    countProgress: async () => 0,
-    sampleNull: () => prisma.resource.findMany({ where: { contentId: null }, select: { slug: true }, take: 15 }),
-    deleteNull: () => prisma.resource.deleteMany({ where: { contentId: null } }),
+    findAll: () => prisma.resource.findMany({ select: { id: true, contentId: true } }),
+    deleteByIds: (ids) => prisma.resource.deleteMany({ where: { id: { in: ids } } }),
+    cascadedProgress: async () => 0,
+  },
+  {
+    name: 'lesson',
+    findAll: () => prisma.lesson.findMany({ select: { id: true, contentId: true } }),
+    deleteByIds: (ids) => prisma.lesson.deleteMany({ where: { id: { in: ids } } }),
+    cascadedProgress: (ids) =>
+      prisma.userLessonProgress.count({ where: { lessonId: { in: ids } } }),
+  },
+  {
+    name: 'section',
+    findAll: () => prisma.section.findMany({ select: { id: true, contentId: true } }),
+    deleteByIds: (ids) => prisma.section.deleteMany({ where: { id: { in: ids } } }),
+    cascadedProgress: async () => 0,
+  },
+  {
+    name: 'course',
+    findAll: () => prisma.course.findMany({ select: { id: true, contentId: true } }),
+    deleteByIds: (ids) => prisma.course.deleteMany({ where: { id: { in: ids } } }),
+    cascadedProgress: async () => 0,
   },
 ]
 
 async function main() {
-  console.log(`${apply ? '🚀 APPLYING' : '🔎 DRY RUN'} — pruning stale (contentId IS NULL) rows\n`)
+  console.log(
+    `${apply ? '🚀 APPLYING' : '🔎 DRY RUN'} — prune rows whose contentId is not in the content ` +
+      `(sanity cap ${Math.round(MAX_FRACTION * 100)}% per entity)\n`
+  )
 
-  // Guard: never run before the sync has populated contentIds.
-  const problemsWithCid = await prisma.problem.count({ where: { NOT: { contentId: null } } })
-  if (problemsWithCid === 0) {
-    console.error('❌ REFUSING: no problems have a contentId — the sync/backfill has not run. Aborting.')
+  const valid = validContentIds(buildContentIdMaps(contentDir))
+
+  // Guard: never run before the sync/backfill has populated contentIds — every
+  // row would look stale and get wiped.
+  const problemsWithContentId = await prisma.problem.count({ where: { NOT: { contentId: null } } })
+  if (problemsWithContentId === 0) {
+    console.error('❌ REFUSING: no problems have a contentId — sync/backfill has not run. Aborting.')
+    process.exit(1)
+  }
+  // Guard: content must actually define problems (a failed content copy would
+  // make everything "stale").
+  if (valid.problem.size === 0) {
+    console.error('❌ REFUSING: content defines 0 problems — content copy likely failed. Aborting.')
     process.exit(1)
   }
 
-  let abort = false
-  for (const e of entities) {
-    const [nul, total, prog] = await Promise.all([e.countNull(), e.countTotal(), e.countProgress()])
-    if (nul === 0) { console.log(`${e.name.padEnd(8)}: 0 stale`); continue }
-    const pct = Math.round((nul / total) * 100)
-    const sample = (await e.sampleNull()).map((r) => r.slug)
-    console.log(`${e.name.padEnd(8)}: ${nul}/${total} stale (${pct}%) | cascades ${prog} progress row(s)`)
-    console.log(`  e.g. ${sample.join(', ')}${nul > 15 ? ` … +${nul - 15}` : ''}`)
-    if (nul > total / 2) {
-      console.error(`  ❌ SANITY: >50% of ${e.name} rows are stale — refusing to delete (investigate first).`)
-      abort = true
-    }
-  }
-  if (abort) { console.error('\nAborting — sanity guard tripped.'); process.exit(1) }
+  const plan: { name: EntityName; ids: string[] }[] = []
+  let capTripped = false
 
-  if (apply) {
-    for (const e of entities) {
-      const res = await e.deleteNull()
-      if (res.count) console.log(`deleted ${res.count} stale ${e.name}(s)`)
+  for (const e of entities) {
+    const rows = await e.findAll()
+    const staleIds = rows
+      .filter((r) => !r.contentId || !valid[e.name].has(r.contentId))
+      .map((r) => r.id)
+
+    if (staleIds.length === 0) {
+      console.log(`${e.name.padEnd(8)}: 0 stale / ${rows.length}`)
+      continue
     }
-    console.log('\n✅ prune applied.')
-  } else {
-    console.log('\nRe-run with --apply to delete (run AFTER the content sync; snapshot first).')
+
+    const fraction = staleIds.length / rows.length
+    const progress = await e.cascadedProgress(staleIds)
+    console.log(
+      `${e.name.padEnd(8)}: ${staleIds.length} stale / ${rows.length} ` +
+        `(${Math.round(fraction * 100)}%) — cascades ${progress} progress row(s)`
+    )
+
+    if (fraction > MAX_FRACTION) {
+      console.error(
+        `  ❌ SANITY CAP: ${Math.round(fraction * 100)}% of ${e.name} rows are stale ` +
+          `(> ${Math.round(MAX_FRACTION * 100)}%). Refusing. Re-run with a raised --max if intentional.`
+      )
+      capTripped = true
+    }
+    plan.push({ name: e.name, ids: staleIds })
   }
+
+  if (capTripped) {
+    console.error('\nAborting — sanity cap tripped. Investigate the content before pruning.')
+    process.exit(1)
+  }
+
+  if (!plan.length) {
+    console.log('\nNothing to prune — DB equals content. ✅')
+    return
+  }
+
+  if (!apply) {
+    console.log('\nRe-run with --apply to delete the stale rows above.')
+    return
+  }
+
+  for (const e of entities) {
+    const p = plan.find((x) => x.name === e.name)
+    if (!p) continue
+    await e.deleteByIds(p.ids)
+    console.log(`deleted ${p.ids.length} stale ${e.name}(s)`)
+  }
+  console.log('\n✅ prune applied — DB now equals content.')
 }
 
-main().catch((e) => { console.error('ERROR:', (e as Error)?.message || e); process.exit(1) }).finally(() => prisma.$disconnect())
+main()
+  .catch((e) => {
+    console.error('ERROR:', (e as Error)?.message || e)
+    process.exit(1)
+  })
+  .finally(() => prisma.$disconnect())
