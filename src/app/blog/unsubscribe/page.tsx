@@ -44,7 +44,7 @@ function UnsubscribeContent() {
 
   const isSuccess = status === 'success'
   const isError = status === 'error'
-  const errorInfo = reason ? errorMessages[reason] : errorMessages['failed']
+  const errorInfo = (reason && errorMessages[reason]) || errorMessages['failed']
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
