@@ -1,3 +1,21 @@
+/**
+ * Blog content sync — publishes MDX blog posts into the database.
+ *
+ * SLUG / IDENTITY CONVENTION (important):
+ *   A post's slug is its folder name, minus an optional `YYYY-MM-DD-` ordering
+ *   prefix (`.../blog/2026-01-19-my-post/page.mdx` -> slug `my-post`). The slug
+ *   is the post's PERMANENT public identity: it is the URL (`/blog/<slug>`), the
+ *   RSS guid, the canonical/OpenGraph url, the sitemap entry, and the Giscus
+ *   comment-thread key. Renaming a folder therefore publishes a NEW post and
+ *   orphans the old URL, its comments and its backlinks — so treat a slug as
+ *   immutable once published. Use the date prefix to reorder files on disk
+ *   without changing the slug.
+ *
+ *   Unlike curriculum content, blog posts intentionally have NO `contentId`:
+ *   the folder name is already an author-controlled, title-independent, stable
+ *   identity, and blog posts carry no user progress that a rename could strand.
+ *   A second identity would be redundant. See src/samples/blog/README.md.
+ */
 import fs from 'fs'
 import path from 'path'
 import { upsertBlogPost } from '@/services/blog'
