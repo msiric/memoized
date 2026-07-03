@@ -137,6 +137,7 @@ export const getLessonsSlugs = async () => {
 }
 
 export const upsertCourse = async (
+  contentId: string,
   courseSlug: string,
   courseTitle: string,
   courseDescription: string,
@@ -145,31 +146,27 @@ export const upsertCourse = async (
   courseOrder: number,
   serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
 ) => {
-  const result = await prisma.course.upsert({
-    where: { slug: courseSlug },
-    update: {
-      title: courseTitle,
-      description: courseDescription,
-      body: courseBody,
-      serializedBody: serializedContent,
-      order: courseOrder,
-      href: courseHref,
-    },
-    create: {
-      title: courseTitle,
-      description: courseDescription,
-      body: courseBody,
-      serializedBody: serializedContent,
-      order: courseOrder,
-      slug: courseSlug,
-      href: courseHref,
-    },
-  })
-
-  return result
+  const data = {
+    contentId,
+    title: courseTitle,
+    description: courseDescription,
+    body: courseBody,
+    serializedBody: serializedContent,
+    order: courseOrder,
+    href: courseHref,
+    slug: courseSlug,
+  }
+  const existing =
+    (await prisma.course.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await prisma.course.findUnique({ where: { slug: courseSlug }, select: { id: true } }))
+  if (existing) {
+    return prisma.course.update({ where: { id: existing.id }, data })
+  }
+  return prisma.course.create({ data })
 }
 
 export const upsertSection = async (
+  contentId: string,
   sectionSlug: string,
   sectionTitle: string,
   sectionDescription: string,
@@ -179,37 +176,28 @@ export const upsertSection = async (
   courseId: string,
   serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
 ) => {
-  const result = await prisma.section.upsert({
-    where: { slug: sectionSlug },
-    update: {
-      title: sectionTitle,
-      description: sectionDescription,
-      body: sectionContent,
-      order: sectionOrder,
-      href: sectionHref,
-      courseId: courseId,
-      ...(serializedContent !== undefined && {
-        serializedBody: serializedContent,
-      }),
-    },
-    create: {
-      title: sectionTitle,
-      description: sectionDescription,
-      body: sectionContent,
-      slug: sectionSlug,
-      order: sectionOrder,
-      href: sectionHref,
-      courseId: courseId,
-      ...(serializedContent !== undefined && {
-        serializedBody: serializedContent,
-      }),
-    },
-  })
-
-  return result
+  const data = {
+    contentId,
+    title: sectionTitle,
+    description: sectionDescription,
+    body: sectionContent,
+    slug: sectionSlug,
+    order: sectionOrder,
+    href: sectionHref,
+    courseId,
+    ...(serializedContent !== undefined && { serializedBody: serializedContent }),
+  }
+  const existing =
+    (await prisma.section.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await prisma.section.findUnique({ where: { slug: sectionSlug }, select: { id: true } }))
+  if (existing) {
+    return prisma.section.update({ where: { id: existing.id }, data })
+  }
+  return prisma.section.create({ data })
 }
 
 export const upsertLesson = async (
+  contentId: string,
   lessonSlug: string,
   lessonTitle: string,
   lessonDescription: string,
@@ -220,35 +208,31 @@ export const upsertLesson = async (
   lessonHref: string,
   sectionId: string,
 ) => {
-  const result = await prisma.lesson.upsert({
-    where: { slug: lessonSlug },
-    update: {
-      title: lessonTitle,
-      description: lessonDescription,
-      order: lessonOrder,
-      body: lessonContent,
-      serializedBody: serializedContent,
-      access: lessonAccess,
-      href: lessonHref,
-      sectionId: sectionId,
-    },
-    create: {
-      title: lessonTitle,
-      description: lessonDescription,
-      order: lessonOrder,
-      slug: lessonSlug,
-      body: lessonContent,
-      serializedBody: serializedContent,
-      access: lessonAccess,
-      href: lessonHref,
-      sectionId: sectionId,
-    },
-  })
-
-  return result
+  const data = {
+    contentId,
+    title: lessonTitle,
+    description: lessonDescription,
+    order: lessonOrder,
+    slug: lessonSlug,
+    body: lessonContent,
+    serializedBody: serializedContent,
+    access: lessonAccess,
+    href: lessonHref,
+    sectionId,
+  }
+  // Match on stable contentId; fall back to legacy slug for rows synced before
+  // contentId existed. Update by row id so UserLessonProgress FKs survive a rename.
+  const existing =
+    (await prisma.lesson.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await prisma.lesson.findUnique({ where: { slug: lessonSlug }, select: { id: true } }))
+  if (existing) {
+    return prisma.lesson.update({ where: { id: existing.id }, data })
+  }
+  return prisma.lesson.create({ data })
 }
 
 export const upsertProblem = async (
+  contentId: string,
   problemSlug: string,
   problemHref: string,
   problemLink: string,
@@ -260,34 +244,32 @@ export const upsertProblem = async (
   lessonId: string,
   serializedAnswer?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
 ) => {
-  const result = await prisma.problem.upsert({
-    where: { slug: problemSlug },
-    update: {
-      href: problemHref,
-      link: problemLink,
-      title: problemTitle,
-      lessonId: lessonId,
-      difficulty: problemDifficulty,
-      question: problemQuestion,
-      answer: problemAnswer,
-      type: problemType,
-      serializedAnswer: serializedAnswer,
-    },
-    create: {
-      title: problemTitle,
-      slug: problemSlug,
-      href: problemHref,
-      link: problemLink,
-      lessonId: lessonId,
-      difficulty: problemDifficulty,
-      question: problemQuestion,
-      answer: problemAnswer,
-      type: problemType,
-      serializedAnswer: serializedAnswer,
-    },
-  })
+  const data = {
+    contentId,
+    href: problemHref,
+    link: problemLink,
+    title: problemTitle,
+    slug: problemSlug,
+    lessonId,
+    difficulty: problemDifficulty,
+    question: problemQuestion,
+    answer: problemAnswer,
+    type: problemType,
+    serializedAnswer,
+  }
 
-  return result
+  // Identify the row by its stable contentId; fall back to the legacy slug for
+  // rows synced before contentId existed (they get contentId set on this pass).
+  // Updating by the row's own id keeps it stable, so every UserProblemProgress
+  // FK survives even when the title/slug changes — no orphan, no cascade.
+  const existing =
+    (await prisma.problem.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await prisma.problem.findUnique({ where: { slug: problemSlug }, select: { id: true } }))
+
+  if (existing) {
+    return prisma.problem.update({ where: { id: existing.id }, data })
+  }
+  return prisma.problem.create({ data })
 }
 
 export const getLessonsAndProblems = async () => {

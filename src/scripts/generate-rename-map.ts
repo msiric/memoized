@@ -81,8 +81,10 @@ function main() {
   console.log(`new-slug collisions: ${collisions}`)
   console.log(`FLAGGED for human review (low title overlap — likely replacements, not renames): ${needsReview}`)
   console.log(`wrote ${out}`)
-  console.log(`\nNEXT: review ${out}, delete any entry that is a replacement (not a rename),`)
-  console.log(`then dry-run: tsx src/scripts/migrate-renamed-problems.ts`)
+  console.log(`\nNOTE: this position-aligned map is a DIAGNOSTIC only — it mis-pairs`)
+  console.log(`restructured lessons and must not drive a prod migration on its own.`)
+  console.log(`NEXT: run inventory-prod-progress.ts to find progress-bearing renames,`)
+  console.log(`content-verify them, then reconcile via reconcile-progress-renames.ts.`)
 }
 
 main()

@@ -218,7 +218,8 @@ describe('Sync Content Script - JSON Structure', () => {
 
       // Verify course was processed with serialized content
       expect(upsertCourse).toHaveBeenCalledWith(
-        'test-course',
+        'test-course', // contentId (course folder id)
+        'test-course', // slug
         'Test Course',
         'Test course description',
         '# Test Content\n\nThis is test content.', // original content
@@ -232,7 +233,8 @@ describe('Sync Content Script - JSON Structure', () => {
 
       // Verify section was processed with serialized content
       expect(upsertSection).toHaveBeenCalledWith(
-        'test-section',
+        'test-coursetest-section', // contentId (courseId + sectionId)
+        'test-section', // slug
         'Test Section',
         'Test section description',
         '# Test Content\n\nThis is test content.', // original content
@@ -247,7 +249,8 @@ describe('Sync Content Script - JSON Structure', () => {
 
       // Verify lesson was processed with serialized content
       expect(upsertLesson).toHaveBeenCalledWith(
-        'test-lesson',
+        'test-coursetest-sectiontest-lesson', // contentId (courseId + sectionId + lessonId)
+        'test-lesson', // slug
         'Test Lesson',
         'Test Description',
         '# Test Content\n\nThis is test content.', // original content
@@ -301,6 +304,7 @@ describe('Sync Content Script - JSON Structure', () => {
 
       // Verify that courses, sections, and lessons are called with serialized content
       expect(upsertCourse).toHaveBeenCalledWith(
+        expect.any(String), // contentId
         expect.any(String),
         expect.any(String),
         expect.any(String),
@@ -314,6 +318,7 @@ describe('Sync Content Script - JSON Structure', () => {
       )
 
       expect(upsertSection).toHaveBeenCalledWith(
+        expect.any(String), // contentId
         expect.any(String),
         expect.any(String),
         expect.any(String),
@@ -328,6 +333,7 @@ describe('Sync Content Script - JSON Structure', () => {
       )
 
       expect(upsertLesson).toHaveBeenCalledWith(
+        expect.any(String), // contentId
         expect.any(String),
         expect.any(String),
         expect.any(String),
@@ -353,6 +359,7 @@ describe('Sync Content Script - JSON Structure', () => {
 
       // Verify upsertProblem was called (the default test data has a problem with answer)
       expect(upsertProblem).toHaveBeenCalledWith(
+        'test-coursetest-sectiontest-lesson/test-problem', // contentId (lesson contentId + problem id/slug)
         'test-problem', // slug
         'https://example.com', // href
         expect.stringContaining('#test-problem'), // link
@@ -378,6 +385,7 @@ describe('Sync Content Script - JSON Structure', () => {
       // (This tests our schema and function signature compatibility)
       await expect(async () => {
         await upsertProblem(
+          'test-lesson-contentid/empty-problem', // contentId
           'empty-problem',
           '',
           '/test-link#empty-problem',

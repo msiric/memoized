@@ -51,7 +51,7 @@ async function serializeMdxContent(content: string, filePath?: string) {
     console.error('File path:', filePath || 'Unknown')
 
     if (isProduction()) {
-      const { reportMdxError } = await import('@/lib/error-tracking')
+      const { reportMdxError } = await import('@/lib/sentry')
       reportMdxError(
         error instanceof Error ? error : new Error(String(error)),
         {
@@ -183,8 +183,10 @@ async function syncWithJsonStructure(contentInfo: {
     )
 
     const courseOrderValue = courseOrder++
+    const courseContentId = courseId
 
     const courseRecord = await upsertCourse(
+      courseContentId,
       courseSlug,
       courseTitle,
       courseDescription,
@@ -204,6 +206,7 @@ async function syncWithJsonStructure(contentInfo: {
         href: sectionHref,
       } = section
       const sectionSlug = slugify(sectionTitle, SLUGIFY_OPTIONS)
+      const sectionContentId = `${courseId}${sectionId}`
       const sectionPath = path.join(contentInfo.path, courseId, sectionId)
       const sectionFilePath = path.join(sectionPath, 'page.mdx')
 
@@ -221,6 +224,7 @@ async function syncWithJsonStructure(contentInfo: {
       const sectionOrderValue = sectionOrder++
 
       const sectionRecord = await upsertSection(
+        sectionContentId,
         sectionSlug,
         sectionTitle,
         sectionDescription,
@@ -238,6 +242,7 @@ async function syncWithJsonStructure(contentInfo: {
 
       for (const lesson of detailedLessons) {
         const lessonSlug = slugify(lesson.title, SLUGIFY_OPTIONS)
+        const lessonContentId = `${courseId}${sectionId}${lesson.id}`
         const lessonPath = path.join(sectionPath, lesson.id, 'page.mdx')
 
         if (!fs.existsSync(lessonPath)) {
@@ -258,6 +263,7 @@ async function syncWithJsonStructure(contentInfo: {
         const lessonOrderValue = lessonOrder++
 
         const lessonRecord = await upsertLesson(
+          lessonContentId,
           lessonSlug,
           lesson.title,
           lesson.description,
@@ -278,6 +284,7 @@ async function syncWithJsonStructure(contentInfo: {
         if (lesson.problems && lesson.problems.length > 0) {
           for (const problem of lesson.problems) {
             const problemSlug = slugify(problem.title, SLUGIFY_OPTIONS)
+            const problemContentId = `${lessonContentId}/${problem.id || problemSlug}`
             const problemLink = `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}/${lessonSlug}#${problemSlug}`
 
             // Serialize problem answer at build time for better performance
@@ -287,6 +294,7 @@ async function syncWithJsonStructure(contentInfo: {
                 : null
 
             await upsertProblem(
+              problemContentId,
               problemSlug,
               problem.href || '',
               problemLink,

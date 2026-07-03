@@ -126,7 +126,7 @@ async function serializeMdxContent(content: string, filePath?: string) {
     console.error('File path:', filePath || 'Unknown')
 
     if (isProduction()) {
-      const { reportMdxError } = await import('@/lib/error-tracking')
+      const { reportMdxError } = await import('@/lib/sentry')
       reportMdxError(
         error instanceof Error ? error : new Error(String(error)),
         {
@@ -181,13 +181,16 @@ async function syncLessonAssociatedResources(): Promise<void> {
           // We need to get the lesson ID from the database to associate resources with it
           // For now, we'll use the lesson slug to find the lesson
           const lessonSlug = slugify(lesson.title, SLUGIFY_OPTIONS)
+          const lessonContentId = `${course.id}${section.id}${lesson.id}`
 
-          // Get lesson from database to get its ID
-          const lessonRecord = await prisma.lesson.findFirst({
-            where: {
-              slug: lessonSlug,
-            },
-          })
+          // Find the lesson by its stable contentId (fall back to legacy slug) to get its ID
+          const lessonRecord =
+            (await prisma.lesson.findUnique({
+              where: { contentId: lessonContentId },
+            })) ??
+            (await prisma.lesson.findFirst({
+              where: { slug: lessonSlug },
+            }))
 
           if (!lessonRecord) {
             console.warn(`⚠️ Lesson not found in database: ${lessonSlug}`)
@@ -221,6 +224,7 @@ async function syncLessonAssociatedResources(): Promise<void> {
             }
 
             await upsertResource(
+              resourceId,
               resourceSlug,
               resourceTitle,
               resourceDescription,
@@ -259,6 +263,7 @@ export async function syncResources(): Promise<void> {
       )
 
       await upsertResource(
+        'intro', // contentId (stable — the resource folder id)
         'intro', // slug
         'Resources', // title
         'Enhance Your Learning Journey', // description

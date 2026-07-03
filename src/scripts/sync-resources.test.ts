@@ -47,7 +47,7 @@ vi.mock('../utils/helpers', () => ({
   isProduction: vi.fn(),
 }))
 
-vi.mock('@/lib/error-tracking', () => ({
+vi.mock('@/lib/sentry', () => ({
   reportMdxError: vi.fn(),
 }))
 
@@ -111,7 +111,8 @@ describe('sync-resources.ts', () => {
       await syncResources()
 
       expect(upsertResource).toHaveBeenCalledWith(
-        'intro',
+        'intro', // contentId (resource folder id)
+        'intro', // slug
         'Resources',
         'Enhance Your Learning Journey',
         '# Resources\n\nIntro content',
@@ -144,7 +145,7 @@ describe('sync-resources.ts', () => {
       const fs = (await import('fs')).default
       const { serialize } = await import('next-mdx-remote-client/serialize')
       const { isProduction } = await import('../utils/helpers')
-      const { reportMdxError } = await import('@/lib/error-tracking')
+      const { reportMdxError } = await import('@/lib/sentry')
       const prisma = (await import('@/lib/prisma')).default
 
       // Explicitly clear and reset fs.existsSync mock to ensure clean state
@@ -262,7 +263,8 @@ describe('sync-resources.ts', () => {
 
       // Should still call upsertResource but with null serializedBody
       expect(upsertResource).toHaveBeenCalledWith(
-        'intro',
+        'intro', // contentId (resource folder id)
+        'intro', // slug
         'Resources',
         'Enhance Your Learning Journey',
         '   ',

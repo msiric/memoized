@@ -20,6 +20,7 @@ export const getResourceBySlug = async (resourceSlug: string) => {
 }
 
 export const upsertResource = async (
+  contentId: string,
   resourceSlug: string,
   resourceTitle: string,
   resourceDescription: string,
@@ -30,36 +31,25 @@ export const upsertResource = async (
   lessonId: string | null,
   serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
 ) => {
-  const result = await prisma.resource.upsert({
-    where: { slug: resourceSlug },
-    update: {
-      title: resourceTitle,
-      description: resourceDescription,
-      order: resourceOrder,
-      body: resourceContent,
-      href: resourceHref,
-      access: lessonAccess,
-      lessonId: lessonId,
-      ...(serializedContent !== undefined && {
-        serializedBody: serializedContent,
-      }),
-    },
-    create: {
-      title: resourceTitle,
-      description: resourceDescription,
-      order: resourceOrder,
-      slug: resourceSlug,
-      body: resourceContent,
-      href: resourceHref,
-      access: lessonAccess,
-      lessonId: lessonId,
-      ...(serializedContent !== undefined && {
-        serializedBody: serializedContent,
-      }),
-    },
-  })
-
-  return result
+  const data = {
+    contentId,
+    title: resourceTitle,
+    description: resourceDescription,
+    order: resourceOrder,
+    slug: resourceSlug,
+    body: resourceContent,
+    href: resourceHref,
+    access: lessonAccess,
+    lessonId,
+    ...(serializedContent !== undefined && { serializedBody: serializedContent }),
+  }
+  const existing =
+    (await prisma.resource.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await prisma.resource.findUnique({ where: { slug: resourceSlug }, select: { id: true } }))
+  if (existing) {
+    return prisma.resource.update({ where: { id: existing.id }, data })
+  }
+  return prisma.resource.create({ data })
 }
 
 export const getResources = async () => {

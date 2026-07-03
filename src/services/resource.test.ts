@@ -18,7 +18,12 @@ vi.mock('@/lib/prisma', () => {
   return {
     ...actualPrisma,
     default: {
-      resource: { findUnique: vi.fn(), upsert: vi.fn(), findMany: vi.fn() },
+      resource: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+        create: vi.fn(),
+        findMany: vi.fn(),
+      },
     },
   }
 })
@@ -61,16 +66,12 @@ describe('Resource services', () => {
   })
 
   describe('upsertResource', () => {
-    it('should upsert a resource', async () => {
-      const mockResource = {
-        id: '1',
-        slug: 'resource-slug',
-        title: 'Resource Title',
-        access: AccessOptions.FREE,
-      }
-      ;(prisma.resource.upsert as Mock).mockResolvedValue(mockResource)
+    it('creates a new resource when no row matches contentId or slug', async () => {
+      ;(prisma.resource.findUnique as Mock).mockResolvedValue(null)
+      ;(prisma.resource.create as Mock).mockResolvedValue({ id: '1' })
 
-      const resource = await upsertResource(
+      await upsertResource(
+        'closures',
         'resource-slug',
         'Resource Title',
         'Resource Description',
@@ -81,20 +82,13 @@ describe('Resource services', () => {
         '1',
         { compiledSource: 'compiled' } as any,
       )
-      expect(resource).toEqual(mockResource)
-      expect(prisma.resource.upsert).toHaveBeenCalledWith({
-        where: { slug: 'resource-slug' },
-        update: {
-          title: 'Resource Title',
-          description: 'Resource Description',
-          order: 1,
-          body: 'Resource Content',
-          href: 'resource-href',
-          access: AccessOptions.FREE,
-          lessonId: '1',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-        create: {
+      expect(prisma.resource.findUnique).toHaveBeenCalledWith({
+        where: { contentId: 'closures' },
+        select: { id: true },
+      })
+      expect(prisma.resource.create).toHaveBeenCalledWith({
+        data: {
+          contentId: 'closures',
           title: 'Resource Title',
           description: 'Resource Description',
           order: 1,
@@ -106,6 +100,30 @@ describe('Resource services', () => {
           serializedBody: { compiledSource: 'compiled' },
         },
       })
+      expect(prisma.resource.update).not.toHaveBeenCalled()
+    })
+
+    it('updates the existing row by id when contentId matches (rename-safe)', async () => {
+      ;(prisma.resource.findUnique as Mock).mockResolvedValueOnce({ id: 'existing' })
+      ;(prisma.resource.update as Mock).mockResolvedValue({ id: 'existing' })
+
+      await upsertResource(
+        'closures',
+        'renamed-slug',
+        'Resource Title',
+        'Resource Description',
+        'Resource Content',
+        1,
+        'resource-href',
+        AccessOptions.FREE,
+        '1',
+        { compiledSource: 'compiled' } as any,
+      )
+      expect(prisma.resource.update).toHaveBeenCalledWith({
+        where: { id: 'existing' },
+        data: expect.objectContaining({ contentId: 'closures', slug: 'renamed-slug' }),
+      })
+      expect(prisma.resource.create).not.toHaveBeenCalled()
     })
   })
 

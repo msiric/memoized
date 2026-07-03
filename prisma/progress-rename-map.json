@@ -1,0 +1,195 @@
+{
+  "note": "Human-verified progress reconciliation map. Supersedes problem-rename-map.json for progress-bearing renames.",
+  "renames": [
+    {
+      "oldSlug": "understanding-event-loops",
+      "newSlug": "the-event-loop",
+      "kind": "MOVE",
+      "users": 4
+    },
+    {
+      "oldSlug": "v8-engine-execution-process",
+      "newSlug": "v8-execution-pipeline-4-tiers",
+      "kind": "RENAME",
+      "users": 3
+    },
+    {
+      "oldSlug": "garbage-collector-overview",
+      "newSlug": "garbage-collection-algorithms",
+      "kind": "MOVE",
+      "users": 2
+    },
+    {
+      "oldSlug": "understanding-variable-scope",
+      "newSlug": "variable-options-var-vs-let-vs-const",
+      "kind": "MOVE",
+      "users": 2
+    },
+    {
+      "oldSlug": "understanding-hidden-classes",
+      "newSlug": "hidden-classes-explained",
+      "kind": "RENAME",
+      "users": 2
+    },
+    {
+      "oldSlug": "commonjs-vs-es6-modules",
+      "newSlug": "commonjs-vs-es-modules",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "defining-and-using-tuples",
+      "newSlug": "tuples-and-readonly-tuples",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "differences-between-primitive-and-objects",
+      "newSlug": "primitives-vs-objects",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "improving-asynchronous-programming",
+      "newSlug": "how-promises-improve-on-callbacks",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "sequential-vs-parallel-execution",
+      "newSlug": "sequential-vs-parallel-execution-with-async-await",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "simplifying-promise-handling",
+      "newSlug": "how-async-await-simplifies-promise-handling",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "temporal-dead-zone-limitation",
+      "newSlug": "temporal-dead-zone-tdz",
+      "kind": "MOVE",
+      "users": 1
+    },
+    {
+      "oldSlug": "understanding-variable-shadowing",
+      "newSlug": "variable-shadowing",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "using-symbols-to-avoid-collisions",
+      "newSlug": "symbols-as-collision-safe-property-keys",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "accessing-object-properties",
+      "newSlug": "enumerating-symbol-properties",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "callback-hell-pitfalls",
+      "newSlug": "callback-hell-and-escape-patterns",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "type-guard-functions-in-typescript",
+      "newSlug": "type-guards-vs-type-assertions",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "typescript-advantages-over-javascript",
+      "newSlug": "why-typescript-the-value-proposition",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "arrow-function-and-context",
+      "newSlug": "why-arrow-functions-have-no-own-this",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "understanding-memory-leaks-in-js",
+      "newSlug": "common-memory-leak-patterns-in-javascript",
+      "kind": "MOVE",
+      "users": 1
+    },
+    {
+      "oldSlug": "differences-in-utility-types",
+      "newSlug": "picklesst-kgreater-omitlesst-kgreater-and-recordlessk-tgreater",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "purpose-of-async-keyword",
+      "newSlug": "async-await-semantics-desugaring-the-wrapper-promise",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "typescript-decorator-tutorial",
+      "newSlug": "method-decorators-wrapping-behavior",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "javascript-function-invocation-methods",
+      "newSlug": "this-binding-rules",
+      "kind": "MOVE",
+      "users": 1
+    },
+    {
+      "oldSlug": "understanding-call-stack-vs-queues",
+      "newSlug": "task-queue-vs-microtask-queue",
+      "kind": "MOVE",
+      "users": 3
+    },
+    {
+      "oldSlug": "type-inference-basics",
+      "newSlug": "how-typescript-infers-types-variables-returns-and-widening",
+      "kind": "MOVE",
+      "users": 1
+    },
+    {
+      "oldSlug": "awaiting-inside-loops",
+      "newSlug": "await-in-loops-the-foreach-trap-the-parallel-map-pattern",
+      "kind": "RENAME",
+      "users": 1
+    },
+    {
+      "oldSlug": "custom-transformers-in-typescript",
+      "newSlug": "the-compiler-api-building-custom-typescript-tools",
+      "kind": "RENAME",
+      "users": 1
+    }
+  ],
+  "merges": [
+    {
+      "oldSlugs": [
+        "differences-in-promise-methods",
+        "promise-comparison-methods"
+      ],
+      "newSlug": "promise-combinator-methods"
+    },
+    {
+      "oldSlugs": [
+        "typescript-discriminated-unions-benefits",
+        "what-are-discriminated-unions"
+      ],
+      "newSlug": "discriminated-unions-the-tagged-variant-pattern"
+    }
+  ],
+  "removed": [
+    {
+      "oldSlug": "purpose-of-debugger-statement",
+      "reason": "no current equivalent (standalone debugger-statement problem dropped; /error-handling has no debugging problem)"
+    }
+  ]
+}
