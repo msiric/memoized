@@ -1,0 +1,12 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Block admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+
+# Sitemaps
+Sitemap: https://www.memoized.io/sitemap.xml
+Sitemap: https://www.memoized.io/blog/sitemap.xml

@@ -1,0 +1,323 @@
+/*
+ * Giscus Theme - Memoized Blog
+ * 
+ * Custom theme matching the Memoized zinc color palette with lime accents.
+ * Overrides Giscus Primer dark theme with consistent border-radius and colors.
+ */
+
+/* ==========================================================================
+   1. DESIGN TOKENS
+   ========================================================================== */
+
+main {
+  /* ----- Custom Memoized Tokens ----- */
+  --memoized-radius: 1rem;
+  --memoized-radius-none: 0;
+
+  /* ----- Zinc Palette ----- */
+  --zinc-50: rgb(250 250 250);
+  --zinc-100: rgb(244 244 245);
+  --zinc-300: rgb(212 212 216);
+  --zinc-400: rgb(161 161 170);
+  --zinc-500: rgb(113 113 122);
+  --zinc-600: rgb(82 82 91);
+  --zinc-700: rgb(63 63 70);
+  --zinc-800: rgb(39 39 42);
+  --zinc-900: rgb(24 24 27);
+  --zinc-950: rgb(9 9 11);
+
+  /* ----- Lime Palette (Brand Accent) ----- */
+  --lime-400: rgb(163 230 53);
+  --lime-500: rgb(132 204 22);
+
+  /* ----- Status Colors ----- */
+  --red-400: rgb(248 113 113);
+  --green-400: rgb(74 222 128);
+
+  /* ==========================================================================
+     2. GISCUS COLOR VARIABLES (Primer Overrides)
+     ========================================================================== */
+
+  /* Canvas / Backgrounds */
+  --color-canvas-default: var(--zinc-900);
+  --color-canvas-overlay: var(--zinc-900);
+  --color-canvas-inset: var(--zinc-800);
+  --color-canvas-subtle: var(--zinc-900);
+
+  /* Borders */
+  --color-border-default: var(--zinc-800);
+  --color-border-muted: var(--zinc-800);
+
+  /* Box/Card Borders */
+  --color-accent-muted: var(--zinc-800);
+  --color-box-border-info: var(--zinc-800);
+
+  /* Text */
+  --color-fg-default: rgb(255 255 255);
+  --color-fg-muted: var(--zinc-400);
+  --color-fg-subtle: var(--zinc-500);
+
+  /* Links / Accent */
+  --color-accent-fg: var(--zinc-500);
+  --color-accent-emphasis: var(--zinc-500);
+
+  /* Secondary Buttons */
+  --color-btn-text: var(--zinc-100);
+  --color-btn-bg: var(--zinc-800);
+  --color-btn-border: var(--zinc-700);
+  --color-btn-hover-bg: var(--zinc-700);
+  --color-btn-hover-border: var(--zinc-600);
+  --color-btn-shadow: 0 0 transparent;
+  --color-btn-inset-shadow: 0 0 transparent;
+
+  /* Primary Buttons (Lime) */
+  --color-btn-primary-text: var(--zinc-900);
+  --color-btn-primary-bg: var(--lime-500);
+  --color-btn-primary-border: var(--lime-500);
+  --color-btn-primary-hover-bg: var(--lime-400);
+  --color-btn-primary-hover-border: var(--lime-400);
+  --color-btn-primary-shadow: 0 0 transparent;
+  --color-btn-primary-inset-shadow: 0 0 transparent;
+
+  /* Primary Buttons - Disabled State */
+  --color-btn-primary-disabled-text: var(--zinc-500);
+  --color-btn-primary-disabled-bg: transparent;
+  --color-btn-primary-disabled-border: var(--zinc-700);
+
+  /* Neutral / Scale Colors (Used internally by Giscus) */
+  --color-neutral-muted: rgba(113, 113, 122, 0.4);
+  --color-scale-gray-1: var(--zinc-800);
+  --color-scale-gray-7: var(--zinc-800);
+  --color-scale-blue-1: var(--zinc-800);
+  --color-scale-blue-8: rgba(63, 63, 70, 0.5);
+
+  /* Reactions */
+  --color-social-reaction-bg-hover: var(--zinc-800);
+  --color-social-reaction-bg-reacted-hover: var(--zinc-700);
+
+  /* Status */
+  --color-danger-fg: var(--red-400);
+  --color-success-fg: var(--green-400);
+}
+
+/* ==========================================================================
+   3. TYPOGRAPHY OVERRIDES
+   ========================================================================== */
+
+/* Main container */
+.gsc-main {
+  color: var(--color-fg-default);
+}
+
+/* Header links */
+.gsc-reactions-count a,
+.gsc-left-header h4 a {
+  color: var(--zinc-400) !important;
+}
+
+.gsc-left-header em,
+.gsc-left-header em a {
+  color: var(--zinc-500) !important;
+}
+
+/* Comment content */
+.gsc-comment-content {
+  color: var(--zinc-300) !important;
+}
+
+/* Replies count */
+.gsc-comment-replies-count {
+  color: var(--zinc-500) !important;
+}
+
+/* Footer links */
+.gsc-comment-box-bottom a:not(.btn-primary) {
+  color: var(--zinc-500) !important;
+}
+
+/* ==========================================================================
+   4. MARKDOWN CONTENT
+   ========================================================================== */
+
+.markdown {
+  color: var(--zinc-300) !important;
+}
+
+.markdown a {
+  color: var(--zinc-100) !important;
+}
+
+.markdown code {
+  background: var(--zinc-800) !important;
+  color: var(--zinc-100) !important;
+}
+
+.markdown pre {
+  background: var(--zinc-950) !important;
+  border-color: var(--zinc-800) !important;
+}
+
+.markdown blockquote {
+  border-left-color: var(--zinc-700) !important;
+  color: var(--zinc-400) !important;
+}
+
+/* ==========================================================================
+   5. BORDER-RADIUS OVERRIDES
+   ========================================================================== */
+
+/* Full radius - main containers */
+.btn,
+.gsc-comment,
+.gsc-comment > div,
+.gsc-comment-box,
+.gsc-comment-box-write,
+.gsc-comment-box-buttons button,
+.gsc-pagination-button,
+.gsc-reactions-popover,
+.gsc-right-header.BtnGroup,
+.BtnGroup-item,
+.gsc-reply-box > button,
+.Box,
+.Box-header,
+.flash,
+.markdown pre,
+.markdown .highlight pre,
+.blob-wrapper,
+.BtnGroup-item .btn:hover {
+  border-radius: var(--memoized-radius) !important;
+}
+
+/* Top corners only */
+.gsc-comment-box-tabs,
+.gsc-comment-box-tabs button,
+.gsc-comment-box-textarea,
+.gsc-comment-content {
+  border-start-start-radius: var(--memoized-radius) !important;
+  border-start-end-radius: var(--memoized-radius) !important;
+}
+
+/* Bottom corners only */
+.gsc-comment-box-textarea-extras,
+.gsc-reply-box {
+  border-end-start-radius: var(--memoized-radius) !important;
+  border-end-end-radius: var(--memoized-radius) !important;
+}
+
+/* No radius - elements that connect to siblings */
+.gsc-replies {
+  border-end-start-radius: var(--memoized-radius-none) !important;
+  border-end-end-radius: var(--memoized-radius-none) !important;
+}
+
+/* ==========================================================================
+   6. BACKGROUND OVERRIDES
+   ========================================================================== */
+
+.gsc-comment-box-textarea-extras,
+.gsc-replies {
+  background-color: transparent !important;
+}
+
+/* ==========================================================================
+   7. INPUT STYLING (Consistent with Newsletter input)
+   ========================================================================== */
+
+/* Textarea and reply input - match newsletter input styling */
+.gsc-comment-box-textarea,
+.gsc-reply-box > button {
+  border-color: var(--zinc-700) !important;
+  background-color: var(--zinc-800) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
+}
+
+.gsc-comment-box-textarea::placeholder,
+.gsc-reply-box > button::placeholder,
+.gsc-reply-box input[type="text"]::placeholder {
+  color: var(--zinc-500) !important;
+  font-size: 0.875rem !important;
+}
+
+/* ==========================================================================
+   8. INTERACTIVE STATES
+   ========================================================================== */
+
+/* Reacted reaction button - lime border */
+.gsc-social-reaction-summary-item.has-reacted {
+  border-color: var(--lime-500) !important;
+}
+
+/* Focus states - lime ring, no border (matches newsletter input) */
+.gsc-comment-box-write:focus-within {
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--lime-500) !important;
+}
+
+/* Reply input focus */
+.gsc-reply-box > button:focus,
+.gsc-reply-box > button:focus-within {
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--lime-500) !important;
+}
+
+/* ==========================================================================
+   9. ACTION BUTTONS (Matches Newsletter Subscribe button)
+   ========================================================================== */
+
+/* Primary Button - Lime (matches Subscribe button in dark mode) */
+.gsc-comment-box-buttons .btn-primary {
+  background-color: var(--lime-500) !important;
+  border-color: var(--lime-500) !important;
+  color: var(--zinc-900) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: background-color 0.15s, border-color 0.15s !important;
+}
+
+.gsc-comment-box-buttons .btn-primary:hover {
+  background-color: var(--lime-400) !important;
+  border-color: var(--lime-400) !important;
+}
+
+.gsc-comment-box-buttons .btn-primary:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--lime-500) !important;
+}
+
+.gsc-comment-box-buttons .btn-primary:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: var(--lime-500) !important;
+  border-color: var(--lime-500) !important;
+}
+
+/* Secondary Button - Zinc neutral */
+.gsc-comment-box-buttons .btn:not(.btn-primary) {
+  background-color: var(--zinc-800) !important;
+  border-color: var(--zinc-700) !important;
+  color: var(--zinc-100) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: background-color 0.15s, border-color 0.15s !important;
+}
+
+.gsc-comment-box-buttons .btn:not(.btn-primary):hover {
+  background-color: var(--zinc-700) !important;
+  border-color: var(--zinc-600) !important;
+}
+
+.gsc-comment-box-buttons .btn:not(.btn-primary):focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--zinc-500) !important;
+}
+
+/* ==========================================================================
+   10. LOADING STATE
+   ========================================================================== */
+
+.gsc-loading-image {
+  background-image: url("https://github.githubassets.com/images/mona-loading-dimmed.gif") !important;
+}

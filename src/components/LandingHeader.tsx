@@ -1,5 +1,6 @@
 import { Logo } from '@/components/Logo'
 import { GitHubIcon } from './icons'
+import { BLOG_PREFIX } from '@/constants'
 
 export const LandingHeader = () => {
   return (
@@ -13,8 +14,25 @@ export const LandingHeader = () => {
           <Logo className="h-6 sm:h-7 lg:h-8 transition-all duration-200 group-hover:opacity-80" />
         </a>
       </div>
+
+      {/* Navigation Links */}
+      <nav className="hidden items-center gap-8 sm:flex">
+        <a
+          href={BLOG_PREFIX}
+          className="text-sm font-medium text-zinc-700 transition-colors duration-200 hover:text-lime-600 dark:text-zinc-300 dark:hover:text-lime-400"
+        >
+          Blog
+        </a>
+      </nav>
       
       <div className="relative flex basis-0 items-center justify-end gap-6 md:flex-grow">
+        {/* Mobile Blog Link */}
+        <a
+          href={BLOG_PREFIX}
+          className="text-sm font-medium text-zinc-700 transition-colors duration-200 hover:text-lime-600 sm:hidden dark:text-zinc-300 dark:hover:text-lime-400"
+        >
+          Blog
+        </a>
         <a
           className="group flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 transition-all duration-200 hover:bg-zinc-200 hover:scale-105 dark:bg-zinc-800 dark:hover:bg-zinc-700"
           aria-label="GitHub"
