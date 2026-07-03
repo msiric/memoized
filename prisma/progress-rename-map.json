@@ -14,12 +14,6 @@
       "users": 3
     },
     {
-      "oldSlug": "garbage-collector-overview",
-      "newSlug": "garbage-collection-algorithms",
-      "kind": "MOVE",
-      "users": 2
-    },
-    {
       "oldSlug": "understanding-variable-scope",
       "newSlug": "variable-options-var-vs-let-vs-const",
       "kind": "MOVE",
@@ -190,6 +184,10 @@
     {
       "oldSlug": "purpose-of-debugger-statement",
       "reason": "no current equivalent (standalone debugger-statement problem dropped; /error-handling has no debugging problem)"
+    },
+    {
+      "oldSlug": "garbage-collector-overview",
+      "reason": "distinct problem: garbage-collection-algorithms (mark-sweep vs ref-counting) pre-existed in prod and remains; the GC-overview problem was removed with no successor"
     }
   ]
 }
