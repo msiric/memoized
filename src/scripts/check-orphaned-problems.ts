@@ -70,7 +70,7 @@ async function main() {
   if (total > allow) {
     console.error(`\n❌ ${total} DB rows have no matching contentId or slug in current content — syncing now would orphan them.\n`)
     for (const [k, o] of found) o.slice(0, 15).forEach((r) => console.error(`   ${k}: ${r.slug} ("${r.title}")`))
-    console.error(`\n   Reconcile: tsx src/scripts/backfill-content-id.ts --apply   (or --allow ${total} for intentional removals).`)
+    console.error(`\n   These are genuine removals or an edited \`id\`. The sync pipeline prunes removals automatically (yarn prune:content); if any is an accidental id change that would strand progress, fix the id in the content instead. Pass --allow ${total} to acknowledge intentional removals here.`)
     process.exit(1)
   }
   console.log('✅ No unexpected orphans. Safe to sync.')
