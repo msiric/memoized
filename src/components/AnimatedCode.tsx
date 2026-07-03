@@ -77,7 +77,7 @@ export const AnimatedCode = ({
           </div>
         </div>
       </div>
-      <div className="mt-6 flex items-start px-1 text-sm">
+      <div className="mt-6 flex min-h-[18rem] items-start px-1 text-sm sm:min-h-[22rem]">
         <div className="w-full">
           {highlighter ? (
             <>
