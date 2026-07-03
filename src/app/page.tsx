@@ -73,22 +73,20 @@ const EXTENSION = 'js'
 
 const CODE_SNIPPETS = [
   {
-    code: `function mergeIntervals(intervals) {
-  if (!intervals.length) return intervals;
-  intervals.sort((a, b) => a[0] - b[0]);
-  let result = [intervals[0]];
-  for (let i = 1; i < intervals.length; i++) {
-    let prev = result[result.length - 1];
-    let curr = intervals[i];
-    if (prev[1] >= curr[0]) {
-      prev[1] = Math.max(prev[1], curr[1]);
-    } else {
-      result.push(curr);
-    }
+    code: `function debounce(fn, delay) {
+  let timeoutId;
+  function debounced(...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn.apply(this, args);
+    }, delay);
   }
-  return result;
+  debounced.cancel = () => {
+    clearTimeout(timeoutId);
+  };
+  return debounced;
 }`,
-    tab: `merge-intervals.${EXTENSION}`,
+    tab: `debounce.${EXTENSION}`,
   },
   {
     code: `function binarySearch(arr, target) {
@@ -109,6 +107,56 @@ const CODE_SNIPPETS = [
     tab: `binary-search.${EXTENSION}`,
   },
   {
+    code: `function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);
+    }
+    return function (...more) {
+      return curried.apply(
+        this,
+        [...args, ...more],
+      );
+    };
+  };
+}`,
+    tab: `curry.${EXTENSION}`,
+  },
+  {
+    code: `function mergeIntervals(intervals) {
+  if (!intervals.length) return intervals;
+  intervals.sort((a, b) => a[0] - b[0]);
+  let result = [intervals[0]];
+  for (let i = 1; i < intervals.length; i++) {
+    let prev = result[result.length - 1];
+    let curr = intervals[i];
+    if (prev[1] >= curr[0]) {
+      prev[1] = Math.max(prev[1], curr[1]);
+    } else {
+      result.push(curr);
+    }
+  }
+  return result;
+}`,
+    tab: `merge-intervals.${EXTENSION}`,
+  },
+  {
+    code: `function deepClone(value) {
+  if (value === null || typeof value !== 'object') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(deepClone);
+  }
+  const clone = {};
+  for (const key of Object.keys(value)) {
+    clone[key] = deepClone(value[key]);
+  }
+  return clone;
+}`,
+    tab: `deep-clone.${EXTENSION}`,
+  },
+  {
     code: `function quickSort(arr) {
   if (arr.length <= 1) return arr;
   let pivot = arr[arr.length - 1];
@@ -127,76 +175,20 @@ const CODE_SNIPPETS = [
     tab: `quick-sort.${EXTENSION}`,
   },
   {
-    code: `function maxSubarraySum(arr, k) {
-  if (arr.length < k) {
-    return null;
-  }
-  let maxSum = 0;
-  for (let i = 0; i < k; i++) {
-    maxSum += arr[i];
-  }
-  let currentSum = maxSum;
-  for (let i = k; i < arr.length; i++) {
-    currentSum += arr[i] - arr[i - k];
-    maxSum = Math.max(maxSum, currentSum);
-  }
-  return maxSum;
-}`,
-    tab: `max-subarray-sum.${EXTENSION}`,
-  },
-  {
-    code: `function activitySelection(activities) {
-  activities.sort((a, b) => {
-    return a[1] - b[1]
+    code: `function promiseAll(promises) {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    let done = 0;
+    if (!promises.length) resolve(results);
+    promises.forEach((promise, i) => {
+      Promise.resolve(promise).then((value) => {
+        results[i] = value;
+        if (++done === promises.length) resolve(results);
+      }, reject);
+    });
   });
-  let lastEndTime = 0;
-  const selected = [];
-  for (let activity of activities) {
-    const [start, end] = activity;
-    if (start >= lastEndTime) {
-      selected.push([start, end]);
-      lastEndTime = end;
-    }
-  }
-  return selected;
 }`,
-    tab: `activity-selection.${EXTENSION}`,
-  },
-  {
-    code: `function pairWithTargetSum(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
-  while (left < right) {
-    const sum = arr[left] + arr[right];
-    if (sum === target) return [left, right];
-    if (sum < target) {
-      left++;
-    }
-    else {
-      right--;
-    }
-  }
-  return [];
-}`,
-    tab: `pair-with-target-sum.${EXTENSION}`,
-  },
-  {
-    code: `function areAnagrams(s1, s2) {
-  if (s1.length !== s2.length) {
-    return false;
-  }
-  const count = {};
-  for (let char of s1) {
-    const val = count[char] || 0;
-    count[char] = val + 1;
-  }
-  for (let char of s2) {
-    if (!count[char]) return false;
-    count[char]--;
-  }
-  return true;
-}`,
-    tab: `are-anagrams.${EXTENSION}`,
+    tab: `promise-all.${EXTENSION}`,
   },
   {
     code: `function validParentheses(s) {
