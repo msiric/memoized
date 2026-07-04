@@ -89,7 +89,7 @@ export const CallToAction = ({ codeSnippets, initialSnippet }: CallToActionProps
               </div>
             </div>
           </div>
-          <div className="relative lg:static xl:pl-10">
+          <div className="hidden sm:block relative lg:static xl:pl-10">
             <div className="absolute inset-x-[-50vw] -bottom-48 -top-24 [mask-image:linear-gradient(transparent,white,white)] lg:-bottom-32 lg:-top-24 lg:left-[calc(50%+14rem)] lg:right-0 lg:[mask-image:none] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:dark:[mask-image:linear-gradient(white,white,transparent)]">
               <HomepageBackground
                 width={668}
