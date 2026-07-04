@@ -77,7 +77,7 @@ export const AnimatedCode = ({
           </div>
         </div>
       </div>
-      <div className="mt-6 flex h-[20rem] items-start overflow-hidden px-1 text-sm sm:h-[24rem]">
+      <div className="mt-6 h-[23rem] overflow-x-auto overflow-y-hidden px-1 text-sm">
         <div className="w-full">
           {highlighter ? (
             <>
