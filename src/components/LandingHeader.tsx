@@ -16,20 +16,10 @@ export const LandingHeader = () => {
       </div>
 
       {/* Navigation Links */}
-      <nav className="hidden items-center gap-8 sm:flex">
+      <div className="relative flex basis-0 items-center justify-end gap-4 sm:gap-6 md:flex-grow">
         <a
           href={BLOG_PREFIX}
           className="text-sm font-medium text-zinc-700 transition-colors duration-200 hover:text-lime-600 dark:text-zinc-300 dark:hover:text-lime-400"
-        >
-          Blog
-        </a>
-      </nav>
-      
-      <div className="relative flex basis-0 items-center justify-end gap-6 md:flex-grow">
-        {/* Mobile Blog Link */}
-        <a
-          href={BLOG_PREFIX}
-          className="text-sm font-medium text-zinc-700 transition-colors duration-200 hover:text-lime-600 sm:hidden dark:text-zinc-300 dark:hover:text-lime-400"
         >
           Blog
         </a>
