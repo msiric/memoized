@@ -82,7 +82,7 @@ export const CallToAction = ({ codeSnippets, initialSnippet }: CallToActionProps
                   />
                 </div>
                 <div className="text-center lg:text-left">
-                  <p className="text-sm text-zinc-300">
+                  <p className="mx-auto max-w-[34ch] text-balance text-sm text-zinc-300 lg:mx-0">
                     Join a <span className="font-semibold text-lime-300">growing community</span> of engineers mastering interview skills
                   </p>
                 </div>
