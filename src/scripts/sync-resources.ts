@@ -1,7 +1,8 @@
 import fs from 'fs'
 import path from 'path'
-import { upsertResource } from '@/services/resource'
 import prisma from '@/lib/prisma'
+import { upsertResource } from '@/services/resource'
+import { Prisma } from '@prisma/client'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
 import { serialize } from 'next-mdx-remote-client/serialize'
@@ -13,6 +14,8 @@ import {
 } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import slugify from 'slugify'
+
+type SerializedJson = Prisma.NullableJsonNullValueInput | InputJsonValue
 
 interface LessonResource {
   id: string
@@ -33,6 +36,19 @@ interface LessonConfig {
 }
 
 slugify.extend({ '/': '-' })
+
+type PreparedResource = {
+  contentId: string
+  slug: string
+  title: string
+  description: string
+  body: string
+  order: number
+  href: string
+  access: 'FREE' | 'PREMIUM'
+  lessonSlug: string | null
+  serializedBody: SerializedJson
+}
 
 /**
  * Get content path information
@@ -99,10 +115,10 @@ function getLessonConfig(sectionPath: string): LessonConfig[] {
 /**
  * Serialize MDX content with error handling
  */
-async function serializeMdxContent(content: string, filePath?: string) {
+async function serializeMdxContent(content: string, filePath?: string): Promise<SerializedJson> {
   if (!content || content.trim().length === 0) {
     console.log('⚠️ Empty content, skipping serialization')
-    return null
+    return Prisma.DbNull
   }
 
   try {
@@ -119,7 +135,7 @@ async function serializeMdxContent(content: string, filePath?: string) {
       },
     })
 
-    return serialized
+    return serialized as unknown as InputJsonValue
   } catch (error) {
     console.error('❌ MDX serialization failed:', error)
     console.error('Content preview:', content.substring(0, 200) + '...')
@@ -144,15 +160,45 @@ async function serializeMdxContent(content: string, filePath?: string) {
 }
 
 /**
- * Sync lesson-associated resources from lesson configurations
+ * Phase 1: Read and serialize all resources into in-memory structures.
+ * No database operations happen here.
  */
-async function syncLessonAssociatedResources(): Promise<void> {
-  console.log('📚 Syncing lesson-associated resources...')
-
+async function prepareResources(): Promise<PreparedResource[]> {
+  const prepared: PreparedResource[] = []
   const contentInfo = getContentPath()
-  let resourceOrder = 1 // Start from 1 so intro resource can have order 0
 
-  // Process each course and section to find lesson-associated resources
+  // Prepare intro resource
+  const introPath = path.join(process.cwd(), 'src/resources/intro/page.mdx')
+
+  if (fs.existsSync(introPath)) {
+    const introContent = fs.readFileSync(introPath, 'utf-8')
+    const serializedIntroContent = await serializeMdxContent(
+      introContent,
+      introPath,
+    )
+
+    prepared.push({
+      contentId: 'intro',
+      slug: 'intro',
+      title: 'Resources',
+      description: 'Enhance Your Learning Journey',
+      body: introContent,
+      order: 0,
+      href: '/resources',
+      access: 'FREE',
+      lessonSlug: null,
+      serializedBody: serializedIntroContent,
+    })
+
+    console.log('✅ Serialized resources intro page')
+  } else {
+    console.warn(`⚠️ Resources intro file not found: ${introPath}`)
+  }
+
+  // Prepare lesson-associated resources
+  console.log('📚 Preparing lesson-associated resources...')
+  let resourceOrder = 1
+
   for (const course of completeCurriculum) {
     const courseSlug = slugify(course.title, SLUGIFY_OPTIONS)
 
@@ -168,34 +214,13 @@ async function syncLessonAssociatedResources(): Promise<void> {
       const lessons = getLessonConfig(sectionPath)
 
       for (const lesson of lessons) {
-        // Process resources from JSON (lesson-associated resources)
         if (lesson.resources && lesson.resources.length > 0) {
           const resourcesDir = path.join(
             process.cwd(),
             `src/${RESOURCES_FOLDER}`,
           )
-
-          // Get lesson access level
           const accessLevel = lesson.access === 'FREE' ? 'FREE' : 'PREMIUM'
-
-          // We need to get the lesson ID from the database to associate resources with it
-          // For now, we'll use the lesson slug to find the lesson
           const lessonSlug = slugify(lesson.title, SLUGIFY_OPTIONS)
-          const lessonContentId = `${course.id}${section.id}${lesson.id}`
-
-          // Find the lesson by its stable contentId (fall back to legacy slug) to get its ID
-          const lessonRecord =
-            (await prisma.lesson.findUnique({
-              where: { contentId: lessonContentId },
-            })) ??
-            (await prisma.lesson.findFirst({
-              where: { slug: lessonSlug },
-            }))
-
-          if (!lessonRecord) {
-            console.warn(`⚠️ Lesson not found in database: ${lessonSlug}`)
-            continue
-          }
 
           for (const resource of lesson.resources) {
             const {
@@ -214,8 +239,7 @@ async function syncLessonAssociatedResources(): Promise<void> {
 
             const resourceContent = fs.readFileSync(resourcePath, 'utf-8')
 
-            // Serialize resource content if it exists
-            let serializedResourceContent = null
+            let serializedResourceContent: SerializedJson = Prisma.DbNull
             if (resourceContent && resourceContent.trim().length > 0) {
               serializedResourceContent = await serializeMdxContent(
                 resourceContent,
@@ -223,26 +247,77 @@ async function syncLessonAssociatedResources(): Promise<void> {
               )
             }
 
-            await upsertResource(
-              resourceId,
-              resourceSlug,
-              resourceTitle,
-              resourceDescription,
-              resourceContent,
-              resourceOrder++,
-              resourceHref || '',
-              accessLevel, // Use the lesson's access level
-              lessonRecord.id,
-              serializedResourceContent as InputJsonValue,
-            )
-            console.log(`✅ Synced lesson resource: ${resourceTitle}`)
+            prepared.push({
+              contentId: resourceId,
+              slug: resourceSlug,
+              title: resourceTitle,
+              description: resourceDescription,
+              body: resourceContent,
+              order: resourceOrder++,
+              href: resourceHref || '',
+              access: accessLevel,
+              lessonSlug,
+              serializedBody: serializedResourceContent,
+            })
+            console.log(`✅ Serialized resource: ${resourceTitle}`)
           }
         }
       }
     }
   }
 
-  console.log('✅ Lesson-associated resources synced')
+  console.log(`📦 Preparation complete: ${prepared.length} resources`)
+  return prepared
+}
+
+/**
+ * Phase 2: Persist all prepared resources to the database in a single transaction.
+ */
+async function persistResources(prepared: PreparedResource[]): Promise<void> {
+  console.log('💾 Persisting resources to database (transaction)...')
+
+  await prisma.$transaction(
+    async (tx) => {
+      for (const resource of prepared) {
+        // Resolve lesson foreign key if this resource is associated with a lesson
+        let lessonId: string | null = null
+        if (resource.lessonSlug) {
+          const lessonRecord = await tx.lesson.findUnique({
+            where: { slug: resource.lessonSlug },
+            select: { id: true },
+          })
+
+          if (!lessonRecord) {
+            console.warn(
+              `⚠️ Lesson not found in database: ${resource.lessonSlug}`,
+            )
+            continue
+          }
+          lessonId = lessonRecord.id
+        }
+
+        await upsertResource(
+          tx,
+          resource.contentId,
+          resource.slug,
+          resource.title,
+          resource.description,
+          resource.body,
+          resource.order,
+          resource.href,
+          resource.access,
+          lessonId,
+          resource.serializedBody,
+        )
+        console.log(`✅ Synced resource: ${resource.title}`)
+      }
+    },
+    {
+      timeout: 30000,
+    },
+  )
+
+  console.log('✅ Resource sync completed')
 }
 
 /**
@@ -252,38 +327,11 @@ export async function syncResources(): Promise<void> {
   console.log('📖 Syncing resource pages...')
 
   try {
-    // Process resources intro page
-    const introPath = path.join(process.cwd(), 'src/resources/intro/page.mdx')
+    // Phase 1: Serialize all resources (no DB operations)
+    const prepared = await prepareResources()
 
-    if (fs.existsSync(introPath)) {
-      const introContent = fs.readFileSync(introPath, 'utf-8')
-      const serializedIntroContent = await serializeMdxContent(
-        introContent,
-        introPath,
-      )
-
-      await upsertResource(
-        'intro', // contentId (stable — the resource folder id)
-        'intro', // slug
-        'Resources', // title
-        'Enhance Your Learning Journey', // description
-        introContent, // body
-        0, // order (first)
-        '/resources', // href
-        'FREE', // access
-        null, // lessonId (not associated with a lesson)
-        serializedIntroContent as InputJsonValue, // serializedBody
-      )
-
-      console.log('✅ Resources intro page synced successfully')
-    } else {
-      console.warn(`⚠️ Resources intro file not found: ${introPath}`)
-    }
-
-    // Process lesson-associated resources
-    await syncLessonAssociatedResources()
-
-    console.log('✅ Resource sync completed')
+    // Phase 2: Persist in a single transaction (all-or-nothing)
+    await persistResources(prepared)
   } catch (error) {
     console.error(`❌ Failed to sync resources: ${error}`)
     throw error
@@ -291,6 +339,10 @@ export async function syncResources(): Promise<void> {
     await prisma.$disconnect()
   }
 }
+
+// Exported for testing
+export { prepareResources, persistResources }
+export type { PreparedResource }
 
 // CLI interface
 if (require.main === module) {

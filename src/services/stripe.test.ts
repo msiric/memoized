@@ -6,6 +6,8 @@ import {
   createStripeCoupon,
   createStripeSession,
   deleteStripeCoupon,
+  getActiveCoupons,
+  getActiveProducts,
   listStripeCoupons,
   retrieveStripeCoupon,
   retrieveStripeSession,
@@ -744,6 +746,46 @@ describe('Stripe services', () => {
       expect(stripe.coupons.create).toHaveBeenCalledWith(
         expect.objectContaining(couponConfig),
       )
+    })
+  })
+
+  describe('getActiveCoupons', () => {
+    it('should return active coupons', async () => {
+      const mockCoupons = [{ id: 'coupon_1', valid: true }]
+      vi.spyOn(stripe.coupons, 'list').mockResolvedValue({
+        data: mockCoupons,
+      } as any)
+
+      const result = await getActiveCoupons()
+      expect(result).toEqual(mockCoupons)
+    })
+
+    it('should throw ServiceError on failure', async () => {
+      vi.spyOn(stripe.coupons, 'list').mockRejectedValue(
+        new Error('Stripe API error'),
+      )
+
+      await expect(getActiveCoupons()).rejects.toThrow(ServiceError)
+    })
+  })
+
+  describe('getActiveProducts', () => {
+    it('should return active products', async () => {
+      const mockProducts = [{ id: 'prod_1', active: true }]
+      vi.spyOn(stripe.products, 'list').mockResolvedValue({
+        data: mockProducts,
+      } as any)
+
+      const result = await getActiveProducts()
+      expect(result).toEqual(mockProducts)
+    })
+
+    it('should throw ServiceError on failure', async () => {
+      vi.spyOn(stripe.products, 'list').mockRejectedValue(
+        new Error('Stripe API error'),
+      )
+
+      await expect(getActiveProducts()).rejects.toThrow(ServiceError)
     })
   })
 })

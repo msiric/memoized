@@ -5,6 +5,7 @@ import {
   upsertResource,
 } from '@/services/resource'
 import { AccessOptions } from '@prisma/client'
+import { InputJsonValue } from '@prisma/client/runtime/library'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('next/cache', () => ({
@@ -18,12 +19,7 @@ vi.mock('@/lib/prisma', () => {
   return {
     ...actualPrisma,
     default: {
-      resource: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-        create: vi.fn(),
-        findMany: vi.fn(),
-      },
+      resource: { findUnique: vi.fn(), findMany: vi.fn() },
     },
   }
 })
@@ -62,68 +58,6 @@ describe('Resource services', () => {
         where: { slug: 'invalid-slug' },
         select: { id: true, title: true, serializedBody: true, access: true },
       })
-    })
-  })
-
-  describe('upsertResource', () => {
-    it('creates a new resource when no row matches contentId or slug', async () => {
-      ;(prisma.resource.findUnique as Mock).mockResolvedValue(null)
-      ;(prisma.resource.create as Mock).mockResolvedValue({ id: '1' })
-
-      await upsertResource(
-        'closures',
-        'resource-slug',
-        'Resource Title',
-        'Resource Description',
-        'Resource Content',
-        1,
-        'resource-href',
-        AccessOptions.FREE,
-        '1',
-        { compiledSource: 'compiled' } as any,
-      )
-      expect(prisma.resource.findUnique).toHaveBeenCalledWith({
-        where: { contentId: 'closures' },
-        select: { id: true },
-      })
-      expect(prisma.resource.create).toHaveBeenCalledWith({
-        data: {
-          contentId: 'closures',
-          title: 'Resource Title',
-          description: 'Resource Description',
-          order: 1,
-          slug: 'resource-slug',
-          body: 'Resource Content',
-          href: 'resource-href',
-          access: AccessOptions.FREE,
-          lessonId: '1',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-      })
-      expect(prisma.resource.update).not.toHaveBeenCalled()
-    })
-
-    it('updates the existing row by id when contentId matches (rename-safe)', async () => {
-      ;(prisma.resource.findUnique as Mock).mockResolvedValueOnce({ id: 'existing' })
-      ;(prisma.resource.update as Mock).mockResolvedValue({ id: 'existing' })
-
-      await upsertResource(
-        'closures',
-        'renamed-slug',
-        'Resource Title',
-        'Resource Description',
-        'Resource Content',
-        1,
-        'resource-href',
-        AccessOptions.FREE,
-        '1',
-        { compiledSource: 'compiled' } as any,
-      )
-      expect(prisma.resource.update).toHaveBeenCalledWith({
-        where: { id: 'existing' },
-        data: expect.objectContaining({ contentId: 'closures', slug: 'renamed-slug' }),
-      })
-      expect(prisma.resource.create).not.toHaveBeenCalled()
     })
   })
 
@@ -170,5 +104,47 @@ describe('Resource services', () => {
         orderBy: { order: 'asc' },
       })
     })
+  })
+})
+
+// upsertResource runs inside sync-resources' $transaction (operates on a tx client),
+// matches contentId-first with a legacy-slug fallback, and updates by row id.
+describe('content-sync upsert (stable identity)', () => {
+  const makeTx = () =>
+    ({ resource: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() } }) as any
+
+  afterEach(() => vi.clearAllMocks())
+
+  it('creates keyed by contentId + slug when nothing matches', async () => {
+    const tx = makeTx()
+    tx.resource.findUnique.mockResolvedValue(null)
+    tx.resource.create.mockResolvedValue({ id: '1' })
+
+    await upsertResource(tx, 'closures', 'res-slug', 'T', 'D', 'body', 1, '/r', AccessOptions.FREE, 'lesson-1', {
+      compiledSource: 'x',
+    } as InputJsonValue)
+
+    expect(tx.resource.findUnique).toHaveBeenCalledWith({
+      where: { contentId: 'closures' },
+      select: { id: true },
+    })
+    expect(tx.resource.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ contentId: 'closures', slug: 'res-slug', lessonId: 'lesson-1' }),
+    })
+    expect(tx.resource.update).not.toHaveBeenCalled()
+  })
+
+  it('updates the matched row by id (rename-safe)', async () => {
+    const tx = makeTx()
+    tx.resource.findUnique.mockResolvedValueOnce({ id: 'existing' })
+    tx.resource.update.mockResolvedValue({ id: 'existing' })
+
+    await upsertResource(tx, 'closures', 'renamed', 'T', 'D', 'body', 1, '/r', AccessOptions.FREE, null)
+
+    expect(tx.resource.update).toHaveBeenCalledWith({
+      where: { id: 'existing' },
+      data: expect.objectContaining({ contentId: 'closures', slug: 'renamed', lessonId: null }),
+    })
+    expect(tx.resource.create).not.toHaveBeenCalled()
   })
 })

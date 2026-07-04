@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { getProblems, markProblemProgress } from '@/services/problem'
+import { ServiceError } from '@/lib/sentry'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemDifficulty } from '@prisma/client'
 import { getServerSession } from 'next-auth'
@@ -19,7 +20,7 @@ vi.mock('@/lib/prisma', () => {
     ...actualPrisma,
     default: {
       userProblemProgress: { upsert: vi.fn() },
-      problem: { findMany: vi.fn() },
+      problem: { findUnique: vi.fn(), findMany: vi.fn() },
       lesson: { findMany: vi.fn() },
     },
   }
@@ -38,7 +39,8 @@ describe('Problem services', () => {
   })
 
   describe('markProblemProgress', () => {
-    it('should mark problem progress', async () => {
+    it('should mark problem progress when problem exists', async () => {
+      ;(prisma.problem.findUnique as Mock).mockResolvedValue({ id: '1' })
       const mockProgress = {
         userId: '1',
         problemId: '1',
@@ -55,6 +57,10 @@ describe('Problem services', () => {
         completed: true,
       })
       expect(progress).toEqual(mockProgress)
+      expect(prisma.problem.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+        select: { id: true },
+      })
       expect(prisma.userProblemProgress.upsert).toHaveBeenCalledWith({
         where: { userId_problemId: { userId: '1', problemId: '1' } },
         update: { completed: true, completedAt: expect.any(Date) },
@@ -65,6 +71,20 @@ describe('Problem services', () => {
           completedAt: expect.any(Date),
         },
       })
+    })
+
+    it('should throw ServiceError when problem does not exist', async () => {
+      ;(prisma.problem.findUnique as Mock).mockResolvedValue(null)
+
+      await expect(
+        markProblemProgress({
+          userId: '1',
+          problemId: 'nonexistent',
+          completed: true,
+        }),
+      ).rejects.toThrow(ServiceError)
+
+      expect(prisma.userProblemProgress.upsert).not.toHaveBeenCalled()
     })
   })
 

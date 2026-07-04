@@ -3,7 +3,7 @@ import { APP_NAME, COURSES_PREFIX } from '@/constants'
 import { PremiumCTA } from '@/components/PremiumCTA'
 import { PreserializedMdxRenderer } from '@/components/PreserializedMdxRenderer'
 import { completeCurriculum } from '@/constants/curriculum'
-import { getLessonBySlug, getLessonsSlugs } from '@/services/lesson'
+import { getLessonBySlug, getLessonMetadataBySlug, getLessonsSlugs } from '@/services/lesson'
 import { getUserWithSubscriptionDetails } from '@/services/user'
 import { UserWithSubscriptionsAndProgress } from '@/types'
 import { userHasAccess } from '@/utils/helpers'
@@ -38,7 +38,7 @@ export async function generateMetadata({
     (s) => s.href === `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}`,
   )
 
-  const lesson = section?.lessons.find((l) => l.id === `/${lessonSlug}`)
+  const lesson = await getLessonMetadataBySlug(lessonSlug)
 
   if (!lesson) {
     return { title: 'Lesson not found' }

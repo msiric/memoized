@@ -12,7 +12,7 @@ import {
   upsertProblem,
   upsertSection,
 } from '@/services/lesson'
-import { Lesson } from '@prisma/client'
+import { Lesson, Prisma, ProblemDifficulty, ProblemType } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
 import slugify from 'slugify'
@@ -20,15 +20,74 @@ import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
 import { serialize } from 'next-mdx-remote-client/serialize'
 
+type SerializedJson = Prisma.NullableJsonNullValueInput | InputJsonValue
+
 slugify.extend({ '/': '-' })
+
+type PreparedCourse = {
+  contentId: string
+  slug: string
+  title: string
+  description: string
+  body: string
+  href: string
+  order: number
+  serializedBody: SerializedJson
+}
+
+type PreparedSection = {
+  contentId: string
+  slug: string
+  title: string
+  description: string
+  body: string
+  href: string
+  order: number
+  courseSlug: string
+  serializedBody: SerializedJson
+}
+
+type PreparedLesson = {
+  contentId: string
+  slug: string
+  title: string
+  description: string
+  body: string
+  href: string
+  order: number
+  access: 'FREE' | 'PREMIUM'
+  sectionSlug: string
+  serializedBody: SerializedJson
+}
+
+type PreparedProblem = {
+  contentId: string
+  slug: string
+  href: string
+  link: string
+  title: string
+  difficulty: ProblemDifficulty
+  question: string
+  answer: string
+  type: ProblemType
+  lessonSlug: string
+  serializedAnswer: SerializedJson
+}
+
+type PreparedContent = {
+  courses: PreparedCourse[]
+  sections: PreparedSection[]
+  lessons: PreparedLesson[]
+  problems: PreparedProblem[]
+}
 
 /**
  * Serialize MDX content with error handling
  */
-async function serializeMdxContent(content: string, filePath?: string) {
+async function serializeMdxContent(content: string, filePath?: string): Promise<SerializedJson> {
   if (!content || content.trim().length === 0) {
     console.log('⚠️ Empty content, skipping serialization')
-    return null
+    return Prisma.DbNull
   }
 
   try {
@@ -44,7 +103,7 @@ async function serializeMdxContent(content: string, filePath?: string) {
       },
     })
 
-    return serialized
+    return serialized as unknown as InputJsonValue
   } catch (error) {
     console.error('❌ MDX serialization failed:', error)
     console.error('Content preview:', content.substring(0, 200) + '...')
@@ -135,12 +194,20 @@ function getDetailedLessonConfig(sectionPath: string) {
 }
 
 /**
- * Main content sync function
+ * Phase 1: Read and serialize all content into in-memory structures.
+ * No database operations happen here. If serialization fails, no DB state changes.
  */
-async function syncWithJsonStructure(contentInfo: {
+async function prepareContent(contentInfo: {
   path: string
   isSample: boolean
-}) {
+}): Promise<PreparedContent> {
+  const prepared: PreparedContent = {
+    courses: [],
+    sections: [],
+    lessons: [],
+    problems: [],
+  }
+
   let courseOrder = 0
   let sectionOrder = 0
   let lessonOrder = 0
@@ -156,7 +223,7 @@ async function syncWithJsonStructure(contentInfo: {
     }
   }
 
-  console.log(`🎯 Starting content sync: ${totalLessons} lessons to process`)
+  console.log(`🎯 Preparing content: ${totalLessons} lessons to serialize`)
 
   for (const course of completeCurriculum) {
     const {
@@ -175,28 +242,23 @@ async function syncWithJsonStructure(contentInfo: {
       courseBody = fs.readFileSync(courseFilePath, 'utf8')
     }
 
-    console.log(`📚 Processing course: ${courseTitle}`)
+    console.log(`📚 Serializing course: ${courseTitle}`)
 
     const serializedContent = await serializeMdxContent(
       courseBody,
       courseFilePath,
     )
 
-    const courseOrderValue = courseOrder++
-    const courseContentId = courseId
-
-    const courseRecord = await upsertCourse(
-      courseContentId,
-      courseSlug,
-      courseTitle,
-      courseDescription,
-      courseBody,
-      courseHref,
-      courseOrderValue,
-      serializedContent as InputJsonValue,
-    )
-
-    console.log(`✅ Synced course: ${courseTitle}`)
+    prepared.courses.push({
+      contentId: courseId,
+      slug: courseSlug,
+      title: courseTitle,
+      description: courseDescription,
+      body: courseBody,
+      href: courseHref,
+      order: courseOrder++,
+      serializedBody: serializedContent,
+    })
 
     for (const section of course.sections) {
       const {
@@ -221,21 +283,17 @@ async function syncWithJsonStructure(contentInfo: {
         sectionFilePath,
       )
 
-      const sectionOrderValue = sectionOrder++
-
-      const sectionRecord = await upsertSection(
-        sectionContentId,
-        sectionSlug,
-        sectionTitle,
-        sectionDescription,
-        sectionContent,
-        sectionOrderValue,
-        sectionHref,
-        courseRecord.id,
-        serializedSectionContent as InputJsonValue,
-      )
-
-      console.log(`✅ Synced section: ${sectionTitle}`)
+      prepared.sections.push({
+        contentId: sectionContentId,
+        slug: sectionSlug,
+        title: sectionTitle,
+        description: sectionDescription,
+        body: sectionContent,
+        href: sectionHref,
+        order: sectionOrder++,
+        courseSlug,
+        serializedBody: serializedSectionContent,
+      })
 
       // Get detailed lesson configuration from JSON
       const detailedLessons = getDetailedLessonConfig(sectionPath)
@@ -260,24 +318,22 @@ async function syncWithJsonStructure(contentInfo: {
         // Convert access level from string to enum
         const accessLevel = lesson.access === 'FREE' ? 'FREE' : 'PREMIUM'
 
-        const lessonOrderValue = lessonOrder++
-
-        const lessonRecord = await upsertLesson(
-          lessonContentId,
-          lessonSlug,
-          lesson.title,
-          lesson.description,
-          lessonContent,
-          serializedLessonContent as InputJsonValue,
-          lessonOrderValue,
-          accessLevel,
-          lessonHref,
-          sectionRecord.id,
-        )
+        prepared.lessons.push({
+          contentId: lessonContentId,
+          slug: lessonSlug,
+          title: lesson.title,
+          description: lesson.description,
+          body: lessonContent,
+          href: lessonHref,
+          order: lessonOrder++,
+          access: accessLevel,
+          sectionSlug,
+          serializedBody: serializedLessonContent,
+        })
 
         processedLessons++
         console.log(
-          `✅ Synced lesson: ${lesson.title} (${processedLessons}/${totalLessons})`,
+          `✅ Serialized lesson: ${lesson.title} (${processedLessons}/${totalLessons})`,
         )
 
         // Process problems from JSON
@@ -291,27 +347,145 @@ async function syncWithJsonStructure(contentInfo: {
             const serializedAnswer =
               problem.answer && problem.answer.trim().length > 0
                 ? await serializeMdxContent(problem.answer, problemLink)
-                : null
+                : Prisma.DbNull
 
-            await upsertProblem(
-              problemContentId,
-              problemSlug,
-              problem.href || '',
-              problemLink,
-              problem.title,
-              problem.difficulty,
-              problem.question,
-              problem.answer,
-              problem.type,
-              lessonRecord.id,
-              serializedAnswer as InputJsonValue,
-            )
-            console.log(`✅ Synced problem: ${problem.title}`)
+            prepared.problems.push({
+              contentId: problemContentId,
+              slug: problemSlug,
+              href: problem.href || '',
+              link: problemLink,
+              title: problem.title,
+              difficulty: problem.difficulty,
+              question: problem.question,
+              answer: problem.answer,
+              type: problem.type,
+              lessonSlug,
+              serializedAnswer: serializedAnswer,
+            })
+            console.log(`✅ Serialized problem: ${problem.title}`)
           }
         }
       }
     }
   }
+
+  console.log(`📦 Preparation complete: ${prepared.courses.length} courses, ${prepared.sections.length} sections, ${prepared.lessons.length} lessons, ${prepared.problems.length} problems`)
+
+  return prepared
+}
+
+/**
+ * Phase 2: Persist all prepared content to the database in a single transaction.
+ * If any upsert fails, the entire transaction rolls back — no partial state.
+ */
+async function persistContent(prepared: PreparedContent): Promise<void> {
+  console.log('💾 Persisting content to database (transaction)...')
+
+  await prisma.$transaction(
+    async (tx) => {
+      // Slug → DB ID maps for foreign key resolution
+      const courseIdMap = new Map<string, string>()
+      const sectionIdMap = new Map<string, string>()
+      const lessonIdMap = new Map<string, string>()
+
+      // Upsert courses
+      for (const course of prepared.courses) {
+        const record = await upsertCourse(
+          tx,
+          course.contentId,
+          course.slug,
+          course.title,
+          course.description,
+          course.body,
+          course.href,
+          course.order,
+          course.serializedBody,
+        )
+        courseIdMap.set(course.slug, record.id)
+        console.log(`✅ Synced course: ${course.title}`)
+      }
+
+      // Upsert sections
+      for (const section of prepared.sections) {
+        const courseId = courseIdMap.get(section.courseSlug)
+        if (!courseId) {
+          throw new Error(
+            `Course not found for section ${section.slug} (courseSlug: ${section.courseSlug})`,
+          )
+        }
+
+        const record = await upsertSection(
+          tx,
+          section.contentId,
+          section.slug,
+          section.title,
+          section.description,
+          section.body,
+          section.order,
+          section.href,
+          courseId,
+          section.serializedBody,
+        )
+        sectionIdMap.set(section.slug, record.id)
+        console.log(`✅ Synced section: ${section.title}`)
+      }
+
+      // Upsert lessons
+      for (const lesson of prepared.lessons) {
+        const sectionId = sectionIdMap.get(lesson.sectionSlug)
+        if (!sectionId) {
+          throw new Error(
+            `Section not found for lesson ${lesson.slug} (sectionSlug: ${lesson.sectionSlug})`,
+          )
+        }
+
+        const record = await upsertLesson(
+          tx,
+          lesson.contentId,
+          lesson.slug,
+          lesson.title,
+          lesson.description,
+          lesson.body,
+          lesson.serializedBody,
+          lesson.order,
+          lesson.access,
+          lesson.href,
+          sectionId,
+        )
+        lessonIdMap.set(lesson.slug, record.id)
+        console.log(`✅ Synced lesson: ${lesson.title}`)
+      }
+
+      // Upsert problems
+      for (const problem of prepared.problems) {
+        const lessonId = lessonIdMap.get(problem.lessonSlug)
+        if (!lessonId) {
+          throw new Error(
+            `Lesson not found for problem ${problem.slug} (lessonSlug: ${problem.lessonSlug})`,
+          )
+        }
+
+        await upsertProblem(
+          tx,
+          problem.contentId,
+          problem.slug,
+          problem.href,
+          problem.link,
+          problem.title,
+          problem.difficulty,
+          problem.question,
+          problem.answer,
+          problem.type,
+          lessonId,
+          problem.serializedAnswer,
+        )
+        console.log(`✅ Synced problem: ${problem.title}`)
+      }
+    },
+    {
+      timeout: 30000, // 30s timeout for safety
+    },
+  )
 
   console.log('🎉 Content sync completed!')
 }
@@ -322,8 +496,17 @@ async function syncWithJsonStructure(contentInfo: {
 export async function syncContent(): Promise<void> {
   const contentInfo = getContentPath()
   console.log('🆕 Using JSON-based lesson configuration')
-  return await syncWithJsonStructure(contentInfo)
+
+  // Phase 1: Serialize all content (no DB operations)
+  const prepared = await prepareContent(contentInfo)
+
+  // Phase 2: Persist in a single transaction (all-or-nothing)
+  await persistContent(prepared)
 }
+
+// Exported for testing
+export { prepareContent, persistContent }
+export type { PreparedContent }
 
 // CLI interface
 if (require.main === module) {

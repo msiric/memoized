@@ -5,8 +5,9 @@ import dynamic from 'next/dynamic'
 import { ContentOverview } from '../components/ContentOverview'
 import { FreeOfferingHighlight } from '../components/FreeOfferingHighlight'
 
-// Revalidate every 60 seconds to pick up new coupons/banners
-export const revalidate = 60
+// Revalidate hourly for Stripe coupon changes.
+// Database banners are invalidated on-demand via revalidateBanners().
+export const revalidate = 3600
 
 const TopBanner = dynamic(
   () => import('../components/TopBanner').then((mod) => mod.TopBanner),

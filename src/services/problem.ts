@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { getServerSession } from 'next-auth'
 import { revalidateProblemProgress } from '@/lib/cache'
+import { ServiceError } from '@/lib/sentry'
 import { ProblemFilter } from '../types'
 
 export type MarkProblemArgs = {
@@ -16,6 +17,18 @@ export const markProblemProgress = async ({
   problemId,
   completed,
 }: MarkProblemArgs) => {
+  const problem = await prisma.problem.findUnique({
+    where: { id: problemId },
+    select: { id: true },
+  })
+
+  if (!problem) {
+    throw new ServiceError('Problem not found', true, {
+      feature: 'problem',
+      action: 'mark-progress',
+    })
+  }
+
   const result = await prisma.userProblemProgress.upsert({
     where: {
       userId_problemId: {

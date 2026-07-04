@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import {
   getLessonBySlug,
+  getLessonMetadataBySlug,
   getLessonsAndProblems,
   getLessonsAndProblemsCounts,
   getLessonsWithProblems,
@@ -9,11 +10,12 @@ import {
   getSectionBySlug,
   markLessonProgress,
   upsertCourse,
+  upsertSection,
   upsertLesson,
   upsertProblem,
-  upsertSection,
 } from '@/services/lesson'
-import { AccessOptions, ProblemDifficulty, ProblemType } from '@prisma/client'
+import { ServiceError } from '@/lib/sentry'
+import { AccessOptions, ProblemDifficulty, ProblemType, Prisma } from '@prisma/client'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -30,30 +32,13 @@ vi.mock('@/lib/prisma', () => {
     ...actualPrisma,
     default: {
       userLessonProgress: { upsert: vi.fn() },
-      section: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-        create: vi.fn(),
-      },
+      section: { findUnique: vi.fn() },
       lesson: {
         findUnique: vi.fn(),
         findMany: vi.fn(),
-        update: vi.fn(),
-        create: vi.fn(),
         count: vi.fn(),
       },
-      course: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-        create: vi.fn(),
-      },
-      problem: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-        create: vi.fn(),
-        findMany: vi.fn(),
-        count: vi.fn(),
-      },
+      problem: { findMany: vi.fn(), count: vi.fn() },
     },
   }
 })
@@ -64,7 +49,8 @@ describe('Lesson services', () => {
   })
 
   describe('markLessonProgress', () => {
-    it('should mark lesson progress', async () => {
+    it('should mark lesson progress when lesson exists', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue({ id: '1' })
       const mockProgress = {
         userId: '1',
         lessonId: '1',
@@ -81,6 +67,10 @@ describe('Lesson services', () => {
         completed: true,
       })
       expect(progress).toEqual(mockProgress)
+      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+        select: { id: true },
+      })
       expect(prisma.userLessonProgress.upsert).toHaveBeenCalledWith({
         where: { userId_lessonId: { userId: '1', lessonId: '1' } },
         update: { completed: true, completedAt: expect.any(Date) },
@@ -91,6 +81,44 @@ describe('Lesson services', () => {
           completedAt: expect.any(Date),
         },
       })
+    })
+
+    it('should throw ServiceError when lesson does not exist', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
+
+      await expect(
+        markLessonProgress({ userId: '1', lessonId: 'nonexistent', completed: true }),
+      ).rejects.toThrow(ServiceError)
+
+      expect(prisma.userLessonProgress.upsert).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('getLessonMetadataBySlug', () => {
+    it('should return title and description for existing lesson', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue({
+        title: 'Variables',
+        description: 'Learn about variable declarations',
+      })
+
+      const result = await getLessonMetadataBySlug('variables')
+
+      expect(result).toEqual({
+        title: 'Variables',
+        description: 'Learn about variable declarations',
+      })
+      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
+        where: { slug: 'variables' },
+        select: { title: true, description: true },
+      })
+    })
+
+    it('should return null for non-existent lesson', async () => {
+      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
+
+      const result = await getLessonMetadataBySlug('nonexistent')
+
+      expect(result).toBeNull()
     })
   })
 
@@ -218,289 +246,6 @@ describe('Lesson services', () => {
           },
         },
       })
-    })
-  })
-
-  describe('upsertCourse', () => {
-    it('creates a new course when no row matches contentId or slug', async () => {
-      ;(prisma.course.findUnique as Mock).mockResolvedValue(null)
-      ;(prisma.course.create as Mock).mockResolvedValue({ id: '1' })
-
-      await upsertCourse(
-        '/js-track',
-        'course-slug',
-        'Course Title',
-        'Course Description',
-        'Course body content',
-        '/course',
-        1,
-        { compiledSource: 'compiled' } as InputJsonValue,
-      )
-      expect(prisma.course.findUnique).toHaveBeenCalledWith({
-        where: { contentId: '/js-track' },
-        select: { id: true },
-      })
-      expect(prisma.course.create).toHaveBeenCalledWith({
-        data: {
-          contentId: '/js-track',
-          title: 'Course Title',
-          description: 'Course Description',
-          body: 'Course body content',
-          order: 1,
-          href: '/course',
-          slug: 'course-slug',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-      })
-      expect(prisma.course.update).not.toHaveBeenCalled()
-    })
-
-    it('updates the existing row by id when contentId matches (rename-safe)', async () => {
-      ;(prisma.course.findUnique as Mock).mockResolvedValueOnce({ id: 'existing' })
-      ;(prisma.course.update as Mock).mockResolvedValue({ id: 'existing' })
-
-      await upsertCourse(
-        '/js-track',
-        'renamed-slug',
-        'Course Title',
-        'Course Description',
-        'Course body content',
-        '/course',
-        1,
-      )
-      expect(prisma.course.update).toHaveBeenCalledWith({
-        where: { id: 'existing' },
-        data: expect.objectContaining({ contentId: '/js-track', slug: 'renamed-slug' }),
-      })
-      expect(prisma.course.create).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('upsertSection', () => {
-    it('creates a new section when no row matches contentId or slug', async () => {
-      ;(prisma.section.findUnique as Mock).mockResolvedValue(null)
-      ;(prisma.section.create as Mock).mockResolvedValue({ id: '1' })
-
-      await upsertSection(
-        '/js-track/core-fundamentals',
-        'section-slug',
-        'Section Title',
-        'Section Description',
-        'Section Content',
-        1,
-        'section-href',
-        'course-id',
-        { compiledSource: 'compiled' } as InputJsonValue,
-      )
-      expect(prisma.section.findUnique).toHaveBeenCalledWith({
-        where: { contentId: '/js-track/core-fundamentals' },
-        select: { id: true },
-      })
-      expect(prisma.section.create).toHaveBeenCalledWith({
-        data: {
-          contentId: '/js-track/core-fundamentals',
-          title: 'Section Title',
-          description: 'Section Description',
-          body: 'Section Content',
-          slug: 'section-slug',
-          order: 1,
-          href: 'section-href',
-          courseId: 'course-id',
-          serializedBody: { compiledSource: 'compiled' },
-        },
-      })
-      expect(prisma.section.update).not.toHaveBeenCalled()
-    })
-
-    it('updates the existing row by id when contentId matches (rename-safe)', async () => {
-      ;(prisma.section.findUnique as Mock).mockResolvedValueOnce({ id: 'existing' })
-      ;(prisma.section.update as Mock).mockResolvedValue({ id: 'existing' })
-
-      await upsertSection(
-        '/js-track/core-fundamentals',
-        'renamed-slug',
-        'Section Title',
-        'Section Description',
-        'Section Content',
-        1,
-        'section-href',
-        'course-id',
-      )
-      expect(prisma.section.update).toHaveBeenCalledWith({
-        where: { id: 'existing' },
-        data: expect.objectContaining({
-          contentId: '/js-track/core-fundamentals',
-          slug: 'renamed-slug',
-        }),
-      })
-      expect(prisma.section.create).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('upsertLesson', () => {
-    it('creates a new lesson when no row matches contentId or slug', async () => {
-      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
-      ;(prisma.lesson.create as Mock).mockResolvedValue({ id: '1' })
-
-      await upsertLesson(
-        '/js-track/core-fundamentals/data-types',
-        'lesson-slug',
-        'Lesson Title',
-        'Lesson Description',
-        'Lesson Content',
-        {} as InputJsonValue,
-        1,
-        AccessOptions.PREMIUM,
-        'lesson-href',
-        'section-id',
-      )
-      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
-        where: { contentId: '/js-track/core-fundamentals/data-types' },
-        select: { id: true },
-      })
-      expect(prisma.lesson.create).toHaveBeenCalledWith({
-        data: {
-          contentId: '/js-track/core-fundamentals/data-types',
-          title: 'Lesson Title',
-          description: 'Lesson Description',
-          order: 1,
-          slug: 'lesson-slug',
-          body: 'Lesson Content',
-          serializedBody: {},
-          access: AccessOptions.PREMIUM,
-          href: 'lesson-href',
-          sectionId: 'section-id',
-        },
-      })
-      expect(prisma.lesson.update).not.toHaveBeenCalled()
-    })
-
-    it('updates the existing row by id when contentId matches (rename-safe)', async () => {
-      ;(prisma.lesson.findUnique as Mock).mockResolvedValueOnce({ id: 'existing' })
-      ;(prisma.lesson.update as Mock).mockResolvedValue({ id: 'existing' })
-
-      await upsertLesson(
-        '/js-track/core-fundamentals/data-types',
-        'renamed-slug',
-        'Lesson Title',
-        'Lesson Description',
-        'Lesson Content',
-        {} as InputJsonValue,
-        1,
-        AccessOptions.PREMIUM,
-        'lesson-href',
-        'section-id',
-      )
-      expect(prisma.lesson.update).toHaveBeenCalledWith({
-        where: { id: 'existing' },
-        data: expect.objectContaining({
-          contentId: '/js-track/core-fundamentals/data-types',
-          slug: 'renamed-slug',
-        }),
-      })
-      expect(prisma.lesson.create).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('upsertProblem', () => {
-    it('creates a new problem when no row matches contentId or slug', async () => {
-      ;(prisma.problem.findUnique as Mock).mockResolvedValue(null)
-      ;(prisma.problem.create as Mock).mockResolvedValue({ id: '1' })
-
-      await upsertProblem(
-        '/js-track/core-fundamentals/data-types/problem-title',
-        'problem-title',
-        'problem-href',
-        'problem-link',
-        'Problem Title',
-        ProblemDifficulty.MEDIUM,
-        'Problem Question',
-        'Problem Answer',
-        ProblemType.CODING,
-        'lesson-id',
-      )
-      expect(prisma.problem.findUnique).toHaveBeenCalledWith({
-        where: { contentId: '/js-track/core-fundamentals/data-types/problem-title' },
-        select: { id: true },
-      })
-      expect(prisma.problem.create).toHaveBeenCalledWith({
-        data: {
-          contentId: '/js-track/core-fundamentals/data-types/problem-title',
-          title: 'Problem Title',
-          href: 'problem-href',
-          link: 'problem-link',
-          lessonId: 'lesson-id',
-          difficulty: ProblemDifficulty.MEDIUM,
-          question: 'Problem Question',
-          answer: 'Problem Answer',
-          type: ProblemType.CODING,
-          slug: 'problem-title',
-          serializedAnswer: undefined,
-        },
-      })
-      expect(prisma.problem.update).not.toHaveBeenCalled()
-    })
-
-    it('updates the existing row by id when contentId matches (rename-safe, progress-preserving)', async () => {
-      ;(prisma.problem.findUnique as Mock).mockResolvedValueOnce({ id: 'existing' })
-      ;(prisma.problem.update as Mock).mockResolvedValue({ id: 'existing' })
-
-      await upsertProblem(
-        '/js-track/core-fundamentals/data-types/problem-title',
-        'renamed-slug',
-        'problem-href',
-        'problem-link',
-        'Problem Title Renamed',
-        ProblemDifficulty.MEDIUM,
-        'Problem Question',
-        'Problem Answer',
-        ProblemType.CODING,
-        'lesson-id',
-      )
-      expect(prisma.problem.update).toHaveBeenCalledWith({
-        where: { id: 'existing' },
-        data: expect.objectContaining({
-          contentId: '/js-track/core-fundamentals/data-types/problem-title',
-          slug: 'renamed-slug',
-          title: 'Problem Title Renamed',
-        }),
-      })
-      expect(prisma.problem.create).not.toHaveBeenCalled()
-    })
-
-    it('falls back to slug when contentId does not match (legacy rows pre-backfill)', async () => {
-      ;(prisma.problem.findUnique as Mock)
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce({ id: 'legacy' })
-      ;(prisma.problem.update as Mock).mockResolvedValue({ id: 'legacy' })
-
-      await upsertProblem(
-        '/js-track/core-fundamentals/data-types/problem-title',
-        'problem-title',
-        'problem-href',
-        'problem-link',
-        'Problem Title',
-        ProblemDifficulty.MEDIUM,
-        'Problem Question',
-        'Problem Answer',
-        ProblemType.CODING,
-        'lesson-id',
-      )
-      expect(prisma.problem.findUnique).toHaveBeenNthCalledWith(1, {
-        where: { contentId: '/js-track/core-fundamentals/data-types/problem-title' },
-        select: { id: true },
-      })
-      expect(prisma.problem.findUnique).toHaveBeenNthCalledWith(2, {
-        where: { slug: 'problem-title' },
-        select: { id: true },
-      })
-      expect(prisma.problem.update).toHaveBeenCalledWith({
-        where: { id: 'legacy' },
-        data: expect.objectContaining({
-          contentId: '/js-track/core-fundamentals/data-types/problem-title',
-        }),
-      })
-      expect(prisma.problem.create).not.toHaveBeenCalled()
     })
   })
 
@@ -696,5 +441,182 @@ describe('Lesson services', () => {
         orderBy: { order: 'asc' },
       })
     })
+  })
+})
+
+// The content-sync upsert helpers run inside sync-content's $transaction, so they
+// operate on a transaction client (tx). They match on the stable contentId first,
+// fall back to the legacy slug, and update by row id so progress FKs survive a rename.
+describe('content-sync upserts (stable identity)', () => {
+  const makeTx = () =>
+    ({
+      course: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() },
+      section: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() },
+      lesson: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() },
+      problem: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() },
+    }) as unknown as Prisma.TransactionClient & Record<string, any>
+
+  afterEach(() => vi.clearAllMocks())
+
+  it('upsertCourse creates keyed by contentId + slug when nothing matches', async () => {
+    const tx = makeTx() as any
+    tx.course.findUnique.mockResolvedValue(null)
+    tx.course.create.mockResolvedValue({ id: '1' })
+
+    await upsertCourse(tx, '/js-track', 'course-slug', 'T', 'D', 'body', '/c', 1, {
+      compiledSource: 'x',
+    } as InputJsonValue)
+
+    expect(tx.course.findUnique).toHaveBeenCalledWith({
+      where: { contentId: '/js-track' },
+      select: { id: true },
+    })
+    expect(tx.course.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ contentId: '/js-track', slug: 'course-slug', title: 'T' }),
+    })
+    expect(tx.course.update).not.toHaveBeenCalled()
+  })
+
+  it('upsertCourse updates the matched row by id (rename-safe)', async () => {
+    const tx = makeTx() as any
+    tx.course.findUnique.mockResolvedValueOnce({ id: 'existing' })
+    tx.course.update.mockResolvedValue({ id: 'existing' })
+
+    await upsertCourse(tx, '/js-track', 'renamed', 'T', 'D', 'body', '/c', 1)
+
+    expect(tx.course.update).toHaveBeenCalledWith({
+      where: { id: 'existing' },
+      data: expect.objectContaining({ contentId: '/js-track', slug: 'renamed' }),
+    })
+    expect(tx.course.create).not.toHaveBeenCalled()
+  })
+
+  it('upsertSection creates then updates by id on a later contentId match', async () => {
+    const tx = makeTx() as any
+    tx.section.findUnique.mockResolvedValue(null)
+    tx.section.create.mockResolvedValue({ id: 's1' })
+    await upsertSection(tx, '/js-track/core', 'sec-slug', 'T', 'D', 'body', 1, '/s', 'course-1')
+    expect(tx.section.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ contentId: '/js-track/core', courseId: 'course-1' }),
+    })
+
+    const tx2 = makeTx() as any
+    tx2.section.findUnique.mockResolvedValueOnce({ id: 'sec' })
+    tx2.section.update.mockResolvedValue({ id: 'sec' })
+    await upsertSection(tx2, '/js-track/core', 'renamed', 'T', 'D', 'body', 1, '/s', 'course-1')
+    expect(tx2.section.update).toHaveBeenCalledWith({
+      where: { id: 'sec' },
+      data: expect.objectContaining({ contentId: '/js-track/core', slug: 'renamed' }),
+    })
+  })
+
+  it('upsertLesson creates then updates by id on a later contentId match', async () => {
+    const tx = makeTx() as any
+    tx.lesson.findUnique.mockResolvedValue(null)
+    tx.lesson.create.mockResolvedValue({ id: 'l1' })
+    await upsertLesson(
+      tx,
+      '/js-track/core/data-types',
+      'lesson-slug',
+      'T',
+      'D',
+      'body',
+      { compiledSource: 'x' } as InputJsonValue,
+      1,
+      AccessOptions.FREE,
+      '/l',
+      'section-1',
+    )
+    expect(tx.lesson.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        contentId: '/js-track/core/data-types',
+        sectionId: 'section-1',
+        access: AccessOptions.FREE,
+      }),
+    })
+
+    const tx2 = makeTx() as any
+    tx2.lesson.findUnique.mockResolvedValueOnce({ id: 'les' })
+    tx2.lesson.update.mockResolvedValue({ id: 'les' })
+    await upsertLesson(
+      tx2,
+      '/js-track/core/data-types',
+      'renamed',
+      'T',
+      'D',
+      'body',
+      Prisma.DbNull,
+      1,
+      AccessOptions.FREE,
+      '/l',
+      'section-1',
+    )
+    expect(tx2.lesson.update).toHaveBeenCalledWith({
+      where: { id: 'les' },
+      data: expect.objectContaining({ contentId: '/js-track/core/data-types', slug: 'renamed' }),
+    })
+  })
+
+  it('upsertProblem updates by id when contentId matches (progress-preserving)', async () => {
+    const tx = makeTx() as any
+    tx.problem.findUnique.mockResolvedValueOnce({ id: 'existing' })
+    tx.problem.update.mockResolvedValue({ id: 'existing' })
+
+    await upsertProblem(
+      tx,
+      '/js-track/core/data-types/pure-functions',
+      'renamed-slug',
+      '/h',
+      '/l',
+      'T',
+      ProblemDifficulty.EASY,
+      'q',
+      'a',
+      ProblemType.CODING,
+      'lesson-1',
+    )
+
+    expect(tx.problem.update).toHaveBeenCalledWith({
+      where: { id: 'existing' },
+      data: expect.objectContaining({
+        contentId: '/js-track/core/data-types/pure-functions',
+        slug: 'renamed-slug',
+      }),
+    })
+    expect(tx.problem.create).not.toHaveBeenCalled()
+  })
+
+  it('upsertProblem falls back to slug when contentId does not match (legacy pre-backfill rows)', async () => {
+    const tx = makeTx() as any
+    tx.problem.findUnique.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'legacy' })
+    tx.problem.update.mockResolvedValue({ id: 'legacy' })
+
+    await upsertProblem(
+      tx,
+      '/js-track/core/data-types/pure-functions',
+      'legacy-slug',
+      '/h',
+      '/l',
+      'T',
+      ProblemDifficulty.EASY,
+      'q',
+      'a',
+      ProblemType.CODING,
+      'lesson-1',
+    )
+
+    expect(tx.problem.findUnique).toHaveBeenNthCalledWith(1, {
+      where: { contentId: '/js-track/core/data-types/pure-functions' },
+      select: { id: true },
+    })
+    expect(tx.problem.findUnique).toHaveBeenNthCalledWith(2, {
+      where: { slug: 'legacy-slug' },
+      select: { id: true },
+    })
+    expect(tx.problem.update).toHaveBeenCalledWith({
+      where: { id: 'legacy' },
+      data: expect.objectContaining({ contentId: '/js-track/core/data-types/pure-functions' }),
+    })
+    expect(tx.problem.create).not.toHaveBeenCalled()
   })
 })
