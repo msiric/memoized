@@ -77,7 +77,7 @@ export const AnimatedCode = ({
           </div>
         </div>
       </div>
-      <div className="mt-6 flex min-h-[18rem] items-start px-1 text-sm sm:min-h-[22rem]">
+      <div className="mt-6 flex h-[20rem] items-start overflow-hidden px-1 text-sm sm:h-[24rem]">
         <div className="w-full">
           {highlighter ? (
             <>
@@ -86,7 +86,7 @@ export const AnimatedCode = ({
                 theme="nord"
                 highlighter={highlighter}
                 code={code}
-                options={{ duration: 800, stagger: 0.3 }}
+                options={{ duration: 800, stagger: 0.3, animateContainer: false }}
                 className="text-xs sm:text-sm"
               />
             </>
