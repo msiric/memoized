@@ -82,14 +82,14 @@ export const CallToAction = ({ codeSnippets, initialSnippet }: CallToActionProps
                   />
                 </div>
                 <div className="text-center lg:text-left">
-                  <p className="text-sm text-zinc-300">
+                  <p className="mx-auto max-w-[34ch] text-balance text-sm text-zinc-300 lg:mx-0">
                     Join a <span className="font-semibold text-lime-300">growing community</span> of engineers mastering interview skills
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="relative lg:static xl:pl-10">
+          <div className="hidden sm:block relative lg:static xl:pl-10">
             <div className="absolute inset-x-[-50vw] -bottom-48 -top-24 [mask-image:linear-gradient(transparent,white,white)] lg:-bottom-32 lg:-top-24 lg:left-[calc(50%+14rem)] lg:right-0 lg:[mask-image:none] dark:[mask-image:linear-gradient(transparent,white,transparent)] lg:dark:[mask-image:linear-gradient(white,white,transparent)]">
               <HomepageBackground
                 width={668}

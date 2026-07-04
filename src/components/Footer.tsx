@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 import { Button } from '@/components/Button'
-import { SUPPORT_EMAIL } from '@/constants'
+import { BLOG_PREFIX, SUPPORT_EMAIL } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import { useAccess } from '@/hooks/useAccess'
 import { usePages } from '@/hooks/usePages'
@@ -145,6 +145,12 @@ function SmallPrint() {
           </span>
         </div>
         <div className="flex gap-4">
+          <Link
+            className="p-2 text-xs text-zinc-600 dark:text-zinc-400"
+            href={BLOG_PREFIX}
+          >
+            Blog
+          </Link>
           <Link
             className="p-2 text-xs text-zinc-600 dark:text-zinc-400"
             href="/privacy"
