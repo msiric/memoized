@@ -95,15 +95,15 @@ export default async function Premium() {
         {/* Success Stats + Limited Time Offer - Cohesive Group */}
         <div className="mx-auto max-w-xl">
           <div className="mb-6 grid grid-cols-3 items-stretch gap-3 sm:gap-6 lg:gap-8">
-            <StatCard value="89%" label="Interview Pass Rate" variant="lime" />
+            <StatCard value="500" label="Practice Problems" variant="lime" />
             <StatCard
-              value="2.5x"
-              label="Faster Job Placement"
+              value="120"
+              label="In-Depth Lessons"
               variant="indigo"
             />
             <StatCard
-              value="$40k+"
-              label="Average Salary Increase"
+              value="2"
+              label="Learning Tracks"
               variant="amber"
             />
           </div>
@@ -161,7 +161,7 @@ export default async function Premium() {
             variant="lime"
             icon={<ClockIcon />}
             title="Lifetime Access"
-            description="One-time purchase gives you permanent access to all content, updates and new course releases. No subscriptions."
+            description="One-time purchase gives you permanent access to all content, updates, and new course releases — no recurring charges."
           />
 
           <FeatureCard
@@ -186,7 +186,7 @@ export default async function Premium() {
           <SectionHeader
             heading="Why Premium Members"
             gradientText="Get Hired Faster"
-            description="While free resources teach concepts, premium training teaches you how to excel in actual interviews. This systematic approach has helped hundreds land roles at top companies."
+            description="While free resources teach concepts, premium training teaches you how to excel in actual interviews. This systematic approach has helped engineers land roles at top companies."
           />
 
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">

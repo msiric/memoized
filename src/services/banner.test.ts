@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { getActiveBanners, upsertBanner } from '@/services/banner'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import { Banner, BannerType } from '@prisma/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 

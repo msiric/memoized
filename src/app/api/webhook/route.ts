@@ -7,7 +7,7 @@ import {
   isWebhookEventProcessed,
   markWebhookEventProcessed,
 } from '@/services/webhook'
-import { reportError } from '@/lib/error-tracking'
+import { reportError } from '@/lib/sentry'
 import Stripe from 'stripe'
 
 const relevantEvents = new Set([

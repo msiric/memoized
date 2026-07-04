@@ -10,6 +10,7 @@ export const COURSES_PREFIX = '/courses'
 export const PROBLEMS_PREFIX = '/problems'
 export const RESOURCES_PREFIX = '/resources'
 export const PREMIUM_PREFIX = "/premium"
+export const BLOG_PREFIX = '/blog'
 
 export const DSA_TRACK_PREFIX = '/dsa-track'
 export const JS_TRACK_PREFIX = '/js-track'
@@ -37,6 +38,7 @@ export const CONTENT_FOLDER = 'content'
 export const SAMPLES_FOLDER = 'samples'
 
 export const RESOURCES_FOLDER = 'resources'
+export const BLOG_FOLDER = 'blog'
 
 export const PREMIUM_QUERY_PARAM = 'upgradedToPremium'
 export const SESSION_QUERY_PARAM = 'sessionId'
@@ -53,4 +55,25 @@ export const SLUGIFY_OPTIONS = {
   strict: true, // strip special characters except replacement
   trim: true, // trim leading and trailing replacement chars
   // No need to use charmap since the forward slash will be replaced by default
+}
+
+/**
+ * Site-wide configuration
+ */
+export const SITE = {
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://www.memoized.io',
+  name: APP_NAME,
+  description: 'Master Data Structures & Algorithms with in-depth courses and coding challenges.',
+}
+
+/**
+ * Default author information for blog posts
+ */
+export const AUTHOR = {
+  name: 'Mario Siric',
+  bio: 'Software engineer and educator passionate about helping developers master data structures, algorithms, and JavaScript fundamentals.',
+  image: 'https://avatars.githubusercontent.com/u/26199969?s=400&u=74701753b39e34fb8b83ce5f221d9dd5fa12064e&v=4',
+  twitter: 'https://x.com/oiramciris',
+  linkedin: 'https://www.linkedin.com/in/mariosiric/',
+  github: 'https://github.com/msiric',
 }

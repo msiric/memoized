@@ -5,7 +5,7 @@ import {
   markLessonProgress,
   MarkLessonArgs as ServiceMarkLessonArgs,
 } from '@/services/lesson'
-import { createCustomError } from '@/lib/error-tracking'
+import { createCustomError } from '@/lib/sentry'
 import { createCustomResponse } from '@/utils/response'
 import { getServerSession } from 'next-auth'
 

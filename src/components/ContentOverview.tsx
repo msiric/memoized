@@ -64,7 +64,7 @@ export const ContentOverview = () => {
                     {/* Quick Stats */}
                     <div className="grid grid-cols-3 gap-3 text-center sm:gap-6 lg:gap-8">
                       <StatCard
-                        value="480+"
+                        value="500+"
                         label="JS Problems"
                         variant="lime"
                       />
@@ -137,9 +137,9 @@ export const ContentOverview = () => {
                   <p
                     className={`${TYPOGRAPHY.body.base} text-zinc-800 dark:text-zinc-300`}
                   >
-                    Practice with actual questions from Google, Meta, Netflix
-                    interviews. Learn the specific JavaScript patterns
-                    interviewers expect to see.
+                    Practice the question types and patterns that companies
+                    like Google, Meta, and Netflix are known to test for. Learn
+                    the specific JavaScript patterns interviewers expect to see.
                   </p>
                   <div
                     className={`mt-3 flex items-center sm:mt-4 ${TYPOGRAPHY.body.small} text-indigo-600 dark:text-indigo-400`}

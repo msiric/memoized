@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import prisma from '@/lib/prisma'
+import { upsertResource } from '@/services/resource'
 import { Prisma } from '@prisma/client'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
@@ -37,6 +38,7 @@ interface LessonConfig {
 slugify.extend({ '/': '-' })
 
 type PreparedResource = {
+  contentId: string
   slug: string
   title: string
   description: string
@@ -140,7 +142,7 @@ async function serializeMdxContent(content: string, filePath?: string): Promise<
     console.error('File path:', filePath || 'Unknown')
 
     if (isProduction()) {
-      const { reportMdxError } = await import('@/lib/error-tracking')
+      const { reportMdxError } = await import('@/lib/sentry')
       reportMdxError(
         error instanceof Error ? error : new Error(String(error)),
         {
@@ -176,6 +178,7 @@ async function prepareResources(): Promise<PreparedResource[]> {
     )
 
     prepared.push({
+      contentId: 'intro',
       slug: 'intro',
       title: 'Resources',
       description: 'Enhance Your Learning Journey',
@@ -245,6 +248,7 @@ async function prepareResources(): Promise<PreparedResource[]> {
             }
 
             prepared.push({
+              contentId: resourceId,
               slug: resourceSlug,
               title: resourceTitle,
               description: resourceDescription,
@@ -292,30 +296,19 @@ async function persistResources(prepared: PreparedResource[]): Promise<void> {
           lessonId = lessonRecord.id
         }
 
-        await tx.resource.upsert({
-          where: { slug: resource.slug },
-          update: {
-            title: resource.title,
-            description: resource.description,
-            order: resource.order,
-            body: resource.body,
-            href: resource.href,
-            access: resource.access,
-            lessonId,
-            serializedBody: resource.serializedBody,
-          },
-          create: {
-            title: resource.title,
-            description: resource.description,
-            order: resource.order,
-            slug: resource.slug,
-            body: resource.body,
-            href: resource.href,
-            access: resource.access,
-            lessonId,
-            serializedBody: resource.serializedBody,
-          },
-        })
+        await upsertResource(
+          tx,
+          resource.contentId,
+          resource.slug,
+          resource.title,
+          resource.description,
+          resource.body,
+          resource.order,
+          resource.href,
+          resource.access,
+          lessonId,
+          resource.serializedBody,
+        )
         console.log(`✅ Synced resource: ${resource.title}`)
       }
     },

@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { revalidateAccount } from '@/lib/cache'
 import { createOrRetrieveCustomer } from '@/services/stripe'
-import { reportError } from '@/lib/error-tracking'
+import { reportError } from '@/lib/sentry'
 
 export const findAccount = async (
   provider: string,

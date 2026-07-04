@@ -1,7 +1,7 @@
 'use client'
 
 import { HeroPattern } from '@/components/HeroPattern'
-import { reportNextError } from '@/lib/error-tracking'
+import { reportNextError } from '@/lib/sentry'
 import { useEffect } from 'react'
 
 export default function GlobalError({

@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { AccessOptions, Prisma } from '@prisma/client'
 
 export const getResourceBySlug = async (resourceSlug: string) => {
   const resource = await prisma.resource.findUnique({
@@ -45,4 +46,39 @@ export const getResourcesSlugs = async () => {
   }
 
   return resources
+}
+
+// ---- Content-sync upsert (stable identity); see lesson.ts for the contract. ----
+export const upsertResource = async (
+  tx: Prisma.TransactionClient,
+  contentId: string,
+  resourceSlug: string,
+  resourceTitle: string,
+  resourceDescription: string,
+  resourceContent: string,
+  resourceOrder: number,
+  resourceHref: string,
+  lessonAccess: AccessOptions,
+  lessonId: string | null,
+  serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
+) => {
+  const data = {
+    contentId,
+    title: resourceTitle,
+    description: resourceDescription,
+    order: resourceOrder,
+    slug: resourceSlug,
+    body: resourceContent,
+    href: resourceHref,
+    access: lessonAccess,
+    lessonId,
+    ...(serializedContent !== undefined && { serializedBody: serializedContent }),
+  }
+  const existing =
+    (await tx.resource.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await tx.resource.findUnique({ where: { slug: resourceSlug }, select: { id: true } }))
+  if (existing) {
+    return tx.resource.update({ where: { id: existing.id }, data })
+  }
+  return tx.resource.create({ data })
 }

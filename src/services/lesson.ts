@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { revalidateLessonProgress } from '@/lib/cache'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
+import { AccessOptions, ProblemDifficulty, ProblemType, Prisma } from '@prisma/client'
 
 export type MarkLessonArgs = {
   userId: string
@@ -277,4 +278,142 @@ export const getLessonsWithResourcesAndProblems = async () => {
     orderBy: { order: 'asc' },
   })
   return { allLessons }
+}
+
+// ---- Content-sync upserts (stable identity) ----
+// Match on the stable contentId, falling back to the legacy slug for rows synced
+// before contentId existed. Update by the row's own id so child rows and
+// UserProgress FKs survive a title/slug change (no orphan, no cascade). Each
+// accepts the active transaction client so the whole sync commits atomically.
+
+export const upsertCourse = async (
+  tx: Prisma.TransactionClient,
+  contentId: string,
+  courseSlug: string,
+  courseTitle: string,
+  courseDescription: string,
+  courseBody: string | null,
+  courseHref: string,
+  courseOrder: number,
+  serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
+) => {
+  const data = {
+    contentId,
+    title: courseTitle,
+    description: courseDescription,
+    body: courseBody,
+    serializedBody: serializedContent,
+    order: courseOrder,
+    href: courseHref,
+    slug: courseSlug,
+  }
+  const existing =
+    (await tx.course.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await tx.course.findUnique({ where: { slug: courseSlug }, select: { id: true } }))
+  if (existing) {
+    return tx.course.update({ where: { id: existing.id }, data })
+  }
+  return tx.course.create({ data })
+}
+
+export const upsertSection = async (
+  tx: Prisma.TransactionClient,
+  contentId: string,
+  sectionSlug: string,
+  sectionTitle: string,
+  sectionDescription: string,
+  sectionContent: string,
+  sectionOrder: number,
+  sectionHref: string,
+  courseId: string,
+  serializedContent?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
+) => {
+  const data = {
+    contentId,
+    title: sectionTitle,
+    description: sectionDescription,
+    body: sectionContent,
+    slug: sectionSlug,
+    order: sectionOrder,
+    href: sectionHref,
+    courseId,
+    ...(serializedContent !== undefined && { serializedBody: serializedContent }),
+  }
+  const existing =
+    (await tx.section.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await tx.section.findUnique({ where: { slug: sectionSlug }, select: { id: true } }))
+  if (existing) {
+    return tx.section.update({ where: { id: existing.id }, data })
+  }
+  return tx.section.create({ data })
+}
+
+export const upsertLesson = async (
+  tx: Prisma.TransactionClient,
+  contentId: string,
+  lessonSlug: string,
+  lessonTitle: string,
+  lessonDescription: string,
+  lessonContent: string,
+  serializedContent: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
+  lessonOrder: number,
+  lessonAccess: AccessOptions,
+  lessonHref: string,
+  sectionId: string,
+) => {
+  const data = {
+    contentId,
+    title: lessonTitle,
+    description: lessonDescription,
+    order: lessonOrder,
+    slug: lessonSlug,
+    body: lessonContent,
+    serializedBody: serializedContent,
+    access: lessonAccess,
+    href: lessonHref,
+    sectionId,
+  }
+  const existing =
+    (await tx.lesson.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await tx.lesson.findUnique({ where: { slug: lessonSlug }, select: { id: true } }))
+  if (existing) {
+    return tx.lesson.update({ where: { id: existing.id }, data })
+  }
+  return tx.lesson.create({ data })
+}
+
+export const upsertProblem = async (
+  tx: Prisma.TransactionClient,
+  contentId: string,
+  problemSlug: string,
+  problemHref: string,
+  problemLink: string,
+  problemTitle: string,
+  problemDifficulty: ProblemDifficulty,
+  problemQuestion: string,
+  problemAnswer: string,
+  problemType: ProblemType,
+  lessonId: string,
+  serializedAnswer?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
+) => {
+  const data = {
+    contentId,
+    href: problemHref,
+    link: problemLink,
+    title: problemTitle,
+    slug: problemSlug,
+    lessonId,
+    difficulty: problemDifficulty,
+    question: problemQuestion,
+    answer: problemAnswer,
+    type: problemType,
+    serializedAnswer,
+  }
+  const existing =
+    (await tx.problem.findUnique({ where: { contentId }, select: { id: true } })) ??
+    (await tx.problem.findUnique({ where: { slug: problemSlug }, select: { id: true } }))
+  if (existing) {
+    return tx.problem.update({ where: { id: existing.id }, data })
+  }
+  return tx.problem.create({ data })
 }

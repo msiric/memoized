@@ -59,6 +59,7 @@ describe('PreserializedMdxRenderer', () => {
 
   const mockProblem = { 
     id: 'problem-1', 
+    contentId: '/js-track/core-fundamentals/data-types/problem-1',
     title: 'Test Problem', 
     difficulty: 'EASY' as const,
     href: '/problem-1',

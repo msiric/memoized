@@ -1,5 +1,5 @@
 import { meiliSearch } from '@/lib/meili'
-import { reportError } from '@/lib/error-tracking'
+import { reportError } from '@/lib/sentry'
 import { checkPremiumAccess } from '@/services/user'
 import { getServerSession } from 'next-auth/next'
 import { NextResponse } from 'next/server'

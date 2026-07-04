@@ -1,5 +1,5 @@
 
-import { sendEmail } from '@/lib/resend'
+import { sendEmail } from '@/services/email'
 import {
   createUserWithAccount,
   findAccount,

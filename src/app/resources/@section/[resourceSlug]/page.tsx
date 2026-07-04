@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation'
 
 export async function generateStaticParams() {
   const resources = await getResourcesSlugs()
-  return resources?.map((resource) => ({ resourceSlug: resource.slug }))
+  return resources?.map((resource) => ({ resourceSlug: resource.slug })) ?? []
 }
 
 export default async function Resource({

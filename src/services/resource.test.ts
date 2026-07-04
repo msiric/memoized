@@ -2,12 +2,11 @@ import prisma from '@/lib/prisma'
 import {
   getResourceBySlug,
   getResources,
+  upsertResource,
 } from '@/services/resource'
 import { AccessOptions } from '@prisma/client'
+import { InputJsonValue } from '@prisma/client/runtime/library'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
-
-// Note: upsertResource was moved into sync-resources.ts as part of the
-// two-phase transactional sync refactor. Its tests now live in sync-resources.test.ts.
 
 vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
@@ -105,5 +104,47 @@ describe('Resource services', () => {
         orderBy: { order: 'asc' },
       })
     })
+  })
+})
+
+// upsertResource runs inside sync-resources' $transaction (operates on a tx client),
+// matches contentId-first with a legacy-slug fallback, and updates by row id.
+describe('content-sync upsert (stable identity)', () => {
+  const makeTx = () =>
+    ({ resource: { findUnique: vi.fn(), create: vi.fn(), update: vi.fn() } }) as any
+
+  afterEach(() => vi.clearAllMocks())
+
+  it('creates keyed by contentId + slug when nothing matches', async () => {
+    const tx = makeTx()
+    tx.resource.findUnique.mockResolvedValue(null)
+    tx.resource.create.mockResolvedValue({ id: '1' })
+
+    await upsertResource(tx, 'closures', 'res-slug', 'T', 'D', 'body', 1, '/r', AccessOptions.FREE, 'lesson-1', {
+      compiledSource: 'x',
+    } as InputJsonValue)
+
+    expect(tx.resource.findUnique).toHaveBeenCalledWith({
+      where: { contentId: 'closures' },
+      select: { id: true },
+    })
+    expect(tx.resource.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({ contentId: 'closures', slug: 'res-slug', lessonId: 'lesson-1' }),
+    })
+    expect(tx.resource.update).not.toHaveBeenCalled()
+  })
+
+  it('updates the matched row by id (rename-safe)', async () => {
+    const tx = makeTx()
+    tx.resource.findUnique.mockResolvedValueOnce({ id: 'existing' })
+    tx.resource.update.mockResolvedValue({ id: 'existing' })
+
+    await upsertResource(tx, 'closures', 'renamed', 'T', 'D', 'body', 1, '/r', AccessOptions.FREE, null)
+
+    expect(tx.resource.update).toHaveBeenCalledWith({
+      where: { id: 'existing' },
+      data: expect.objectContaining({ contentId: 'closures', slug: 'renamed', lessonId: null }),
+    })
+    expect(tx.resource.create).not.toHaveBeenCalled()
   })
 })

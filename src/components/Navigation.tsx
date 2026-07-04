@@ -14,7 +14,7 @@ import {
   NavigationProps,
   NavigationSection,
 } from '@/types'
-import { CustomError, handleError } from '@/lib/error-tracking'
+import { CustomError, handleError } from '@/lib/sentry'
 import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
 import {

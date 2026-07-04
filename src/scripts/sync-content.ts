@@ -6,6 +6,12 @@ import {
 } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import prisma from '@/lib/prisma'
+import {
+  upsertCourse,
+  upsertLesson,
+  upsertProblem,
+  upsertSection,
+} from '@/services/lesson'
 import { Lesson, Prisma, ProblemDifficulty, ProblemType } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
@@ -19,6 +25,7 @@ type SerializedJson = Prisma.NullableJsonNullValueInput | InputJsonValue
 slugify.extend({ '/': '-' })
 
 type PreparedCourse = {
+  contentId: string
   slug: string
   title: string
   description: string
@@ -29,6 +36,7 @@ type PreparedCourse = {
 }
 
 type PreparedSection = {
+  contentId: string
   slug: string
   title: string
   description: string
@@ -40,6 +48,7 @@ type PreparedSection = {
 }
 
 type PreparedLesson = {
+  contentId: string
   slug: string
   title: string
   description: string
@@ -52,6 +61,7 @@ type PreparedLesson = {
 }
 
 type PreparedProblem = {
+  contentId: string
   slug: string
   href: string
   link: string
@@ -100,7 +110,7 @@ async function serializeMdxContent(content: string, filePath?: string): Promise<
     console.error('File path:', filePath || 'Unknown')
 
     if (isProduction()) {
-      const { reportMdxError } = await import('@/lib/error-tracking')
+      const { reportMdxError } = await import('@/lib/sentry')
       reportMdxError(
         error instanceof Error ? error : new Error(String(error)),
         {
@@ -240,6 +250,7 @@ async function prepareContent(contentInfo: {
     )
 
     prepared.courses.push({
+      contentId: courseId,
       slug: courseSlug,
       title: courseTitle,
       description: courseDescription,
@@ -257,6 +268,7 @@ async function prepareContent(contentInfo: {
         href: sectionHref,
       } = section
       const sectionSlug = slugify(sectionTitle, SLUGIFY_OPTIONS)
+      const sectionContentId = `${courseId}${sectionId}`
       const sectionPath = path.join(contentInfo.path, courseId, sectionId)
       const sectionFilePath = path.join(sectionPath, 'page.mdx')
 
@@ -272,6 +284,7 @@ async function prepareContent(contentInfo: {
       )
 
       prepared.sections.push({
+        contentId: sectionContentId,
         slug: sectionSlug,
         title: sectionTitle,
         description: sectionDescription,
@@ -287,6 +300,7 @@ async function prepareContent(contentInfo: {
 
       for (const lesson of detailedLessons) {
         const lessonSlug = slugify(lesson.title, SLUGIFY_OPTIONS)
+        const lessonContentId = `${courseId}${sectionId}${lesson.id}`
         const lessonPath = path.join(sectionPath, lesson.id, 'page.mdx')
 
         if (!fs.existsSync(lessonPath)) {
@@ -305,6 +319,7 @@ async function prepareContent(contentInfo: {
         const accessLevel = lesson.access === 'FREE' ? 'FREE' : 'PREMIUM'
 
         prepared.lessons.push({
+          contentId: lessonContentId,
           slug: lessonSlug,
           title: lesson.title,
           description: lesson.description,
@@ -325,6 +340,7 @@ async function prepareContent(contentInfo: {
         if (lesson.problems && lesson.problems.length > 0) {
           for (const problem of lesson.problems) {
             const problemSlug = slugify(problem.title, SLUGIFY_OPTIONS)
+            const problemContentId = `${lessonContentId}/${problem.id || problemSlug}`
             const problemLink = `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}/${lessonSlug}#${problemSlug}`
 
             // Serialize problem answer at build time for better performance
@@ -334,6 +350,7 @@ async function prepareContent(contentInfo: {
                 : Prisma.DbNull
 
             prepared.problems.push({
+              contentId: problemContentId,
               slug: problemSlug,
               href: problem.href || '',
               link: problemLink,
@@ -373,26 +390,17 @@ async function persistContent(prepared: PreparedContent): Promise<void> {
 
       // Upsert courses
       for (const course of prepared.courses) {
-        const record = await tx.course.upsert({
-          where: { slug: course.slug },
-          update: {
-            title: course.title,
-            description: course.description,
-            body: course.body,
-            serializedBody: course.serializedBody,
-            order: course.order,
-            href: course.href,
-          },
-          create: {
-            title: course.title,
-            description: course.description,
-            body: course.body,
-            serializedBody: course.serializedBody,
-            order: course.order,
-            slug: course.slug,
-            href: course.href,
-          },
-        })
+        const record = await upsertCourse(
+          tx,
+          course.contentId,
+          course.slug,
+          course.title,
+          course.description,
+          course.body,
+          course.href,
+          course.order,
+          course.serializedBody,
+        )
         courseIdMap.set(course.slug, record.id)
         console.log(`✅ Synced course: ${course.title}`)
       }
@@ -406,28 +414,18 @@ async function persistContent(prepared: PreparedContent): Promise<void> {
           )
         }
 
-        const record = await tx.section.upsert({
-          where: { slug: section.slug },
-          update: {
-            title: section.title,
-            description: section.description,
-            body: section.body,
-            order: section.order,
-            href: section.href,
-            courseId,
-            serializedBody: section.serializedBody,
-          },
-          create: {
-            title: section.title,
-            description: section.description,
-            body: section.body,
-            slug: section.slug,
-            order: section.order,
-            href: section.href,
-            courseId,
-            serializedBody: section.serializedBody,
-          },
-        })
+        const record = await upsertSection(
+          tx,
+          section.contentId,
+          section.slug,
+          section.title,
+          section.description,
+          section.body,
+          section.order,
+          section.href,
+          courseId,
+          section.serializedBody,
+        )
         sectionIdMap.set(section.slug, record.id)
         console.log(`✅ Synced section: ${section.title}`)
       }
@@ -441,30 +439,19 @@ async function persistContent(prepared: PreparedContent): Promise<void> {
           )
         }
 
-        const record = await tx.lesson.upsert({
-          where: { slug: lesson.slug },
-          update: {
-            title: lesson.title,
-            description: lesson.description,
-            order: lesson.order,
-            body: lesson.body,
-            serializedBody: lesson.serializedBody,
-            access: lesson.access,
-            href: lesson.href,
-            sectionId,
-          },
-          create: {
-            title: lesson.title,
-            description: lesson.description,
-            order: lesson.order,
-            slug: lesson.slug,
-            body: lesson.body,
-            serializedBody: lesson.serializedBody,
-            access: lesson.access,
-            href: lesson.href,
-            sectionId,
-          },
-        })
+        const record = await upsertLesson(
+          tx,
+          lesson.contentId,
+          lesson.slug,
+          lesson.title,
+          lesson.description,
+          lesson.body,
+          lesson.serializedBody,
+          lesson.order,
+          lesson.access,
+          lesson.href,
+          sectionId,
+        )
         lessonIdMap.set(lesson.slug, record.id)
         console.log(`✅ Synced lesson: ${lesson.title}`)
       }
@@ -478,32 +465,20 @@ async function persistContent(prepared: PreparedContent): Promise<void> {
           )
         }
 
-        await tx.problem.upsert({
-          where: { slug: problem.slug },
-          update: {
-            href: problem.href,
-            link: problem.link,
-            title: problem.title,
-            lessonId,
-            difficulty: problem.difficulty,
-            question: problem.question,
-            answer: problem.answer,
-            type: problem.type,
-            serializedAnswer: problem.serializedAnswer,
-          },
-          create: {
-            title: problem.title,
-            slug: problem.slug,
-            href: problem.href,
-            link: problem.link,
-            lessonId,
-            difficulty: problem.difficulty,
-            question: problem.question,
-            answer: problem.answer,
-            type: problem.type,
-            serializedAnswer: problem.serializedAnswer,
-          },
-        })
+        await upsertProblem(
+          tx,
+          problem.contentId,
+          problem.slug,
+          problem.href,
+          problem.link,
+          problem.title,
+          problem.difficulty,
+          problem.question,
+          problem.answer,
+          problem.type,
+          lessonId,
+          problem.serializedAnswer,
+        )
         console.log(`✅ Synced problem: ${problem.title}`)
       }
     },

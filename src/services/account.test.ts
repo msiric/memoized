@@ -20,7 +20,7 @@ vi.mock('@/lib/prisma', () => {
     default: { account: { findUnique: vi.fn() }, user: { create: vi.fn() } },
   }
 })
-vi.mock('@/lib/resend')
+vi.mock('@/services/email')
 vi.mock('@/services/stripe', () => ({ createOrRetrieveCustomer: vi.fn() }))
 
 describe('Account services', () => {

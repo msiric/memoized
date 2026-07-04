@@ -19,7 +19,7 @@ vi.mock('@/constants', () => ({
   COURSES_PREFIX: '/courses',
 }))
 
-vi.mock('@/lib/error-tracking', () => ({
+vi.mock('@/lib/sentry', () => ({
   ServiceError: class ServiceError extends Error {
     constructor(message: string) {
       super(message)
@@ -45,9 +45,9 @@ describe('Email Service', () => {
   let ServiceError: any
 
   beforeAll(async () => {
-    const resendModule = await import('@/lib/resend')
-    const errorModule = await import('@/lib/error-tracking')
-    sendEmail = resendModule.sendEmail
+    const emailModule = await import('@/services/email')
+    const errorModule = await import('@/lib/sentry')
+    sendEmail = emailModule.sendEmail
     ServiceError = errorModule.ServiceError
   })
 
@@ -204,8 +204,9 @@ describe('Email Service', () => {
       expect(html).toContain('Welcome to TestApp')
       expect(html).toContain('Mario from TestApp')
 
+      // Logo uses production URL (email clients can't access localhost)
       expect(html).toContain(
-        'src="https://test.memoized.io/images/brand/logo-dark.png"',
+        'src="https://www.memoized.io/images/brand/logo-dark.png"',
       )
       expect(html).toContain('alt="Logo"')
 
@@ -263,8 +264,9 @@ describe('Email Service', () => {
 
       expect(html).toContain('Mario from TestApp')
 
+      // Logo uses production URL (email clients can't access localhost)
       expect(html).toContain(
-        'src="https://test.memoized.io/images/brand/logo-dark.png"',
+        'src="https://www.memoized.io/images/brand/logo-dark.png"',
       )
     })
 
@@ -361,8 +363,9 @@ describe('Email Service', () => {
 
         expect(html).toContain('alt="Logo"')
         expect(html).toContain('height="30"')
+        // Logo uses production URL (email clients can't access localhost)
         expect(html).toContain(
-          'src="https://test.memoized.io/images/brand/logo-dark.png"',
+          'src="https://www.memoized.io/images/brand/logo-dark.png"',
         )
 
         expect(html).toContain('Best,<br />Mario from TestApp')
@@ -421,25 +424,23 @@ describe('Email Service', () => {
       expect(logoMatch).toBeTruthy()
 
       const logoUrl = logoMatch![1]
+      // Logo uses production URL (email clients can't access localhost)
       expect(logoUrl).toBe(
-        'https://test.memoized.io/images/brand/logo-dark.png',
+        'https://www.memoized.io/images/brand/logo-dark.png',
       )
 
-      if (logoUrl.includes('test.memoized.io')) {
-        expect(logoUrl).toContain('logo-dark.png')
-      } else {
-        try {
-          const response = await fetch(logoUrl, { method: 'HEAD' })
-          expect(response.ok).toBe(true)
-          expect(response.status).toBe(200)
+      // Verify the production URL is accessible (network test)
+      try {
+        const response = await fetch(logoUrl, { method: 'HEAD' })
+        expect(response.ok).toBe(true)
+        expect(response.status).toBe(200)
 
-          const contentType = response.headers.get('content-type')
-          expect(contentType).toMatch(/^image\/(png|jpeg|jpg|gif|webp)/i)
-        } catch (error) {
-          throw new Error(
-            `Logo image is not accessible at ${logoUrl}: ${error}`,
-          )
-        }
+        const contentType = response.headers.get('content-type')
+        expect(contentType).toMatch(/^image\/(png|jpeg|jpg|gif|webp)/i)
+      } catch (error) {
+        throw new Error(
+          `Logo image is not accessible at ${logoUrl}: ${error}`,
+        )
       }
     })
 
@@ -476,8 +477,9 @@ describe('Email Service', () => {
       const sentEmail = mockSend.mock.calls[0][0]
       const html = sentEmail.html
 
+      // Logo uses production URL (email clients can't access localhost)
       expect(html).toContain(
-        'src="https://test.memoized.io/images/brand/logo-dark.png"',
+        'src="https://www.memoized.io/images/brand/logo-dark.png"',
       )
     })
 

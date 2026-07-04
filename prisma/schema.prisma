@@ -33,6 +33,8 @@ enum ProblemDifficulty {
 enum ProblemType {
   CODING
   THEORY
+  IMPLEMENT
+  CODE
 }
 
 enum BannerType {
@@ -87,6 +89,7 @@ model Lesson {
   title          String
   description    String?
   slug           String               @unique
+  contentId      String?              @unique
   body           String
   serializedBody Json?
   access         AccessOptions        @default(FREE)
@@ -152,6 +155,7 @@ model Course {
   body           String?
   serializedBody Json?
   slug           String    @unique
+  contentId      String?   @unique
   isActive       Boolean   @default(true)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now())
@@ -171,6 +175,7 @@ model Section {
   body           String
   serializedBody Json?
   slug           String   @unique
+  contentId      String?  @unique
   courseId       String
   course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   lessons        Lesson[]
@@ -193,6 +198,7 @@ model Problem {
   href             String
   link             String
   slug             String                @unique
+  contentId        String?               @unique
   difficulty       ProblemDifficulty
   lessonId         String
   lesson           Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -246,6 +252,7 @@ model Resource {
   title          String
   description    String?
   slug           String        @unique
+  contentId      String?       @unique
   body           String
   serializedBody Json?
   access         AccessOptions @default(FREE)
@@ -266,4 +273,24 @@ model WebhookEvent {
   processedAt   DateTime @default(now())
 
   @@index([processedAt], name: "webhook_event_processed_at_idx")
+}
+
+model BlogPost {
+  id             String    @id @default(uuid())
+  slug           String    @unique
+  title          String
+  description    String
+  body           String
+  serializedBody Json?
+  coverImage     String?
+  author         String    @default("Mario Siric")
+  tags           String[]  @default([])
+  readingTime    Int       @default(5)
+  published      Boolean   @default(false)
+  publishedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([published, publishedAt(sort: Desc)], name: "blog_post_published_idx")
+  @@index([slug], name: "blog_post_slug_idx")
 }

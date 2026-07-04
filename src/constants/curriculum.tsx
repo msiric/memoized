@@ -98,9 +98,9 @@ export const completeCurriculum: CurriculumCourse[] = [
         href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${CORE_FUNDAMENTALS_PREFIX}`,
         title: 'Core Fundamentals',
         description:
-          'Understanding and utilizing built-in data structures in programming.',
+          'Master the core JavaScript language and execution model every interview probes.',
         about:
-          'Understand and utilize the fundamental data structures built into JavaScript. Learn their concepts, use cases, time and space complexities, and practical tips and tricks. Avoid common pitfalls and master advanced string algorithms, numerical operations, arrays, objects, sets, maps, and more.',
+          'Build unshakeable foundations in the concepts interviewers probe first: closures, scope and hoisting, the scope chain, this-binding, prototypes, and the object model. Understand the engine and runtime, the call stack, the event loop, and asynchronous JavaScript, plus data types, coercion, error handling, modules, and memory management.',
         icon: 'browserAndWebAPIsIcon',
         order: 1,
         access: AccessOptions.FREE,
@@ -111,9 +111,9 @@ export const completeCurriculum: CurriculumCourse[] = [
         href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${TYPESCRIPT_INTRODUCTION_PREFIX}`,
         title: 'TypeScript Introduction',
         description:
-          'Exploring widely-used algorithms and problem-solving techniques.',
+          'Go from TypeScript basics to generics, type-level programming, and the compiler.',
         about:
-          'Explore widely-used algorithms and problem-solving techniques essential for coding interviews. Master sliding windows, two pointers, cyclic sort, tree and graph traversals, binary search, and many more. Apply these techniques to solve complex problems with confidence.',
+          'Learn TypeScript the way interviews expect: from basic types, interfaces, enums, and generics to advanced types, conditional types, utility types, and full type-level programming. Master narrowing with type guards and inference, then round it out with declarations, decorators, namespaces and modules, compiler internals, project configuration, and migration strategies.',
         icon: 'typescriptAdvancedIcon',
         order: 2,
         access: AccessOptions.PREMIUM,
@@ -123,9 +123,10 @@ export const completeCurriculum: CurriculumCourse[] = [
         id: FRONTEND_DEVELOPMENT_PREFIX,
         href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${FRONTEND_DEVELOPMENT_PREFIX}`,
         title: 'Frontend Development',
-        description: 'Diving into complex topics for in-depth understanding.',
+        description:
+          'Master modern frontend engineering, from rendering internals to system design.',
         about:
-          'Dive into complex topics for an in-depth understanding of sophisticated algorithms. Study network flow algorithms, dynamic programming, segment trees, union find, minimum spanning trees, shortest path algorithms, and more. Gain a competitive edge with knowledge of advanced concepts and their practical applications.',
+          'Prepare for frontend interviews with the topics that actually come up: component architecture, state management, the virtual DOM, and reconciliation. Go deep on the web platform (Web APIs, CORS, accessibility, security), performance, testing, build tools, code splitting, server-side rendering, and micro-frontends, then tie it together with a dedicated frontend-interview guide, deployment, Git, and CI/CD.',
         icon: 'modernFrontendIcon',
         order: 3,
         access: AccessOptions.PREMIUM,
@@ -136,9 +137,9 @@ export const completeCurriculum: CurriculumCourse[] = [
         href: `${COURSES_PREFIX}${JS_TRACK_PREFIX}${ADVANCED_CONCEPTS_PREFIX}`,
         title: 'Advanced Concepts',
         description:
-          'Creating and implementing custom data structures for various needs.',
+          'Level up with advanced JavaScript: async patterns, meta-programming, and workers.',
         about:
-          'Go beyond the basics with custom data structures tailored for specific needs. Implement and optimize linked lists, stacks, queues, heaps, trees, graphs, tries, and more. Develop the skills to create efficient and effective data structures for any problem.',
+          'Move beyond the fundamentals into the advanced JavaScript that distinguishes senior engineers: functional programming, higher-order functions, promise patterns, async/await, and generators. Explore meta-programming, symbols, and reflection, then tackle memory leaks, web and service workers, browser storage, event handling, performance optimization, security, and design patterns.',
         icon: 'javascriptMechanicsIcon',
         order: 4,
         access: AccessOptions.PREMIUM,
@@ -157,7 +158,7 @@ export const completeCurriculum: CurriculumCourse[] = [
     seo: {
       title: 'Data Structures & Algorithms Track - Master Coding Interviews',
       description:
-        'Master data structures and algorithms with JavaScript implementations. 200+ problems covering arrays, trees, graphs, dynamic programming, and more. Perfect for technical interviews.',
+        'Master data structures and algorithms with JavaScript implementations. 165 problems covering arrays, trees, graphs, dynamic programming, and more. Perfect for technical interviews.',
       keywords: [
         'data structures javascript',
         'algorithms javascript',

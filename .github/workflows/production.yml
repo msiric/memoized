@@ -40,6 +40,11 @@ jobs:
         run: yarn generate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Sync blog posts to database
+        run: yarn sync:blog
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
       # Note: Content sync and MeiliSearch indexing are handled
       # by the private content repository's GitHub Actions workflow.

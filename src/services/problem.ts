@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { getServerSession } from 'next-auth'
 import { revalidateProblemProgress } from '@/lib/cache'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import { ProblemFilter } from '../types'
 
 export type MarkProblemArgs = {

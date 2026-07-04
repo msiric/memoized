@@ -123,3 +123,100 @@
 .animate-expand-in {
   animation: expand-in 0.6s ease-out both;
 }
+
+/* Print styles for blog posts */
+@media print {
+  /* Hide non-essential UI elements */
+  .reading-progress,
+  header,
+  footer,
+  nav,
+  .share-buttons,
+  .newsletter-cta,
+  .author-card,
+  .related-posts,
+  .giscus,
+  .post-navigation,
+  button,
+  [role="progressbar"] {
+    display: none !important;
+  }
+
+  /* Optimize main content for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt !important;
+    line-height: 1.5 !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  article {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Ensure images print properly */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Avoid breaking inside headings and paragraphs */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  p, li, blockquote {
+    page-break-inside: avoid !important;
+  }
+
+  /* Keep headings with following content */
+  h1, h2, h3, h4, h5, h6 {
+    orphans: 3 !important;
+    widows: 3 !important;
+  }
+
+  /* Hide anchor link icons */
+  a[href^="#"]::before,
+  .group > a[aria-label^="Link to"] {
+    display: none !important;
+  }
+
+  /* Make links visible but not clickable-looking */
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+
+  /* Show URL after external links */
+  article a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Code blocks */
+  pre, code {
+    background: #f5f5f5 !important;
+    color: black !important;
+    border: 1px solid #ddd !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Ensure proper margins */
+  .prose {
+    max-width: 100% !important;
+  }
+
+  /* Add print-specific margins */
+  @page {
+    margin: 1.5cm;
+  }
+}
+

@@ -65,6 +65,22 @@ vi.mock('../utils/helpers', () => ({
   isProduction: vi.fn().mockReturnValue(false),
 }))
 
+// Builds a transaction-client mock exposing the findUnique/create/update that the
+// contentId-first upsert helpers use. findUnique resolves null so the helpers create.
+function makeTxMock() {
+  const entity = (id: string) => ({
+    findUnique: vi.fn().mockResolvedValue(null),
+    create: vi.fn().mockResolvedValue({ id }),
+    update: vi.fn().mockResolvedValue({ id }),
+  })
+  return {
+    course: entity('course-id'),
+    section: entity('section-id'),
+    lesson: entity('lesson-id'),
+    problem: entity('problem-id'),
+  } as any
+}
+
 describe('Sync Content Script - Two-Phase Architecture', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
@@ -121,12 +137,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
 
       // Mock transaction to execute the callback
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
-          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
-          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
-          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
-        }
+        const tx = makeTxMock()
         return fn(tx)
       })
 
@@ -148,12 +159,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const prisma = (await import('@/lib/prisma')).default
 
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
-          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
-          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
-          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
-        }
+        const tx = makeTxMock()
         return fn(tx)
       })
 
@@ -179,12 +185,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const prisma = (await import('@/lib/prisma')).default
 
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
-          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
-          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
-          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
-        }
+        const tx = makeTxMock()
         return fn(tx)
       })
 
@@ -207,12 +208,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const prisma = (await import('@/lib/prisma')).default
 
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
-          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
-          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
-          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
-        }
+        const tx = makeTxMock()
         return fn(tx)
       })
 
@@ -247,20 +243,8 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const { syncContent } = await import('./sync-content')
       const prisma = (await import('@/lib/prisma')).default
 
-      const courseUpsert = vi.fn().mockResolvedValue({ id: 'course-id' })
-      const sectionUpsert = vi.fn().mockResolvedValue({ id: 'section-id' })
-      const lessonUpsert = vi.fn().mockResolvedValue({ id: 'lesson-id' })
-      const problemUpsert = vi.fn().mockResolvedValue({ id: 'problem-id' })
-
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          course: { upsert: courseUpsert },
-          section: { upsert: sectionUpsert },
-          lesson: { upsert: lessonUpsert },
-          problem: { upsert: problemUpsert },
-        }
-        return fn(tx)
-      })
+      const tx = makeTxMock()
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => fn(tx))
 
       await syncContent()
 
@@ -270,27 +254,29 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
         { timeout: 30000 },
       )
 
-      // Verify upserts were called within the transaction
-      expect(courseUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { slug: 'test-course' },
+      // Every row is written with its stable contentId (the derived content path),
+      // proving the sync persists via the contentId-first upsert helpers.
+      expect(tx.course.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ contentId: 'test-course', slug: 'test-course' }),
+      })
+      expect(tx.section.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          contentId: 'test-coursetest-section',
+          slug: 'test-section',
         }),
-      )
-      expect(sectionUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { slug: 'test-section' },
+      })
+      expect(tx.lesson.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          contentId: 'test-coursetest-sectiontest-lesson',
+          slug: 'test-lesson',
         }),
-      )
-      expect(lessonUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { slug: 'test-lesson' },
+      })
+      expect(tx.problem.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          contentId: 'test-coursetest-sectiontest-lesson/test-problem',
+          slug: 'test-problem',
         }),
-      )
-      expect(problemUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { slug: 'test-problem' },
-        }),
-      )
+      })
     })
 
     it('does not persist any data if transaction fails', async () => {
@@ -309,12 +295,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const prisma = (await import('@/lib/prisma')).default
 
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
-          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
-          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
-          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
-        }
+        const tx = makeTxMock()
         return fn(tx)
       })
 
@@ -343,12 +324,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const prisma = (await import('@/lib/prisma')).default
 
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          course: { upsert: vi.fn().mockResolvedValue({ id: 'course-id' }) },
-          section: { upsert: vi.fn().mockResolvedValue({ id: 'section-id' }) },
-          lesson: { upsert: vi.fn().mockResolvedValue({ id: 'lesson-id' }) },
-          problem: { upsert: vi.fn().mockResolvedValue({ id: 'problem-id' }) },
-        }
+        const tx = makeTxMock()
         return fn(tx)
       })
 

@@ -42,10 +42,10 @@ export const CreatorIntro = () => {
                 Meet the Creator
               </Badge>
 
-              <h1 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} text-white`}>
+              <h2 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} text-white`}>
                 Hello, I&apos;m <GradientText>Mario</GradientText>, creator of{' '}
                 <span className="text-lime-400">{APP_NAME}</span>
-              </h1>
+              </h2>
               <div className="mb-6 sm:mb-8 space-y-3 sm:space-y-4 lg:space-y-6 text-sm sm:text-base lg:text-lg text-zinc-300">
                 <p>
                   As a <span className="font-semibold text-white">Senior Software Engineer at Microsoft</span> with years of 

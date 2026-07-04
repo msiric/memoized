@@ -174,6 +174,20 @@ const nextConfig = {
   headers: async () => {
     return [
       {
+        // CORS header for Giscus custom theme
+        source: '/giscus-theme.css',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
         source: '/_next/static/:path*',
         headers: [
           {

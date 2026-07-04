@@ -40,7 +40,7 @@ vi.mock('../utils/helpers', () => ({
   isProduction: vi.fn(),
 }))
 
-vi.mock('@/lib/error-tracking', () => ({
+vi.mock('@/lib/sentry', () => ({
   reportMdxError: vi.fn(),
 }))
 
@@ -97,14 +97,15 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
         frontmatter: {},
       } as any)
 
-      const resourceUpsert = vi.fn().mockResolvedValue({ id: 'resource-id' })
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          lesson: { findUnique: vi.fn() },
-          resource: { upsert: resourceUpsert },
-        }
-        return fn(tx)
-      })
+      const tx = {
+        lesson: { findUnique: vi.fn() },
+        resource: {
+          findUnique: vi.fn().mockResolvedValue(null),
+          create: vi.fn().mockResolvedValue({ id: 'resource-id' }),
+          update: vi.fn(),
+        },
+      }
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => fn(tx))
       vi.mocked(prisma.$disconnect).mockResolvedValue()
 
       await syncResources()
@@ -115,17 +116,15 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
         { timeout: 30000 },
       )
 
-      // Verify intro resource was upserted within transaction
-      expect(resourceUpsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { slug: 'intro' },
-          create: expect.objectContaining({
-            slug: 'intro',
-            title: 'Resources',
-            access: 'FREE',
-          }),
+      // The intro resource is created with its stable contentId ('intro').
+      expect(tx.resource.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          contentId: 'intro',
+          slug: 'intro',
+          title: 'Resources',
+          access: 'FREE',
         }),
-      )
+      })
       expect(prisma.$disconnect).toHaveBeenCalled()
     })
 
@@ -141,7 +140,11 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
       vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
         const tx = {
           lesson: { findUnique: vi.fn() },
-          resource: { upsert: vi.fn() },
+          resource: {
+            findUnique: vi.fn().mockResolvedValue(null),
+            create: vi.fn(),
+            update: vi.fn(),
+          },
         }
         return fn(tx)
       })
@@ -155,7 +158,7 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
       const fs = (await import('fs')).default
       const { serialize } = await import('next-mdx-remote-client/serialize')
       const { isProduction } = await import('../utils/helpers')
-      const { reportMdxError } = await import('@/lib/error-tracking')
+      const { reportMdxError } = await import('@/lib/sentry')
       const prisma = (await import('@/lib/prisma')).default
 
       vi.mocked(fs.existsSync).mockReset()

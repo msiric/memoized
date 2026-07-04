@@ -14,11 +14,13 @@ import { Problem } from '@prisma/client'
 
 export async function generateStaticParams() {
   const lessons = await getLessonsSlugs()
-  return lessons?.map((lesson) => ({
-    lessonSlug: lesson.slug,
-    sectionSlug: lesson.section.slug,
-    courseSlug: lesson.section.course.slug,
-  }))
+  return (
+    lessons?.map((lesson) => ({
+      lessonSlug: lesson.slug,
+      sectionSlug: lesson.section.slug,
+      courseSlug: lesson.section.course.slug,
+    })) ?? []
+  )
 }
 
 export async function generateMetadata({

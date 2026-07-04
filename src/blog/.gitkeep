@@ -1,0 +1,2 @@
+# This directory is populated by the CI/CD pipeline from the private memoized-content repo.
+# For local development, sample blog content is used from src/samples/blog/

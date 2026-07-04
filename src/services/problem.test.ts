@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { getProblems, markProblemProgress } from '@/services/problem'
-import { ServiceError } from '@/lib/error-tracking'
+import { ServiceError } from '@/lib/sentry'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemDifficulty } from '@prisma/client'
 import { getServerSession } from 'next-auth'

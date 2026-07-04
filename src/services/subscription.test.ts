@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { sendEmail } from '@/lib/resend'
+import { sendEmail } from '@/services/email'
 import { stripe } from '@/lib/stripe'
 import {
   createLifetimeAccess,
@@ -23,7 +23,7 @@ vi.mock('next/cache', () => ({
 
 // Mock external dependencies
 vi.mock('@/lib/prisma')
-vi.mock('@/lib/resend')
+vi.mock('@/services/email')
 vi.mock('@/lib/stripe')
 vi.mock('@/utils/helpers')
 
