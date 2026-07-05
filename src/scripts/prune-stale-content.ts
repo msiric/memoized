@@ -46,6 +46,21 @@ type EntityOps = {
   cascadedProgress: (ids: string[]) => Promise<number>
 }
 
+/**
+ * The rows a prune would remove: those whose `contentId` the content no longer
+ * defines (or which never got one). Kept pure and exported so the delete
+ * decision is unit-testable without a database — the incident that motivated
+ * this was a bad `validIds` set silently marking real content stale.
+ */
+export function computeStale(
+  rows: { id: string; contentId: string | null }[],
+  validIds: Set<string>,
+): string[] {
+  return rows
+    .filter((r) => !r.contentId || !validIds.has(r.contentId))
+    .map((r) => r.id)
+}
+
 // Leaf-to-root order: deleting problems before their lessons keeps counts exact
 // (a parent delete can't cascade away rows we are separately about to delete).
 const entities: EntityOps[] = [
@@ -110,9 +125,7 @@ async function main() {
 
   for (const e of entities) {
     const rows = await e.findAll()
-    const staleIds = rows
-      .filter((r) => !r.contentId || !valid[e.name].has(r.contentId))
-      .map((r) => r.id)
+    const staleIds = computeStale(rows, valid[e.name])
 
     if (staleIds.length === 0) {
       console.log(`${e.name.padEnd(8)}: 0 stale / ${rows.length}`)
@@ -160,9 +173,11 @@ async function main() {
   console.log('\n✅ prune applied — DB now equals content.')
 }
 
-main()
-  .catch((e) => {
-    console.error('ERROR:', (e as Error)?.message || e)
-    process.exit(1)
-  })
-  .finally(() => prisma.$disconnect())
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      console.error('ERROR:', (e as Error)?.message || e)
+      process.exit(1)
+    })
+    .finally(() => prisma.$disconnect())
+}
