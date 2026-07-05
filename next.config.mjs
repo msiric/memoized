@@ -243,6 +243,24 @@ const nextConfig = {
       },
     ]
   },
+  redirects: async () => {
+    return [
+      // The two "Security" lessons were renamed for clarity (Browser Security /
+      // Web Application Security), which changes their premium URL slug. Keep the
+      // old URLs working for existing bookmarks and links.
+      {
+        source: '/courses/js-track/advanced-concepts/security',
+        destination: '/courses/js-track/advanced-concepts/browser-security',
+        permanent: true,
+      },
+      {
+        source: '/courses/js-track/frontend-development/security',
+        destination:
+          '/courses/js-track/frontend-development/web-application-security',
+        permanent: true,
+      },
+    ]
+  },
   poweredByHeader: false,
 }
 
