@@ -86,7 +86,7 @@ model Lesson {
   href           String
   title          String
   description    String?
-  slug           String               @unique
+  slug           String
   contentId      String?              @unique
   body           String
   serializedBody Json?
@@ -99,6 +99,7 @@ model Lesson {
   resources      Resource[]
   lessonProgress UserLessonProgress[]
 
+  @@unique([sectionId, slug])
   @@index([order], name: "lesson_order_idx")
   @@index([access], name: "lesson_access_idx")
   @@index([sectionId, order], name: "lesson_section_order_idx")
@@ -195,7 +196,7 @@ model Problem {
   serializedAnswer Json?
   href             String
   link             String
-  slug             String                @unique
+  slug             String
   contentId        String?               @unique
   difficulty       ProblemDifficulty
   lessonId         String
@@ -204,6 +205,7 @@ model Problem {
   updatedAt        DateTime              @default(now())
   problemProgress  UserProblemProgress[]
 
+  @@unique([lessonId, slug])
   @@index([type], name: "problem_type_idx")
   @@index([difficulty], name: "problem_difficulty_idx")
   @@index([lessonId, difficulty], name: "problem_lesson_difficulty_idx")

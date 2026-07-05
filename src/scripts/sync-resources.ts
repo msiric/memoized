@@ -47,6 +47,7 @@ type PreparedResource = {
   href: string
   access: 'FREE' | 'PREMIUM'
   lessonSlug: string | null
+  sectionSlug: string | null
   serializedBody: SerializedJson
 }
 
@@ -187,6 +188,7 @@ async function prepareResources(): Promise<PreparedResource[]> {
       href: '/resources',
       access: 'FREE',
       lessonSlug: null,
+      sectionSlug: null,
       serializedBody: serializedIntroContent,
     })
 
@@ -257,6 +259,7 @@ async function prepareResources(): Promise<PreparedResource[]> {
               href: resourceHref || '',
               access: accessLevel,
               lessonSlug,
+              sectionSlug,
               serializedBody: serializedResourceContent,
             })
             console.log(`✅ Serialized resource: ${resourceTitle}`)
@@ -284,9 +287,12 @@ async function persistResources(prepared: PreparedResource[]): Promise<void> {
   for (const resource of prepared) {
     // Resolve lesson foreign key if this resource is associated with a lesson
     let lessonId: string | null = null
-    if (resource.lessonSlug) {
-      const lessonRecord = await prisma.lesson.findUnique({
-        where: { slug: resource.lessonSlug },
+    if (resource.lessonSlug && resource.sectionSlug) {
+      const lessonRecord = await prisma.lesson.findFirst({
+        where: {
+          slug: resource.lessonSlug,
+          section: { slug: resource.sectionSlug },
+        },
         select: { id: true },
       })
 

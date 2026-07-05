@@ -102,7 +102,10 @@ describe('Lesson component', () => {
       })
 
       expect(metadata.title).toContain('Variables')
-      expect(getLessonMetadataBySlug).toHaveBeenCalledWith('variables')
+      expect(getLessonMetadataBySlug).toHaveBeenCalledWith(
+        'test-section',
+        'variables',
+      )
       expect(getLessonBySlug).not.toHaveBeenCalled()
     })
 

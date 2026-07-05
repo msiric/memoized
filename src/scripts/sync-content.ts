@@ -70,7 +70,7 @@ type PreparedProblem = {
   question: string
   answer: string
   type: ProblemType
-  lessonSlug: string
+  lessonContentId: string
   serializedAnswer: SerializedJson
 }
 
@@ -359,7 +359,7 @@ async function prepareContent(contentInfo: {
               question: problem.question,
               answer: problem.answer,
               type: problem.type,
-              lessonSlug,
+              lessonContentId,
               serializedAnswer: serializedAnswer,
             })
             console.log(`✅ Serialized problem: ${problem.title}`)
@@ -459,16 +459,16 @@ async function persistContent(prepared: PreparedContent): Promise<void> {
       lesson.href,
       sectionId,
     )
-    lessonIdMap.set(lesson.slug, record.id)
+    lessonIdMap.set(lesson.contentId, record.id)
     console.log(`✅ Synced lesson: ${lesson.title}`)
   }
 
   // Upsert problems
   for (const problem of prepared.problems) {
-    const lessonId = lessonIdMap.get(problem.lessonSlug)
+    const lessonId = lessonIdMap.get(problem.lessonContentId)
     if (!lessonId) {
       throw new Error(
-        `Lesson not found for problem ${problem.slug} (lessonSlug: ${problem.lessonSlug})`,
+        `Lesson not found for problem ${problem.slug} (lessonContentId: ${problem.lessonContentId})`,
       )
     }
 
