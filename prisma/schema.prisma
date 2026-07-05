@@ -162,7 +162,6 @@ model Course {
 
   @@index([order], name: "course_order_idx")
   @@index([isActive], name: "course_is_active_idx")
-  @@index([slug], name: "course_slug_idx")
 }
 
 model Section {
@@ -185,7 +184,6 @@ model Section {
   @@index([order], name: "section_order_idx")
   @@index([courseId, order], name: "section_course_order_idx")
   @@index([slug], name: "section_slug_idx")
-  @@index([courseId], name: "section_course_idx")
 }
 
 model Problem {

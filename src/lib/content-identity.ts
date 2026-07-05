@@ -88,15 +88,6 @@ export function buildContentIndex(contentDir: string): ContentIndex {
 }
 
 /**
- * slug -> contentId maps. Convenience for slug-based matching only; collides on
- * duplicate titles (last wins). Use `buildContentIndex(...).validIds` whenever
- * completeness matters (e.g. deciding what is stale).
- */
-export function buildContentIdMaps(contentDir: string): ContentIdMaps {
-  return buildContentIndex(contentDir).maps
-}
-
-/**
  * The COMPLETE set of valid `contentId`s per entity — everything the content
  * currently defines. A DB row whose contentId is not in its entity's set is
  * stale (removed from content) and safe to prune.
