@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { syncResources } from './sync-resources'
 
+// Resources persist via the contentId-first upsert helper, which calls
+// prisma.resource.findUnique/create/update directly (no global transaction).
 vi.mock('@/lib/prisma', () => ({
   default: {
-    $transaction: vi.fn(),
     $disconnect: vi.fn(),
+    lesson: { findUnique: vi.fn() },
+    resource: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
   },
 }))
 
@@ -68,8 +75,21 @@ vi.mock('process', () => ({
 }))
 
 describe('sync-resources.ts - Two-Phase Architecture', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks()
+
+    // Arm the prisma model mocks so the upsert helper takes the create path
+    // and disconnect resolves.
+    const prisma = (await import('@/lib/prisma')).default
+    vi.mocked(prisma.lesson.findUnique).mockResolvedValue(null as any)
+    vi.mocked(prisma.resource.findUnique).mockResolvedValue(null as any)
+    vi.mocked(prisma.resource.create).mockResolvedValue({
+      id: 'resource-id',
+    } as any)
+    vi.mocked(prisma.resource.update).mockResolvedValue({
+      id: 'resource-id',
+    } as any)
+    vi.mocked(prisma.$disconnect).mockResolvedValue(undefined as any)
   })
 
   describe('syncResources', () => {
@@ -77,7 +97,7 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
       expect(typeof syncResources).toBe('function')
     })
 
-    it('should sync intro resource within a transaction', async () => {
+    it('should sync intro resource via a contentId-first upsert', async () => {
       const fs = (await import('fs')).default
       const { serialize } = await import('next-mdx-remote-client/serialize')
       const prisma = (await import('@/lib/prisma')).default
@@ -97,27 +117,10 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
         frontmatter: {},
       } as any)
 
-      const tx = {
-        lesson: { findUnique: vi.fn() },
-        resource: {
-          findUnique: vi.fn().mockResolvedValue(null),
-          create: vi.fn().mockResolvedValue({ id: 'resource-id' }),
-          update: vi.fn(),
-        },
-      }
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => fn(tx))
-      vi.mocked(prisma.$disconnect).mockResolvedValue()
-
       await syncResources()
 
-      // Verify transaction was used
-      expect(prisma.$transaction).toHaveBeenCalledWith(
-        expect.any(Function),
-        { timeout: 30000 },
-      )
-
       // The intro resource is created with its stable contentId ('intro').
-      expect(tx.resource.create).toHaveBeenCalledWith({
+      expect(prisma.resource.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           contentId: 'intro',
           slug: 'intro',
@@ -134,21 +137,8 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
 
       vi.mocked(fs.existsSync)
         .mockReturnValueOnce(false) // no .git
-        .mockReturnValueOnce(true)  // samples exist
+        .mockReturnValueOnce(true) // samples exist
         .mockReturnValueOnce(false) // intro doesn't exist
-
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = {
-          lesson: { findUnique: vi.fn() },
-          resource: {
-            findUnique: vi.fn().mockResolvedValue(null),
-            create: vi.fn(),
-            update: vi.fn(),
-          },
-        }
-        return fn(tx)
-      })
-      vi.mocked(prisma.$disconnect).mockResolvedValue()
 
       await expect(syncResources()).resolves.not.toThrow()
       expect(prisma.$disconnect).toHaveBeenCalled()
@@ -177,7 +167,6 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
       const serializationError = new Error('MDX compilation failed')
       vi.mocked(serialize).mockRejectedValue(serializationError)
       vi.mocked(reportMdxError).mockResolvedValue()
-      vi.mocked(prisma.$disconnect).mockResolvedValue()
 
       await expect(syncResources()).rejects.toThrow('MDX serialization failed')
 
@@ -196,8 +185,6 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
       vi.mocked(fs.existsSync)
         .mockReturnValueOnce(false) // no .git
         .mockReturnValueOnce(false) // no samples
-
-      vi.mocked(prisma.$disconnect).mockResolvedValue()
 
       await expect(syncResources()).rejects.toThrow(
         'No content source available',
@@ -220,12 +207,11 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
 
       vi.mocked(fs.readFileSync).mockReturnValue('# Content')
       vi.mocked(serialize).mockRejectedValue(new Error('Serialization failed'))
-      vi.mocked(prisma.$disconnect).mockResolvedValue()
 
       await expect(syncResources()).rejects.toThrow()
 
-      // Transaction should NOT have been called since Phase 1 failed
-      expect(prisma.$transaction).not.toHaveBeenCalled()
+      // Persistence should NOT have run since Phase 1 failed
+      expect(prisma.resource.create).not.toHaveBeenCalled()
     })
   })
 })

@@ -42,12 +42,24 @@ vi.mock('@/constants/curriculum', () => ({
     },
   ],
 }))
-vi.mock('@/lib/prisma', () => ({
-  default: {
-    $disconnect: vi.fn(),
-    $transaction: vi.fn(),
-  },
-}))
+// The sync persists via the contentId-first upsert helpers, which call
+// prisma.<model>.findUnique/create/update directly (no global transaction).
+vi.mock('@/lib/prisma', () => {
+  const model = () => ({
+    findUnique: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  })
+  return {
+    default: {
+      $disconnect: vi.fn(),
+      course: model(),
+      section: model(),
+      lesson: model(),
+      problem: model(),
+    },
+  }
+})
 vi.mock('slugify', () => {
   const slugifyFn = vi.fn((text: string) => {
     if (!text) return 'unknown'
@@ -65,20 +77,15 @@ vi.mock('../utils/helpers', () => ({
   isProduction: vi.fn().mockReturnValue(false),
 }))
 
-// Builds a transaction-client mock exposing the findUnique/create/update that the
-// contentId-first upsert helpers use. findUnique resolves null so the helpers create.
-function makeTxMock() {
-  const entity = (id: string) => ({
-    findUnique: vi.fn().mockResolvedValue(null),
-    create: vi.fn().mockResolvedValue({ id }),
-    update: vi.fn().mockResolvedValue({ id }),
-  })
-  return {
-    course: entity('course-id'),
-    section: entity('section-id'),
-    lesson: entity('lesson-id'),
-    problem: entity('problem-id'),
-  } as any
+// Arm the prisma model mocks so the contentId-first helpers find no existing
+// row (→ create path) and every create/update returns a usable id.
+async function primePersistMocks() {
+  const prisma = (await import('@/lib/prisma')).default as any
+  for (const name of ['course', 'section', 'lesson', 'problem']) {
+    prisma[name].findUnique.mockResolvedValue(null)
+    prisma[name].create.mockResolvedValue({ id: `${name}-id` })
+    prisma[name].update.mockResolvedValue({ id: `${name}-id` })
+  }
 }
 
 describe('Sync Content Script - Two-Phase Architecture', () => {
@@ -124,6 +131,8 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       return '# Test Content\n\nThis is test content.'
     })
 
+    await primePersistMocks()
+
     // Suppress console output in tests
     vi.spyOn(console, 'log').mockImplementation(() => {})
     vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -133,13 +142,6 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
   describe('Content Detection', () => {
     it('detects main content when available', async () => {
       const { syncContent } = await import('./sync-content')
-      const prisma = (await import('@/lib/prisma')).default
-
-      // Mock transaction to execute the callback
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = makeTxMock()
-        return fn(tx)
-      })
 
       const consoleSpy = vi.spyOn(console, 'log')
       await syncContent()
@@ -156,12 +158,6 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       })
 
       const { syncContent } = await import('./sync-content')
-      const prisma = (await import('@/lib/prisma')).default
-
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = makeTxMock()
-        return fn(tx)
-      })
 
       const consoleSpy = vi.spyOn(console, 'log')
       await syncContent()
@@ -184,15 +180,10 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       const { syncContent } = await import('./sync-content')
       const prisma = (await import('@/lib/prisma')).default
 
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = makeTxMock()
-        return fn(tx)
-      })
-
       await syncContent()
 
-      // Transaction should have been called (Phase 2 ran)
-      expect(prisma.$transaction).toHaveBeenCalledTimes(1)
+      // Phase 2 ran: content was persisted via the upsert helpers
+      expect(prisma.problem.create).toHaveBeenCalled()
     })
 
     it('handles missing lesson files gracefully', async () => {
@@ -205,12 +196,6 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       })
 
       const { syncContent } = await import('./sync-content')
-      const prisma = (await import('@/lib/prisma')).default
-
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = makeTxMock()
-        return fn(tx)
-      })
 
       const consoleSpy = vi.spyOn(console, 'warn')
       await syncContent()
@@ -233,45 +218,39 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
 
       const { syncContent } = await import('./sync-content')
 
-      // Phase 1 fails → no transaction is called → error propagates
+      // Phase 1 fails → persistence never runs → error propagates
       await expect(syncContent()).rejects.toThrow('MDX serialization failed')
     })
   })
 
-  describe('Phase 2: Transactional Persistence', () => {
-    it('persists all content within a single transaction', async () => {
+  describe('Phase 2: Persistence', () => {
+    it('persists every entity with its stable contentId', async () => {
       const { syncContent } = await import('./sync-content')
       const prisma = (await import('@/lib/prisma')).default
 
-      const tx = makeTxMock()
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => fn(tx))
-
       await syncContent()
-
-      // Verify transaction was called with timeout
-      expect(prisma.$transaction).toHaveBeenCalledWith(
-        expect.any(Function),
-        { timeout: 30000 },
-      )
 
       // Every row is written with its stable contentId (the derived content path),
       // proving the sync persists via the contentId-first upsert helpers.
-      expect(tx.course.create).toHaveBeenCalledWith({
-        data: expect.objectContaining({ contentId: 'test-course', slug: 'test-course' }),
+      expect(prisma.course.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          contentId: 'test-course',
+          slug: 'test-course',
+        }),
       })
-      expect(tx.section.create).toHaveBeenCalledWith({
+      expect(prisma.section.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           contentId: 'test-coursetest-section',
           slug: 'test-section',
         }),
       })
-      expect(tx.lesson.create).toHaveBeenCalledWith({
+      expect(prisma.lesson.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           contentId: 'test-coursetest-sectiontest-lesson',
           slug: 'test-lesson',
         }),
       })
-      expect(tx.problem.create).toHaveBeenCalledWith({
+      expect(prisma.problem.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           contentId: 'test-coursetest-sectiontest-lesson/test-problem',
           slug: 'test-problem',
@@ -279,25 +258,19 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       })
     })
 
-    it('does not persist any data if transaction fails', async () => {
+    it('propagates persistence errors instead of swallowing them', async () => {
       const { syncContent } = await import('./sync-content')
       const prisma = (await import('@/lib/prisma')).default
 
-      vi.mocked(prisma.$transaction).mockRejectedValue(
-        new Error('Transaction failed'),
+      vi.mocked(prisma.course.create).mockRejectedValue(
+        new Error('DB write failed'),
       )
 
-      await expect(syncContent()).rejects.toThrow('Transaction failed')
+      await expect(syncContent()).rejects.toThrow('DB write failed')
     })
 
     it('tracks progress during sync', async () => {
       const { syncContent } = await import('./sync-content')
-      const prisma = (await import('@/lib/prisma')).default
-
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = makeTxMock()
-        return fn(tx)
-      })
 
       const consoleSpy = vi.spyOn(console, 'log')
       await syncContent()
@@ -305,9 +278,7 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('Preparing content: 1 lessons to serialize'),
       )
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '🎉 Content sync completed!',
-      )
+      expect(consoleSpy).toHaveBeenCalledWith('🎉 Content sync completed!')
     })
   })
 
@@ -321,12 +292,6 @@ describe('Sync Content Script - Two-Phase Architecture', () => {
       })
 
       const { syncContent } = await import('./sync-content')
-      const prisma = (await import('@/lib/prisma')).default
-
-      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
-        const tx = makeTxMock()
-        return fn(tx)
-      })
 
       // JSON parse errors are handled gracefully (returns empty lessons)
       await expect(syncContent()).resolves.toBeUndefined()
