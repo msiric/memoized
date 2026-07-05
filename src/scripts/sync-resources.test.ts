@@ -217,7 +217,7 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
   })
 
   describe('persistResources', () => {
-    it('resolves a lesson-associated resource by [sectionSlug, slug]', async () => {
+    it('resolves a lesson-associated resource by [courseSlug, sectionSlug, slug]', async () => {
       const prisma = (await import('@/lib/prisma')).default
 
       vi.mocked(prisma.lesson.findFirst).mockResolvedValue({
@@ -236,14 +236,22 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
           access: 'FREE',
           lessonSlug: 'closures',
           sectionSlug: 'core-fundamentals',
+          courseSlug: 'js-track',
           serializedBody: null as any,
         },
       ])
 
-      // The lesson foreign key is resolved within its section, not by a global
-      // slug — two lessons could share the slug across sections.
+      // The lesson foreign key is resolved within its section AND course, not by
+      // a global slug — two lessons could share the slug across sections, and two
+      // sections could share the slug across courses.
       expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
-        where: { slug: 'closures', section: { slug: 'core-fundamentals' } },
+        where: {
+          slug: 'closures',
+          section: {
+            slug: 'core-fundamentals',
+            course: { slug: 'js-track' },
+          },
+        },
         select: { id: true },
       })
       // The resource is created against the resolved lesson.
@@ -271,6 +279,7 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
           access: 'FREE',
           lessonSlug: null,
           sectionSlug: null,
+          courseSlug: null,
           serializedBody: null as any,
         },
       ])

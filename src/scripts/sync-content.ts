@@ -56,7 +56,7 @@ type PreparedLesson = {
   href: string
   order: number
   access: 'FREE' | 'PREMIUM'
-  sectionSlug: string
+  sectionContentId: string
   serializedBody: SerializedJson
 }
 
@@ -327,7 +327,7 @@ async function prepareContent(contentInfo: {
           href: lessonHref,
           order: lessonOrder++,
           access: accessLevel,
-          sectionSlug,
+          sectionContentId,
           serializedBody: serializedLessonContent,
         })
 
@@ -433,16 +433,16 @@ async function persistContent(prepared: PreparedContent): Promise<void> {
       courseId,
       section.serializedBody,
     )
-    sectionIdMap.set(section.slug, record.id)
+    sectionIdMap.set(section.contentId, record.id)
     console.log(`✅ Synced section: ${section.title}`)
   }
 
   // Upsert lessons
   for (const lesson of prepared.lessons) {
-    const sectionId = sectionIdMap.get(lesson.sectionSlug)
+    const sectionId = sectionIdMap.get(lesson.sectionContentId)
     if (!sectionId) {
       throw new Error(
-        `Section not found for lesson ${lesson.slug} (sectionSlug: ${lesson.sectionSlug})`,
+        `Section not found for lesson ${lesson.slug} (sectionContentId: ${lesson.sectionContentId})`,
       )
     }
 

@@ -51,20 +51,27 @@ export const markLessonProgress = async ({
 }
 
 export const getLessonMetadataBySlug = async (
+  courseSlug: string,
   sectionSlug: string,
   lessonSlug: string,
 ) => {
   const lesson = await prisma.lesson.findFirst({
-    where: { slug: lessonSlug, section: { slug: sectionSlug } },
+    where: {
+      slug: lessonSlug,
+      section: { slug: sectionSlug, course: { slug: courseSlug } },
+    },
     select: { title: true, description: true },
   })
 
   return lesson
 }
 
-export const getSectionBySlug = async (sectionSlug: string) => {
-  const section = await prisma.section.findUnique({
-    where: { slug: sectionSlug },
+export const getSectionBySlug = async (
+  courseSlug: string,
+  sectionSlug: string,
+) => {
+  const section = await prisma.section.findFirst({
+    where: { slug: sectionSlug, course: { slug: courseSlug } },
     select: {
       id: true,
       serializedBody: true,
@@ -92,19 +99,19 @@ export const getSectionsSlugs = async () => {
 }
 
 export const getLessonBySlug = async (
+  courseSlug: string,
   sectionSlug: string,
   lessonSlug: string,
 ) => {
   const lesson = await prisma.lesson.findFirst({
     where: {
       slug: lessonSlug,
-      section: { slug: sectionSlug },
+      section: { slug: sectionSlug, course: { slug: courseSlug } },
     },
     select: {
       id: true,
       title: true,
       serializedBody: true,
-      body: true, // Required for search indexing (MeiliSearch)
       access: true,
       problems: {
         orderBy: {
@@ -346,9 +353,10 @@ export const upsertSection = async (
     courseId,
     ...(serializedContent !== undefined && { serializedBody: serializedContent }),
   }
-  const existing =
-    (await tx.section.findUnique({ where: { contentId }, select: { id: true } })) ??
-    (await tx.section.findUnique({ where: { slug: sectionSlug }, select: { id: true } }))
+  const existing = await tx.section.findUnique({
+    where: { contentId },
+    select: { id: true },
+  })
   if (existing) {
     return tx.section.update({ where: { id: existing.id }, data })
   }
