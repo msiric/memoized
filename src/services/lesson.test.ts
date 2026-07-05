@@ -32,7 +32,7 @@ vi.mock('@/lib/prisma', () => {
     ...actualPrisma,
     default: {
       userLessonProgress: { upsert: vi.fn() },
-      section: { findUnique: vi.fn() },
+      section: { findFirst: vi.fn() },
       lesson: {
         findUnique: vi.fn(),
         findFirst: vi.fn(),
@@ -103,6 +103,7 @@ describe('Lesson services', () => {
       })
 
       const result = await getLessonMetadataBySlug(
+        'js-track',
         'core-fundamentals',
         'variables',
       )
@@ -112,7 +113,10 @@ describe('Lesson services', () => {
         description: 'Learn about variable declarations',
       })
       expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
-        where: { slug: 'variables', section: { slug: 'core-fundamentals' } },
+        where: {
+          slug: 'variables',
+          section: { slug: 'core-fundamentals', course: { slug: 'js-track' } },
+        },
         select: { title: true, description: true },
       })
     })
@@ -121,6 +125,7 @@ describe('Lesson services', () => {
       ;(prisma.lesson.findFirst as Mock).mockResolvedValue(null)
 
       const result = await getLessonMetadataBySlug(
+        'js-track',
         'core-fundamentals',
         'nonexistent',
       )
@@ -138,12 +143,12 @@ describe('Lesson services', () => {
         serializedBody: { compiledSource: 'compiled' },
         course: { slug: 'course-slug' },
       }
-      ;(prisma.section.findUnique as Mock).mockResolvedValue(mockSection)
+      ;(prisma.section.findFirst as Mock).mockResolvedValue(mockSection)
 
-      const section = await getSectionBySlug('section-slug')
+      const section = await getSectionBySlug('js-track', 'section-slug')
       expect(section).toEqual(mockSection)
-      expect(prisma.section.findUnique).toHaveBeenCalledWith({
-        where: { slug: 'section-slug' },
+      expect(prisma.section.findFirst).toHaveBeenCalledWith({
+        where: { slug: 'section-slug', course: { slug: 'js-track' } },
         select: {
           id: true,
           serializedBody: true,
@@ -153,13 +158,13 @@ describe('Lesson services', () => {
     })
 
     it('should return null if section is not found', async () => {
-      ;(prisma.section.findUnique as Mock).mockResolvedValue(null)
+      ;(prisma.section.findFirst as Mock).mockResolvedValue(null)
 
-      const section = await getSectionBySlug('invalid-slug')
+      const section = await getSectionBySlug('js-track', 'invalid-slug')
       expect(section).toBeNull()
 
-      expect(prisma.section.findUnique).toHaveBeenCalledWith({
-        where: { slug: 'invalid-slug' },
+      expect(prisma.section.findFirst).toHaveBeenCalledWith({
+        where: { slug: 'invalid-slug', course: { slug: 'js-track' } },
         select: {
           id: true,
           serializedBody: true,
@@ -183,10 +188,17 @@ describe('Lesson services', () => {
       }
       ;(prisma.lesson.findFirst as Mock).mockResolvedValue(mockLesson)
 
-      const lesson = await getLessonBySlug('section-slug', 'lesson-slug')
+      const lesson = await getLessonBySlug(
+        'js-track',
+        'section-slug',
+        'lesson-slug',
+      )
       expect(lesson).toEqual(mockLesson)
       expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
-        where: { slug: 'lesson-slug', section: { slug: 'section-slug' } },
+        where: {
+          slug: 'lesson-slug',
+          section: { slug: 'section-slug', course: { slug: 'js-track' } },
+        },
         select: {
           id: true,
           title: true,
@@ -220,11 +232,18 @@ describe('Lesson services', () => {
     it('should return null if lesson is not found', async () => {
       ;(prisma.lesson.findFirst as Mock).mockResolvedValue(null)
 
-      const lesson = await getLessonBySlug('section-slug', 'invalid-slug')
+      const lesson = await getLessonBySlug(
+        'js-track',
+        'section-slug',
+        'invalid-slug',
+      )
       expect(lesson).toBeNull()
 
       expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
-        where: { slug: 'invalid-slug', section: { slug: 'section-slug' } },
+        where: {
+          slug: 'invalid-slug',
+          section: { slug: 'section-slug', course: { slug: 'js-track' } },
+        },
         select: {
           id: true,
           title: true,

@@ -72,7 +72,7 @@ export default async function Section({
 }: {
   params: { sectionSlug: string; courseSlug: string }
 }) {
-  const section = await getSectionBySlug(params.sectionSlug)
+  const section = await getSectionBySlug(params.courseSlug, params.sectionSlug)
 
   if (!section) {
     return notFound()

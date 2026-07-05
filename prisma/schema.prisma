@@ -173,7 +173,7 @@ model Section {
   href           String
   body           String
   serializedBody Json?
-  slug           String   @unique
+  slug           String
   contentId      String?  @unique
   courseId       String
   course         Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -181,6 +181,7 @@ model Section {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @default(now())
 
+  @@unique([courseId, slug])
   @@index([order], name: "section_order_idx")
   @@index([courseId, order], name: "section_course_order_idx")
   @@index([slug], name: "section_slug_idx")
