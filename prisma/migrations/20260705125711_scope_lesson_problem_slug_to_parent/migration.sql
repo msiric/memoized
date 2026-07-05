@@ -5,11 +5,15 @@
 -- hierarchical (/course/section/lesson, problems are #slug anchors within a
 -- lesson), so slugs only need to be unique within their parent. Scope them.
 
--- DropIndex
-DROP INDEX "Lesson_slug_key";
+-- Drop the global unique on slug. Depending on how the environment was first
+-- provisioned it exists either as a named constraint (constraint-backed index)
+-- or as a bare unique index, so handle both — dropping the constraint also
+-- drops its backing index; the DROP INDEX cleans up the bare-index case.
+ALTER TABLE "Lesson" DROP CONSTRAINT IF EXISTS "Lesson_slug_key";
+DROP INDEX IF EXISTS "Lesson_slug_key";
 
--- DropIndex
-DROP INDEX "Problem_slug_key";
+ALTER TABLE "Problem" DROP CONSTRAINT IF EXISTS "Problem_slug_key";
+DROP INDEX IF EXISTS "Problem_slug_key";
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Lesson_sectionId_slug_key" ON "Lesson"("sectionId", "slug");
