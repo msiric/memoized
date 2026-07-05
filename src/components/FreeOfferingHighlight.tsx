@@ -4,6 +4,7 @@ import { IconContainer } from './IconContainer'
 import { DecorativeBlur } from './DecorativeBlur'
 import { CheckCircleIcon, BookIcon, FlaskIcon, GlobeIcon } from './icons'
 import { SPACING, TYPOGRAPHY } from '@/constants/designTokens'
+import { CONTENT_STATS } from '@/constants/content-stats'
 
 export const FreeOfferingHighlight = () => {
   return (
@@ -22,7 +23,7 @@ export const FreeOfferingHighlight = () => {
 
                   {/* Main message */}
                   <h2 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} ${TYPOGRAPHY.color.primary}`}>
-                    <GradientText>500+ JavaScript problems</GradientText> are free to solve
+                    <GradientText>{CONTENT_STATS.problems} JavaScript problems</GradientText> are free to solve
                   </h2>
 
                   <p className={`mx-auto ${SPACING.descriptionMargin.large} max-w-2xl ${TYPOGRAPHY.body.large} ${TYPOGRAPHY.color.secondary}`}>
@@ -41,7 +42,7 @@ export const FreeOfferingHighlight = () => {
                         All Problems Free
                       </h3>
                       <p className={`text-sm ${TYPOGRAPHY.color.secondary}`}>
-                        500+ coding challenges accessible to everyone
+                        {CONTENT_STATS.problems} coding challenges accessible to everyone
                       </p>
                     </div>
 

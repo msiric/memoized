@@ -1,11 +1,12 @@
 import { APP_NAME, COURSES_PREFIX } from '@/constants'
+import { CONTENT_STATS } from '@/constants/content-stats'
 import { Metadata } from 'next'
 import { ReactNode } from 'react'
 import { CoursesProviders } from './providers'
 
 export const metadata: Metadata = {
   title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
-  description: 'Explore comprehensive JavaScript and Data Structures & Algorithms courses. Master 450+ interview problems with detailed explanations and JavaScript-specific implementation patterns.',
+  description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses. Master ${CONTENT_STATS.problems} interview problems with detailed explanations and JavaScript-specific implementation patterns.`,
   keywords: [
     'javascript courses',
     'algorithm courses',
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   ].join(', '),
   openGraph: {
     title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
-    description: 'Explore comprehensive JavaScript and Data Structures & Algorithms courses with 450+ interview problems.',
+    description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses with ${CONTENT_STATS.problems} interview problems.`,
     url: `${process.env.NEXT_PUBLIC_SITE_URL}${COURSES_PREFIX}`,
     images: [
       {
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
-    description: 'Explore comprehensive JavaScript and Data Structures & Algorithms courses with 450+ interview problems.',
+    description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses with ${CONTENT_STATS.problems} interview problems.`,
     images: ['/twitter-image.png'],
   },
   alternates: {

@@ -1,5 +1,6 @@
 import { Providers } from '@/app/providers'
 import { APP_NAME } from '@/constants'
+import { CONTENT_STATS } from '@/constants/content-stats'
 import '@/styles/tailwind.css'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { Analytics } from '@vercel/analytics/react'
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     template: `%s | ${APP_NAME}`,
     default: `JavaScript Interview Prep | ${APP_NAME}`,
   },
-  description: 'Master JavaScript interview questions with 450+ problems focused on JS-specific patterns. Learn async algorithms, closure gotchas, and performance optimization. Created by Microsoft Senior SWE.',
+  description: `Master JavaScript interview questions with ${CONTENT_STATS.problems} problems focused on JS-specific patterns. Learn async algorithms, closure gotchas, and performance optimization. Created by Microsoft Senior SWE.`,
   keywords: [
     'javascript interview questions',
     'javascript algorithms', 
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'JavaScript Interview Prep - Master Algorithms & JS Patterns',
-    description: 'Master JavaScript interview questions with 450+ problems focused on JS-specific patterns. Created by Microsoft Senior SWE.',
+    description: `Master JavaScript interview questions with ${CONTENT_STATS.problems} problems focused on JS-specific patterns. Created by Microsoft Senior SWE.`,
     url: `${process.env.NEXT_PUBLIC_SITE_URL}`,
     siteName: APP_NAME,
     images: [
@@ -59,7 +60,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'JavaScript Interview Prep - Master Algorithms & JS Patterns',
-    description: 'Master JavaScript interview questions with 450+ problems focused on JS-specific patterns.',
+    description: `Master JavaScript interview questions with ${CONTENT_STATS.problems} problems focused on JS-specific patterns.`,
     images: ['/twitter-image.png'], 
   },
   robots: {
@@ -85,7 +86,7 @@ function StructuredData() {
         "url": `${process.env.NEXT_PUBLIC_SITE_URL}`,
         "name": APP_NAME,
         "alternateName": "Memoized.io",
-        "description": "JavaScript interview preparation platform with 450+ coding problems",
+        "description": `JavaScript interview preparation platform with ${CONTENT_STATS.problems} coding problems`,
         "publisher": {
           "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/#organization`
         },
@@ -127,7 +128,7 @@ function StructuredData() {
                 "@type": "SiteNavigationElement",
                 "position": 4,
                 "name": "Interview Problems",
-                "description": "450+ coding interview problems with solutions",
+                "description": `${CONTENT_STATS.problems} coding interview problems with solutions`,
                 "url": `${process.env.NEXT_PUBLIC_SITE_URL}/courses`
               }
             ]
@@ -164,7 +165,7 @@ function StructuredData() {
         "offers": {
           "@type": "EducationalOccupationalProgram",
           "name": "JavaScript Interview Preparation Course",
-          "description": "Comprehensive coding interview preparation with 450+ problems",
+          "description": `Comprehensive coding interview preparation with ${CONTENT_STATS.problems} problems`,
           "provider": {
             "@type": "Organization",
             "name": APP_NAME
@@ -183,7 +184,7 @@ function StructuredData() {
             {
               "@type": "Course",
               "name": "JavaScript Interview Preparation",
-              "description": "Comprehensive JavaScript interview prep with 450+ problems",
+              "description": `Comprehensive JavaScript interview prep with ${CONTENT_STATS.problems} problems`,
               "provider": {
                 "@type": "Organization",
                 "name": APP_NAME
@@ -203,7 +204,7 @@ function StructuredData() {
             "name": "What makes Memoized different from other coding interview platforms?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Memoized focuses specifically on JavaScript and TypeScript interview patterns with 450+ problems designed by a Microsoft Senior Software Engineer. We emphasize JS-specific concepts like closures, async patterns, and engine internals."
+              "text": `Memoized focuses specifically on JavaScript and TypeScript interview patterns with ${CONTENT_STATS.problems} problems designed by a Microsoft Senior Software Engineer. We emphasize JS-specific concepts like closures, async patterns, and engine internals.`
             }
           },
           {

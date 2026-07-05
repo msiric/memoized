@@ -5,6 +5,7 @@ import { FeaturePoint } from './FeaturePoint'
 import { DecorativeBlur } from './DecorativeBlur'
 import { CheckCircleIcon, LightningIcon, ChartIcon, ClipboardCheckIcon } from './icons'
 import { SPACING, TYPOGRAPHY } from '@/constants/designTokens'
+import { CONTENT_STATS } from '@/constants/content-stats'
 
 export const SolveProblems = () => {
   return (
@@ -33,7 +34,7 @@ export const SolveProblems = () => {
           {/* Enhanced Content */}
           <div className="md:order-1">
             <Badge variant="indigo" icon={<CheckCircleIcon />} className={SPACING.margin.md}>
-              500+ Problems
+              {CONTENT_STATS.problems} Problems
             </Badge>
 
             <h2 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} ${TYPOGRAPHY.color.primary}`}>
@@ -41,7 +42,7 @@ export const SolveProblems = () => {
             </h2>
 
             <p className={`${SPACING.descriptionMargin.large} ${TYPOGRAPHY.body.large} ${TYPOGRAPHY.color.secondary}`}>
-              Access all 500+ diverse practice problems and questions designed to prepare you for real interview scenarios.
+              Access all {CONTENT_STATS.problems} diverse practice problems and questions designed to prepare you for real interview scenarios.
             </p>
 
             {/* Feature Points */}

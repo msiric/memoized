@@ -1,5 +1,6 @@
 import dynamic from 'next/dynamic'
 import { APP_NAME, PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '../../../constants'
+import { CONTENT_STATS } from '@/constants/content-stats'
 import { getActiveCoursesWithProgress } from '../../../services/course'
 import { retrieveStripeSession } from '../../../services/stripe'
 import { CourseCard } from '../../../components/CourseCard'
@@ -42,14 +43,6 @@ export default async function Courses({ searchParams }: CoursesProps) {
       ? stripeSessionResult.value
       : null
 
-  const totalLessons =
-    courses?.reduce((sum, course) => sum + course.metadata.lessons.total, 0) ||
-    0
-  const totalProblems =
-    courses?.reduce((sum, course) => sum + course.metadata.problems.total, 0) ||
-    0
-  const totalCourses = courses?.length || 0
-
   return (
     <>
       <SectionContainer width="wide" padding="standard">
@@ -82,17 +75,17 @@ export default async function Courses({ searchParams }: CoursesProps) {
         <div className="mx-auto max-w-xl">
           <div className="grid grid-cols-3 items-stretch gap-3 sm:gap-6 lg:gap-8">
             <StatCard
-              value={totalCourses}
+              value={CONTENT_STATS.courses}
               label="Expert Courses"
               variant="lime"
             />
             <StatCard
-              value={totalLessons}
+              value={CONTENT_STATS.lessons}
               label="Interactive Lessons"
               variant="indigo"
             />
             <StatCard
-              value={totalProblems}
+              value={CONTENT_STATS.problems}
               label="Practice Problems"
               variant="amber"
             />

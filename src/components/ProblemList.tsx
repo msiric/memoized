@@ -2,6 +2,7 @@
 
 import { markProblem } from '@/actions/markProblem'
 import { PROBLEM_CARD } from '@/constants/designTokens'
+import { CONTENT_STATS } from '@/constants/content-stats'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { ProblemFilter, EnrichedProblem, ProblemStatus } from '@/types'
@@ -537,7 +538,7 @@ export const ProblemList = ({
         <div className="prose mx-auto mb-8 max-w-[1024px] dark:prose-invert">
           <h1>Welcome to the Problems Page: Master Every Challenge</h1>
           <p className="lead">
-            Browse and filter through 450+ JavaScript interview problems. Track your progress, reveal solutions and master each topic systematically.
+            Browse and filter through {CONTENT_STATS.problems} JavaScript interview problems. Track your progress, reveal solutions and master each topic systematically.
           </p>
         </div>
       </article>
