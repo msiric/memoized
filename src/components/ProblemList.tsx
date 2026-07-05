@@ -3,6 +3,7 @@
 import { markProblem } from '@/actions/markProblem'
 import { PROBLEM_CARD } from '@/constants/designTokens'
 import { CONTENT_STATS } from '@/constants/content-stats'
+import { ProblemQuestion } from './ProblemQuestion'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { ProblemFilter, EnrichedProblem, ProblemStatus } from '@/types'
@@ -190,9 +191,11 @@ const ProblemSlideOverContent = ({
             Question
           </span>
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 sm:p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
-            <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-              {problem.question}
-            </p>
+            <ProblemQuestion
+              question={problem.question}
+              serializedQuestion={problem.serializedQuestion}
+              className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
+            />
           </div>
         </motion.div>
       )}

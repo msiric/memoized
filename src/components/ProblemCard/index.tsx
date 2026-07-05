@@ -2,6 +2,7 @@
 
 import { markProblem } from '@/actions/markProblem'
 import { PROBLEM_CARD } from '@/constants/designTokens'
+import { ProblemQuestion } from '../ProblemQuestion'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { CustomError, handleError } from '@/lib/sentry'
@@ -234,9 +235,11 @@ export const ProblemCard = ({
                   <span className={clsx(PROBLEM_CARD.sectionLabel, PROBLEM_CARD.questionLabel)}>
                     Question
                   </span>
-                  <p className="text-sm font-medium leading-relaxed text-zinc-900 dark:text-zinc-100">
-                    {problem.question}
-                  </p>
+                  <ProblemQuestion
+                    question={problem.question}
+                    serializedQuestion={problem.serializedQuestion}
+                    className="text-sm font-medium leading-relaxed text-zinc-900 dark:text-zinc-100"
+                  />
                 </motion.div>
               )}
 

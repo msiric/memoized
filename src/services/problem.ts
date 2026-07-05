@@ -65,6 +65,7 @@ const getAllProblemsAndLessons = async () => {
         question: true,
         type: true,
         slug: true,
+        serializedQuestion: true,
         serializedAnswer: true,
         lesson: {
           select: {
@@ -122,6 +123,7 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
         question: true,
         type: true,
         slug: true,
+        serializedQuestion: true,
         serializedAnswer: true,
         lesson: {
           select: {

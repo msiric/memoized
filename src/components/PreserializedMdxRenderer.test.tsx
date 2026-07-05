@@ -71,6 +71,7 @@ describe('PreserializedMdxRenderer', () => {
     lessonId: 'lesson-123',
     createdAt: new Date(),
     updatedAt: new Date(),
+    serializedQuestion: { compiledSource: 'mock serialized question' },
     serializedAnswer: { compiledSource: 'mock serialized answer' }
   }
 
