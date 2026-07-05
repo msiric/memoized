@@ -1,4 +1,5 @@
 import { APP_NAME } from '@/constants'
+import { CONTENT_STATS } from '@/constants/content-stats'
 import { completeCurriculum } from '@/constants/curriculum'
 import { SECTION_ICONS } from '@/constants/icons'
 import { FaBookOpen } from 'react-icons/fa'
@@ -64,7 +65,7 @@ export const ContentOverview = () => {
                     {/* Quick Stats */}
                     <div className="grid grid-cols-3 gap-3 text-center sm:gap-6 lg:gap-8">
                       <StatCard
-                        value="500+"
+                        value={CONTENT_STATS.problems}
                         label="JS Problems"
                         variant="lime"
                       />

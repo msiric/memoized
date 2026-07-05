@@ -1,12 +1,15 @@
 import { APP_NAME } from '@/constants'
+import { CONTENT_STATS } from '@/constants/content-stats'
 import '@/styles/tailwind.css'
 import { type Metadata } from 'next'
 import { ReactNode } from 'react'
 import { ProblemProviders } from './providers'
 
+const problemsPageTitle = `JavaScript Interview Problems - ${CONTENT_STATS.problems} Coding Challenges`
+
 export const metadata: Metadata = {
-  title: 'JavaScript Interview Problems - 450+ Coding Challenges',
-  description: 'Practice 450+ JavaScript interview problems with detailed solutions. Covers arrays, strings, trees, graphs, dynamic programming, and async patterns. LeetCode-style problems with JS focus.',
+  title: problemsPageTitle,
+  description: `Practice ${CONTENT_STATS.problems} JavaScript interview problems with detailed solutions. Covers arrays, strings, trees, graphs, dynamic programming, and async patterns. LeetCode-style problems with JS focus.`,
   keywords: [
     'javascript interview problems',
     'coding challenges javascript',
@@ -18,8 +21,8 @@ export const metadata: Metadata = {
     'programming problems javascript'
   ].join(', '),
   openGraph: {
-    title: 'JavaScript Interview Problems - 450+ Coding Challenges',
-    description: 'Practice 450+ JavaScript interview problems with detailed solutions and language-specific insights.',
+    title: problemsPageTitle,
+    description: `Practice ${CONTENT_STATS.problems} JavaScript interview problems with detailed solutions and language-specific insights.`,
     url: `${process.env.NEXT_PUBLIC_SITE_URL}/problems`,
     images: [
       {
@@ -32,8 +35,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JavaScript Interview Problems - 450+ Coding Challenges',
-    description: 'Practice 450+ JavaScript interview problems with detailed solutions.',
+    title: problemsPageTitle,
+    description: `Practice ${CONTENT_STATS.problems} JavaScript interview problems with detailed solutions.`,
     images: ['/twitter-image.png'],
   },
   alternates: {

@@ -26,6 +26,7 @@ import {
 } from '@/components/icons'
 import { HiSparkles } from 'react-icons/hi2'
 import { CONTAINER } from '@/constants/designTokens'
+import { CONTENT_STATS } from '@/constants/content-stats'
 
 export default async function Premium() {
   const session = await getServerSession(authOptions)
@@ -95,14 +96,14 @@ export default async function Premium() {
         {/* Success Stats + Limited Time Offer - Cohesive Group */}
         <div className="mx-auto max-w-xl">
           <div className="mb-6 grid grid-cols-3 items-stretch gap-3 sm:gap-6 lg:gap-8">
-            <StatCard value="500" label="Practice Problems" variant="lime" />
+            <StatCard value={CONTENT_STATS.problems} label="Practice Problems" variant="lime" />
             <StatCard
-              value="120"
+              value={CONTENT_STATS.lessons}
               label="In-Depth Lessons"
               variant="indigo"
             />
             <StatCard
-              value="2"
+              value={CONTENT_STATS.courses}
               label="Learning Tracks"
               variant="amber"
             />

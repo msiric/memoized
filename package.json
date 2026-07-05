@@ -47,6 +47,7 @@
     "index": "cross-env tsx src/scripts/index-search.ts",
     "prune:content": "cross-env tsx src/scripts/prune-stale-content.ts",
     "prune:content:dev": "cross-env tsx --env-file .env src/scripts/prune-stale-content.ts",
+    "verify:stats": "cross-env tsx src/scripts/verify-content-stats.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
     "test": "vitest",
     "test:check": "vitest run",
