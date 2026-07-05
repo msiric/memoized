@@ -75,7 +75,7 @@ export const ContentOverview = () => {
                         variant="indigo"
                       />
                       <StatCard
-                        value="Real"
+                        value="Curated"
                         label="Interview Questions"
                         variant="amber"
                       />
