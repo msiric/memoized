@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { syncResources } from './sync-resources'
+import { persistResources, syncResources } from './sync-resources'
 
 // Resources persist via the contentId-first upsert helper, which calls
 // prisma.resource.findUnique/create/update directly (no global transaction).
+// A lesson-associated resource resolves its lesson by [sectionSlug, slug].
 vi.mock('@/lib/prisma', () => ({
   default: {
     $disconnect: vi.fn(),
-    lesson: { findUnique: vi.fn() },
+    lesson: { findFirst: vi.fn() },
     resource: {
       findUnique: vi.fn(),
       create: vi.fn(),
@@ -81,7 +82,7 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
     // Arm the prisma model mocks so the upsert helper takes the create path
     // and disconnect resolves.
     const prisma = (await import('@/lib/prisma')).default
-    vi.mocked(prisma.lesson.findUnique).mockResolvedValue(null as any)
+    vi.mocked(prisma.lesson.findFirst).mockResolvedValue(null as any)
     vi.mocked(prisma.resource.findUnique).mockResolvedValue(null as any)
     vi.mocked(prisma.resource.create).mockResolvedValue({
       id: 'resource-id',
@@ -212,6 +213,72 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
 
       // Persistence should NOT have run since Phase 1 failed
       expect(prisma.resource.create).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('persistResources', () => {
+    it('resolves a lesson-associated resource by [sectionSlug, slug]', async () => {
+      const prisma = (await import('@/lib/prisma')).default
+
+      vi.mocked(prisma.lesson.findFirst).mockResolvedValue({
+        id: 'lesson-1',
+      } as any)
+
+      await persistResources([
+        {
+          contentId: 'resource-content-id',
+          slug: 'cheatsheet',
+          title: 'Cheatsheet',
+          description: 'A handy cheatsheet',
+          body: '# Cheatsheet',
+          order: 1,
+          href: '/resources/cheatsheet',
+          access: 'FREE',
+          lessonSlug: 'closures',
+          sectionSlug: 'core-fundamentals',
+          serializedBody: null as any,
+        },
+      ])
+
+      // The lesson foreign key is resolved within its section, not by a global
+      // slug — two lessons could share the slug across sections.
+      expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
+        where: { slug: 'closures', section: { slug: 'core-fundamentals' } },
+        select: { id: true },
+      })
+      // The resource is created against the resolved lesson.
+      expect(prisma.resource.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          contentId: 'resource-content-id',
+          slug: 'cheatsheet',
+          lessonId: 'lesson-1',
+        }),
+      })
+    })
+
+    it('skips lesson resolution for a resource with no lesson', async () => {
+      const prisma = (await import('@/lib/prisma')).default
+
+      await persistResources([
+        {
+          contentId: 'intro',
+          slug: 'intro',
+          title: 'Resources',
+          description: 'Intro',
+          body: '# Intro',
+          order: 0,
+          href: '/resources',
+          access: 'FREE',
+          lessonSlug: null,
+          sectionSlug: null,
+          serializedBody: null as any,
+        },
+      ])
+
+      expect(prisma.lesson.findFirst).not.toHaveBeenCalled()
+      expect(prisma.resource.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({ contentId: 'intro', lessonId: null }),
+      })
     })
   })
 })

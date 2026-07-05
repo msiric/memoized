@@ -541,6 +541,12 @@ describe('content-sync upserts (stable identity)', () => {
         access: AccessOptions.FREE,
       }),
     })
+    // Identity is contentId only: one lookup, no slug fallback.
+    expect(tx.lesson.findUnique).toHaveBeenCalledTimes(1)
+    expect(tx.lesson.findUnique).toHaveBeenCalledWith({
+      where: { contentId: '/js-track/core/data-types' },
+      select: { id: true },
+    })
 
     const tx2 = makeTx() as any
     tx2.lesson.findUnique.mockResolvedValueOnce({ id: 'les' })
