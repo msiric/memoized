@@ -129,6 +129,7 @@ export const getLessonBySlug = async (
           type: true,
           question: true,
           slug: true,
+          serializedQuestion: true,
           serializedAnswer: true,
         },
       },
@@ -410,6 +411,7 @@ export const upsertProblem = async (
   problemAnswer: string,
   problemType: ProblemType,
   lessonId: string,
+  serializedQuestion?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
   serializedAnswer?: Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue,
 ) => {
   const data = {
@@ -423,6 +425,7 @@ export const upsertProblem = async (
     question: problemQuestion,
     answer: problemAnswer,
     type: problemType,
+    serializedQuestion,
     serializedAnswer,
   }
   const existing = await tx.problem.findUnique({

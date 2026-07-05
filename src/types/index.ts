@@ -93,6 +93,7 @@ export type PracticeProblem = {
   title: string
   difficulty: ProblemDifficulty
   question: string
+  serializedQuestion: string
   serializedAnswer: string
   type: ProblemType
 }
@@ -123,6 +124,7 @@ export type EnrichedProblem = {
   difficulty: ProblemDifficulty
   lesson: { title: string; slug: string; href: string }
   problemProgress: { completed: boolean }[]
+  serializedQuestion?: Prisma.JsonValue | null
   serializedAnswer?: Prisma.JsonValue | null
 }
 
@@ -169,6 +171,7 @@ export type Problem = Prisma.ProblemGetPayload<{
     href: true
     link: true
     question: true
+    serializedQuestion: true
     serializedAnswer: true
     type: true
     slug: true

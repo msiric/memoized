@@ -187,22 +187,23 @@ model Section {
 }
 
 model Problem {
-  id               String                @id @default(uuid())
-  title            String
-  type             ProblemType
-  question         String                @default("")
-  answer           String                @default("")
-  serializedAnswer Json?
-  href             String
-  link             String
-  slug             String
-  contentId        String?               @unique
-  difficulty       ProblemDifficulty
-  lessonId         String
-  lesson           Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @default(now())
-  problemProgress  UserProblemProgress[]
+  id                 String                @id @default(uuid())
+  title              String
+  type               ProblemType
+  question           String                @default("")
+  answer             String                @default("")
+  serializedQuestion Json?
+  serializedAnswer   Json?
+  href               String
+  link               String
+  slug               String
+  contentId          String?               @unique
+  difficulty         ProblemDifficulty
+  lessonId           String
+  lesson             Lesson                @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now())
+  problemProgress    UserProblemProgress[]
 
   @@unique([lessonId, slug])
   @@index([type], name: "problem_type_idx")

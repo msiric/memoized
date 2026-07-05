@@ -4,6 +4,7 @@ import { MouseEvent } from 'react'
 import { RxCross2 } from 'react-icons/rx'
 import { EnrichedProblem } from '../types'
 import { PreserializedMdxRenderer } from './PreserializedMdxRenderer'
+import { ProblemQuestion } from './ProblemQuestion'
 import { SPACING } from '@/constants/designTokens'
 
 export type AnswerModalProps = {
@@ -46,9 +47,13 @@ export const AnswerModal = ({ isOpen, onClose, problem }: AnswerModalProps) => {
 
           <div className="overflow-hidden">
             {problem.question && (
-              <p className="color-white m-0 mb-5 mt-3 font-bold">
-                {problem.question}
-              </p>
+              <div className="mb-5 mt-3 font-bold">
+                <ProblemQuestion
+                  question={problem.question}
+                  serializedQuestion={problem.serializedQuestion}
+                  className="color-white m-0"
+                />
+              </div>
             )}
             {problem.serializedAnswer && (
               <PreserializedMdxRenderer

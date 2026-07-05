@@ -71,6 +71,7 @@ type PreparedProblem = {
   answer: string
   type: ProblemType
   lessonContentId: string
+  serializedQuestion: SerializedJson
   serializedAnswer: SerializedJson
 }
 
@@ -343,7 +344,12 @@ async function prepareContent(contentInfo: {
             const problemContentId = `${lessonContentId}/${problem.id || problemSlug}`
             const problemLink = `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}/${lessonSlug}#${problemSlug}`
 
-            // Serialize problem answer at build time for better performance
+            // Serialize problem question and answer at build time (they can
+            // contain markdown/code) so they render through the MDX pipeline.
+            const serializedQuestion =
+              problem.question && problem.question.trim().length > 0
+                ? await serializeMdxContent(problem.question, problemLink)
+                : Prisma.DbNull
             const serializedAnswer =
               problem.answer && problem.answer.trim().length > 0
                 ? await serializeMdxContent(problem.answer, problemLink)
@@ -360,6 +366,7 @@ async function prepareContent(contentInfo: {
               answer: problem.answer,
               type: problem.type,
               lessonContentId,
+              serializedQuestion: serializedQuestion,
               serializedAnswer: serializedAnswer,
             })
             console.log(`✅ Serialized problem: ${problem.title}`)
@@ -484,6 +491,7 @@ async function persistContent(prepared: PreparedContent): Promise<void> {
       problem.answer,
       problem.type,
       lessonId,
+      problem.serializedQuestion,
       problem.serializedAnswer,
     )
     console.log(`✅ Synced problem: ${problem.title}`)
