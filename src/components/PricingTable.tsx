@@ -93,7 +93,7 @@ export const PricingTable = ({ products, user }: PricingTableProps) => {
               >
                 {isPopular && (
                   <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full bg-lime-500 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-white shadow-sm">
+                    <span className="rounded-full bg-lime-500 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-semibold text-zinc-900 shadow-sm">
                       Most Popular
                     </span>
                   </div>
@@ -149,7 +149,7 @@ export const PricingTable = ({ products, user }: PricingTableProps) => {
                       disabled={
                         hasActiveSubscription || productIdLoading === product.id
                       }
-                      className="w-full rounded-lg bg-lime-600 px-4 py-2 sm:px-5 sm:py-2.5 text-center text-xs sm:text-sm font-medium text-white enabled:hover:bg-lime-700 enabled:focus:ring-4 enabled:focus:ring-lime-200 disabled:opacity-50 dark:text-white enabled:dark:focus:ring-lime-900"
+                      className="w-full rounded-lg bg-lime-500 px-4 py-2 sm:px-5 sm:py-2.5 text-center text-xs sm:text-sm font-medium text-zinc-900 enabled:hover:bg-lime-600 enabled:focus:ring-4 enabled:focus:ring-lime-200 disabled:opacity-50 dark:text-zinc-900 enabled:dark:focus:ring-lime-900"
                     >
                       {hasActiveSubscription
                         ? currentActiveSubscription?.priceId === price.id
@@ -168,7 +168,7 @@ export const PricingTable = ({ products, user }: PricingTableProps) => {
                   ) : (
                     <button
                       onClick={() => openModal()}
-                      className="w-full rounded-lg bg-lime-600 px-4 py-2 sm:px-5 sm:py-2.5 text-center text-xs sm:text-sm font-medium text-white hover:bg-lime-700 focus:ring-4 focus:ring-lime-200 dark:text-white dark:focus:ring-lime-900"
+                      className="w-full rounded-lg bg-lime-500 px-4 py-2 sm:px-5 sm:py-2.5 text-center text-xs sm:text-sm font-medium text-zinc-900 hover:bg-lime-600 focus:ring-4 focus:ring-lime-200 dark:text-zinc-900 dark:focus:ring-lime-900"
                     >
                       {price.type === 'one_time'
                         ? 'Log in to purchase'

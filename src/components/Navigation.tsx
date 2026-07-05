@@ -107,7 +107,7 @@ SectionLink.displayName = 'SectionLink'
 const TopLevelNavItem = memo(
   ({ href, children }: { href: string; children: React.ReactNode }) => {
     return (
-      <li className="flex-1 md:hidden">
+      <div className="flex-1 md:hidden">
         <Link
           href={href}
           className="flex items-center justify-center rounded-lg py-2.5 text-sm font-medium text-zinc-400 transition-all hover:bg-zinc-700/50 hover:text-white"
@@ -115,7 +115,7 @@ const TopLevelNavItem = memo(
         >
           {children}
         </Link>
-      </li>
+      </div>
     )
   },
 )
@@ -401,21 +401,21 @@ export const NavPremiumButton = memo(() => {
 
   const content =
     user === undefined ? (
-      <li className="flex-1 md:hidden">
+      <div className="flex-1 md:hidden">
         <span className="flex items-center justify-center rounded-lg py-2.5 text-sm font-medium text-zinc-500">
           ...
         </span>
-      </li>
+      </div>
     ) : user?.currentSubscriptionStatus === SubscriptionStatus.ACTIVE ? (
       user.currentSubscriptionPlan === SubscriptionPlan.LIFETIME ? (
-        <li className="flex-1 md:hidden">
+        <div className="flex-1 md:hidden">
           <span className="flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-medium text-indigo-400">
             <HiSparkles className="h-4 w-4" />
             {currentSubscription}
           </span>
-        </li>
+        </div>
       ) : (
-        <li className="flex-1 md:hidden">
+        <div className="flex-1 md:hidden">
           <button
             onClick={handleStripePortalRequest}
             disabled={isSubmitting}
@@ -429,10 +429,10 @@ export const NavPremiumButton = memo(() => {
             <HiSparkles className="h-4 w-4" />
             {currentSubscription}
           </button>
-        </li>
+        </div>
       )
     ) : (
-      <li className="flex-1 md:hidden">
+      <div className="flex-1 md:hidden">
         <Link
           href={PREMIUM_PREFIX}
           className="flex items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-medium text-indigo-400 transition-all hover:bg-zinc-700/50 hover:text-indigo-300"
@@ -440,7 +440,7 @@ export const NavPremiumButton = memo(() => {
           <HiSparkles className="h-4 w-4" />
           Premium
         </Link>
-      </li>
+      </div>
     )
 
   return content
@@ -463,7 +463,7 @@ export const Navigation = ({ navigation, ...props }: NavigationProps) => {
 
   return (
     <nav {...props}>
-      <ul role="list">
+      <div>
         <div className="mb-6 mt-4 flex items-center overflow-hidden rounded-xl border border-zinc-700/50 bg-zinc-800/50 p-1 md:hidden">
           {navigationLinks.map((link) => (
             <TopLevelNavItem key={link.href} href={link.href}>
@@ -503,22 +503,22 @@ export const Navigation = ({ navigation, ...props }: NavigationProps) => {
             <IconWrapper icon={BookIcon} />
           </Link>
         </div>
-        <div className="px-2">
+        <ul role="list" className="list-none px-2">
           {navigation?.sections.map((section) => (
             <NavigationGroup key={section.title} section={section} />
           ))}
-        </div>
+        </ul>
         {/* Mobile-only auth button - hidden when header auth button is visible */}
         <div className="sticky bottom-0 z-10 min-[416px]:hidden">
-          <li className="flex justify-between gap-2">
+          <div className="flex justify-between gap-2">
             <AuthButton
               variant="filled"
               className="mt-6 w-full truncate"
               isMobile
             />
-          </li>
+          </div>
         </div>
-      </ul>
+      </div>
     </nav>
   )
 }

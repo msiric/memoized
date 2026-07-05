@@ -25,7 +25,7 @@ type MarkButtonProps = {
 
 const MarkButton = ({ checked, onClick, children, variant = 'neutral' }: MarkButtonProps) => {
   const checkedStyles = variant === 'positive'
-    ? 'bg-lime-500 text-white dark:bg-lime-500 dark:text-zinc-900'
+    ? 'bg-lime-500 text-zinc-900 dark:bg-lime-500 dark:text-zinc-900'
     : 'bg-zinc-200 text-zinc-700 dark:bg-zinc-600 dark:text-zinc-200'
 
   return (

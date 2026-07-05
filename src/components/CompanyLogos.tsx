@@ -47,40 +47,40 @@ export const CompanyLogos = () => {
             </p>
             <div className="grid grid-cols-4 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaMeta className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaMeta aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaAmazon className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaAmazon aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaApple className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaApple aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <SiNetflix className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <SiNetflix aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaGoogle className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaGoogle aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaMicrosoft className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaMicrosoft aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <SiUber className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <SiUber aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <SiTesla className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <SiTesla aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaTwitter className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaTwitter aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaAirbnb className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaAirbnb aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <FaTiktok className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <FaTiktok aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
               <div className="group flex items-center justify-center transition-all duration-300 hover:scale-110">
-                <BsNvidia className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
+                <BsNvidia aria-hidden="true" className="h-[32px] w-[32px] fill-zinc-400 transition-colors group-hover:fill-white" />
               </div>
             </div>
           </div>
