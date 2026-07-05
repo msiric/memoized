@@ -16,7 +16,7 @@
  * Usage: tsx src/scripts/check-orphaned-problems.ts [--content <dir>] [--allow <n>]
  */
 import { CONTENT_FOLDER } from '@/constants'
-import { buildContentIdMaps, validContentIds, type EntityName } from '@/lib/content-identity'
+import { buildContentIndex, type EntityName } from '@/lib/content-identity'
 import prisma from '@/lib/prisma'
 import fs from 'fs'
 import path from 'path'
@@ -29,8 +29,7 @@ function arg(name: string, def?: string) {
 // Valid contentIds + legacy slugs per entity, from the shared identity module.
 // A DB row is an orphan only if it matches NEITHER — see orphans().
 function buildContent(contentDir: string) {
-  const maps = buildContentIdMaps(contentDir)
-  const ids = validContentIds(maps)
+  const { maps, validIds: ids } = buildContentIndex(contentDir)
   const mk = (name: EntityName) => ({ ids: ids[name], slugs: new Set(Object.keys(maps[name])) })
   return {
     course: mk('course'),
