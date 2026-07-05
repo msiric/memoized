@@ -27,9 +27,9 @@ export const FreeOfferingHighlight = () => {
                   </h2>
 
                   <p className={`mx-auto ${SPACING.descriptionMargin.large} max-w-2xl ${TYPOGRAPHY.body.large} ${TYPOGRAPHY.color.secondary}`}>
-                    Every coding problem, first section of every course and all
-                    related resources. No credit card required, no hidden costs.
-                    Just start learning today.
+                    Every coding problem, the first section of every course, and
+                    their related resources. No credit card required, no hidden
+                    costs. Just start learning today.
                   </p>
 
                   {/* Feature highlights */}
@@ -66,7 +66,7 @@ export const FreeOfferingHighlight = () => {
                         Free Resources
                       </h3>
                       <p className={`text-sm ${TYPOGRAPHY.color.secondary}`}>
-                        Learning materials, guides and references included
+                        Guides and references that accompany the free lessons
                       </p>
                     </div>
                   </div>

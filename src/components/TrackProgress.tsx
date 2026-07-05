@@ -34,7 +34,7 @@ export const TrackProgress = () => {
           {/* Enhanced Content */}
           <div className="md:order-2">
             <Badge variant="lime" icon={<ChartIcon />} className={SPACING.margin.md}>
-              Progress Analytics
+              Progress Tracking
             </Badge>
 
             <h2 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} ${TYPOGRAPHY.color.primary}`}>
@@ -42,7 +42,7 @@ export const TrackProgress = () => {
             </h2>
 
             <p className={`${SPACING.descriptionMargin.large} ${TYPOGRAPHY.body.large} ${TYPOGRAPHY.color.secondary}`}>
-              {APP_NAME} provides detailed analytics to track your progress as you complete lessons and solve problems.
+              {APP_NAME} shows your completion progress as you work through lessons and solve problems.
             </p>
 
             {/* Feature Points */}
@@ -50,7 +50,7 @@ export const TrackProgress = () => {
               <FeaturePoint
                 icon={<CheckCircleIcon />}
                 title="Completion Tracking"
-                description="See what you've completed and identify areas to focus on with detailed progress insights."
+                description="See what you've completed and identify areas to focus on at a glance."
                 variant="lime"
               />
 
@@ -63,8 +63,8 @@ export const TrackProgress = () => {
 
               <FeaturePoint
                 icon={<ClockIcon />}
-                title="Regular Updates"
-                description="New content and features added regularly, giving you access to the latest tools for interview success."
+                title="Continuously Refined"
+                description="The platform is actively maintained and improved to keep your interview preparation sharp and relevant."
                 variant="amber"
               />
             </div>
