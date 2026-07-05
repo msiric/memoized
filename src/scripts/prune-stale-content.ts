@@ -26,7 +26,7 @@
  *   tsx src/scripts/prune-stale-content.ts --content <dir> --max 0.1
  */
 import { CONTENT_FOLDER } from '@/constants'
-import { buildContentIdMaps, validContentIds, type EntityName } from '@/lib/content-identity'
+import { validContentIds, type EntityName } from '@/lib/content-identity'
 import prisma from '@/lib/prisma'
 import path from 'path'
 
@@ -89,7 +89,7 @@ async function main() {
       `(sanity cap ${Math.round(MAX_FRACTION * 100)}% per entity)\n`
   )
 
-  const valid = validContentIds(buildContentIdMaps(contentDir))
+  const valid = validContentIds(contentDir)
 
   // Guard: never run before the sync/backfill has populated contentIds — every
   // row would look stale and get wiped.
