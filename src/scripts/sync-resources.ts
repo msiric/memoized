@@ -271,51 +271,49 @@ async function prepareResources(): Promise<PreparedResource[]> {
 }
 
 /**
- * Phase 2: Persist all prepared resources to the database in a single transaction.
+ * Phase 2: Persist all prepared resources to the database.
+ *
+ * Like the content sync, resources are upserted by their stable contentId, so
+ * this is idempotent and safe to re-run. We avoid a single global interactive
+ * transaction — it would hold write locks for the whole sync and does not
+ * scale — and rely on the sanity-capped prune step to remove stale rows.
  */
 async function persistResources(prepared: PreparedResource[]): Promise<void> {
-  console.log('💾 Persisting resources to database (transaction)...')
+  console.log('💾 Persisting resources to database...')
 
-  await prisma.$transaction(
-    async (tx) => {
-      for (const resource of prepared) {
-        // Resolve lesson foreign key if this resource is associated with a lesson
-        let lessonId: string | null = null
-        if (resource.lessonSlug) {
-          const lessonRecord = await tx.lesson.findUnique({
-            where: { slug: resource.lessonSlug },
-            select: { id: true },
-          })
+  for (const resource of prepared) {
+    // Resolve lesson foreign key if this resource is associated with a lesson
+    let lessonId: string | null = null
+    if (resource.lessonSlug) {
+      const lessonRecord = await prisma.lesson.findUnique({
+        where: { slug: resource.lessonSlug },
+        select: { id: true },
+      })
 
-          if (!lessonRecord) {
-            console.warn(
-              `⚠️ Lesson not found in database: ${resource.lessonSlug}`,
-            )
-            continue
-          }
-          lessonId = lessonRecord.id
-        }
-
-        await upsertResource(
-          tx,
-          resource.contentId,
-          resource.slug,
-          resource.title,
-          resource.description,
-          resource.body,
-          resource.order,
-          resource.href,
-          resource.access,
-          lessonId,
-          resource.serializedBody,
+      if (!lessonRecord) {
+        console.warn(
+          `⚠️ Lesson not found in database: ${resource.lessonSlug}`,
         )
-        console.log(`✅ Synced resource: ${resource.title}`)
+        continue
       }
-    },
-    {
-      timeout: 30000,
-    },
-  )
+      lessonId = lessonRecord.id
+    }
+
+    await upsertResource(
+      prisma,
+      resource.contentId,
+      resource.slug,
+      resource.title,
+      resource.description,
+      resource.body,
+      resource.order,
+      resource.href,
+      resource.access,
+      lessonId,
+      resource.serializedBody,
+    )
+    console.log(`✅ Synced resource: ${resource.title}`)
+  }
 
   console.log('✅ Resource sync completed')
 }

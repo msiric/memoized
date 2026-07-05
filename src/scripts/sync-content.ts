@@ -375,117 +375,119 @@ async function prepareContent(contentInfo: {
 }
 
 /**
- * Phase 2: Persist all prepared content to the database in a single transaction.
- * If any upsert fails, the entire transaction rolls back — no partial state.
+ * Phase 2: Persist all prepared content to the database.
+ *
+ * Upserts are keyed by each entity's stable contentId, so the sync is
+ * idempotent and safe to re-run, and parents are written before children so
+ * foreign keys are always valid. A mid-run failure therefore leaves a partial
+ * but consistent catalog that the next run completes (CI surfaces the error).
+ *
+ * We deliberately do NOT wrap this in one global interactive transaction:
+ * ~600 sequential upserts exceeded Prisma's transaction timeout as the catalog
+ * grew, and a single transaction would hold write locks for the entire sync.
+ * Stale-row removal is handled separately by the sanity-capped prune step.
  */
 async function persistContent(prepared: PreparedContent): Promise<void> {
-  console.log('💾 Persisting content to database (transaction)...')
+  console.log('💾 Persisting content to database...')
 
-  await prisma.$transaction(
-    async (tx) => {
-      // Slug → DB ID maps for foreign key resolution
-      const courseIdMap = new Map<string, string>()
-      const sectionIdMap = new Map<string, string>()
-      const lessonIdMap = new Map<string, string>()
+  // Slug → DB ID maps for foreign key resolution
+  const courseIdMap = new Map<string, string>()
+  const sectionIdMap = new Map<string, string>()
+  const lessonIdMap = new Map<string, string>()
 
-      // Upsert courses
-      for (const course of prepared.courses) {
-        const record = await upsertCourse(
-          tx,
-          course.contentId,
-          course.slug,
-          course.title,
-          course.description,
-          course.body,
-          course.href,
-          course.order,
-          course.serializedBody,
-        )
-        courseIdMap.set(course.slug, record.id)
-        console.log(`✅ Synced course: ${course.title}`)
-      }
+  // Upsert courses
+  for (const course of prepared.courses) {
+    const record = await upsertCourse(
+      prisma,
+      course.contentId,
+      course.slug,
+      course.title,
+      course.description,
+      course.body,
+      course.href,
+      course.order,
+      course.serializedBody,
+    )
+    courseIdMap.set(course.slug, record.id)
+    console.log(`✅ Synced course: ${course.title}`)
+  }
 
-      // Upsert sections
-      for (const section of prepared.sections) {
-        const courseId = courseIdMap.get(section.courseSlug)
-        if (!courseId) {
-          throw new Error(
-            `Course not found for section ${section.slug} (courseSlug: ${section.courseSlug})`,
-          )
-        }
+  // Upsert sections
+  for (const section of prepared.sections) {
+    const courseId = courseIdMap.get(section.courseSlug)
+    if (!courseId) {
+      throw new Error(
+        `Course not found for section ${section.slug} (courseSlug: ${section.courseSlug})`,
+      )
+    }
 
-        const record = await upsertSection(
-          tx,
-          section.contentId,
-          section.slug,
-          section.title,
-          section.description,
-          section.body,
-          section.order,
-          section.href,
-          courseId,
-          section.serializedBody,
-        )
-        sectionIdMap.set(section.slug, record.id)
-        console.log(`✅ Synced section: ${section.title}`)
-      }
+    const record = await upsertSection(
+      prisma,
+      section.contentId,
+      section.slug,
+      section.title,
+      section.description,
+      section.body,
+      section.order,
+      section.href,
+      courseId,
+      section.serializedBody,
+    )
+    sectionIdMap.set(section.slug, record.id)
+    console.log(`✅ Synced section: ${section.title}`)
+  }
 
-      // Upsert lessons
-      for (const lesson of prepared.lessons) {
-        const sectionId = sectionIdMap.get(lesson.sectionSlug)
-        if (!sectionId) {
-          throw new Error(
-            `Section not found for lesson ${lesson.slug} (sectionSlug: ${lesson.sectionSlug})`,
-          )
-        }
+  // Upsert lessons
+  for (const lesson of prepared.lessons) {
+    const sectionId = sectionIdMap.get(lesson.sectionSlug)
+    if (!sectionId) {
+      throw new Error(
+        `Section not found for lesson ${lesson.slug} (sectionSlug: ${lesson.sectionSlug})`,
+      )
+    }
 
-        const record = await upsertLesson(
-          tx,
-          lesson.contentId,
-          lesson.slug,
-          lesson.title,
-          lesson.description,
-          lesson.body,
-          lesson.serializedBody,
-          lesson.order,
-          lesson.access,
-          lesson.href,
-          sectionId,
-        )
-        lessonIdMap.set(lesson.slug, record.id)
-        console.log(`✅ Synced lesson: ${lesson.title}`)
-      }
+    const record = await upsertLesson(
+      prisma,
+      lesson.contentId,
+      lesson.slug,
+      lesson.title,
+      lesson.description,
+      lesson.body,
+      lesson.serializedBody,
+      lesson.order,
+      lesson.access,
+      lesson.href,
+      sectionId,
+    )
+    lessonIdMap.set(lesson.slug, record.id)
+    console.log(`✅ Synced lesson: ${lesson.title}`)
+  }
 
-      // Upsert problems
-      for (const problem of prepared.problems) {
-        const lessonId = lessonIdMap.get(problem.lessonSlug)
-        if (!lessonId) {
-          throw new Error(
-            `Lesson not found for problem ${problem.slug} (lessonSlug: ${problem.lessonSlug})`,
-          )
-        }
+  // Upsert problems
+  for (const problem of prepared.problems) {
+    const lessonId = lessonIdMap.get(problem.lessonSlug)
+    if (!lessonId) {
+      throw new Error(
+        `Lesson not found for problem ${problem.slug} (lessonSlug: ${problem.lessonSlug})`,
+      )
+    }
 
-        await upsertProblem(
-          tx,
-          problem.contentId,
-          problem.slug,
-          problem.href,
-          problem.link,
-          problem.title,
-          problem.difficulty,
-          problem.question,
-          problem.answer,
-          problem.type,
-          lessonId,
-          problem.serializedAnswer,
-        )
-        console.log(`✅ Synced problem: ${problem.title}`)
-      }
-    },
-    {
-      timeout: 30000, // 30s timeout for safety
-    },
-  )
+    await upsertProblem(
+      prisma,
+      problem.contentId,
+      problem.slug,
+      problem.href,
+      problem.link,
+      problem.title,
+      problem.difficulty,
+      problem.question,
+      problem.answer,
+      problem.type,
+      lessonId,
+      problem.serializedAnswer,
+    )
+    console.log(`✅ Synced problem: ${problem.title}`)
+  }
 
   console.log('🎉 Content sync completed!')
 }
@@ -500,7 +502,7 @@ export async function syncContent(): Promise<void> {
   // Phase 1: Serialize all content (no DB operations)
   const prepared = await prepareContent(contentInfo)
 
-  // Phase 2: Persist in a single transaction (all-or-nothing)
+  // Phase 2: Persist via idempotent, contentId-keyed upserts
   await persistContent(prepared)
 }
 
