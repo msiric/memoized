@@ -33,11 +33,32 @@ jobs:
         run: yarn test:check
         env:
           RESEND_TOKEN: ${{ secrets.RESEND_TOKEN }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # Tests mock Prisma; a dummy URL keeps prod credentials out of PR CI.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
 
   build:
     name: Build Check
     runs-on: ubuntu-latest
+    # An ephemeral Postgres, migrated fresh from the PR's own migrations. Build
+    # Check must never run migrations against production — schema changes reach
+    # prod only via the deploy workflow on merge to master.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: memoized_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
+      DATABASE_URL_UNPOOLED: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
     steps:
       - uses: actions/checkout@v4
 
@@ -52,13 +73,10 @@ jobs:
 
       - name: Generate Prisma client
         run: yarn generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build
         run: yarn build
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NEXT_PUBLIC_SITE_URL: https://memoized.dev
           MEILISEARCH_HOST: http://localhost:7700
           MEILISEARCH_MASTER_KEY: dummy-key-for-ci-build
