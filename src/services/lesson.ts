@@ -50,9 +50,12 @@ export const markLessonProgress = async ({
   return result
 }
 
-export const getLessonMetadataBySlug = async (lessonSlug: string) => {
-  const lesson = await prisma.lesson.findUnique({
-    where: { slug: lessonSlug },
+export const getLessonMetadataBySlug = async (
+  sectionSlug: string,
+  lessonSlug: string,
+) => {
+  const lesson = await prisma.lesson.findFirst({
+    where: { slug: lessonSlug, section: { slug: sectionSlug } },
     select: { title: true, description: true },
   })
 
@@ -88,10 +91,14 @@ export const getSectionsSlugs = async () => {
   return sections
 }
 
-export const getLessonBySlug = async (lessonSlug: string) => {
-  const lesson = await prisma.lesson.findUnique({
+export const getLessonBySlug = async (
+  sectionSlug: string,
+  lessonSlug: string,
+) => {
+  const lesson = await prisma.lesson.findFirst({
     where: {
       slug: lessonSlug,
+      section: { slug: sectionSlug },
     },
     select: {
       id: true,
@@ -373,9 +380,10 @@ export const upsertLesson = async (
     href: lessonHref,
     sectionId,
   }
-  const existing =
-    (await tx.lesson.findUnique({ where: { contentId }, select: { id: true } })) ??
-    (await tx.lesson.findUnique({ where: { slug: lessonSlug }, select: { id: true } }))
+  const existing = await tx.lesson.findUnique({
+    where: { contentId },
+    select: { id: true },
+  })
   if (existing) {
     return tx.lesson.update({ where: { id: existing.id }, data })
   }
@@ -409,9 +417,10 @@ export const upsertProblem = async (
     type: problemType,
     serializedAnswer,
   }
-  const existing =
-    (await tx.problem.findUnique({ where: { contentId }, select: { id: true } })) ??
-    (await tx.problem.findUnique({ where: { slug: problemSlug }, select: { id: true } }))
+  const existing = await tx.problem.findUnique({
+    where: { contentId },
+    select: { id: true },
+  })
   if (existing) {
     return tx.problem.update({ where: { id: existing.id }, data })
   }

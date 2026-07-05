@@ -38,7 +38,7 @@ export async function generateMetadata({
     (s) => s.href === `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}`,
   )
 
-  const lesson = await getLessonMetadataBySlug(lessonSlug)
+  const lesson = await getLessonMetadataBySlug(sectionSlug, lessonSlug)
 
   if (!lesson) {
     return { title: 'Lesson not found' }
@@ -85,7 +85,7 @@ export default async function Lesson({
   const session = await getServerSession(authOptions)
 
   const [lesson, user] = await Promise.all([
-    getLessonBySlug(params.lessonSlug),
+    getLessonBySlug(params.sectionSlug, params.lessonSlug),
     session && getUserWithSubscriptionDetails(session.userId),
   ])
 

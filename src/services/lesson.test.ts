@@ -35,6 +35,7 @@ vi.mock('@/lib/prisma', () => {
       section: { findUnique: vi.fn() },
       lesson: {
         findUnique: vi.fn(),
+        findFirst: vi.fn(),
         findMany: vi.fn(),
         count: vi.fn(),
       },
@@ -96,27 +97,33 @@ describe('Lesson services', () => {
 
   describe('getLessonMetadataBySlug', () => {
     it('should return title and description for existing lesson', async () => {
-      ;(prisma.lesson.findUnique as Mock).mockResolvedValue({
+      ;(prisma.lesson.findFirst as Mock).mockResolvedValue({
         title: 'Variables',
         description: 'Learn about variable declarations',
       })
 
-      const result = await getLessonMetadataBySlug('variables')
+      const result = await getLessonMetadataBySlug(
+        'core-fundamentals',
+        'variables',
+      )
 
       expect(result).toEqual({
         title: 'Variables',
         description: 'Learn about variable declarations',
       })
-      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
-        where: { slug: 'variables' },
+      expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
+        where: { slug: 'variables', section: { slug: 'core-fundamentals' } },
         select: { title: true, description: true },
       })
     })
 
     it('should return null for non-existent lesson', async () => {
-      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
+      ;(prisma.lesson.findFirst as Mock).mockResolvedValue(null)
 
-      const result = await getLessonMetadataBySlug('nonexistent')
+      const result = await getLessonMetadataBySlug(
+        'core-fundamentals',
+        'nonexistent',
+      )
 
       expect(result).toBeNull()
     })
@@ -174,12 +181,12 @@ describe('Lesson services', () => {
         access: AccessOptions.FREE,
         section: { slug: 'section-slug', course: { slug: 'course-slug' } },
       }
-      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(mockLesson)
+      ;(prisma.lesson.findFirst as Mock).mockResolvedValue(mockLesson)
 
-      const lesson = await getLessonBySlug('lesson-slug')
+      const lesson = await getLessonBySlug('section-slug', 'lesson-slug')
       expect(lesson).toEqual(mockLesson)
-      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
-        where: { slug: 'lesson-slug' },
+      expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
+        where: { slug: 'lesson-slug', section: { slug: 'section-slug' } },
         select: {
           id: true,
           title: true,
@@ -211,13 +218,13 @@ describe('Lesson services', () => {
     })
 
     it('should return null if lesson is not found', async () => {
-      ;(prisma.lesson.findUnique as Mock).mockResolvedValue(null)
+      ;(prisma.lesson.findFirst as Mock).mockResolvedValue(null)
 
-      const lesson = await getLessonBySlug('invalid-slug')
+      const lesson = await getLessonBySlug('section-slug', 'invalid-slug')
       expect(lesson).toBeNull()
 
-      expect(prisma.lesson.findUnique).toHaveBeenCalledWith({
-        where: { slug: 'invalid-slug' },
+      expect(prisma.lesson.findFirst).toHaveBeenCalledWith({
+        where: { slug: 'invalid-slug', section: { slug: 'section-slug' } },
         select: {
           id: true,
           title: true,
@@ -586,15 +593,15 @@ describe('content-sync upserts (stable identity)', () => {
     expect(tx.problem.create).not.toHaveBeenCalled()
   })
 
-  it('upsertProblem falls back to slug when contentId does not match (legacy pre-backfill rows)', async () => {
+  it('upsertProblem creates a new row when contentId does not match (no slug fallback)', async () => {
     const tx = makeTx() as any
-    tx.problem.findUnique.mockResolvedValueOnce(null).mockResolvedValueOnce({ id: 'legacy' })
-    tx.problem.update.mockResolvedValue({ id: 'legacy' })
+    tx.problem.findUnique.mockResolvedValue(null)
+    tx.problem.create.mockResolvedValue({ id: 'new' })
 
     await upsertProblem(
       tx,
       '/js-track/core/data-types/pure-functions',
-      'legacy-slug',
+      'some-slug',
       '/h',
       '/l',
       'T',
@@ -605,18 +612,14 @@ describe('content-sync upserts (stable identity)', () => {
       'lesson-1',
     )
 
-    expect(tx.problem.findUnique).toHaveBeenNthCalledWith(1, {
+    // Identity is contentId only: a single lookup, then create. There is no
+    // slug fallback (that was the mechanism that overwrote same-titled rows).
+    expect(tx.problem.findUnique).toHaveBeenCalledTimes(1)
+    expect(tx.problem.findUnique).toHaveBeenCalledWith({
       where: { contentId: '/js-track/core/data-types/pure-functions' },
       select: { id: true },
     })
-    expect(tx.problem.findUnique).toHaveBeenNthCalledWith(2, {
-      where: { slug: 'legacy-slug' },
-      select: { id: true },
-    })
-    expect(tx.problem.update).toHaveBeenCalledWith({
-      where: { id: 'legacy' },
-      data: expect.objectContaining({ contentId: '/js-track/core/data-types/pure-functions' }),
-    })
-    expect(tx.problem.create).not.toHaveBeenCalled()
+    expect(tx.problem.create).toHaveBeenCalled()
+    expect(tx.problem.update).not.toHaveBeenCalled()
   })
 })
