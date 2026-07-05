@@ -112,7 +112,6 @@ export const getLessonBySlug = async (
       id: true,
       title: true,
       serializedBody: true,
-      body: true, // Required for search indexing (MeiliSearch)
       access: true,
       problems: {
         orderBy: {

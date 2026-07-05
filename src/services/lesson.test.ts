@@ -181,7 +181,6 @@ describe('Lesson services', () => {
         slug: 'lesson-slug',
         problems: [],
         title: 'Lesson Title',
-        body: 'Lesson body content',
         serializedBody: { compiledSource: 'compiled' },
         access: AccessOptions.FREE,
         section: { slug: 'section-slug', course: { slug: 'course-slug' } },
@@ -203,7 +202,6 @@ describe('Lesson services', () => {
           id: true,
           title: true,
           serializedBody: true,
-          body: true,
           access: true,
           problems: {
             orderBy: { difficulty: 'asc' },
@@ -248,7 +246,6 @@ describe('Lesson services', () => {
           id: true,
           title: true,
           serializedBody: true,
-          body: true,
           access: true,
           problems: {
             orderBy: { difficulty: 'asc' },
