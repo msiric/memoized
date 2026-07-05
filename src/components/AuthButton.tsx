@@ -65,7 +65,7 @@ export const AuthButton = ({ isMobile = false, className, ...props }: AuthButton
         </div>
         <div className="min-w-0 flex-1 text-left">
           <p className="text-[15px] font-semibold tracking-tight text-white">Sign in</p>
-          <p className="text-[13px] text-zinc-500">Access your progress</p>
+          <p className="text-[13px] text-zinc-400">Access your progress</p>
         </div>
       </button>
     )

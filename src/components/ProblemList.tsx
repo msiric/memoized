@@ -84,6 +84,7 @@ const ProblemRow = memo(
         <td className="px-6 py-4 text-center">
           <input
             type="checkbox"
+            aria-label={`Mark "${problem.title}" complete`}
             checked={problem.problemProgress.some(
               (progress) => progress.completed,
             )}
@@ -562,6 +563,7 @@ export const ProblemList = ({
           </div>
           <div className="w-full p-1 sm:w-2/4 lg:p-0">
             <Select
+              aria-label="Filter by difficulty"
               value={difficulty || ''}
               onChange={handleDifficultyChange}
               variant="primary"
@@ -577,6 +579,7 @@ export const ProblemList = ({
           </div>
           <div className="w-full p-1 sm:w-2/4 lg:p-0">
             <Select
+              aria-label="Filter by status"
               value={status || ''}
               onChange={handleStatusChange}
               variant="primary"
@@ -591,6 +594,7 @@ export const ProblemList = ({
           </div>
           <div className="w-full p-1 sm:w-2/4 lg:p-0">
             <Select
+              aria-label="Filter by lesson"
               value={lesson || ''}
               onChange={handleLessonChange}
               variant="primary"
@@ -607,6 +611,7 @@ export const ProblemList = ({
           </div>
           <div className="w-full p-1 sm:w-2/4 lg:p-0">
             <Select
+              aria-label="Filter by type"
               value={type || ''}
               onChange={handleTypeChange}
               variant="primary"
@@ -628,7 +633,7 @@ export const ProblemList = ({
         </div>
         <div className="relative mx-auto max-w-[1024px] overflow-x-auto rounded-lg border border-zinc-300 shadow-lg dark:border-zinc-600">
           <table className="w-full overflow-hidden rounded-lg text-left text-sm text-zinc-500 rtl:text-right dark:text-zinc-400">
-            <thead className="border-b border-zinc-300 bg-zinc-50 text-xs uppercase text-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-400">
+            <thead className="border-b border-zinc-300 bg-zinc-50 text-xs uppercase text-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
               <tr>
                 {TABLE_COLUMNS.map((column, index) => (
                   <th
