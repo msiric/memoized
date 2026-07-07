@@ -13,6 +13,7 @@ import { PracticeProblems } from './PracticeProblems'
 export { Button } from '@/components/Button'
 export { Code as code, CodeGroup, Pre as pre } from '@/components/Code'
 export { DynamicImage as img } from '@/components/DynamicImage'
+export { ArrayVisualizer } from '@/components/visualizations/ArrayVisualizer'
 
 export type CustomLinkProps = {
   href: string
