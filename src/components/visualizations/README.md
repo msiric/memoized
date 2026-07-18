@@ -32,9 +32,11 @@ Every component is reviewed side-by-side in the dev-only gallery at
 `/dev/visualizations` (gated out of production). Add a specimen there when a new
 component lands, so drift is easy to catch.
 
-Static structural and flow diagrams are authored as Mermaid and rendered to
-committed SVG under `public/images/visualizations/`, referenced from MDX as
-`![alt](/images/visualizations/<slug>.svg)`.
+Static structural and flow diagrams are authored as Mermaid in `diagrams/*.mmd`,
+rendered to committed SVG under `public/images/visualizations/` by `yarn
+render-diagrams`, and referenced from MDX as
+`![alt](/images/visualizations/<slug>.svg)`. See `diagrams/README.md` for the
+authoring flow and theme.
 
 ## The step-log pattern
 

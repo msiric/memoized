@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
+import { DynamicImage } from '@/components/DynamicImage'
 import { ArrayVisualizer, SequenceStepper, buildEventLoopSteps } from '@/components/visualizations'
 
 /**
@@ -29,6 +30,11 @@ export default function VisualizationGalleryPage() {
       name: 'SequenceStepper',
       note: 'Temporal — event loop, call stack, async ordering.',
       node: <SequenceStepper frames={frames} code={code} label="Event loop · setTimeout vs Promise ordering" />,
+    },
+    {
+      name: 'Mermaid → committed SVG',
+      note: 'Static structural / flow / state diagrams, authored in diagrams/*.mmd and rendered by yarn render-diagrams.',
+      node: <DynamicImage src="/images/visualizations/promise-lifecycle.svg" alt="Promise lifecycle state diagram" />,
     },
   ]
 
