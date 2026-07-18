@@ -1,4 +1,4 @@
-export { ArrayVisualizer, buildSlidingWindowSteps } from './ArrayVisualizer'
+export { ArrayVisualizer } from './ArrayVisualizer'
 export { SequenceStepper } from './SequenceStepper'
 export { buildEventLoopSteps } from './SequenceStepper.data'
 export { StructureVisualizer } from './StructureVisualizer'

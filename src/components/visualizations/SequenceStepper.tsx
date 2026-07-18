@@ -8,6 +8,7 @@ import { VizFrame } from './primitives/VizFrame'
 import { useMounted } from './primitives/useMounted'
 import { useStepper } from './primitives/useStepper'
 import { viz } from './primitives/tokens'
+import type { SequenceFrame } from './SequenceStepper.data'
 
 /**
  * A reusable, data-driven step-through for temporal JavaScript topics: the event
@@ -16,19 +17,6 @@ import { viz } from './primitives/tokens'
  * out with framer-motion's layout animations, so there are no hand-placed
  * coordinates. Built on the shared stepper, frame, controls, and tokens.
  */
-
-export type LaneId = 'stack' | 'webapi' | 'micro' | 'macro' | 'console'
-
-export type SequenceFrame = {
-  stack: string[]
-  webapi: string[]
-  micro: string[]
-  macro: string[]
-  console: string[]
-  note: string
-  /** 0-based line to highlight in the code panel, if any. */
-  line?: number
-}
 
 export type SequenceStepperProps = {
   frames: SequenceFrame[]

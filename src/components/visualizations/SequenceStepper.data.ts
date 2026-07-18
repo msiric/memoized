@@ -1,11 +1,20 @@
-import type { SequenceFrame } from './SequenceStepper'
-
 /**
  * Step-log data for the SequenceStepper. Kept OUT of the 'use client' component
  * module so it is server-safe: a server-rendered lesson can call it to produce
  * frames and pass them to the client renderer. This mirrors the data/rendering
  * separation in ADR-001 (data is not client-only).
  */
+
+export type SequenceFrame = {
+  stack: string[]
+  webapi: string[]
+  micro: string[]
+  macro: string[]
+  console: string[]
+  note: string
+  /** 0-based line to highlight in the code panel, if any. */
+  line?: number
+}
 
 /**
  * The canonical "Example 1: setTimeout vs Promise" from the event-loop lesson.
