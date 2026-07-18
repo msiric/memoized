@@ -36,7 +36,9 @@ export type SequenceStepperProps = {
   label?: string
 }
 
-/** Uniform chip height and gap, so reserved heights are predictable. */
+// Layout constants the height-reservation math depends on. Each MUST stay in
+// lockstep with the Tailwind utility that renders it, or the stage will reflow:
+//   CHIP_H = h-7 (28px)  ·  CHIP_GAP = gap-1.5 (6px)  ·  CONSOLE_LINE = leading-6 (24px)
 const CHIP_H = 28
 const CHIP_GAP = 6
 const CONSOLE_LINE = 24
@@ -84,6 +86,11 @@ function Lane({
   // are content-width tokens (a queue holds several side by side, so each hugs its
   // text and full-width would collide). This asymmetry is deliberate, not a bug.
   const itemClass = vertical ? 'w-full' : 'max-w-[12rem] flex-none'
+  // Chips are keyed by their label, which must be UNIQUE within a lane per frame:
+  // popLayout animates a chip to its new position across frames by matching keys, so a
+  // stable per-chip identity is required. Two identically-labelled chips in one lane
+  // (e.g. repeated recursive frames) would collide — encode a distinguishing suffix in
+  // the data if a lesson ever needs them.
   const items = chips.map((chip) =>
     mounted ? (
       <motion.div
@@ -130,7 +137,9 @@ function Lane({
         {/* Plain CSS-transition span, NOT a framer-motion component: framer injects
             client-only inline styles that differ from the SSR output, tripping
             hydration for an always-mounted element; a class-toggled opacity fades
-            identically on server and client. The label occupies the top chip slot
+            identically on server and client, and the reduced-motion duration is gated
+            behind mount so the first client render still matches the server. The label
+            occupies the top chip slot
             (CHIP_H tall) in every lane, so the placeholder always reads directly under
             the lane label and lines up with where the first chip renders — horizontal
             queues fill the row from the left, the vertical call stack packs frames at
@@ -140,7 +149,7 @@ function Lane({
           style={{ height: CHIP_H }}
           className={clsx(
             'pointer-events-none absolute left-0 top-0 flex items-center text-[11px] italic text-zinc-400 transition-opacity',
-            reduce ? 'duration-0' : 'duration-200',
+            mounted && reduce ? 'duration-0' : 'duration-200',
             chips.length === 0 ? 'opacity-100' : 'opacity-0',
           )}
         >
