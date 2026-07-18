@@ -1,7 +1,13 @@
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { DynamicImage } from '@/components/DynamicImage'
-import { ArrayVisualizer, SequenceStepper, buildEventLoopSteps } from '@/components/visualizations'
+import {
+  ArrayVisualizer,
+  SequenceStepper,
+  StructureVisualizer,
+  buildEventLoopSteps,
+  buildInorderTraversalSteps,
+} from '@/components/visualizations'
 
 /**
  * Dev-only internal gallery: every visualization component rendered from the shared
@@ -13,6 +19,7 @@ export default function VisualizationGalleryPage() {
   if (process.env.NODE_ENV === 'production') notFound()
 
   const { frames, code } = buildEventLoopSteps()
+  const inorder = buildInorderTraversalSteps()
 
   const specimens: { name: string; note: string; node: ReactNode }[] = [
     {
@@ -30,6 +37,11 @@ export default function VisualizationGalleryPage() {
       name: 'SequenceStepper',
       note: 'Temporal — event loop, call stack, async ordering.',
       node: <SequenceStepper frames={frames} code={code} label="Event loop · setTimeout vs Promise ordering" />,
+    },
+    {
+      name: 'StructureVisualizer',
+      note: 'Hierarchical — binary trees, BSTs, heaps (D3 auto-layout).',
+      node: <StructureVisualizer tree={inorder.tree} frames={inorder.frames} label="Binary search tree · in-order traversal" />,
     },
     {
       name: 'Mermaid → committed SVG',

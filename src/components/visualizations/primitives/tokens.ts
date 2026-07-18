@@ -41,6 +41,23 @@ export const viz = {
     console: 'border-emerald-500/50 bg-emerald-400/10 text-emerald-800 dark:text-emerald-200',
   },
 
+  /**
+   * A node in a structure diagram (tree, heap), coloured by its traversal state.
+   * Applied to SVG elements, so colours use Tailwind's fill-/stroke- utilities;
+   * stroke widths are set as attributes on the elements themselves.
+   */
+  node: {
+    edge: 'stroke-zinc-300 dark:stroke-zinc-600',
+    circle: 'transition-colors',
+    default: 'fill-white stroke-zinc-300 dark:fill-zinc-800 dark:stroke-zinc-600',
+    visited: 'fill-lime-100 stroke-lime-500/60 dark:fill-lime-400/15 dark:stroke-lime-400/50',
+    active: 'fill-lime-500 stroke-lime-500 dark:fill-lime-500 dark:stroke-lime-400',
+    label: 'font-mono text-sm font-semibold transition-colors',
+    defaultText: 'fill-zinc-600 dark:fill-zinc-200',
+    visitedText: 'fill-lime-700 dark:fill-lime-100',
+    activeText: 'fill-zinc-950 dark:fill-zinc-950',
+  },
+
   /** A status pill (window sum, max so far). */
   pill: {
     base: 'rounded-md border px-2.5 py-1.5 font-mono text-xs',

@@ -3098,7 +3098,7 @@
   dependencies:
     "@types/geojson" "*"
 
-"@types/d3-hierarchy@*":
+"@types/d3-hierarchy@*", "@types/d3-hierarchy@^3.1.7":
   version "3.1.7"
   resolved "https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@types/d3-hierarchy/-/d3-hierarchy-3.1.7.tgz#6023fb3b2d463229f2d680f9ac4b47466f71f17b"
   integrity sha1-YCP7Oy1GMiny1oD5rEtHRm9x8Xs=
@@ -4827,7 +4827,7 @@ d3-geo@3:
   dependencies:
     d3-array "2.5.0 - 3"
 
-d3-hierarchy@3:
+d3-hierarchy@3, d3-hierarchy@^3.1.2:
   version "3.1.2"
   resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/d3-hierarchy/-/d3-hierarchy-3.1.2.tgz#b01cd42c1eed3d46db77a5966cf726f8c09160c6"
   integrity sha1-sBzULB7tPUbbd6WWbPcm+MCRYMY=

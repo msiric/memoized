@@ -24,9 +24,14 @@ primitives/          shared chrome, interaction, and theme (build once)
   useMounted.ts      SSR hydration gate (see "Layout stability")
 ArrayVisualizer.tsx      arrays and strings (sliding window, two-pointer, ...)
 SequenceStepper.tsx      temporal (event loop, call stack, async)
-StructureVisualizer.tsx  trees, graphs, heaps (D3 auto-layout) — planned
+StructureVisualizer.tsx  hierarchical: binary trees, BSTs, heaps (d3-hierarchy)
 index.ts                 barrel, registered in ../mdx.tsx
 ```
+
+`StructureVisualizer` covers hierarchical structures (trees and heaps), laid out
+deterministically by `d3-hierarchy`. Arbitrary-graph *structure* is served by the
+Mermaid pipeline below; interactive graph traversal (non-deterministic force
+layout) is deliberately out of scope until a lesson needs it.
 
 Every component is reviewed side-by-side in the dev-only gallery at
 `/dev/visualizations` (gated out of production). Add a specimen there when a new
