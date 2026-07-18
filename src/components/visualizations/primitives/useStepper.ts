@@ -72,6 +72,10 @@ export function useStepper(total: number, options?: { playMs?: number; ariaLabel
 
   const onKeyDown = useCallback(
     (e: ReactKeyboardEvent) => {
+      // Only act when the frame container itself is focused, not when a child control
+      // button is. Otherwise a keydown on a focused button bubbles up here and Space
+      // would toggle play (and be suppressed on the button) instead of activating it.
+      if (e.target !== e.currentTarget) return
       if (e.key === 'ArrowRight') {
         e.preventDefault()
         setPlaying(false)

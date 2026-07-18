@@ -61,4 +61,23 @@ describe('SequenceStepper', () => {
       assertStableOverlays()
     }
   })
+
+  it('scopes keyboard control to the focused frame, not the control buttons', () => {
+    const { frames, code } = buildEventLoopSteps()
+    render(<SequenceStepper frames={frames} code={code} />)
+    const frame = screen.getByRole('group', { name: 'Event loop step-through' })
+
+    // Space on a focused control button must NOT toggle play — the button owns its
+    // own activation. If the container hijacked it, Play would flip to Pause here.
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Reset' }), { key: ' ' })
+    expect(screen.getByLabelText('Play')).toBeInTheDocument()
+
+    // Space on the frame itself does drive the stepper.
+    fireEvent.keyDown(frame, { key: ' ' })
+    expect(screen.getByLabelText('Pause')).toBeInTheDocument()
+
+    // Arrow keys on the frame step it.
+    fireEvent.keyDown(frame, { key: 'ArrowRight' })
+    expect(screen.getByTestId('step-counter').textContent).toBe(`1 / ${frames.length - 1}`)
+  })
 })
