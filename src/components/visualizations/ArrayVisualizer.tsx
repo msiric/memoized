@@ -2,18 +2,23 @@
 
 import clsx from 'clsx'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
+import { VizControls } from './primitives/VizControls'
+import { VizFrame } from './primitives/VizFrame'
+import { useMounted } from './primitives/useMounted'
+import { useStepper } from './primitives/useStepper'
+import { viz } from './primitives/tokens'
 
 /**
  * A reusable, data-driven array visualizer for the interview-prep lessons.
  *
  * The author provides only DATA (an array + a window size). The component runs
- * the algorithm to build a step-log, then renders each frame. The window is a
- * single overlay sized EXACTLY to the active cells and sitting behind them
- * (the cells are transparent, so the overlay shows through as the highlight).
- * Its position and width are computed from the step, so it slides reliably and
- * there are no coordinates to hand-tune. The same component generalises to
- * two-pointer, binary search, and sorting by swapping the step-log generator.
+ * the algorithm to build a step-log, then plays it via the shared stepper. The
+ * window is a single overlay sized EXACTLY to the active cells and positioned
+ * from the step, so it slides reliably with no hand-placed coordinates. Entering
+ * and leaving cues are derived from the previous frame, so they stay correct in
+ * both directions. The same component generalises to two-pointer, binary search,
+ * and sorting by swapping the step-log generator.
  */
 
 export type ArrayStep = {
@@ -21,21 +26,14 @@ export type ArrayStep = {
   end: number
   sum: number | null
   max: number
-  removed?: number
-  added?: number
   note: string
   win?: boolean
 }
 
 /** Fixed-size sliding window: emit one frame per window position. */
-export const buildSlidingWindowSteps = (
-  data: number[],
-  k: number,
-): ArrayStep[] => {
+export const buildSlidingWindowSteps = (data: number[], k: number): ArrayStep[] => {
   if (k <= 0 || k > data.length) {
-    return [
-      { start: 0, end: -1, sum: null, max: 0, note: 'Window size must be between 1 and the array length.' },
-    ]
+    return [{ start: 0, end: -1, sum: null, max: 0, note: 'Window size must be between 1 and the array length.' }]
   }
   const steps: ArrayStep[] = []
   let sum = 0
@@ -57,8 +55,6 @@ export const buildSlidingWindowSteps = (
       end,
       sum,
       max,
-      removed,
-      added,
       note: `Slide: remove ${data[removed]} (i${removed}), add ${data[added]} (i${added}) \u2192 sum ${sum}.${isNewMax ? ' New max.' : ''}`,
     })
   }
@@ -82,30 +78,31 @@ export type ArrayVisualizerProps = {
 const CELL = 44 // px, compact for a lesson page
 const GAP = 10 // px
 
+const windowSet = (s: ArrayStep | undefined): Set<number> => {
+  const set = new Set<number>()
+  if (s && s.start >= 0 && s.end >= s.start) for (let i = s.start; i <= s.end; i++) set.add(i)
+  return set
+}
+
 export function ArrayVisualizer({ data, windowSize, label }: ArrayVisualizerProps) {
   const steps = useMemo(() => buildSlidingWindowSteps(data, windowSize), [data, windowSize])
-  const [index, setIndex] = useState(0)
-  const [pulse, setPulse] = useState<{ entering: number[]; leaving: number[] }>({ entering: [], leaving: [] })
+  const stepper = useStepper(steps.length, { ariaLabel: 'Sliding window visualization' })
   const reduce = useReducedMotion()
+  const mounted = useMounted()
+  const { index } = stepper
   const step = steps[index]
 
-  const windowSet = (s: ArrayStep) => {
-    const set = new Set<number>()
-    if (s.start >= 0 && s.end >= s.start) for (let i = s.start; i <= s.end; i++) set.add(i)
-    return set
-  }
-  // Direction-aware transition: compare the window we were showing to the one we
-  // move to, so entering/leaving are correct whether stepping forward or back.
-  const navigate = (target: number) => {
-    const n = Math.max(0, Math.min(steps.length - 1, target))
-    const from = windowSet(steps[index])
-    const to = windowSet(steps[n])
-    setPulse({
-      entering: [...to].filter((i) => !from.has(i)),
-      leaving: [...from].filter((i) => !to.has(i)),
-    })
-    setIndex(n)
-  }
+  // Derive entering/leaving from the previous committed frame, so the cues are
+  // correct whether stepping forward, back, or resetting.
+  const prevIndexRef = useRef(index)
+  const fromStep = steps[prevIndexRef.current]
+  useEffect(() => {
+    prevIndexRef.current = index
+  })
+  const to = windowSet(step)
+  const from = windowSet(fromStep)
+  const entering = [...to].filter((i) => !from.has(i))
+  const leaving = [...from].filter((i) => !to.has(i))
 
   const hasWindow = step.start >= 0 && step.end >= step.start
   const count = hasWindow ? step.end - step.start + 1 : 0
@@ -116,57 +113,66 @@ export function ArrayVisualizer({ data, windowSize, label }: ArrayVisualizerProp
 
   const cellPulse = (i: number) => {
     if (reduce) return {}
-    if (pulse.entering.includes(i)) return { scale: [0.75, 1.08, 1] }
-    if (pulse.leaving.includes(i)) return { y: [0, 5, 0], opacity: [1, 0.6, 1] }
+    if (entering.includes(i)) return viz.motion.pulseEnter
+    if (leaving.includes(i)) return viz.motion.pulseLeave
     return { scale: 1 }
   }
 
   return (
-    <div className="my-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700/60 dark:bg-zinc-800/40">
-      {label ? (
-        <p className="mb-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</p>
-      ) : null}
-
+    <VizFrame
+      label={label}
+      caption={step.note}
+      captionReserve={steps.map((s) => s.note)}
+      controls={<VizControls stepper={stepper} />}
+      containerProps={stepper.containerProps}
+    >
       <div className="overflow-x-auto py-1">
         {/* the window overlay is sized exactly to the active cells and sits behind them */}
         <div className="relative mx-auto" style={{ width: rowW, height: CELL }}>
           {hasWindow ? (
-            <motion.div
-              aria-hidden
-              initial={false}
-              animate={{ x: frameX, width: frameW }}
-              transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 380, damping: 32 }}
-              className={clsx(
-                'pointer-events-none absolute left-0 top-0 z-0 rounded-lg border-2',
-                step.win
-                  ? 'border-amber-400 bg-amber-400/15 shadow-[0_0_16px_rgba(251,191,36,0.35)]'
-                  : 'border-lime-500 bg-lime-400/15 shadow-[0_0_16px_rgba(132,204,22,0.4)]',
-              )}
-              style={{ height: CELL }}
-            />
+            mounted ? (
+              <motion.div
+                aria-hidden
+                initial={false}
+                animate={{ x: frameX, width: frameW }}
+                transition={reduce ? { duration: 0 } : viz.motion.slide}
+                className={clsx('pointer-events-none absolute left-0 top-0 z-0', viz.window.base, step.win ? viz.window.win : viz.window.default)}
+                style={{ height: CELL }}
+              />
+            ) : (
+              <div
+                aria-hidden
+                className={clsx('pointer-events-none absolute left-0 top-0 z-0', viz.window.base, step.win ? viz.window.win : viz.window.default)}
+                style={{ height: CELL, width: frameW, transform: `translateX(${frameX}px)` }}
+              />
+            )
           ) : null}
 
           <div className="absolute inset-0 z-10 flex" style={{ gap: GAP }} data-testid="array-cells">
             {data.map((value, i) => {
               const active = i >= step.start && i <= step.end
-              return (
+              const className = clsx(
+                viz.cell.base,
+                active ? viz.cell.active : viz.cell.muted,
+                leaving.includes(i) && viz.cell.leavingText,
+                entering.includes(i) && viz.cell.enteringText,
+              )
+              const style = { width: CELL, height: CELL }
+              return mounted ? (
                 <motion.div
                   key={i}
                   data-testid="cell"
                   animate={cellPulse(i)}
-                  transition={{ duration: reduce ? 0 : 0.3 }}
-                  className={clsx(
-                    'flex items-center justify-center rounded-lg border-2 font-mono text-base font-semibold transition-colors',
-                    active
-                      ? 'border-transparent bg-transparent text-zinc-900 dark:text-white'
-                      : 'border-zinc-200 bg-white text-zinc-400 dark:border-zinc-800 dark:bg-zinc-900/60 dark:text-zinc-600',
-                    pulse.leaving.includes(i) && 'text-rose-500 dark:text-rose-300',
-                    pulse.entering.includes(i) && 'text-lime-600 dark:text-lime-300',
-                  )}
-                  style={{ width: CELL, height: CELL }}
+                  transition={{ duration: reduce ? 0 : viz.motion.pulseDuration }}
+                  className={className}
+                  style={style}
                 >
                   {value}
                 </motion.div>
+              ) : (
+                <div key={i} data-testid="cell" className={className} style={style}>
+                  {value}
+                </div>
               )
             })}
           </div>
@@ -175,11 +181,7 @@ export function ArrayVisualizer({ data, windowSize, label }: ArrayVisualizerProp
         {/* index row */}
         <div className="mx-auto mt-1 flex" style={{ width: rowW, gap: GAP }}>
           {data.map((_, i) => (
-            <span
-              key={i}
-              className="text-center font-mono text-[10px] text-zinc-400"
-              style={{ width: CELL }}
-            >
+            <span key={i} className="text-center font-mono text-[10px] text-zinc-400" style={{ width: CELL }}>
               i{i}
             </span>
           ))}
@@ -187,51 +189,13 @@ export function ArrayVisualizer({ data, windowSize, label }: ArrayVisualizerProp
       </div>
 
       <div className="mt-3 flex flex-wrap justify-center gap-2">
-        <span className="rounded-md border border-lime-500/40 bg-lime-50 px-2.5 py-1.5 font-mono text-xs text-lime-800 dark:bg-lime-400/10 dark:text-lime-200" data-testid="sum">
+        <span className={clsx(viz.pill.base, viz.pill.primary)} data-testid="sum">
           window sum = <strong>{step.sum ?? '\u2013'}</strong>
         </span>
-        <span className="rounded-md border border-amber-400/50 bg-amber-50 px-2.5 py-1.5 font-mono text-xs text-amber-800 dark:bg-amber-400/10 dark:text-amber-200" data-testid="max">
+        <span className={clsx(viz.pill.base, viz.pill.win)} data-testid="max">
           max so far = <strong>{step.max}</strong>
         </span>
       </div>
-
-      <p
-        className="mt-3 rounded-lg border border-zinc-200 border-l-[3px] border-l-lime-500 bg-white p-2.5 text-xs text-zinc-700 dark:border-zinc-700 dark:border-l-lime-400 dark:bg-zinc-900 dark:text-zinc-200"
-        data-testid="narration"
-      >
-        {step.note}
-      </p>
-
-      <div className="mt-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => navigate(0)}
-          className="rounded-md border border-zinc-300 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700/50"
-        >
-          Reset
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate(index - 1)}
-          disabled={index === 0}
-          aria-label="Previous step"
-          className="rounded-md border border-zinc-300 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700/50"
-        >
-          Back
-        </button>
-        <button
-          type="button"
-          onClick={() => navigate(index + 1)}
-          disabled={index === steps.length - 1}
-          aria-label="Next step"
-          className="rounded-md bg-lime-500 px-2.5 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-lime-400 disabled:opacity-40"
-        >
-          Step
-        </button>
-        <span className="ml-auto font-mono text-[10px] text-zinc-400" data-testid="step-counter">
-          {index} / {steps.length - 1}
-        </span>
-      </div>
-    </div>
+    </VizFrame>
   )
 }
