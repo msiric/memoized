@@ -1,0 +1,12 @@
+%% Promise lifecycle: the three states and the transitions between them.
+%% Rendered to a committed SVG by `yarn render-diagrams`. Do not hand-edit the SVG.
+stateDiagram-v2
+  direction LR
+  [*] --> Pending: new Promise(executor)
+  Pending --> Fulfilled: resolve(value)
+  Pending --> Rejected: reject(reason)
+  Fulfilled --> [*]: then(onFulfilled)
+  Rejected --> [*]: catch(onRejected)
+
+  classDef settled stroke:#84cc16,color:#84cc16
+  class Fulfilled,Rejected settled
