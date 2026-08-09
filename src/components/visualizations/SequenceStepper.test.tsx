@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { SequenceStepper } from './SequenceStepper'
-import { buildEventLoopSteps } from './SequenceStepper.data'
+import { buildEventLoopSteps, buildMultiplePromisesSteps, buildZeroDelayTimeoutSteps } from './SequenceStepper.data'
 
 afterEach(cleanup)
 
@@ -10,6 +10,23 @@ describe('SequenceStepper', () => {
     const { frames } = buildEventLoopSteps()
     expect(frames.length).toBeGreaterThan(10)
     expect(frames[frames.length - 1].console).toEqual(['Start', 'End', 'Promise', 'setTimeout'])
+  })
+
+  it('builds the multiple-promises step-log ending in the verified FIFO microtask order', () => {
+    const { frames } = buildMultiplePromisesSteps()
+    // Verified against real Node output.
+    expect(frames[frames.length - 1].console).toEqual(['Start', 'End', 'Promise 1', 'Promise 2'])
+    // Both callbacks sit in the microtask queue together before either runs.
+    expect(frames.some((fr) => fr.micro.length === 2 && fr.macro.length === 0)).toBe(true)
+  })
+
+  it('builds the zero-delay-timeout step-log ending in the verified FIFO macrotask order', () => {
+    const { frames } = buildZeroDelayTimeoutSteps()
+    // Verified against real Node output.
+    expect(frames[frames.length - 1].console).toEqual(['Start', 'End', 'Timeout 1', 'Timeout 2'])
+    // Both timer callbacks reach the macrotask queue (never the microtask queue).
+    expect(frames.some((fr) => fr.macro.length === 2)).toBe(true)
+    expect(frames.every((fr) => fr.micro.length === 0)).toBe(true)
   })
 
   it('renders every lane and the code panel', () => {

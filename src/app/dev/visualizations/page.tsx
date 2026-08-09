@@ -4,7 +4,9 @@ import { DynamicImage } from '@/components/DynamicImage'
 import {
   ArrayVisualizer,
   EventLoopExample,
+  MultiplePromisesExample,
   StructureVisualizer,
+  ZeroDelayTimeoutExample,
   buildInorderTraversalSteps,
 } from '@/components/visualizations'
 
@@ -35,6 +37,16 @@ export default function VisualizationGalleryPage() {
       name: 'EventLoopExample (SequenceStepper)',
       note: 'Temporal — the canonical setTimeout vs Promise walkthrough lessons embed as <EventLoopExample />.',
       node: <EventLoopExample />,
+    },
+    {
+      name: 'MultiplePromisesExample',
+      note: 'Temporal — two promise callbacks, showing the microtask queue is FIFO.',
+      node: <MultiplePromisesExample />,
+    },
+    {
+      name: 'ZeroDelayTimeoutExample',
+      note: 'Temporal — two 0ms timers still defer to macrotasks, run FIFO one per turn.',
+      node: <ZeroDelayTimeoutExample />,
     },
     {
       name: 'StructureVisualizer',
