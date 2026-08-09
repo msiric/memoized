@@ -3,9 +3,8 @@ import type { ReactNode } from 'react'
 import { DynamicImage } from '@/components/DynamicImage'
 import {
   ArrayVisualizer,
-  SequenceStepper,
+  EventLoopExample,
   StructureVisualizer,
-  buildEventLoopSteps,
   buildInorderTraversalSteps,
 } from '@/components/visualizations'
 
@@ -13,12 +12,11 @@ import {
  * Dev-only internal gallery: every visualization component rendered from the shared
  * primitives in one place, so visual drift is easy to catch as the system grows. This
  * is a maintainer tool, not lesson content — it is gated out of production and never
- * shipped to readers. Add a specimen here whenever a new component lands.
+ * shipped to readers. Add a specimen here whenever a new component or example lands.
  */
 export default function VisualizationGalleryPage() {
   if (process.env.NODE_ENV === 'production') notFound()
 
-  const { frames, code } = buildEventLoopSteps()
   const inorder = buildInorderTraversalSteps()
 
   const specimens: { name: string; note: string; node: ReactNode }[] = [
@@ -34,9 +32,9 @@ export default function VisualizationGalleryPage() {
       ),
     },
     {
-      name: 'SequenceStepper',
-      note: 'Temporal — event loop, call stack, async ordering.',
-      node: <SequenceStepper frames={frames} code={code} label="Event loop · setTimeout vs Promise ordering" />,
+      name: 'EventLoopExample (SequenceStepper)',
+      note: 'Temporal — the canonical setTimeout vs Promise walkthrough lessons embed as <EventLoopExample />.',
+      node: <EventLoopExample />,
     },
     {
       name: 'StructureVisualizer',
