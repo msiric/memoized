@@ -20,6 +20,7 @@ export {
   EventLoopExample,
   MultiplePromisesExample,
   ZeroDelayTimeoutExample,
+  CallStackExample,
 } from '@/components/visualizations'
 
 export type CustomLinkProps = {

@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { DynamicImage } from '@/components/DynamicImage'
 import {
   ArrayVisualizer,
+  CallStackExample,
   EventLoopExample,
   MultiplePromisesExample,
   StructureVisualizer,
@@ -47,6 +48,11 @@ export default function VisualizationGalleryPage() {
       name: 'ZeroDelayTimeoutExample',
       note: 'Temporal — two 0ms timers still defer to macrotasks, run FIFO one per turn.',
       node: <ZeroDelayTimeoutExample />,
+    },
+    {
+      name: 'CallStackExample (SequenceStepper, lanes=[stack])',
+      note: 'Temporal — call-stack push/pop only; shows the lanes prop rendering a focused subset.',
+      node: <CallStackExample />,
     },
     {
       name: 'StructureVisualizer',

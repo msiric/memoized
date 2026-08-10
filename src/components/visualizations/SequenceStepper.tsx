@@ -18,10 +18,19 @@ import type { SequenceFrame } from './SequenceStepper.data'
  * coordinates. Built on the shared stepper, frame, controls, and tokens.
  */
 
+/** The temporal lanes the stepper can render, in display order. */
+export type LaneKey = 'stack' | 'webapi' | 'micro' | 'macro'
+
 export type SequenceStepperProps = {
   frames: SequenceFrame[]
   code?: string[]
   label?: string
+  /**
+   * Which lanes to render, in the given order. Defaults to all four. A lesson that is
+   * purely about the call stack passes `['stack']` so the always-empty Web-APIs and
+   * queue lanes don't add noise. The console log is always shown.
+   */
+  lanes?: LaneKey[]
 }
 
 // Layout constants the height-reservation math depends on. Each MUST stay in
@@ -30,6 +39,20 @@ export type SequenceStepperProps = {
 const CHIP_H = 28
 const CHIP_GAP = 6
 const CONSOLE_LINE = 24
+
+// The lane roster, in display order. A single static config the renderer maps over,
+// instead of four near-identical <Lane> blocks; the `lanes` prop filters it.
+const LANE_CONFIG: {
+  key: LaneKey
+  label: string
+  chipClass: string
+  orientation: 'vertical' | 'horizontal'
+}[] = [
+  { key: 'stack', label: 'Call stack', chipClass: viz.chip.stack, orientation: 'vertical' },
+  { key: 'webapi', label: 'Web APIs', chipClass: viz.chip.webapi, orientation: 'horizontal' },
+  { key: 'micro', label: 'Microtask queue', chipClass: viz.chip.micro, orientation: 'horizontal' },
+  { key: 'macro', label: 'Macrotask queue', chipClass: viz.chip.macro, orientation: 'horizontal' },
+]
 
 /** A single chip. Fixed height, single line, truncates with a tooltip so it always fits. */
 function Chip({ text, chipClass }: { text: string; chipClass: string }) {
@@ -148,7 +171,7 @@ function Lane({
   )
 }
 
-export function SequenceStepper({ frames, code, label }: SequenceStepperProps) {
+export function SequenceStepper({ frames, code, label, lanes }: SequenceStepperProps) {
   const stepper = useStepper(frames.length, { ariaLabel: 'Event loop step-through' })
   const reduce = useReducedMotion()
   const mounted = useMounted()
@@ -168,6 +191,10 @@ export function SequenceStepper({ frames, code, label }: SequenceStepperProps) {
   }, [frames])
 
   const highlighted = useMemo(() => new Set(code ? [frame.line ?? -1] : []), [code, frame.line])
+
+  // Filter the lane roster by the `lanes` prop (default: all four), so a lesson can
+  // render a focused subset (e.g. just the call stack) without empty lanes as noise.
+  const shownLanes = lanes ? LANE_CONFIG.filter((l) => lanes.includes(l.key)) : LANE_CONFIG
 
   return (
     <VizFrame
@@ -197,10 +224,18 @@ export function SequenceStepper({ frames, code, label }: SequenceStepperProps) {
         ) : null}
 
         <div className="flex min-w-0 flex-col gap-2.5" data-testid="lanes">
-          <Lane label="Call stack" chipClass={viz.chip.stack} chips={frame.stack} orientation="vertical" reserveCount={reserve.stack} reduce={reduce} mounted={mounted} />
-          <Lane label="Web APIs" chipClass={viz.chip.webapi} chips={frame.webapi} orientation="horizontal" reserveCount={reserve.webapi} reduce={reduce} mounted={mounted} />
-          <Lane label="Microtask queue" chipClass={viz.chip.micro} chips={frame.micro} orientation="horizontal" reserveCount={reserve.micro} reduce={reduce} mounted={mounted} />
-          <Lane label="Macrotask queue" chipClass={viz.chip.macro} chips={frame.macro} orientation="horizontal" reserveCount={reserve.macro} reduce={reduce} mounted={mounted} />
+          {shownLanes.map((l) => (
+            <Lane
+              key={l.key}
+              label={l.label}
+              chipClass={l.chipClass}
+              chips={frame[l.key]}
+              orientation={l.orientation}
+              reserveCount={reserve[l.key]}
+              reduce={reduce}
+              mounted={mounted}
+            />
+          ))}
         </div>
       </div>
 

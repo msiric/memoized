@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { SequenceStepper } from './SequenceStepper'
-import { buildEventLoopSteps, buildMultiplePromisesSteps, buildZeroDelayTimeoutSteps } from './SequenceStepper.data'
+import { buildEventLoopSteps, buildMultiplePromisesSteps, buildZeroDelayTimeoutSteps, buildCallStackSteps } from './SequenceStepper.data'
 
 afterEach(cleanup)
 
@@ -77,6 +77,32 @@ describe('SequenceStepper', () => {
       fireEvent.click(next)
       assertStableOverlays()
     }
+  })
+
+  it('builds the call-stack step-log ending in the verified LIFO console order', () => {
+    const { frames } = buildCallStackSteps()
+    // Verified against real Node output for the lesson's own first()/second() example.
+    expect(frames[frames.length - 1].console).toEqual(['Second Function', 'First Function'])
+    // The stack reaches depth 4 (global -> first -> second -> console.log) then unwinds.
+    expect(Math.max(...frames.map((fr) => fr.stack.length))).toBe(4)
+    // The global context is pushed first and still remains when the program ends.
+    expect(frames[frames.length - 1].stack).toEqual(['Global context'])
+    // A pure call-stack walkthrough never touches the queue lanes.
+    expect(frames.every((fr) => fr.webapi.length === 0 && fr.micro.length === 0 && fr.macro.length === 0)).toBe(true)
+  })
+
+  it('renders only the requested lanes when `lanes` is set', () => {
+    const { frames, code } = buildCallStackSteps()
+    render(<SequenceStepper frames={frames} code={code} lanes={['stack']} />)
+    expect(screen.getByText('Call stack')).toBeInTheDocument()
+    // The queue lanes are omitted entirely.
+    expect(screen.queryByText('Web APIs')).not.toBeInTheDocument()
+    expect(screen.queryByText('Microtask queue')).not.toBeInTheDocument()
+    expect(screen.queryByText('Macrotask queue')).not.toBeInTheDocument()
+    // Only the call stack's own "empty" overlay exists (at frame 0); the console shows
+    // its own "no output yet" placeholder, not "empty".
+    expect(screen.getAllByText('empty')).toHaveLength(1)
+    expect(screen.getByTestId('console')).toBeInTheDocument()
   })
 
   it('scopes keyboard control to the focused frame, not the control buttons', () => {

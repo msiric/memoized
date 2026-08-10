@@ -150,3 +150,53 @@ export const buildZeroDelayTimeoutSteps = (): { code: string[]; frames: Sequence
   ]
   return { code, frames }
 }
+
+/**
+ * The call-stack walkthrough for the context-and-call-stack lesson. It steps through
+ * that lesson's OWN `first()`/`second()` example so the visual and the surrounding
+ * prose teach the same code. Nested calls push frames; returns pop them — last in,
+ * first out — and the global context stays until the program ends, matching the
+ * lesson's numbered execution steps. Only the call stack and console change, so the
+ * renderer hides the queue lanes via `lanes={['stack']}`.
+ * Verified against real Node output: Second Function, First Function.
+ */
+export const buildCallStackSteps = (): { code: string[]; frames: SequenceFrame[] } => {
+  const code = [
+    'function first() {',
+    '  second()',
+    "  console.log('First Function')",
+    '}',
+    '',
+    'function second() {',
+    "  console.log('Second Function')",
+    '}',
+    '',
+    'first()',
+  ]
+  // Local frame builder: this walkthrough only uses the call stack and console, so it
+  // hardcodes the empty queue lanes and keeps the frame table focused on what changes.
+  const f = (line: number | undefined, stack: string[], con: string[], note: string): SequenceFrame => ({
+    stack,
+    webapi: [],
+    micro: [],
+    macro: [],
+    console: con,
+    note,
+    line,
+  })
+  const G = 'Global context'
+  const frames = [
+    f(undefined, [], [], 'The call stack tracks which function is running right now. Step through to watch frames push and pop.'),
+    f(undefined, [G], [], 'The program starts. The global execution context is created and pushed onto the stack.'),
+    f(9, [G, 'first()'], [], 'first() is called, so its execution context is created and pushed on top.'),
+    f(1, [G, 'first()', 'second()'], [], 'Inside first(), the call to second() pushes another frame. first() is now paused, waiting.'),
+    f(6, [G, 'first()', 'second()', "console.log('Second Function')"], [], 'second() calls console.log, which is pushed on top of second().'),
+    f(6, [G, 'first()', 'second()'], ['Second Function'], "It prints 'Second Function' and pops off the stack."),
+    f(7, [G, 'first()'], ['Second Function'], 'second() reaches its end and returns, so its frame pops. Control resumes in first().'),
+    f(2, [G, 'first()', "console.log('First Function')"], ['Second Function'], "first() continues to its own console.log, which is pushed."),
+    f(2, [G, 'first()'], ['Second Function', 'First Function'], "It prints 'First Function' and pops."),
+    f(3, [G], ['Second Function', 'First Function'], 'first() returns and its frame pops. Only the global context is left.'),
+    f(undefined, [G], ['Second Function', 'First Function'], "LIFO: second() was pushed last and finished first, which is why 'Second Function' prints before 'First Function'. The global context remains until the program ends."),
+  ]
+  return { code, frames }
+}
