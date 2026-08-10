@@ -9,9 +9,13 @@
  */
 
 export const viz = {
+  // `not-prose` insulates the whole visualization from the surrounding MDX
+  // typography (lessons render inside `.prose`), so prose defaults can't leak in
+  // and shift our spacing, font-size, or element styling. Everything below is
+  // styled explicitly by these tokens.
   frame:
-    'my-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700/60 dark:bg-zinc-800/40',
-  label: 'mb-3 text-xs font-medium text-zinc-500 dark:text-zinc-400',
+    'not-prose my-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700/60 dark:bg-zinc-800/40',
+  label: 'mb-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300',
   caption:
     'rounded-lg border border-zinc-200 border-l-[3px] border-l-lime-500 bg-white p-2.5 text-xs text-zinc-700 dark:border-zinc-700 dark:border-l-lime-400 dark:bg-zinc-900 dark:text-zinc-200',
 
