@@ -33,7 +33,7 @@ export const viz = {
 
   /** A labelled chip in a lane (call stack frame, queued callback). */
   chip: {
-    base: 'flex h-7 items-center rounded-md border px-2.5 font-mono text-xs',
+    base: 'flex h-7 items-center rounded-md border px-2 font-mono text-xs',
     stack: 'border-lime-500/50 bg-lime-400/10 text-lime-800 dark:text-lime-200',
     micro: 'border-violet-500/50 bg-violet-400/10 text-violet-800 dark:text-violet-200',
     macro: 'border-amber-500/50 bg-amber-400/10 text-amber-800 dark:text-amber-200',
@@ -68,11 +68,11 @@ export const viz = {
   laneLabel: 'mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400',
 
   button: {
-    base: 'rounded-md border border-zinc-300 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700/50',
+    base: 'shrink-0 rounded-md border border-zinc-300 px-2.5 py-1.5 text-xs font-semibold text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700/50',
     primary:
-      'rounded-md bg-lime-500 px-2.5 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-lime-400 disabled:opacity-40',
+      'shrink-0 rounded-md bg-lime-500 px-2.5 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-lime-400 disabled:opacity-40',
   },
-  counter: 'ml-auto font-mono text-[10px] text-zinc-400',
+  counter: 'ml-auto shrink-0 whitespace-nowrap text-right font-mono text-[10px] tabular-nums text-zinc-400',
 
   /** Motion presets. Renderers gate these on prefers-reduced-motion. */
   motion: {

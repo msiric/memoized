@@ -11,8 +11,12 @@ import { viz } from './tokens'
 
 export function VizControls({ stepper, showPlay = true }: { stepper: Stepper; showPlay?: boolean }) {
   const { index, total, atStart, atEnd, playing, next, back, reset, togglePlay } = stepper
+  // Reserve the counter's widest value so it never changes width as the index grows
+  // (e.g. "1 / 14" -> "14 / 14"). Otherwise a mid-playthrough widening could push the
+  // bar to wrap at borderline widths, jumping the controls height. font-mono => 1ch/char.
+  const maxLabel = `${total - 1} / ${total - 1}`
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <button type="button" onClick={reset} className={viz.button.base}>
         Reset
       </button>
@@ -45,7 +49,7 @@ export function VizControls({ stepper, showPlay = true }: { stepper: Stepper; sh
           {playing ? 'Pause' : 'Play'}
         </button>
       ) : null}
-      <span className={viz.counter} data-testid="step-counter">
+      <span className={viz.counter} style={{ minWidth: `${maxLabel.length}ch` }} data-testid="step-counter">
         {index} / {total - 1}
       </span>
     </div>

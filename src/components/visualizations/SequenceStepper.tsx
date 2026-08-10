@@ -179,7 +179,7 @@ export function SequenceStepper({ frames, code, label }: SequenceStepperProps) {
     >
       <div className="grid gap-3 md:grid-cols-2">
         {code ? (
-          <pre className="overflow-x-auto rounded-lg border border-zinc-200 bg-white p-2.5 font-mono text-xs leading-6 dark:border-zinc-700 dark:bg-zinc-900" data-testid="code-panel">
+          <pre className="min-w-0 overflow-x-auto rounded-lg border border-zinc-200 bg-white p-2.5 font-mono text-xs leading-6 dark:border-zinc-700 dark:bg-zinc-900" data-testid="code-panel">
             {code.map((ln, i) => (
               <div
                 key={i}
@@ -196,7 +196,7 @@ export function SequenceStepper({ frames, code, label }: SequenceStepperProps) {
           </pre>
         ) : null}
 
-        <div className="flex flex-col gap-2.5" data-testid="lanes">
+        <div className="flex min-w-0 flex-col gap-2.5" data-testid="lanes">
           <Lane label="Call stack" chipClass={viz.chip.stack} chips={frame.stack} orientation="vertical" reserveCount={reserve.stack} reduce={reduce} mounted={mounted} />
           <Lane label="Web APIs" chipClass={viz.chip.webapi} chips={frame.webapi} orientation="horizontal" reserveCount={reserve.webapi} reduce={reduce} mounted={mounted} />
           <Lane label="Microtask queue" chipClass={viz.chip.micro} chips={frame.micro} orientation="horizontal" reserveCount={reserve.micro} reduce={reduce} mounted={mounted} />
