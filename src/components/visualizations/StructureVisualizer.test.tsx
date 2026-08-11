@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest'
 import { render, screen, fireEvent, cleanup } from '@testing-library/react'
 import { StructureVisualizer } from './StructureVisualizer'
-import { buildInorderTraversalSteps } from './StructureVisualizer.data'
+import { buildInorderTraversalSteps, buildPrototypeChainSteps } from './StructureVisualizer.data'
 
 afterEach(cleanup)
 
@@ -37,6 +37,55 @@ describe('StructureVisualizer', () => {
     const texts = [...screen.getByTestId('structure-svg').querySelectorAll('text')]
     for (const text of texts) {
       expect(text.getAttribute('class')).toContain('fill-lime')
+    }
+  })
+
+  it('builds a prototype chain that ends at null and resolves own before inherited', () => {
+    const { tree, frames } = buildPrototypeChainSteps()
+    // A chain is a degenerate tree: every node has exactly one child until null.
+    const ids: string[] = []
+    for (let node: typeof tree | undefined = tree; node; node = node.children?.[0]) ids.push(node.id)
+    expect(ids).toEqual(['john', 'person', 'objproto', 'null'])
+    // The first lookup resolves on john itself (own property, nothing walked yet).
+    expect(frames[1].active).toBe('john')
+    expect(frames[1].visited).toEqual([])
+    // The failed lookup walks the whole chain and stops at null.
+    const last = frames.filter((f) => f.active !== null).pop()
+    expect(last?.active).toBe('null')
+  })
+
+  it('renders box nodes with a rect instead of a circle', () => {
+    const { tree, frames } = buildPrototypeChainSteps()
+    render(<StructureVisualizer tree={tree} frames={frames} nodeShape="box" label="Prototype chain" />)
+    const svg = screen.getByTestId('structure-svg')
+    expect(svg.querySelectorAll('rect')).toHaveLength(4)
+    expect(svg.querySelectorAll('circle')).toHaveLength(0)
+    // Long labels render in full rather than being clipped to a circle.
+    const labels = [...svg.querySelectorAll('text')].map((t) => t.textContent)
+    expect(labels).toContain('Object.prototype')
+  })
+
+  it('still renders circles by default, so existing tree visuals are unchanged', () => {
+    const { tree, frames } = buildInorderTraversalSteps()
+    render(<StructureVisualizer tree={tree} frames={frames} label="BST in-order" />)
+    const svg = screen.getByTestId('structure-svg')
+    expect(svg.querySelectorAll('circle')).toHaveLength(7)
+    expect(svg.querySelectorAll('rect')).toHaveLength(0)
+  })
+
+  it('draws edges between node boundaries so they never show through a node', () => {
+    const { tree, frames } = buildPrototypeChainSteps()
+    render(<StructureVisualizer tree={tree} frames={frames} nodeShape="box" label="Prototype chain" />)
+    const lines = [...screen.getByTestId('structure-svg').querySelectorAll('line')]
+    expect(lines).toHaveLength(3)
+    // Some node states are semi-transparent, so a centre-to-centre edge would be visible
+    // through the node. Every edge must start below its parent and end above its child.
+    for (const line of lines) {
+      const y1 = Number(line.getAttribute('y1'))
+      const y2 = Number(line.getAttribute('y2'))
+      expect(y2).toBeGreaterThan(y1)
+      // The visible span is strictly the gap between levels, never the full 58px pitch.
+      expect(y2 - y1).toBeLessThan(58)
     }
   })
 })

@@ -28,12 +28,22 @@ export type StructureVisualizerProps = {
   tree: TreeNode
   frames: StructureFrame[]
   label?: string
+  /**
+   * Node shape. `circle` (default) suits short values — BST keys, heap elements.
+   * `box` sizes a uniform rounded rect to the longest label, for named nodes that
+   * never fit in a small circle (prototype-chain links, linked-list cells, trie nodes).
+   */
+  nodeShape?: 'circle' | 'box'
 }
 
 const NODE_R = 20 // node radius, px
 const GAP_X = 18 // horizontal gap between sibling node edges, px
 const GAP_Y = 58 // vertical distance between levels, px
-const PAD = NODE_R + 6 // padding around the laid-out tree, px
+const BOX_H = 32 // box-node height, px
+const BOX_PAD_X = 14 // horizontal padding inside a box node, px
+// Advance width of the node label font (font-mono text-sm). Used to size box nodes
+// to their text without measuring in the DOM, so layout is identical on server and client.
+const CHAR_W = 8.4
 
 type NodeState = 'default' | 'visited' | 'active'
 
@@ -43,30 +53,39 @@ const NODE_STATE: Record<NodeState, { circle: string; text: string }> = {
   active: { circle: viz.node.active, text: viz.node.activeText },
 }
 
-export function StructureVisualizer({ tree, frames, label }: StructureVisualizerProps) {
+export function StructureVisualizer({ tree, frames, label, nodeShape = 'circle' }: StructureVisualizerProps) {
   const stepper = useStepper(frames.length, { ariaLabel: 'Data structure traversal' })
   const frame = frames[stepper.index]
 
-  // Lay the tree out once. nodeSize gives uniform spacing; we then normalise the
+  // Lay the tree out once. Node half-extents drive both the spacing and the padding,
+  // so circle and box nodes are laid out by the same math; we then normalise the
   // (possibly negative) coordinates into a 0,0-origin viewBox with padding.
   const layout = useMemo(() => {
-    const root = treeLayout<TreeNode>().nodeSize([NODE_R * 2 + GAP_X, GAP_Y])(
-      hierarchy<TreeNode>(tree, (d) => d.children),
-    )
+    const isBox = nodeShape === 'box'
+    const measured = hierarchy<TreeNode>(tree, (d) => d.children)
+    const longest = Math.max(...measured.descendants().map((n) => n.data.label.length))
+    const halfW = isBox ? Math.round((longest * CHAR_W + BOX_PAD_X * 2) / 2) : NODE_R
+    const halfH = isBox ? BOX_H / 2 : NODE_R
+    const root = treeLayout<TreeNode>().nodeSize([halfW * 2 + GAP_X, GAP_Y])(measured)
     const nodes = root.descendants()
     const xs = nodes.map((n) => n.x)
     const ys = nodes.map((n) => n.y)
     const minX = Math.min(...xs)
     const minY = Math.min(...ys)
+    const padX = halfW + 6
+    const padY = halfH + 6
     return {
       nodes,
       links: root.links(),
-      offsetX: -minX + PAD,
-      offsetY: -minY + PAD,
-      width: Math.max(...xs) - minX + PAD * 2,
-      height: Math.max(...ys) - minY + PAD * 2,
+      halfW,
+      halfH,
+      isBox,
+      offsetX: -minX + padX,
+      offsetY: -minY + padY,
+      width: Math.max(...xs) - minX + padX * 2,
+      height: Math.max(...ys) - minY + padY * 2,
     }
-  }, [tree])
+  }, [tree, nodeShape])
 
   const visited = new Set(frame.visited)
   const stateOf = (id: string): NodeState => (id === frame.active ? 'active' : visited.has(id) ? 'visited' : 'default')
@@ -90,13 +109,18 @@ export function StructureVisualizer({ tree, frames, label }: StructureVisualizer
           data-testid="structure-svg"
         >
           <g>
+            {/* Edges run from the BOTTOM of the parent to the TOP of the child rather than
+                centre to centre. Node fills are semi-transparent in some states (visited is
+                lime at 15% in dark mode), so a centre-to-centre line would show through the
+                node it is drawn behind. Stopping at the node boundary is also just how tree
+                diagrams are drawn, and it works for both node shapes. */}
             {layout.links.map((link, i) => (
               <line
                 key={i}
                 x1={link.source.x + layout.offsetX}
-                y1={link.source.y + layout.offsetY}
+                y1={link.source.y + layout.offsetY + layout.halfH}
                 x2={link.target.x + layout.offsetX}
-                y2={link.target.y + layout.offsetY}
+                y2={link.target.y + layout.offsetY - layout.halfH}
                 strokeWidth={1.5}
                 className={viz.node.edge}
               />
@@ -111,7 +135,19 @@ export function StructureVisualizer({ tree, frames, label }: StructureVisualizer
                   transform={`translate(${n.x + layout.offsetX},${n.y + layout.offsetY})`}
                   data-testid="node"
                 >
-                  <circle r={NODE_R} strokeWidth={2} className={clsx(viz.node.circle, state.circle)} />
+                  {layout.isBox ? (
+                    <rect
+                      x={-layout.halfW}
+                      y={-layout.halfH}
+                      width={layout.halfW * 2}
+                      height={layout.halfH * 2}
+                      rx={8}
+                      strokeWidth={2}
+                      className={clsx(viz.node.circle, state.circle)}
+                    />
+                  ) : (
+                    <circle r={NODE_R} strokeWidth={2} className={clsx(viz.node.circle, state.circle)} />
+                  )}
                   <text textAnchor="middle" dominantBaseline="central" className={clsx(viz.node.label, state.text)}>
                     {n.data.label}
                   </text>

@@ -21,6 +21,7 @@ export {
   MultiplePromisesExample,
   ZeroDelayTimeoutExample,
   CallStackExample,
+  PrototypeChainExample,
 } from '@/components/visualizations'
 
 export type CustomLinkProps = {

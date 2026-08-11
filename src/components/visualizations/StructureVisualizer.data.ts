@@ -75,3 +75,88 @@ export function buildInorderTraversalSteps(root: TreeNode = bst): { tree: TreeNo
 
   return { tree: root, frames }
 }
+
+/**
+ * The prototype chain for the objects lesson, built from that lesson's OWN example:
+ *
+ *   let person = { greet() {...} }
+ *   let john = Object.create(person)
+ *   john.name = 'John'
+ *
+ * Rendered as a chain (each node has a single child) whose reading order top-to-bottom
+ * IS the lookup order, so the walk down the diagram is the walk up the [[Prototype]]
+ * chain. The step-log resolves three property accesses that each end differently: an
+ * own property, an inherited one, and one that exists nowhere — which is exactly what
+ * interviewers probe. Verified in Node: john's own keys are ['name'],
+ * john.hasOwnProperty('greet') is false, getPrototypeOf(john) === person,
+ * getPrototypeOf(person) === Object.prototype, and getPrototypeOf(Object.prototype) is null.
+ */
+export function buildPrototypeChainSteps(): { tree: TreeNode; frames: StructureFrame[] } {
+  const tree: TreeNode = {
+    id: 'john',
+    label: 'john { name }',
+    children: [
+      {
+        id: 'person',
+        label: 'person { greet }',
+        children: [
+          {
+            id: 'objproto',
+            label: 'Object.prototype',
+            children: [{ id: 'null', label: 'null' }],
+          },
+        ],
+      },
+    ],
+  }
+
+  const frames: StructureFrame[] = [
+    {
+      active: null,
+      visited: [],
+      note: 'Every object has a hidden [[Prototype]] link to another object. Reading a property walks this chain from the top down.',
+    },
+    {
+      active: 'john',
+      visited: [],
+      note: "john.name: the search starts on john itself, which owns name. Found immediately — an OWN property, no walking needed.",
+    },
+    {
+      active: 'john',
+      visited: [],
+      note: 'john.greet(): the search starts on john again. john only owns name, so there is no greet here.',
+    },
+    {
+      active: 'person',
+      visited: ['john'],
+      note: "Not found, so it follows the [[Prototype]] link to person, which owns greet. Found — an INHERITED property. It still runs with this = john, so it prints 'Hello, my name is John'.",
+    },
+    {
+      active: 'john',
+      visited: [],
+      note: 'john.age: nothing defines age. The search starts on john once more.',
+    },
+    {
+      active: 'person',
+      visited: ['john'],
+      note: 'Not on john, so it checks person. Not there either.',
+    },
+    {
+      active: 'objproto',
+      visited: ['john', 'person'],
+      note: 'Next is Object.prototype, where the built-ins like hasOwnProperty and toString live. Still no age.',
+    },
+    {
+      active: 'null',
+      visited: ['john', 'person', 'objproto'],
+      note: 'The chain ends at null. The search stops here and john.age is undefined — that is why a missing property returns undefined instead of throwing.',
+    },
+    {
+      active: null,
+      visited: ['john', 'person', 'objproto', 'null'],
+      note: 'Own properties are found first and shadow inherited ones; otherwise each prototype is checked in order, and every chain ends at null.',
+    },
+  ]
+
+  return { tree, frames }
+}

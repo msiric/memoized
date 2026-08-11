@@ -6,6 +6,7 @@ import {
   CallStackExample,
   EventLoopExample,
   MultiplePromisesExample,
+  PrototypeChainExample,
   StructureVisualizer,
   ZeroDelayTimeoutExample,
   buildInorderTraversalSteps,
@@ -58,6 +59,11 @@ export default function VisualizationGalleryPage() {
       name: 'StructureVisualizer',
       note: 'Hierarchical — binary trees, BSTs, heaps (D3 auto-layout).',
       node: <StructureVisualizer tree={inorder.tree} frames={inorder.frames} label="Binary search tree · in-order traversal" />,
+    },
+    {
+      name: 'PrototypeChainExample (StructureVisualizer, nodeShape=box)',
+      note: 'Hierarchical — a named chain rendered with box nodes; shows the nodeShape variant for labels that never fit a circle.',
+      node: <PrototypeChainExample />,
     },
     {
       name: 'Mermaid → committed SVG',
