@@ -30,7 +30,11 @@ export function VizFrame({ children, label, caption, captionReserve, controls, c
   const hasCaption = caption !== undefined && caption !== null
   const reserve = captionReserve && captionReserve.length > 0
   return (
-    <div className={`${viz.frame} outline-none focus-visible:ring-2 focus-visible:ring-lime-500/60`} {...containerProps}>
+    <div
+      className={`${viz.frame} outline-none focus-visible:ring-2 focus-visible:ring-lime-500/60`}
+      data-testid="viz-frame"
+      {...containerProps}
+    >
       {label ? <p className={viz.label}>{label}</p> : null}
       {children}
       {hasCaption ? (
