@@ -7,8 +7,8 @@ config:
 ---
 flowchart TB
   accTitle: Determine this for a function invocation
-  accDescr: Read top to bottom and stop at the first matching rule. Arrows use lexical this. Construction uses a new instance. Ordinary calls to bound functions retain their bound receiver. Otherwise call or apply supply a receiver, method calls use their base object, and plain calls depend on the function's strictness.
-  arrow("1. Arrow function?<br/>Yes: enclosing this")
+  accDescr: Read top to bottom and stop at the first matching rule. An arrow target uses lexical this even through a bound wrapper. Construction uses a new instance. Ordinary calls to bound non-arrow functions retain their bound receiver. Otherwise call or apply supply a receiver, method calls use their base object, and plain calls depend on the function's strictness.
+  arrow("1. Arrow target?<br/>Yes: enclosing this")
   construct("2. Called with new?<br/>Yes: new instance")
   bound("3. Already bound?<br/>Yes: bound receiver")
   explicit("4. Using call or apply?<br/>Yes: supplied receiver")
