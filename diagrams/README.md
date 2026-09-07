@@ -19,10 +19,22 @@ point Puppeteer at an existing browser: `PUPPETEER_EXECUTABLE_PATH=/path/to/chro
 ## Theme
 
 `mermaid.config.json` themes every diagram with the platform palette: zinc line-art
-(`#71717a`), a lime accent (`#84cc16`, applied per-diagram via `classDef`), and a
+(`#71717a`), readable zinc text (`#d4d4d8`), a lime accent (`#84cc16`, applied per-diagram via `classDef`), and a
 transparent canvas. Edge-label backgrounds are set to the dark page background
 (`#18181b`, i.e. Tailwind `zinc-900`) so labels mask the line beneath them.
 
 The app is dark-only (`forcedTheme="dark"`), so diagrams are tuned for the dark
 surface. If a light theme is ever reintroduced, the label background here must be
 revisited (an `<img>` cannot adapt its baked colors to two themes).
+
+## Lesson-sized diagrams
+
+Prefer top-to-bottom layouts and short labels. A diagram that fits the page but
+shrinks its text below a readable size is not responsive. Inspect the rendered
+image in its real lesson at 320px, not just the SVG in isolation.
+
+Include `accTitle` and `accDescr` in the source and descriptive alt text in MDX.
+Keep the equivalent explanation in the lesson: an image is a teaching aid, not a
+replacement for accessible prose. For static lessons, use Playwright to check image
+loading, label size, bounds and page overflow; `verify:viz` targets interactive
+`viz-frame` containers and does not validate standalone images.

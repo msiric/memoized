@@ -1,41 +1,46 @@
 {
   "theme": "base",
+  "flowchart": {
+    "useMaxWidth": false
+  },
+  "state": {
+    "useMaxWidth": false
+  },
   "themeVariables": {
     "fontFamily": "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
     "fontSize": "15px",
     "primaryColor": "transparent",
     "primaryBorderColor": "#71717a",
-    "primaryTextColor": "#71717a",
+    "primaryTextColor": "#d4d4d8",
     "secondaryColor": "transparent",
     "secondaryBorderColor": "#71717a",
-    "secondaryTextColor": "#71717a",
+    "secondaryTextColor": "#d4d4d8",
     "tertiaryColor": "transparent",
     "tertiaryBorderColor": "#71717a",
-    "tertiaryTextColor": "#71717a",
+    "tertiaryTextColor": "#d4d4d8",
     "lineColor": "#71717a",
-    "textColor": "#71717a",
+    "textColor": "#d4d4d8",
     "mainBkg": "transparent",
     "nodeBorder": "#71717a",
-    "nodeTextColor": "#71717a",
+    "nodeTextColor": "#d4d4d8",
     "clusterBkg": "transparent",
     "clusterBorder": "#71717a",
     "edgeLabelBackground": "#18181b",
     "labelBackgroundColor": "#18181b",
-    "titleColor": "#71717a",
-    "labelColor": "#71717a",
+    "titleColor": "#d4d4d8",
+    "labelColor": "#d4d4d8",
     "stateBkg": "transparent",
-    "stateLabelColor": "#71717a",
+    "stateLabelColor": "#d4d4d8",
     "specialStateColor": "#71717a",
     "transitionColor": "#71717a",
-    "transitionLabelColor": "#71717a",
+    "transitionLabelColor": "#d4d4d8",
     "compositeBackground": "transparent",
     "compositeTitleBackground": "transparent",
     "compositeBorder": "#71717a",
     "altBackground": "transparent",
     "innerEndBackground": "#71717a",
     "noteBkgColor": "transparent",
-    "noteTextColor": "#71717a",
+    "noteTextColor": "#d4d4d8",
     "noteBorderColor": "#71717a"
   }
 }
-

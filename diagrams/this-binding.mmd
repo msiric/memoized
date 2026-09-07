@@ -1,0 +1,21 @@
+---
+config:
+  htmlLabels: false
+  flowchart:
+    padding: 12
+    rankSpacing: 30
+---
+flowchart TB
+  accTitle: Determine this for a function invocation
+  accDescr: Read top to bottom and stop at the first matching rule. Arrows use lexical this. Construction uses a new instance. Ordinary calls to bound functions retain their bound receiver. Otherwise call or apply supply a receiver, method calls use their base object, and plain calls depend on the function's strictness.
+  arrow("1. Arrow function?<br/>Yes: enclosing this")
+  construct("2. Called with new?<br/>Yes: new instance")
+  bound("3. Already bound?<br/>Yes: bound receiver")
+  explicit("4. Using call or apply?<br/>Yes: supplied receiver")
+  method("5. Method invocation?<br/>Yes: base object")
+  plain("6. Plain function call<br/>Strict: undefined<br/>Sloppy: globalThis")
+  arrow -->|No| construct
+  construct -->|No| bound
+  bound -->|No| explicit
+  explicit -->|No| method
+  method -->|No| plain

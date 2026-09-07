@@ -70,6 +70,11 @@ export default function VisualizationGalleryPage() {
       note: 'Static structural / flow / state diagrams, authored in diagrams/*.mmd and rendered by yarn render-diagrams.',
       node: <DynamicImage src="/images/visualizations/promise-lifecycle.svg" alt="Promise lifecycle state diagram" />,
     },
+    {
+      name: 'this binding decision flow',
+      note: 'Read top to bottom and stop at the first matching rule; outcomes stay inside the cards to remain readable on mobile.',
+      node: <DynamicImage src="/images/visualizations/this-binding.svg" alt="Six ordered decisions for determining this in a function call" />,
+    },
   ]
 
   return (
