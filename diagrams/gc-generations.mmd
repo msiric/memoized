@@ -1,0 +1,17 @@
+---
+config:
+  htmlLabels: false
+  flowchart:
+    padding: 10
+    rankSpacing: 26
+---
+flowchart TB
+  accTitle: Generational collection focuses on young objects
+  accDescr: Ordinary new allocations enter the young generation. Minor collections retain reachable survivors and reclaim unreachable young objects. Some survivors are promoted to the old generation. Major collections consider the whole heap. Exact promotion and scheduling rules are engine details, and old-to-young references must be tracked.
+  young("Young generation<br/>Most new allocations")
+  minor("Minor collection<br/>Keep reachable survivors<br/>Reclaim unreachable young")
+  old("Old generation<br/>Promoted survivors")
+  major("Major collection<br/>Consider the whole heap")
+  young --> minor
+  minor -->|Some survivors| old
+  old --> major

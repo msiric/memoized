@@ -32,6 +32,8 @@ revisited (an `<img>` cannot adapt its baked colors to two themes).
 Prefer top-to-bottom layouts and short labels. A diagram that fits the page but
 shrinks its text below a readable size is not responsive. Inspect the rendered
 image in its real lesson at 320px, not just the SVG in isolation.
+The shared subgraph title margin reserves room above grouped nodes; check title
+and node bounds as well as the outer image width.
 
 Include `accTitle` and `accDescr` in the source and descriptive alt text in MDX.
 Keep the equivalent explanation in the lesson: an image is a teaching aid, not a

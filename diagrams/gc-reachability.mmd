@@ -1,0 +1,21 @@
+---
+config:
+  htmlLabels: false
+  flowchart:
+    padding: 10
+    rankSpacing: 40
+---
+flowchart TB
+  accTitle: A cycle without a path from roots is collectible
+  accDescr: Roots retain the person object. After createCircularReference returns, objA and objB still reference each other, but no root reaches either object. Their cycle is eligible for collection, unlike the reachable person object.
+  roots("GC roots")
+  person("person object<br/>Reachable: retain")
+  subgraph island["Unreachable cycle"]
+    objA("objA")
+    objB("objB")
+    objA -->|ref| objB
+    objB -->|ref| objA
+  end
+  roots --> person
+  %% Layout-only link: there is no reference from person into the cycle.
+  person ~~~ objA

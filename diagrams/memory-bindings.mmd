@@ -1,0 +1,15 @@
+---
+config:
+  htmlLabels: false
+  flowchart:
+    padding: 10
+    rankSpacing: 26
+---
+flowchart TB
+  accTitle: Bindings, active calls, and object identity
+  accDescr: A conceptual snapshot of the lesson examples: the active add call has parameters a equal to 5 and b equal to 10. A separate live person binding refers to the object containing Bob and age 25. This is not a physical storage map; engines may use registers, stack slots or heap contexts.
+  params("Active call: add(5, 10)<br/>a = 5, b = 10")
+  binding("Live enclosing scope<br/>person binding")
+  object("Object on managed heap<br/>name: Bob<br/>age: 25")
+  params ~~~ binding
+  binding -->|Reference| object

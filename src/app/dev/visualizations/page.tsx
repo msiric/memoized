@@ -85,6 +85,21 @@ export default function VisualizationGalleryPage() {
       note: 'The engine lesson’s MyObject example: common constructor assignments, then divergent property additions.',
       node: <DynamicImage src="/images/visualizations/hidden-class-transitions.svg" alt="MyObject instances share a shape until c or d is added" />,
     },
+    {
+      name: 'Memory bindings and object identity',
+      note: 'A conceptual snapshot, not a promise about where an engine physically stores values.',
+      node: <DynamicImage src="/images/visualizations/memory-bindings.svg" alt="An active add call and a separate person binding pointing to an object" />,
+    },
+    {
+      name: 'GC root reachability',
+      note: 'The lesson’s unreachable objA/objB cycle contrasts with a reachable person object.',
+      node: <DynamicImage src="/images/visualizations/gc-reachability.svg" alt="A reachable person object and a separate collectible cycle" />,
+    },
+    {
+      name: 'Generational collection',
+      note: 'Young-object collection and survivor promotion, without hard-coded timing or age guarantees.',
+      node: <DynamicImage src="/images/visualizations/gc-generations.svg" alt="Young generation, minor collection, survivor promotion and whole-heap major collection" />,
+    },
   ]
 
   return (
