@@ -1,0 +1,22 @@
+---
+config:
+  htmlLabels: false
+  flowchart:
+    padding: 10
+    rankSpacing: 26
+---
+flowchart TB
+  accTitle: V8 execution tiers and deoptimization
+  accDescr: Parsing produces an AST and bytecode. Ignition interprets bytecode. Sparkplug compiles baseline code. Maglev and TurboFan optimize using runtime feedback. Failed speculative assumptions trigger deoptimization, rebuilding interpreter state. Not every function visits every tier.
+  source("JavaScript source")
+  parse("Parse to AST<br/>Generate bytecode")
+  ignition("Ignition<br/>Interpret bytecode")
+  sparkplug("Sparkplug<br/>Baseline machine code")
+  maglev("Maglev<br/>Fast optimization")
+  turbo("TurboFan<br/>Peak optimization")
+  deopt("Deoptimization<br/>Rebuild interpreter state")
+  source --> parse --> ignition
+  ignition --> sparkplug --> maglev --> turbo
+  maglev -.-> deopt
+  turbo -.-> deopt
+  deopt -.-> ignition

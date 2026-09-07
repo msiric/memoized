@@ -75,6 +75,16 @@ export default function VisualizationGalleryPage() {
       note: 'Read top to bottom and stop at the first matching rule; outcomes stay inside the cards to remain readable on mobile.',
       node: <DynamicImage src="/images/visualizations/this-binding.svg" alt="Six ordered decisions for determining this in a function call" />,
     },
+    {
+      name: 'V8 tiers and deoptimization',
+      note: 'Static conceptual pipeline, including speculative optimization and interpreter-state reconstruction.',
+      node: <DynamicImage src="/images/visualizations/v8-tiering.svg" alt="V8 execution tiers with deoptimization back to interpreter state" />,
+    },
+    {
+      name: 'Hidden-class transitions',
+      note: 'The engine lesson’s MyObject example: common constructor assignments, then divergent property additions.',
+      node: <DynamicImage src="/images/visualizations/hidden-class-transitions.svg" alt="MyObject instances share a shape until c or d is added" />,
+    },
   ]
 
   return (

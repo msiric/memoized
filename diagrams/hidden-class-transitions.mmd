@@ -1,0 +1,20 @@
+---
+config:
+  htmlLabels: false
+  flowchart:
+    padding: 10
+    nodeSpacing: 18
+    rankSpacing: 28
+---
+flowchart TB
+  accTitle: MyObject instances follow different shape transitions
+  accDescr: Both new MyObject instances add a then b and share a shape. Adding c to obj1 and d to obj2 produces two different shapes. Shape identifiers are illustrative, not actual V8 addresses.
+  start("S0<br/>New MyObject")
+  a("S1<br/>a")
+  ab("S2<br/>a, b<br/>Shared by obj1 and obj2")
+  abc("S3: obj1<br/>a, b, c")
+  abd("S4: obj2<br/>a, b, d")
+  start -->|Add a| a
+  a -->|Add b| ab
+  ab -->|Add c| abc
+  ab -->|Add d| abd
