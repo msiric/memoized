@@ -1,6 +1,6 @@
 import { render, screen, cleanup } from '@testing-library/react'
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest'
-import BlogPostPage, { generateMetadata, generateStaticParams } from './page'
+import BlogPostPage, { generateMetadata, generateStaticParams, dynamic } from './page'
 import {
   getBlogPostBySlug,
   getBlogPostSlugs,
@@ -23,7 +23,7 @@ vi.mock('@/components/ShareButtons', () => ({ ShareButtons: () => <div>Share</di
 vi.mock('@/components/NewsletterCTA', () => ({ NewsletterCTA: () => <div>Newsletter</div> }))
 vi.mock('@/components/MemoizedCTA', () => ({ MemoizedCTA: () => <div>Memoized CTA</div> }))
 vi.mock('@/components/AuthorCard', () => ({ AuthorCard: () => <div>Author</div> }))
-vi.mock('next/image', () => ({ default: (props: any) => <img alt={props.alt} /> }))
+vi.mock('next/image', () => ({ default: ({ alt }: { alt: string }) => <div role="img" aria-label={alt} /> }))
 
 const notFoundMock = vi.fn()
 vi.mock('next/navigation', () => ({
@@ -113,23 +113,27 @@ describe('Blog post page', () => {
   })
 
   describe('generateMetadata', () => {
+    it('renders publication decisions at request time rather than caching scheduled 404s', () => {
+      expect(dynamic).toBe('force-dynamic')
+    })
     it('builds metadata from the post', async () => {
       vi.mocked(getBlogPostBySlug).mockResolvedValue(basePost as any)
 
       const meta = await generateMetadata({ params: Promise.resolve({ slug: 'hello-world' }) })
 
-      expect(meta.title).toBe('Hello World | Memoized Blog')
+      expect(meta.title).toEqual({ absolute: 'Hello World | Memoized' })
       expect(meta.description).toBe('A first post')
       expect(meta.alternates?.canonical).toBe('https://test.memoized.io/blog/hello-world')
       expect((meta.openGraph as { type?: string })?.type).toBe('article')
     })
 
-    it('returns a "Post Not Found" title for a missing post', async () => {
+    it('signals a missing post rather than emitting an indexable fallback title', async () => {
       vi.mocked(getBlogPostBySlug).mockResolvedValue(null)
 
       const meta = await generateMetadata({ params: Promise.resolve({ slug: 'missing' }) })
 
-      expect(meta.title).toBe('Post Not Found')
+      expect(meta).toBeUndefined()
+      expect(notFoundMock).toHaveBeenCalled()
     })
   })
 

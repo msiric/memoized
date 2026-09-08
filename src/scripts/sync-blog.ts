@@ -23,6 +23,7 @@ import prisma from '@/lib/prisma'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
 import { serialize } from 'next-mdx-remote-client/serialize'
+import { assertCompiledMdx } from '@/lib/mdx-result'
 import { BLOG_FOLDER, SAMPLES_FOLDER } from '@/constants'
 
 // Sample blog folder for development when real content isn't available
@@ -103,10 +104,10 @@ async function serializeMdxContent(content: string, filePath?: string) {
       },
     })
 
+    assertCompiledMdx(serialized, filePath)
     return serialized
   } catch (error) {
     console.error('❌ MDX serialization failed:', error)
-    console.error('Content preview:', content.substring(0, 200) + '...')
     console.error('File path:', filePath || 'Unknown')
 
     if (isProduction()) {
@@ -242,6 +243,7 @@ async function syncBlogPosts(): Promise<string[]> {
 
       // Serialize MDX content
       const serialized = await serializeMdxContent(body, mdxPath)
+      if (metadata.published) assertCompiledMdx(serialized, mdxPath)
 
       // Handle cover image path
       let coverImage = metadata.coverImage

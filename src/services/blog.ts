@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+import { publishedBlogWhere } from '@/lib/blog-publication'
 
 /**
  * Get all published blog posts, ordered by publish date (newest first)
@@ -13,7 +14,7 @@ export async function getBlogPosts(options?: {
   const { tag, limit = 20, offset = 0 } = options || {}
 
   const where: Prisma.BlogPostWhereInput = {
-    published: true,
+    ...publishedBlogWhere(),
     ...(tag && { tags: { has: tag } }),
   }
 
@@ -66,7 +67,7 @@ export async function getBlogPostBySlug(slug: string) {
   })
 
   // Only return if published (or in preview mode - can add later)
-  if (!post || !post.published) {
+  if (!post || !post.published || (post.publishedAt && post.publishedAt > new Date())) {
     return null
   }
 
@@ -78,7 +79,7 @@ export async function getBlogPostBySlug(slug: string) {
  */
 export async function getBlogPostSlugs() {
   const posts = await prisma.blogPost.findMany({
-    where: { published: true },
+    where: publishedBlogWhere(),
     select: { slug: true },
   })
 
@@ -90,7 +91,7 @@ export async function getBlogPostSlugs() {
  */
 export async function getAllBlogTags() {
   const posts = await prisma.blogPost.findMany({
-    where: { published: true },
+    where: publishedBlogWhere(),
     select: { tags: true },
   })
 
@@ -114,7 +115,7 @@ export async function getRelatedPosts(currentSlug: string, tags: string[], limit
 
   const posts = await prisma.blogPost.findMany({
     where: {
-      published: true,
+      ...publishedBlogWhere(),
       slug: { not: currentSlug },
       tags: { hasSome: tags },
     },
@@ -186,7 +187,7 @@ export async function upsertBlogPost(
  */
 export async function getBlogPostsForFeed() {
   return prisma.blogPost.findMany({
-    where: { published: true },
+    where: publishedBlogWhere(),
     select: {
       slug: true,
       title: true,
@@ -206,7 +207,7 @@ export async function getBlogPostsForFeed() {
  */
 export async function getBlogPostsForSitemap() {
   return prisma.blogPost.findMany({
-    where: { published: true },
+    where: publishedBlogWhere(),
     select: {
       slug: true,
       updatedAt: true,
@@ -225,7 +226,7 @@ export async function getAdjacentPosts(currentSlug: string, currentPublishedAt: 
     // Previous post = the one published right after current (newer)
     prisma.blogPost.findFirst({
       where: {
-        published: true,
+        ...publishedBlogWhere(),
         slug: { not: currentSlug },
         publishedAt: { gt: currentPublishedAt },
       },
@@ -238,7 +239,7 @@ export async function getAdjacentPosts(currentSlug: string, currentPublishedAt: 
     // Next post = the one published right before current (older)
     prisma.blogPost.findFirst({
       where: {
-        published: true,
+        ...publishedBlogWhere(),
         slug: { not: currentSlug },
         publishedAt: { lt: currentPublishedAt },
       },

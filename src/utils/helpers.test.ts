@@ -13,12 +13,10 @@ import {
   calculateProgress,
   capitalizeFirstLetter,
   checkSubscriptionStatus,
-  fetchPricesFromStripe,
   filterAndSortProblems,
   formatPrice,
   formatter,
   getInitials,
-  getPlanFromStripePlan,
   getStatusFromStripeStatus,
   getURL,
   isPrismaUniqueConstraintError,
@@ -29,6 +27,7 @@ import {
   toDateTime,
   userHasAccess,
 } from '@/utils/helpers'
+import { fetchPricesFromStripe, getPlanFromStripePlan } from '@/lib/stripe-plans'
 import {
   AccessOptions,
   Lesson,

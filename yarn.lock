@@ -991,10 +991,10 @@
     "@emnapi/wasi-threads" "1.2.2"
     tslib "^2.4.0"
 
-"@emnapi/runtime@^0.44.0":
-  version "0.44.0"
-  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/runtime/-/runtime-0.44.0.tgz#1ef702f846cfcd559d28eb7673919087ba5b63e3"
-  integrity sha1-HvcC+EbPzVWdKOt2c5GQh7pbY+M=
+"@emnapi/runtime@^1.2.0":
+  version "1.11.3"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@emnapi/runtime/-/runtime-1.11.3.tgz#84257ae3b0531eb2aec1ffa23d70700da007ba95"
+  integrity sha1-hCV647BTHrKuwf+iPXBwDaAHupU=
   dependencies:
     tslib "^2.4.0"
 
@@ -1415,118 +1415,118 @@
     "@iconify/types" "^2.0.0"
     import-meta-resolve "^4.2.0"
 
-"@img/sharp-darwin-arm64@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-darwin-arm64/-/sharp-darwin-arm64-0.33.1.tgz#9d3cb0e4899b10b003608a018877b45b6db02861"
-  integrity sha1-nTyw5ImbELADYIoBiHe0W22wKGE=
+"@img/sharp-darwin-arm64@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-darwin-arm64/-/sharp-darwin-arm64-0.33.5.tgz#ef5b5a07862805f1e8145a377c8ba6e98813ca08"
+  integrity sha1-71taB4YoBfHoFFo3fIum6YgTygg=
   optionalDependencies:
-    "@img/sharp-libvips-darwin-arm64" "1.0.0"
+    "@img/sharp-libvips-darwin-arm64" "1.0.4"
 
-"@img/sharp-darwin-x64@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-darwin-x64/-/sharp-darwin-x64-0.33.1.tgz#3ad6b275dba0ed9995ce4403fc2c59b0475a0162"
-  integrity sha1-Otayddug7ZmVzkQD/CxZsEdaAWI=
+"@img/sharp-darwin-x64@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-darwin-x64/-/sharp-darwin-x64-0.33.5.tgz#e03d3451cd9e664faa72948cc70a403ea4063d61"
+  integrity sha1-4D00Uc2eZk+qcpSMxwpAPqQGPWE=
   optionalDependencies:
-    "@img/sharp-libvips-darwin-x64" "1.0.0"
+    "@img/sharp-libvips-darwin-x64" "1.0.4"
 
-"@img/sharp-libvips-darwin-arm64@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-darwin-arm64/-/sharp-libvips-darwin-arm64-1.0.0.tgz#8baf27b01dabba524e885c30287e1916ab978de7"
-  integrity sha1-i68nsB2rulJOiFwwKH4ZFquXjec=
+"@img/sharp-libvips-darwin-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-darwin-arm64/-/sharp-libvips-darwin-arm64-1.0.4.tgz#447c5026700c01a993c7804eb8af5f6e9868c07f"
+  integrity sha1-RHxQJnAMAamTx4BOuK9fbphowH8=
 
-"@img/sharp-libvips-darwin-x64@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-darwin-x64/-/sharp-libvips-darwin-x64-1.0.0.tgz#509113f649d3ea0e99b76d41437fc0049d8ba2f9"
-  integrity sha1-UJET9knT6g6Zt21BQ3/ABJ2Lovk=
+"@img/sharp-libvips-darwin-x64@1.0.4":
+  version "1.0.4"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-darwin-x64/-/sharp-libvips-darwin-x64-1.0.4.tgz#e0456f8f7c623f9dbfbdc77383caa72281d86062"
+  integrity sha1-4EVvj3xiP52/vcdzg8qnIoHYYGI=
 
-"@img/sharp-libvips-linux-arm64@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-arm64/-/sharp-libvips-linux-arm64-1.0.0.tgz#9e131cc95f9f8aa36da9addee89efead21ad9993"
-  integrity sha1-nhMcyV+fiqNtqa3e6J7+rSGtmZM=
+"@img/sharp-libvips-linux-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-arm64/-/sharp-libvips-linux-arm64-1.0.4.tgz#979b1c66c9a91f7ff2893556ef267f90ebe51704"
+  integrity sha1-l5scZsmpH3/yiTVW7yZ/kOvlFwQ=
 
-"@img/sharp-libvips-linux-arm@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-arm/-/sharp-libvips-linux-arm-1.0.0.tgz#a529f68a28ab1d219907071c41ace029121d1c4f"
-  integrity sha1-pSn2iiirHSGZBwccQazgKRIdHE8=
+"@img/sharp-libvips-linux-arm@1.0.5":
+  version "1.0.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-arm/-/sharp-libvips-linux-arm-1.0.5.tgz#99f922d4e15216ec205dcb6891b721bfd2884197"
+  integrity sha1-mfki1OFSFuwgXctokbchv9KIQZc=
 
-"@img/sharp-libvips-linux-s390x@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-s390x/-/sharp-libvips-linux-s390x-1.0.0.tgz#c26aaa9ee58b47ff901bb5f93f29c4ab3f03caf7"
-  integrity sha1-wmqqnuWLR/+QG7X5PynEqz8Dyvc=
+"@img/sharp-libvips-linux-s390x@1.0.4":
+  version "1.0.4"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-s390x/-/sharp-libvips-linux-s390x-1.0.4.tgz#f8a5eb1f374a082f72b3f45e2fb25b8118a8a5ce"
+  integrity sha1-+KXrHzdKCC9ys/ReL7JbgRiopc4=
 
-"@img/sharp-libvips-linux-x64@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-x64/-/sharp-libvips-linux-x64-1.0.0.tgz#7a04795fbf2668b9dd7c74bf8326cb779131d809"
-  integrity sha1-egR5X78maLndfHS/gybLd5Ex2Ak=
+"@img/sharp-libvips-linux-x64@1.0.4":
+  version "1.0.4"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linux-x64/-/sharp-libvips-linux-x64-1.0.4.tgz#d4c4619cdd157774906e15770ee119931c7ef5e0"
+  integrity sha1-1MRhnN0Vd3SQbhV3DuEZkxx+9eA=
 
-"@img/sharp-libvips-linuxmusl-arm64@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linuxmusl-arm64/-/sharp-libvips-linuxmusl-arm64-1.0.0.tgz#600e7322faa5ce124d3ae2cbf63808ea47678591"
-  integrity sha1-YA5zIvqlzhJNOuLL9jgI6kdnhZE=
+"@img/sharp-libvips-linuxmusl-arm64@1.0.4":
+  version "1.0.4"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linuxmusl-arm64/-/sharp-libvips-linuxmusl-arm64-1.0.4.tgz#166778da0f48dd2bded1fa3033cee6b588f0d5d5"
+  integrity sha1-Fmd42g9I3Sve0fowM87mtYjw1dU=
 
-"@img/sharp-libvips-linuxmusl-x64@1.0.0":
-  version "1.0.0"
-  resolved "https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linuxmusl-x64/-/sharp-libvips-linuxmusl-x64-1.0.0.tgz#af33a04e75f192c5396c6a41df8b7b7bf15a8006"
-  integrity sha1-rzOgTnXxksU5bGpB34t7e/FagAY=
+"@img/sharp-libvips-linuxmusl-x64@1.0.4":
+  version "1.0.4"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-libvips-linuxmusl-x64/-/sharp-libvips-linuxmusl-x64-1.0.4.tgz#93794e4d7720b077fcad3e02982f2f1c246751ff"
+  integrity sha1-k3lOTXcgsHf8rT4CmC8vHCRnUf8=
 
-"@img/sharp-linux-arm64@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-arm64/-/sharp-linux-arm64-0.33.1.tgz#3f419eb6f9ace924c511903a4d9034fb847de06b"
-  integrity sha1-P0Getvms6STFEZA6TZA0+4R94Gs=
+"@img/sharp-linux-arm64@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-arm64/-/sharp-linux-arm64-0.33.5.tgz#edb0697e7a8279c9fc829a60fc35644c4839bb22"
+  integrity sha1-7bBpfnqCecn8gppg/DVkTEg5uyI=
   optionalDependencies:
-    "@img/sharp-libvips-linux-arm64" "1.0.0"
+    "@img/sharp-libvips-linux-arm64" "1.0.4"
 
-"@img/sharp-linux-arm@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-arm/-/sharp-linux-arm-0.33.1.tgz#87e157716c55fa274dd652e71bf9a5b7c260f8ab"
-  integrity sha1-h+FXcWxV+idN1lLnG/mlt8Jg+Ks=
+"@img/sharp-linux-arm@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-arm/-/sharp-linux-arm-0.33.5.tgz#422c1a352e7b5832842577dc51602bcd5b6f5eff"
+  integrity sha1-QiwaNS57WDKEJXfcUWArzVtvXv8=
   optionalDependencies:
-    "@img/sharp-libvips-linux-arm" "1.0.0"
+    "@img/sharp-libvips-linux-arm" "1.0.5"
 
-"@img/sharp-linux-s390x@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-s390x/-/sharp-linux-s390x-0.33.1.tgz#c554567bb211cb1e916562752e70ef65df0cdcb7"
-  integrity sha1-xVRWe7IRyx6RZWJ1LnDvZd8M3Lc=
+"@img/sharp-linux-s390x@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-s390x/-/sharp-linux-s390x-0.33.5.tgz#f5c077926b48e97e4a04d004dfaf175972059667"
+  integrity sha1-9cB3kmtI6X5KBNAE368XWXIFlmc=
   optionalDependencies:
-    "@img/sharp-libvips-linux-s390x" "1.0.0"
+    "@img/sharp-libvips-linux-s390x" "1.0.4"
 
-"@img/sharp-linux-x64@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-x64/-/sharp-linux-x64-0.33.1.tgz#c8623c743e2a68b460b63bd2e225b1b5a485d144"
-  integrity sha1-yGI8dD4qaLRgtjvS4iWxtaSF0UQ=
+"@img/sharp-linux-x64@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linux-x64/-/sharp-linux-x64-0.33.5.tgz#d806e0afd71ae6775cc87f0da8f2d03a7c2209cb"
+  integrity sha1-2Abgr9ca5ndcyH8NqPLQOnwiCcs=
   optionalDependencies:
-    "@img/sharp-libvips-linux-x64" "1.0.0"
+    "@img/sharp-libvips-linux-x64" "1.0.4"
 
-"@img/sharp-linuxmusl-arm64@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linuxmusl-arm64/-/sharp-linuxmusl-arm64-0.33.1.tgz#1b17f9950246108cb22cf98f1822fbe4a5b0dc9e"
-  integrity sha1-Gxf5lQJGEIyyLPmPGCL75KWw3J4=
+"@img/sharp-linuxmusl-arm64@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linuxmusl-arm64/-/sharp-linuxmusl-arm64-0.33.5.tgz#252975b915894fb315af5deea174651e208d3d6b"
+  integrity sha1-JSl1uRWJT7MVr13uoXRlHiCNPWs=
   optionalDependencies:
-    "@img/sharp-libvips-linuxmusl-arm64" "1.0.0"
+    "@img/sharp-libvips-linuxmusl-arm64" "1.0.4"
 
-"@img/sharp-linuxmusl-x64@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linuxmusl-x64/-/sharp-linuxmusl-x64-0.33.1.tgz#69e2ab197c6d6e7a09748e0f2d03244d2c2afed7"
-  integrity sha1-aeKrGXxtbnoJdI4PLQMkTSwq/tc=
+"@img/sharp-linuxmusl-x64@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-linuxmusl-x64/-/sharp-linuxmusl-x64-0.33.5.tgz#3f4609ac5d8ef8ec7dadee80b560961a60fd4f48"
+  integrity sha1-P0YJrF2O+Ox9re6AtWCWGmD9T0g=
   optionalDependencies:
-    "@img/sharp-libvips-linuxmusl-x64" "1.0.0"
+    "@img/sharp-libvips-linuxmusl-x64" "1.0.4"
 
-"@img/sharp-wasm32@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-2.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-wasm32/-/sharp-wasm32-0.33.1.tgz#aa6f33a8535e6bd4a66c59aeb569499db9d30043"
-  integrity sha1-qm8zqFNea9SmbFmutWlJnbnTAEM=
+"@img/sharp-wasm32@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-wasm32/-/sharp-wasm32-0.33.5.tgz#6f44f3283069d935bb5ca5813153572f3e6f61a1"
+  integrity sha1-b0TzKDBp2TW7XKWBMVNXLz5vYaE=
   dependencies:
-    "@emnapi/runtime" "^0.44.0"
+    "@emnapi/runtime" "^1.2.0"
 
-"@img/sharp-win32-ia32@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-win32-ia32/-/sharp-win32-ia32-0.33.1.tgz#8df522d79b3c08f59e65fbe773849daa353c4f12"
-  integrity sha1-jfUi15s8CPWeZfvnc4SdqjU8TxI=
+"@img/sharp-win32-ia32@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-win32-ia32/-/sharp-win32-ia32-0.33.5.tgz#1a0c839a40c5351e9885628c85f2e5dfd02b52a9"
+  integrity sha1-GgyDmkDFNR6YhWKMhfLl39ArUqk=
 
-"@img/sharp-win32-x64@0.33.1":
-  version "0.33.1"
-  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-win32-x64/-/sharp-win32-x64-0.33.1.tgz#8b56e97dc9d987b070d7530a357161d0f057c5af"
-  integrity sha1-i1bpfcnZh7Bw11MKNXFh0PBXxa8=
+"@img/sharp-win32-x64@0.33.5":
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/@img/sharp-win32-x64/-/sharp-win32-x64-0.33.5.tgz#56f00962ff0c4e0eb93d34a047d29fa995e3e342"
+  integrity sha1-VvAJYv8MTg65PTSgR9KfqZXj40I=
 
 "@internationalized/date@^3.12.2":
   version "3.12.2"
@@ -5233,10 +5233,10 @@ dequal@^2.0.0, dequal@^2.0.3:
   resolved "https://registry.npmjs.org/dequal/-/dequal-2.0.3.tgz"
   integrity sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==
 
-detect-libc@^2.0.2:
-  version "2.0.4"
-  resolved "https://registry.npmjs.org/detect-libc/-/detect-libc-2.0.4.tgz"
-  integrity sha512-3UDv+G9CsCKO1WKMGw9fwq/SWJYbI0c5Y7LU1AXYoDdbhE2AHQ6N6Nb34sG8Fj7T5APy8qXDCKuuIHd1BR0tVA==
+detect-libc@^2.0.3:
+  version "2.1.2"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/detect-libc/-/detect-libc-2.1.2.tgz#689c5dcdc1900ef5583a4cb9f6d7b473742074ad"
+  integrity sha1-aJxdzcGQDvVYOky59te0c3QgdK0=
 
 devlop@^1.0.0, devlop@^1.1.0:
   version "1.1.0"
@@ -9617,14 +9617,14 @@ semver@^6.3.1:
   resolved "https://registry.npmjs.org/semver/-/semver-6.3.1.tgz"
   integrity sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==
 
-semver@^7.5.2, semver@^7.5.3, semver@^7.5.4, semver@^7.6.0, semver@^7.7.1:
+semver@^7.5.2, semver@^7.5.3, semver@^7.6.0, semver@^7.7.1:
   version "7.7.2"
   resolved "https://registry.npmjs.org/semver/-/semver-7.7.2.tgz"
   integrity sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==
 
-semver@^7.7.4:
+semver@^7.6.3, semver@^7.7.4:
   version "7.8.5"
-  resolved "https://ms-feed-12.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/semver/-/semver-7.8.5.tgz#39b646037dd50c14fb451e7e4cac58ed8b863f69"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/semver/-/semver-7.8.5.tgz#39b646037dd50c14fb451e7e4cac58ed8b863f69"
   integrity sha1-ObZGA33VDBT7RR5+TKxY7YuGP2k=
 
 serialize-error@^12.0.0:
@@ -9665,34 +9665,34 @@ set-proto@^1.0.0:
     es-errors "^1.3.0"
     es-object-atoms "^1.0.0"
 
-sharp@0.33.1:
-  version "0.33.1"
-  resolved "https://registry.npmjs.org/sharp/-/sharp-0.33.1.tgz"
-  integrity sha512-iAYUnOdTqqZDb3QjMneBKINTllCJDZ3em6WaWy7NPECM4aHncvqHRm0v0bN9nqJxMiwamv5KIdauJ6lUzKDpTQ==
+sharp@0.33.5:
+  version "0.33.5"
+  resolved "https://ms-feed-25.pkgs.visualstudio.com/1es-public/_packaging/npm-public/npm/registry/sharp/-/sharp-0.33.5.tgz#13e0e4130cc309d6a9497596715240b2ec0c594e"
+  integrity sha1-E+DkEwzDCdapSXWWcVJAsuwMWU4=
   dependencies:
     color "^4.2.3"
-    detect-libc "^2.0.2"
-    semver "^7.5.4"
+    detect-libc "^2.0.3"
+    semver "^7.6.3"
   optionalDependencies:
-    "@img/sharp-darwin-arm64" "0.33.1"
-    "@img/sharp-darwin-x64" "0.33.1"
-    "@img/sharp-libvips-darwin-arm64" "1.0.0"
-    "@img/sharp-libvips-darwin-x64" "1.0.0"
-    "@img/sharp-libvips-linux-arm" "1.0.0"
-    "@img/sharp-libvips-linux-arm64" "1.0.0"
-    "@img/sharp-libvips-linux-s390x" "1.0.0"
-    "@img/sharp-libvips-linux-x64" "1.0.0"
-    "@img/sharp-libvips-linuxmusl-arm64" "1.0.0"
-    "@img/sharp-libvips-linuxmusl-x64" "1.0.0"
-    "@img/sharp-linux-arm" "0.33.1"
-    "@img/sharp-linux-arm64" "0.33.1"
-    "@img/sharp-linux-s390x" "0.33.1"
-    "@img/sharp-linux-x64" "0.33.1"
-    "@img/sharp-linuxmusl-arm64" "0.33.1"
-    "@img/sharp-linuxmusl-x64" "0.33.1"
-    "@img/sharp-wasm32" "0.33.1"
-    "@img/sharp-win32-ia32" "0.33.1"
-    "@img/sharp-win32-x64" "0.33.1"
+    "@img/sharp-darwin-arm64" "0.33.5"
+    "@img/sharp-darwin-x64" "0.33.5"
+    "@img/sharp-libvips-darwin-arm64" "1.0.4"
+    "@img/sharp-libvips-darwin-x64" "1.0.4"
+    "@img/sharp-libvips-linux-arm" "1.0.5"
+    "@img/sharp-libvips-linux-arm64" "1.0.4"
+    "@img/sharp-libvips-linux-s390x" "1.0.4"
+    "@img/sharp-libvips-linux-x64" "1.0.4"
+    "@img/sharp-libvips-linuxmusl-arm64" "1.0.4"
+    "@img/sharp-libvips-linuxmusl-x64" "1.0.4"
+    "@img/sharp-linux-arm" "0.33.5"
+    "@img/sharp-linux-arm64" "0.33.5"
+    "@img/sharp-linux-s390x" "0.33.5"
+    "@img/sharp-linux-x64" "0.33.5"
+    "@img/sharp-linuxmusl-arm64" "0.33.5"
+    "@img/sharp-linuxmusl-x64" "0.33.5"
+    "@img/sharp-wasm32" "0.33.5"
+    "@img/sharp-win32-ia32" "0.33.5"
+    "@img/sharp-win32-x64" "0.33.5"
 
 shebang-command@^2.0.0:
   version "2.0.0"

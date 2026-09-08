@@ -9,10 +9,14 @@ import Lesson, { generateMetadata } from './page'
 // Mock the imported modules
 vi.mock('next-auth')
 vi.mock('@/services/lesson')
+vi.mock('@/services/search', () => ({ getSearchCatalog: async () => ({ courses: [], resources: [], posts: [] }) }))
 vi.mock('@/services/user')
 vi.mock('@/utils/helpers')
 vi.mock('@/components/PreserializedMdxRenderer', () => ({
-  PreserializedMdxRenderer: () => <div>Mocked MDX Renderer</div>,
+  PreserializedMdxRenderer: ({ serializedContent }: { serializedContent: { compiledSource: string } }) => <div>Mocked MDX Renderer {serializedContent.compiledSource}</div>,
+}))
+vi.mock('@/components/ProblemCard', () => ({
+  ProblemCard: ({ problem }: { problem: { question: string } }) => <div>{problem.question}</div>,
 }))
 
 // Mock next/navigation
@@ -31,9 +35,10 @@ describe('Lesson component', () => {
     vi.mocked(getLessonBySlug).mockResolvedValue({
       id: 'lesson1',
       title: 'Test Lesson',
-      serializedBody: { compiledSource: 'mock content' },
-      access: 'premium',
-      problems: [],
+      serializedBody: { compiledSource: 'PREMIUM_SECRET_CONTENT' },
+      description: 'Public lesson introduction',
+      access: 'PREMIUM',
+      problems: [{ id: 'free-problem', question: 'A free practice question' }],
     } as any)
     vi.mocked(getUserWithSubscriptionDetails).mockResolvedValue({
       id: 'user123',
@@ -50,10 +55,10 @@ describe('Lesson component', () => {
       }),
     )
 
-    expect(screen.getByText(/Test Lesson is Premium/)).toBeDefined()
-    expect(
-      screen.getByText(/Upgrade to access this content/),
-    ).toBeDefined()
+    expect(screen.getByRole('heading', { level: 1, name: 'Test Lesson' })).toBeDefined()
+    expect(screen.getByText('Public lesson introduction')).toBeDefined()
+    expect(screen.getByText('A free practice question')).toBeDefined()
+    expect(document.body.textContent).not.toContain('PREMIUM_SECRET_CONTENT')
     expect(
       screen.getByRole('link', { name: 'Upgrade to Premium' }),
     ).toBeDefined()
@@ -83,7 +88,7 @@ describe('Lesson component', () => {
       }),
     )
 
-    expect(screen.getByText('Mocked MDX Renderer')).toBeDefined()
+    expect(screen.getByText(/Mocked MDX Renderer/)).toBeDefined()
   })
 
   describe('generateMetadata', () => {
@@ -101,7 +106,7 @@ describe('Lesson component', () => {
         },
       })
 
-      expect(metadata.title).toContain('Variables')
+      expect(metadata.title).toEqual({ absolute: 'Variables — JavaScript Interview Practice | Memoized' })
       expect(getLessonMetadataBySlug).toHaveBeenCalledWith(
         'test-course',
         'test-section',
@@ -110,7 +115,7 @@ describe('Lesson component', () => {
       expect(getLessonBySlug).not.toHaveBeenCalled()
     })
 
-    it('should return fallback title when lesson not found', async () => {
+    it('should signal notFound rather than publish fallback metadata', async () => {
       vi.mocked(getLessonMetadataBySlug).mockResolvedValue(null)
 
       const metadata = await generateMetadata({
@@ -121,7 +126,8 @@ describe('Lesson component', () => {
         },
       })
 
-      expect(metadata.title).toBe('Lesson not found')
+      expect(metadata).toBeUndefined()
+      expect(notFoundMock).toHaveBeenCalled()
     })
   })
 

@@ -6,6 +6,7 @@ import { useRef, ReactNode } from 'react'
 import { useMDXComponents } from '../../mdx-components'
 import { BlogImage } from './BlogImage'
 import { BlogH1, BlogH2, BlogH3, BlogH4 } from './BlogHeading'
+import { assertCompiledMdx } from '@/lib/mdx-result'
 
 export type BlogMdxRendererProps = {
   serializedContent: Prisma.JsonValue | null | undefined
@@ -49,9 +50,7 @@ export const BlogMdxRenderer = ({ serializedContent }: BlogMdxRendererProps) => 
   // Store hydrated content in a ref so it only hydrates once
   const hydratedContentRef = useRef<ReactNode | null>(null)
 
-  if (!serializedContent) {
-    return null
-  }
+  assertCompiledMdx(serializedContent, 'blog content')
 
   if (hydratedContentRef.current === null) {
     const content = serializedContent as HydrateProps
@@ -67,12 +66,13 @@ export const BlogMdxRenderer = ({ serializedContent }: BlogMdxRendererProps) => 
       wrapper: BlogWrapper,
     }
 
-    const { content: hydratedContent } = hydrate({
+    const { content: hydratedContent, error } = hydrate({
       compiledSource: content.compiledSource,
       frontmatter: content.frontmatter || {},
       scope: content.scope || {},
       components: components as Parameters<typeof hydrate>[0]['components'],
     })
+    if (error) throw new Error('Blog content could not be rendered. The compiled content must be refreshed.')
 
     hydratedContentRef.current = hydratedContent
   }

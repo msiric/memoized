@@ -1,9 +1,16 @@
 import { Footer } from '@/components/Footer'
 import { getUnifiedBanners } from '@/services/banner'
-import { highlightCode } from '@/utils/helpers'
+import { highlightCode } from '@/lib/shiki'
 import dynamic from 'next/dynamic'
 import { ContentOverview } from '../components/ContentOverview'
 import { FreeOfferingHighlight } from '../components/FreeOfferingHighlight'
+import { pageMetadata } from '@/lib/seo'
+
+export const metadata = pageMetadata({
+  title: 'JavaScript & TypeScript Interview Prep',
+  description: 'Prepare for JavaScript and TypeScript interviews with free theory and coding practice, worked explanations, and a structured curriculum.',
+  path: '/',
+})
 
 // Revalidate hourly for Stripe coupon changes.
 // Database banners are invalidated on-demand via revalidateBanners().
@@ -222,7 +229,7 @@ const CODE_SNIPPETS = [
 export default async function Home() {
   const [unifiedBanners, initialSnippet] = await Promise.all([
     getUnifiedBanners(),
-    highlightCode(CODE_SNIPPETS[0].code),
+    highlightCode(CODE_SNIPPETS[0].code, 'js', 'nord'),
   ])
 
   return (

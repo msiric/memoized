@@ -1,6 +1,7 @@
 'use client'
 
 import { markProblem } from '@/actions/markProblem'
+import { trackLearningEvent } from '@/lib/analytics'
 import { PROBLEM_CARD } from '@/constants/designTokens'
 import { CONTENT_STATS } from '@/constants/content-stats'
 import { ProblemQuestion } from './ProblemQuestion'
@@ -121,12 +122,14 @@ const ProblemSlideOverContent = ({
 
   const handleRevealAnswer = useCallback(() => {
     setStage('answer')
-  }, [])
+    trackLearningEvent('practice_answer_revealed', { content_id: problem.id, content_type: isTheory ? 'THEORY' : 'CODING', source: 'practice' })
+  }, [problem.id, isTheory])
 
   // Reset stage when problem changes
   useEffect(() => {
     setStage('question')
-  }, [problem.id])
+    trackLearningEvent('practice_question_opened', { content_id: problem.id, content_type: isTheory ? 'THEORY' : 'CODING', source: 'practice' })
+  }, [problem.id, isTheory])
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -459,6 +462,7 @@ export const ProblemList = ({
       handleResponse(response as CustomResponse, enqueueSnackbar)
       toggleCompletedProblem(problemId)
       toggleCompletion(problemId)
+      if (currentlyCompleted) trackLearningEvent('problem_marked_complete', { content_id: problemId, source: 'practice' })
     } catch (error) {
       handleError(error as CustomError, enqueueSnackbar)
     }

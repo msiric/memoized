@@ -1,9 +1,12 @@
-import { APP_NAME, COURSES_PREFIX } from '@/constants'
+import { COURSES_PREFIX } from '@/constants'
 import { PreserializedMdxRenderer } from '@/components/PreserializedMdxRenderer'
 import { completeCurriculum } from '@/constants/curriculum'
 import { getSectionBySlug, getSectionsSlugs } from '@/services/lesson'
 import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { getSearchCatalog } from '@/services/search'
+import { CatalogDirectory } from '@/components/CatalogDirectory'
+import { lessonPath, pageMetadata, sectionPath } from '@/lib/seo'
 
 export async function generateStaticParams() {
   const sections = await getSectionsSlugs()
@@ -31,7 +34,7 @@ export async function generateMetadata({
   )
 
   if (!section) {
-    return { title: 'Section not found' }
+    return notFound()
   }
 
   const title = `${section.title} - ${course?.title}`
@@ -39,31 +42,7 @@ export async function generateMetadata({
     section.description || `Learn about ${section.title} in this section.`
 
   return {
-    title,
-    description,
-    keywords: `${section.title}, ${course?.title}, programming tutorial, coding lessons`,
-    openGraph: {
-      title,
-      description,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}${COURSES_PREFIX}/${courseSlug}/${sectionSlug}`,
-      images: [
-        {
-          url: '/og-image.png',
-          width: 1200,
-          height: 630,
-          alt: `${title} - ${APP_NAME}`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/twitter-image.png'],
-    },
-    alternates: {
-      canonical: `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}`,
-    },
+    ...pageMetadata({ title, description, path: sectionPath(courseSlug, sectionSlug) }),
   }
 }
 
@@ -78,5 +57,14 @@ export default async function Section({
     return notFound()
   }
 
-  return <PreserializedMdxRenderer serializedContent={section.serializedBody} />
+  const catalog = await getSearchCatalog()
+  const entry = catalog.courses.find((item) => item.slug === params.courseSlug)?.sections.find((item) => item.slug === params.sectionSlug)
+  return (
+    <>
+      <PreserializedMdxRenderer serializedContent={section.serializedBody} />
+      <CatalogDirectory title="Lessons and free practice" items={(entry?.lessons ?? []).map((item) => ({
+        ...item, href: lessonPath(params.courseSlug, params.sectionSlug, item.slug),
+      }))} />
+    </>
+  )
 }

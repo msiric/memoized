@@ -1,8 +1,5 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { APP_NAME, COURSES_PREFIX } from '@/constants'
-import { PremiumCTA } from '@/components/PremiumCTA'
 import { PreserializedMdxRenderer } from '@/components/PreserializedMdxRenderer'
-import { completeCurriculum } from '@/constants/curriculum'
 import { getLessonBySlug, getLessonMetadataBySlug, getLessonsSlugs } from '@/services/lesson'
 import { getUserWithSubscriptionDetails } from '@/services/user'
 import { UserWithSubscriptionsAndProgress } from '@/types'
@@ -11,6 +8,13 @@ import { type Metadata } from 'next'
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 import { Problem } from '@prisma/client'
+import { lessonMetadata, lessonPath, sectionPath, coursePath, siteUrl } from '@/lib/seo'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
+import { CatalogDirectory } from '@/components/CatalogDirectory'
+import { LessonPreview } from '@/components/LessonPreview'
+import { JsonLd } from '@/components/JsonLd'
+import { getSearchCatalog } from '@/services/search'
+import { extractSectionsFromCompiledSource } from '@/services/section'
 
 export async function generateStaticParams() {
   const lessons = await getLessonsSlugs()
@@ -30,51 +34,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { courseSlug, sectionSlug, lessonSlug } = params
 
-  const course = completeCurriculum.find(
-    (c) => c.href === `${COURSES_PREFIX}/${courseSlug}`,
-  )
-
-  const section = course?.sections.find(
-    (s) => s.href === `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}`,
-  )
-
   const lesson = await getLessonMetadataBySlug(courseSlug, sectionSlug, lessonSlug)
 
   if (!lesson) {
-    return { title: 'Lesson not found' }
+    return notFound()
   }
 
-  const title = `${lesson.title} - ${section?.title} - ${course?.title}`
-  const description =
-    lesson.description || `Learn about ${lesson.title} in this lesson.`
-
-  return {
-    title,
-    description,
-    keywords: `${lesson.title}, ${section?.title}, ${course?.title}, programming tutorial, coding lesson`,
-    openGraph: {
-      title,
-      description,
-      url: `${process.env.NEXT_PUBLIC_SITE_URL}${COURSES_PREFIX}/${courseSlug}/${sectionSlug}/${lessonSlug}`,
-      images: [
-        {
-          url: '/og-image.png',
-          width: 1200,
-          height: 630,
-          alt: `${title} - ${APP_NAME}`,
-        },
-      ],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description,
-      images: ['/twitter-image.png'],
-    },
-    alternates: {
-      canonical: `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}/${lessonSlug}`,
-    },
-  }
+  return lessonMetadata(lessonPath(courseSlug, sectionSlug, lessonSlug), lesson.title, lesson.description)
 }
 
 export default async function Lesson({
@@ -98,15 +64,42 @@ export default async function Lesson({
     lesson.access,
   )
 
-  if (!hasAccess) {
-    return <PremiumCTA heading={lesson.title} />
-  }
+  const catalog = await getSearchCatalog()
+  const course = catalog.courses.find((item) => item.slug === params.courseSlug)
+  const section = course?.sections.find((item) => item.slug === params.sectionSlug)
+  const path = lessonPath(params.courseSlug, params.sectionSlug, params.lessonSlug)
+  const position = section?.lessons.findIndex((item) => item.slug === params.lessonSlug) ?? -1
+  const neighbors = section && position >= 0 ? section.lessons.filter((_, index) => Math.abs(index - position) === 1) : []
+  const serialized = lesson.serializedBody
+  const compiledSource = serialized && typeof serialized === 'object' && !Array.isArray(serialized) && typeof serialized.compiledSource === 'string'
+    ? serialized.compiledSource : ''
+  const topics = [...new Set(extractSectionsFromCompiledSource(compiledSource).map((item) => item.title))]
 
   return (
-    <PreserializedMdxRenderer
+    <>
+      <div className="mx-auto max-w-3xl px-4 pt-8">
+        <Breadcrumbs items={[
+          { title: 'Courses', href: '/courses' },
+          { title: course?.title ?? params.courseSlug, href: coursePath(params.courseSlug) },
+          { title: section?.title ?? params.sectionSlug, href: sectionPath(params.courseSlug, params.sectionSlug) },
+          { title: lesson.title, href: path },
+        ]} />
+      </div>
+      <JsonLd data={{
+        '@context': 'https://schema.org', '@type': ['WebPage', 'LearningResource'],
+        name: lesson.title, description: lesson.description, url: siteUrl(path),
+        learningResourceType: 'Lesson', inLanguage: 'en',
+        isAccessibleForFree: lesson.access === 'FREE',
+      }} />
+      {hasAccess ? <PreserializedMdxRenderer
       serializedContent={lesson.serializedBody}
       lessonId={lesson.id}
       problems={lesson.problems as Problem[]}
-    />
+      showNextPage={false}
+    /> : <LessonPreview title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
+      <CatalogDirectory title="Continue in this section" items={neighbors.map((item) => ({
+        ...item, href: lessonPath(params.courseSlug, params.sectionSlug, item.slug),
+      }))} />
+    </>
   )
 }

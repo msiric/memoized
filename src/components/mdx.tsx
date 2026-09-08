@@ -39,7 +39,7 @@ const CustomLink = ({ href, children, ...rest }: CustomLinkProps) => {
   }
 
   return (
-    <Link href={href} {...rest}>
+    <Link href={href} prefetch={false} {...rest}>
       {children}
     </Link>
   )
@@ -61,6 +61,14 @@ const _ResourceLink = ({ href, children, ...rest }: CustomLinkProps) => {
 }
 
 export const a = CustomLink
+
+export function table({ children, className, ...props }: React.ComponentPropsWithoutRef<'table'>) {
+  return (
+    <div className="my-8 min-w-0 overflow-x-auto focus-visible:outline-lime-500" role="region" aria-label="Scrollable data table" tabIndex={0}>
+      <table {...props} className={clsx('!my-0', className)}>{children}</table>
+    </div>
+  )
+}
 
 export const ResourceLink = _ResourceLink
 
