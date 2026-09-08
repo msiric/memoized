@@ -8,6 +8,7 @@ import Resources from './page'
 
 vi.mock('next-auth')
 vi.mock('@/services/resource')
+vi.mock('@/services/search', () => ({ getSearchCatalog: async () => ({ courses: [], resources: [], posts: [] }) }))
 vi.mock('@/services/user')
 vi.mock('@/utils/helpers')
 vi.mock('@/components/PreserializedMdxRenderer', () => ({

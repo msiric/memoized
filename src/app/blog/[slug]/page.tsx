@@ -11,6 +11,12 @@ import { MemoizedCTA } from '@/components/MemoizedCTA'
 import { AuthorCard } from '@/components/AuthorCard'
 import { BLOG_PREFIX, APP_NAME, AUTHOR } from '@/constants'
 import { getSiteUrl } from '@/config/env'
+import { JsonLd } from '@/components/JsonLd'
+import { pageMetadata } from '@/lib/seo'
+
+// Publication depends on wall-clock time; an early 404 must not be cached past
+// publishedAt when there is no publish-time invalidation hook.
+export const dynamic = 'force-dynamic'
 
 type BlogPostPageProps = {
   params: Promise<{ slug: string }>
@@ -49,10 +55,9 @@ function generateArticleJsonLd(post: {
       },
     },
     datePublished: post.publishedAt?.toISOString(),
-    dateModified: post.updatedAt.toISOString(),
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `${siteUrl}${BLOG_PREFIX}/${post.slug}`,
+      '@id': `${siteUrl}${BLOG_PREFIX}/${encodeURIComponent(post.slug)}`,
     },
     ...(post.coverImage && {
       image: {
@@ -77,38 +82,31 @@ export async function generateMetadata({
   const post = await getBlogPostBySlug(slug)
 
   if (!post) {
-    return {
-      title: 'Post Not Found',
-    }
+    return notFound()
   }
 
   const siteUrl = getSiteUrl()
 
   return {
-    title: `${post.title} | ${APP_NAME} Blog`,
-    description: post.description,
+    ...pageMetadata({ title: post.title, description: post.description, path: `${BLOG_PREFIX}/${encodeURIComponent(post.slug)}` }),
     authors: [{ name: post.author }],
     openGraph: {
       title: post.title,
       description: post.description,
-      url: `${siteUrl}${BLOG_PREFIX}/${post.slug}`,
+      url: `${siteUrl}${BLOG_PREFIX}/${encodeURIComponent(post.slug)}`,
       siteName: APP_NAME,
       type: 'article',
       publishedTime: post.publishedAt?.toISOString(),
-      modifiedTime: post.updatedAt.toISOString(),
       authors: [post.author],
       images: post.coverImage
         ? [{ url: post.coverImage, width: 1200, height: 630 }]
-        : undefined,
+        : [{ url: '/og-image.png', width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.description,
-      images: post.coverImage ? [post.coverImage] : undefined,
-    },
-    alternates: {
-      canonical: `${siteUrl}${BLOG_PREFIX}/${post.slug}`,
+      images: [post.coverImage || '/twitter-image.png'],
     },
   }
 }
@@ -139,10 +137,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (
     <>
       {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
       
       <article className="mx-auto max-w-2xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:pt-20">
         {/* Header */}

@@ -44,7 +44,7 @@ describe('Resource services', () => {
       expect(resource).toEqual(mockResource)
       expect(prisma.resource.findUnique).toHaveBeenCalledWith({
         where: { slug: 'resource-slug' },
-        select: { id: true, title: true, serializedBody: true, access: true },
+        select: { id: true, title: true, description: true, slug: true, serializedBody: true, access: true },
       })
     })
 
@@ -56,7 +56,7 @@ describe('Resource services', () => {
 
       expect(prisma.resource.findUnique).toHaveBeenCalledWith({
         where: { slug: 'invalid-slug' },
-        select: { id: true, title: true, serializedBody: true, access: true },
+        select: { id: true, title: true, description: true, slug: true, serializedBody: true, access: true },
       })
     })
   })

@@ -8,6 +8,7 @@ import { signIn } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 import { FaGithub, FaGoogle } from 'react-icons/fa'
 import { IoClose } from 'react-icons/io5'
+import { trackLearningEvent } from '@/lib/analytics'
 
 export const SignIn = () => {
   const isModalOpen = useAuthStore((state) => state.isModalOpen)
@@ -18,10 +19,11 @@ export const SignIn = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const handleClick = async (provider: string) => {
+  const handleClick = async (provider: 'google' | 'github') => {
     try {
       setLoading(true)
       setError(null)
+      trackLearningEvent('auth_started', { provider, source: 'sign_in' })
       await signIn(provider)
     } catch (_error) {
       setLoading(false)
@@ -92,7 +94,7 @@ export const SignIn = () => {
             Welcome to {APP_NAME}
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
-            Sign in to unlock all features
+            Sign in to save your learning progress
           </p>
         </div>
 

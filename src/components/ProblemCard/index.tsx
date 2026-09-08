@@ -23,11 +23,16 @@ import slugify from 'slugify'
 import { SLUGIFY_OPTIONS } from '../../constants'
 import { PreserializedMdxRenderer } from '../PreserializedMdxRenderer'
 import { TypeBadge, DifficultyBadge, ThinkingPrompt } from './shared'
+import { trackLearningEvent } from '@/lib/analytics'
 
 export type RevealStage = 'collapsed' | 'question' | 'answer'
 
+export type PracticeProblem = Pick<Problem,
+  'id' | 'title' | 'type' | 'difficulty' | 'href' | 'question' | 'serializedQuestion' | 'serializedAnswer'
+>
+
 export type ProblemCardProps = {
-  problem: Problem
+  problem: PracticeProblem
   defaultExpanded?: boolean
   showLesson?: boolean
   lessonTitle?: string
@@ -50,6 +55,7 @@ export const ProblemCard = ({
     defaultExpanded ? 'question' : 'collapsed',
   )
   const [thinkStartTime, setThinkStartTime] = useState<number | null>(null)
+  const [attemptStarted, setAttemptStarted] = useState(false)
 
   const problemSlug = slugify(problem.title, SLUGIFY_OPTIONS)
   const isTheory = problem.type === ProblemType.THEORY
@@ -82,15 +88,23 @@ export const ProblemCard = ({
   const handleToggle = useCallback(() => {
     if (stage === 'collapsed') {
       setStage('question')
+      trackLearningEvent('practice_question_opened', { content_id: problem.id, content_type: problem.type, source: 'practice' })
     } else {
       setStage('collapsed')
       setThinkStartTime(null)
+      setAttemptStarted(false)
     }
-  }, [stage])
+  }, [stage, problem.id, problem.type])
 
   const handleRevealAnswer = useCallback(() => {
     setStage('answer')
-  }, [])
+    trackLearningEvent('practice_answer_revealed', { content_id: problem.id, content_type: problem.type, source: 'practice' })
+  }, [problem.id, problem.type])
+
+  const handleStartAttempt = () => {
+    setAttemptStarted(true)
+    trackLearningEvent('practice_attempt_started', { content_id: problem.id, content_type: problem.type, source: 'practice' })
+  }
 
   const handleCheckboxChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (!session) return openModal()
@@ -104,6 +118,7 @@ export const ProblemCard = ({
       if (!response.success) return handleError(response, enqueueSnackbar)
       handleResponse(response as CustomResponse, enqueueSnackbar)
       toggleCompletedProblem(problem.id)
+      if (currentlyCompleted) trackLearningEvent('problem_marked_complete', { content_id: problem.id, content_type: problem.type, source: 'practice' })
     } catch (error) {
       handleError(error as CustomError, enqueueSnackbar)
     }
@@ -204,7 +219,7 @@ export const ProblemCard = ({
         {isExpanded && (
           <motion.div
             key="content"
-            initial={{ height: 0, opacity: 0 }}
+            initial={defaultExpanded ? false : { height: 0, opacity: 0 }}
             animate={{ 
               height: 'auto', 
               opacity: 1,
@@ -227,7 +242,7 @@ export const ProblemCard = ({
               {/* Question */}
               {problem.question && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={defaultExpanded ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                   className="mb-4 space-y-2"
@@ -250,6 +265,8 @@ export const ProblemCard = ({
                     key="thinking"
                     onReveal={handleRevealAnswer}
                     isTheory={isTheory}
+                    onStart={handleStartAttempt}
+                    attemptStarted={attemptStarted}
                   />
                 )}
 

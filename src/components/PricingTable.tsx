@@ -14,6 +14,7 @@ import { useState } from 'react'
 import Stripe from 'stripe'
 import { CheckIcon } from './icons'
 import { SPACING } from '@/constants/designTokens'
+import { trackLearningEvent } from '@/lib/analytics'
 
 export type PricingTableProps = {
   products: ProductWithCoupon[]
@@ -44,6 +45,7 @@ export const PricingTable = ({ products, user }: PricingTableProps) => {
       if (!session?.userId) {
         setProductIdLoading(undefined)
         openModal()
+        return
       }
 
       const response = await createCheckout(product)
@@ -59,6 +61,7 @@ export const PricingTable = ({ products, user }: PricingTableProps) => {
         return
       }
 
+      trackLearningEvent('checkout_started', { content_id: product.id, source: 'pricing' })
       router.push(sessionUrl)
 
       setProductIdLoading(undefined)

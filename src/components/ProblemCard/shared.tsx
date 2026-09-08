@@ -69,9 +69,11 @@ export const DifficultyBadge = ({ difficulty }: DifficultyBadgeProps) => {
 export type ThinkingPromptProps = {
   onReveal: () => void
   isTheory: boolean
+  onStart?: () => void
+  attemptStarted?: boolean
 }
 
-export const ThinkingPrompt = ({ onReveal, isTheory }: ThinkingPromptProps) => (
+export const ThinkingPrompt = ({ onReveal, isTheory, onStart, attemptStarted = false }: ThinkingPromptProps) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
@@ -83,9 +85,16 @@ export const ThinkingPrompt = ({ onReveal, isTheory }: ThinkingPromptProps) => (
       Take a moment to think about this before revealing the answer
     </p>
     <p className={THINKING_PROMPT.hint}>
-      Active recall strengthens memory retention
+      Explain your reasoning or try an implementation before comparing answers.
     </p>
+    {onStart && (
+      <button type="button" onClick={onStart} disabled={attemptStarted}
+        className="mt-3 rounded-lg border border-zinc-300 px-3 py-2 text-xs font-semibold text-zinc-700 disabled:opacity-60 dark:border-zinc-600 dark:text-zinc-200">
+        {attemptStarted ? 'Attempt started' : 'Start an attempt'}
+      </button>
+    )}
     <button
+      type="button"
       onClick={onReveal}
       className={clsx(
         PROBLEM_CARD.revealButton,

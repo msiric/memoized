@@ -201,6 +201,7 @@ describe('Lesson services', () => {
         select: {
           id: true,
           title: true,
+          description: true,
           serializedBody: true,
           access: true,
           problems: {
@@ -246,6 +247,7 @@ describe('Lesson services', () => {
         select: {
           id: true,
           title: true,
+          description: true,
           serializedBody: true,
           access: true,
           problems: {

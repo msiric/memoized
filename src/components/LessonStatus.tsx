@@ -10,6 +10,7 @@ import { CustomResponse, handleResponse } from '@/utils/response'
 import clsx from 'clsx'
 import { useSession } from 'next-auth/react'
 import { enqueueSnackbar } from 'notistack'
+import { trackLearningEvent } from '@/lib/analytics'
 
 export enum LessonCompleted {
   'YES' = 'YES',
@@ -74,6 +75,7 @@ export function LessonStatus({ lessonId }: LessonStatusProps) {
       if (!response.success) return handleError(response, enqueueSnackbar)
       handleResponse(response as CustomResponse, enqueueSnackbar)
       toggleCompletedLesson(lessonId)
+      if (completed) trackLearningEvent('lesson_marked_complete', { content_id: lessonId, content_type: 'lesson', source: 'lesson' })
     } catch (error) {
       handleError(error as CustomError, enqueueSnackbar)
     }

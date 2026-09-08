@@ -9,10 +9,10 @@ import {
 } from '@/services/subscription'
 import {
   formatDate,
-  getPlanFromStripePlan,
   getStatusFromStripeStatus,
   isProduction,
 } from '@/utils/helpers'
+import { getPlanFromStripePlan } from '@/lib/stripe-plans'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -26,6 +26,7 @@ vi.mock('@/lib/prisma')
 vi.mock('@/services/email')
 vi.mock('@/lib/stripe')
 vi.mock('@/utils/helpers')
+vi.mock('@/lib/stripe-plans')
 
 describe('Subscription services', () => {
   beforeEach(() => {

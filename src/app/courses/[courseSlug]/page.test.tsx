@@ -6,6 +6,7 @@ import Course from './page'
 
 vi.mock('next-auth')
 vi.mock('@/services/course')
+vi.mock('@/services/search', () => ({ getSearchCatalog: async () => ({ courses: [], resources: [], posts: [] }) }))
 vi.mock('@/components/PreserializedMdxRenderer', () => ({
   PreserializedMdxRenderer: () => <div>Mocked MDX Renderer</div>,
 }))

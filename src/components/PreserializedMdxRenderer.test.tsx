@@ -1,6 +1,8 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { PreserializedMdxRenderer } from './PreserializedMdxRenderer'
+import { hydrate } from 'next-mdx-remote-client/csr'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 // Mock next-mdx-remote-client components and dependencies
 vi.mock('next-mdx-remote-client/csr', () => ({
@@ -84,6 +86,10 @@ describe('PreserializedMdxRenderer', () => {
   })
 
   describe('Basic Rendering', () => {
+    it('does not silently replace a failed hydration with empty HTML', () => {
+      vi.mocked(hydrate).mockReturnValueOnce({ content: <div className="mdx-empty" />, mod: {}, error: new Error('failed') })
+      expect(() => renderToStaticMarkup(<PreserializedMdxRenderer serializedContent={mockSerializedContent} />)).toThrow(/Content could not be rendered/)
+    })
     it('renders MDXRemote with serialized content', () => {
       render(
         <PreserializedMdxRenderer serializedContent={mockSerializedContent} />

@@ -7,6 +7,8 @@ export const getResourceBySlug = async (resourceSlug: string) => {
     select: {
       id: true,
       title: true,
+      description: true,
+      slug: true,
       serializedBody: true,
       access: true,
     },
@@ -18,6 +20,12 @@ export const getResourceBySlug = async (resourceSlug: string) => {
 
   return resource
 }
+
+export const getResourceMetadataBySlug = (slug: string) =>
+  prisma.resource.findUnique({
+    where: { slug },
+    select: { title: true, description: true, slug: true, access: true },
+  })
 
 export const getResources = async () => {
   const allResources = await prisma.resource.findMany({

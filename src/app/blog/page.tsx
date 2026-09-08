@@ -1,42 +1,43 @@
 import { Suspense } from 'react'
-import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBlogPosts, getAllBlogTags } from '@/services/blog'
 import { NewsletterCTA } from '@/components/NewsletterCTA'
-import { APP_NAME, BLOG_PREFIX } from '@/constants'
+import { BLOG_PREFIX } from '@/constants'
 import { getSiteUrl } from '@/config/env'
+import { pageMetadata } from '@/lib/seo'
+import { notFound } from 'next/navigation'
 
 const siteUrl = getSiteUrl()
 
-export const metadata: Metadata = {
-  title: `Blog | ${APP_NAME}`,
-  description:
-    'Articles on software development, coding interviews, and building products. Learn tips, tricks, and insights from the memoized team.',
-  openGraph: {
-    title: `Blog | ${APP_NAME}`,
-    description:
-      'Articles on software development, coding interviews, and building products.',
-    url: `${siteUrl}/blog`,
-    siteName: APP_NAME,
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: `Blog | ${APP_NAME}`,
-    description:
-      'Articles on software development, coding interviews, and building products.',
-  },
-  alternates: {
-    canonical: `${siteUrl}/blog`,
-    types: {
-      'application/rss+xml': `${siteUrl}/blog/rss.xml`,
-    },
-  },
+type BlogPageProps = {
+  searchParams: Promise<{ tag?: string; page?: string }>
 }
 
-type BlogPageProps = {
-  searchParams: Promise<{ tag?: string }>
+function blogPath(tag: string | undefined, page: number) {
+  const query = new URLSearchParams()
+  if (tag) query.set('tag', tag)
+  if (page > 1) query.set('page', String(page))
+  return `/blog${query.size ? `?${query}` : ''}`
+}
+
+function pageNumber(value?: string) {
+  if (!value) return 1
+  if (!/^[1-9]\d*$/.test(value) || Number(value) > 10000) notFound()
+  return Number(value)
+}
+
+export async function generateMetadata({ searchParams }: BlogPageProps) {
+  const { tag, page } = await searchParams
+  const number = pageNumber(page)
+  const { total } = await getBlogPosts({ tag, limit: 1 })
+  if (number > Math.max(1, Math.ceil(total / 20))) notFound()
+  const metadata = pageMetadata({
+    title: `${tag ? `${tag} articles` : 'JavaScript Interview Articles'}${number > 1 ? ` — Page ${number}` : ''}`,
+    description: 'Articles about JavaScript, TypeScript, technical interview preparation and building software.',
+    path: blogPath(tag, number), index: total > 0 && !tag,
+  })
+  return { ...metadata, alternates: { ...metadata.alternates, types: { 'application/rss+xml': `${siteUrl}/blog/rss.xml` } } }
 }
 
 function formatBlogDate(date: Date | null): string {
@@ -48,8 +49,8 @@ function formatBlogDate(date: Date | null): string {
   }).format(new Date(date))
 }
 
-async function BlogPostList({ tag }: { tag?: string }) {
-  const { posts } = await getBlogPosts({ tag })
+async function BlogPostList({ tag, page }: { tag?: string; page: number }) {
+  const { posts, total } = await getBlogPosts({ tag, offset: (page - 1) * 20 })
 
   if (posts.length === 0) {
     return (
@@ -129,6 +130,12 @@ async function BlogPostList({ tag }: { tag?: string }) {
           ))}
         </div>
       )}
+      {(page > 1 || page * 20 < total) && (
+        <nav aria-label="Blog pagination" className="flex justify-between gap-4 text-sm text-lime-700 dark:text-lime-300">
+          {page > 1 ? <Link href={blogPath(tag, page - 1)}>Previous page</Link> : <span />}
+          {page * 20 < total && <Link href={blogPath(tag, page + 1)}>Next page</Link>}
+        </nav>
+      )}
     </div>
   )
 }
@@ -194,7 +201,8 @@ async function TagFilter({ activeTag }: { activeTag?: string }) {
 }
 
 export default async function BlogPage({ searchParams }: BlogPageProps) {
-  const { tag } = await searchParams
+  const { tag, page } = await searchParams
+  const number = pageNumber(page)
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-16 pt-12 sm:px-6 sm:pt-16 lg:pt-20">
@@ -215,7 +223,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
       {/* Blog Posts */}
       <Suspense fallback={<BlogPostListSkeleton />}>
-        <BlogPostList tag={tag} />
+        <BlogPostList tag={tag} page={number} />
       </Suspense>
 
       {/* Newsletter CTA */}

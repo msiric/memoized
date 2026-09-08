@@ -5,10 +5,10 @@ import { ServiceError, getErrorMessage } from '@/lib/sentry'
 import { revalidateSubscription } from '@/lib/cache'
 import {
   formatDate,
-  getPlanFromStripePlan,
   getStatusFromStripeStatus,
   isProduction,
 } from '@/utils/helpers'
+import { getPlanFromStripePlan } from '@/lib/stripe-plans'
 import { SubscriptionStatus } from '@prisma/client'
 import { format } from 'date-fns'
 import Stripe from 'stripe'

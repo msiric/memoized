@@ -111,6 +111,7 @@ export const getLessonBySlug = async (
     select: {
       id: true,
       title: true,
+      description: true,
       serializedBody: true,
       access: true,
       problems: {

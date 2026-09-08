@@ -3,8 +3,6 @@ import {
   PROBLEMS_PREFIX,
   RESOURCES_PREFIX,
 } from '@/constants'
-import { highlightCode as sharedHighlightCode } from '@/lib/shiki'
-import { stripe } from '@/lib/stripe'
 import {
   ActiveCoupon,
   Curriculum,
@@ -20,11 +18,10 @@ import {
 import {
   AccessOptions,
   Subscription,
-  SubscriptionPlan,
   SubscriptionStatus,
 } from '@prisma/client'
 import { format, fromUnixTime, isBefore, parseISO } from 'date-fns'
-import Stripe from 'stripe'
+import type Stripe from 'stripe'
 
 export const formatter = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -208,37 +205,6 @@ export const getURL = (path: string = '', env = process.env) => {
 
   // Concatenate the URL and the path.
   return path ? `${url}/${path}` : url
-}
-
-export const fetchPricesFromStripe = async () => {
-  const prices = await stripe.prices.list({ limit: 100 })
-  return prices.data.reduce(
-    (acc, price) => {
-      acc[price.id] = price
-      return acc
-    },
-    {} as Record<string, Stripe.Price>,
-  )
-}
-
-export const getPlanFromStripePlan = async (
-  priceId: string,
-): Promise<SubscriptionPlan | void> => {
-  const prices = await fetchPricesFromStripe()
-  const price = prices[priceId]
-
-  if (!price) return
-
-  switch (price.nickname) {
-    case 'Monthly':
-      return SubscriptionPlan.MONTHLY
-    case 'Yearly':
-      return SubscriptionPlan.YEARLY
-    case 'Lifetime':
-      return SubscriptionPlan.LIFETIME
-    default:
-      return
-  }
 }
 
 export const getStatusFromStripeStatus = (
@@ -554,14 +520,6 @@ export const formatPercentage = (value: number) => {
   return value % 1 === 0 ? value.toString() : value.toFixed(2)
 }
 
-export async function highlightCode(
-  code: string,
-  lang: string = 'js',
-  theme: string = 'nord',
-) {
-  return sharedHighlightCode(code, lang, theme)
-}
-
 export function isPrismaUniqueConstraintError(error: unknown): boolean {
   return (
     error !== null &&
@@ -570,4 +528,3 @@ export function isPrismaUniqueConstraintError(error: unknown): boolean {
     error.code === 'P2002'
   )
 }
-

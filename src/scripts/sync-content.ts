@@ -19,6 +19,7 @@ import slugify from 'slugify'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
 import { serialize } from 'next-mdx-remote-client/serialize'
+import { assertCompiledMdx } from '@/lib/mdx-result'
 
 type SerializedJson = Prisma.NullableJsonNullValueInput | InputJsonValue
 
@@ -104,10 +105,10 @@ async function serializeMdxContent(content: string, filePath?: string): Promise<
       },
     })
 
+    assertCompiledMdx(serialized, filePath)
     return serialized as unknown as InputJsonValue
   } catch (error) {
     console.error('❌ MDX serialization failed:', error)
-    console.error('Content preview:', content.substring(0, 200) + '...')
     console.error('File path:', filePath || 'Unknown')
 
     if (isProduction()) {
