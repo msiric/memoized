@@ -2,10 +2,9 @@
 
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import { Highlighter } from 'shiki'
+import type { Highlighter } from 'shiki'
 import 'shiki-magic-move/dist/style.css'
 import { ShikiMagicMove } from 'shiki-magic-move/react'
-import { getSharedHighlighter } from '@/lib/shiki'
 
 export type AnimatedCodeProps = {
   initialTab?: string
@@ -26,16 +25,39 @@ export const AnimatedCode = ({
   const [highlighter, setHighlighter] = useState<Highlighter>()
   const [index, setIndex] = useState(0)
   const [flip, setFlip] = useState(false)
+  const [animate, setAnimate] = useState(false)
 
   useEffect(() => {
-    const initializeHighlighter = async () => {
-      const highlighter = await getSharedHighlighter();
-      setHighlighter(highlighter);
+    const desktop = window.matchMedia('(min-width: 1024px)')
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setAnimate(desktop.matches && !reduced.matches)
+    update()
+    desktop.addEventListener('change', update)
+    reduced.addEventListener('change', update)
+    return () => {
+      desktop.removeEventListener('change', update)
+      reduced.removeEventListener('change', update)
     }
-    initializeHighlighter()
   }, [])
 
   useEffect(() => {
+    if (!animate || highlighter) return
+    let mounted = true
+    const initializeHighlighter = async () => {
+      try {
+        const { getSharedHighlighter } = await import('@/lib/shiki')
+        const highlighter = await getSharedHighlighter()
+        if (mounted) setHighlighter(highlighter)
+      } catch {
+        console.warn('Animated highlighting is unavailable; the server-rendered example remains visible.')
+      }
+    }
+    initializeHighlighter()
+    return () => { mounted = false }
+  }, [animate, highlighter])
+
+  useEffect(() => {
+    if (!animate || !highlighter) return
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % codeSnippets.length)
       setCode(codeSnippets[(index + 1) % codeSnippets.length].code)
@@ -44,7 +66,7 @@ export const AnimatedCode = ({
     }, 2000)
 
     return () => clearInterval(interval)
-  }, [codeSnippets, index])
+  }, [codeSnippets, index, animate, highlighter])
 
   useEffect(() => {
     if (flip) {
@@ -69,17 +91,17 @@ export const AnimatedCode = ({
         <div
           className={clsx(
             'flex h-6 rounded-full bg-gradient-to-r from-lime-400/30 via-lime-400 to-lime-400/30 p-px font-medium text-lime-300 will-change-transform',
-            flip && 'animate-flipVertical',
+            flip && animate && 'animate-flipVertical',
           )}
         >
           <div className="flex items-center justify-center rounded-full bg-slate-800 px-2.5">
-            {tab}
+            {animate ? tab : initialTab}
           </div>
         </div>
       </div>
       <div className="mt-6 h-[23rem] overflow-x-auto overflow-y-hidden px-1 text-sm">
         <div className="w-full">
-          {highlighter ? (
+          {animate && highlighter ? (
             <>
               <ShikiMagicMove
                 lang="ts"

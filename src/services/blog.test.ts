@@ -47,6 +47,11 @@ const mockBlogPostUnpublished = {
   published: false,
 }
 
+const expectedPublishedWhere = {
+  published: true,
+  OR: [{ publishedAt: null }, { publishedAt: { lte: expect.any(Date) } }],
+}
+
 describe('Blog service', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -63,7 +68,7 @@ describe('Blog service', () => {
       expect(result).toEqual({ posts, total: 1 })
       expect(prisma.blogPost.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { published: true },
+          where: expectedPublishedWhere,
           orderBy: { publishedAt: 'desc' },
           take: 20,
           skip: 0,
@@ -79,7 +84,7 @@ describe('Blog service', () => {
 
       expect(prisma.blogPost.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { published: true, tags: { has: 'react' } },
+          where: { ...expectedPublishedWhere, tags: { has: 'react' } },
         }),
       )
     })
@@ -110,6 +115,10 @@ describe('Blog service', () => {
   })
 
   describe('getBlogPostBySlug', () => {
+    it('does not expose a scheduled post before its publication date', async () => {
+      vi.mocked(prisma.blogPost.findUnique).mockResolvedValue({ ...mockBlogPost, publishedAt: new Date('2099-01-01') })
+      expect(await getBlogPostBySlug('scheduled')).toBeNull()
+    })
     it('returns post when found and published', async () => {
       ;(prisma.blogPost.findUnique as ReturnType<typeof vi.fn>).mockResolvedValue(mockBlogPost)
 
@@ -159,7 +168,7 @@ describe('Blog service', () => {
 
       expect(result).toEqual(['post-1', 'post-2', 'post-3'])
       expect(prisma.blogPost.findMany).toHaveBeenCalledWith({
-        where: { published: true },
+        where: expectedPublishedWhere,
         select: { slug: true },
       })
     })
@@ -229,7 +238,7 @@ describe('Blog service', () => {
       expect(result).toEqual(relatedPosts)
       expect(prisma.blogPost.findMany).toHaveBeenCalledWith({
         where: {
-          published: true,
+          ...expectedPublishedWhere,
           slug: { not: 'test-post' },
           tags: { hasSome: ['react', 'typescript'] },
         },
@@ -354,7 +363,7 @@ describe('Blog service', () => {
 
       expect(result).toEqual(feedPosts)
       expect(prisma.blogPost.findMany).toHaveBeenCalledWith({
-        where: { published: true },
+        where: expectedPublishedWhere,
         select: {
           slug: true,
           title: true,
@@ -382,7 +391,7 @@ describe('Blog service', () => {
 
       expect(result).toEqual(sitemapPosts)
       expect(prisma.blogPost.findMany).toHaveBeenCalledWith({
-        where: { published: true },
+        where: expectedPublishedWhere,
         select: {
           slug: true,
           updatedAt: true,

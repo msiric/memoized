@@ -83,9 +83,10 @@ export const ThinkingPrompt = ({ onReveal, isTheory }: ThinkingPromptProps) => (
       Take a moment to think about this before revealing the answer
     </p>
     <p className={THINKING_PROMPT.hint}>
-      Active recall strengthens memory retention
+      Explain your reasoning or try an implementation before comparing answers.
     </p>
     <button
+      type="button"
       onClick={onReveal}
       className={clsx(
         PROBLEM_CARD.revealButton,

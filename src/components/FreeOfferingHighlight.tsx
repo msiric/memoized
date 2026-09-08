@@ -42,7 +42,7 @@ export const FreeOfferingHighlight = () => {
                         All Problems Free
                       </h3>
                       <p className={`text-sm ${TYPOGRAPHY.color.secondary}`}>
-                        {CONTENT_STATS.problems} coding challenges accessible to everyone
+                        {CONTENT_STATS.problems} theory and coding questions accessible to everyone
                       </p>
                     </div>
 

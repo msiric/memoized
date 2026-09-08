@@ -7,6 +7,9 @@ import { UserWithSubscriptionsAndProgress } from '@/types'
 import { userHasAccess } from '@/utils/helpers'
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
+import { getSearchCatalog } from '@/services/search'
+import { CatalogDirectory } from '@/components/CatalogDirectory'
+import { resourcePath } from '@/lib/seo'
 
 export default async function Resources() {
   const session = await getServerSession(authOptions)
@@ -29,9 +32,15 @@ export default async function Resources() {
     return <PremiumCTA heading={resource.title} />
   }
 
+  const { resources } = await getSearchCatalog()
   return (
+    <>
     <PreserializedMdxRenderer
       serializedContent={resource.serializedBody}
     />
+    <CatalogDirectory title="Implementation references" items={resources.filter((item) => item.slug !== 'intro').map((item) => ({
+      ...item, href: resourcePath(item.slug),
+    }))} />
+    </>
   )
 }

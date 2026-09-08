@@ -61,9 +61,15 @@ export function middleware(request: NextRequest) {
   }
 
   const path = request.nextUrl.pathname
+  const publicStaticAsset =
+    !/^\/(api|admin|private)(\/|$)/.test(path) &&
+    /\.(png|jpe?g|gif|webp|avif|svg|css|js|woff2?|ttf|otf|webmanifest)$/i.test(path)
   
   // Skip rate limiting for static assets and trusted API routes
+  // Root-level social images/fonts must not consume the document budget or make
+  // Next's internal image-optimizer fetch fail after a navigation burst.
   if (
+    publicStaticAsset ||
     path.startsWith('/_next') ||
     path.startsWith('/images') ||
     path.startsWith('/media') ||

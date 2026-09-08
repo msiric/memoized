@@ -81,6 +81,7 @@ const SectionLink = memo(
     return (
       <Link
         href={href}
+        prefetch={false}
         aria-current={active ? 'page' : undefined}
         className={clsx(
           'flex items-center justify-between text-sm font-semibold',
@@ -171,6 +172,7 @@ const NavLink = memo(
     return (
       <Link
         href={href}
+        prefetch={false}
         {...(isExternal && { target: '_blank' })}
         aria-current={active ? 'page' : undefined}
         className={clsx(
