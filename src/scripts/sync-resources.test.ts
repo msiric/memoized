@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { persistResources, syncResources } from './sync-resources'
+import { prepareResources, persistResources, syncResources } from './sync-resources'
 
 // Resources persist via the contentId-first upsert helper, which calls
 // prisma.resource.findUnique/create/update directly (no global transaction).
@@ -29,6 +29,9 @@ vi.mock('path', () => ({
       const joined = args.join('/')
       if (joined.includes('src/resources/intro/page.mdx')) {
         return '/mock/src/resources/intro/page.mdx'
+      }
+      if (joined.endsWith('/src/resources')) {
+        return '/mock/src/resources'
       }
       if (joined.includes('.git')) {
         return '/mock/src/content/.git'
@@ -96,6 +99,29 @@ describe('sync-resources.ts - Two-Phase Architecture', () => {
   describe('syncResources', () => {
     it('should export syncResources function', () => {
       expect(typeof syncResources).toBe('function')
+    })
+
+    it('prepares an explicit immutable source root without persisting or using sample fallback', async () => {
+      const fs = (await import('fs')).default
+      const { serialize } = await import('next-mdx-remote-client/serialize')
+      const prisma = (await import('@/lib/prisma')).default
+      vi.mocked(fs.existsSync).mockReset().mockImplementation((file) =>
+        String(file) === '/release-resources/intro/page.mdx',
+      )
+      vi.mocked(fs.readFileSync).mockReturnValue('# Resources')
+      vi.mocked(serialize).mockResolvedValue({
+        compiledSource: 'prepared', scope: {}, frontmatter: {},
+      })
+
+      const resources = await prepareResources({
+        contentPath: '/release-content', resourcesPath: '/release-resources',
+      })
+
+      expect(resources).toHaveLength(1)
+      expect(fs.readFileSync).toHaveBeenCalledWith('/release-resources/intro/page.mdx', 'utf-8')
+      expect(fs.existsSync).not.toHaveBeenCalledWith('/mock/src/samples')
+      expect(prisma.resource.create).not.toHaveBeenCalled()
+      expect(prisma.$disconnect).not.toHaveBeenCalled()
     })
 
     it('should sync intro resource via a contentId-first upsert', async () => {

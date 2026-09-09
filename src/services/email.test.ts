@@ -7,7 +7,7 @@ import {
   afterEach,
   beforeAll,
 } from 'vitest'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 vi.stubEnv('RESEND_TOKEN', 'test-token')
@@ -408,7 +408,7 @@ describe('Email Service', () => {
       expect(existsSync(logoPath)).toBe(true)
     })
 
-    it('should have an accessible logo image URL (network test)', async () => {
+    it('maps the production logo URL to a valid local PNG without a network dependency', async () => {
       mockSend.mockResolvedValue({ id: 'email-id' })
 
       await sendEmail({
@@ -429,19 +429,13 @@ describe('Email Service', () => {
         'https://www.memoized.io/images/brand/logo-dark.png',
       )
 
-      // Verify the production URL is accessible (network test)
-      try {
-        const response = await fetch(logoUrl, { method: 'HEAD' })
-        expect(response.ok).toBe(true)
-        expect(response.status).toBe(200)
-
-        const contentType = response.headers.get('content-type')
-        expect(contentType).toMatch(/^image\/(png|jpeg|jpg|gif|webp)/i)
-      } catch (error) {
-        throw new Error(
-          `Logo image is not accessible at ${logoUrl}: ${error}`,
-        )
-      }
+      // HTTP availability belongs to release probes, not production-dependent unit tests.
+      const pathname = new URL(logoUrl).pathname
+      expect(pathname).toBe('/images/brand/logo-dark.png')
+      const image = readFileSync(join(process.cwd(), 'public', pathname.slice(1)))
+      expect(image.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+      expect(image.readUInt32BE(16)).toBeGreaterThan(0)
+      expect(image.readUInt32BE(20)).toBeGreaterThan(0)
     })
 
     it('should have correct logo attributes for accessibility', async () => {

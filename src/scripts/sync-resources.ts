@@ -166,12 +166,17 @@ async function serializeMdxContent(content: string, filePath?: string): Promise<
  * Phase 1: Read and serialize all resources into in-memory structures.
  * No database operations happen here.
  */
-async function prepareResources(): Promise<PreparedResource[]> {
+async function prepareResources(
+  options: { contentPath?: string; resourcesPath?: string } = {},
+): Promise<PreparedResource[]> {
   const prepared: PreparedResource[] = []
-  const contentInfo = getContentPath()
+  const contentInfo = options.contentPath
+    ? { path: options.contentPath, isSample: false }
+    : getContentPath()
+  const resourcesDir = options.resourcesPath ?? path.join(process.cwd(), 'src', RESOURCES_FOLDER)
 
   // Prepare intro resource
-  const introPath = path.join(process.cwd(), 'src/resources/intro/page.mdx')
+  const introPath = path.join(resourcesDir, 'intro', 'page.mdx')
 
   if (fs.existsSync(introPath)) {
     const introContent = fs.readFileSync(introPath, 'utf-8')
@@ -220,10 +225,6 @@ async function prepareResources(): Promise<PreparedResource[]> {
 
       for (const lesson of lessons) {
         if (lesson.resources && lesson.resources.length > 0) {
-          const resourcesDir = path.join(
-            process.cwd(),
-            `src/${RESOURCES_FOLDER}`,
-          )
           const accessLevel = lesson.access === 'FREE' ? 'FREE' : 'PREMIUM'
           const lessonSlug = slugify(lesson.title, SLUGIFY_OPTIONS)
 
@@ -341,7 +342,7 @@ export async function syncResources(): Promise<void> {
     // Phase 1: Serialize all resources (no DB operations)
     const prepared = await prepareResources()
 
-    // Phase 2: Persist in a single transaction (all-or-nothing)
+    // Phase 2: Persist through idempotent per-resource upserts.
     await persistResources(prepared)
   } catch (error) {
     console.error(`❌ Failed to sync resources: ${error}`)

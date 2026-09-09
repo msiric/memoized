@@ -7,6 +7,10 @@ on:
   push:
     branches: [ master ]
 
+concurrency:
+  group: memoized-app-production
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -25,8 +29,8 @@ jobs:
       - name: Run tests
         run: yarn test:check        
         env:
-          RESEND_TOKEN: ${{ secrets.RESEND_TOKEN }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          RESEND_TOKEN: re_disabled_unit_test_key
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
       
       - name: Run type check
         run: yarn typecheck

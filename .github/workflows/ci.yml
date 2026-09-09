@@ -32,7 +32,7 @@ jobs:
       - name: Run tests
         run: yarn test:check
         env:
-          RESEND_TOKEN: ${{ secrets.RESEND_TOKEN }}
+          RESEND_TOKEN: re_disabled_unit_test_key
           # Tests mock Prisma; a dummy URL keeps prod credentials out of PR CI.
           DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
 
