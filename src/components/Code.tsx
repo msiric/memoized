@@ -14,33 +14,7 @@ import clsx from 'clsx'
 import { create } from 'zustand'
 
 import { Tag } from '@/components/Tag'
-
-const languageNames: Record<string, string> = {
-  js: 'JavaScript',
-  ts: 'TypeScript',
-  javascript: 'JavaScript',
-  typescript: 'TypeScript',
-  php: 'PHP',
-  python: 'Python',
-  ruby: 'Ruby',
-  go: 'Go',
-}
-
-function getPanelTitle({
-  title,
-  language,
-}: {
-  title?: string
-  language?: string
-}) {
-  if (title) {
-    return title
-  }
-  if (language && language in languageNames) {
-    return languageNames[language]
-  }
-  return 'Code'
-}
+import { getPanelTitle } from '@/lib/code-panel-title'
 
 function ClipboardIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (

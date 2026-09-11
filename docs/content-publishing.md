@@ -36,12 +36,23 @@ props/spreads and code-fence metadata. Allowed authoring forms are the explicit
 Markdown subset used by the profile, plus bare `<Note>` and bare `<CodeGroup>`
 with nonempty allowlisted-language code panels.
 
+Use components as multiline Markdown blocks. An inline `<Note>text</Note>` is
+not the supported block form. ESM is allowed only for the byte-frozen root
+metadata export, never inside a Note, list, blockquote or another nested node.
+CodeGroups must have distinct rendered tab labels. Repeated languages,
+`ts`/`typescript` aliases and two fallback `Code` labels are rejected because
+the existing reader cannot select those panels independently.
+
 The structural plan records the class, profile, source lesson UID, allowed
 fields, headings/anchors, links, code/group surface, external HTTPS destinations
 and a pairwise anchor-conflict proof across base/candidate body and answers
 with fixed problem-card anchors. This is eligibility/compatibility evidence
 only; it is not correctness, pedagogy, independence, owner approval or
 production readiness.
+
+Each selected surface must generate nonempty unique H2 IDs before its IDs enter
+the conflict proof. The reader's fixed practice-section heading and unchanged
+question headings are reserved alongside the five problem-card anchors.
 
 Local fragment links are deliberately conservative in this first profile: every
 fragment target must already resolve in both the base and candidate source

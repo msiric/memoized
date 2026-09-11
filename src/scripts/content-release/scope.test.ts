@@ -323,6 +323,93 @@ describe('existing entity structural text source scope', () => {
     })).toThrow(/anchors collide/)
   })
 
+  it.each([
+    ['Note', '<Note>\n\nexport const extra = 1\n\n</Note>\n'],
+    ['nested Note', '<Note>\n\n<Note>\n\nexport const extra = 1\n\n</Note>\n\n</Note>\n'],
+    ['Note import', '<Note>\n\nimport extra from "./unused.js"\n\n</Note>\n'],
+    ['Note initializer', '<Note>\n\nexport const extra = (() => { throw new Error("unsafe initializer") })()\n\n</Note>\n'],
+  ])('rejects nested ESM in a %s in both the body and answers', (_, nestedEsm) => {
+    const base = structuralFixture()
+    const bodyCandidate = structuralFixture()
+    fs.writeFileSync(path.join(bodyCandidate, structuralLessonPath), structuralBody + '\n' + nestedEsm)
+    expect(() => assertInPlaceScope(base, bodyCandidate, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(/Nested MDX imports\/exports/)
+
+    const answerCandidate = structuralFixture()
+    const candidate = structuredClone(structuralConfig)
+    candidate.lessons[0].problems[0].answer += '\n' + nestedEsm
+    fs.writeFileSync(path.join(answerCandidate, structuralConfigPath), JSON.stringify(candidate, null, 2))
+    expect(() => assertInPlaceScope(base, answerCandidate, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(/Nested MDX imports\/exports/)
+  })
+
+  it('does not confuse non-executable quoted or listed export text with ESM', () => {
+    const base = structuralFixture(), next = structuralFixture()
+    fs.writeFileSync(path.join(next, structuralLessonPath), `${structuralBody}\n> export const extra = 1\n\n- export const another = 2\n`)
+    expect(() => assertInPlaceScope(base, next, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).not.toThrow()
+  })
+
+  it.each([
+    ['duplicate suffix', '## Checkpoint\n\n## Checkpoint\n\n## Checkpoint 2\n', /Duplicate generated H2 anchor/],
+    ['empty slug', '## \u{1F600}\n\n## \u{1F600}\n', /Empty generated H2 anchor/],
+  ])('rejects %s heading IDs within each body or answer before set conversion', (_, headings, message) => {
+    const base = structuralFixture()
+    const bodyCandidate = structuralFixture()
+    fs.writeFileSync(path.join(bodyCandidate, structuralLessonPath), `${structuralBody}\n${headings}`)
+    expect(() => assertInPlaceScope(base, bodyCandidate, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(message)
+
+    const answerCandidate = structuralFixture()
+    const candidate = structuredClone(structuralConfig)
+    candidate.lessons[0].problems[0].answer += '\n' + headings
+    fs.writeFileSync(path.join(answerCandidate, structuralConfigPath), JSON.stringify(candidate, null, 2))
+    expect(() => assertInPlaceScope(base, answerCandidate, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(message)
+  })
+
+  it('reserves the actual practice section in the anchor catalog and collision proof', () => {
+    const base = structuralFixture()
+    const linked = structuralFixture()
+    fs.writeFileSync(path.join(linked, structuralLessonPath), `${structuralBody}\n[Go to practice](#practice-problems).\n`)
+    const report = assertInPlaceScope(base, linked, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })
+    expect(report.structural?.anchorConflictProof.fixedReaderAnchors.map(anchor => anchor.id)).toContain('practice-problems')
+
+    const bodyCollision = structuralFixture()
+    fs.writeFileSync(path.join(bodyCollision, structuralLessonPath), `${structuralBody}\n## Practice Problems\n\nA competing destination.\n`)
+    expect(() => assertInPlaceScope(base, bodyCollision, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(/collides with fixed reader anchor/)
+
+    const answerCollision = structuralFixture()
+    const candidate = structuredClone(structuralConfig)
+    candidate.lessons[0].problems[0].answer += '\n## Practice Problems\n\nA competing destination.\n'
+    fs.writeFileSync(path.join(answerCollision, structuralConfigPath), JSON.stringify(candidate, null, 2))
+    expect(() => assertInPlaceScope(base, answerCollision, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(/collides with fixed reader anchor/)
+  })
+
+  it('also reserves headings in unchanged question text', () => {
+    const base = structuralFixture(), next = structuralFixture()
+    const candidate = structuredClone(structuralConfig)
+    candidate.lessons[0].problems[0].question = '## Question Context\n\nExplain the original concept.'
+    for (const root of [base, next]) {
+      fs.writeFileSync(path.join(root, structuralConfigPath), JSON.stringify(candidate, null, 2))
+    }
+    fs.writeFileSync(path.join(next, structuralLessonPath), `${structuralBody}\n## Question Context\n\nA competing destination.\n`)
+    expect(() => assertInPlaceScope(base, next, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(/collides with fixed reader anchor/)
+  })
+
   it('fails closed on literal reversal that drops published anchors but allows compatible recovery retaining them', () => {
     const base = structuralFixture()
     const published = structuralFixture()
@@ -388,5 +475,20 @@ describe('existing entity structural text source scope', () => {
       changeClass: STRUCTURAL_CHANGE_CLASS,
       lesson: STRUCTURAL_LESSON_UID,
     })).not.toThrow()
+  })
+
+  it.each([
+    ['typescript', 'typescript'],
+    ['ts', 'typescript'],
+    ['js', 'javascript'],
+    ['json', 'bash'],
+    ['text', 'json'],
+  ])('rejects CodeGroup panels %s/%s with indistinguishable rendered labels', (first, second) => {
+    const base = structuralFixture(), next = structuralFixture()
+    const group = `\n<CodeGroup>\n\n\`\`\`${first}\n"first"\n\`\`\`\n\n\`\`\`${second}\n"second"\n\`\`\`\n\n</CodeGroup>\n`
+    fs.writeFileSync(path.join(next, structuralLessonPath), structuralBody + group)
+    expect(() => assertInPlaceScope(base, next, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    })).toThrow(/Duplicate rendered CodeGroup panel label/)
   })
 })

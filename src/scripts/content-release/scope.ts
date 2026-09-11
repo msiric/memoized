@@ -8,6 +8,8 @@ import remarkGfm from 'remark-gfm'
 import { slugifyWithCounter } from '@sindresorhus/slugify'
 import { toString } from 'mdast-util-to-string'
 import slugify from 'slugify'
+import { PRACTICE_PROBLEMS_PREFIX, SLUGIFY_OPTIONS } from '@/constants'
+import { getPanelTitle } from '@/lib/code-panel-title'
 
 const parser = remark().use(remarkMdx).use(remarkGfm)
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -30,7 +32,6 @@ export type ReleaseScopeOptions = {
 const STRUCTURAL_CONFIG_PATH = 'content/js-track/typescript-introduction/_lessons.json'
 const STRUCTURAL_LESSON_PATH = 'content/js-track/typescript-introduction/ts-basics/page.mdx'
 const ALLOWED_CODE_LANGUAGES = new Set(['bash', 'javascript', 'js', 'json', 'text', 'typescript', 'ts'])
-const PROBLEM_SLUGIFY_OPTIONS = { replacement: '-', lower: true, strict: true, trim: true }
 
 export const digest = (value: string | Buffer) =>
   createHash('sha256').update(value).digest('hex')
@@ -199,7 +200,7 @@ function parseDetailedConfig(raw: Buffer, filename: string): ParsedConfig {
       }
       const problemId = typeof problem.id === 'string' && problem.id
         ? problem.id
-        : slugify(problem.title, PROBLEM_SLUGIFY_OPTIONS)
+        : slugify(problem.title, SLUGIFY_OPTIONS)
       return {
         id: problemId,
         title: problem.title,
@@ -209,7 +210,7 @@ function parseDetailedConfig(raw: Buffer, filename: string): ParsedConfig {
         difficulty: problem.difficulty,
         href: typeof problem.href === 'string' ? problem.href : '',
         contentId: `${contentId}/${problemId}`,
-        cardAnchor: slugify(problem.title, PROBLEM_SLUGIFY_OPTIONS),
+        cardAnchor: slugify(problem.title, SLUGIFY_OPTIONS),
       }
     })
     lessons.push({
@@ -267,6 +268,7 @@ export type StructuralSurfaceReport = {
   anchorConflictProof: {
     checked: string
     fixedProblemCardAnchors: AnchorEvidence[]
+    fixedReaderAnchors: AnchorEvidence[]
     pairwiseCompatibleIds: string[]
   }
   externalHttpsDestinations: string[]
@@ -356,7 +358,7 @@ function validateFlowNode(
   }
   switch (node.type) {
     case 'mdxjsEsm':
-      return
+      throw new Error(`Nested MDX imports/exports are not supported in ${label}`)
     case 'heading':
       if (typeof node.depth !== 'number' || node.depth < 1 || node.depth > 6) {
         throw new Error(`Unsupported heading depth in ${label}`)
@@ -405,11 +407,17 @@ function validateFlowNode(
         const panels = childrenOf(node)
         if (!panels.length) throw new Error(`CodeGroup requires at least one code panel in ${label}`)
         const group: CodeGroupEvidence = { panels: [] }
+        const panelLabels = new Set<string>()
         for (const panel of panels) {
           if (!isRecord(panel) || panel.type !== 'code') {
             throw new Error(`CodeGroup may contain only code panels in ${label}`)
           }
           const code = codeEvidence(panel, true)
+          const panelLabel = getPanelTitle({ language: code.language })
+          if (panelLabels.has(panelLabel)) {
+            throw new Error(`Duplicate rendered CodeGroup panel label in ${label}: ${panelLabel}`)
+          }
+          panelLabels.add(panelLabel)
           evidence.codeBlocks.push(code)
           group.panels.push(code)
         }
@@ -455,7 +463,6 @@ function emptyEvidence(): MdxSurfaceEvidence {
 function summarizeMdx(markdown: string, label: string, allowMetadataExport: boolean): MdxSurfaceEvidence {
   const tree = parser.parse(markdown)
   const evidence = emptyEvidence()
-  for (const child of childrenOf(tree)) validateFlowNode(child, label, evidence)
   const esmValues = topLevelEsmValues(tree)
   if (allowMetadataExport ? esmValues.length !== 1 : esmValues.length !== 0) {
     throw new Error(`Unsupported MDX import/export in ${label}`)
@@ -464,6 +471,10 @@ function summarizeMdx(markdown: string, label: string, allowMetadataExport: bool
     if (!allowMetadataExport || !/^export\s+const\s+metadata\s*=/.test(value.trim())) {
       throw new Error(`Unsupported MDX import/export in ${label}`)
     }
+  }
+  for (const child of childrenOf(tree)) {
+    if (isRecord(child) && child.type === 'mdxjsEsm') continue
+    validateFlowNode(child, label, evidence)
   }
   const headings = headingEvidence(tree)
   evidence.h1 = headings.h1
@@ -555,13 +566,19 @@ function validateLinks(evidence: MdxSurfaceEvidence, route: string, catalogs: Ca
   return links
 }
 
-function idsFrom(evidence: MdxSurfaceEvidence) {
-  return new Set(evidence.h2.map((heading) => heading.id))
+function idsFrom(evidence: MdxSurfaceEvidence, label?: string) {
+  const ids = new Set<string>()
+  for (const heading of evidence.h2) {
+    if (label && !heading.id) throw new Error(`Empty generated H2 anchor in ${label}`)
+    if (label && ids.has(heading.id)) throw new Error(`Duplicate generated H2 anchor in ${label}: ${heading.id}`)
+    ids.add(heading.id)
+  }
+  return ids
 }
 
 function state(label: string, markdown: string, allowMetadataExport: boolean): SurfaceState {
   const evidence = summarizeMdx(markdown, label, allowMetadataExport)
-  return { label, evidence, ids: idsFrom(evidence) }
+  return { label, evidence, ids: idsFrom(evidence, label) }
 }
 
 function looseHeadingIds(markdown: string): Set<string> {
@@ -603,6 +620,7 @@ function buildCatalog(files: Map<string, Buffer>, label: string): Catalog {
         for (const id of looseHeadingIds(problem.answer)) ids.add(id)
       }
       for (const anchor of cardAnchors) ids.add(anchor.id)
+      if (lesson.problems.length) ids.add(PRACTICE_PROBLEMS_PREFIX.slice(1))
       addRoute(lesson.route, ids)
       if (lesson.sourceUid === STRUCTURAL_LESSON_UID) {
         const body = state(`${label} ${lesson.bodyPath}`, bodyRaw.toString('utf8'), true)
@@ -638,10 +656,15 @@ function assertNoPairwiseAnchorConflicts(
       variants: [answer, candidate.answers[index]],
     })),
   ]
-  const fixed = base.cardAnchors
+  const fixed = [
+    { text: 'Practice Problems', id: PRACTICE_PROBLEMS_PREFIX.slice(1) },
+    ...base.cardAnchors,
+    ...base.questions.flatMap((question) => question.evidence.h2),
+  ]
   const fixedIds = new Map<string, string>()
   for (const anchor of fixed) {
-    if (fixedIds.has(anchor.id)) throw new Error(`Duplicate fixed problem-card anchor: ${anchor.id}`)
+    if (!anchor.id) throw new Error('Empty fixed reader anchor')
+    if (fixedIds.has(anchor.id)) throw new Error(`Duplicate fixed reader anchor: ${anchor.id}`)
     fixedIds.set(anchor.id, anchor.text)
   }
   const compatible = new Set<string>()
@@ -649,7 +672,7 @@ function assertNoPairwiseAnchorConflicts(
     for (const variant of group.variants) {
       for (const id of variant.ids) {
         if (fixedIds.has(id)) {
-          throw new Error(`Structural heading anchor collides with problem-card anchor: ${id}`)
+          throw new Error(`Structural heading anchor collides with fixed reader anchor: ${id}`)
         }
         compatible.add(id)
       }
@@ -669,8 +692,9 @@ function assertNoPairwiseAnchorConflicts(
     }
   }
   return {
-    checked: 'Pairwise proof over base/candidate lesson body plus each base/candidate selected answer, with all fixed problem-card anchors included.',
-    fixedProblemCardAnchors: fixed,
+    checked: 'Pairwise proof over individually nonempty/unique base/candidate heading IDs, with the practice heading, problem cards and unchanged question headings reserved.',
+    fixedProblemCardAnchors: base.cardAnchors,
+    fixedReaderAnchors: fixed,
     pairwiseCompatibleIds: [...compatible].sort(),
   }
 }

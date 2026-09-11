@@ -14,7 +14,7 @@ export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
     <>
       <h2
         className="!mt-16 mb-4 scroll-mt-24 text-lg font-semibold text-zinc-900 dark:text-white"
-        id="practice-problems"
+        id={PRACTICE_PROBLEMS_PREFIX.slice(1)}
       >
         <a
           className="group text-inherit no-underline hover:text-inherit"
