@@ -6,7 +6,16 @@ import { CONTENT_STATS } from '@/constants/content-stats'
 import { assertCompiledMdx } from '@/lib/mdx-result'
 import { prepareContent, type PreparedContent } from '../sync-content'
 import { prepareResources, type PreparedResource } from '../sync-resources'
-import { assertInPlaceScope, digest, type ScopeReport } from './scope'
+import {
+  DEFAULT_CHANGE_CLASS,
+  STRUCTURAL_CHANGE_CLASS,
+  assertInPlaceScope,
+  digest,
+  normalizeReleaseScopeOptions,
+  type ChangeClass,
+  type ReleaseScopeOptions,
+  type ScopeReport,
+} from './scope'
 
 type Kind = 'course' | 'section' | 'lesson' | 'problem' | 'resource'
 type TextField = 'body' | 'question' | 'answer'
@@ -33,6 +42,8 @@ export type InPlaceChange = {
   serializedAfter: { compiledSource: string }
 }
 export type InPlacePlan = {
+  changeClass: ChangeClass
+  lesson: string
   scope: ScopeReport
   before: CatalogRow[]
   after: CatalogRow[]
@@ -102,12 +113,22 @@ async function prepareSnapshot(root: string): Promise<CatalogRow[]> {
   return sourceRows(content, resources)
 }
 
-export async function planInPlaceRelease(baseRoot: string, candidateRoot: string): Promise<InPlacePlan> {
-  const scope = assertInPlaceScope(baseRoot, candidateRoot)
+export async function planInPlaceRelease(
+  baseRoot: string,
+  candidateRoot: string,
+  options: ReleaseScopeOptions = {},
+): Promise<InPlacePlan> {
+  const releaseScope = normalizeReleaseScopeOptions(options)
+  const scope = releaseScope.changeClass === DEFAULT_CHANGE_CLASS
+    ? assertInPlaceScope(baseRoot, candidateRoot)
+    : assertInPlaceScope(baseRoot, candidateRoot, releaseScope)
   // Both complete datasets, including resources, are prepared before any write.
   const before = await prepareSnapshot(baseRoot)
   const after = await prepareSnapshot(candidateRoot)
-  if (!isDeepStrictEqual(scope, assertInPlaceScope(baseRoot, candidateRoot))) {
+  const stableScope = releaseScope.changeClass === DEFAULT_CHANGE_CLASS
+    ? assertInPlaceScope(baseRoot, candidateRoot)
+    : assertInPlaceScope(baseRoot, candidateRoot, releaseScope)
+  if (!isDeepStrictEqual(scope, stableScope)) {
     throw new Error('Source payload changed during release preparation')
   }
   const previous = catalogMap(before)
@@ -133,7 +154,13 @@ export async function planInPlaceRelease(baseRoot: string, candidateRoot: string
       })
     }
   }
-  return { scope, before, after, changes }
+  if (releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS) {
+    const allowed = new Set(scope.structural?.allowedChangedFields.map((field) => field.contentId) ?? [])
+    if (!scope.structural || changes.some((change) => !allowed.has(change.contentId))) {
+      throw new Error('Structural release plan contains a change outside the selected TS Basics fields')
+    }
+  }
+  return { changeClass: releaseScope.changeClass, lesson: releaseScope.lesson, scope, before, after, changes }
 }
 
 /** A bounded read snapshot, not the former full-catalog write transaction. */
@@ -264,12 +291,23 @@ export async function applyInPlaceRelease(
 }
 
 export function describeInPlacePlan(plan: InPlacePlan) {
+  const changedEntities = plan.changes.map((change) => ({
+    kind: change.kind, contentId: change.contentId, field: change.field,
+    beforeSha256: digest(change.before), afterSha256: digest(change.after),
+  }))
+  if (plan.changeClass === STRUCTURAL_CHANGE_CLASS) {
+    return {
+      changeClass: STRUCTURAL_CHANGE_CLASS,
+      profile: plan.scope.structural?.profile,
+      lesson: plan.lesson,
+      allowedChangedFields: plan.scope.structural?.allowedChangedFields,
+      scope: plan.scope,
+      changedEntities,
+    }
+  }
   return {
     changeClass: 'independent-in-place-text-v1',
     scope: plan.scope,
-    changedEntities: plan.changes.map((change) => ({
-      kind: change.kind, contentId: change.contentId, field: change.field,
-      beforeSha256: digest(change.before), afterSha256: digest(change.after),
-    })),
+    changedEntities,
   }
 }

@@ -3,7 +3,7 @@
 `yarn publish:content` is a narrow operator tool, not a general curriculum
 migration or a security boundary against privileged maintainers.
 
-## Supported class
+## Supported classes
 
 `independent-in-place-text-v1` permits shape-preserving text/code repairs in
 existing lesson/resource bodies and existing problem answers. It preserves
@@ -11,6 +11,44 @@ identity, order, access, question contracts, resource associations, counts,
 headings, links, imports/exports, expressions, JSX attributes/components and
 code-panel structure. Course/section introductions and the resource hub are not
 editable through this class.
+
+`existing-entity-structural-text-v1` is an opt-in minimum structural profile for
+one lesson only:
+
+```text
+--change-class existing-entity-structural-text-v1
+--lesson js-track/typescript-introduction/ts-basics
+```
+
+Without `--change-class`, the publisher defaults to
+`independent-in-place-text-v1`; `--lesson` is rejected for that default class.
+The structural class currently rejects every other lesson UID and every unknown
+class value. It may change only
+`content/js-track/typescript-introduction/ts-basics/page.mdx` and the answer
+fields of the existing five TS Basics problem records in
+`content/js-track/typescript-introduction/_lessons.json`.
+
+The structural profile freezes lesson/problem/resource metadata, question text,
+IDs, titles, types, difficulties, hrefs, relationships, ordering, payload
+inventory and the lesson metadata export bytes. It rejects new imports/exports,
+MDX expressions, unsupported JSX/HTML/fragments/images/embeds/scripts, component
+props/spreads and code-fence metadata. Allowed authoring forms are the explicit
+Markdown subset used by the profile, plus bare `<Note>` and bare `<CodeGroup>`
+with nonempty allowlisted-language code panels.
+
+The structural plan records the class, profile, source lesson UID, allowed
+fields, headings/anchors, links, code/group surface, external HTTPS destinations
+and a pairwise anchor-conflict proof across base/candidate body and answers
+with fixed problem-card anchors. This is eligibility/compatibility evidence
+only; it is not correctness, pedagogy, independence, owner approval or
+production readiness.
+
+Local fragment links are deliberately conservative in this first profile: every
+fragment target must already resolve in both the base and candidate source
+catalogs. A new link cannot depend on a newly introduced heading in another
+field, and links to newly introduced local anchors are rejected even if the
+same candidate adds the target. Same-field generated section navigation and
+reader hash behavior still need real reader evidence outside this source check.
 
 Structural eligibility does not establish pedagogical or code correctness.
 An independent review must establish that edits are semantically independent
@@ -52,9 +90,15 @@ yarn publish:content --repository <content-git-repository>
   --base <full-published-content-sha>
   --candidate <full-candidate-content-sha>
   --app <full-approved-app-sha>
+  [--change-class independent-in-place-text-v1]
   --environment <reviewed-target-descriptor.json>
   --report <new-private-journal.json>
 ```
+
+For the TS Basics structural profile, add both `--change-class` and `--lesson`
+as shown above. The lesson value is the source path without a leading slash;
+database content IDs remain the canonical IDs prepared from source and may have
+a leading slash.
 
 The journal records source/target fingerprints, changed identities and the plan
 SHA256, without copying full authored bodies or user data. Review the complete
@@ -82,6 +126,13 @@ For a known content-write failure, inspect the journal and database before
 retrying. Already-applied rows can be skipped. Selective recovery uses a newly
 reviewed reverse-source plan, preserving user writes rather than restoring an
 entire old database. Recheck the pinned app's compatibility with both sources.
+
+Structural recovery is also anchor-preserving. If a published structural source
+added H2 anchors, a literal candidate-to-original-base reversal that removes
+those anchors fails closed. Use a separately reviewed compatible recovery source
+that retains all already-published anchors, or use exact reverse-source
+restoration only when the anchor sets allow it. There is no force or recovery
+bypass.
 
 ## Search activation is a separate boundary
 
