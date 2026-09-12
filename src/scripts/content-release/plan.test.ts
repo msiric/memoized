@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { applyInPlaceRelease, checkReleaseState, planInPlaceRelease, readReleaseCatalog } from './plan'
+import { applyInPlaceRelease, checkReleaseState, describeInPlacePlan, planInPlaceRelease, readReleaseCatalog } from './plan'
+import { STRUCTURAL_CHANGE_CLASS, STRUCTURAL_LESSON_UID } from './scope'
 
 const mocks = vi.hoisted(() => ({
   content: vi.fn(), resources: vi.fn(), scope: vi.fn(), transaction: vi.fn(),
@@ -101,9 +102,61 @@ describe('complete preparation and supported field planning', () => {
     expect(plan.changes.map((change) => [change.kind, change.field])).toEqual([
       ['lesson', 'body'], ['problem', 'answer'], ['resource', 'body'],
     ])
+    expect(mocks.scope).toHaveBeenNthCalledWith(1, '/base', '/candidate')
     expect(mocks.resources).toHaveBeenCalledWith({ contentPath: '/candidate/content', resourcesPath: '/candidate/resources' })
     expect(mocks.transaction).not.toHaveBeenCalled()
     expect(mocks.lesson).not.toHaveBeenCalled()
+  })
+
+  it('passes structural opt-in options to scope and binds structural evidence into the described plan', async () => {
+    const structuralAfter = snapshot('after')
+    structuralAfter.resources = before.resources
+    mocks.scope.mockReturnValue({
+      changedFiles: [],
+      structural: {
+        profile: 'ts-basics-g3a-minimum',
+        allowedChangedFields: [
+          { kind: 'lesson', contentId: before.content.lessons[0].contentId, field: 'body' },
+          { kind: 'problem', contentId: before.content.problems[0].contentId, field: 'answer' },
+        ],
+      },
+    })
+    mocks.content.mockResolvedValueOnce(before.content).mockResolvedValueOnce(structuralAfter.content)
+    mocks.resources.mockResolvedValueOnce(before.resources).mockResolvedValueOnce(structuralAfter.resources)
+    const plan = await planInPlaceRelease('/base', '/candidate', {
+      changeClass: STRUCTURAL_CHANGE_CLASS,
+      lesson: STRUCTURAL_LESSON_UID,
+    })
+    expect(mocks.scope).toHaveBeenNthCalledWith(1, '/base', '/candidate', {
+      changeClass: STRUCTURAL_CHANGE_CLASS,
+      lesson: STRUCTURAL_LESSON_UID,
+    })
+    const described = describeInPlacePlan(plan)
+    expect(described).toMatchObject({
+      changeClass: STRUCTURAL_CHANGE_CLASS,
+      profile: 'ts-basics-g3a-minimum',
+      lesson: STRUCTURAL_LESSON_UID,
+      allowedChangedFields: expect.any(Array),
+    })
+  })
+
+  it('rejects structural plans containing otherwise-supported rows outside TS Basics', async () => {
+    mocks.scope.mockReturnValue({
+      changedFiles: [],
+      structural: {
+        profile: 'ts-basics-g3a-minimum',
+        allowedChangedFields: [
+          { kind: 'lesson', contentId: before.content.lessons[0].contentId, field: 'body' },
+          { kind: 'problem', contentId: before.content.problems[0].contentId, field: 'answer' },
+        ],
+      },
+    })
+    mocks.content.mockResolvedValueOnce(before.content).mockResolvedValueOnce(after.content)
+    mocks.resources.mockResolvedValueOnce(before.resources).mockResolvedValueOnce(after.resources)
+    await expect(planInPlaceRelease('/base', '/candidate', {
+      changeClass: STRUCTURAL_CHANGE_CLASS,
+      lesson: STRUCTURAL_LESSON_UID,
+    })).rejects.toThrow(/outside the selected TS Basics fields/)
   })
 
   it('does not persist when resource preparation fails after content preparation', async () => {

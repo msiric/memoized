@@ -4,7 +4,7 @@ import { parseArgs } from 'node:util'
 import prisma from '@/lib/prisma'
 import { archiveContent, fullRevision, verifyAppRevision, verifyEnvironment } from './content-release/inputs'
 import { applyInPlaceRelease, checkReleaseState, describeInPlacePlan, planInPlaceRelease, readReleaseCatalog, type ChangeResult } from './content-release/plan'
-import { digest } from './content-release/scope'
+import { DEFAULT_CHANGE_CLASS, STRUCTURAL_CHANGE_CLASS, digest, normalizeReleaseScopeOptions, parseChangeClass } from './content-release/scope'
 
 function required(value: string | undefined, name: string) {
   if (!value?.trim()) throw new Error(`Missing required --${name}`)
@@ -16,8 +16,8 @@ function message(error: unknown) {
   return text.replace(/postgres(?:ql)?:\/\/\S+/gi, '[database URL redacted]').slice(0, 1200)
 }
 
-export async function publishContent(args = process.argv.slice(2)) {
-  const { values } = parseArgs({
+export function parsePublishContentArgs(args: string[]) {
+  const parsed = parseArgs({
     args,
     options: {
       repository: { type: 'string' }, base: { type: 'string' }, candidate: { type: 'string' },
@@ -25,8 +25,19 @@ export async function publishContent(args = process.argv.slice(2)) {
       approval: { type: 'string' }, apply: { type: 'boolean', default: false },
       independent: { type: 'boolean', default: false },
       'expected-plan': { type: 'string' },
+      'change-class': { type: 'string' }, lesson: { type: 'string' },
     },
   })
+  const changeClass = parseChangeClass(parsed.values['change-class'])
+  if (changeClass === DEFAULT_CHANGE_CLASS && parsed.values.lesson !== undefined) {
+    throw new Error(`--lesson is only supported with ${STRUCTURAL_CHANGE_CLASS}`)
+  }
+  const scope = normalizeReleaseScopeOptions({ changeClass, lesson: parsed.values.lesson })
+  return { values: parsed.values, scope }
+}
+
+export async function publishContent(args = process.argv.slice(2)) {
+  const { values, scope } = parsePublishContentArgs(args)
   const appRoot = process.cwd()
   const repository = path.resolve(required(values.repository, 'repository'))
   const base = fullRevision(required(values.base, 'base'), 'Base revision')
@@ -93,7 +104,7 @@ export async function publishContent(args = process.argv.slice(2)) {
   try {
     archives.push(archiveContent(repository, base))
     archives.push(archiveContent(repository, candidate))
-    const plan = await planInPlaceRelease(archives[0].directory, archives[1].directory)
+    const plan = await planInPlaceRelease(archives[0].directory, archives[1].directory, scope)
     record.plan = describeInPlacePlan(plan)
     record.planSha256 = digest(JSON.stringify({
       app, base, candidate, environmentSha256: record.environmentSha256, plan: record.plan,
