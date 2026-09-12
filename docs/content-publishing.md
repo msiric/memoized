@@ -160,6 +160,12 @@ failed cleanup is different from an unknown swap outcome.
 and index state first. Retained staging indexes require deliberate cleanup after
 their role is known; do not delete them by a broad prefix.
 
+Index swaps also rewrite index names in completed task history. A historical
+task can therefore mention the new staging name without being a second execution
+of the current swap. If the receipt was lost, use the current staging generation's
+preparation task IDs and timing alongside the active/staging contents. Do not
+identify the operation by an unbounded name match alone.
+
 During a compatible content repair, search may briefly serve the previous valid
 text snapshot. Access/identity/URLs do not change in this class. If search
 activation fails, publication is incomplete until the required search state is
