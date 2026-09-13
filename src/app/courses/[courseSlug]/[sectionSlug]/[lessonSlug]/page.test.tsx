@@ -1,10 +1,11 @@
 import { getLessonBySlug, getLessonMetadataBySlug } from '@/services/lesson'
 import { getUserWithSubscriptionDetails } from '@/services/user'
 import { userHasAccess } from '@/utils/helpers'
-import { render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { getServerSession } from 'next-auth'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Lesson, { generateMetadata } from './page'
+import type { ReactNode } from 'react'
 
 // Mock the imported modules
 vi.mock('next-auth')
@@ -13,7 +14,7 @@ vi.mock('@/services/search', () => ({ getSearchCatalog: async () => ({ courses: 
 vi.mock('@/services/user')
 vi.mock('@/utils/helpers')
 vi.mock('@/components/PreserializedMdxRenderer', () => ({
-  PreserializedMdxRenderer: ({ serializedContent }: { serializedContent: { compiledSource: string } }) => <div>Mocked MDX Renderer {serializedContent.compiledSource}</div>,
+  PreserializedMdxRenderer: ({ serializedContent, header }: { serializedContent: { compiledSource: string }; header?: ReactNode }) => <article>{header}<div>Mocked MDX Renderer {serializedContent.compiledSource}</div></article>,
 }))
 vi.mock('@/components/ProblemCard', () => ({
   ProblemCard: ({ problem }: { problem: { question: string } }) => <div>{problem.question}</div>,
@@ -26,6 +27,8 @@ vi.mock('next/navigation', () => ({
 }))
 
 describe('Lesson component', () => {
+  afterEach(cleanup)
+
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -58,6 +61,7 @@ describe('Lesson component', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Test Lesson' })).toBeDefined()
     expect(screen.getByText('Public lesson introduction')).toBeDefined()
     expect(screen.getByText('A free practice question')).toBeDefined()
+    expect(screen.getByRole('navigation', { name: 'Breadcrumb' }).closest('article')).not.toBeNull()
     expect(document.body.textContent).not.toContain('PREMIUM_SECRET_CONTENT')
     expect(
       screen.getByRole('link', { name: 'Upgrade to Premium' }),
@@ -89,6 +93,7 @@ describe('Lesson component', () => {
     )
 
     expect(screen.getByText(/Mocked MDX Renderer/)).toBeDefined()
+    expect(screen.getByRole('navigation', { name: 'Breadcrumb' }).closest('article')).not.toBeNull()
   })
 
   describe('generateMetadata', () => {
