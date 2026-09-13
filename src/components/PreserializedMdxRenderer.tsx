@@ -10,6 +10,7 @@ import { assertCompiledMdx } from '@/lib/mdx-result'
 export type PreserializedMdxRendererProps = {
   serializedContent: Prisma.JsonValue | null | undefined
   lessonId?: string
+  header?: ReactNode
   problems?: Problem[]
   withPadding?: boolean
   showNextPage?: boolean
@@ -19,6 +20,7 @@ export type PreserializedMdxRendererProps = {
 export const PreserializedMdxRenderer = ({
   serializedContent,
   lessonId,
+  header,
   problems = [],
   withPadding = true,
   showNextPage = true,
@@ -36,6 +38,7 @@ export const PreserializedMdxRenderer = ({
         <WrapperComponent
           {...props}
           lessonId={lessonId}
+          header={header}
           problems={problems}
           withPadding={withPadding}
           showNextPage={showNextPage}

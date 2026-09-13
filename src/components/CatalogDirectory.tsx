@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { AccessOptions } from '@prisma/client'
+import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 
 type CatalogItem = {
   title: string
@@ -17,7 +18,7 @@ export function CatalogDirectory({
 }) {
   if (items.length === 0) return null
   return (
-    <section aria-label={title} className="mx-auto my-10 max-w-3xl px-4">
+    <section aria-label={title} className={`${CONTENT_COLUMN_CLASSES} mb-10`}>
       <h2 className="mb-4 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
         {title}
       </h2>

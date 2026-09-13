@@ -74,17 +74,15 @@ export default async function Lesson({
   const compiledSource = serialized && typeof serialized === 'object' && !Array.isArray(serialized) && typeof serialized.compiledSource === 'string'
     ? serialized.compiledSource : ''
   const topics = [...new Set(extractSectionsFromCompiledSource(compiledSource).map((item) => item.title))]
+  const header = <Breadcrumbs items={[
+    { title: 'Courses', href: '/courses' },
+    { title: course?.title ?? params.courseSlug, href: coursePath(params.courseSlug) },
+    { title: section?.title ?? params.sectionSlug, href: sectionPath(params.courseSlug, params.sectionSlug) },
+    { title: lesson.title, href: path },
+  ]} />
 
   return (
     <>
-      <div className="mx-auto max-w-3xl px-4 pt-8">
-        <Breadcrumbs items={[
-          { title: 'Courses', href: '/courses' },
-          { title: course?.title ?? params.courseSlug, href: coursePath(params.courseSlug) },
-          { title: section?.title ?? params.sectionSlug, href: sectionPath(params.courseSlug, params.sectionSlug) },
-          { title: lesson.title, href: path },
-        ]} />
-      </div>
       <JsonLd data={{
         '@context': 'https://schema.org', '@type': ['WebPage', 'LearningResource'],
         name: lesson.title, description: lesson.description, url: siteUrl(path),
@@ -92,11 +90,12 @@ export default async function Lesson({
         isAccessibleForFree: lesson.access === 'FREE',
       }} />
       {hasAccess ? <PreserializedMdxRenderer
+      header={header}
       serializedContent={lesson.serializedBody}
       lessonId={lesson.id}
       problems={lesson.problems as Problem[]}
       showNextPage={false}
-    /> : <LessonPreview title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
+    /> : <LessonPreview header={header} title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
       <CatalogDirectory title="Continue in this section" items={neighbors.map((item) => ({
         ...item, href: lessonPath(params.courseSlug, params.sectionSlug, item.slug),
       }))} />

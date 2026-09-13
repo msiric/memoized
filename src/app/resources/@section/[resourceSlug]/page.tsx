@@ -11,6 +11,7 @@ import { pageMetadata, resourcePath, siteUrl } from '@/lib/seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { JsonLd } from '@/components/JsonLd'
 import Link from 'next/link'
+import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 
 export async function generateMetadata({ params }: { params: { resourceSlug: string } }) {
   const resource = await getResourceMetadataBySlug(params.resourceSlug)
@@ -52,7 +53,7 @@ export default async function Resource({
 
   if (!hasAccess) {
     return (
-      <article className="mx-auto max-w-3xl px-4 py-10">
+      <article className={`${CONTENT_COLUMN_CLASSES} py-10`}>
         <Breadcrumbs items={[{ title: 'Resources', href: '/resources' }, { title: resource.title, href: resourcePath(resource.slug) }]} />
         <p className="mb-3 text-xs font-medium text-lime-700 dark:text-lime-300">Premium implementation reference</p>
         <h1 className="mb-5 break-words text-2xl font-bold text-zinc-900 dark:text-white">{resource.title}</h1>

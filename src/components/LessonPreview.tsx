@@ -1,19 +1,24 @@
 import { ProblemCard, type PracticeProblem } from './ProblemCard'
 import { PremiumCTA } from './PremiumCTA'
+import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
+import { ReactNode } from 'react'
 
 export function LessonPreview({
   title,
   description,
   topics,
   problems,
+  header,
 }: {
   title: string
   description: string | null
   topics: string[]
   problems: PracticeProblem[]
+  header?: ReactNode
 }) {
   return (
-    <article className="mx-auto max-w-3xl px-4 pb-10">
+    <article className={`${CONTENT_COLUMN_CLASSES} pb-10 pt-8`}>
+      {header}
       <p className="mb-3 text-xs font-medium text-lime-700 dark:text-lime-300">
         Lesson overview · Free interview practice
       </p>

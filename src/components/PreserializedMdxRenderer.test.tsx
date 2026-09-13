@@ -38,6 +38,7 @@ vi.mock('../../mdx-components', () => ({
   useMDXComponents: vi.fn(() => ({
     wrapper: vi.fn((props) => (
       <div data-testid="mock-wrapper" {...props}>
+        {props.header}
         <div data-testid="wrapper-content">{props.children}</div>
         <div data-testid="wrapper-lesson-id">{props.lessonId}</div>
         <div data-testid="wrapper-problems-count">{props.problems?.length || 0}</div>
@@ -120,6 +121,16 @@ describe('PreserializedMdxRenderer', () => {
   })
 
   describe('Wrapper Component Props', () => {
+    it('passes the reader header into the MDX wrapper', () => {
+      render(
+        <PreserializedMdxRenderer
+          serializedContent={mockSerializedContent}
+          header={<nav aria-label="Breadcrumb">Course / Lesson</nav>}
+        />,
+      )
+      expect(screen.getByRole('navigation', { name: 'Breadcrumb' }).closest('[data-testid="mock-wrapper"]')).not.toBeNull()
+    })
+
     it('passes lessonId to wrapper component', () => {
       render(
         <PreserializedMdxRenderer 

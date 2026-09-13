@@ -9,6 +9,7 @@ import { FaExternalLinkAlt } from 'react-icons/fa'
 import { LessonFeedback } from './LessonFeedback'
 import { NextPage } from './NextPage'
 import { PracticeProblems } from './PracticeProblems'
+import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 
 export { Button } from '@/components/Button'
 export { Code as code, CodeGroup, Pre as pre } from '@/components/Code'
@@ -76,6 +77,7 @@ export type WrapperProps = {
   lessonId?: string
   problems?: Problem[]
   children: ReactNode
+  header?: ReactNode
   withPadding?: boolean
   showNextPage?: boolean
   showFooter?: boolean
@@ -85,6 +87,7 @@ export const wrapper = function Wrapper({
   lessonId,
   problems = [],
   children,
+  header,
   withPadding = true,
   showNextPage = true,
   showFooter = true,
@@ -92,21 +95,26 @@ export const wrapper = function Wrapper({
   return (
     <article
       className={clsx(
-        'flex h-full flex-col',
-        withPadding ? 'pb-10 pt-10 md:pt-16' : 'p-1 pt-2',
+        'flex min-w-0 flex-col',
+        withPadding
+          ? header ? 'pb-10 pt-8' : 'pb-10 pt-10 md:pt-16'
+          : 'p-1 pt-2',
       )}
     >
-      <Prose className="flex-auto">{children}</Prose>
-      <div className="prose flex-auto dark:prose-invert [html_:where(&>*)]:mx-auto [html_:where(&>*)]:max-w-2xl [html_:where(&>*)]:lg:mx-[calc(50%-min(50%,theme(maxWidth.lg)))] [html_:where(&>*)]:lg:max-w-3xl">
-        <PracticeProblems problems={problems} />
-      </div>
+      {header && <div className={CONTENT_COLUMN_CLASSES}>{header}</div>}
+      <Prose>{children}</Prose>
+      {problems.length > 0 && (
+        <Prose>
+          <PracticeProblems problems={problems} />
+        </Prose>
+      )}
       {showNextPage && (
-        <div className="mx-auto mt-6 w-full max-w-2xl lg:max-w-5xl">
+        <div className={clsx(CONTENT_COLUMN_CLASSES, 'mt-6')}>
           <NextPage />
         </div>
       )}
       {showFooter && lessonId && (
-        <footer className="mx-auto mt-16 w-full max-w-2xl lg:max-w-5xl">
+        <footer className={clsx(CONTENT_COLUMN_CLASSES, 'mt-10')}>
           <LessonStatus lessonId={lessonId} />
           <LessonFeedback lessonId={lessonId} />
         </footer>

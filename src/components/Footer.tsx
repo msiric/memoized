@@ -8,6 +8,7 @@ import { useAuthStore } from '@/contexts/auth'
 import { useAccess } from '@/hooks/useAccess'
 import { usePages } from '@/hooks/usePages'
 import clsx from 'clsx'
+import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 
 function PageLink({
   label,
@@ -35,7 +36,7 @@ function PageLink({
         tabIndex={-1}
         aria-hidden="true"
         className={clsx(
-          'text-base font-semibold text-zinc-900 transition hover:text-zinc-600 dark:text-white dark:hover:text-zinc-300',
+          'max-w-full break-words text-base font-semibold text-zinc-900 transition hover:text-zinc-600 dark:text-white dark:hover:text-zinc-300',
           className,
         )}
       >
@@ -56,9 +57,9 @@ function PageNavigation() {
   }
 
   return (
-    <div className="flex items-center gap-4">
+    <nav aria-label="Page navigation" className="grid grid-cols-2 gap-6">
       {previousPage && (
-        <div className="flex flex-col items-start gap-3">
+        <div className="flex min-w-0 flex-col items-start gap-3">
           <PageLink
             label="Previous"
             page={previousPage}
@@ -68,11 +69,11 @@ function PageNavigation() {
         </div>
       )}
       {nextPage && (
-        <div className="ml-auto flex flex-col items-end gap-3">
+        <div className="col-start-2 flex min-w-0 flex-col items-end gap-3">
           <PageLink label="Next" page={nextPage} className="text-right" />
         </div>
       )}
-    </div>
+    </nav>
   )
 }
 
@@ -180,7 +181,7 @@ export type FooterProps = {
 const widthClasses: Record<FooterWidth, string> = {
   full: 'sm:px-6 lg:px-8',
   wide: 'max-w-7xl',
-  prose: 'max-w-2xl lg:max-w-5xl',
+  prose: CONTENT_COLUMN_CLASSES,
 }
 
 export function Footer({ fullWidth, width }: FooterProps) {
