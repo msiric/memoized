@@ -6,6 +6,7 @@ import { ServiceError } from '@/lib/sentry'
 
 vi.mock('next-auth')
 vi.mock('@/services/problem')
+vi.mock('@/app/api/auth/[...nextauth]/route', () => ({ authOptions: {} }))
 
 describe('markProblem', () => {
   const mockProblemProgress = {
@@ -36,6 +37,7 @@ describe('markProblem', () => {
 
     expect(result.success).toBe(true)
     expect(result.message).toBe('Practice problem marked as complete')
+    expect(result).toMatchObject({ userId: 'user_123', problemId: 'problem_123', completed: true })
     expect(markProblemProgress).toHaveBeenCalledWith({
       userId: 'user_123',
       problemId: 'problem_123',
@@ -57,6 +59,7 @@ describe('markProblem', () => {
 
     expect(result.success).toBe(true)
     expect(result.message).toBe('Practice problem marked as incomplete')
+    expect(result).toMatchObject({ userId: 'user_123', problemId: 'problem_123', completed: false })
   })
 
   it('should return error if user session is not found', async () => {
@@ -102,5 +105,26 @@ describe('markProblem', () => {
 
     expect(result.success).toBe(false)
     expect(result.message).toBe('Failed to update practice problem status')
+  })
+
+  it('rejects a switched session instead of trusting expectedUserId as authority', async () => {
+    vi.mocked(getServerSession).mockResolvedValue({ userId: 'actual-user' })
+    const result = await markProblem({ problemId: 'p1', completed: true, expectedUserId: 'old-user' })
+    expect(result.success).toBe(false)
+    expect(result.message).toContain('account changed')
+    expect(markProblemProgress).not.toHaveBeenCalled()
+  })
+
+  it('accepts the matching optional account precondition without premium checks', async () => {
+    vi.mocked(getServerSession).mockResolvedValue({ userId: 'free-user' })
+    await markProblem({ problemId: 'p1', completed: false, expectedUserId: 'free-user' })
+    expect(markProblemProgress).toHaveBeenCalledWith({ userId: 'free-user', problemId: 'p1', completed: false })
+  })
+
+  it('does not persist from a malformed session with no user ID', async () => {
+    vi.mocked(getServerSession).mockResolvedValue({ user: { name: 'Present' } })
+    const result = await markProblem({ problemId: 'p1', completed: true })
+    expect(result.success).toBe(false)
+    expect(markProblemProgress).not.toHaveBeenCalled()
   })
 })

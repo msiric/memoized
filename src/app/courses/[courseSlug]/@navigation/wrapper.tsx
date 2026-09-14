@@ -1,7 +1,6 @@
 'use client'
 
 import { Navigation } from '@/components/Navigation'
-import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import {
   Curriculum,
@@ -22,14 +21,12 @@ export type LayoutProps = {
 }
 
 export function Wrapper({
-  userData,
   fullCurriculum,
   allLessons,
   allProblems,
 }: LayoutProps) {
   const courseSlug = useCourseSlug()
 
-  const setUser = useAuthStore((state) => state.setUser)
   const updateContent = useContentStore((state) => state.updateContent)
 
   const currentCourse = fullCurriculum?.find((item) => item.slug === courseSlug)
@@ -38,13 +35,10 @@ export function Wrapper({
 
   useEffect(() => {
     updateContent(undefined, undefined, fullCurriculum, allLessons, allProblems)
-    setUser(userData ?? null)
   }, [
     updateContent,
     allLessons,
     fullCurriculum,
-    setUser,
-    userData,
     allProblems,
   ])
 

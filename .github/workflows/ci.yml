@@ -109,6 +109,27 @@ jobs:
           done
           test "$ready" = true
           node --import tsx src/scripts/check-reader-layout.ts "$RUNNER_TEMP/reader-layout/config.json"
+          node --import tsx src/scripts/check-guided-path.ts on
+          node --import tsx src/scripts/check-guided-path-state.ts on
+          kill "$server_pid"
+          if wait "$server_pid"; then
+            :
+          else
+            exit_code=$?
+            test "$exit_code" -eq 143
+          fi
+          G4_TS_FIRST_PASS_ENABLED=false node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3014 >> "$RUNNER_TEMP/reader-layout/server.log" 2>&1 &
+          server_pid=$!
+          ready=false
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:3014/courses/js-track/core-fundamentals/data-types > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = true
+          node --import tsx src/scripts/check-guided-path.ts off
         env:
           NEXT_PUBLIC_SITE_URL: https://memoized.dev
           MEILISEARCH_HOST: http://localhost:7700
@@ -117,6 +138,72 @@ jobs:
           NEXTAUTH_SECRET: dummy-nextauth-secret-for-ci
           NEXTAUTH_URL: http://127.0.0.1:3014
           SENTRY_DISABLE: true
+          G4_TS_FIRST_PASS_ENABLED: 'true'
+          READER_LAYOUT_FIXTURE: '1'
+          READER_LAYOUT_REPORT_DIR: ${{ runner.temp }}/reader-layout
+
+      # Opt in with this PR label before a new push. A second production
+      # build is deliberately not charged to every ordinary PR.
+      - name: Check pinned old reader against new writer (opt-in)
+        if: contains(github.event.pull_request.labels.*.name, 'g4-old-reader')
+        timeout-minutes: 20
+        run: |
+          set -euo pipefail
+          baseline="$RUNNER_TEMP/g4-old-reader"
+          echo "G4 compatibility: preparing pinned baseline"
+          git fetch --no-tags origin "$G4_OLD_READER_SHA"
+          git worktree add --detach "$baseline" "$G4_OLD_READER_SHA"
+          test "$(git -C "$baseline" rev-parse HEAD)" = "$G4_OLD_READER_SHA"
+          cmp yarn.lock "$baseline/yarn.lock"
+          cmp prisma/schema.prisma "$baseline/prisma/schema.prisma"
+          for name in .env .env.local .env.production .env.production.local prisma/.env; do
+            test ! -e "$baseline/$name"
+          done
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
+          echo "G4 compatibility: building pinned baseline without migrations"
+          (
+            cd "$baseline"
+            G4_TS_FIRST_PASS_ENABLED=false NEXTAUTH_URL=http://127.0.0.1:3015 \
+              node "$GITHUB_WORKSPACE/node_modules/next/dist/bin/next" build
+          ) 2>&1 | tee "$RUNNER_TEMP/reader-layout/guided-state-baseline-build.log"
+          echo "G4 compatibility: starting loopback writer and old reader"
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3014 \
+            > "$RUNNER_TEMP/reader-layout/guided-state-new-writer.log" 2>&1 &
+          new_pid=$!
+          old_pid=''
+          trap 'kill "$new_pid"; if test -n "$old_pid"; then kill "$old_pid"; fi' EXIT
+          (
+            cd "$baseline"
+            G4_TS_FIRST_PASS_ENABLED=false NEXTAUTH_URL=http://127.0.0.1:3015 \
+              exec node "$GITHUB_WORKSPACE/node_modules/next/dist/bin/next" start --hostname 127.0.0.1 --port 3015
+          ) > "$RUNNER_TEMP/reader-layout/guided-state-old-reader.log" 2>&1 &
+          old_pid=$!
+          for port in 3014 3015; do
+            ready=false
+            for attempt in $(seq 1 30); do
+              if curl --silent --fail "http://127.0.0.1:$port/courses/js-track/core-fundamentals/data-types" > /dev/null; then
+                ready=true
+                break
+              fi
+              sleep 2
+            done
+            test "$ready" = true
+          done
+          echo "G4 compatibility: checking shared synthetic progress history"
+          node --import tsx src/scripts/check-guided-path-state.ts compat
+        env:
+          G4_OLD_READER_SHA: bb5d8143d289f3e835e58628be30c4345da2db2b
+          NEXT_PUBLIC_SITE_URL: https://memoized.dev
+          MEILISEARCH_HOST: http://localhost:7700
+          MEILISEARCH_MASTER_KEY: dummy-key-for-ci-build
+          RESEND_TOKEN: re_dummy_key_for_ci_build
+          NEXTAUTH_SECRET: dummy-nextauth-secret-for-ci
+          NEXTAUTH_URL: http://127.0.0.1:3014
+          NEXT_TELEMETRY_DISABLED: '1'
+          SENTRY_DISABLE: true
+          G4_TS_FIRST_PASS_ENABLED: 'true'
+          READER_LAYOUT_FIXTURE: '1'
+          READER_LAYOUT_REPORT_DIR: ${{ runner.temp }}/reader-layout
 
       - name: Upload reader layout evidence
         if: always()

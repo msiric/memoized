@@ -7,6 +7,8 @@ import { notFound } from 'next/navigation'
 import { getSearchCatalog } from '@/services/search'
 import { CatalogDirectory } from '@/components/CatalogDirectory'
 import { lessonPath, pageMetadata, sectionPath } from '@/lib/seo'
+import { isTypescriptFirstPassEnabled } from '@/config/features'
+import { firstPassHref, isTsBasicsRoute } from '@/lib/typescript-first-pass'
 
 export async function generateStaticParams() {
   const sections = await getSectionsSlugs()
@@ -59,11 +61,15 @@ export default async function Section({
 
   const catalog = await getSearchCatalog()
   const entry = catalog.courses.find((item) => item.slug === params.courseSlug)?.sections.find((item) => item.slug === params.sectionSlug)
+  const guidedEntry = isTsBasicsRoute(params) && isTypescriptFirstPassEnabled()
   return (
     <>
       <PreserializedMdxRenderer serializedContent={section.serializedBody} />
       <CatalogDirectory title="Lessons and free practice" items={(entry?.lessons ?? []).map((item) => ({
         ...item, href: lessonPath(params.courseSlug, params.sectionSlug, item.slug),
+        ...(guidedEntry && item.slug === 'ts-basics' ? {
+          secondaryAction: { href: firstPassHref(), label: 'Open the guided first pass' },
+        } : {}),
       }))} />
     </>
   )

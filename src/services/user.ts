@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { UserWithSubscriptionsAndProgress } from '@/types'
-import { ServiceError } from '@/lib/sentry'
+import { reportErrorSafely, ServiceError } from '@/lib/sentry'
+import type { ProgressSnapshotResult } from '@/types/progress'
 import {
   buildCurriculum,
   calculateProgress,
@@ -15,7 +16,66 @@ import {
   getLessonsWithProblems,
   getLessonsWithResourcesAndProblems,
 } from './lesson'
-import { SubscriptionStatus } from '@prisma/client'
+import { Prisma, SubscriptionStatus } from '@prisma/client'
+
+type ProgressUser = {
+  id: string
+  lessonProgress: { lessonId: string }[]
+  problemProgress: { problemId: string }[]
+}
+
+async function readProgressUser<T extends ProgressUser>(
+  userId: string | undefined,
+  readUser: (userId: string) => Promise<T | null>,
+): Promise<{ user: T | null; progress: ProgressSnapshotResult }> {
+  if (userId === undefined) {
+    return {
+      user: null,
+      progress: { status: 'anonymous', userId: null, completedLessons: [], completedProblems: [] },
+    }
+  }
+  let user: T | null
+  try {
+    user = await readUser(userId)
+  } catch (error) {
+    if (!(error instanceof ServiceError) &&
+        !(error instanceof Prisma.PrismaClientKnownRequestError) &&
+        !(error instanceof Prisma.PrismaClientInitializationError)) throw error
+    reportErrorSafely(error, { userId, feature: 'progress', action: 'read-snapshot' })
+    return {
+      user: null,
+      progress: { status: 'unavailable', userId, message: 'Saved progress is unavailable. Please retry.' },
+    }
+  }
+  if (!user) {
+    reportErrorSafely('Authenticated progress user not found', { userId, feature: 'progress', action: 'read-snapshot' })
+    return {
+      user: null,
+      progress: { status: 'unavailable', userId, message: 'Your account could not be loaded. Please sign in again.' },
+    }
+  }
+  return {
+    user,
+    progress: {
+      status: 'ready',
+      userId: user.id,
+      completedLessons: user.lessonProgress.map(({ lessonId }) => lessonId),
+      completedProblems: user.problemProgress.map(({ problemId }) => problemId),
+    },
+  }
+}
+
+export const getUserProgressSnapshot = async (userId: string): Promise<ProgressSnapshotResult> => {
+  const { progress } = await readProgressUser(userId, (id) => prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      lessonProgress: { where: { completed: true }, select: { lessonId: true } },
+      problemProgress: { where: { completed: true }, select: { problemId: true } },
+    },
+  }))
+  return progress
+}
 
 export const getUserById = async (userId: string) => {
   const user = await prisma.user.findUnique({
@@ -95,8 +155,8 @@ export const getUserWithSubscriptionDetails = async (userId: string) => {
 }
 
 export const getUserProgressWithCurriculum = async (userId?: string) => {
-  const [user, { allLessons, allProblems }] = await Promise.all([
-    userId ? getUserWithSubscriptionDetails(userId) : Promise.resolve(null),
+  const [{ user, progress: progressSnapshot }, { allLessons, allProblems }] = await Promise.all([
+    readProgressUser(userId, getUserWithSubscriptionDetails),
     getLessonsAndProblems(),
   ])
 
@@ -115,6 +175,7 @@ export const getUserProgressWithCurriculum = async (userId?: string) => {
 
   return {
     user: enrichedUser,
+    progress: progressSnapshot,
     curriculum: sortedContent,
     lessons: allLessons,
     problems,
@@ -122,8 +183,8 @@ export const getUserProgressWithCurriculum = async (userId?: string) => {
 }
 
 export const getUserProgressWithResources = async (userId?: string) => {
-  const [user, { allLessons }] = await Promise.all([
-    userId ? getUserWithSubscriptionDetails(userId) : Promise.resolve(null),
+  const [{ user, progress: progressSnapshot }, { allLessons }] = await Promise.all([
+    readProgressUser(userId, getUserWithSubscriptionDetails),
     getLessonsWithResourcesAndProblems(),
   ])
 
@@ -150,13 +211,14 @@ export const getUserProgressWithResources = async (userId?: string) => {
 
   return {
     user: enrichedUser,
+    progress: progressSnapshot,
     lessons: lessons,
   }
 }
 
 export const getUserProgressWithProblems = async (userId?: string) => {
-  const [user, { allLessons }] = await Promise.all([
-    userId ? getUserWithSubscriptionDetails(userId) : Promise.resolve(null),
+  const [{ user, progress: progressSnapshot }, { allLessons }] = await Promise.all([
+    readProgressUser(userId, getUserWithSubscriptionDetails),
     getLessonsWithProblems(),
   ])
 
@@ -181,6 +243,7 @@ export const getUserProgressWithProblems = async (userId?: string) => {
 
   return {
     user: enrichedUser,
+    progress: progressSnapshot,
     problemList: sortedContent,
     lessons: allLessons,
     problems,

@@ -4,8 +4,11 @@ import path from 'node:path'
 import { PrismaClient } from '@prisma/client'
 import { serialize } from 'next-mdx-remote-client/serialize'
 import { assertCompiledMdx } from '../lib/mdx-result'
+import { createFirstPassLessonFixture } from '../test-fixtures/typescript-first-pass'
+import { assertStateFixtureDatabase, STATE_PROFILES, stateUserId, UNRELATED_LESSON, UNRELATED_PROBLEM } from './guided-path-state-fixture'
 
 async function main() {
+  assertStateFixtureDatabase()
   assert.equal(process.env.READER_LAYOUT_FIXTURE, '1', 'Explicit fixture opt-in is required')
   const target = new URL(process.env.DATABASE_URL ?? '')
   assert(['localhost', '127.0.0.1'].includes(target.hostname))
@@ -66,6 +69,85 @@ async function main() {
       }
       routes.push(href)
     }
+    const tsFixture = createFirstPassLessonFixture()
+    const tsSection = await prisma.section.create({ data: {
+      slug: 'typescript-introduction', contentId: '/js-track/typescript-introduction',
+      title: 'TypeScript Introduction', order: 2, href: '/courses/js-track/typescript-introduction',
+      body, serializedBody, courseId: course.id,
+    } })
+    const tsBody = '# TypeScript fixture\n\nG4_PRIVATE_LESSON_BODY\n\n## Classes and Inheritance\n\nPrivate fixture reference.'
+    await prisma.lesson.create({ data: {
+      id: tsFixture.id, contentId: tsFixture.contentId, slug: 'ts-basics', title: tsFixture.title,
+      description: tsFixture.description, access: 'PREMIUM', order: 1,
+      href: '/courses/js-track/typescript-introduction/ts-basics',
+      body: tsBody, serializedBody: await compile(tsBody), sectionId: tsSection.id,
+    } })
+    for (const problem of tsFixture.problems) {
+      const answer = 'Synthetic fixture feedback.\n\n```typescript\nconst example: string = "A deliberately long fixture line that must remain inside a real horizontally scrollable code panel"\n```'
+      await prisma.problem.create({ data: {
+        ...problem, answer,
+        serializedQuestion: await compile(problem.question), serializedAnswer: await compile(answer),
+      } })
+    }
+    for (const fixture of [
+      { id: 'g4-ci-free', role: 'free', marks: [0, 2] },
+      { id: 'g4-ci-premium', role: 'premium', marks: [0, 1, 2, 3] },
+      { id: 'g4-ci-revoked', role: 'revoked', marks: [1] },
+    ]) {
+      await prisma.user.create({ data: {
+        id: fixture.id, name: fixture.id, email: `${fixture.id}@example.invalid`,
+        ...(fixture.role === 'free' ? {} : { customer: { create: {
+          stripeCustomerId: `cus_${fixture.id}`,
+          subscriptions: { create: {
+            stripeSubscriptionId: `sub_${fixture.id}`, plan: 'LIFETIME',
+            status: fixture.role === 'premium' ? 'ACTIVE' : 'EXPIRED',
+            startDate: new Date(0), currentPeriodStart: new Date(0),
+          } },
+        } } }),
+      } })
+      for (const index of fixture.marks) {
+        await prisma.userProblemProgress.create({ data: {
+          userId: fixture.id, problemId: tsFixture.problems[index].id, completed: true,
+          completedAt: new Date('2026-08-01T00:00:00Z'),
+        } })
+      }
+      await prisma.userProblemProgress.create({ data: {
+        userId: fixture.id, problemId: tsFixture.problems[4].id, completed: true,
+      } })
+      await prisma.userLessonProgress.create({ data: { userId: fixture.id, lessonId: tsFixture.id, completed: true } })
+    }
+    const unrelatedLesson = await prisma.lesson.findUniqueOrThrow({ where: { contentId: UNRELATED_LESSON }, select: { id: true } })
+    const unrelatedProblem = await prisma.problem.findUniqueOrThrow({ where: { contentId: UNRELATED_PROBLEM }, select: { id: true } })
+    for (const profile of STATE_PROFILES) {
+      const id = stateUserId(profile.key)
+      await prisma.user.create({ data: {
+        id, name: id, email: `${id}@example.invalid`,
+        ...(profile.premium ? { customer: { create: {
+          stripeCustomerId: `cus_${id}`,
+          subscriptions: { create: {
+            stripeSubscriptionId: `sub_${id}`, plan: 'LIFETIME', status: 'ACTIVE',
+            startDate: new Date(0), currentPeriodStart: new Date(0),
+          } },
+        } } } : {}),
+      } })
+      for (const problemId of [
+        ...profile.marks.map(index => tsFixture.problems[index].id),
+        ...(profile.unrelated ? [unrelatedProblem.id] : []),
+      ]) {
+        await prisma.userProblemProgress.create({ data: {
+          userId: id, problemId, completed: true, completedAt: new Date('2026-08-01T00:00:00Z'),
+        } })
+      }
+      for (const lessonId of [
+        ...(profile.lesson ? [tsFixture.id] : []),
+        ...(profile.unrelated ? [unrelatedLesson.id] : []),
+      ]) {
+        await prisma.userLessonProgress.create({ data: {
+          userId: id, lessonId, completed: true, completedAt: new Date('2026-08-01T00:00:00Z'),
+        } })
+      }
+    }
+    routes.push('/courses/js-track/typescript-introduction', '/courses/js-track/typescript-introduction/ts-basics')
     for (const [index, fixture] of [
       { slug: 'intro', access: 'FREE' },
       { slug: 'layout-reference', access: 'FREE' },

@@ -1,3 +1,10 @@
+export function isCompiledMdx(value: unknown): value is { compiledSource: string } {
+  return !!value && typeof value === 'object' &&
+    (!('error' in value) || !value.error) &&
+    'compiledSource' in value && typeof value.compiledSource === 'string' &&
+    value.compiledSource.trim() !== ''
+}
+
 /** The serializer returns a failure object; it does not always throw. */
 export function assertCompiledMdx(
   value: unknown,
@@ -7,14 +14,7 @@ export function assertCompiledMdx(
     value && typeof value === 'object' && 'error' in value
       ? value.error
       : undefined
-  if (
-    failure ||
-    !value ||
-    typeof value !== 'object' ||
-    !('compiledSource' in value) ||
-    typeof value.compiledSource !== 'string' ||
-    value.compiledSource.trim() === ''
-  ) {
+  if (!isCompiledMdx(value)) {
     const message =
       failure &&
       typeof failure === 'object' &&

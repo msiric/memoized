@@ -19,10 +19,7 @@ export default async function Header({
     <Wrapper
       courseSlug={courseSlug}
       userData={data?.user}
-      completedLessons={data?.user?.lessonProgress.map((item) => item.lessonId)}
-      completedProblems={data?.user?.problemProgress.map(
-        (item) => item.problemId,
-      )}
+      progressData={data.progress}
       fullCurriculum={data?.curriculum as Curriculum[]}
       allLessons={data?.lessons as LessonConfig[]}
       allProblems={data?.problems as ProblemConfig[]}

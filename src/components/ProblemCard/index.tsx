@@ -1,17 +1,11 @@
 'use client'
 
-import { markProblem } from '@/actions/markProblem'
 import { PROBLEM_CARD } from '@/constants/designTokens'
 import { ProblemQuestion } from '../ProblemQuestion'
-import { useAuthStore } from '@/contexts/auth'
-import { useContentStore } from '@/contexts/progress'
-import { CustomError, handleError } from '@/lib/sentry'
-import { CustomResponse, handleResponse } from '@/utils/response'
+import { useProblemCompletion } from '@/hooks/useProblemCompletion'
 import { Problem, ProblemType } from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useSession } from 'next-auth/react'
-import { enqueueSnackbar } from 'notistack'
 import { ChangeEvent, useCallback, useEffect, useState } from 'react'
 import {
   HiCheck,
@@ -36,6 +30,8 @@ export type ProblemCardProps = {
   defaultExpanded?: boolean
   showLesson?: boolean
   lessonTitle?: string
+  headingLevel?: 2 | 3
+  headingId?: string
 }
 
 export const ProblemCard = ({
@@ -43,13 +39,11 @@ export const ProblemCard = ({
   defaultExpanded = false,
   showLesson = false,
   lessonTitle,
+  headingLevel = 3,
+  headingId,
 }: ProblemCardProps) => {
-  const { data: session } = useSession()
-  const openModal = useAuthStore((state) => state.openModal)
-  const completedProblems = useContentStore((state) => state.completedProblems)
-  const toggleCompletedProblem = useContentStore(
-    (state) => state.toggleCompletedProblem,
-  )
+  const { isCompleted, isPending, isDisabled, error, setCompleted } = useProblemCompletion(problem.id)
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
 
   const [stage, setStage] = useState<RevealStage>(
     defaultExpanded ? 'question' : 'collapsed',
@@ -100,20 +94,9 @@ export const ProblemCard = ({
   }, [problem.id, problem.type])
 
   const handleCheckboxChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (!session) return openModal()
     const currentlyCompleted = event.currentTarget.checked
-
-    try {
-      const response = await markProblem({
-        problemId: problem.id,
-        completed: currentlyCompleted,
-      })
-      if (!response.success) return handleError(response, enqueueSnackbar)
-      handleResponse(response as CustomResponse, enqueueSnackbar)
-      toggleCompletedProblem(problem.id)
+    if (await setCompleted(currentlyCompleted)) {
       if (currentlyCompleted) trackLearningEvent('problem_marked_complete', { content_id: problem.id, content_type: problem.type, source: 'practice' })
-    } catch (error) {
-      handleError(error as CustomError, enqueueSnackbar)
     }
   }
 
@@ -145,7 +128,14 @@ export const ProblemCard = ({
           </div>
 
           {/* Title */}
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
+          <Heading
+            id={headingId}
+            tabIndex={headingId !== undefined ? -1 : undefined}
+            className={clsx(
+              'text-sm font-semibold text-zinc-900 dark:text-white',
+              headingId !== undefined && 'scroll-mt-28',
+            )}
+          >
             {isTheory ? (
               problem.title
             ) : (
@@ -159,7 +149,7 @@ export const ProblemCard = ({
                 <HiArrowTopRightOnSquare className="h-3.5 w-3.5 opacity-50 transition-opacity group-hover:opacity-100" />
               </a>
             )}
-          </h3>
+          </Heading>
         </div>
 
         {/* Right side: Actions */}
@@ -169,23 +159,25 @@ export const ProblemCard = ({
             <div className="relative">
               <input
                 type="checkbox"
-                checked={completedProblems.has(problem.id)}
+                checked={isCompleted}
+                disabled={isDisabled}
+                aria-busy={isPending}
                 onChange={handleCheckboxChange}
                 className="peer sr-only"
               />
               <div
                 className={clsx(
                   'flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all duration-200',
-                  completedProblems.has(problem.id)
+                  isCompleted
                     ? 'border-lime-500 bg-lime-500 dark:border-lime-500 dark:bg-lime-500'
                     : 'border-zinc-300 bg-transparent hover:border-zinc-400 dark:border-zinc-600 dark:hover:border-zinc-500',
                 )}
               >
-                {completedProblems.has(problem.id) && <HiCheck className="h-3 w-3 text-white dark:text-zinc-900" />}
+                {isCompleted && <HiCheck className="h-3 w-3 text-white dark:text-zinc-900" />}
               </div>
             </div>
-            <span className={clsx(completedProblems.has(problem.id) ? 'text-lime-600 dark:text-lime-400' : 'text-zinc-500 dark:text-zinc-400')}>
-              {completedProblems.has(problem.id) ? 'Completed' : 'Mark complete'}
+            <span className={clsx(isCompleted ? 'text-lime-600 dark:text-lime-400' : 'text-zinc-500 dark:text-zinc-400')}>
+              {isCompleted ? 'Completed' : 'Mark complete'}
             </span>
           </label>
 
@@ -205,6 +197,8 @@ export const ProblemCard = ({
             </button>
           )}
         </div>
+        {isPending && <p role="status" className="mt-2 text-sm">Saving progress…</p>}
+        {error && <p role="alert" className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
       </div>
 
       {/* Expandable content */}
