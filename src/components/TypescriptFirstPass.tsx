@@ -239,7 +239,7 @@ export function TypescriptFirstPass({
       <details className="mb-6 rounded-xl border border-zinc-200 p-4 dark:border-zinc-700">
         <summary className="cursor-pointer text-sm font-semibold text-zinc-900 dark:text-white">Preparation options</summary>
         <div className="mt-3 space-y-3 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
-          <p>Already comfortable with JavaScript functions and objects? Start with a question. If TypeScript is new, use its free worked explanation to prepare, then close it and try explaining a changed example.</p>
+          <p>Already comfortable with JavaScript functions and objects? Start with a question. If TypeScript is new, start with its free worked explanation. Close it and try explaining a changed example.</p>
           <p>The <Link href={`${path.lessonHref}#setting-up-type-script`} prefetch={false} className="text-lime-700 underline dark:text-lime-300">Premium lesson walkthrough</Link> includes the complete local compiler fixture. That manual exercise is not run or counted here.</p>
           <p>Need a JavaScript refresher? Review <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions#defining_functions" target="_blank" rel="noopener noreferrer" className="text-lime-700 underline dark:text-lime-300">defining and calling functions</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects#objects_and_properties" target="_blank" rel="noopener noreferrer" className="text-lime-700 underline dark:text-lime-300">object properties</a>. Return when you can write a small function and read two object properties.</p>
         </div>

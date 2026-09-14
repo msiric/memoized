@@ -291,10 +291,15 @@ export const ProblemList = ({
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const [selectedProblem, setSelectedProblem] =
-    useState<EnrichedProblem | null>(null)
-  const [selectedProblemIndex, setSelectedProblemIndex] = useState<number>(-1)
-  const [isAnswerModalOpen, setIsAnswerModalOpen] = useState(false)
+  const [drawer, setDrawer] = useState<{
+    sequence: EnrichedProblem[]
+    selectedProblemId: string
+  } | null>(null)
+  const drawerProblems = drawer?.sequence ?? []
+  const selectedProblemIndex = drawerProblems.findIndex(
+    (problem) => problem.id === drawer?.selectedProblemId,
+  )
+  const selectedProblem = drawerProblems[selectedProblemIndex]
 
   const [problems, setProblems] = useState<EnrichedProblem[]>(filteredProblems)
   const [lessons] = useState<Partial<Lesson>[]>(initialLessons)
@@ -433,32 +438,25 @@ export const ProblemList = ({
   }
 
   const handleShowAnswer = (problem: EnrichedProblem) => {
-    const index = problems.findIndex((p) => p.id === problem.id)
-    setSelectedProblem(problem)
-    setSelectedProblemIndex(index)
-    setIsAnswerModalOpen(true)
+    // Keep this drawer's order stable while completion updates the filtered table.
+    setDrawer({ sequence: [...problems], selectedProblemId: problem.id })
   }
 
-  const handleNavigateNext = () => {
-    if (selectedProblemIndex < problems.length - 1) {
-      const nextIndex = selectedProblemIndex + 1
-      setSelectedProblemIndex(nextIndex)
-      setSelectedProblem(problems[nextIndex])
-    }
-  }
-
-  const handleNavigatePrevious = () => {
-    if (selectedProblemIndex > 0) {
-      const prevIndex = selectedProblemIndex - 1
-      setSelectedProblemIndex(prevIndex)
-      setSelectedProblem(problems[prevIndex])
-    }
+  const handleNavigate = (direction: -1 | 1) => {
+    setDrawer((current) => {
+      if (!current) return current
+      const index = current.sequence.findIndex(
+        (problem) => problem.id === current.selectedProblemId,
+      )
+      const neighbor = current.sequence[index + direction]
+      return index >= 0 && neighbor
+        ? { ...current, selectedProblemId: neighbor.id }
+        : current
+    })
   }
 
   const handleCloseSlideOver = () => {
-    setIsAnswerModalOpen(false)
-    setSelectedProblem(null)
-    setSelectedProblemIndex(-1)
+    setDrawer(null)
   }
 
   useEffect(() => {
@@ -662,15 +660,15 @@ export const ProblemList = ({
         </div>
       </div>
       <SlideOverPanel
-        isOpen={isAnswerModalOpen}
+        isOpen={!!selectedProblem}
         onClose={handleCloseSlideOver}
         title={selectedProblem?.title || 'Problem'}
-        onNext={handleNavigateNext}
-        onPrevious={handleNavigatePrevious}
-        hasNext={selectedProblemIndex < problems.length - 1}
+        onNext={() => handleNavigate(1)}
+        onPrevious={() => handleNavigate(-1)}
+        hasNext={selectedProblemIndex >= 0 && selectedProblemIndex < drawerProblems.length - 1}
         hasPrevious={selectedProblemIndex > 0}
         currentIndex={selectedProblemIndex}
-        totalCount={problems.length}
+        totalCount={drawerProblems.length}
         problemType={selectedProblem?.type as 'THEORY' | 'CODING'}
       >
         {selectedProblem && (

@@ -4,7 +4,6 @@ import { ProblemList } from './ProblemList'
 import { useContentStore } from '@/contexts/progress'
 import { useAuthStore } from '@/contexts/auth'
 import type { EnrichedProblem } from '@/types'
-import type { ReactNode } from 'react'
 
 const mocks = vi.hoisted(() => ({
   mark: vi.fn(), session: vi.fn(), track: vi.fn(), router: {},
@@ -22,10 +21,6 @@ vi.mock('@/utils/response', () => ({ handleResponse: vi.fn() }))
 vi.mock('@/components/PreserializedMdxRenderer', () => ({
   PreserializedMdxRenderer: () => <div>Free bank answer</div>,
 }))
-vi.mock('@/components/SlideOverPanel', () => ({
-  SlideOverPanel: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
-    isOpen ? <section role="dialog" aria-label="Problem details">{children}</section> : null,
-}))
 
 const problem: EnrichedProblem = {
   id: 'p1', title: 'Bank question', type: 'THEORY', difficulty: 'EASY',
@@ -35,9 +30,15 @@ const problem: EnrichedProblem = {
   serializedAnswer: { compiledSource: 'answer' },
 }
 const props = { allProblems: [problem], filteredProblems: [problem], initialLessons: [] }
-const confirmation = (completed: boolean) => ({
-  success: true, userId: 'a', problemId: 'p1', completed, message: 'Saved',
+const confirmation = (completed: boolean, problemId = 'p1') => ({
+  success: true, userId: 'a', problemId, completed, message: 'Saved',
 })
+const questions = Array.from({ length: 3 }, (_, index): EnrichedProblem => ({
+  ...problem,
+  id: `p${index + 1}`,
+  title: `Question ${index + 1}`,
+  question: `Explain question ${index + 1}.`,
+}))
 beforeEach(() => {
   vi.clearAllMocks()
   window.history.replaceState({}, '', '/problems')
@@ -51,6 +52,113 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Problem bank confirmed controls', () => {
+  it.each([2, 3])('keeps all %i incomplete questions reachable as saves remove their table rows', async (count) => {
+    const sequence = questions.slice(0, count)
+    mocks.mark.mockImplementation(async ({ problemId, completed }) => confirmation(completed, problemId))
+    render(<ProblemList allProblems={sequence} filteredProblems={sequence} initialLessons={[]} />)
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: 'incomplete' } })
+    const table = screen.getByRole('table')
+    fireEvent.click(within(table).getByRole('button', { name: sequence[0].title }))
+    const dialog = screen.getByRole('dialog')
+
+    for (const [index, question] of sequence.entries()) {
+      expect(dialog).toHaveAccessibleName(question.title)
+      expect(within(dialog).getByText(question.question)).toBeInTheDocument()
+      expect(within(dialog).queryByText('Free bank answer')).not.toBeInTheDocument()
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
+      await within(dialog).findByText('Free bank answer')
+      fireEvent.click(within(dialog).getByRole('checkbox'))
+      await waitFor(() => expect(within(table).queryByRole('button', { name: question.title })).not.toBeInTheDocument())
+
+      expect(dialog).toHaveAccessibleName(question.title)
+      expect(within(dialog).getByText('Free bank answer')).toBeInTheDocument()
+      expect(within(dialog).getByRole('checkbox')).toBeChecked()
+      expect(within(dialog).getByText(`${index + 1}/${count}`)).toBeInTheDocument()
+      const next = within(dialog).getByRole('button', { name: 'Next problem (→)' })
+      if (index < count - 1) {
+        expect(next).toBeEnabled()
+        fireEvent.click(next)
+      } else {
+        expect(next).toBeDisabled()
+      }
+    }
+
+    expect(within(table).getByText('No problems found.')).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Previous problem (←)' }))
+    expect(dialog).toHaveAccessibleName(sequence[count - 2].title)
+    expect(within(dialog).getByRole('checkbox')).toBeChecked()
+    expect(mocks.mark).toHaveBeenCalledTimes(count)
+  })
+
+  it('preserves both neighbors when the middle question leaves the incomplete table', async () => {
+    mocks.mark.mockResolvedValue(confirmation(true, 'p2'))
+    render(<ProblemList allProblems={questions} filteredProblems={questions} initialLessons={[]} />)
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: 'incomplete' } })
+    fireEvent.click(screen.getByRole('button', { name: questions[1].title }))
+    const dialog = screen.getByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('checkbox'))
+    await waitFor(() => expect(within(screen.getByRole('table')).queryByRole('button', { name: questions[1].title })).not.toBeInTheDocument())
+
+    expect(within(dialog).getByText('2/3')).toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'ArrowRight' })
+    expect(dialog).toHaveAccessibleName(questions[2].title)
+    fireEvent.keyDown(document, { key: 'ArrowLeft' })
+    expect(dialog).toHaveAccessibleName(questions[1].title)
+    fireEvent.keyDown(document, { key: 'ArrowLeft' })
+    expect(dialog).toHaveAccessibleName(questions[0].title)
+    expect(within(dialog).getByRole('button', { name: 'Previous problem (←)' })).toBeDisabled()
+  })
+
+  it('keeps an open sequence stable through sort/filter changes and captures the new order on reopen', async () => {
+    render(<ProblemList allProblems={questions} filteredProblems={questions} initialLessons={[]} />)
+    const table = screen.getByRole('table')
+    fireEvent.click(within(table).getByRole('button', { name: 'Title' }))
+    fireEvent.click(within(table).getByRole('button', { name: 'Title' }))
+    fireEvent.click(within(table).getByRole('button', { name: questions[2].title }))
+    const dialog = screen.getByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
+    await within(dialog).findByText('Free bank answer')
+
+    fireEvent.click(within(table).getByRole('button', { name: 'Title' }))
+    fireEvent.change(screen.getByPlaceholderText('Search problems...'), { target: { value: questions[0].title } })
+    expect(within(table).queryByRole('button', { name: questions[2].title })).not.toBeInTheDocument()
+    expect(dialog).toHaveAccessibleName(questions[2].title)
+    expect(within(dialog).getByText('Free bank answer')).toBeInTheDocument()
+    expect(within(dialog).getByText('1/3')).toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Next problem (→)' }))
+    expect(dialog).toHaveAccessibleName(questions[1].title)
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Next problem (→)' }))
+    expect(dialog).toHaveAccessibleName(questions[0].title)
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close (Esc)' }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    fireEvent.click(within(table).getByRole('button', { name: questions[0].title }))
+    const reopened = screen.getByRole('dialog')
+    expect(within(reopened).getByText('1/1')).toBeInTheDocument()
+    expect(within(reopened).getByRole('button', { name: 'Next problem (→)' })).toBeDisabled()
+    expect(within(reopened).getByRole('button', { name: 'Previous problem (←)' })).toBeDisabled()
+    expect(within(reopened).queryByText('Free bank answer')).not.toBeInTheDocument()
+  })
+
+  it('keeps the next completed question reachable after unmarking the active question', async () => {
+    const sequence = questions.slice(0, 2)
+    useContentStore.getState().hydrateProgressSnapshot({
+      userId: 'a', completedLessons: [], completedProblems: sequence.map(({ id }) => id),
+    })
+    mocks.mark.mockResolvedValue(confirmation(false))
+    render(<ProblemList allProblems={sequence} filteredProblems={sequence} initialLessons={[]} />)
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: 'completed' } })
+    fireEvent.click(screen.getByRole('button', { name: sequence[0].title }))
+    const dialog = screen.getByRole('dialog')
+    fireEvent.click(within(dialog).getByRole('checkbox'))
+    await waitFor(() => expect(within(screen.getByRole('table')).queryByRole('button', { name: sequence[0].title })).not.toBeInTheDocument())
+    expect(dialog).toHaveAccessibleName(sequence[0].title)
+    expect(within(dialog).getByRole('checkbox')).not.toBeChecked()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Next problem (→)' }))
+    expect(dialog).toHaveAccessibleName(sequence[1].title)
+    expect(within(dialog).getByRole('checkbox')).toBeChecked()
+  })
+
   it('shares pending state between row and drawer, preserves disclosure, and saves just once', async () => {
     let resolve!: (value: ReturnType<typeof confirmation>) => void
     mocks.mark.mockReturnValue(new Promise((done) => { resolve = done }))
