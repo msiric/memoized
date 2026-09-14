@@ -13,11 +13,13 @@ const mocks = vi.hoisted(() => ({
   unavailable: vi.fn(),
   refresh: vi.fn(),
   report: vi.fn(),
+  setOwner: vi.fn(),
   session: { data: { userId: 'user-a' }, status: 'authenticated' },
   store: {
     progressOwnerId: 'user-a',
     progressStatus: 'ready',
     progressRevision: 0,
+    progressEpoch: 0,
     completedProblems: new Set<string>(),
   },
 }))
@@ -34,7 +36,7 @@ vi.mock('@/contexts/progress', () => ({
       ...mocks.store, hydrateProgressSnapshot: mocks.hydrate, hydrateProgressFromHeader: mocks.hydrateFromHeader,
       setProgressUnavailable: mocks.unavailable,
     }),
-    { getState: () => mocks.store },
+    { getState: () => ({ ...mocks.store, setProgressOwner: mocks.setOwner }) },
   ),
 }))
 vi.mock('./Button', () => ({
@@ -67,6 +69,7 @@ describe('TypeScript guided view', () => {
     mocks.store.progressOwnerId = 'user-a'
     mocks.store.progressStatus = 'ready'
     mocks.store.progressRevision = 0
+    mocks.store.progressEpoch = 0
     mocks.store.completedProblems = new Set()
     mocks.snapshot.mockResolvedValue(initialProgress)
     window.history.replaceState(null, '', firstPassHref())

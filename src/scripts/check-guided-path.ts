@@ -31,6 +31,32 @@ async function navigate(page: Page, url: string) {
   throw new Error('Repeated rate limiting after honoring Retry-After')
 }
 
+async function checkGuidedGeometry(page: Page) {
+  const metrics = await page.evaluate(() => {
+    const main = document.querySelector('main')
+    const article = main?.querySelector('[data-guided-path]')
+    const footer = main?.parentElement?.querySelector(':scope > footer')
+    const title = article?.querySelector('h1')
+    const breadcrumb = article?.querySelector('[aria-label="Breadcrumb"]')
+    const navigation = article?.querySelector('[aria-label="Question navigation"]')
+    return [main, article, footer, title, breadcrumb, navigation].map(element => {
+      if (!element) return null
+      const box = element.getBoundingClientRect()
+      return { x: box.x, top: box.top + scrollY, bottom: box.bottom + scrollY }
+    })
+  })
+  const [main, article, footer, title, breadcrumb, navigation] = metrics
+  assert(main && article && footer && title && breadcrumb && navigation, 'Missing guided reader geometry')
+  assert(main.bottom >= article.bottom - 1, 'Guided article overflows main')
+  assert(footer.top >= main.bottom - 1, 'Footer overlaps guided content')
+  assert(navigation.bottom <= article.bottom, 'Question navigation escapes its article')
+  assert(Math.abs(footer.x - title.x) <= 1, 'Guided title and footer columns differ')
+  assert(Math.abs(breadcrumb.x - title.x) <= 1, 'Guided breadcrumb and title columns differ')
+  const gap = title.top - breadcrumb.bottom
+  assert(gap >= 16 && gap <= 72, `Guided breadcrumb/title gap: ${gap}px`)
+  return metrics
+}
+
 async function main() {
   const mode = process.argv[2]
   assert(mode === 'on' || mode === 'off')
@@ -126,12 +152,14 @@ async function main() {
           await page.waitForFunction(() => document.body.innerText.includes('Synthetic fixture feedback.'))
         } else {
           await page.waitForSelector('[data-guided-path="typescript-first-pass"]')
+          await checkGuidedGeometry(page)
           const expected = profile.id ? `${profile.count}/4 marked complete` : 'Sign in to save your marks'
           await page.waitForFunction(value => document.querySelector('[data-path-count]')?.textContent?.trim() === value, {}, expected)
           assert.equal(await page.$eval('#guided-question-title', element => element.textContent), TS_FIRST_PASS_STEPS[profile.first].title)
           assert(!(await page.content()).includes('G4_PRIVATE_LESSON_BODY'), 'Guided response must not project the paid body')
           await clickButton(page, 'Reveal answer')
           await page.waitForFunction(() => document.body.innerText.includes('Synthetic fixture feedback.'))
+          await checkGuidedGeometry(page)
           phase = 'revealed'
           if (width === 320) {
             phase = 'failed-save'

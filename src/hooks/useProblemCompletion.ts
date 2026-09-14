@@ -25,13 +25,19 @@ export function useProgressInitialization(
   userData: UserWithSubscriptionsAndProgress | null | undefined,
 ) {
   const userId = useProgressSession()
+  const sourceEpoch = useRef<{ progress: ProgressSnapshotResult; epoch: number } | null>(null)
   useEffect(() => {
     if (userId === undefined) return
-    if (!progress || progress.userId !== userId) {
+    const state = useContentStore.getState()
+    // A mounted header's undated payload must not survive an account round trip.
+    if (progress && sourceEpoch.current?.progress !== progress) {
+      sourceEpoch.current = { progress, epoch: state.progressEpoch }
+    }
+    if (!progress || progress.userId !== userId || sourceEpoch.current?.epoch !== state.progressEpoch) {
       useAuthStore.getState().setUser(null)
       return
     }
-    useContentStore.getState().hydrateProgressFromHeader(progress)
+    state.hydrateProgressFromHeader(progress)
     useAuthStore.getState().setUser(progress.status === 'ready' ? userData ?? null : null)
   }, [progress, userData, userId])
 }

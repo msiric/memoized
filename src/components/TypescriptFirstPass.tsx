@@ -60,6 +60,8 @@ export function TypescriptFirstPass({
   sessionRef.current = session
   const refreshInFlight = useRef<{ owner: string; epoch: number } | null>(null)
   const requestEpoch = useRef(0)
+  const initializedOwner = useRef<string | null | undefined>(undefined)
+  const initialOwnership = useRef<{ owner: string | null; epoch: number } | null>(null)
   const activeRef = useRef(activeStep)
   activeRef.current = activeStep
   const mounted = useRef(true)
@@ -84,16 +86,11 @@ export function TypescriptFirstPass({
   const initialDefaultRef = useRef(initialDefault)
 
   useEffect(() => {
-    if (sessionStatus === 'loading') return
-    const currentOwner = sessionStatus === 'authenticated' ? session?.userId : null
-    if (initialProgress.userId === currentOwner) hydrateFromHeader(initialProgress)
-  }, [hydrateFromHeader, initialProgress, session?.userId, sessionStatus])
-
-  useEffect(() => {
     mounted.current = true
     return () => {
       mounted.current = false
-      requestEpoch.current++
+      refreshInFlight.current = null
+      initializedOwner.current = undefined
       if (focusRequest.current !== null) cancelAnimationFrame(focusRequest.current)
     }
   }, [])
@@ -180,22 +177,30 @@ export function TypescriptFirstPass({
     }
   }, [hydrate, unavailable])
 
-  const initializedOwner = useRef<string | null | undefined>(undefined)
   useEffect(() => {
     if (sessionStatus === 'loading') return
-    const currentOwner = sessionStatus === 'authenticated' ? session?.userId : null
+    const currentOwner = sessionStatus === 'authenticated' ? session?.userId ?? null : null
     if (initializedOwner.current === currentOwner) return
     initializedOwner.current = currentOwner
     requestEpoch.current++
+    useContentStore.getState().setProgressOwner(currentOwner)
+    const epoch = useContentStore.getState().progressEpoch
+    if (!initialOwnership.current) initialOwnership.current = { owner: currentOwner, epoch }
+    setLoadError(null)
     if (!currentOwner) {
       refreshInFlight.current = null
       setRefreshing(false)
       hydrate({ userId: null, completedLessons: [], completedProblems: [] })
       setLoadError(null)
-    } else if (initialProgress.status !== 'ready' || initialProgress.userId !== currentOwner) {
+    } else {
+      // An RSC bootstrap is valid only for the ownership epoch that received it.
+      const canBootstrap = initialOwnership.current.owner === currentOwner &&
+        initialOwnership.current.epoch === epoch && initialProgress.userId === currentOwner
+      if (canBootstrap) hydrateFromHeader(initialProgress)
+      if (canBootstrap && initialProgress.status === 'ready') return
       void refreshProgress()
     }
-  }, [hydrate, initialProgress, refreshProgress, session?.userId, sessionStatus])
+  }, [hydrate, hydrateFromHeader, initialProgress, refreshProgress, session?.userId, sessionStatus])
 
   useEffect(() => {
     const onFocus = () => { if (document.visibilityState === 'visible') void refreshProgress() }

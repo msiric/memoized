@@ -151,6 +151,21 @@ describe('useProblemCompletion', () => {
 })
 
 describe('full-user header initialization', () => {
+  it('does not reuse a mounted header snapshot after an account round trip', () => {
+    const original = ready('a', ['old-mark'])
+    const { rerender } = renderHook(({ progress }) => useProgressInitialization(progress, null), {
+      initialProps: { progress: original },
+    })
+    session('b')
+    rerender({ progress: original })
+    session('a')
+    rerender({ progress: original })
+    expect(store().progressStatus).toBe('loading')
+    expect(store().completedProblems.size).toBe(0)
+    rerender({ progress: ready('a', ['current-mark']) })
+    expect(store().completedProblems).toEqual(new Set(['current-mark']))
+  })
+
   it('waits for known session ownership and ignores a stale other-user RSC payload', () => {
     session(undefined)
     useContentStore.setState(useContentStore.getInitialState(), true)
