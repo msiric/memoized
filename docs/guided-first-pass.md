@@ -32,6 +32,20 @@ The normal lesson URL is unchanged. An inactive flag returns the normal reader
 and free questions. The previous app also ignores the query and retains the
 fragment, so rollback does not introduce a new missing pathname.
 
+## Rendering policy
+
+The lesson route explicitly uses `dynamic = 'force-dynamic'` and does not export
+`generateStaticParams`. Its response depends on the current session and query,
+so it is rendered at request time rather than enumerated for static generation.
+This policy applies to the lesson route template, not to the whole site.
+
+Do not rely on the position of `getServerSession` or a later query-parameter read
+to stop static generation after database work has already begun. Authentication,
+access checks and question progress retain their existing runtime behavior.
+The sitemap still derives lesson URLs from the catalog independently of static
+path generation. Public metadata caching, if added later, needs its own explicit
+review rather than weakening this personalized response boundary.
+
 ## Data and progress
 
 The server resolves canonical content IDs to existing row IDs and validates
