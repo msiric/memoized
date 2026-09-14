@@ -7,13 +7,14 @@ import type { EnrichedProblem } from '@/types'
 
 const mocks = vi.hoisted(() => ({
   mark: vi.fn(), session: vi.fn(), track: vi.fn(), router: {},
+  searchParams: null as URLSearchParams | null,
 }))
 vi.mock('@/actions/markProblem', () => ({ markProblem: mocks.mark }))
 vi.mock('next-auth/react', () => ({ useSession: mocks.session }))
 vi.mock('next/navigation', () => ({
   useRouter: () => mocks.router,
   usePathname: () => '/problems',
-  useSearchParams: () => null,
+  useSearchParams: () => mocks.searchParams,
 }))
 vi.mock('@/lib/analytics', () => ({ trackLearningEvent: mocks.track }))
 vi.mock('@/lib/sentry', () => ({ handleError: vi.fn() }))
@@ -41,6 +42,7 @@ const questions = Array.from({ length: 3 }, (_, index): EnrichedProblem => ({
 }))
 beforeEach(() => {
   vi.clearAllMocks()
+  mocks.searchParams = null
   window.history.replaceState({}, '', '/problems')
   useContentStore.setState(useContentStore.getInitialState(), true)
   useAuthStore.setState(useAuthStore.getInitialState(), true)
@@ -52,6 +54,43 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Problem bank confirmed controls', () => {
+  it('keeps the router filter URL when a confirmed action reapplies its canonical URL', async () => {
+    const nativeReplace = window.history.replaceState.bind(window.history)
+    nativeReplace({ __NA: true }, '', '/problems')
+    let canonicalUrl = '/problems'
+    const replace = vi.spyOn(window.history, 'replaceState').mockImplementation((data: unknown, title, url) => {
+      const internal = data !== null && typeof data === 'object' &&
+        (('__NA' in data && data.__NA) || ('_N' in data && data._N))
+      if (!internal && url) canonicalUrl = String(url)
+      nativeReplace({ __NA: true }, title, url)
+    })
+    try {
+      mocks.mark.mockImplementation(async ({ completed }) => {
+        nativeReplace({ __NA: true }, '', canonicalUrl)
+        return confirmation(completed)
+      })
+      render(<ProblemList {...props} />)
+      fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: 'incomplete' } })
+      expect(canonicalUrl).toBe('/problems?status=incomplete')
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Mark "Bank question" complete' }))
+      await waitFor(() => expect(within(screen.getByRole('table')).queryByRole('button', { name: problem.title })).not.toBeInTheDocument())
+      expect(window.location.search).toBe('?status=incomplete')
+      fireEvent.click(screen.getByRole('button', { name: 'Reset Filters' }))
+      expect(canonicalUrl).toBe('/problems')
+      expect(replace).toHaveBeenLastCalledWith(null, '', '/problems')
+    } finally { replace.mockRestore() }
+  })
+
+  it('does not rewrite an already-matching URL during filter initialization', () => {
+    mocks.searchParams = new URLSearchParams('status=incomplete')
+    window.history.replaceState({ __NA: true }, '', '/problems?status=incomplete')
+    const replace = vi.spyOn(window.history, 'replaceState')
+    try {
+      render(<ProblemList {...props} />)
+      expect(replace).not.toHaveBeenCalled()
+    } finally { replace.mockRestore() }
+  })
+
   it.each([2, 3])('keeps all %i incomplete questions reachable as saves remove their table rows', async (count) => {
     const sequence = questions.slice(0, count)
     mocks.mark.mockImplementation(async ({ problemId, completed }) => confirmation(completed, problemId))

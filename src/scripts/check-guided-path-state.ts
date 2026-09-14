@@ -733,6 +733,7 @@ async function main() {
         }, {}, expectedTitles)
         const sequence = await reader.page.$$eval('table tbody tr button', buttons =>
           buttons.map(button => button.textContent?.trim() ?? ''))
+        const filteredUrl = reader.page.url()
         assert.equal(new URL(reader.page.url()).searchParams.get('status'), 'incomplete')
         await waitChecked(reader.page, tableCheckbox(sequence[0]), false)
         await clickText(reader.page, 'table tbody button', sequence[0])
@@ -751,6 +752,7 @@ async function main() {
           const beforeSave = await snapshot(prisma, before.userIds)
           reader.phase(`filtered-question-${index + 1}-mark-with-drawer-open`)
           await save(reader, '[role="dialog"] label', dialogBox, profile.key, problemIndex, true)
+          assert.equal(reader.page.url(), filteredUrl, 'A confirmed save must preserve the selected filter URL')
           await bankTitles(reader.page, sequence.slice(index + 1))
           assert.equal(await dialog.evaluate(element =>
             element.isConnected && document.querySelector('[role="dialog"]') === element), true,
@@ -781,6 +783,7 @@ async function main() {
         await waitChecked(reader.page, dialogBox, false)
         await reader.capture('reopened-current-single-question-sequence')
         reader.phase('filtered-bank-reload-confirms-persistence')
+        assert.equal(reader.page.url(), filteredUrl)
         await reader.go(reader.page.url(), true)
         await bankTitles(reader.page, sequence.slice(-1))
         await waitChecked(reader.page, tableCheckbox(sequence.at(-1)!), false)

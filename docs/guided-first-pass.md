@@ -86,7 +86,8 @@ against the same actual production build and disposable `memoized_ci` database:
   same drawer, original sequence/count, and revealed feedback. Next must open
   the original next question without skipping it or becoming disabled.
   Closing/reopening must use the newly filtered one-question sequence; reload
-  confirms the saved marks.
+  confirms the saved marks and filter URL. Public history updates let Next
+  manage its own history markers so a save cannot restore a stale unfiltered URL.
 - One actual owner's ACTIVE → EXPIRED subscription transition with identical
   read-only progress history and normal-reader paid-body protection (768px).
 - A real successful old-owner save, committed in PostgreSQL while CDP holds

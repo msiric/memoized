@@ -426,15 +426,7 @@ export const ProblemList = ({
     setSortColumn(null)
     setSortOrder(null)
 
-    window.history.replaceState(
-      {
-        ...window.history.state,
-        as: pathname,
-        url: pathname,
-      },
-      '',
-      pathname,
-    )
+    window.history.replaceState(null, '', pathname)
   }
 
   const handleShowAnswer = (problem: EnrichedProblem) => {
@@ -480,15 +472,10 @@ export const ProblemList = ({
     const queryString = query.toString()
     const newUrl = queryString ? `${pathname}?${queryString}` : pathname
 
-    window.history.replaceState(
-      {
-        ...window.history.state,
-        as: newUrl,
-        url: newUrl,
-      },
-      '',
-      newUrl,
-    )
+    if (`${window.location.pathname}${window.location.search}` !== newUrl) {
+      // Next copies its own history markers; supplying them bypasses router sync.
+      window.history.replaceState(null, '', newUrl)
+    }
   }, [
     search,
     difficulty,
