@@ -73,7 +73,7 @@ scrolling, public projection, malformed queries and disabled fallback.
 `node --import tsx src/scripts/check-guided-path-state.ts on` adds **14 cases**
 against the same actual production build and disposable `memoized_ci` database:
 
-- Empty/full free, empty premium, optional-only and lesson-only histories (five
+- Empty/full free, empty premium, optional-only free and lesson-only premium histories (five
   cases across 320/375/768/1024px). P5 and lesson self-reports remain `0/4`.
 - Real hash-only entry, conflicting step/hash, Next, browser Back/Forward,
   reload and focus refresh after an external fixture mark (320 and 768px).

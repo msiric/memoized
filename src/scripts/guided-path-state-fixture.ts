@@ -9,7 +9,7 @@ export const STATE_PROFILES = [
   { key: 'full-free', premium: false, marks: [0, 1, 2, 3], lesson: false, unrelated: false },
   { key: 'empty-premium', premium: true, marks: [], lesson: false, unrelated: false },
   { key: 'optional-only', premium: false, marks: [4], lesson: false, unrelated: false },
-  { key: 'lesson-only', premium: false, marks: [], lesson: true, unrelated: false },
+  { key: 'lesson-only', premium: true, marks: [], lesson: true, unrelated: false },
   { key: 'shared', premium: false, marks: [0, 4], lesson: true, unrelated: true },
   { key: 'filtered-bank-three', premium: false, marks: [3, 4], lesson: true, unrelated: true },
   { key: 'filtered-bank-two', premium: false, marks: [2, 3, 4], lesson: true, unrelated: true },

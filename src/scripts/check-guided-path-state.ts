@@ -211,7 +211,15 @@ class Reader {
     if (target.origin === this.base) await pace(target)
     let interceptResponse = false
     if (target.origin === this.base && event.request.method === 'POST' && event.request.postData?.includes('"problemId"')) {
-      const [mark] = JSON.parse(event.request.postData) as Mark[]
+      const payload: unknown = JSON.parse(event.request.postData)
+      assert(Array.isArray(payload) && payload.length === 1, 'Expected one explicit save argument')
+      const value: unknown = payload[0]
+      assert(value !== null && typeof value === 'object' &&
+        'problemId' in value && typeof value.problemId === 'string' &&
+        'completed' in value && typeof value.completed === 'boolean' &&
+        'expectedUserId' in value && typeof value.expectedUserId === 'string',
+      'Every write must contain an explicit desired value and owner')
+      const mark: Mark = { problemId: value.problemId, completed: value.completed, expectedUserId: value.expectedUserId }
       assert(fixture.problems.some(problem => problem.id === mark.problemId))
       assert.equal(typeof mark.completed, 'boolean', 'Every write must express the desired value')
       assert(ownedUsers.includes(mark.expectedUserId), 'Every new-writer save must specify its exact synthetic owner')
@@ -749,7 +757,6 @@ async function main() {
         await reader.page.waitForSelector(`#${TS_FIRST_PASS_STEPS[0].id}`)
         assert.equal(await reader.page.$('[data-guided-path]'), null)
         assert(!(await reader.page.content()).includes(privateMarker), 'Expired entitlement must protect normal reader body and payload')
-        await clickText(reader.page, `#${TS_FIRST_PASS_STEPS[0].id} button`, 'Expand')
         await reader.reveal(`#${TS_FIRST_PASS_STEPS[0].id}`)
         await reader.capture('expired-normal-public-feedback')
         reader.phase('expired-identical-progress-history')
@@ -802,7 +809,7 @@ async function main() {
         await reader.question(2)
         await reader.capture('new-owner-before-old-response')
         await reader.page.evaluate(() => {
-          const state = globalThis as unknown as { g4Counts: string[]; g4Observer: MutationObserver }
+          const state = window as typeof window & { g4Counts: string[]; g4Observer: MutationObserver }
           state.g4Counts = [document.querySelector('[data-path-count]')?.textContent?.trim() ?? 'missing']
           state.g4Observer = new MutationObserver(() => {
             state.g4Counts.push(document.querySelector('[data-path-count]')?.textContent?.trim() ?? 'missing')
@@ -824,7 +831,7 @@ async function main() {
         await reader.count(3)
         await waitChecked(reader.page, `#${step.id} input`, false)
         const counts = await reader.page.evaluate(() => {
-          const state = globalThis as unknown as { g4Counts: string[]; g4Observer: MutationObserver }
+          const state = window as typeof window & { g4Counts: string[]; g4Observer: MutationObserver }
           state.g4Observer.disconnect()
           return state.g4Counts
         })
