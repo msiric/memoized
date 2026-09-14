@@ -110,6 +110,7 @@ export const getLessonBySlug = async (
     },
     select: {
       id: true,
+      contentId: true,
       title: true,
       description: true,
       serializedBody: true,
@@ -120,6 +121,7 @@ export const getLessonBySlug = async (
         },
         select: {
           id: true,
+          contentId: true,
           difficulty: true,
           href: true,
           link: true,

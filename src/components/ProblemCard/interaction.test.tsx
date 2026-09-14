@@ -5,36 +5,20 @@ import {
   render,
   screen,
   waitFor,
+  act,
 } from '@testing-library/react'
 import { ProblemCard, type PracticeProblem } from './index'
+import { useContentStore } from '@/contexts/progress'
+import { useAuthStore } from '@/contexts/auth'
 
 const mocks = vi.hoisted(() => ({
   track: vi.fn(),
   session: vi.fn(),
   mark: vi.fn(),
-  openModal: vi.fn(),
-  toggle: vi.fn(),
 }))
 vi.mock('@/lib/analytics', () => ({ trackLearningEvent: mocks.track }))
 vi.mock('next-auth/react', () => ({ useSession: mocks.session }))
 vi.mock('@/actions/markProblem', () => ({ markProblem: mocks.mark }))
-vi.mock('@/contexts/auth', () => ({
-  useAuthStore: (
-    select: (state: { openModal: typeof mocks.openModal }) => unknown,
-  ) => select({ openModal: mocks.openModal }),
-}))
-vi.mock('@/contexts/progress', () => ({
-  useContentStore: (
-    select: (state: {
-      completedProblems: Set<string>
-      toggleCompletedProblem: typeof mocks.toggle
-    }) => unknown,
-  ) =>
-    select({
-      completedProblems: new Set<string>(),
-      toggleCompletedProblem: mocks.toggle,
-    }),
-}))
 vi.mock('@/utils/response', () => ({ handleResponse: vi.fn() }))
 vi.mock('@/lib/sentry', () => ({ handleError: vi.fn() }))
 vi.mock('@/components/PreserializedMdxRenderer', () => ({
@@ -54,9 +38,21 @@ const problem: PracticeProblem = {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mocks.session.mockReturnValue({ data: null })
+  useContentStore.setState(useContentStore.getInitialState(), true)
+  useAuthStore.setState(useAuthStore.getInitialState(), true)
+  mocks.session.mockReturnValue({ data: null, status: 'unauthenticated' })
 })
 afterEach(cleanup)
+
+function signIn() {
+  mocks.session.mockReturnValue({ data: { userId: 'test-user' }, status: 'authenticated' })
+  useContentStore.getState().hydrateProgressSnapshot({
+    userId: 'test-user', completedLessons: ['other-lesson'], completedProblems: ['optional'],
+  })
+}
+function confirmation(completed: boolean) {
+  return { success: true, userId: 'test-user', problemId: problem.id, completed, message: 'Saved' }
+}
 
 describe('Explicit practice actions', () => {
   it('keeps existing answer reveals without adding unfinished attempt controls', () => {
@@ -73,21 +69,23 @@ describe('Explicit practice actions', () => {
   it('does not report completion for an anonymous click or a failed save', async () => {
     const { rerender } = render(<ProblemCard problem={problem} />)
     fireEvent.click(screen.getByRole('checkbox'))
-    expect(mocks.openModal).toHaveBeenCalled()
+    expect(useAuthStore.getState().isModalOpen).toBe(true)
     expect(mocks.mark).not.toHaveBeenCalled()
-    mocks.session.mockReturnValue({ data: { userId: 'test-user' } })
-    mocks.mark.mockResolvedValue({ success: false })
+    act(signIn)
+    mocks.mark.mockResolvedValue({ success: false, message: 'Save failed' })
     rerender(<ProblemCard problem={problem} />)
     fireEvent.click(screen.getByRole('checkbox'))
     await waitFor(() => expect(mocks.mark).toHaveBeenCalled())
+    expect(await screen.findByRole('alert')).toHaveTextContent('Save failed')
+    expect(screen.getByRole('checkbox')).not.toBeChecked()
     expect(mocks.track).not.toHaveBeenCalledWith(
       'problem_marked_complete',
       expect.anything(),
     )
   })
   it('reports self-marked completion only after a successful save', async () => {
-    mocks.session.mockReturnValue({ data: { userId: 'test-user' } })
-    mocks.mark.mockResolvedValue({ success: true })
+    signIn()
+    mocks.mark.mockResolvedValue(confirmation(true))
     render(<ProblemCard problem={problem} />)
     fireEvent.click(screen.getByRole('checkbox'))
     await waitFor(() =>
@@ -97,5 +95,58 @@ describe('Explicit practice actions', () => {
         source: 'practice',
       }),
     )
+  })
+
+  it('retains the revealed answer, focus, and last confirmed mark during duplicate clicks and saves', async () => {
+    signIn()
+    let resolve!: (value: ReturnType<typeof confirmation>) => void
+    mocks.mark.mockReturnValue(new Promise((done) => { resolve = done }))
+    render(<ProblemCard problem={problem} defaultExpanded headingLevel={2} headingId="active-question" />)
+    const heading = screen.getByRole('heading', { level: 2, name: problem.title })
+    expect(heading).toHaveAttribute('tabindex', '-1')
+    expect(heading).toHaveAttribute('id', 'active-question')
+    expect(heading).toHaveClass('scroll-mt-28')
+    heading.focus()
+    expect(heading).toHaveFocus()
+    fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
+    await screen.findByText('Free answer body')
+    const checkbox = screen.getByRole('checkbox')
+    fireEvent.click(checkbox)
+    fireEvent.click(checkbox)
+    expect(mocks.mark).toHaveBeenCalledTimes(1)
+    expect(checkbox).toBeDisabled()
+    expect(checkbox).not.toBeChecked()
+    expect(screen.getByRole('status')).toHaveTextContent('Saving')
+    await act(async () => { resolve(confirmation(true)) })
+    expect(checkbox).toBeChecked()
+    expect(checkbox).not.toBeDisabled()
+    expect(screen.getByText('Free answer body')).toBeInTheDocument()
+    expect(heading).toHaveFocus()
+    expect(useContentStore.getState().completedProblems).toEqual(new Set(['optional', problem.id]))
+    expect(useContentStore.getState().completedLessons).toEqual(new Set(['other-lesson']))
+  })
+
+  it('keeps the ordinary h3 title non-focusable by default', () => {
+    render(<ProblemCard problem={problem} />)
+    const heading = screen.getByRole('heading', { level: 3, name: problem.title })
+    expect(heading).not.toHaveAttribute('tabindex')
+    expect(heading).not.toHaveAttribute('id')
+    expect(heading).not.toHaveClass('scroll-mt-28')
+  })
+
+  it('unmarks explicitly even if an old header returns a completed snapshot', async () => {
+    signIn()
+    useContentStore.getState().toggleCompletedProblem(problem.id)
+    mocks.mark.mockResolvedValue(confirmation(false))
+    render(<ProblemCard problem={problem} />)
+    fireEvent.click(screen.getByRole('checkbox'))
+    await waitFor(() => expect(screen.getByRole('checkbox')).not.toBeChecked())
+    act(() => useContentStore.getState().hydrateProgressFromHeader({
+      status: 'ready', userId: 'test-user', completedLessons: [], completedProblems: [problem.id],
+    }))
+    expect(screen.getByRole('checkbox')).not.toBeChecked()
+    expect(mocks.mark).toHaveBeenCalledWith({
+      problemId: problem.id, completed: false, expectedUserId: 'test-user',
+    })
   })
 })

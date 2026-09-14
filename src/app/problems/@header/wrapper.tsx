@@ -1,7 +1,8 @@
 'use client'
 
 import { Header } from '@/components/Header'
-import { useAuthStore } from '@/contexts/auth'
+import { useProgressInitialization } from '@/hooks/useProblemCompletion'
+import type { ProgressSnapshotResult } from '@/types/progress'
 import { useContentStore } from '@/contexts/progress'
 import {
   LessonConfig,
@@ -14,6 +15,7 @@ import { useEffect } from 'react'
 
 export type LayoutProps = {
   userData?: UserWithSubscriptionsAndProgress | null
+  progressData?: ProgressSnapshotResult
   completedLessons?: string[]
   completedProblems?: string[]
   problemList?: LessonWithProblems[]
@@ -23,33 +25,27 @@ export type LayoutProps = {
 
 export function Wrapper({
   userData,
-  completedLessons,
-  completedProblems,
+  progressData,
   problemList,
   allLessons,
   allProblems,
 }: LayoutProps) {
-  const setUser = useAuthStore((state) => state.setUser)
+  useProgressInitialization(progressData, userData)
   const updateContent = useContentStore((state) => state.updateContent)
 
   const navigation = problemListToNavigation(problemList)
 
   useEffect(() => {
     updateContent(
-      completedLessons,
-      completedProblems,
+      undefined,
+      undefined,
       undefined,
       allLessons,
       allProblems,
     )
-    setUser(userData ?? null)
   }, [
-    completedLessons,
     updateContent,
     allLessons,
-    setUser,
-    userData,
-    completedProblems,
     allProblems,
   ])
 

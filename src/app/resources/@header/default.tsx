@@ -12,10 +12,7 @@ export default async function Header() {
   return (
     <Wrapper
       userData={data?.user}
-      completedLessons={data?.user?.lessonProgress.map((item) => item.lessonId)}
-      completedProblems={data?.user?.problemProgress.map(
-        (item) => item.problemId,
-      )}
+      progressData={data.progress}
       resourceList={data?.lessons as LessonWithResourcesAndProblems[]}
     />
   )

@@ -12,13 +12,14 @@ import { getServerSession } from 'next-auth'
 export type MarkProblemArgs = {
   problemId?: string
   completed: boolean
+  expectedUserId?: string
 }
 
-export async function markProblem({ problemId, completed }: MarkProblemArgs) {
+export async function markProblem({ problemId, completed, expectedUserId }: MarkProblemArgs) {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session)
+    if (!session?.userId)
       return createCustomError({
         message: 'Failed to retrieve user session',
         showSnackbar: true,
@@ -31,6 +32,12 @@ export async function markProblem({ problemId, completed }: MarkProblemArgs) {
       })
 
     const userId = session.userId
+    if (expectedUserId !== undefined && expectedUserId !== userId) {
+      return createCustomError({
+        message: 'Your account changed. Refresh and try again.',
+        showSnackbar: true,
+      })
+    }
 
     await markProblemProgress({
       userId,
@@ -38,10 +45,15 @@ export async function markProblem({ problemId, completed }: MarkProblemArgs) {
       completed,
     } as ServiceMarkProblemArgs)
 
-    return createCustomResponse({
-      message: `Practice problem marked as ${completed ? 'complete' : 'incomplete'}`,
-      showSnackbar: true,
-    })
+    return {
+      ...createCustomResponse({
+        message: `Practice problem marked as ${completed ? 'complete' : 'incomplete'}`,
+        showSnackbar: true,
+      }),
+      userId,
+      problemId,
+      completed,
+    }
   } catch (error) {
     return createCustomError({
       message: 'Failed to update practice problem status',

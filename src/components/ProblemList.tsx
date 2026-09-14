@@ -1,23 +1,18 @@
 'use client'
 
-import { markProblem } from '@/actions/markProblem'
 import { trackLearningEvent } from '@/lib/analytics'
 import { PROBLEM_CARD } from '@/constants/designTokens'
 import { CONTENT_STATS } from '@/constants/content-stats'
 import { ProblemQuestion } from './ProblemQuestion'
-import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
+import { useProblemCompletion } from '@/hooks/useProblemCompletion'
 import { ProblemFilter, EnrichedProblem, ProblemStatus } from '@/types'
-import { CustomError, handleError } from '@/lib/sentry'
 import { filterAndSortProblems } from '@/utils/helpers'
-import { CustomResponse, handleResponse } from '@/utils/response'
 import { Lesson, ProblemDifficulty, ProblemType } from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { enqueueSnackbar } from 'notistack'
-import { ChangeEvent, memo, useCallback, useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6'
 import {
   HiCheck,
@@ -46,15 +41,12 @@ const TABLE_COLUMNS = [
 type ProblemRowProps = {
   problem: EnrichedProblem
   handleShowAnswer: (problem: EnrichedProblem) => void
-  handleCheckboxChange: (
-    event: ChangeEvent<HTMLInputElement>,
-    problemId: string,
-  ) => Promise<void>
 }
 
 const ProblemRow = memo(
-  ({ problem, handleShowAnswer, handleCheckboxChange }: ProblemRowProps) => {
+  ({ problem, handleShowAnswer }: ProblemRowProps) => {
     const isTheory = problem.type === ProblemType.THEORY
+    const { isCompleted, isPending, isDisabled, error, setCompleted } = useProblemCompletion(problem.id)
     return (
       <tr
         key={problem.id}
@@ -86,12 +78,19 @@ const ProblemRow = memo(
           <input
             type="checkbox"
             aria-label={`Mark "${problem.title}" complete`}
-            checked={problem.problemProgress.some(
-              (progress) => progress.completed,
-            )}
-            onChange={(event) => handleCheckboxChange(event, problem.id)}
+            checked={isCompleted}
+            disabled={isDisabled}
+            aria-busy={isPending}
+            onChange={async (event) => {
+              const completed = event.currentTarget.checked
+              if (await setCompleted(completed) && completed) {
+                trackLearningEvent('problem_marked_complete', { content_id: problem.id, source: 'practice' })
+              }
+            }}
             className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500"
           />
+          {isPending && <span role="status" className="block text-xs">Saving progress…</span>}
+          {error && <span role="alert" className="block text-xs text-red-600 dark:text-red-400">{error}</span>}
         </td>
       </tr>
     )
@@ -104,21 +103,15 @@ type RevealStage = 'question' | 'answer'
 
 type ProblemSlideOverContentProps = {
   problem: EnrichedProblem
-  onCheckboxChange: (
-    event: ChangeEvent<HTMLInputElement>,
-    problemId: string,
-  ) => Promise<void>
 }
 
 const ProblemSlideOverContent = ({
   problem,
-  onCheckboxChange,
 }: ProblemSlideOverContentProps) => {
   const [stage, setStage] = useState<RevealStage>('question')
-  const completedProblems = useContentStore((state) => state.completedProblems)
+  const { isCompleted, isPending, isDisabled, error, setCompleted } = useProblemCompletion(problem.id)
 
   const isTheory = problem.type === 'THEORY'
-  const isCompleted = completedProblems.has(problem.id)
 
   const handleRevealAnswer = useCallback(() => {
     setStage('answer')
@@ -164,7 +157,14 @@ const ProblemSlideOverContent = ({
             <input
               type="checkbox"
               checked={isCompleted}
-              onChange={(e) => onCheckboxChange(e, problem.id)}
+              disabled={isDisabled}
+              aria-busy={isPending}
+              onChange={async (event) => {
+                const completed = event.currentTarget.checked
+                if (await setCompleted(completed) && completed) {
+                  trackLearningEvent('problem_marked_complete', { content_id: problem.id, source: 'practice' })
+                }
+              }}
               className="peer sr-only"
             />
             <div
@@ -183,6 +183,9 @@ const ProblemSlideOverContent = ({
           </span>
         </label>
       </div>
+
+      {isPending && <p role="status" className="text-sm">Saving progress…</p>}
+      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
       {/* Question */}
       {problem.question && (
@@ -276,11 +279,14 @@ export const ProblemList = ({
   filteredProblems,
   initialLessons,
 }: ProblemListProps) => {
-  const { data: session } = useSession()
-  const toggleCompletedProblem = useContentStore(
-    (state) => state.toggleCompletedProblem,
-  )
-  const openModal = useAuthStore((state) => state.openModal)
+  const completedProblems = useContentStore((state) => state.completedProblems)
+  const progressStatus = useContentStore((state) => state.progressStatus)
+  const confirmedProblems = useMemo(() => allProblems.map((problem) => ({
+    ...problem,
+    problemProgress: progressStatus === 'ready' && completedProblems.has(problem.id)
+      ? [{ completed: true }]
+      : [],
+  })), [allProblems, completedProblems, progressStatus])
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -326,10 +332,10 @@ export const ProblemList = ({
       sortOrder: sortOrder as 'asc' | 'desc',
     }
 
-    const newProblems = filterAndSortProblems(allProblems, filter)
+    const newProblems = filterAndSortProblems(confirmedProblems, filter)
     setProblems(newProblems)
   }, [
-    allProblems,
+    confirmedProblems,
     search,
     difficulty,
     status,
@@ -424,48 +430,6 @@ export const ProblemList = ({
       '',
       pathname,
     )
-  }
-
-  const toggleCompletion = async (problemId: string) => {
-    const updatedProblems = problems.map((problem) =>
-      problem.id === problemId
-        ? {
-            ...problem,
-            problemProgress:
-              problem.problemProgress.length === 0
-                ? [{ completed: true }]
-                : problem.problemProgress.map((progress) => ({
-                    ...progress,
-                    completed: !progress.completed,
-                  })),
-          }
-        : problem,
-    )
-    setProblems(updatedProblems)
-  }
-
-  const onCheckboxChange = async (
-    event: ChangeEvent<HTMLInputElement>,
-    problemId: string,
-  ) => {
-    if (!session) {
-      return openModal()
-    }
-    const currentlyCompleted = event.currentTarget.checked
-
-    try {
-      const response = await markProblem({
-        problemId,
-        completed: currentlyCompleted,
-      })
-      if (!response.success) return handleError(response, enqueueSnackbar)
-      handleResponse(response as CustomResponse, enqueueSnackbar)
-      toggleCompletedProblem(problemId)
-      toggleCompletion(problemId)
-      if (currentlyCompleted) trackLearningEvent('problem_marked_complete', { content_id: problemId, source: 'practice' })
-    } catch (error) {
-      handleError(error as CustomError, enqueueSnackbar)
-    }
   }
 
   const handleShowAnswer = (problem: EnrichedProblem) => {
@@ -681,7 +645,6 @@ export const ProblemList = ({
                     key={problem.id}
                     problem={problem}
                     handleShowAnswer={handleShowAnswer}
-                    handleCheckboxChange={onCheckboxChange}
                   />
                 ))
               ) : (
@@ -714,7 +677,6 @@ export const ProblemList = ({
           <ProblemSlideOverContent
             key={selectedProblem.id}
             problem={selectedProblem}
-            onCheckboxChange={onCheckboxChange}
           />
         )}
       </SlideOverPanel>

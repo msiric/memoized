@@ -109,6 +109,26 @@ jobs:
           done
           test "$ready" = true
           node --import tsx src/scripts/check-reader-layout.ts "$RUNNER_TEMP/reader-layout/config.json"
+          node --import tsx src/scripts/check-guided-path.ts on
+          kill "$server_pid"
+          if wait "$server_pid"; then
+            :
+          else
+            exit_code=$?
+            test "$exit_code" -eq 143
+          fi
+          G4_TS_FIRST_PASS_ENABLED=false node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3014 >> "$RUNNER_TEMP/reader-layout/server.log" 2>&1 &
+          server_pid=$!
+          ready=false
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:3014/courses/js-track/core-fundamentals/data-types > /dev/null; then
+              ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$ready" = true
+          node --import tsx src/scripts/check-guided-path.ts off
         env:
           NEXT_PUBLIC_SITE_URL: https://memoized.dev
           MEILISEARCH_HOST: http://localhost:7700
@@ -117,6 +137,9 @@ jobs:
           NEXTAUTH_SECRET: dummy-nextauth-secret-for-ci
           NEXTAUTH_URL: http://127.0.0.1:3014
           SENTRY_DISABLE: true
+          G4_TS_FIRST_PASS_ENABLED: 'true'
+          READER_LAYOUT_FIXTURE: '1'
+          READER_LAYOUT_REPORT_DIR: ${{ runner.temp }}/reader-layout
 
       - name: Upload reader layout evidence
         if: always()
