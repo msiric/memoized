@@ -5,8 +5,10 @@ import { PrismaClient } from '@prisma/client'
 import { serialize } from 'next-mdx-remote-client/serialize'
 import { assertCompiledMdx } from '../lib/mdx-result'
 import { createFirstPassLessonFixture } from '../test-fixtures/typescript-first-pass'
+import { assertStateFixtureDatabase, STATE_PROFILES, stateUserId, UNRELATED_LESSON, UNRELATED_PROBLEM } from './guided-path-state-fixture'
 
 async function main() {
+  assertStateFixtureDatabase()
   assert.equal(process.env.READER_LAYOUT_FIXTURE, '1', 'Explicit fixture opt-in is required')
   const target = new URL(process.env.DATABASE_URL ?? '')
   assert(['localhost', '127.0.0.1'].includes(target.hostname))
@@ -113,6 +115,37 @@ async function main() {
         userId: fixture.id, problemId: tsFixture.problems[4].id, completed: true,
       } })
       await prisma.userLessonProgress.create({ data: { userId: fixture.id, lessonId: tsFixture.id, completed: true } })
+    }
+    const unrelatedLesson = await prisma.lesson.findUniqueOrThrow({ where: { contentId: UNRELATED_LESSON }, select: { id: true } })
+    const unrelatedProblem = await prisma.problem.findUniqueOrThrow({ where: { contentId: UNRELATED_PROBLEM }, select: { id: true } })
+    for (const profile of STATE_PROFILES) {
+      const id = stateUserId(profile.key)
+      await prisma.user.create({ data: {
+        id, name: id, email: `${id}@example.invalid`,
+        ...(profile.premium ? { customer: { create: {
+          stripeCustomerId: `cus_${id}`,
+          subscriptions: { create: {
+            stripeSubscriptionId: `sub_${id}`, plan: 'LIFETIME', status: 'ACTIVE',
+            startDate: new Date(0), currentPeriodStart: new Date(0),
+          } },
+        } } } : {}),
+      } })
+      for (const problemId of [
+        ...profile.marks.map(index => tsFixture.problems[index].id),
+        ...(profile.unrelated ? [unrelatedProblem.id] : []),
+      ]) {
+        await prisma.userProblemProgress.create({ data: {
+          userId: id, problemId, completed: true, completedAt: new Date('2026-08-01T00:00:00Z'),
+        } })
+      }
+      for (const lessonId of [
+        ...(profile.lesson ? [tsFixture.id] : []),
+        ...(profile.unrelated ? [unrelatedLesson.id] : []),
+      ]) {
+        await prisma.userLessonProgress.create({ data: {
+          userId: id, lessonId, completed: true, completedAt: new Date('2026-08-01T00:00:00Z'),
+        } })
+      }
     }
     routes.push('/courses/js-track/typescript-introduction', '/courses/js-track/typescript-introduction/ts-basics')
     for (const [index, fixture] of [

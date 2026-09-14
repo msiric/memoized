@@ -64,9 +64,75 @@ The guided view keeps public Q/A available when its progress read fails.
 The normal reader geometry fixture includes a synthetic TS lesson and public
 question contracts with synthetic answers. `check-guided-path.ts on/off`
 exercises the actual built app and ephemeral CI database across anonymous, free,
-premium and revoked states at 320, 1440 and 3840px. It covers persisted marks,
+premium and revoked states at 320, 375, 768, 1024, 1440, 2560 and 3840px. It covers persisted marks,
 duplicate/failing saves, progress refresh failure, account changes, code focus/
 scrolling, public projection, malformed queries and disabled fallback.
+
+### Extended hosted state coverage
+
+`node --import tsx src/scripts/check-guided-path-state.ts on` adds **14 cases**
+against the same actual production build and disposable `memoized_ci` database:
+
+- Empty/full free, empty premium, optional-only and lesson-only histories (five
+  cases across 320/375/768/1024px). P5 and lesson self-reports remain `0/4`.
+- Real hash-only entry, conflicting step/hash, Next, browser Back/Forward,
+  reload and focus refresh after an external fixture mark (320 and 768px).
+- Normal lesson/optional-question links and cross-route Back/Forward (768px).
+- Normal Problems table and slide-over mark/unmark, shared confirmation,
+  reload and guided-reader persistence, with unrelated full-user problem and
+  lesson history preserved (375 and 1024px).
+- Reactive Incomplete filtering with three questions (375px) and two questions
+  (1024px): marking the open question removes its table row but preserves the
+  same drawer, original sequence/count, and revealed feedback. Next must open
+  the original next question without skipping it or becoming disabled.
+  Closing/reopening must use the newly filtered one-question sequence; reload
+  confirms the saved marks.
+- One actual owner's ACTIVE → EXPIRED subscription transition with identical
+  read-only progress history and normal-reader paid-body protection (768px).
+- A real successful old-owner save, committed in PostgreSQL while CDP holds
+  its response, followed by signed-cookie/session switching without navigation.
+  The new owner's read may queue behind that save, so loading remains distinct
+  from confirmed marks. Releasing the response must never apply the old owner's
+  count or remove their legitimate mark. While B remains active, A's disposable history
+  changes again; returning A → B → A without navigation must read A's current
+  `4/4`, not reuse its original `1/4` bootstrap snapshot (375px).
+
+Fixtures require explicit opt-in and asserted loopback `/memoized_ci` URLs.
+The browser blocks every non-loopback/data request, reserves at most 70
+middleware-counted requests per minute, honors bounded read `Retry-After`, and
+never retries a write. Reports contain phase/stack diagnostics, DOM snapshots,
+screenshots, HTTP status metadata (not API bodies/cookies/tokens), and exact
+synthetic before/after/restored progress rows. Each case restores only its
+specific fixture rows in `finally`; it never truncates tables.
+
+**Pinned old-reader compatibility is an explicit opt-in gate**, not part of an
+ordinary PR's build cost. Add the `g4-old-reader` label **before pushing a new PR
+revision** targeting `master` (this workflow has no `workflow_dispatch` and does
+not trigger merely from adding a label). Its bounded 20-minute stage checks out
+`bb5d8143d289f3e835e58628be30c4345da2db2b` outside the source tree under
+`RUNNER_TEMP`, asserts identical `yarn.lock` and Prisma schema, reuses the locked
+dependencies, and builds Next directly without migrations or curriculum sync.
+It starts the new writer on 3014 and pinned old reader on 3015 using only dummy
+CI configuration and the same fresh database.
+
+`node --import tsx src/scripts/check-guided-path-state.ts compat` then performs
+one mixed-version scenario: two actual new-writer desired-value saves, five
+old-reader observations (free/premium/anonymous query+fragment fallback and
+free/premium problem banks), and exact unchanged-history assertions after every
+old-reader visit. `G4_OLD_READER_SHA` must match the pin. The command restores the
+pre-write synthetic rows in `finally`. Run it only in the prepared hosted job;
+do not point it at production, real accounts, or a shared local database.
+
+The `reader-layout` artifact includes `guided-state-on.json`,
+`guided-state-compat.json` when opted in, screenshots, and server/build logs.
+Every phase is printed and appended immediately to the corresponding
+`guided-state-*.jsonl`; the JSON report is atomically refreshed before each
+phase, on HTTP responses, and after DOM capture. A 20-second console heartbeat
+identifies the current case/phase during waits. Before/after/restored fixture
+snapshots are persisted at their boundaries, not deferred until the suite ends.
+Implementation or type/lint success is **not** hosted acceptance: the required
+reports must show `complete: true` and every restoration must match before
+claiming runtime coverage or mixed-version compatibility.
 
 Before activation, independently review the exact diff and confirm ordinary
 reading/progress behavior as well as the guided view. Deploy support inactive,
