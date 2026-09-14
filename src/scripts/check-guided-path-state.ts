@@ -4,7 +4,7 @@ import path from 'node:path'
 import { setTimeout as pause } from 'node:timers/promises'
 import { PrismaClient } from '@prisma/client'
 import { encode } from 'next-auth/jwt'
-import puppeteer, { type Browser, type BrowserContext, type CDPSession, type HTTPResponse, type Page, type Protocol } from 'puppeteer'
+import puppeteer, { type Browser, type BrowserContext, type CDPSession, type ElementHandle, type HTTPResponse, type Page, type Protocol } from 'puppeteer'
 import { firstPassHref, TS_BASICS_HREF, TS_FIRST_PASS_OPTIONAL, TS_FIRST_PASS_STEPS } from '../lib/typescript-first-pass'
 import { createFirstPassLessonFixture } from '../test-fixtures/typescript-first-pass'
 import {
@@ -68,11 +68,35 @@ async function restore(prisma: PrismaClient, before: Snapshot, allowedProblems: 
 async function clickText(page: Page, selector: string, text: string) {
   for (const element of await page.$$(selector)) {
     if (await element.evaluate((node, expected) => node.textContent?.trim() === expected, text)) {
-      await element.click()
+      await clickElement(page, element)
       return
     }
   }
   throw new Error(`Missing visible control: ${selector} / ${text}`)
+}
+
+async function clickElement(page: Page, element: ElementHandle<Element>) {
+  // Native scrolling keeps targets clear of the fixed header. Wait for the
+  // real drawer's entrance animation rather than clicking through it.
+  await element.evaluate(node => node.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' }))
+  await page.waitForFunction(async node => {
+    const before = node.getBoundingClientRect()
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+    const box = node.getBoundingClientRect()
+    const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+    return node.isConnected && box.width > 0 && box.height > 0 &&
+      box.top >= 0 && box.left >= 0 && box.bottom <= innerHeight && box.right <= innerWidth &&
+      Math.abs(box.x - before.x) < 0.25 && Math.abs(box.y - before.y) < 0.25 &&
+      Math.abs(box.width - before.width) < 0.25 && Math.abs(box.height - before.height) < 0.25 &&
+      hit !== null && node.contains(hit)
+  }, {}, element)
+  await element.click()
+}
+
+async function clickSelector(page: Page, selector: string) {
+  const element = await page.waitForSelector(selector)
+  assert(element)
+  await clickElement(page, element)
 }
 
 async function waitChecked(page: Page, selector: string, completed: boolean) {
@@ -142,6 +166,8 @@ class Reader {
   held: Protocol.Fetch.RequestPausedEvent | null = null
   private readRetryAt: number | null = null
   private readonly pending = new Set<Promise<void>>()
+  private readonly pendingMarks = new Map<string, { mark: Mark; hold: boolean }>()
+  private readonly capturedMarks = new Map<Mark, { status: number | undefined; body: string }>()
 
   private constructor(
     readonly context: BrowserContext, readonly page: Page, readonly cdp: CDPSession,
@@ -194,13 +220,24 @@ class Reader {
 
   private async intercept(event: Protocol.Fetch.RequestPausedEvent) {
     if (event.responseStatusCode !== undefined || event.responseErrorReason !== undefined) {
-      assert.equal(this.held, null, 'Only one old-owner save response may be held')
-      this.held = event
+      const pending = this.pendingMarks.get(event.requestId)
+      assert(pending, 'Only actual mark responses are intercepted')
+      const result = await this.cdp.send('Fetch.getResponseBody', { requestId: event.requestId })
+      this.capturedMarks.set(pending.mark, {
+        status: event.responseStatusCode,
+        body: result.base64Encoded ? Buffer.from(result.body, 'base64').toString('utf8') : result.body,
+      })
       this.evidence.responses.push({
-        phase: this.evidence.phase, kind: 'committed-save-response-held', method: event.request.method,
+        phase: this.evidence.phase, kind: pending.hold ? 'committed-save-response-held' : 'actual-save-response-captured',
+        method: event.request.method,
         path: new URL(event.request.url).pathname, status: event.responseStatusCode,
       })
       this.publish(this.evidence)
+      this.pendingMarks.delete(event.requestId)
+      if (pending.hold) {
+        assert.equal(this.held, null, 'Only one old-owner save response may be held')
+        this.held = event
+      } else await this.cdp.send('Fetch.continueResponse', { requestId: event.requestId })
       return
     }
     const target = new URL(event.request.url)
@@ -224,10 +261,22 @@ class Reader {
       assert.equal(typeof mark.completed, 'boolean', 'Every write must express the desired value')
       assert(ownedUsers.includes(mark.expectedUserId), 'Every new-writer save must specify its exact synthetic owner')
       this.marks.push(mark)
-      interceptResponse = this.holdNextMark
+      this.pendingMarks.set(event.requestId, { mark, hold: this.holdNextMark })
+      interceptResponse = true
       this.holdNextMark = false
     }
     await this.cdp.send('Fetch.continueRequest', { requestId: event.requestId, interceptResponse })
+  }
+
+  assertConfirmation(index: number) {
+    const mark = this.marks[index]
+    const reply = this.capturedMarks.get(mark)
+    assert(reply, 'Capture the original response with Fetch before continuing it')
+    assert.equal(reply.status, 200)
+    assert(reply.body.includes('"success":true'), 'The actual action must confirm success, not just return HTTP 200')
+    assert(reply.body.includes(`"userId":${JSON.stringify(mark.expectedUserId)}`), 'Confirmation owner must match')
+    assert(reply.body.includes(`"problemId":${JSON.stringify(mark.problemId)}`), 'Confirmation question must match')
+    assert(reply.body.includes(`"completed":${JSON.stringify(mark.completed)}`), 'Confirmation desired value must match')
   }
 
   async signIn(profile: StateProfile) {
@@ -329,6 +378,8 @@ class Reader {
       count: document.querySelector('[data-path-count]')?.textContent?.trim() ?? null,
       title: document.getElementById('guided-question-title')?.textContent ?? null,
       focusId: document.activeElement?.id ?? null,
+      focusTag: document.activeElement?.tagName ?? null,
+      focusedPlaceholder: document.activeElement?.getAttribute('placeholder') ?? null,
       mainText: document.querySelector<HTMLElement>('main')?.innerText ?? '',
       checkboxes: [...document.querySelectorAll<HTMLInputElement>('main input[type="checkbox"], [role="dialog"] input[type="checkbox"]')].map(input => ({
         label: input.getAttribute('aria-label'), checked: input.checked, disabled: input.disabled,
@@ -378,10 +429,10 @@ async function assertChangedOnly(prisma: PrismaClient, before: Snapshot, userId:
 async function save(reader: Reader, selector: string, checkbox: string, user: StateProfile, problemIndex: number, completed: boolean) {
   const start = reader.marks.length
   const response = reader.expectResponse('mark')
-  await reader.page.click(selector)
+  await clickSelector(reader.page, selector)
   const reply = await response()
   assert.equal(reply.status(), 200, 'No write retry: inspect the server/database if this save is ambiguous')
-  assert(/"success":true/.test(await reply.text()), 'The actual action must confirm success, not just return HTTP 200')
+  reader.assertConfirmation(start)
   await waitChecked(reader.page, checkbox, completed)
   assert.deepEqual(reader.marks.slice(start), [{
     problemId: fixture.problems[problemIndex].id, completed, expectedUserId: stateUserId(user),
@@ -713,7 +764,7 @@ async function main() {
             'Next must remain available when the original next question is still incomplete')
           await reader.capture(`filtered-question-${index + 1}-marked-answer-retained`)
           reader.phase(`filtered-question-${index + 1}-next-without-closing`)
-          await reader.page.click(nextButton)
+          await clickSelector(reader.page, nextButton)
           await drawerPosition(reader.page, sequence[index + 1], index + 1, sequence.length)
           await waitChecked(reader.page, dialogBox, false)
           await reader.page.waitForFunction(() => [...document.querySelectorAll('[role="dialog"] button')].some(button =>
@@ -780,7 +831,7 @@ async function main() {
         await reader.reveal()
         const oldResponse = reader.expectResponse('mark')
         reader.holdNextMark = true
-        await reader.page.click(`#${step.id} label`)
+        await clickSelector(reader.page, `#${step.id} label`)
         const deadline = Date.now() + 120_000
         while (!reader.held && !reader.errors.length && Date.now() < deadline) await pause(50)
         assert.deepEqual(reader.errors, [])
@@ -820,9 +871,7 @@ async function main() {
         await reader.release()
         const reply = await oldResponse()
         assert.equal(reply.status(), 200)
-        const confirmation = await reply.text()
-        assert(/"success":true/.test(confirmation), 'The late actual action response must confirm success')
-        assert(confirmation.includes(oldId), 'The late response must be the old owner’s actual confirmation')
+        reader.assertConfirmation(0)
         await reader.count(3)
         await waitChecked(reader.page, `#${step.id} input`, false)
         const refresh = reader.expectResponse('progress-read')

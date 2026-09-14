@@ -104,6 +104,11 @@ never retries a write. Reports contain phase/stack diagnostics, DOM snapshots,
 screenshots, HTTP status metadata (not API bodies/cookies/tokens), and exact
 synthetic before/after/restored progress rows. Each case restores only its
 specific fixture rows in `finally`; it never truncates tables.
+Native pointer targets are scrolled clear of the fixed header and checked for
+stable bounds and hit-testing before clicks. Original action responses are read
+through CDP Fetch while paused, then continued unchanged. This avoids relying
+on a separate Network session's response-body cache; owner, question and desired
+value confirmations are still required.
 
 **Pinned old-reader compatibility is an explicit opt-in gate**, not part of an
 ordinary PR's build cost. Add the `g4-old-reader` label **before pushing a new PR
