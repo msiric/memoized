@@ -26,7 +26,7 @@ vi.mock('@/components/PreserializedMdxRenderer', () => ({
   PreserializedMdxRenderer: ({ header }: { header: ReactNode }) => <article>{header}<h1>Normal reader</h1></article>,
 }))
 vi.mock('@/components/LessonPreview', () => ({
-  LessonPreview: ({ header }: { header: ReactNode }) => <article>{header}<h1>Public preview</h1></article>,
+  LessonPreview: ({ header, actions }: { header: ReactNode; actions?: ReactNode }) => <article>{header}<h1>Public preview</h1>{actions}</article>,
 }))
 
 const params = { courseSlug: 'js-track', sectionSlug: 'typescript-introduction', lessonSlug: 'ts-basics' }
@@ -57,7 +57,7 @@ describe('guided route boundary', () => {
     vi.stubEnv('G4_TS_FIRST_PASS_ENABLED', 'false')
     render(await Lesson({ params, searchParams: { path: 'typescript-first-pass', step: 'typescript-vs-javascript' } }))
     expect(screen.getByRole('heading', { name: 'Public preview' })).toBeDefined()
-    expect(screen.getByText(/guided view is not active/)).toBeDefined()
+    expect(screen.queryByRole('link', { name: 'Open the guided first pass' })).toBeNull()
     expect(TypescriptFirstPass).not.toHaveBeenCalled()
     expect(getProgressSnapshot).not.toHaveBeenCalled()
   })

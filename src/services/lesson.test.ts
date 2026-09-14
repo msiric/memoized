@@ -178,6 +178,7 @@ describe('Lesson services', () => {
     it('should return lesson by slug', async () => {
       const mockLesson = {
         id: '1',
+        contentId: '/js-track/section-slug/lesson-slug',
         slug: 'lesson-slug',
         problems: [],
         title: 'Lesson Title',
@@ -200,6 +201,7 @@ describe('Lesson services', () => {
         },
         select: {
           id: true,
+          contentId: true,
           title: true,
           description: true,
           serializedBody: true,
@@ -208,6 +210,7 @@ describe('Lesson services', () => {
             orderBy: { difficulty: 'asc' },
             select: {
               id: true,
+              contentId: true,
               difficulty: true,
               href: true,
               link: true,
@@ -246,6 +249,7 @@ describe('Lesson services', () => {
         },
         select: {
           id: true,
+          contentId: true,
           title: true,
           description: true,
           serializedBody: true,
@@ -254,6 +258,7 @@ describe('Lesson services', () => {
             orderBy: { difficulty: 'asc' },
             select: {
               id: true,
+              contentId: true,
               difficulty: true,
               href: true,
               link: true,

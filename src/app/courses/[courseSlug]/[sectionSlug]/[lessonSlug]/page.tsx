@@ -119,15 +119,16 @@ export default async function Lesson({
   const topics = [...new Set(extractSectionsFromCompiledSource(compiledSource).map((item) => item.title))]
   const fallbackNotice = requested === undefined ? null
     : requested === TS_FIRST_PASS_ID && isTarget && !enabled
-      ? 'The guided view is not active. The full lesson and free questions are available below.'
+      ? null
       : isTarget || requested === TS_FIRST_PASS_ID
         ? 'That guided view is not available here. You can use the normal lesson and free practice.'
         : null
+  const entryAction = enabled ? <Link href={firstPassHref()} prefetch={false}
+    className="block py-1 text-sm font-medium text-lime-700 underline underline-offset-4 dark:text-lime-300">Open the guided first pass</Link> : null
   const header = <>
     {breadcrumb}
     {fallbackNotice && <p role="status" className="mb-5 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{fallbackNotice}</p>}
-    {enabled && <Link href={firstPassHref()} prefetch={false}
-      className="mb-4 block text-sm font-medium text-lime-700 underline underline-offset-4 dark:text-lime-300">Open the guided first pass</Link>}
+    {hasAccess && entryAction && <div className="mb-3">{entryAction}</div>}
   </>
 
   return (
@@ -139,7 +140,7 @@ export default async function Lesson({
       lessonId={lesson.id}
       problems={lesson.problems as Problem[]}
       showNextPage={false}
-    /> : <LessonPreview header={header} title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
+    /> : <LessonPreview header={header} actions={entryAction} title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
       <CatalogDirectory title="Continue in this section" items={neighbors.map((item) => ({
         ...item, href: lessonPath(params.courseSlug, params.sectionSlug, item.slug),
       }))} />

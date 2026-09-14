@@ -9,12 +9,14 @@ export function LessonPreview({
   topics,
   problems,
   header,
+  actions,
 }: {
   title: string
   description: string | null
   topics: string[]
   problems: PracticeProblem[]
   header?: ReactNode
+  actions?: ReactNode
 }) {
   return (
     <article className={`${CONTENT_COLUMN_CLASSES} pb-10 pt-8`}>
@@ -25,6 +27,7 @@ export function LessonPreview({
       <h1 className="mb-5 break-words text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
         {title}
       </h1>
+      {actions && <div className="mb-5">{actions}</div>}
       {description && (
         <p className="mb-6 text-sm leading-7 text-zinc-600 dark:text-zinc-300">
           {description}
