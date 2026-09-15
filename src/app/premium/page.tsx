@@ -26,17 +26,19 @@ import {
 } from '@/components/icons'
 import { HiSparkles } from 'react-icons/hi2'
 import { CONTAINER } from '@/constants/designTokens'
-import { CONTENT_STATS } from '@/constants/content-stats'
+import { getCatalogStatsSnapshot } from '@/lib/catalog-request'
 
 export default async function Premium() {
   const session = await getServerSession(authOptions)
   const user =
     session && (await getUserWithSubscriptionDetails(session?.userId))
 
-  const [coupons, products] = await Promise.all([
+  const [coupons, products, catalog] = await Promise.all([
     getActiveCoupons(),
     getActiveProducts(),
+    getCatalogStatsSnapshot(),
   ])
+  const stats = catalog.status === 'available' ? catalog.stats : null
 
   const productsWithCoupons = products.map((product) => {
     const price = product.default_price as Stripe.Price
@@ -96,18 +98,23 @@ export default async function Premium() {
         {/* Success Stats + Limited Time Offer - Cohesive Group */}
         <div className="mx-auto max-w-xl">
           <div className="mb-6 grid grid-cols-3 items-stretch gap-3 sm:gap-6 lg:gap-8">
-            <StatCard value={CONTENT_STATS.problems} label="Practice Problems" variant="lime" />
+            <StatCard value={stats?.problems ?? '—'} label="Practice Problems" variant="lime" />
             <StatCard
-              value={CONTENT_STATS.lessons}
+              value={stats?.lessons ?? '—'}
               label="In-Depth Lessons"
               variant="indigo"
             />
             <StatCard
-              value={CONTENT_STATS.courses}
+              value={stats?.courses ?? '—'}
               label="Learning Tracks"
               variant="amber"
             />
           </div>
+          {!stats && (
+            <p role="status" className="mb-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
+              Catalog counts are unavailable. Please try again later.
+            </p>
+          )}
           <TimeLimitedOffer products={productsWithCoupons as ProductWithCoupon[]} />
         </div>
       </SectionContainer>

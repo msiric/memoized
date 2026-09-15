@@ -1,44 +1,51 @@
 import { APP_NAME, COURSES_PREFIX } from '@/constants'
-import { CONTENT_STATS } from '@/constants/content-stats'
+import { getCoursesSnapshot } from '@/lib/catalog-request'
 import { Metadata } from 'next'
 import { ReactNode } from 'react'
 import { CoursesProviders } from './providers'
 
-export const metadata: Metadata = {
-  title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
-  description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses. Master ${CONTENT_STATS.problems} interview problems with detailed explanations and JavaScript-specific implementation patterns.`,
-  keywords: [
-    'javascript courses',
-    'algorithm courses',
-    'data structures course',
-    'javascript training',
-    'coding bootcamp',
-    'programming courses',
-    'interview preparation course',
-    'online coding course'
-  ].join(', '),
-  openGraph: {
+export const dynamic = 'force-dynamic'
+
+export async function generateMetadata(): Promise<Metadata> {
+  const catalog = await getCoursesSnapshot()
+  const problemCount =
+    catalog.status === 'available' ? `${catalog.stats.problems} ` : ''
+  return {
     title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
-    description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses with ${CONTENT_STATS.problems} interview problems.`,
-    url: `${process.env.NEXT_PUBLIC_SITE_URL}${COURSES_PREFIX}`,
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: `${APP_NAME} Courses - JavaScript and Algorithm Learning Tracks`,
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
-    description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses with ${CONTENT_STATS.problems} interview problems.`,
-    images: ['/twitter-image.png'],
-  },
-  alternates: {
-    canonical: `${COURSES_PREFIX}`,
-  },
+    description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses. Master ${problemCount}interview problems with detailed explanations and JavaScript-specific implementation patterns.`,
+    keywords: [
+      'javascript courses',
+      'algorithm courses',
+      'data structures course',
+      'javascript training',
+      'coding bootcamp',
+      'programming courses',
+      'interview preparation course',
+      'online coding course',
+    ].join(', '),
+    openGraph: {
+      title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
+      description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses with ${problemCount}interview problems.`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL}${COURSES_PREFIX}`,
+      images: [
+        {
+          url: '/og-image.png',
+          width: 1200,
+          height: 630,
+          alt: `${APP_NAME} Courses - JavaScript and Algorithm Learning Tracks`,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'JavaScript & Algorithm Courses - Interactive Learning Tracks',
+      description: `Explore comprehensive JavaScript and Data Structures & Algorithms courses with ${problemCount}interview problems.`,
+      images: ['/twitter-image.png'],
+    },
+    alternates: {
+      canonical: `${COURSES_PREFIX}`,
+    },
+  }
 }
 
 export type CoursesLayoutProps = {

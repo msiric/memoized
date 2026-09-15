@@ -1,4 +1,5 @@
-import { getProblems } from '@/services/problem'
+import { getProblemBankSnapshot } from '@/lib/catalog-request'
+import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemStatus } from '@/types'
 import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import { render, screen } from '@testing-library/react'
@@ -6,7 +7,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ProblemsPage from './page'
 
 // Mock the imported modules and components
-vi.mock('@/services/problem')
+vi.mock('@/lib/catalog-request', () => ({ getProblemBankSnapshot: vi.fn() }))
+vi.mock('@/utils/helpers', () => ({ filterAndSortProblems: vi.fn() }))
 vi.mock('@/components/ProblemList', () => ({
   ProblemList: ({ allProblems, filteredProblems, initialLessons }: any) => (
     <div data-testid="problem-list">
@@ -28,7 +30,8 @@ describe('ProblemsPage component', () => {
       lessons: ['Lesson 1', 'Lesson 2'],
     }
 
-    vi.mocked(getProblems).mockResolvedValue(mockProblems as any)
+    vi.mocked(getProblemBankSnapshot).mockResolvedValue(mockProblems as any)
+    vi.mocked(filterAndSortProblems).mockReturnValue(mockProblems.filteredProblems as any)
 
     const searchParams = {
       search: 'test',
@@ -49,14 +52,14 @@ describe('ProblemsPage component', () => {
     expect(problemList.textContent).toContain('Lessons: 2')
   })
 
-  it('calls getProblems with correct filter', async () => {
+  it('applies filters to the shared unfiltered snapshot without a second catalog read', async () => {
     const mockProblems = {
       allProblems: [],
       filteredProblems: [],
       lessons: [],
     }
 
-    vi.mocked(getProblems).mockResolvedValue(mockProblems)
+    vi.mocked(getProblemBankSnapshot).mockResolvedValue(mockProblems)
 
     const searchParams = {
       search: 'test',
@@ -70,7 +73,8 @@ describe('ProblemsPage component', () => {
 
     await ProblemsPage({ searchParams })
 
-    expect(getProblems).toHaveBeenCalledWith({
+    expect(getProblemBankSnapshot).toHaveBeenCalledWith()
+    expect(filterAndSortProblems).toHaveBeenCalledWith(mockProblems.allProblems, {
       search: 'test',
       difficulty: ProblemDifficulty.MEDIUM,
       status: 'INCOMPLETE' as ProblemStatus,
@@ -88,19 +92,21 @@ describe('ProblemsPage component', () => {
       lessons: [],
     }
 
-    vi.mocked(getProblems).mockResolvedValue(mockProblems)
+    vi.mocked(getProblemBankSnapshot).mockResolvedValue(mockProblems)
 
     const searchParams = {} as any
 
     await ProblemsPage({ searchParams })
 
-    expect(getProblems).toHaveBeenCalledWith({
+    expect(getProblemBankSnapshot).toHaveBeenCalledWith()
+    expect(filterAndSortProblems).toHaveBeenCalledWith(mockProblems.allProblems, {
       difficulty: undefined,
       status: undefined,
       lesson: undefined,
       search: undefined,
       sortColumn: undefined,
       sortOrder: undefined,
+      type: undefined,
     })
   })
 })

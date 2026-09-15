@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 import { Badge } from './Badge'
 import { GradientText } from './GradientText'
@@ -5,9 +7,11 @@ import { FeaturePoint } from './FeaturePoint'
 import { DecorativeBlur } from './DecorativeBlur'
 import { CheckCircleIcon, LightningIcon, ChartIcon, ClipboardCheckIcon } from './icons'
 import { SPACING, TYPOGRAPHY } from '@/constants/designTokens'
-import { CONTENT_STATS } from '@/constants/content-stats'
+import { useCatalogStats } from './CatalogStatsProvider'
 
 export const SolveProblems = () => {
+  const result = useCatalogStats()
+  const problems = result.status === 'available' ? result.stats.problems : null
   return (
     <section className={`relative ${SPACING.section.vertical}`}>
       <div className={`mx-auto max-w-7xl ${SPACING.section.horizontal}`}>
@@ -34,7 +38,7 @@ export const SolveProblems = () => {
           {/* Enhanced Content */}
           <div className="md:order-1">
             <Badge variant="indigo" icon={<CheckCircleIcon />} className={SPACING.margin.md}>
-              {CONTENT_STATS.problems} Problems
+              {problems === null ? 'Practice' : problems} Problems
             </Badge>
 
             <h2 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} ${TYPOGRAPHY.color.primary}`}>
@@ -42,7 +46,7 @@ export const SolveProblems = () => {
             </h2>
 
             <p className={`${SPACING.descriptionMargin.large} ${TYPOGRAPHY.body.large} ${TYPOGRAPHY.color.secondary}`}>
-              Access all {CONTENT_STATS.problems} diverse practice problems and questions designed to prepare you for real interview scenarios.
+              Access all {problems === null ? '' : `${problems} `}diverse practice problems and questions designed to prepare you for real interview scenarios.
             </p>
 
             {/* Feature Points */}

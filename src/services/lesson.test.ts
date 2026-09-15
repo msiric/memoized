@@ -15,6 +15,7 @@ import {
   upsertProblem,
 } from '@/services/lesson'
 import { ServiceError } from '@/lib/sentry'
+import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID } from '@/lib/g3b-task'
 import { AccessOptions, ProblemDifficulty, ProblemType, Prisma } from '@prisma/client'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
@@ -175,6 +176,32 @@ describe('Lesson services', () => {
   })
 
   describe('getLessonBySlug', () => {
+    it('places the complete G3B native task fourth without changing database identities', async () => {
+      const problems = [
+        { id: 'old-prefix', contentId: G3B_CARD_ORDER[0] },
+        { id: 'new-substring', contentId: G3B_CARD_ORDER[3] },
+        { id: 'old-subsequence', contentId: G3B_CARD_ORDER[1] },
+        { id: 'old-edit-distance', contentId: G3B_CARD_ORDER[2] },
+      ]
+      ;(prisma.lesson.findFirst as Mock).mockResolvedValue({
+        id: 'existing-lesson',
+        contentId: G3B_LESSON_CONTENT_ID,
+        problems,
+      })
+
+      const lesson = await getLessonBySlug(
+        'dsa-track',
+        'common-techniques',
+        'longest-common-substring',
+      )
+
+      expect(lesson?.problems.map(problem => problem.id)).toEqual([
+        'old-prefix', 'old-subsequence', 'old-edit-distance', 'new-substring',
+      ])
+      expect(lesson?.problems[3]).toBe(problems[1])
+      expect(problems[1].id).toBe('new-substring')
+    })
+
     it('should return lesson by slug', async () => {
       const mockLesson = {
         id: '1',

@@ -54,6 +54,30 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('Problem bank confirmed controls', () => {
+  it('uses the unfiltered loaded catalog total rather than a compiled or filtered count', async () => {
+    render(<ProblemList allProblems={questions} filteredProblems={questions} initialLessons={[]} />)
+    expect(screen.getByText(/the 3 JavaScript interview problems loaded in this view/)).toBeInTheDocument()
+    fireEvent.change(screen.getByPlaceholderText('Search problems...'), { target: { value: questions[0].title } })
+    await waitFor(() => expect(within(screen.getByRole('table')).queryByRole('button', { name: questions[1].title })).not.toBeInTheDocument())
+    expect(screen.getByText(/the 3 JavaScript interview problems loaded in this view/)).toBeInTheDocument()
+  })
+
+  it('opens a native coding task without an empty external title or invented run action', async () => {
+    const native: EnrichedProblem = { ...problem, type: 'CODING', href: '' }
+    render(<ProblemList allProblems={[native]} filteredProblems={[native]} initialLessons={[]} />)
+    fireEvent.click(screen.getByRole('button', { name: native.title }))
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveAccessibleName(native.title)
+    expect(within(dialog).getAllByRole('heading', { name: native.title })).toHaveLength(2)
+    expect(within(dialog).queryByRole('link', { name: native.title })).not.toBeInTheDocument()
+    expect(within(dialog).queryByRole('link', { name: /Practice on LeetCode/ })).not.toBeInTheDocument()
+    expect(within(dialog).getByText('Write and run your solution locally before revealing the answer.')).toBeInTheDocument()
+    expect(within(dialog).queryByRole('button', { name: /^(Run|Submit)$/ })).not.toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
+    await within(dialog).findByText('Free bank answer')
+    expect(within(dialog).getByRole('checkbox')).not.toBeDisabled()
+  })
+
   it('keeps the router filter URL when a confirmed action reapplies its canonical URL', async () => {
     const nativeReplace = window.history.replaceState.bind(window.history)
     nativeReplace({ __NA: true }, '', '/problems')

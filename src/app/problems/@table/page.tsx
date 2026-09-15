@@ -1,7 +1,8 @@
 import { ProblemList } from '@/components/ProblemList'
 import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import { ProblemStatus } from '@/types'
-import { getProblems } from '@/services/problem'
+import { getProblemBankSnapshot } from '@/lib/catalog-request'
+import { filterAndSortProblems } from '@/utils/helpers'
 
 const ProblemsPage = async ({
   searchParams,
@@ -29,7 +30,8 @@ const ProblemsPage = async ({
     sortOrder: sortOrder || undefined,
   }
 
-  const { allProblems, filteredProblems, lessons } = await getProblems(filter)
+  const { allProblems, lessons } = await getProblemBankSnapshot()
+  const filteredProblems = filterAndSortProblems(allProblems, filter)
 
   return (
     <ProblemList
