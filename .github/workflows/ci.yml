@@ -111,6 +111,7 @@ jobs:
           node --import tsx src/scripts/check-reader-layout.ts "$RUNNER_TEMP/reader-layout/config.json"
           node --import tsx src/scripts/check-guided-path.ts on
           node --import tsx src/scripts/check-guided-path-state.ts on
+          node --import tsx src/scripts/check-lesson-rendering.ts on
           kill "$server_pid"
           if wait "$server_pid"; then
             :
@@ -130,6 +131,7 @@ jobs:
           done
           test "$ready" = true
           node --import tsx src/scripts/check-guided-path.ts off
+          node --import tsx src/scripts/check-lesson-rendering.ts off
         env:
           NEXT_PUBLIC_SITE_URL: https://memoized.dev
           MEILISEARCH_HOST: http://localhost:7700
