@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 
-export const G4_OLD_READER_SHA = 'bb5d8143d289f3e835e58628be30c4345da2db2b'
+export const G4_OLD_READER_SHA = '191a0b9983b3f497480ad7dc33a6b8305393d32b'
 export const UNRELATED_LESSON = '/js-track/core-fundamentals/data-types'
 export const UNRELATED_PROBLEM = `${UNRELATED_LESSON}/layout-question-1`
 

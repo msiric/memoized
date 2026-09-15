@@ -3,6 +3,9 @@ name: CI
 permissions:
   contents: read
 
+env:
+  COREPACK_ENABLE_AUTO_PIN: '0'
+
 on:
   pull_request:
     branches: [master]
@@ -12,13 +15,20 @@ jobs:
     name: Test & Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version-file: package.json
           cache: 'yarn'
+
+      - name: Enable the declared package manager
+        run: |
+          corepack enable
+          node --version
+          corepack --version
+          yarn --version
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -28,6 +38,14 @@ jobs:
 
       - name: Run type check
         run: yarn typecheck
+
+      - name: Check the pinned deployment CLI on Node24
+        run: |
+          version=$(node .github/scripts/deploy-vercel.mjs --cli-version)
+          npm install --prefix "$RUNNER_TEMP/vercel-cli" --no-package-lock --no-save --engine-strict "vercel@$version"
+          node "$RUNNER_TEMP/vercel-cli/node_modules/vercel/dist/index.js" --version
+        env:
+          VERCEL_TELEMETRY_DISABLED: '1'
 
       - name: Run tests
         run: yarn test:check
@@ -60,13 +78,21 @@ jobs:
       DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
       DATABASE_URL_UNPOOLED: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version-file: package.json
           cache: 'yarn'
+
+      - name: Enable the declared package manager and record writer runtime
+        run: |
+          corepack enable
+          node --version
+          corepack --version
+          yarn --version
+          echo "NODE24_BIN=$(command -v node)" >> "$GITHUB_ENV"
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -146,6 +172,13 @@ jobs:
 
       # Opt in with this PR label before a new push. A second production
       # build is deliberately not charged to every ordinary PR.
+      - name: Set up the previous production runtime for recovery coverage
+        if: contains(github.event.pull_request.labels.*.name, 'g4-old-reader')
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20.20.2'
+          package-manager-cache: false
+
       - name: Check pinned old reader against new writer (opt-in)
         if: contains(github.event.pull_request.labels.*.name, 'g4-old-reader')
         timeout-minutes: 20
@@ -156,28 +189,33 @@ jobs:
           git fetch --no-tags origin "$G4_OLD_READER_SHA"
           git worktree add --detach "$baseline" "$G4_OLD_READER_SHA"
           test "$(git -C "$baseline" rev-parse HEAD)" = "$G4_OLD_READER_SHA"
-          cmp yarn.lock "$baseline/yarn.lock"
           cmp prisma/schema.prisma "$baseline/prisma/schema.prisma"
           for name in .env .env.local .env.production .env.production.local prisma/.env; do
             test ! -e "$baseline/$name"
           done
-          ln -s "$GITHUB_WORKSPACE/node_modules" "$baseline/node_modules"
-          echo "G4 compatibility: building pinned baseline without migrations"
+          echo "G4 compatibility: previous production runtime"
+          node --version
+          echo "G4 compatibility: current writer runtime"
+          "$NODE24_BIN" --version
+          echo "G4_OLD_READER_NODE_VERSION=$(node -p 'process.version')" >> "$GITHUB_ENV"
+          echo "G4 compatibility: installing the baseline's own locked dependencies"
           (
             cd "$baseline"
-            G4_TS_FIRST_PASS_ENABLED=false NEXTAUTH_URL=http://127.0.0.1:3015 \
-              node "$GITHUB_WORKSPACE/node_modules/next/dist/bin/next" build
+            HUSKY=0 corepack yarn@1.22.22 install --frozen-lockfile
+            echo "G4 compatibility: building the previous app on Node 20 without migrations"
+            G4_TS_FIRST_PASS_ENABLED=true NEXTAUTH_URL=http://127.0.0.1:3015 \
+              node node_modules/next/dist/bin/next build
           ) 2>&1 | tee "$RUNNER_TEMP/reader-layout/guided-state-baseline-build.log"
           echo "G4 compatibility: starting loopback writer and old reader"
-          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3014 \
+          "$NODE24_BIN" node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3014 \
             > "$RUNNER_TEMP/reader-layout/guided-state-new-writer.log" 2>&1 &
           new_pid=$!
           old_pid=''
           trap 'kill "$new_pid"; if test -n "$old_pid"; then kill "$old_pid"; fi' EXIT
           (
             cd "$baseline"
-            G4_TS_FIRST_PASS_ENABLED=false NEXTAUTH_URL=http://127.0.0.1:3015 \
-              exec node "$GITHUB_WORKSPACE/node_modules/next/dist/bin/next" start --hostname 127.0.0.1 --port 3015
+            G4_TS_FIRST_PASS_ENABLED=true NEXTAUTH_URL=http://127.0.0.1:3015 \
+              exec node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3015
           ) > "$RUNNER_TEMP/reader-layout/guided-state-old-reader.log" 2>&1 &
           old_pid=$!
           for port in 3014 3015; do
@@ -192,9 +230,11 @@ jobs:
             test "$ready" = true
           done
           echo "G4 compatibility: checking shared synthetic progress history"
-          node --import tsx src/scripts/check-guided-path-state.ts compat
+          G4_OLD_READER_NODE_VERSION="$(node -p 'process.version')" \
+            "$NODE24_BIN" --import tsx src/scripts/check-guided-path-state.ts compat
         env:
-          G4_OLD_READER_SHA: bb5d8143d289f3e835e58628be30c4345da2db2b
+          G4_OLD_READER_SHA: 191a0b9983b3f497480ad7dc33a6b8305393d32b
+          G4_OLD_READER_FLAG_ENABLED: 'true'
           NEXT_PUBLIC_SITE_URL: https://memoized.dev
           MEILISEARCH_HOST: http://localhost:7700
           MEILISEARCH_MASTER_KEY: dummy-key-for-ci-build
@@ -209,7 +249,7 @@ jobs:
 
       - name: Upload reader layout evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reader-layout
           path: ${{ runner.temp }}/reader-layout

@@ -2,6 +2,9 @@
   "name": "memoized",
   "version": "1.0.0",
   "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": "24.x"
+  },
   "description": "A modern, open-source learning platform for programming education",
   "author": "Mario Siric <mario.siric@mail.com>",
   "license": "MIT",
@@ -55,7 +58,7 @@
     "test:check": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:setup": "vitest run src/scripts/setup-dev.test.ts",
-    "prebuild": "yarn run migrate",
+    "prebuild": "node --version && yarn run migrate",
     "postinstall": "yarn run generate",
     "install:clean": "cross-env tsx src/scripts/clean-dependencies.ts && yarn install",
     "setup:content": "cross-env tsx src/scripts/setup-content.ts",
@@ -129,7 +132,7 @@
     "@types/d3-hierarchy": "^3.1.7",
     "@types/glob": "^8.1.0",
     "@types/mdx": "^2.0.8",
-    "@types/node": "^20.10.8",
+    "@types/node": "^24.13.3",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/react-highlight-words": "^0.20.0",

@@ -444,6 +444,11 @@ async function main() {
   const mode = process.argv[2]
   assert(mode === 'on' || mode === 'compat', 'Use on or compat; never run against real accounts or databases')
   if (mode === 'compat') assert.equal(process.env.G4_OLD_READER_SHA, G4_OLD_READER_SHA)
+  const oldGuidedEnabled = process.env.G4_OLD_READER_FLAG_ENABLED === 'true'
+  if (mode === 'compat' && oldGuidedEnabled) {
+    assert.equal(process.versions.node.split('.')[0], '24', 'Run the new-writer checker with Node 24')
+    assert.match(process.env.G4_OLD_READER_NODE_VERSION ?? '', /^v20\./, 'Record the previous production reader runtime')
+  }
   const output = process.env.READER_LAYOUT_REPORT_DIR
   const secret = process.env.NEXTAUTH_SECRET
   assert(output && secret)
@@ -451,6 +456,9 @@ async function main() {
   const prisma = new PrismaClient()
   const report = {
     mode, baseline: mode === 'compat' ? G4_OLD_READER_SHA : null,
+    checkerNodeVersion: process.version,
+    baselineNodeVersion: mode === 'compat' ? process.env.G4_OLD_READER_NODE_VERSION ?? null : null,
+    baselineGuidedEnabled: mode === 'compat' && oldGuidedEnabled,
     phase: 'starting', updatedAt: new Date().toISOString(),
     expectedCases: mode === 'on' ? 14 : 1, complete: false,
     cases: [] as CaseEvidence[], failures: [] as string[],
@@ -956,8 +964,23 @@ async function main() {
             if (profile) await old.signIn(profile)
             const selected = TS_FIRST_PASS_STEPS[1].id
             await old.go(firstPassHref(selected))
+            if (oldGuidedEnabled) {
+              if (profile) await old.guided(expected.get(profile)!.filter(index => index < 4).length, 1)
+              else {
+                await old.page.waitForSelector('[data-guided-path="typescript-first-pass"]')
+                await old.page.waitForFunction(() =>
+                  document.querySelector('[data-path-count]')?.textContent?.trim() === 'Sign in to save your marks')
+                await old.question(1)
+                assert(!(await old.page.content()).includes(privateMarker))
+              }
+              await old.reveal()
+              await old.capture(`baseline-guided-${profile ?? 'anonymous'}`)
+              assert.deepEqual(await snapshot(prisma, before.userIds), written)
+              old.phase(`pinned-old-normal-reader-${profile ?? 'anonymous'}`)
+              await old.go(`${TS_BASICS_HREF}#${selected}`)
+            }
             await old.page.waitForSelector(`#${selected}`)
-            assert.equal(await old.page.$('[data-guided-path]'), null, 'The exact old app must fall back to its normal reader')
+            assert.equal(await old.page.$('[data-guided-path]'), null, 'The exact old app must retain its normal reader')
             assert.equal(new URL(old.page.url()).hash, `#${selected}`)
             assert.equal((await old.page.content()).includes(privateMarker), profile === 'compat-premium')
             await old.reveal(`#${selected}`)
@@ -966,7 +989,7 @@ async function main() {
                 await waitChecked(old.page, `#${TS_FIRST_PASS_STEPS[index].id} input`, expected.get(profile)!.includes(index))
               }
             }
-            await old.capture(`baseline-fallback-${profile ?? 'anonymous'}`)
+            await old.capture(`baseline-${oldGuidedEnabled ? 'normal' : 'fallback'}-${profile ?? 'anonymous'}`)
             if (profile) {
               old.phase(`pinned-old-bank-${profile}`)
               await old.go('/problems')

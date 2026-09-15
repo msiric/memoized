@@ -3,6 +3,9 @@ name: Deploy Next.js app to Vercel
 permissions:
   contents: read
 
+env:
+  COREPACK_ENABLE_AUTO_PIN: '0'
+
 on:
   push:
     branches: [ master ]
@@ -15,13 +18,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version-file: package.json
           cache: 'yarn'
+
+      - name: Enable the declared package manager
+        run: |
+          corepack enable
+          node --version
+          corepack --version
+          yarn --version
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -34,6 +46,14 @@ jobs:
       
       - name: Run type check
         run: yarn typecheck
+
+      - name: Install the pinned deployment CLI before loading production credentials
+        run: |
+          version=$(node .github/scripts/deploy-vercel.mjs --cli-version)
+          npm install --prefix "$RUNNER_TEMP/vercel-cli" --no-package-lock --no-save --engine-strict "vercel@$version"
+          node "$RUNNER_TEMP/vercel-cli/node_modules/vercel/dist/index.js" --version
+        env:
+          VERCEL_TELEMETRY_DISABLED: '1'
       
       - name: Run database migrations
         run: yarn migrate
@@ -55,9 +75,9 @@ jobs:
       # See: https://github.com/msiric/memoized-content
       
       - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.ORG_ID}}
-          vercel-project-id: ${{ secrets.PROJECT_ID}}
-          vercel-args: '--prod'
+        run: node .github/scripts/deploy-vercel.mjs deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          VERCEL_CLI_ROOT: ${{ runner.temp }}/vercel-cli
