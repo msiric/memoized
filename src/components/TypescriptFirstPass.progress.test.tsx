@@ -85,7 +85,9 @@ describe('guided progress with mounted shared headers', () => {
   it('can recover an unavailable initial snapshot under StrictMode effect replay', async () => {
     mocks.snapshot.mockResolvedValue(ready('a', [path.questions[2].id]))
     render(<StrictMode>{view({ status: 'unavailable', userId: 'a', message: 'Unavailable' })}</StrictMode>)
-    await waitFor(() => expect(screen.getByText('1/4 marked complete')).toBeDefined())
-    expect(screen.queryByText('Refreshing saved marks...')).toBeNull()
+    await waitFor(() => {
+      expect(screen.getByText('1/4 marked complete')).toBeDefined()
+      expect(screen.queryByText('Refreshing saved marks...')).toBeNull()
+    })
   })
 })
