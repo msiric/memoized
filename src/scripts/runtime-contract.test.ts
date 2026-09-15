@@ -36,4 +36,15 @@ describe('Node runtime release contract', () => {
     expect(ci).toContain('"$NODE24_BIN" --import tsx src/scripts/check-guided-path-state.ts compat')
     expect(ci).toContain("G4_OLD_READER_FLAG_ENABLED: 'true'")
   })
+
+  it('uses a fixed-target CLI without a selector-dropping third-party retry', () => {
+    const production = read('.github/workflows/production.yml')
+    expect(production).not.toContain('amondnet/vercel-action')
+    expect(production).toContain('run: node .github/scripts/deploy-vercel.mjs deploy')
+    expect(production).toContain('version=$(node .github/scripts/deploy-vercel.mjs --cli-version)')
+    expect(production.indexOf('Install the pinned deployment CLI')).toBeLessThan(production.indexOf('Run database migrations'))
+    expect(production).toContain('VERCEL_ORG_ID: ${{ secrets.ORG_ID }}')
+    expect(production).toContain('VERCEL_PROJECT_ID: ${{ secrets.PROJECT_ID }}')
+    expect(production).toContain('persist-credentials: false')
+  })
 })

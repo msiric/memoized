@@ -39,6 +39,14 @@ jobs:
       - name: Run type check
         run: yarn typecheck
 
+      - name: Check the pinned deployment CLI on Node24
+        run: |
+          version=$(node .github/scripts/deploy-vercel.mjs --cli-version)
+          npm install --prefix "$RUNNER_TEMP/vercel-cli" --no-package-lock --no-save --engine-strict "vercel@$version"
+          node "$RUNNER_TEMP/vercel-cli/node_modules/vercel/dist/index.js" --version
+        env:
+          VERCEL_TELEMETRY_DISABLED: '1'
+
       - name: Run tests
         run: yarn test:check
         env:

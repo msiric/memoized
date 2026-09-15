@@ -45,6 +45,13 @@
 **Requirements:** Node.js 24.x LTS, Yarn 1.22.22 (via Corepack), Docker Desktop.
 `package.json` is the Node major-version contract used by CI and Vercel.
 
+Production uses the pinned Vercel CLI through `.github/scripts/deploy-vercel.mjs`.
+The runner requires the reviewed project/team fingerprint, the master push and
+checkout SHA to agree, and the declared Node/CLI versions. It never removes
+project selectors or retries a failed deployment against another target.
+The CLI is installed in the job's temporary directory before deployment
+credentials are provided. This does not add deployment tooling to the app bundle.
+
 ```bash
 git clone https://github.com/msiric/memoized.git
 cd memoized
