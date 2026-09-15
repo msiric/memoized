@@ -170,6 +170,11 @@ claiming runtime coverage or mixed-version compatibility.
 Before activation, independently review the exact diff and confirm ordinary
 reading/progress behavior as well as the guided view. Deploy support inactive,
 then enable the production-scoped flag only for a separately observed deployment.
+Also build the exact candidate against an isolated complete catalog under
+production-like pooling constraints and controlled response latency. Small
+synthetic reader fixtures do not establish full-catalog build viability. Keep
+those diagnostics away from production data services and do not change live
+connection limits to obtain a passing result.
 Environment changes apply to a new deployment, not the already-serving one.
 Keep the publisher's app pin aligned with the observed release.
 
