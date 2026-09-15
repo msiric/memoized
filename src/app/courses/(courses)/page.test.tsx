@@ -1,13 +1,13 @@
 import { cleanup, render, screen } from '@testing-library/react'
 import Stripe from 'stripe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getActiveCoursesWithProgress } from '../../../services/course'
+import { getCoursesSnapshot } from '@/lib/catalog-request'
 import { retrieveStripeSession } from '../../../services/stripe'
 import Courses from './page'
 import { COURSES_PREFIX } from '../../../constants'
 
 // Mock the imported modules
-vi.mock('../../../services/course')
+vi.mock('@/lib/catalog-request', () => ({ getCoursesSnapshot: vi.fn() }))
 vi.mock('../../../services/stripe')
 vi.mock('../../../components/CourseCard', () => ({
   CourseCard: ({ title }: { title: string }) => (
@@ -162,6 +162,11 @@ describe('Courses page', () => {
 
   beforeEach(() => {
     vi.resetAllMocks()
+    vi.mocked(getCoursesSnapshot).mockResolvedValue({
+      status: 'available',
+      courses: mockCourses as any,
+      stats: { courses: 2, lessons: 18, problems: 9 },
+    })
   })
 
   afterEach(() => {
@@ -169,9 +174,6 @@ describe('Courses page', () => {
   })
 
   it('renders courses when data is successfully fetched', async () => {
-    vi.mocked(getActiveCoursesWithProgress).mockResolvedValue(
-      mockCourses as any,
-    )
     vi.mocked(retrieveStripeSession).mockResolvedValue(
       {} as Stripe.Response<Stripe.Checkout.Session>,
     )
@@ -188,9 +190,7 @@ describe('Courses page', () => {
   })
 
   it('handles failed course fetch gracefully', async () => {
-    vi.mocked(getActiveCoursesWithProgress).mockRejectedValue(
-      new Error('Failed to fetch'),
-    )
+    vi.mocked(getCoursesSnapshot).mockResolvedValue({ status: 'unavailable' })
     vi.mocked(retrieveStripeSession).mockResolvedValue(
       {} as Stripe.Response<Stripe.Checkout.Session>,
     )
@@ -204,9 +204,6 @@ describe('Courses page', () => {
   })
 
   it('renders PremiumModal when premium query param is present', async () => {
-    vi.mocked(getActiveCoursesWithProgress).mockResolvedValue(
-      mockCourses as any,
-    )
     vi.mocked(retrieveStripeSession).mockResolvedValue({
       id: 'session_123',
       status: 'complete',
@@ -227,9 +224,6 @@ describe('Courses page', () => {
   })
 
   it('handles failed Stripe session fetch gracefully', async () => {
-    vi.mocked(getActiveCoursesWithProgress).mockResolvedValue(
-      mockCourses as any,
-    )
     vi.mocked(retrieveStripeSession).mockRejectedValue(
       new Error('Failed to fetch'),
     )
@@ -249,9 +243,6 @@ describe('Courses page', () => {
   })
 
   it('does not render PremiumModal when premium query param is absent', async () => {
-    vi.mocked(getActiveCoursesWithProgress).mockResolvedValue(
-      mockCourses as any,
-    )
     vi.mocked(retrieveStripeSession).mockResolvedValue(
       {} as Stripe.Response<Stripe.Checkout.Session>,
     )

@@ -1,7 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
-import { STRUCTURAL_CHANGE_CLASS, STRUCTURAL_LESSON_UID, assertInPlaceScope, assertSameMdxSurface, normalizeReleaseScopeOptions } from './scope'
+import { ADDITIVE_CHANGE_CLASS, ADDITIVE_PROFILE, STRUCTURAL_CHANGE_CLASS, STRUCTURAL_LESSON_UID, assertInPlaceScope, assertSameMdxSurface, normalizeReleaseScopeOptions } from './scope'
+import { G3B_CARD_ORDER, G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
+import { G3B_CONFIG_PATH } from './catalog'
 
 const roots: string[] = []
 const body = "export const metadata = { title: 'Example' }\n\n# Example\n\nExplain this value.\n\n```js\nconsole.log(1)\n```\n"
@@ -126,9 +128,137 @@ function structuralFixture() {
   return root
 }
 
+const g3bOptions = { changeClass: ADDITIVE_CHANGE_CLASS, lesson: G3B_LESSON_UID } as const
+const g3bBodyPath = `content/${G3B_LESSON_UID}/page.mdx`
+const g3bBody = "export const metadata = { title: 'Longest Common Substring' }\n\n# Longest Common Substring\n\n## Concept and Use Cases\n\nA baseline explanation.\n"
+const nativeTask = {
+  id: G3B_TASK.id, title: G3B_TASK.title, question: G3B_TASK.question,
+  type: G3B_TASK.type, difficulty: G3B_TASK.difficulty, href: G3B_TASK.href,
+  answer: 'Return a longest contiguous match.\n\n```js\nfunction example() { return \"abc\" }\n```\n',
+}
+function g3bFixture(add = false) {
+  const root = fixture()
+  const problems = ['Longest Common Prefix', 'Longest Common Subsequence', 'Edit Distance'].map((title, index) => ({
+    id: G3B_CARD_ORDER[index].split('/').pop()!, title,
+    type: 'CODING', difficulty: ['EASY', 'MEDIUM', 'HARD'][index], href: `https://example.com/${index}`,
+    question: `Unchanged question ${index}.`, answer,
+  }))
+  if (add) problems.push({ ...nativeTask })
+  writeFixtureFile(root, G3B_CONFIG_PATH, JSON.stringify({ lessons: [{
+    id: '/longest-common-substring', title: 'Longest Common Substring', description: 'Stable description',
+    order: 20, access: 'PREMIUM', problems,
+  }] }))
+  writeFixtureFile(root, g3bBodyPath, g3bBody)
+  return root
+}
+function editG3b(root: string, change: (lesson: Record<string, any>) => void) {
+  const config = JSON.parse(fs.readFileSync(path.join(root, G3B_CONFIG_PATH), 'utf8'))
+  change(config.lessons[0])
+  writeFixtureFile(root, G3B_CONFIG_PATH, JSON.stringify(config))
+}
+
 afterEach(() => {
   for (const root of roots.splice(0)) fs.rmSync(root, { recursive: true })
   fs.rmSync(path.join(process.cwd(), '.content-release-test-work'), { recursive: true, force: true })
+})
+
+describe('bounded native G3B source scope', () => {
+  it('requires exact class/lesson opt-in and supports the unchanged 506-catalog profile', () => {
+    expect(() => normalizeReleaseScopeOptions({ changeClass: ADDITIVE_CHANGE_CLASS })).toThrow(/requires --lesson/)
+    expect(() => normalizeReleaseScopeOptions({ ...g3bOptions, lesson: STRUCTURAL_LESSON_UID })).toThrow(/requires --lesson/)
+    const base = g3bFixture()
+    expect(assertInPlaceScope(base, base, g3bOptions)).toMatchObject({
+      changedFiles: [], structural: { profile: ADDITIVE_PROFILE, allowedChangedFields: expect.any(Array) },
+    })
+  })
+  it('allows only the complete fourth task and dependent card link after creation', () => {
+    const base = g3bFixture(), next = g3bFixture(true)
+    writeFixtureFile(next, g3bBodyPath, g3bBody + `\nTry [the task](#${G3B_TASK.id}).\n`)
+    editG3b(next, lesson => { lesson.problems[0].answer += '\nExtra free explanation.\n' })
+    const report = assertInPlaceScope(base, next, g3bOptions)
+    expect(report.addition?.contentId).toBe(G3B_TASK.contentId)
+    expect(report.structural?.allowedChangedFields).toHaveLength(4)
+    expect(report.structural?.anchorConflictProof.fixedProblemCardAnchors.at(-1)?.id).toBe(G3B_TASK.id)
+    expect(() => assertInPlaceScope(base, next)).toThrow()
+    expect(() => assertInPlaceScope(base, next, { changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID })).toThrow()
+  })
+  it.each([
+    ['id', 'other-task'], ['title', 'A different title'], ['question', 'A different contract'],
+    ['type', 'THEORY'], ['difficulty', 'EASY'], ['href', 'https://example.com'],
+    ['answer', ' \n'], ['access', 'PREMIUM'], ['order', 4], ['link', G3B_TASK.link],
+  ])('rejects changed new-task payload/schema %s', (field, value) => {
+    const base = g3bFixture(), next = g3bFixture(true)
+    editG3b(next, lesson => { lesson.problems[3][field] = value })
+    expect(() => assertInPlaceScope(base, next, g3bOptions)).toThrow()
+  })
+  it('rejects wrong owner, duplicate identities, extra additions and changed card order', () => {
+    for (const mutate of [
+      (lesson: Record<string, any>) => { lesson.id = '/wrong-owner' },
+      (lesson: Record<string, any>) => { lesson.problems.push({ ...nativeTask }) },
+      (lesson: Record<string, any>) => { lesson.problems.push({ ...nativeTask, id: 'another', title: 'Another' }) },
+      (lesson: Record<string, any>) => { lesson.problems.reverse() },
+    ]) {
+      const base = g3bFixture(), next = g3bFixture(true)
+      editG3b(next, mutate)
+      expect(() => assertInPlaceScope(base, next, g3bOptions)).toThrow()
+    }
+  })
+  it('rejects old questions/metadata, unrelated files, H1/export/H2 removal and collisions', () => {
+    const base = g3bFixture()
+    for (const mutate of [
+      (lesson: Record<string, any>) => { lesson.access = 'FREE' },
+      (lesson: Record<string, any>) => { lesson.title = 'Other' },
+      (lesson: Record<string, any>) => { lesson.problems[0].question = 'Repurposed' },
+      (lesson: Record<string, any>) => { lesson.problems[0].difficulty = 'HARD' },
+    ]) {
+      const next = g3bFixture(true)
+      editG3b(next, mutate)
+      expect(() => assertInPlaceScope(base, next, g3bOptions)).toThrow(/Metadata/)
+    }
+    for (const changedBody of [
+      g3bBody.replace('# Longest Common Substring', '# Renamed'),
+      g3bBody.replace('title:', 'description:'),
+      g3bBody.replace('## Concept and Use Cases', '## Missing Old Anchor'),
+      g3bBody + `\n## ${G3B_TASK.title}\n\nConflicting heading.\n`,
+      g3bBody + '\n<script>bad</script>\n',
+      g3bBody + '\n[Broken](#new-body-anchor)\n\n## New Body Anchor\n\nNew content.\n',
+    ]) {
+      const next = g3bFixture(true)
+      writeFixtureFile(next, g3bBodyPath, changedBody)
+      expect(() => assertInPlaceScope(base, next, g3bOptions)).toThrow()
+    }
+    const next = g3bFixture(true)
+    writeFixtureFile(next, lessonPath, body.replace('Explain', 'Clarify'))
+    expect(() => assertInPlaceScope(base, next, g3bOptions)).toThrow(/outside/)
+  })
+  it('rejects a new-task link without an active complete task and cross-field answer collisions', () => {
+    const base = g3bFixture(), next = g3bFixture()
+    writeFixtureFile(next, g3bBodyPath, g3bBody + `\n[Try](#${G3B_TASK.id})\n`)
+    expect(() => assertInPlaceScope(base, next, g3bOptions)).toThrow(/fragment/)
+    const added = g3bFixture(true)
+    editG3b(added, lesson => { lesson.problems[3].answer += '\n## Concept and Use Cases\n\nConflicting answer.\n' })
+    expect(() => assertInPlaceScope(base, added, g3bOptions)).toThrow(/collide/)
+  })
+  it('retains the complete new task through 507 recovery and future in-place/TS repairs', () => {
+    const base = g3bFixture(true), recovery = g3bFixture(true)
+    writeFixtureFile(base, g3bBodyPath, g3bBody + '\nA later explanation.\n')
+    expect(assertInPlaceScope(base, recovery, g3bOptions).addition).toBeUndefined()
+    expect(assertInPlaceScope(recovery, recovery).changedFiles).toEqual([])
+    const tsBase = structuralFixture(), tsCandidate = structuralFixture()
+    for (const root of [tsBase, tsCandidate]) {
+      for (const filename of [G3B_CONFIG_PATH, g3bBodyPath]) {
+        writeFixtureFile(root, filename, fs.readFileSync(path.join(recovery, filename), 'utf8'))
+      }
+    }
+    writeFixtureFile(tsCandidate, structuralLessonPath, structuralBody + '\nAn independent TS explanation.\n')
+    expect(assertInPlaceScope(tsBase, tsCandidate, {
+      changeClass: STRUCTURAL_CHANGE_CLASS, lesson: STRUCTURAL_LESSON_UID,
+    }).changedFiles.map(file => file.path)).toEqual([structuralLessonPath])
+    editG3b(recovery, lesson => { lesson.problems[3].answer += '\nChanged immutable task.\n' })
+    expect(() => assertInPlaceScope(base, recovery, g3bOptions)).toThrow(/immutable/)
+    expect(() => assertInPlaceScope(base, recovery)).toThrow(/immutable/)
+    expect(() => assertInPlaceScope(base, g3bFixture(), g3bOptions)).toThrow(/immutable/)
+  })
 })
 
 describe('independent in-place source scope', () => {

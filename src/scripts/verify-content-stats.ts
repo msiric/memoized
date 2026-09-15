@@ -1,56 +1,33 @@
 /**
- * Guard that CONTENT_STATS (the single source of truth for headline counts shown
- * across the app) still matches the actual content. Derives the real counts from
- * the content files using the same identity walk the prune trusts, and exits
- * non-zero on any mismatch.
- *
- * Run by the content sync before deploying: adding or removing a lesson/problem
- * without updating CONTENT_STATS fails the sync instead of shipping a wrong,
- * inconsistent number to the marketing surfaces. Also runnable locally via
- * `yarn verify:stats`.
+ * Strict offline/source baseline validation, not a live headline count.
+ * Admit 506 complete baseline tasks or those tasks plus only the exact G3B task.
+ * Preparing the whole catalog also verifies raw/compiled fields and resources.
  */
-import { CONTENT_FOLDER } from '@/constants'
-import { CONTENT_STATS } from '@/constants/content-stats'
+import path from 'node:path'
 import { validContentIds } from '@/lib/content-identity'
-import fs from 'fs'
-import path from 'path'
+import { assertKnownSourceCatalog } from './content-release/scope'
+import { prepareSnapshot } from './content-release/plan'
+import { describeCatalog } from './content-release/catalog'
 
-function main() {
-  const contentDir = path.join('src', CONTENT_FOLDER)
-  if (
-    !fs.existsSync(path.join(contentDir, 'js-track')) &&
-    !fs.existsSync(path.join(contentDir, 'dsa-track'))
-  ) {
-    console.error(
-      `❌ No content under ${contentDir}. This check must run where the real content is present (e.g. the content sync).`,
-    )
-    process.exit(1)
-  }
-
-  const ids = validContentIds(contentDir)
-  const actual = {
-    courses: ids.course.size,
-    sections: ids.section.size,
-    lessons: ids.lesson.size,
-    problems: ids.problem.size,
-    resources: ids.resource.size,
-  }
-
-  const mismatches = (
-    Object.keys(actual) as Array<keyof typeof actual>
-  ).filter((key) => actual[key] !== CONTENT_STATS[key])
-
-  if (mismatches.length > 0) {
-    console.error(
-      '❌ CONTENT_STATS is out of date with the content. Update src/constants/content-stats.ts:\n',
-    )
-    for (const key of mismatches) {
-      console.error(`   ${key}: constant=${CONTENT_STATS[key]} actual=${actual[key]}`)
+export async function verifyContentStats(root = path.join(process.cwd(), 'src')) {
+  assertKnownSourceCatalog(root)
+  const expected = validContentIds(path.join(root, 'content'))
+  const rows = await prepareSnapshot(root)
+  const manifest = describeCatalog(rows)
+  for (const kind of Object.keys(expected) as (keyof typeof expected)[]) {
+    const actual = rows.filter(row => row.kind === kind)
+    if (actual.length !== expected[kind].size || actual.some(row => !expected[kind].has(row.contentId))) {
+      throw new Error(`Prepared ${kind} catalog differs from authoritative source identities`)
     }
-    process.exit(1)
   }
-
-  console.log('✅ CONTENT_STATS matches the content:', JSON.stringify(actual))
+  return manifest
 }
 
-main()
+if (require.main === module) {
+  verifyContentStats()
+    .then(manifest => console.log('✅ Authorized complete source catalog:', JSON.stringify(manifest)))
+    .catch(error => {
+      console.error(error instanceof Error ? error.message : 'Source catalog validation failed')
+      process.exitCode = 1
+    })
+}
