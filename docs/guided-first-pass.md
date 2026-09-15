@@ -29,7 +29,7 @@ derives the next unmarked question again. No scroll position, editor buffer or
 review queue is stored.
 
 The normal lesson URL is unchanged. An inactive flag returns the normal reader
-and free questions. The previous app also ignores the query and retains the
+and free questions. Older readers without this feature ignore the query and retain the
 fragment, so rollback does not introduce a new missing pathname.
 
 ## Rendering policy
@@ -142,17 +142,19 @@ value confirmations are still required.
 ordinary PR's build cost. Add the `g4-old-reader` label **before pushing a new PR
 revision** targeting `master` (this workflow has no `workflow_dispatch` and does
 not trigger merely from adding a label). Its bounded 20-minute stage checks out
-`bb5d8143d289f3e835e58628be30c4345da2db2b` outside the source tree under
-`RUNNER_TEMP`, asserts identical `yarn.lock` and Prisma schema, reuses the locked
-dependencies, and builds Next directly without migrations or curriculum sync.
-It starts the new writer on 3014 and pinned old reader on 3015 using only dummy
-CI configuration and the same fresh database.
+`191a0b9983b3f497480ad7dc33a6b8305393d32b` outside the source tree under
+`RUNNER_TEMP` and asserts an identical Prisma schema. It installs that baseline's
+own locked dependencies and builds it with its previous production runtime,
+Node 20.20.2, without migrations or curriculum sync. The new writer and checker
+run on the declared Node 24 runtime. Both servers use only dummy CI configuration
+and the same fresh database, on ports 3014 and 3015 respectively.
 
 `node --import tsx src/scripts/check-guided-path-state.ts compat` then performs
-one mixed-version scenario: two actual new-writer desired-value saves, five
-old-reader observations (free/premium/anonymous query+fragment fallback and
-free/premium problem banks), and exact unchanged-history assertions after every
-old-reader visit. `G4_OLD_READER_SHA` must match the pin. The command restores the
+one mixed-version scenario: two actual Node 24 writer desired-value saves and
+eight Node 20 reader observations (free/premium/anonymous guided and normal
+reading plus free/premium problem banks). Exact unchanged-history assertions
+follow every old-reader visit. `G4_OLD_READER_SHA` must match the pin and the report
+records both runtimes. The command restores the
 pre-write synthetic rows in `finally`. Run it only in the prepared hosted job;
 do not point it at production, real accounts, or a shared local database.
 

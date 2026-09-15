@@ -3,6 +3,7 @@ import path from 'path'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 import { CONTENT_FOLDER, SAMPLES_FOLDER } from '@/constants'
+import { engines } from '../../package.json'
 
 const execAsync = promisify(exec)
 
@@ -34,14 +35,14 @@ async function commandExists(command: string): Promise<boolean> {
 /**
  * Validate prerequisites (Node.js, Yarn, Docker)
  */
-async function validatePrerequisites(): Promise<void> {
+export async function validatePrerequisites(nodeVersion = process.version): Promise<void> {
   log.step('Validating prerequisites...')
   
   // Check Node.js version
-  const nodeVersion = process.version
-  const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0])
-  if (majorVersion < 18) {
-    throw new Error(`Node.js 18+ required, found ${nodeVersion}`)
+  const requiredMajor = /^(\d+)\.x$/.exec(engines.node)?.[1]
+  if (!requiredMajor) throw new Error('package.json must declare a supported Node.js major as N.x')
+  if (!nodeVersion.startsWith(`v${requiredMajor}.`)) {
+    throw new Error(`Node.js ${engines.node} required, found ${nodeVersion}`)
   }
   log.info(`Node.js ${nodeVersion} ✓`)
   

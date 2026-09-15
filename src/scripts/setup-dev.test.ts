@@ -9,6 +9,7 @@ import fs from 'fs'
 import path from 'path'
 import { exec } from 'child_process'
 import { promisify } from 'util'
+import { validatePrerequisites } from './setup-dev'
 
 const execAsync = promisify(exec)
 
@@ -70,30 +71,19 @@ describe('setup-dev.ts (Simplified)', () => {
   })
 
   describe('validatePrerequisites', () => {
-    const validatePrerequisites = async (): Promise<void> => {
-      // Check Node.js version
-      const nodeVersion = process.version
-      const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0])
-      if (majorVersion < 18) {
-        throw new Error(`Node.js 18+ required, found ${nodeVersion}`)
-      }
-
-      // Check required commands (mocked)
-      const commands = ['yarn', 'docker', 'docker-compose']
-      for (const cmd of commands) {
-        try {
-          await execAsync(`which ${cmd}`)
-        } catch {
-          throw new Error(`${cmd} is required but not found`)
-        }
-      }
-    }
-
     it('should pass with valid Node.js and required commands', async () => {
       vi.mocked(execAsync).mockResolvedValue({ stdout: '/usr/bin/cmd', stderr: '' } as any)
       
       await expect(validatePrerequisites()).resolves.toBeUndefined()
     })
+
+    it.each(['v18.20.0', 'v20.20.2', 'v22.13.0', 'v25.0.0', 'invalid'])(
+      'rejects unsupported runtime %s before invoking setup commands',
+      async version => {
+        await expect(validatePrerequisites(version)).rejects.toThrow(`Node.js 24.x required, found ${version}`)
+        expect(execAsync).not.toHaveBeenCalled()
+      },
+    )
 
     it('should throw error for missing commands', async () => {
       vi.mocked(execAsync).mockImplementation((cmd: string) => {

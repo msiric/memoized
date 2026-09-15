@@ -42,11 +42,13 @@
 
 ## Quick Start
 
-**Requirements:** Node.js 18+, Yarn, Docker Desktop
+**Requirements:** Node.js 24.x LTS, Yarn 1.22.22 (via Corepack), Docker Desktop.
+`package.json` is the Node major-version contract used by CI and Vercel.
 
 ```bash
 git clone https://github.com/msiric/memoized.git
 cd memoized
+corepack enable
 yarn install
 yarn setup:dev
 yarn dev
