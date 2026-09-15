@@ -32,6 +32,23 @@ The normal lesson URL is unchanged. An inactive flag returns the normal reader
 and free questions. The previous app also ignores the query and retains the
 fragment, so rollback does not introduce a new missing pathname.
 
+## Rendering policy
+
+The lesson route explicitly uses `dynamic = 'force-dynamic'` and does not export
+`generateStaticParams`. Its response depends on the current session and query,
+so it is rendered at request time rather than enumerated for static generation.
+This policy applies to the lesson route template, not to the whole site.
+It controls server rendering and caching, not Next's client Router Cache. A
+fresh server request or reload must receive current content; browser Back or
+client navigation alone is not a guarantee of a new server read.
+
+Do not rely on the position of `getServerSession` or a later query-parameter read
+to stop static generation after database work has already begun. Authentication,
+access checks and question progress retain their existing runtime behavior.
+The sitemap still derives lesson URLs from the catalog independently of static
+path generation. Public metadata caching, if added later, needs its own explicit
+review rather than weakening this personalized response boundary.
+
 ## Data and progress
 
 The server resolves canonical content IDs to existing row IDs and validates
@@ -67,6 +84,16 @@ exercises the actual built app and ephemeral CI database across anonymous, free,
 premium and revoked states at 320, 375, 768, 1024, 1440, 2560 and 3840px. It covers persisted marks,
 duplicate/failing saves, progress refresh failure, account changes, code focus/
 scrolling, public projection, malformed queries and disabled fallback.
+
+`check-lesson-rendering.ts on/off` adds 15 cases per mode for the rendering
+contract. It inspects the actual build manifests, checks unknown catalog paths
+for real 404/noindex responses and checks document/Flight cache headers. It
+changes only known synthetic description/body/feedback markers in the disposable
+CI database, reloads the exact same URLs with normal browser caching enabled and
+requires fresh metadata and feedback with the same access boundaries. Every
+modified fixture field and timestamp is restored, and all progress rows must
+remain identical. Reports are `lesson-rendering-on.json` and
+`lesson-rendering-off.json` in the existing reader-layout artifact.
 
 ### Extended hosted state coverage
 
@@ -143,6 +170,11 @@ claiming runtime coverage or mixed-version compatibility.
 Before activation, independently review the exact diff and confirm ordinary
 reading/progress behavior as well as the guided view. Deploy support inactive,
 then enable the production-scoped flag only for a separately observed deployment.
+Also build the exact candidate against an isolated complete catalog under
+production-like pooling constraints and controlled response latency. Small
+synthetic reader fixtures do not establish full-catalog build viability. Keep
+those diagnostics away from production data services and do not change live
+connection limits to obtain a passing result.
 Environment changes apply to a new deployment, not the already-serving one.
 Keep the publisher's app pin aligned with the observed release.
 

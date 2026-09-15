@@ -1,6 +1,6 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { PreserializedMdxRenderer } from '@/components/PreserializedMdxRenderer'
-import { getLessonBySlug, getLessonMetadataBySlug, getLessonsSlugs } from '@/services/lesson'
+import { getLessonBySlug, getLessonMetadataBySlug } from '@/services/lesson'
 import { getUserWithSubscriptionDetails } from '@/services/user'
 import { UserWithSubscriptionsAndProgress } from '@/types'
 import { userHasAccess } from '@/utils/helpers'
@@ -24,16 +24,8 @@ import { getProgressSnapshot } from '@/actions/getProgressSnapshot'
 import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 import { reportErrorSafely } from '@/lib/sentry'
 
-export async function generateStaticParams() {
-  const lessons = await getLessonsSlugs()
-  return (
-    lessons?.map((lesson) => ({
-      lessonSlug: lesson.slug,
-      sectionSlug: lesson.section.slug,
-      courseSlug: lesson.section.course.slug,
-    })) ?? []
-  )
-}
+// Lesson output depends on the current session and guided-view query.
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata({
   params,

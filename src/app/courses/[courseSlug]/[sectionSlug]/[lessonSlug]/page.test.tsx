@@ -5,6 +5,7 @@ import { cleanup, render, screen } from '@testing-library/react'
 import { getServerSession } from 'next-auth'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Lesson, { generateMetadata } from './page'
+import * as lessonRoute from './page'
 import type { ReactNode } from 'react'
 
 // Mock the imported modules
@@ -31,6 +32,11 @@ describe('Lesson component', () => {
 
   beforeEach(() => {
     vi.resetAllMocks()
+  })
+
+  it('declares request-time rendering without build-time lesson enumeration', () => {
+    expect(lessonRoute.dynamic).toBe('force-dynamic')
+    expect(lessonRoute).not.toHaveProperty('generateStaticParams')
   })
 
   it('renders PremiumCTA when user does not have access', async () => {
