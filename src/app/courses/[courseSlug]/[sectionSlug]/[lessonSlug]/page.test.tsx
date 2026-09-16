@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Lesson, { generateMetadata } from './page'
 import * as lessonRoute from './page'
 import type { ReactNode } from 'react'
+import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_TASK } from '@/lib/g3b-task'
 
 // Mock the imported modules
 vi.mock('next-auth')
@@ -66,12 +67,52 @@ describe('Lesson component', () => {
 
     expect(screen.getByRole('heading', { level: 1, name: 'Test Lesson' })).toBeDefined()
     expect(screen.getByText('Public lesson introduction')).toBeDefined()
+    expect(screen.getByRole('heading', { level: 1, name: 'Test Lesson' }).nextElementSibling)
+      .toBe(screen.getByText('Public lesson introduction'))
     expect(screen.getByText('A free practice question')).toBeDefined()
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' }).closest('article')).not.toBeNull()
     expect(document.body.textContent).not.toContain('PREMIUM_SECRET_CONTENT')
     expect(
       screen.getByRole('link', { name: 'Upgrade to Premium' }),
     ).toBeDefined()
+  })
+
+  it.each([3, 4])('gates the free primary entry on the active %i-question G3B snapshot', async count => {
+    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(userHasAccess).mockReturnValue(false)
+    vi.mocked(getLessonBySlug).mockResolvedValue({
+      id: 'g3b-lesson',
+      contentId: G3B_LESSON_CONTENT_ID,
+      title: 'Longest Common Substring',
+      description: 'The public lesson introduction',
+      serializedBody: { compiledSource: 'PREMIUM_SECRET_CONTENT' },
+      access: 'PREMIUM',
+      section: { slug: 'common-techniques', course: { slug: 'dsa-track' } },
+      problems: G3B_CARD_ORDER.slice(0, count).map((contentId, index) => ({
+        id: `problem-${index}`, contentId, title: index === 3 ? G3B_TASK.title : `Existing task ${index}`,
+        href: index === 3 ? '' : 'https://leetcode.com/problems/example',
+        link: '/courses/dsa-track/common-techniques/longest-common-substring',
+        slug: `problem-${index}`, difficulty: 'MEDIUM', type: 'CODING',
+        question: index === 3 ? G3B_TASK.question : 'Existing free question',
+        serializedQuestion: null, serializedAnswer: { compiledSource: 'free answer' },
+        createdAt: new Date(0), updatedAt: new Date(0), lessonId: 'g3b-lesson',
+      })),
+    })
+    render(await Lesson({ params: {
+      courseSlug: 'dsa-track', sectionSlug: 'common-techniques', lessonSlug: 'longest-common-substring',
+    } }))
+
+    const title = screen.getByRole('heading', { level: 1, name: 'Longest Common Substring' })
+    const entry = screen.queryByRole('link', { name: G3B_TASK.title })
+    if (count === 3) {
+      expect(entry).not.toBeInTheDocument()
+      expect(title.nextElementSibling).toBe(screen.getByText('The public lesson introduction'))
+    } else {
+      expect(entry).toHaveAttribute('href', `#${G3B_TASK.id}`)
+      expect(title.nextElementSibling).toContainElement(entry)
+      expect(screen.getByText(/Prefix, subsequence and edit distance are optional comparisons/)).toBeInTheDocument()
+    }
+    expect(document.body.textContent).not.toContain('PREMIUM_SECRET_CONTENT')
   })
 
   it('renders dynamic Page component when user has access', async () => {

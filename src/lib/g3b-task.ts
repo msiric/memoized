@@ -25,12 +25,28 @@ export const G3B_CARD_ORDER = [
   G3B_TASK.contentId,
 ] as const
 
+function g3bPracticeById<T extends { contentId: string | null }>(
+  lessonContentId: string | null,
+  problems: T[],
+): Map<string | null, T> | null {
+  if (lessonContentId !== G3B_LESSON_CONTENT_ID || problems.length !== G3B_CARD_ORDER.length) return null
+  const byId = new Map(problems.map(problem => [problem.contentId, problem]))
+  if (byId.size !== G3B_CARD_ORDER.length || !G3B_CARD_ORDER.every(id => byId.has(id))) return null
+  return byId
+}
+
+export function hasG3bPractice(
+  lessonContentId: string | null,
+  problems: { contentId: string | null }[],
+): boolean {
+  return g3bPracticeById(lessonContentId, problems) !== null
+}
+
 export function orderG3bPractice<T extends { contentId: string | null }>(
   lessonContentId: string | null,
   problems: T[],
 ): T[] {
-  if (lessonContentId !== G3B_LESSON_CONTENT_ID || problems.length !== G3B_CARD_ORDER.length) return problems
-  const byId = new Map(problems.map(problem => [problem.contentId, problem]))
-  if (byId.size !== G3B_CARD_ORDER.length || !G3B_CARD_ORDER.every(id => byId.has(id))) return problems
+  const byId = g3bPracticeById(lessonContentId, problems)
+  if (!byId) return problems
   return G3B_CARD_ORDER.map(id => byId.get(id)!)
 }

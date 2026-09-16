@@ -58,6 +58,7 @@ const getAllProblemsAndLessons = async () => {
     prisma.problem.findMany({
       select: {
         id: true,
+        contentId: true,
         title: true,
         href: true,
         link: true,
@@ -116,6 +117,7 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
     prisma.problem.findMany({
       select: {
         id: true,
+        contentId: true,
         title: true,
         href: true,
         link: true,
