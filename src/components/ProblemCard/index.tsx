@@ -19,12 +19,13 @@ import { PreserializedMdxRenderer } from '../PreserializedMdxRenderer'
 import { TypeBadge, DifficultyBadge, ThinkingPrompt } from './shared'
 import { trackLearningEvent } from '@/lib/analytics'
 import { isNativeCodingProblem } from '@/lib/problem-presentation'
+import { G3bLocalPractice } from '../G3bLocalPractice'
 
 export type RevealStage = 'collapsed' | 'question' | 'answer'
 
 export type PracticeProblem = Pick<Problem,
   'id' | 'title' | 'type' | 'difficulty' | 'href' | 'question' | 'serializedQuestion' | 'serializedAnswer'
->
+> & Partial<Pick<Problem, 'contentId'>>
 
 export type ProblemCardProps = {
   problem: PracticeProblem
@@ -252,6 +253,8 @@ export const ProblemCard = ({
                   />
                 </motion.div>
               )}
+
+              <G3bLocalPractice problem={problem} />
 
               {/* Stage-specific content */}
               <AnimatePresence mode="wait">

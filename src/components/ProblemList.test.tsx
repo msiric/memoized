@@ -4,6 +4,7 @@ import { ProblemList } from './ProblemList'
 import { useContentStore } from '@/contexts/progress'
 import { useAuthStore } from '@/contexts/auth'
 import type { EnrichedProblem } from '@/types'
+import { G3B_TASK } from '@/lib/g3b-task'
 
 const mocks = vi.hoisted(() => ({
   mark: vi.fn(), session: vi.fn(), track: vi.fn(), router: {},
@@ -63,7 +64,7 @@ describe('Problem bank confirmed controls', () => {
   })
 
   it('opens a native coding task without an empty external title or invented run action', async () => {
-    const native: EnrichedProblem = { ...problem, type: 'CODING', href: '' }
+    const native: EnrichedProblem = { ...problem, ...G3B_TASK }
     render(<ProblemList allProblems={[native]} filteredProblems={[native]} initialLessons={[]} />)
     fireEvent.click(screen.getByRole('button', { name: native.title }))
     const dialog = screen.getByRole('dialog')
@@ -72,6 +73,7 @@ describe('Problem bank confirmed controls', () => {
     expect(within(dialog).queryByRole('link', { name: native.title })).not.toBeInTheDocument()
     expect(within(dialog).queryByRole('link', { name: /Practice on LeetCode/ })).not.toBeInTheDocument()
     expect(within(dialog).getByText('Write and run your solution locally before revealing the answer.')).toBeInTheDocument()
+    expect(within(dialog).getByText('Starter and local commands')).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: /^(Run|Submit)$/ })).not.toBeInTheDocument()
     fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
     await within(dialog).findByText('Free bank answer')

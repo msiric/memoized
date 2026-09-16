@@ -10,6 +10,7 @@ import {
 import { ProblemCard, type PracticeProblem } from './index'
 import { useContentStore } from '@/contexts/progress'
 import { useAuthStore } from '@/contexts/auth'
+import { G3B_TASK } from '@/lib/g3b-task'
 
 const mocks = vi.hoisted(() => ({
   track: vi.fn(),
@@ -55,6 +56,15 @@ function confirmation(completed: boolean) {
 }
 
 describe('Explicit practice actions', () => {
+  it('makes scoped local setup available before the new task answer is revealed', async () => {
+    render(<ProblemCard problem={{ ...problem, ...G3B_TASK }} defaultExpanded />)
+    expect(screen.getByText('Starter and local commands')).toBeInTheDocument()
+    expect(screen.queryByText('Free answer body')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
+    await screen.findByText('Free answer body')
+    expect(screen.getByText('Starter and local commands')).toBeInTheDocument()
+  })
+
   it('presents native coding as local practice with the existing free reveal and completion controls', async () => {
     const native: PracticeProblem = { ...problem, type: 'CODING', href: '' }
     render(<ProblemCard problem={native} defaultExpanded />)

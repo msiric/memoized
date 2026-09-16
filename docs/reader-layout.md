@@ -10,6 +10,9 @@ must use that same alignment. A lesson breadcrumb belongs in the reader header
 slot so its spacing is not added on top of a second page header.
 Long prose tokens may wrap inside narrow nested lists. Preformatted code keeps
 its normal horizontal scroller rather than widening the whole document.
+Tables use normal word wrapping and keep inline-code identifiers intact. Their
+scroll region handles the resulting intrinsic width instead of breaking matrix
+labels into individual characters. Ordinary prose wrapping is unchanged.
 
 The existing PR Build Check now seeds synthetic public lessons, a paid preview,
 introductions and resource views into its fresh `memoized_ci` database. It builds

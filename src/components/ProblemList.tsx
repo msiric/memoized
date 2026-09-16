@@ -3,6 +3,7 @@
 import { trackLearningEvent } from '@/lib/analytics'
 import { PROBLEM_CARD } from '@/constants/designTokens'
 import { isNativeCodingProblem } from '@/lib/problem-presentation'
+import { G3bLocalPractice } from './G3bLocalPractice'
 import { ProblemQuestion } from './ProblemQuestion'
 import { useContentStore } from '@/contexts/progress'
 import { useProblemCompletion } from '@/hooks/useProblemCompletion'
@@ -213,6 +214,8 @@ const ProblemSlideOverContent = ({
           </div>
         </motion.div>
       )}
+
+      <G3bLocalPractice problem={problem} />
 
       {/* Stage-specific content */}
       <AnimatePresence mode="wait">

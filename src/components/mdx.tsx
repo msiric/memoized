@@ -66,7 +66,7 @@ export const a = CustomLink
 export function table({ children, className, ...props }: React.ComponentPropsWithoutRef<'table'>) {
   return (
     <div className="my-8 min-w-0 overflow-x-auto focus-visible:outline-lime-500" role="region" aria-label="Scrollable data table" tabIndex={0}>
-      <table {...props} className={clsx('!my-0', className)}>{children}</table>
+      <table {...props} className={clsx('!my-0 break-normal [&_code]:whitespace-nowrap', className)}>{children}</table>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_LESSON_HREF, G3B_TASK, orderG3bPractice } from './g3b-task'
+import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_LESSON_HREF, G3B_TASK, hasG3bPractice, orderG3bPractice } from './g3b-task'
 import { isNativeCodingProblem } from './problem-presentation'
 
 const ordered: { contentId: string | null; id: string; label: number }[] =
@@ -33,6 +33,12 @@ describe('bounded G3B practice contract', () => {
   it('preserves the old three-question view before real creation', () => {
     const old = ordered.slice(0, 3)
     expect(orderG3bPractice(G3B_LESSON_CONTENT_ID, old)).toBe(old)
+    expect(hasG3bPractice(G3B_LESSON_CONTENT_ID, old)).toBe(false)
+  })
+
+  it('advertises the primary attempt only with the complete active identity set in its own lesson', () => {
+    expect(hasG3bPractice(G3B_LESSON_CONTENT_ID, ordered)).toBe(true)
+    expect(hasG3bPractice('/another/lesson', ordered)).toBe(false)
   })
 
   it.each([
@@ -41,6 +47,7 @@ describe('bounded G3B practice contract', () => {
     { input: [ordered[0], ordered[1], ordered[2], { contentId: null, id: 'missing-id', label: 3 }] },
   ])('never drops or reorders an unexpected catalog shape', ({ input }) => {
     expect(orderG3bPractice(G3B_LESSON_CONTENT_ID, input)).toBe(input)
+    expect(hasG3bPractice(G3B_LESSON_CONTENT_ID, input)).toBe(false)
   })
 })
 

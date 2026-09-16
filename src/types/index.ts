@@ -117,6 +117,7 @@ export type LessonResource = {
 
 export type EnrichedProblem = {
   id: string
+  contentId?: string | null
   title: string
   href: string
   question: string

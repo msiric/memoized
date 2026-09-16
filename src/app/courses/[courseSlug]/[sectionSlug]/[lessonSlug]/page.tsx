@@ -23,6 +23,8 @@ import { TypescriptFirstPass } from '@/components/TypescriptFirstPass'
 import { getProgressSnapshot } from '@/actions/getProgressSnapshot'
 import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 import { reportErrorSafely } from '@/lib/sentry'
+import { G3bPracticeEntry } from '@/components/G3bPracticeEntry'
+import { hasG3bPractice } from '@/lib/g3b-task'
 
 // Lesson output depends on the current session and guided-view query.
 export const dynamic = 'force-dynamic'
@@ -117,6 +119,9 @@ export default async function Lesson({
         : null
   const entryAction = enabled ? <Link href={firstPassHref()} prefetch={false}
     className="block py-1 text-sm font-medium text-lime-700 underline underline-offset-4 dark:text-lime-300">Open the guided first pass</Link> : null
+  const previewAction = entryAction ?? (hasG3bPractice(lesson.contentId, lesson.problems)
+    ? <G3bPracticeEntry lessonContentId={lesson.contentId} problems={lesson.problems} />
+    : null)
   const header = <>
     {breadcrumb}
     {fallbackNotice && <p role="status" className="mb-5 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{fallbackNotice}</p>}
@@ -132,7 +137,9 @@ export default async function Lesson({
       lessonId={lesson.id}
       problems={lesson.problems as Problem[]}
       showNextPage={false}
-    /> : <LessonPreview header={header} actions={entryAction} title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
+    /> : <LessonPreview header={header}
+      actions={previewAction}
+      title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
       <CatalogDirectory title="Continue in this section" items={neighbors.map((item) => ({
         ...item, href: lessonPath(params.courseSlug, params.sectionSlug, item.slug),
       }))} />

@@ -130,7 +130,9 @@ describe('Problem services', () => {
         allProblems: mockProblems,
         lessons: mockLessons,
       })
-      expect(prisma.problem.findMany).toHaveBeenCalled()
+      expect(prisma.problem.findMany).toHaveBeenCalledWith(expect.objectContaining({
+        select: expect.objectContaining({ contentId: true }),
+      }))
       expect(prisma.lesson.findMany).toHaveBeenCalledWith({
         orderBy: { title: 'asc' },
         select: { title: true, slug: true },
