@@ -139,6 +139,18 @@ Integrations   → Stripe (Payments) · Resend (Email) · Sentry (Monitoring)
    yarn dev
    ```
 
+### Builds and migrations
+
+`yarn build` and `yarn build:dev` do not apply database migrations. Prepare the
+intended local database explicitly before building.
+
+Production migrations run once in the GitHub deployment workflow, before the
+Vercel deployment. That step verifies the independently reviewed direct
+database target before running `yarn migrate`. Runtime traffic may keep using
+the pooler, but schema migrations must not run through it or from build hooks.
+Standalone builds and redeployments require an already prepared schema.
+Do not disable Prisma's advisory locking to work around a blocked migration.
+
 ## Tech Stack
 
 | Category   | Technology                                                                   |

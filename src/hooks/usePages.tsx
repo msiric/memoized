@@ -5,6 +5,7 @@ import { LessonResult, SectionResult } from '@/types'
 import { AccessOptions } from '@prisma/client'
 import { usePathname } from 'next/navigation'
 import { useCourseSlug } from './useCourseSlug'
+import { getLessonNavigation, type NavigationPage } from '@/lib/lesson-navigation'
 
 export const usePages = () => {
   const pathname = usePathname()
@@ -49,9 +50,9 @@ export const usePages = () => {
     (page) => page.href === pathname,
   )
 
-  let previousPage: LessonResult | SectionResult | null = null
+  let previousPage: NavigationPage | null = null
   let currentPage: LessonResult | SectionResult | null = null
-  let nextPage: LessonResult | SectionResult | null = null
+  let nextPage: NavigationPage | null = null
 
   const isFirstSection = pathname === courseSections[0].href
   const isStartOfSection = pathname === currentSection.href
@@ -75,18 +76,15 @@ export const usePages = () => {
     nextPage = allPagesInSection[0] || null
   } else if (currentPageIndex !== -1) {
     // We are within a lesson in the section
-    previousPage =
-      currentPageIndex === 0
-        ? currentSection
-        : allPagesInSection[currentPageIndex - 1] || null
+    const neighbors = getLessonNavigation(courseSections, currentSectionIndex, currentPageIndex)
+    previousPage = neighbors.previousPage
     currentPage = allPagesInSection[currentPageIndex]
-    nextPage = isEndOfSection
-      ? nextSection
-      : allPagesInSection[currentPageIndex + 1] || null
+    nextPage = neighbors.nextPage
   }
 
   return {
     isIntroduction,
+    isLesson: currentPageIndex !== -1,
     previousPage,
     currentPage,
     nextPage,

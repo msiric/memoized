@@ -1,10 +1,12 @@
 import { cleanup, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 import { Footer } from './Footer'
 
+const state = vi.hoisted(() => ({ isLesson: false }))
 vi.mock('@/hooks/usePages', () => ({
   usePages: () => ({
+    isLesson: state.isLesson,
     previousPage: { title: 'Previous lesson', href: '/previous' },
     currentPage: { access: 'FREE' },
     nextPage: { title: 'A long next lesson title that must wrap', href: '/next' },
@@ -16,7 +18,16 @@ vi.mock('@/contexts/auth', () => ({
 }))
 
 describe('reader footer layout', () => {
+  beforeEach(() => { state.isLesson = false })
   afterEach(cleanup)
+
+  it('leaves lesson navigation to the server-rendered lesson page', () => {
+    state.isLesson = true
+    render(<Footer width="prose" />)
+    expect(screen.queryByRole('navigation', { name: 'Page navigation' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Previous lesson')).not.toBeInTheDocument()
+    expect(screen.getByText(/Contact:/)).toBeInTheDocument()
+  })
 
   it('uses the same prose column without adding another horizontal inset', () => {
     const { container } = render(<Footer width="prose" />)
