@@ -11,7 +11,10 @@ import slugify from 'slugify'
 import { PRACTICE_PROBLEMS_PREFIX, SLUGIFY_OPTIONS } from '@/constants'
 import { getPanelTitle } from '@/lib/code-panel-title'
 import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
-import { assertG3bSourceTask, G3B_CONFIG_PATH } from './catalog'
+import { G3C_BODY_DESCRIPTION, G3C_BODY_TITLE, G3C_HEADINGS, G3C_LESSON_CONTENT_ID, G3C_LESSON_UID, G3C_OLD_TASK_IDS, G3C_TASK } from '@/lib/g3c-task'
+import { G3C_CONFIG_PATH, G3C_LEGACY_BODY_SHA256, G3C_LESSON_METADATA, G3C_OLD_CONTRACTS } from '@/lib/g3c-publication'
+import { staticHeading } from '@/mdx/static-headings.mjs'
+import { assertG3bSourceTask, assertG3cSourceTask, G3B_CONFIG_PATH } from './catalog'
 
 const parser = remark().use(remarkMdx).use(remarkGfm)
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -23,6 +26,7 @@ export const STRUCTURAL_PROFILE = 'ts-basics-g3a-minimum'
 export const STRUCTURAL_LESSON_UID = 'js-track/typescript-introduction/ts-basics'
 export const ADDITIVE_CHANGE_CLASS = 'single-unit-additive-task-v1'
 export const ADDITIVE_PROFILE = 'g3b-native-task-minimum'
+export const G3C_ADDITIVE_PROFILE = 'g3c-native-task-minimum'
 
 type DefaultChangeClass = typeof DEFAULT_CHANGE_CLASS
 type StructuralChangeClass = typeof STRUCTURAL_CHANGE_CLASS
@@ -36,6 +40,17 @@ export type ReleaseScopeOptions = {
 const STRUCTURAL_CONFIG_PATH = 'content/js-track/typescript-introduction/_lessons.json'
 const STRUCTURAL_LESSON_PATH = 'content/js-track/typescript-introduction/ts-basics/page.mdx'
 const ALLOWED_CODE_LANGUAGES = new Set(['bash', 'javascript', 'js', 'json', 'text', 'typescript', 'ts'])
+const G3C_CODE_LANGUAGES = new Set([...ALLOWED_CODE_LANGUAGES, 'jsx', 'tsx', 'css', 'html'])
+type SurfacePolicy = { g3c?: boolean; legacySha256?: string; disclosureLabel?: string }
+
+function answerSurfacePolicy(g3c: boolean, problemId: string): SurfacePolicy {
+  if (!g3c) return {}
+  return {
+    g3c: true,
+    legacySha256: G3C_OLD_CONTRACTS.find(item => item.id === problemId)?.answerSha256,
+    disclosureLabel: problemId === G3C_TASK.id ? 'Open the complete reference files' : undefined,
+  }
+}
 
 export const digest = (value: string | Buffer) =>
   createHash('sha256').update(value).digest('hex')
@@ -52,12 +67,13 @@ export function normalizeReleaseScopeOptions(options: ReleaseScopeOptions = {}):
   const changeClass = parseChangeClass(options.changeClass)
   const lesson = options.lesson ?? ''
   if (changeClass === DEFAULT_CHANGE_CLASS) {
-    if (lesson) throw new Error(`--lesson is only supported with ${STRUCTURAL_CHANGE_CLASS}`)
+    if (lesson) throw new Error('--lesson is only supported with an explicit structural or additive change class')
     return { changeClass, lesson: '' }
   }
-  const expectedLesson = changeClass === ADDITIVE_CHANGE_CLASS ? G3B_LESSON_UID : STRUCTURAL_LESSON_UID
-  if (lesson !== expectedLesson) {
-    throw new Error(`${changeClass} requires --lesson ${expectedLesson}`)
+  const expectedLessons = changeClass === ADDITIVE_CHANGE_CLASS
+    ? [G3B_LESSON_UID, G3C_LESSON_UID] : [STRUCTURAL_LESSON_UID]
+  if (!expectedLessons.includes(lesson)) {
+    throw new Error(`${changeClass} requires --lesson ${expectedLessons.join(' or ')}`)
   }
   return { changeClass, lesson }
 }
@@ -65,7 +81,8 @@ export function normalizeReleaseScopeOptions(options: ReleaseScopeOptions = {}):
 function structure(value: unknown, heading = false): unknown {
   if (Array.isArray(value)) return value.map((item) => structure(item, heading))
   if (!isRecord(value)) return value
-  const inHeading = heading || value.type === 'heading'
+  const inHeading = heading || value.type === 'heading' ||
+    ((value.type === 'mdxJsxFlowElement' || value.type === 'mdxJsxTextElement') && value.name === 'h2')
   return Object.fromEntries(Object.entries(value)
     .filter(([key]) => key !== 'position' && key !== 'data')
     .map(([key, item]) => [
@@ -247,14 +264,14 @@ export type MdxSurfaceEvidence = {
   links: LinkEvidence[]
   codeBlocks: CodeBlockEvidence[]
   codeGroups: CodeGroupEvidence[]
-  components: { name: 'Note' | 'CodeGroup'; count: number }[]
+  components: { name: 'Note' | 'CodeGroup' | 'details'; count: number }[]
 }
 export type StructuralField =
   | { kind: 'lesson'; lesson: string; contentId: string; sourcePath: string; field: 'body' }
   | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'answer' }
 export type StructuralSurfaceReport = {
   changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS
-  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE
+  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE | typeof G3C_ADDITIVE_PROFILE
   lesson: string
   allowedChangedFields: StructuralField[]
   changedSurfaces: {
@@ -315,25 +332,39 @@ function childrenOf(node: unknown): unknown[] {
   return isRecord(node) && Array.isArray(node.children) ? node.children : []
 }
 
-function codeEvidence(node: Record<string, unknown>, inCodeGroup: boolean): CodeBlockEvidence {
+function codeEvidence(node: Record<string, unknown>, inCodeGroup: boolean, policy: SurfacePolicy = {}): CodeBlockEvidence {
   if (typeof node.value !== 'string' || !node.value.trim()) {
     throw new Error('Empty code panel is not supported in the structural class')
   }
-  if (typeof node.lang !== 'string' || !ALLOWED_CODE_LANGUAGES.has(node.lang)) {
+  const legacyLanguage = policy.legacySha256 && (node.lang == null || node.lang === 'python' || node.lang === 'plaintext')
+  if (!legacyLanguage && (typeof node.lang !== 'string' ||
+      !(policy.g3c ? G3C_CODE_LANGUAGES : ALLOWED_CODE_LANGUAGES).has(node.lang))) {
     throw new Error(`Unsupported code fence language in structural class: ${String(node.lang)}`)
   }
   if (node.meta !== null && node.meta !== undefined) {
     throw new Error('Code fence metadata is not supported in the structural class')
   }
   return {
-    language: node.lang,
+    language: typeof node.lang === 'string' ? node.lang : '',
     lines: node.value.split('\n').length,
     inCodeGroup,
     hasMeta: false,
   }
 }
 
-function validatePhrasingNode(node: unknown, label: string, links: LinkEvidence[]): void {
+function literalG3cHeading(node: Record<string, unknown>, label: string): AnchorEvidence {
+  // remark parses a standalone single-line JSX heading as text JSX inside a
+  // paragraph; the reader's MDX pipeline promotes it to flow JSX before rehype.
+  const heading = staticHeading(node.type === 'mdxJsxTextElement'
+    ? { ...node, type: 'mdxJsxFlowElement' } : node)
+  if (!heading || !Object.hasOwn(G3C_HEADINGS, heading.id) ||
+      heading.title !== G3C_HEADINGS[heading.id as keyof typeof G3C_HEADINGS]) {
+    throw new Error(`Only exact static G3C h2 ID/title pairs with one literal id and plain text are supported: ${label}`)
+  }
+  return { text: heading.title, id: heading.id }
+}
+
+function validatePhrasingNode(node: unknown, label: string, links: LinkEvidence[], policy: SurfacePolicy = {}): void {
   if (!isRecord(node) || typeof node.type !== 'string') {
     throw new Error(`Unsupported MDX node in ${label}`)
   }
@@ -344,13 +375,13 @@ function validatePhrasingNode(node: unknown, label: string, links: LinkEvidence[
       return
     case 'emphasis':
     case 'strong':
-      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, links))
+      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, links, policy))
       return
     case 'link': {
       if (typeof node.url !== 'string' || node.title !== null) {
         throw new Error(`Unsupported link form in ${label}`)
       }
-      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, links))
+      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, links, policy))
       links.push({ text: toString(node), href: node.url, kind: 'internal' })
       return
     }
@@ -364,6 +395,7 @@ function validateFlowNode(
   label: string,
   evidence: MdxSurfaceEvidence,
   inCodeGroup = false,
+  policy: SurfacePolicy = {},
 ): void {
   if (!isRecord(node) || typeof node.type !== 'string') {
     throw new Error(`Unsupported MDX node in ${label}`)
@@ -375,43 +407,72 @@ function validateFlowNode(
       if (typeof node.depth !== 'number' || node.depth < 1 || node.depth > 6) {
         throw new Error(`Unsupported heading depth in ${label}`)
       }
-      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links))
+      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links, policy))
       return
-    case 'paragraph':
-      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links))
+    case 'paragraph': {
+      const children = childrenOf(node)
+      const onlyChild = children[0]
+      if (policy.g3c && children.length === 1 && isRecord(onlyChild) &&
+          onlyChild.type === 'mdxJsxTextElement' && onlyChild.name === 'h2') {
+        literalG3cHeading(onlyChild, label)
+        return
+      }
+      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links, policy))
       return
+    }
     case 'list':
       if (typeof node.ordered !== 'boolean') throw new Error(`Unsupported list form in ${label}`)
-      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence))
+      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence, false, policy))
       return
     case 'listItem':
       if (node.checked !== null && node.checked !== undefined) {
         throw new Error(`Task-list items are not supported in ${label}`)
       }
-      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence))
+      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence, false, policy))
       return
     case 'blockquote':
-      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence))
+      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence, false, policy))
       return
     case 'table':
-      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence))
+      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence, false, policy))
       return
     case 'tableRow':
-      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence))
+      childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence, false, policy))
       return
     case 'tableCell':
-      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links))
+      childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links, policy))
       return
     case 'code':
-      evidence.codeBlocks.push(codeEvidence(node, inCodeGroup))
+      evidence.codeBlocks.push(codeEvidence(node, inCodeGroup, policy))
       return
     case 'mdxJsxFlowElement': {
       const name = node.name
       const attributes = Array.isArray(node.attributes) ? node.attributes : []
+      if (name === 'h2' && policy.g3c) {
+        literalG3cHeading(node, label)
+        return
+      }
+      if (name === 'details' && policy.g3c && policy.disclosureLabel) {
+        const [first, ...contents] = childrenOf(node)
+        const summary = isRecord(first) && first.type === 'paragraph' && childrenOf(first).length === 1
+          ? childrenOf(first)[0] : first
+        const text = childrenOf(summary)
+        if (attributes.length || !isRecord(summary) ||
+            !['mdxJsxFlowElement', 'mdxJsxTextElement'].includes(String(summary.type)) ||
+            summary.name !== 'summary' || !Array.isArray(summary.attributes) || summary.attributes.length ||
+            text.length !== 1 || !isRecord(text[0]) || text[0].type !== 'text' ||
+            text[0].value !== policy.disclosureLabel || !contents.length ||
+            evidence.components.some(component => component.name === 'details')) {
+          throw new Error(`Only one attribute-free G3C file disclosure with its exact plain-text summary is supported: ${label}`)
+        }
+        evidence.components.push({ name: 'details', count: 1 })
+        contents.forEach(child => validateFlowNode(child, label, evidence, false, { ...policy, disclosureLabel: undefined }))
+        return
+      }
       if (name === 'Note') {
         if (attributes.length) throw new Error(`Note attributes are not supported in ${label}`)
         evidence.components.push({ name: 'Note', count: 1 })
-        childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence))
+        childrenOf(node).forEach((child) => validateFlowNode(child, label, evidence, false, policy))
         return
       }
       if (name === 'CodeGroup') {
@@ -424,7 +485,7 @@ function validateFlowNode(
           if (!isRecord(panel) || panel.type !== 'code') {
             throw new Error(`CodeGroup may contain only code panels in ${label}`)
           }
-          const code = codeEvidence(panel, true)
+          const code = codeEvidence(panel, true, policy)
           const panelLabel = getPanelTitle({ language: code.language })
           if (panelLabels.has(panelLabel)) {
             throw new Error(`Duplicate rendered CodeGroup panel label in ${label}: ${panelLabel}`)
@@ -455,14 +516,21 @@ function headingEvidence(tree: unknown) {
   const h1: string[] = []
   const h2: AnchorEvidence[] = []
   const counter = slugifyWithCounter()
-  function visitNode(node: unknown) {
+  function visitNode(node: unknown, parent?: unknown) {
     if (!isRecord(node)) return
     if (node.type === 'heading') {
       const text = toString(node)
       if (node.depth === 1) h1.push(text)
       if (node.depth === 2) h2.push({ text, id: counter(text) })
     }
-    childrenOf(node).forEach(visitNode)
+    if ((node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') && node.name === 'h2') {
+      if (node.type === 'mdxJsxTextElement' &&
+          (!isRecord(parent) || parent.type !== 'paragraph' || childrenOf(parent).length !== 1)) {
+        throw new Error('A literal G3C h2 must be a standalone heading, not inline phrasing')
+      }
+      h2.push(literalG3cHeading(node, 'heading inventory'))
+    }
+    childrenOf(node).forEach(child => visitNode(child, node))
   }
   visitNode(tree)
   return { h1, h2 }
@@ -472,7 +540,11 @@ function emptyEvidence(): MdxSurfaceEvidence {
   return { h1: [], h2: [], links: [], codeBlocks: [], codeGroups: [], components: [] }
 }
 
-function summarizeMdx(markdown: string, label: string, allowMetadataExport: boolean): MdxSurfaceEvidence {
+function summarizeMdx(markdown: string, label: string, allowMetadataExport: boolean, requestedPolicy: SurfacePolicy = {}): MdxSurfaceEvidence {
+  const policy = {
+    ...requestedPolicy,
+    legacySha256: requestedPolicy.legacySha256 === digest(markdown) ? requestedPolicy.legacySha256 : undefined,
+  }
   const tree = parser.parse(markdown)
   const evidence = emptyEvidence()
   const esmValues = topLevelEsmValues(tree)
@@ -486,11 +558,22 @@ function summarizeMdx(markdown: string, label: string, allowMetadataExport: bool
   }
   for (const child of childrenOf(tree)) {
     if (isRecord(child) && child.type === 'mdxjsEsm') continue
-    validateFlowNode(child, label, evidence)
+    validateFlowNode(child, label, evidence, false, policy)
   }
   const headings = headingEvidence(tree)
   evidence.h1 = headings.h1
   evidence.h2 = headings.h2
+  if (policy.g3c && !policy.legacySha256) {
+    if (allowMetadataExport) {
+      assertG3cBodyMetadata(tree, label)
+      if (!isDeepStrictEqual(evidence.h1, [G3C_BODY_TITLE]) ||
+          !isDeepStrictEqual(evidence.h2, Object.entries(G3C_HEADINGS).map(([id, text]) => ({ id, text })))) {
+        throw new Error(`G3C requires the exact approved body H1 and nine heading destinations: ${label}`)
+      }
+    } else if (evidence.h1.length || evidence.h2.length) {
+      throw new Error(`G3C question/answer sections must use H3 or deeper, not H1/H2: ${label}`)
+    }
+  }
   evidence.components = [...new Map(evidence.components.map((item) => [item.name, {
     name: item.name,
     count: evidence.components.filter((component) => component.name === item.name).length,
@@ -498,23 +581,57 @@ function summarizeMdx(markdown: string, label: string, allowMetadataExport: bool
   return evidence
 }
 
+function assertG3cBodyMetadata(tree: unknown, label: string) {
+  const esm = childrenOf(tree).find(node => isRecord(node) && node.type === 'mdxjsEsm')
+  const program = isRecord(esm) && isRecord(esm.data) ? esm.data.estree : undefined
+  const statements = isRecord(program) && Array.isArray(program.body) ? program.body : []
+  const statement = statements[0]
+  const declaration = isRecord(statement) ? statement.declaration : undefined
+  const declarations = isRecord(declaration) && Array.isArray(declaration.declarations) ? declaration.declarations : []
+  const variable = declarations[0]
+  const object = isRecord(variable) ? variable.init : undefined
+  const properties = isRecord(object) && Array.isArray(object.properties) ? object.properties : []
+  const values: Record<string, unknown> = {}
+  if (statements.length !== 1 || !isRecord(statement) || statement.type !== 'ExportNamedDeclaration' ||
+      !isRecord(declaration) || declaration.type !== 'VariableDeclaration' || declaration.kind !== 'const' ||
+      declarations.length !== 1 || !isRecord(variable) || !isRecord(variable.id) ||
+      variable.id.type !== 'Identifier' || variable.id.name !== 'metadata' ||
+      !isRecord(object) || object.type !== 'ObjectExpression' || properties.length !== 2) {
+    throw new Error(`G3C requires only the approved static metadata export: ${label}`)
+  }
+  for (const property of properties) {
+    if (!isRecord(property) || property.type !== 'Property' || property.kind !== 'init' ||
+        property.computed || property.method || property.shorthand || !isRecord(property.key) ||
+        !isRecord(property.value) || property.value.type !== 'Literal' || typeof property.value.value !== 'string') {
+      throw new Error(`G3C metadata must contain only static title/description strings: ${label}`)
+    }
+    const key = property.key.type === 'Identifier' ? property.key.name : property.key.value
+    if (typeof key !== 'string' || Object.hasOwn(values, key)) throw new Error(`Duplicate G3C metadata property: ${label}`)
+    values[key] = property.value.value
+  }
+  if (!isDeepStrictEqual(values, { title: G3C_BODY_TITLE, description: G3C_BODY_DESCRIPTION })) {
+    throw new Error(`Unapproved G3C body metadata: ${label}`)
+  }
+}
+
 function assertStructuralMdxSurface(
   before: string,
   after: string,
   label: string,
   allowMetadataExport: boolean,
+  policy: SurfacePolicy = {},
 ) {
   if (!after.trim()) throw new Error(`Empty content is not supported in the structural class: ${label}`)
   const beforeTree = parser.parse(before)
   const afterTree = parser.parse(after)
   const beforeEsm = topLevelEsmValues(beforeTree)
   const afterEsm = topLevelEsmValues(afterTree)
-  if (!isDeepStrictEqual(beforeEsm, afterEsm)) {
+  if (!policy.g3c && !isDeepStrictEqual(beforeEsm, afterEsm)) {
     throw new Error(`Metadata export/import surface changed in structural class: ${label}`)
   }
-  const beforeEvidence = summarizeMdx(before, label, allowMetadataExport)
-  const afterEvidence = summarizeMdx(after, label, allowMetadataExport)
-  if (!isDeepStrictEqual(beforeEvidence.h1, afterEvidence.h1)) {
+  const beforeEvidence = summarizeMdx(before, label, allowMetadataExport, policy)
+  const afterEvidence = summarizeMdx(after, label, allowMetadataExport, policy)
+  if (!policy.g3c && !isDeepStrictEqual(beforeEvidence.h1, afterEvidence.h1)) {
     throw new Error(`H1 text changed in structural class: ${label}`)
   }
   const afterH2 = new Set(afterEvidence.h2.map((heading) => heading.id))
@@ -588,8 +705,8 @@ function idsFrom(evidence: MdxSurfaceEvidence, label?: string) {
   return ids
 }
 
-function state(label: string, markdown: string, allowMetadataExport: boolean): SurfaceState {
-  const evidence = summarizeMdx(markdown, label, allowMetadataExport)
+function state(label: string, markdown: string, allowMetadataExport: boolean, policy: SurfacePolicy = {}): SurfaceState {
+  const evidence = summarizeMdx(markdown, label, allowMetadataExport, policy)
   return { label, evidence, ids: idsFrom(evidence, label) }
 }
 
@@ -635,11 +752,16 @@ function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = S
       if (lesson.problems.length) ids.add(PRACTICE_PROBLEMS_PREFIX.slice(1))
       addRoute(lesson.route, ids)
       if (lesson.sourceUid === selectedUid) {
-        const body = state(`${label} ${lesson.bodyPath}`, bodyRaw.toString('utf8'), true)
+        const g3c = selectedUid === G3C_LESSON_UID
+        const body = state(`${label} ${lesson.bodyPath}`, bodyRaw.toString('utf8'), true,
+          g3c ? { g3c, legacySha256: G3C_LEGACY_BODY_SHA256 } : {})
         const questions = lesson.problems.map((problem) =>
-          state(`${label} ${lesson.sourceUid} question ${problem.id}`, problem.question, false))
+          state(`${label} ${lesson.sourceUid} question ${problem.id}`, problem.question, false, {
+            g3c, disclosureLabel: g3c && problem.id === G3C_TASK.id ? 'Open the complete starter files' : undefined,
+          }))
         const answers = lesson.problems.map((problem) =>
-          state(`${label} ${lesson.sourceUid} answer ${problem.id}`, problem.answer, false))
+          state(`${label} ${lesson.sourceUid} answer ${problem.id}`, problem.answer, false,
+            answerSurfacePolicy(g3c, problem.id)))
         selectedLesson = { lesson, body, questions, answers, cardAnchors }
       }
     }
@@ -655,6 +777,11 @@ function selectedLessonConfig(config: ParsedConfig, filename: string, selectedUi
     if (![3, 4].includes(lesson.problems.length) ||
         lesson.problems.some((problem, index) => problem.contentId !== G3B_CARD_ORDER[index])) {
       throw new Error('G3B requires the three unchanged cards and only the optional fourth canonical task')
+    }
+  } else if (selectedUid === G3C_LESSON_UID) {
+    const ids = [...G3C_OLD_TASK_IDS, G3C_TASK.id]
+    if (![5, 6].includes(lesson.problems.length) || lesson.problems.some((problem, index) => problem.id !== ids[index])) {
+      throw new Error('G3C requires the five unchanged cards and only the optional sixth canonical task')
     }
   } else if (lesson.problems.length !== 5 || lesson.problems.some((problem) => !problem.id)) {
     throw new Error(`${STRUCTURAL_CHANGE_CLASS} requires the existing five TS Basics problem records`)
@@ -719,17 +846,33 @@ function assertNoPairwiseAnchorConflicts(
 function structuralScope(baseRoot: string, candidateRoot: string, lesson: string, changeClass: StructuralSurfaceReport['changeClass']): ScopeReport {
   normalizeReleaseScopeOptions({ changeClass, lesson })
   const additive = changeClass === ADDITIVE_CHANGE_CLASS
-  const configPath = additive ? G3B_CONFIG_PATH : STRUCTURAL_CONFIG_PATH
-  const lessonPath = additive ? `content/${G3B_LESSON_UID}/page.mdx` : STRUCTURAL_LESSON_PATH
+  const g3c = additive && lesson === G3C_LESSON_UID
+  const nativeTask = g3c ? G3C_TASK : G3B_TASK
+  const taskName = g3c ? 'G3C' : 'G3B'
+  const configPath = g3c ? G3C_CONFIG_PATH : additive ? G3B_CONFIG_PATH : STRUCTURAL_CONFIG_PATH
+  const lessonPath = additive ? `content/${lesson}/page.mdx` : STRUCTURAL_LESSON_PATH
   const before = payloadFiles(baseRoot)
   const after = payloadFiles(candidateRoot)
   if (!isDeepStrictEqual([...before.keys()], [...after.keys()])) {
     throw new Error('Structural publishing cannot add, remove or move payload files')
   }
-  const beforeTask = validateKnownSourceTask(before)
-  const afterTask = validateKnownSourceTask(after)
-  if (beforeTask && !isDeepStrictEqual(beforeTask, afterTask)) {
+  const beforeG3b = validateKnownSourceTask(before)
+  const afterG3b = validateKnownSourceTask(after)
+  const beforeG3c = validateKnownG3cSourceTask(before)
+  const afterG3c = validateKnownG3cSourceTask(after)
+  if ((g3c || beforeG3c || afterG3c) && (!beforeG3b || !afterG3b)) {
+    throw new Error('G3C requires the complete retained G3B task in both catalogs')
+  }
+  if ((g3c || beforeG3b) && !isDeepStrictEqual(beforeG3b, afterG3b)) {
     throw new Error('The retained G3B task is immutable; recovery must keep its complete record')
+  }
+  if ((!g3c || beforeG3c) && !isDeepStrictEqual(beforeG3c, afterG3c)) {
+    throw new Error('The retained G3C task is immutable; creation requires its exact selected profile')
+  }
+  const beforeTask = g3c ? beforeG3c : beforeG3b
+  const afterTask = g3c ? afterG3c : afterG3b
+  if (beforeTask && !isDeepStrictEqual(beforeTask, afterTask)) {
+    throw new Error(`The retained ${taskName} task is immutable; recovery must keep its complete record`)
   }
   const selectedBeforeRaw = before.get(configPath)
   const selectedAfterRaw = after.get(configPath)
@@ -742,7 +885,7 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
   const selectedAfter = selectedLessonConfig(selectedAfterConfig, configPath, lesson)
   if (additive && !beforeTask && afterTask) {
     const metadata = selectedAfterConfig.metadata as { lessons: { id: string; problems: unknown[] }[] }
-    metadata.lessons.find(item => item.id === '/longest-common-substring')!.problems.pop()
+    metadata.lessons.find(item => item.id === selectedAfter.id)!.problems.pop()
   }
   if (!isDeepStrictEqual(selectedBeforeConfig.metadata, selectedAfterConfig.metadata)) {
     throw new Error(`Metadata, question contract, identity or ordering change: ${configPath}`)
@@ -755,7 +898,7 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
     if (baselineLesson.sourceUid === lesson) return
     baselineLesson.problems.forEach((problem, problemIndex) => {
       if (problem.answer !== candidateLesson.problems[problemIndex]?.answer) {
-        throw new Error(`Only ${additive ? 'G3B' : 'TS Basics'} answers may change in ${configPath}`)
+        throw new Error(`Only ${additive ? taskName : 'TS Basics'} answers may change in ${configPath}`)
       }
     })
   })
@@ -785,7 +928,7 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
   }
   // Creation precedes all dependent old-field writes, so this one card exists
   // in every admitted mixed state. No other candidate-only anchor is admitted.
-  if (additive && afterTask) baseCatalog.routes.get(selectedBefore.route)!.add(G3B_TASK.id)
+  if (additive && afterTask) baseCatalog.routes.get(selectedBefore.route)!.add(nativeTask.id)
   const changedFiles: ScopeReport['changedFiles'] = []
   const changedSurfaces: StructuralSurfaceReport['changedSurfaces'] = []
 
@@ -801,11 +944,15 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
     }
     addChangedFile(filename, oldBody, newBody)
   }
+  if (g3c && changedFiles.length && !afterTask) {
+    throw new Error('G3C authored changes require the complete canonical task before dependent writes')
+  }
 
   if (!before.get(lessonPath)) throw new Error(`Selected structural lesson body missing: ${lessonPath}`)
   const beforeBody = before.get(lessonPath)!.toString('utf8')
   const afterBody = after.get(lessonPath)!.toString('utf8')
-  const bodyEvidence = assertStructuralMdxSurface(beforeBody, afterBody, lessonPath, true)
+  const bodyEvidence = assertStructuralMdxSurface(beforeBody, afterBody, lessonPath, true,
+    g3c ? { g3c, legacySha256: G3C_LEGACY_BODY_SHA256 } : {})
   bodyEvidence.before.links = validateLinks(bodyEvidence.before, selectedBefore.route, [baseCatalog, candidateCatalog], lessonPath)
   bodyEvidence.after.links = validateLinks(bodyEvidence.after, selectedBefore.route, [baseCatalog, candidateCatalog], lessonPath)
   if (beforeBody !== afterBody) {
@@ -827,6 +974,7 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
       candidate.answer,
       `${configPath} answer ${problem.id}`,
       false,
+      answerSurfacePolicy(g3c, problem.id),
     )
     evidence.before.links = validateLinks(evidence.before, selectedBefore.route, [baseCatalog, candidateCatalog], `${problem.id} answer`)
     evidence.after.links = validateLinks(evidence.after, selectedBefore.route, [baseCatalog, candidateCatalog], `${problem.id} answer`)
@@ -841,17 +989,17 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
   })
 
   const nativeSurfaces = additive && afterTask ? {
-    answer: candidateCatalog.selectedLesson.answers[3].evidence,
-    question: candidateCatalog.selectedLesson.questions[3].evidence,
+    answer: candidateCatalog.selectedLesson.answers[g3c ? 5 : 3].evidence,
+    question: candidateCatalog.selectedLesson.questions[g3c ? 5 : 3].evidence,
   } : undefined
   if (nativeSurfaces) {
-    nativeSurfaces.answer.links = validateLinks(nativeSurfaces.answer, selectedBefore.route, [baseCatalog, candidateCatalog], 'G3B free answer')
-    nativeSurfaces.question.links = validateLinks(nativeSurfaces.question, selectedBefore.route, [baseCatalog, candidateCatalog], 'G3B question')
+    nativeSurfaces.answer.links = validateLinks(nativeSurfaces.answer, selectedBefore.route, [baseCatalog, candidateCatalog], `${taskName} free answer`)
+    nativeSurfaces.question.links = validateLinks(nativeSurfaces.question, selectedBefore.route, [baseCatalog, candidateCatalog], `${taskName} question`)
   }
   const anchorConflictProof = assertNoPairwiseAnchorConflicts(baseCatalog.selectedLesson, candidateCatalog.selectedLesson)
   const allowedChangedFields: StructuralField[] = [
     { kind: 'lesson', lesson, contentId: selectedBefore.contentId, sourcePath: lessonPath, field: 'body' },
-    ...selectedBefore.problems.filter(problem => problem.contentId !== G3B_TASK.contentId).map((problem): StructuralField => ({
+    ...selectedBefore.problems.filter(problem => problem.contentId !== nativeTask.contentId).map((problem): StructuralField => ({
       kind: 'problem', lesson, contentId: problem.contentId,
       configPath, problemId: problem.id, title: problem.title, field: 'answer',
     })),
@@ -866,12 +1014,12 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
   return {
     changedFiles,
     ...(additive && !beforeTask && afterTask && nativeSurfaces ? { addition: {
-      contentId: G3B_TASK.contentId, questionSha256: digest(G3B_TASK.question), answerSha256: digest(afterTask.answer),
+      contentId: nativeTask.contentId, questionSha256: digest(selectedAfter.problems.at(-1)!.question), answerSha256: digest(afterTask.answer),
       ...nativeSurfaces,
     } } : {}),
     structural: {
       changeClass,
-      profile: additive ? ADDITIVE_PROFILE : STRUCTURAL_PROFILE,
+      profile: g3c ? G3C_ADDITIVE_PROFILE : additive ? ADDITIVE_PROFILE : STRUCTURAL_PROFILE,
       lesson,
       allowedChangedFields,
       changedSurfaces,
@@ -880,9 +1028,11 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
       limits: [
         'Eligibility and compatibility only; pedagogical correctness, free-feedback sufficiency and human approval are not established.',
         'External HTTPS destinations are syntax-checked and recorded for review, not semantically verified.',
-        additive ? 'Only the selected G3B body, three old answers and the complete canonical fourth task are writable; the retained task is immutable.' : 'Only the selected TS Basics body and its existing five answer fields are writable in this profile.',
+        g3c ? 'Only the selected G3C body, five old answers and the complete canonical sixth task are writable. Both retained native tasks are immutable. Final full-question/setup binding and independent review are required.'
+          : additive ? 'Only the selected G3B body, three old answers and the complete canonical fourth task are writable; the retained task is immutable.' : 'Only the selected TS Basics body and its existing five answer fields are writable in this profile.',
         additive ? 'Only the canonical new task card may be a candidate-only link target, after complete creation. All other links must resolve in both source catalogs.' : 'Local fragment links must resolve in both base and candidate source catalogs; links to newly introduced anchors are rejected in this minimum profile.',
-        'Recovery plans must retain every H2 anchor present in the current base source. Literal reversal that removes published anchors fails closed; use an explicitly reviewed compatible recovery source instead.',
+        g3c ? 'Only hash-frozen legacy body/answers may use the legacy fence exceptions. Restoring that exact body also restores its legacy export/H1 pair; this is compatibility, not quality endorsement.'
+          : 'Recovery plans must retain every H2 anchor present in the current base source. Literal reversal that removes published anchors fails closed; use an explicitly reviewed compatible recovery source instead.',
         'Same-field generated navigation and reader hash behavior still require real reader evidence outside this machine scope check.',
       ],
     },
@@ -897,7 +1047,8 @@ function validateKnownSourceTask(files: Map<string, Buffer>) {
     const config = JSON.parse(raw.toString('utf8'))
     for (const lesson of config.lessons ?? []) {
       for (const problem of lesson.problems ?? []) {
-        if (problem.id !== G3B_TASK.id && problem.title !== G3B_TASK.title) continue
+        if (problem.id !== G3B_TASK.id && problem.title !== G3B_TASK.title &&
+            (typeof problem.title !== 'string' || slugify(problem.title, SLUGIFY_OPTIONS) !== G3B_TASK.slug)) continue
         if (task) throw new Error('Duplicate G3B source task identity')
         task = assertG3bSourceTask(problem, `/${match[1]}/${match[2]}${lesson.id}`)
         const selected = parseDetailedConfig(raw, filename).lessons.find(item => item.contentId === G3B_LESSON_CONTENT_ID)
@@ -910,8 +1061,52 @@ function validateKnownSourceTask(files: Map<string, Buffer>) {
   return task
 }
 
+function validateKnownG3cSourceTask(files: Map<string, Buffer>) {
+  let task: ReturnType<typeof assertG3cSourceTask> | undefined
+  for (const [filename, raw] of files) {
+    const match = /^content\/([^/]+)\/([^/]+)\/_lessons\.json$/.exec(filename)
+    if (!match) continue
+    const config = JSON.parse(raw.toString('utf8'))
+    for (const lesson of config.lessons ?? []) {
+      const contentId = `/${match[1]}/${match[2]}${lesson.id}`
+      if (contentId === G3C_LESSON_CONTENT_ID) {
+        const { problems, ...metadata } = lesson
+        if (!isDeepStrictEqual(metadata, G3C_LESSON_METADATA) || !Array.isArray(problems) ||
+            ![5, 6].includes(problems.length)) throw new Error('G3C canonical lesson metadata and five old tasks must be preserved')
+        G3C_OLD_CONTRACTS.forEach((contract, index) => {
+          const problem = problems[index]
+          if (!isRecord(problem) || typeof problem.question !== 'string' || typeof problem.answer !== 'string') {
+            throw new Error('Missing G3C old question/answer')
+          }
+          const { question, answer: _answer, ...problemMetadata } = problem
+          if (digest(question) !== contract.questionSha256 || !isDeepStrictEqual(problemMetadata, {
+            id: contract.id, title: contract.title, difficulty: contract.difficulty, type: 'THEORY', href: '',
+          })) throw new Error('G3C old question contract, identity, metadata or ordering changed')
+        })
+        if (problems.length === 6 && problems[5]?.id !== G3C_TASK.id) {
+          throw new Error('Only the exact G3C source-sixth task is permitted')
+        }
+      }
+      for (const problem of lesson.problems ?? []) {
+        if (problem.id !== G3C_TASK.id && problem.title !== G3C_TASK.title &&
+            (typeof problem.title !== 'string' || slugify(problem.title, SLUGIFY_OPTIONS) !== G3C_TASK.slug)) continue
+        if (task) throw new Error('Duplicate G3C source task identity')
+        task = assertG3cSourceTask(problem, contentId)
+        if (lesson.problems.length !== 6 || lesson.problems[5] !== problem) {
+          throw new Error('G3C requires exactly five old cards followed by its native task')
+        }
+      }
+    }
+  }
+  return task
+}
+
 export function assertKnownSourceCatalog(root: string) {
-  return validateKnownSourceTask(payloadFiles(root))
+  const files = payloadFiles(root)
+  const g3b = validateKnownSourceTask(files)
+  const g3c = validateKnownG3cSourceTask(files)
+  if (g3c && !g3b) throw new Error('G3C requires the complete retained G3B task')
+  return g3b
 }
 
 /** Scope is stricter than ordinary MDX validity; semantic independence still needs review. */
@@ -928,6 +1123,14 @@ export function assertInPlaceScope(
   const after = payloadFiles(candidateRoot)
   const beforeTask = validateKnownSourceTask(before)
   const afterTask = validateKnownSourceTask(after)
+  const beforeG3c = validateKnownG3cSourceTask(before)
+  const afterG3c = validateKnownG3cSourceTask(after)
+  if (!isDeepStrictEqual(beforeG3c, afterG3c)) {
+    throw new Error('The G3C task is immutable outside its approved creation')
+  }
+  if ((beforeG3c || afterG3c) && (!beforeTask || !afterTask)) {
+    throw new Error('G3C requires the complete retained G3B task')
+  }
   if (!isDeepStrictEqual(beforeTask, afterTask)) {
     throw new Error('The G3B task is immutable outside its approved creation')
   }

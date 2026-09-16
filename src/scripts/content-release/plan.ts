@@ -3,7 +3,8 @@ import { isDeepStrictEqual } from 'node:util'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { assertCompiledMdx } from '@/lib/mdx-result'
-import { G3B_LESSON_CONTENT_ID, G3B_TASK } from '@/lib/g3b-task'
+import { G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
+import { G3C_LESSON_UID, G3C_TASK } from '@/lib/g3c-task'
 import { prepareContent, type PreparedContent } from '../sync-content'
 import { prepareResources, type PreparedResource } from '../sync-resources'
 import {
@@ -17,7 +18,7 @@ import {
   type ReleaseScopeOptions,
   type ScopeReport,
 } from './scope'
-import { assertG3bTask, catalogMap, describeCatalog } from './catalog'
+import { catalogMap, describeCatalog, nativeTaskContract } from './catalog'
 
 type Kind = 'course' | 'section' | 'lesson' | 'problem' | 'resource'
 type TextField = 'body' | 'question' | 'answer'
@@ -54,6 +55,13 @@ export type InPlacePlan = {
 }
 
 const key = (row: Pick<CatalogRow, 'kind' | 'contentId'>) => `${row.kind}:${row.contentId}`
+const isNativeTask = (contentId: string) => contentId === G3B_TASK.contentId || contentId === G3C_TASK.contentId
+function selectedTask(scope: Pick<InPlacePlan, 'changeClass' | 'lesson'>) {
+  if (scope.changeClass !== ADDITIVE_CHANGE_CLASS) return undefined
+  if (scope.lesson === G3B_LESSON_UID) return G3B_TASK.contentId
+  if (scope.lesson === G3C_LESSON_UID) return G3C_TASK.contentId
+  throw new Error('Unsupported additive lesson selection')
+}
 
 function row(
   kind: Kind,
@@ -121,20 +129,21 @@ export async function planInPlaceRelease(
   const previous = catalogMap(before)
   const candidate = catalogMap(after)
   const creations = after.filter(item => !previous.has(key(item)))
+  const taskId = selectedTask(releaseScope)
   if (creations.length && (releaseScope.changeClass !== ADDITIVE_CHANGE_CLASS || creations.length !== 1 ||
-      creations[0].contentId !== G3B_TASK.contentId || scope.addition?.contentId !== G3B_TASK.contentId)) {
+      creations[0].contentId !== taskId || scope.addition?.contentId !== taskId)) {
     throw new Error('Unsupported release identity addition')
   }
-  if (creations.length) assertG3bTask(creations[0])
+  if (creations.length) nativeTaskContract(creations[0].contentId).assert(creations[0])
   const changes: InPlaceChange[] = []
   for (const [id, oldRow] of previous) {
     const next = candidate.get(id)
     if (!next || !isDeepStrictEqual(oldRow.metadata, next.metadata)) {
       throw new Error(`Unsupported metadata/identity change: ${id}`)
     }
-    if (oldRow.contentId === G3B_TASK.contentId &&
+    if (isNativeTask(oldRow.contentId) &&
         (!isDeepStrictEqual(oldRow.text, next.text) || !isDeepStrictEqual(oldRow.serialized, next.serialized))) {
-      throw new Error('Retained G3B complete task payload is immutable')
+      throw new Error('Retained G3B/G3C complete task payload is immutable')
     }
     for (const field of ['body', 'question', 'answer'] as const) {
       if (oldRow.text[field] === next.text[field]) continue
@@ -154,7 +163,7 @@ export async function planInPlaceRelease(
   if (releaseScope.changeClass !== DEFAULT_CHANGE_CLASS) {
     const allowed = new Set(scope.structural?.allowedChangedFields.map((field) => field.contentId) ?? [])
     if (!scope.structural || changes.some((change) => !allowed.has(change.contentId))) {
-      throw new Error(`Structural release plan contains a change outside the selected ${releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS ? 'TS Basics' : 'G3B'} fields`)
+      throw new Error(`Structural release plan contains a change outside the selected ${releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS ? 'TS Basics' : releaseScope.lesson === G3C_LESSON_UID ? 'G3C' : 'G3B'} fields`)
     }
   }
   return { changeClass: releaseScope.changeClass, lesson: releaseScope.lesson, scope, before, after, changes, creations }
@@ -239,8 +248,9 @@ export function checkReleaseState(plan: InPlacePlan, current: CatalogRow[]) {
   const before = catalogMap(plan.before)
   const after = catalogMap(plan.after)
   const additions = plan.after.filter(item => !before.has(key(item)))
+  const taskId = selectedTask(plan)
   if (additions.length && (plan.changeClass !== ADDITIVE_CHANGE_CLASS || additions.length !== 1 ||
-      additions[0].contentId !== G3B_TASK.contentId)) {
+      additions[0].contentId !== taskId)) {
     throw new Error('Unsupported release identity addition')
   }
   for (const [id, actual] of live) {
@@ -257,8 +267,8 @@ export function checkReleaseState(plan: InPlacePlan, current: CatalogRow[]) {
         (!sameAuthoredState(actual, baseline) && !sameAuthoredState(actual, candidate))) {
       throw new Error(`Unexpected database content/metadata state; no overwrite permitted: ${id}`)
     }
-    if (additions.length && !live.has(`problem:${G3B_TASK.contentId}`) && !sameAuthoredState(actual, baseline)) {
-      throw new Error('Dependent authored changes exist without the complete G3B task')
+    if (additions.length && !live.has(`problem:${taskId}`) && !sameAuthoredState(actual, baseline)) {
+      throw new Error(`Dependent authored changes exist without the complete ${nativeTaskContract(taskId!).name} task`)
     }
   }
   return live
@@ -272,11 +282,12 @@ export type ChangeResult = {
 }
 
 function inspectCreatedTask(actual: CatalogRow, candidate: CatalogRow, owner: CatalogRow) {
-  assertG3bTask(actual)
+  const contract = nativeTaskContract(candidate.contentId)
+  contract.assert(actual)
   if (!actual.id || !/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(actual.id) ||
       actual.match?.kind !== 'problem' || actual.match.where.lessonId !== owner.id ||
       !isDeepStrictEqual(actual.metadata, candidate.metadata) || !sameAuthoredState(actual, candidate)) {
-    throw new Error('Canonical G3B record exists with a different UUID, owner or complete payload; no reuse permitted')
+    throw new Error(`Canonical ${contract.name} record exists with a different UUID, owner or complete payload; no reuse permitted`)
   }
   return actual
 }
@@ -292,20 +303,22 @@ function mayHaveCreated(error: unknown) {
 }
 
 async function createCompleteTask(candidate: CatalogRow, owner: CatalogRow) {
-  assertG3bTask(candidate)
-  if (!owner.id || owner.contentId !== G3B_LESSON_CONTENT_ID || owner.match?.kind !== 'lesson') {
-    throw new Error('Missing conditional G3B lesson ownership')
+  const contract = nativeTaskContract(candidate.contentId)
+  const { task } = contract
+  contract.assert(candidate)
+  if (!owner.id || owner.contentId !== contract.lessonContentId || owner.match?.kind !== 'lesson') {
+    throw new Error(`Missing conditional ${contract.name} lesson ownership`)
   }
   const question = candidate.serialized.question
   const answer = candidate.serialized.answer
-  assertCompiledMdx(question, 'G3B question')
-  assertCompiledMdx(answer, 'G3B answer')
+  assertCompiledMdx(question, `${contract.name} question`)
+  assertCompiledMdx(answer, `${contract.name} answer`)
   try {
     const created = await prisma.problem.create({
       data: {
-        contentId: G3B_TASK.contentId, slug: G3B_TASK.slug, title: G3B_TASK.title,
-        type: G3B_TASK.type, difficulty: G3B_TASK.difficulty, href: G3B_TASK.href, link: G3B_TASK.link,
-        question: G3B_TASK.question, answer: candidate.text.answer!,
+        contentId: task.contentId, slug: task.slug, title: task.title,
+        type: task.type, difficulty: task.difficulty, href: task.href, link: task.link,
+        question: candidate.text.question!, answer: candidate.text.answer!,
         serializedQuestion: question, serializedAnswer: answer,
         lesson: { connect: { id: owner.id, AND: owner.match.where } },
       },
@@ -317,10 +330,10 @@ async function createCompleteTask(candidate: CatalogRow, owner: CatalogRow) {
     // Resolve only the canonical identity/unique slot. Never upsert, overwrite,
     // regenerate a UUID or continue dependent writes on an unknown receipt.
     const receipts = await prisma.problem.findMany({
-      where: { OR: [{ contentId: G3B_TASK.contentId }, { lessonId: owner.id, slug: G3B_TASK.slug }] },
+      where: { OR: [{ contentId: task.contentId }, { lessonId: owner.id, slug: task.slug }] },
       select: problemSelection,
     })
-    if (receipts.length !== 1) throw new Error('G3B create receipt is missing or ambiguous; dependent writes blocked')
+    if (receipts.length !== 1) throw new Error(`${contract.name} create receipt is missing or ambiguous; dependent writes blocked`)
     return {
       actual: inspectCreatedTask(databaseProblem(receipts[0]), candidate, owner),
       status: 'already-created' as const,
@@ -335,15 +348,14 @@ export async function applyInPlaceRelease(
   const current = checkReleaseState(plan, await readReleaseCatalog())
   const after = catalogMap(plan.after)
   const results: ChangeResult[] = []
-  const nativeTasks = plan.after.filter(item => item.contentId === G3B_TASK.contentId && (
-    plan.changeClass === ADDITIVE_CHANGE_CLASS || plan.creations.some(creation => key(creation) === key(item))
-  ))
+  const nativeTasks = plan.after.filter(item => item.contentId === selectedTask(plan))
   for (const creation of nativeTasks) {
-    const owner = current.get(`lesson:${G3B_LESSON_CONTENT_ID}`)
-    if (!owner) throw new Error('G3B owner is absent')
+    const contract = nativeTaskContract(creation.contentId)
+    const owner = current.get(`lesson:${contract.lessonContentId}`)
+    if (!owner) throw new Error(`${contract.name} owner is absent`)
     const existing = current.get(key(creation))
     if (!existing && !plan.creations.some(item => key(item) === key(creation))) {
-      throw new Error('Retained G3B task is missing; recreation is not permitted')
+      throw new Error(`Retained ${contract.name} task is missing; recreation is not permitted`)
     }
     const receipt = existing
       ? { actual: inspectCreatedTask(existing, creation, owner), status: 'already-created' as const }
@@ -387,7 +399,7 @@ export async function applyInPlaceRelease(
   }
   for (const creation of plan.creations) {
     const persisted = final.get(key(creation))
-    if (!persisted || !sameAuthoredState(persisted, creation)) throw new Error('G3B task was not fully persisted')
+    if (!persisted || !sameAuthoredState(persisted, creation)) throw new Error('Native task was not fully persisted')
   }
   for (const change of plan.changes) {
     const id = key(change)

@@ -1,6 +1,7 @@
 /**
  * Strict offline/source baseline validation, not a live headline count.
- * Admit 506 complete baseline tasks or those tasks plus only the exact G3B task.
+ * Admit 506 baseline tasks, 507 with exact G3B, or 508 with exact G3B and G3C.
+ * G3C remains fail-closed until its complete reviewed question/setup is bound.
  * Preparing the whole catalog also verifies raw/compiled fields and resources.
  */
 import path from 'node:path'

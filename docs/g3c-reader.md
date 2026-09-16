@@ -26,3 +26,12 @@ is unchanged.
 JSX and TSX fences use distinct labels, as do HTML and CSS. They remain inert
 source displayed with the existing tabs and copy controls. The renderer does not
 evaluate a learner's program. Existing labels and G3B's setup remain unchanged.
+
+The new task keeps every starter and reference file in its source-owned payload,
+including the shared lockfile. Each file listing sits inside a closed native
+`details` disclosure so it does not bury the requirements or feedback. Its
+plain-text `summary` is a direct child and uses the browser's native activation.
+There is no download service or custom accordion state. The publishing exception
+is limited to one attribute-free disclosure in each new-task surface with its
+exact starter/reference summary. Existing answers and the lesson body gain no
+new component permission.

@@ -40,6 +40,22 @@ describe('static legacy heading serialization', () => {
     ])
   })
 
+  it('renders a native file disclosure with a direct summary and no sidebar destination', async () => {
+    const source = '<details>\n<summary>Open the complete starter files</summary>\n\n### File: example.ts\n\nText to copy.\n\n</details>'
+    const compiled = await serialize({ source, options: { mdxOptions } })
+    assertCompiledMdx(compiled)
+    expect(extractSectionsFromCompiledSource(compiled.compiledSource)).toEqual([])
+    const renderedModule = new Function(compiled.compiledSource)({ ...runtime, useMDXComponents: () => ({}) })
+    const markup = renderToStaticMarkup(createElement(renderedModule.default))
+    const container = document.createElement('div')
+    container.innerHTML = markup
+    const details = container.querySelector('details')
+    expect(details?.open).toBe(false)
+    expect(details?.firstElementChild?.tagName).toBe('SUMMARY')
+    expect(details?.firstElementChild?.textContent).toBe('Open the complete starter files')
+    expect(details?.querySelector('h3')?.textContent).toBe('File: example.ts')
+  })
+
   it.each([
     { attributes: [{ type: 'mdxJsxAttribute', name: 'id', value: { type: 'mdxJsxAttributeValueExpression', value: 'dynamic' } }] },
     { attributes: [{ type: 'mdxJsxAttribute', name: 'id', value: 'safe' }, { type: 'mdxJsxAttribute', name: 'onClick', value: 'unsafe' }] },
