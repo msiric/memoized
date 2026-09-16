@@ -5,6 +5,8 @@ describe('shared code-panel labels', () => {
   it.each([
     ['js', 'JavaScript'], ['javascript', 'JavaScript'],
     ['ts', 'TypeScript'], ['typescript', 'TypeScript'],
+    ['jsx', 'JavaScript (JSX)'], ['tsx', 'TypeScript (TSX)'],
+    ['html', 'HTML'], ['css', 'CSS'],
     ['php', 'PHP'], ['python', 'Python'], ['ruby', 'Ruby'], ['go', 'Go'],
     ['json', 'Code'], ['bash', 'Code'], ['text', 'Code'], ['unknown', 'Code'],
   ])('keeps the existing renderer label for %s', (language, label) => {

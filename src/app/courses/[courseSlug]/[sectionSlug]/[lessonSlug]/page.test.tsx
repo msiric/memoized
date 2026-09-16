@@ -11,6 +11,7 @@ import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_TASK } from '@/lib/g3b-task'
 import { getSearchCatalog } from '@/services/search'
 import { Footer } from '@/components/Footer'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { G3C_LESSON_CONTENT_ID, G3C_OLD_TASK_IDS, G3C_TASK } from '@/lib/g3c-task'
 
 // Mock the imported modules
 vi.mock('next-auth')
@@ -87,6 +88,38 @@ describe('Lesson component', () => {
   it('declares request-time rendering without build-time lesson enumeration', () => {
     expect(lessonRoute.dynamic).toBe('force-dynamic')
     expect(lessonRoute).not.toHaveProperty('generateStaticParams')
+  })
+
+  it.each([5, 6])('shows the G3C free entry only for the complete %i-question snapshot', async count => {
+    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(userHasAccess).mockReturnValue(false)
+    const contentIds = [...G3C_OLD_TASK_IDS.map(id => `${G3C_LESSON_CONTENT_ID}/${id}`), G3C_TASK.contentId]
+    vi.mocked(getLessonBySlug).mockResolvedValue({
+      id: 'frontend-lesson', contentId: G3C_LESSON_CONTENT_ID,
+      title: 'Frontend Interviews', description: 'Public frontend introduction',
+      access: 'PREMIUM', serializedBody: { compiledSource: 'PAID_FRONTEND_BODY' },
+      section: { slug: 'frontend-development', course: { slug: 'js-track' } },
+      problems: contentIds.slice(0, count).map((contentId, index) => ({
+        id: `row-${index}`, contentId, title: index === 5 ? G3C_TASK.title : `Old question ${index}`,
+        question: 'Free question', difficulty: 'MEDIUM', type: index === 5 ? 'CODING' : 'THEORY',
+        href: '', link: '', slug: `row-${index}`, lessonId: 'frontend-lesson',
+        createdAt: new Date(0), updatedAt: new Date(0),
+        serializedQuestion: null, serializedAnswer: { compiledSource: 'free answer' },
+      })),
+    })
+    render(await Lesson({ params: {
+      courseSlug: 'js-track', sectionSlug: 'frontend-development', lessonSlug: 'frontend-interviews',
+    } }))
+    const heading = screen.getByRole('heading', { level: 1, name: 'Frontend Interviews' })
+    const entry = screen.queryByRole('link', { name: G3C_TASK.title })
+    if (count === 5) {
+      expect(entry).not.toBeInTheDocument()
+      expect(heading.nextElementSibling).toBe(screen.getByText('Public frontend introduction'))
+    } else {
+      expect(entry).toHaveAttribute('href', `#${G3C_TASK.id}`)
+      expect(heading.nextElementSibling).toContainElement(entry)
+    }
+    expect(document.body.textContent).not.toContain('PAID_FRONTEND_BODY')
   })
 
   it('renders PremiumCTA when user does not have access', async () => {
