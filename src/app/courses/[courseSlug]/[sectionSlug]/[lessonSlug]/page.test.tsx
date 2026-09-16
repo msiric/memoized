@@ -8,11 +8,14 @@ import Lesson, { generateMetadata } from './page'
 import * as lessonRoute from './page'
 import type { ReactNode } from 'react'
 import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_TASK } from '@/lib/g3b-task'
+import { getSearchCatalog } from '@/services/search'
+import { Footer } from '@/components/Footer'
+import { renderToStaticMarkup } from 'react-dom/server'
 
 // Mock the imported modules
 vi.mock('next-auth')
 vi.mock('@/services/lesson')
-vi.mock('@/services/search', () => ({ getSearchCatalog: async () => ({ courses: [], resources: [], posts: [] }) }))
+vi.mock('@/services/search', () => ({ getSearchCatalog: vi.fn() }))
 vi.mock('@/services/user')
 vi.mock('@/utils/helpers')
 vi.mock('@/components/PreserializedMdxRenderer', () => ({
@@ -20,6 +23,13 @@ vi.mock('@/components/PreserializedMdxRenderer', () => ({
 }))
 vi.mock('@/components/ProblemCard', () => ({
   ProblemCard: ({ problem }: { problem: { question: string } }) => <div>{problem.question}</div>,
+}))
+vi.mock('@/hooks/usePages', () => ({
+  usePages: () => ({
+    isLesson: true, currentPage: { access: 'PREMIUM' },
+    previousPage: { title: 'Palindromic Subsequence', href: '/courses/dsa-track/common-techniques/palindromic-subsequence' },
+    nextPage: { title: 'Recursion and Memoization', href: '/courses/dsa-track/common-techniques/recursion-and-memoization' },
+  }),
 }))
 
 // Mock next/navigation
@@ -33,6 +43,45 @@ describe('Lesson component', () => {
 
   beforeEach(() => {
     vi.resetAllMocks()
+    vi.mocked(getSearchCatalog).mockResolvedValue({ courses: [], resources: [], posts: [] })
+  })
+
+  it.each([false, true])('renders one server-owned neighbor block without the footer duplicate (access=%s)', async hasAccess => {
+    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(userHasAccess).mockReturnValue(hasAccess)
+    const titles = ['Palindromic Subsequence', 'Longest Common Substring', 'Recursion and Memoization']
+    const slugs = ['palindromic-subsequence', 'longest-common-substring', 'recursion-and-memoization']
+    vi.mocked(getSearchCatalog).mockResolvedValue({
+      resources: [], posts: [],
+      courses: [{
+        slug: 'dsa-track', title: 'DSA Track', description: '',
+        sections: [{
+          slug: 'common-techniques', title: 'Common Techniques', description: '',
+          lessons: slugs.map((slug, index) => ({ slug, title: titles[index], description: '', access: 'PREMIUM' })),
+        }],
+      }],
+    })
+    vi.mocked(getLessonBySlug).mockResolvedValue({
+      id: 'g3b-lesson', contentId: G3B_LESSON_CONTENT_ID, title: titles[1], description: '',
+      serializedBody: { compiledSource: 'PREMIUM_SECRET_CONTENT' }, access: 'PREMIUM', problems: [],
+      section: { slug: 'common-techniques', course: { slug: 'dsa-track' } },
+    })
+    const page = await Lesson({ params: {
+      courseSlug: 'dsa-track', sectionSlug: 'common-techniques', lessonSlug: 'longest-common-substring',
+    } })
+    const serverHtml = renderToStaticMarkup(page)
+    expect(serverHtml).toContain('aria-label="Previous: Palindromic Subsequence"')
+    expect(serverHtml).toContain('aria-label="Next: Recursion and Memoization"')
+    render(<>{page}<Footer width="prose" /></>)
+
+    expect(screen.getAllByRole('navigation', { name: 'Lesson navigation' })).toHaveLength(1)
+    expect(screen.queryByRole('navigation', { name: 'Page navigation' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Continue in this section')).not.toBeInTheDocument()
+    expect(screen.getAllByText(titles[0])).toHaveLength(1)
+    expect(screen.getAllByText(titles[2])).toHaveLength(1)
+    expect(screen.getByRole('link', { name: `Previous: ${titles[0]}` })).toHaveAttribute('href', `/courses/dsa-track/common-techniques/${slugs[0]}`)
+    expect(screen.getByRole('link', { name: `Next: ${titles[2]}` })).toHaveAttribute('href', `/courses/dsa-track/common-techniques/${slugs[2]}`)
+    expect(document.body.textContent?.includes('PREMIUM_SECRET_CONTENT')).toBe(hasAccess)
   })
 
   it('declares request-time rendering without build-time lesson enumeration', () => {

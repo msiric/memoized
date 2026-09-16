@@ -10,7 +10,8 @@ import { notFound } from 'next/navigation'
 import { Problem } from '@prisma/client'
 import { lessonMetadata, lessonPath, sectionPath, coursePath, siteUrl } from '@/lib/seo'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
-import { CatalogDirectory } from '@/components/CatalogDirectory'
+import { PageNavigation } from '@/components/PageNavigation'
+import { getLessonNavigation } from '@/lib/lesson-navigation'
 import { LessonPreview } from '@/components/LessonPreview'
 import { JsonLd } from '@/components/JsonLd'
 import { getSearchCatalog } from '@/services/search'
@@ -65,7 +66,24 @@ export default async function Lesson({
   const section = course?.sections.find((item) => item.slug === params.sectionSlug)
   const path = lessonPath(params.courseSlug, params.sectionSlug, params.lessonSlug)
   const position = section?.lessons.findIndex((item) => item.slug === params.lessonSlug) ?? -1
-  const neighbors = section && position >= 0 ? section.lessons.filter((_, index) => Math.abs(index - position) === 1) : []
+  const sections = course?.sections.map(item => ({
+    title: item.title,
+    href: sectionPath(params.courseSlug, item.slug),
+    lessons: item.lessons.map(lesson => ({
+      title: lesson.title,
+      href: lessonPath(params.courseSlug, item.slug, lesson.slug),
+    })),
+  })) ?? []
+  const neighbors = getLessonNavigation(
+    sections,
+    course?.sections.findIndex(item => item.slug === params.sectionSlug) ?? -1,
+    position,
+  )
+  const navigation = neighbors.previousPage || neighbors.nextPage ? (
+    <div className={`${CONTENT_COLUMN_CLASSES} mb-10`}>
+      <PageNavigation {...neighbors} label="Lesson navigation" />
+    </div>
+  ) : null
   const breadcrumb = <Breadcrumbs items={[
     { title: 'Courses', href: '/courses' },
     { title: course?.title ?? params.courseSlug, href: coursePath(params.courseSlug) },
@@ -95,12 +113,14 @@ export default async function Lesson({
           </p>
           <Link href={path} prefetch={false} className="text-sm text-lime-700 underline dark:text-lime-300">Open the full lesson and free questions</Link>
         </article>
+        {navigation}
       </>
     }
     const progress = await getProgressSnapshot()
     return <>
       {structuredData}
       <TypescriptFirstPass path={resolved.path} initialProgress={progress} requestedStep={searchParams.step} header={breadcrumb} />
+      {navigation}
     </>
   }
 
@@ -140,9 +160,7 @@ export default async function Lesson({
     /> : <LessonPreview header={header}
       actions={previewAction}
       title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
-      <CatalogDirectory title="Continue in this section" items={neighbors.map((item) => ({
-        ...item, href: lessonPath(params.courseSlug, params.sectionSlug, item.slug),
-      }))} />
+      {navigation}
     </>
   )
 }

@@ -14,6 +14,13 @@ Tables use normal word wrapping and keep inline-code identifiers intact. Their
 scroll region handles the resulting intrinsic width instead of breaking matrix
 labels into individual characters. Ordinary prose wrapping is unchanged.
 
+Lesson pages own one server-rendered previous/next navigation block. It remains
+available on free previews and preserves section-introduction boundaries. The
+shared footer must not render a second lesson navigation after client hydration.
+Course and section introductions retain their existing footer navigation.
+Do not add an adjacent-lesson directory alongside that block: it duplicates the
+same destinations and previously escaped geometry-only regression checks.
+
 The existing PR Build Check now seeds synthetic public lessons, a paid preview,
 introductions and resource views into its fresh `memoized_ci` database. It builds
 and starts the actual app, then runs Chromium at 320, 1440 and 3840 CSS pixels.

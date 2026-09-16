@@ -2,79 +2,25 @@
 
 import Link from 'next/link'
 
-import { Button } from '@/components/Button'
 import { BLOG_PREFIX, SUPPORT_EMAIL } from '@/constants'
 import { useAuthStore } from '@/contexts/auth'
 import { useAccess } from '@/hooks/useAccess'
 import { usePages } from '@/hooks/usePages'
 import clsx from 'clsx'
 import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
+import { PageNavigation } from '@/components/PageNavigation'
 
-function PageLink({
-  label,
-  page,
-  previous = false,
-  className,
-}: {
-  label: string
-  page: { href: string; title: string }
-  previous?: boolean
-  className?: string
-}) {
-  return (
-    <>
-      <Button
-        href={page.href}
-        aria-label={`${label}: ${page.title}`}
-        variant="secondary"
-        arrow={previous ? 'left' : 'right'}
-      >
-        {label}
-      </Button>
-      <Link
-        href={page.href}
-        tabIndex={-1}
-        aria-hidden="true"
-        className={clsx(
-          'max-w-full break-words text-base font-semibold text-zinc-900 transition hover:text-zinc-600 dark:text-white dark:hover:text-zinc-300',
-          className,
-        )}
-      >
-        {page.title}
-      </Link>
-    </>
-  )
-}
-
-function PageNavigation() {
-  const { previousPage, currentPage, nextPage } = usePages()
+function FooterPageNavigation() {
+  const { previousPage, currentPage, nextPage, isLesson } = usePages()
   const userData = useAuthStore((state) => state.user)
 
   const hasAccess = useAccess(userData, currentPage?.access)
 
-  if ((!previousPage && !nextPage) || !hasAccess) {
+  if (isLesson || (!previousPage && !nextPage) || !hasAccess) {
     return null
   }
 
-  return (
-    <nav aria-label="Page navigation" className="grid grid-cols-2 gap-6">
-      {previousPage && (
-        <div className="flex min-w-0 flex-col items-start gap-3">
-          <PageLink
-            label="Previous"
-            page={previousPage}
-            previous
-            className="text-left"
-          />
-        </div>
-      )}
-      {nextPage && (
-        <div className="col-start-2 flex min-w-0 flex-col items-end gap-3">
-          <PageLink label="Next" page={nextPage} className="text-right" />
-        </div>
-      )}
-    </nav>
-  )
+  return <PageNavigation previousPage={previousPage} nextPage={nextPage} />
 }
 
 function XIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -195,7 +141,7 @@ export function Footer({ fullWidth, width }: FooterProps) {
         widthClasses[resolvedWidth],
       )}
     >
-      <PageNavigation />
+      <FooterPageNavigation />
       <SmallPrint />
     </footer>
   )

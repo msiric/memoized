@@ -116,12 +116,20 @@ async function main() {
                 })
                 return {
                   overflow: document.documentElement.scrollWidth - innerWidth,
+                  lessonNavigationCount: main.querySelectorAll('nav[aria-label="Lesson navigation"]').length,
+                  footerNavigationCount: footer?.querySelectorAll('nav[aria-label="Page navigation"]').length ?? 0,
+                  duplicateLessonDirectory: main.querySelector('section[aria-label="Continue in this section"]') !== null,
                   main: mainBox, article: articleBox, title: titleBox, footer: footerBox,
                   breadcrumb: breadcrumbBox, lastBody: lastBodyBox, practice: practiceBox,
                   lastCard: lastCardBox, status: statusBox, directory: directoryBox,
                 }
               })
               assert(metrics.overflow <= 1, `Document overflow: ${metrics.overflow}px`)
+              if (/^\/courses\/[^/]+\/[^/]+\/[^/]+\/?$/.test(new URL(route, base).pathname)) {
+                assert.equal(metrics.lessonNavigationCount, 1, 'A lesson must have one server-rendered navigation block')
+                assert.equal(metrics.footerNavigationCount, 0, 'The footer duplicates the lesson navigation')
+                assert.equal(metrics.duplicateLessonDirectory, false, 'The adjacent-lesson directory duplicates previous/next links')
+              }
               assert(metrics.main && metrics.title && metrics.footer, 'Missing reader or footer')
               assert(metrics.footer.top >= metrics.main.bottom - 1, 'Footer overlaps main content')
               if (metrics.article) assert(metrics.main.bottom >= metrics.article.bottom - 1, 'Article overflows main')
