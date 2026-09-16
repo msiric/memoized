@@ -58,7 +58,7 @@
     "test:check": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:setup": "vitest run src/scripts/setup-dev.test.ts",
-    "prebuild": "node --version && yarn run migrate",
+    "prebuild": "node --version",
     "postinstall": "yarn run generate",
     "install:clean": "cross-env tsx src/scripts/clean-dependencies.ts && yarn install",
     "setup:content": "cross-env tsx src/scripts/setup-content.ts",

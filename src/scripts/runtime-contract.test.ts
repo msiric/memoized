@@ -10,7 +10,22 @@ describe('Node runtime release contract', () => {
     expect(manifest.engines.node).toBe('24.x')
     expect(manifest.devDependencies['@types/node']).toMatch(/^\^24\./)
     expect(manifest.packageManager).toBe('yarn@1.22.22')
-    expect(manifest.scripts.prebuild).toBe('node --version && yarn run migrate')
+    expect(manifest.scripts.prebuild).toBe('node --version')
+  })
+
+  it('keeps builds migration-free and runs one guarded direct migration before deployment', () => {
+    const production = read('.github/workflows/production.yml')
+    const ci = read('.github/workflows/ci.yml')
+    for (const [name, command] of Object.entries(manifest.scripts)) {
+      if (/^(?:pre|post)?build(?::|$)/.test(name)) expect(command).not.toMatch(/\bmigrate\b|\bdb push\b/)
+    }
+    expect(manifest.scripts.migrate).toBe('prisma migrate deploy')
+    expect(production.match(/^\s+yarn migrate\s*$/gm)).toHaveLength(1)
+    expect(production.indexOf('node .github/scripts/verify-migration-target.mjs')).toBeLessThan(production.indexOf('yarn migrate'))
+    expect(production.indexOf('yarn migrate')).toBeLessThan(production.indexOf('- name: Deploy to Vercel'))
+    expect(production).not.toContain('PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK')
+    expect(ci.indexOf('yarn migrate')).toBeLessThan(ci.indexOf('- name: Build\n'))
+    expect(read('src/scripts/setup-dev.ts')).toContain("execAsync('yarn migrate:dev')")
   })
 
   it('takes current CI and deployment runtimes from the package contract', () => {

@@ -77,7 +77,9 @@ on their feature branches. Existing free question/reveal/progress interactions
 remain available; measurement does not infer an attempt from viewing a question.
 
 Run targeted Vitest, typecheck/lint and the existing production build against an
-isolated review database. Never let `prebuild` migrations target an unintended DB.
+isolated review database. Prepare its schema explicitly first; application builds
+do not run migrations. Production migration belongs to the guarded direct-
+connection step in the deployment workflow.
 Check real HTTP status, canonical/title/robots, sitemap coverage, structured data,
 anonymous and paid behavior, and mobile rendering at 320px.
 

@@ -56,7 +56,9 @@ jobs:
           VERCEL_TELEMETRY_DISABLED: '1'
       
       - name: Run database migrations
-        run: yarn migrate
+        run: |
+          node .github/scripts/verify-migration-target.mjs
+          yarn migrate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
