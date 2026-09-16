@@ -10,6 +10,8 @@ import { toString } from 'mdast-util-to-string'
 import slugify from 'slugify'
 import { PRACTICE_PROBLEMS_PREFIX, SLUGIFY_OPTIONS } from '@/constants'
 import { getPanelTitle } from '@/lib/code-panel-title'
+import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
+import { assertG3bSourceTask, G3B_CONFIG_PATH } from './catalog'
 
 const parser = remark().use(remarkMdx).use(remarkGfm)
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -19,10 +21,12 @@ export const DEFAULT_CHANGE_CLASS = 'independent-in-place-text-v1'
 export const STRUCTURAL_CHANGE_CLASS = 'existing-entity-structural-text-v1'
 export const STRUCTURAL_PROFILE = 'ts-basics-g3a-minimum'
 export const STRUCTURAL_LESSON_UID = 'js-track/typescript-introduction/ts-basics'
+export const ADDITIVE_CHANGE_CLASS = 'single-unit-additive-task-v1'
+export const ADDITIVE_PROFILE = 'g3b-native-task-minimum'
 
 type DefaultChangeClass = typeof DEFAULT_CHANGE_CLASS
 type StructuralChangeClass = typeof STRUCTURAL_CHANGE_CLASS
-export type ChangeClass = DefaultChangeClass | StructuralChangeClass
+export type ChangeClass = DefaultChangeClass | StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS
 
 export type ReleaseScopeOptions = {
   changeClass?: ChangeClass
@@ -38,7 +42,7 @@ export const digest = (value: string | Buffer) =>
 
 export function parseChangeClass(value: unknown): ChangeClass {
   const changeClass = value ?? DEFAULT_CHANGE_CLASS
-  if (changeClass !== DEFAULT_CHANGE_CLASS && changeClass !== STRUCTURAL_CHANGE_CLASS) {
+  if (changeClass !== DEFAULT_CHANGE_CLASS && changeClass !== STRUCTURAL_CHANGE_CLASS && changeClass !== ADDITIVE_CHANGE_CLASS) {
     throw new Error(`Unsupported content change class: ${String(changeClass)}`)
   }
   return changeClass
@@ -51,8 +55,9 @@ export function normalizeReleaseScopeOptions(options: ReleaseScopeOptions = {}):
     if (lesson) throw new Error(`--lesson is only supported with ${STRUCTURAL_CHANGE_CLASS}`)
     return { changeClass, lesson: '' }
   }
-  if (lesson !== STRUCTURAL_LESSON_UID) {
-    throw new Error(`${STRUCTURAL_CHANGE_CLASS} requires --lesson ${STRUCTURAL_LESSON_UID}`)
+  const expectedLesson = changeClass === ADDITIVE_CHANGE_CLASS ? G3B_LESSON_UID : STRUCTURAL_LESSON_UID
+  if (lesson !== expectedLesson) {
+    throw new Error(`${changeClass} requires --lesson ${expectedLesson}`)
   }
   return { changeClass, lesson }
 }
@@ -248,9 +253,9 @@ export type StructuralField =
   | { kind: 'lesson'; lesson: string; contentId: string; sourcePath: string; field: 'body' }
   | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'answer' }
 export type StructuralSurfaceReport = {
-  changeClass: StructuralChangeClass
-  profile: typeof STRUCTURAL_PROFILE
-  lesson: typeof STRUCTURAL_LESSON_UID
+  changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS
+  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE
+  lesson: string
   allowedChangedFields: StructuralField[]
   changedSurfaces: {
     kind: 'lesson-body' | 'problem-answer'
@@ -278,6 +283,13 @@ export type StructuralSurfaceReport = {
 export type ScopeReport = {
   changedFiles: { path: string; beforeSha256: string; afterSha256: string }[]
   structural?: StructuralSurfaceReport
+  addition?: {
+    contentId: string
+    questionSha256: string
+    answerSha256: string
+    question: MdxSurfaceEvidence
+    answer: MdxSurfaceEvidence
+  }
 }
 
 type SurfaceState = {
@@ -585,7 +597,7 @@ function looseHeadingIds(markdown: string): Set<string> {
   return idsFrom({ ...emptyEvidence(), ...headingEvidence(parser.parse(markdown)) })
 }
 
-function buildCatalog(files: Map<string, Buffer>, label: string): Catalog {
+function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = STRUCTURAL_LESSON_UID): Catalog {
   const routes = new Map<string, Set<string>>()
   let selectedLesson: LessonState | undefined
   const addRoute = (route: string, ids: Iterable<string> = []) => {
@@ -622,7 +634,7 @@ function buildCatalog(files: Map<string, Buffer>, label: string): Catalog {
       for (const anchor of cardAnchors) ids.add(anchor.id)
       if (lesson.problems.length) ids.add(PRACTICE_PROBLEMS_PREFIX.slice(1))
       addRoute(lesson.route, ids)
-      if (lesson.sourceUid === STRUCTURAL_LESSON_UID) {
+      if (lesson.sourceUid === selectedUid) {
         const body = state(`${label} ${lesson.bodyPath}`, bodyRaw.toString('utf8'), true)
         const questions = lesson.problems.map((problem) =>
           state(`${label} ${lesson.sourceUid} question ${problem.id}`, problem.question, false))
@@ -632,14 +644,19 @@ function buildCatalog(files: Map<string, Buffer>, label: string): Catalog {
       }
     }
   }
-  if (!selectedLesson) throw new Error(`Selected structural lesson missing: ${STRUCTURAL_LESSON_UID}`)
+  if (!selectedLesson) throw new Error(`Selected structural lesson missing: ${selectedUid}`)
   return { routes, selectedLesson }
 }
 
-function selectedLessonConfig(config: ParsedConfig, filename: string) {
-  const lesson = config.lessons.find((item) => item.sourceUid === STRUCTURAL_LESSON_UID)
+function selectedLessonConfig(config: ParsedConfig, filename: string, selectedUid = STRUCTURAL_LESSON_UID) {
+  const lesson = config.lessons.find((item) => item.sourceUid === selectedUid)
   if (!lesson) throw new Error(`Selected structural lesson missing in ${filename}`)
-  if (lesson.problems.length !== 5 || lesson.problems.some((problem) => !problem.id)) {
+  if (selectedUid === G3B_LESSON_UID) {
+    if (![3, 4].includes(lesson.problems.length) ||
+        lesson.problems.some((problem, index) => problem.contentId !== G3B_CARD_ORDER[index])) {
+      throw new Error('G3B requires the three unchanged cards and only the optional fourth canonical task')
+    }
+  } else if (lesson.problems.length !== 5 || lesson.problems.some((problem) => !problem.id)) {
     throw new Error(`${STRUCTURAL_CHANGE_CLASS} requires the existing five TS Basics problem records`)
   }
   return lesson
@@ -651,15 +668,15 @@ function assertNoPairwiseAnchorConflicts(
 ): StructuralSurfaceReport['anchorConflictProof'] {
   const groups: { name: string; variants: SurfaceState[] }[] = [
     { name: 'lesson body', variants: [base.body, candidate.body] },
-    ...base.answers.map((answer, index) => ({
-      name: `answer ${base.lesson.problems[index]?.id}`,
-      variants: [answer, candidate.answers[index]],
+    ...candidate.answers.map((answer, index) => ({
+      name: `answer ${candidate.lesson.problems[index]?.id}`,
+      variants: base.answers[index] ? [base.answers[index], answer] : [answer],
     })),
   ]
   const fixed = [
     { text: 'Practice Problems', id: PRACTICE_PROBLEMS_PREFIX.slice(1) },
-    ...base.cardAnchors,
-    ...base.questions.flatMap((question) => question.evidence.h2),
+    ...candidate.cardAnchors,
+    ...candidate.questions.flatMap((question) => question.evidence.h2),
   ]
   const fixedIds = new Map<string, string>()
   for (const anchor of fixed) {
@@ -693,45 +710,57 @@ function assertNoPairwiseAnchorConflicts(
   }
   return {
     checked: 'Pairwise proof over individually nonempty/unique base/candidate heading IDs, with the practice heading, problem cards and unchanged question headings reserved.',
-    fixedProblemCardAnchors: base.cardAnchors,
+    fixedProblemCardAnchors: candidate.cardAnchors,
     fixedReaderAnchors: fixed,
     pairwiseCompatibleIds: [...compatible].sort(),
   }
 }
 
-function structuralScope(baseRoot: string, candidateRoot: string, lesson: string): ScopeReport {
-  normalizeReleaseScopeOptions({ changeClass: STRUCTURAL_CHANGE_CLASS, lesson })
+function structuralScope(baseRoot: string, candidateRoot: string, lesson: string, changeClass: StructuralSurfaceReport['changeClass']): ScopeReport {
+  normalizeReleaseScopeOptions({ changeClass, lesson })
+  const additive = changeClass === ADDITIVE_CHANGE_CLASS
+  const configPath = additive ? G3B_CONFIG_PATH : STRUCTURAL_CONFIG_PATH
+  const lessonPath = additive ? `content/${G3B_LESSON_UID}/page.mdx` : STRUCTURAL_LESSON_PATH
   const before = payloadFiles(baseRoot)
   const after = payloadFiles(candidateRoot)
   if (!isDeepStrictEqual([...before.keys()], [...after.keys()])) {
     throw new Error('Structural publishing cannot add, remove or move payload files')
   }
-  const selectedBeforeRaw = before.get(STRUCTURAL_CONFIG_PATH)
-  const selectedAfterRaw = after.get(STRUCTURAL_CONFIG_PATH)
-  if (!selectedBeforeRaw || !selectedAfterRaw) {
-    throw new Error(`Selected structural lesson config missing: ${STRUCTURAL_CONFIG_PATH}`)
+  const beforeTask = validateKnownSourceTask(before)
+  const afterTask = validateKnownSourceTask(after)
+  if (beforeTask && !isDeepStrictEqual(beforeTask, afterTask)) {
+    throw new Error('The retained G3B task is immutable; recovery must keep its complete record')
   }
-  const selectedBeforeConfig = parseDetailedConfig(selectedBeforeRaw, STRUCTURAL_CONFIG_PATH)
-  const selectedAfterConfig = parseDetailedConfig(selectedAfterRaw, STRUCTURAL_CONFIG_PATH)
-  const selectedBefore = selectedLessonConfig(selectedBeforeConfig, STRUCTURAL_CONFIG_PATH)
-  const selectedAfter = selectedLessonConfig(selectedAfterConfig, STRUCTURAL_CONFIG_PATH)
+  const selectedBeforeRaw = before.get(configPath)
+  const selectedAfterRaw = after.get(configPath)
+  if (!selectedBeforeRaw || !selectedAfterRaw) {
+    throw new Error(`Selected structural lesson config missing: ${configPath}`)
+  }
+  const selectedBeforeConfig = parseDetailedConfig(selectedBeforeRaw, configPath)
+  const selectedAfterConfig = parseDetailedConfig(selectedAfterRaw, configPath)
+  const selectedBefore = selectedLessonConfig(selectedBeforeConfig, configPath, lesson)
+  const selectedAfter = selectedLessonConfig(selectedAfterConfig, configPath, lesson)
+  if (additive && !beforeTask && afterTask) {
+    const metadata = selectedAfterConfig.metadata as { lessons: { id: string; problems: unknown[] }[] }
+    metadata.lessons.find(item => item.id === '/longest-common-substring')!.problems.pop()
+  }
   if (!isDeepStrictEqual(selectedBeforeConfig.metadata, selectedAfterConfig.metadata)) {
-    throw new Error(`Metadata, question contract, identity or ordering change: ${STRUCTURAL_CONFIG_PATH}`)
+    throw new Error(`Metadata, question contract, identity or ordering change: ${configPath}`)
   }
   selectedBeforeConfig.lessons.forEach((baselineLesson, lessonIndex) => {
     const candidateLesson = selectedAfterConfig.lessons[lessonIndex]
     if (!candidateLesson || baselineLesson.sourceUid !== candidateLesson.sourceUid) {
-      throw new Error(`Metadata, question contract, identity or ordering change: ${STRUCTURAL_CONFIG_PATH}`)
+      throw new Error(`Metadata, question contract, identity or ordering change: ${configPath}`)
     }
-    if (baselineLesson.sourceUid === STRUCTURAL_LESSON_UID) return
+    if (baselineLesson.sourceUid === lesson) return
     baselineLesson.problems.forEach((problem, problemIndex) => {
       if (problem.answer !== candidateLesson.problems[problemIndex]?.answer) {
-        throw new Error(`Only TS Basics answers may change in ${STRUCTURAL_CONFIG_PATH}`)
+        throw new Error(`Only ${additive ? 'G3B' : 'TS Basics'} answers may change in ${configPath}`)
       }
     })
   })
   for (const [filename, raw] of before) {
-    if (!/^content\/[^/]+\/[^/]+\/_lessons\.json$/.test(filename) || filename === STRUCTURAL_CONFIG_PATH) continue
+    if (!/^content\/[^/]+\/[^/]+\/_lessons\.json$/.test(filename) || filename === configPath) continue
     const candidate = after.get(filename)!
     if (!raw.equals(candidate)) {
       throw new Error(`File is outside the supported structural class: ${filename}`)
@@ -739,6 +768,7 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
   }
   for (const [filename, raw] of before) {
     if (!/^content\/[^/]+\/[^/]+\/_lessons\.json$/.test(filename)) continue
+    if (filename === configPath) continue
     const baseline = parseDetailedConfig(raw, filename)
     const candidate = parseDetailedConfig(after.get(filename)!, filename)
     if (!isDeepStrictEqual(baseline.metadata, candidate.metadata)) {
@@ -746,8 +776,16 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
     }
   }
 
-  const baseCatalog = buildCatalog(before, 'base')
-  const candidateCatalog = buildCatalog(after, 'candidate')
+  const baseCatalog = buildCatalog(before, 'base', lesson)
+  const candidateCatalog = buildCatalog(after, 'candidate', lesson)
+  if (additive && !beforeTask) {
+    for (const surface of [baseCatalog.selectedLesson.body, ...baseCatalog.selectedLesson.answers]) {
+      validateLinks(surface.evidence, selectedBefore.route, [baseCatalog], surface.label)
+    }
+  }
+  // Creation precedes all dependent old-field writes, so this one card exists
+  // in every admitted mixed state. No other candidate-only anchor is admitted.
+  if (additive && afterTask) baseCatalog.routes.get(selectedBefore.route)!.add(G3B_TASK.id)
   const changedFiles: ScopeReport['changedFiles'] = []
   const changedSurfaces: StructuralSurfaceReport['changedSurfaces'] = []
 
@@ -758,22 +796,22 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
   for (const [filename, oldBody] of before) {
     const newBody = after.get(filename)!
     if (oldBody.equals(newBody)) continue
-    if (filename !== STRUCTURAL_CONFIG_PATH && filename !== STRUCTURAL_LESSON_PATH) {
+    if (filename !== configPath && filename !== lessonPath) {
       throw new Error(`File is outside the supported structural class: ${filename}`)
     }
     addChangedFile(filename, oldBody, newBody)
   }
 
-  if (!before.get(STRUCTURAL_LESSON_PATH)) throw new Error(`Selected structural lesson body missing: ${STRUCTURAL_LESSON_PATH}`)
-  const beforeBody = before.get(STRUCTURAL_LESSON_PATH)!.toString('utf8')
-  const afterBody = after.get(STRUCTURAL_LESSON_PATH)!.toString('utf8')
-  const bodyEvidence = assertStructuralMdxSurface(beforeBody, afterBody, STRUCTURAL_LESSON_PATH, true)
-  bodyEvidence.before.links = validateLinks(bodyEvidence.before, selectedBefore.route, [baseCatalog, candidateCatalog], STRUCTURAL_LESSON_PATH)
-  bodyEvidence.after.links = validateLinks(bodyEvidence.after, selectedBefore.route, [baseCatalog, candidateCatalog], STRUCTURAL_LESSON_PATH)
+  if (!before.get(lessonPath)) throw new Error(`Selected structural lesson body missing: ${lessonPath}`)
+  const beforeBody = before.get(lessonPath)!.toString('utf8')
+  const afterBody = after.get(lessonPath)!.toString('utf8')
+  const bodyEvidence = assertStructuralMdxSurface(beforeBody, afterBody, lessonPath, true)
+  bodyEvidence.before.links = validateLinks(bodyEvidence.before, selectedBefore.route, [baseCatalog, candidateCatalog], lessonPath)
+  bodyEvidence.after.links = validateLinks(bodyEvidence.after, selectedBefore.route, [baseCatalog, candidateCatalog], lessonPath)
   if (beforeBody !== afterBody) {
     changedSurfaces.push({
-      kind: 'lesson-body', lesson: STRUCTURAL_LESSON_UID, contentId: selectedBefore.contentId,
-      sourcePath: STRUCTURAL_LESSON_PATH, field: 'body',
+      kind: 'lesson-body', lesson, contentId: selectedBefore.contentId,
+      sourcePath: lessonPath, field: 'body',
       beforeSha256: digest(beforeBody), afterSha256: digest(afterBody),
       before: bodyEvidence.before, after: bodyEvidence.after,
     })
@@ -787,40 +825,54 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
     const evidence = assertStructuralMdxSurface(
       problem.answer,
       candidate.answer,
-      `${STRUCTURAL_CONFIG_PATH} answer ${problem.id}`,
+      `${configPath} answer ${problem.id}`,
       false,
     )
     evidence.before.links = validateLinks(evidence.before, selectedBefore.route, [baseCatalog, candidateCatalog], `${problem.id} answer`)
     evidence.after.links = validateLinks(evidence.after, selectedBefore.route, [baseCatalog, candidateCatalog], `${problem.id} answer`)
     if (problem.answer !== candidate.answer) {
       changedSurfaces.push({
-        kind: 'problem-answer', lesson: STRUCTURAL_LESSON_UID, contentId: problem.contentId,
-        problemId: problem.id, title: problem.title, sourcePath: STRUCTURAL_CONFIG_PATH,
+        kind: 'problem-answer', lesson, contentId: problem.contentId,
+        problemId: problem.id, title: problem.title, sourcePath: configPath,
         field: 'answer', beforeSha256: digest(problem.answer), afterSha256: digest(candidate.answer),
         before: evidence.before, after: evidence.after,
       })
     }
   })
 
+  const nativeSurfaces = additive && afterTask ? {
+    answer: candidateCatalog.selectedLesson.answers[3].evidence,
+    question: candidateCatalog.selectedLesson.questions[3].evidence,
+  } : undefined
+  if (nativeSurfaces) {
+    nativeSurfaces.answer.links = validateLinks(nativeSurfaces.answer, selectedBefore.route, [baseCatalog, candidateCatalog], 'G3B free answer')
+    nativeSurfaces.question.links = validateLinks(nativeSurfaces.question, selectedBefore.route, [baseCatalog, candidateCatalog], 'G3B question')
+  }
   const anchorConflictProof = assertNoPairwiseAnchorConflicts(baseCatalog.selectedLesson, candidateCatalog.selectedLesson)
   const allowedChangedFields: StructuralField[] = [
-    { kind: 'lesson', lesson: STRUCTURAL_LESSON_UID, contentId: selectedBefore.contentId, sourcePath: STRUCTURAL_LESSON_PATH, field: 'body' },
-    ...selectedBefore.problems.map((problem): StructuralField => ({
-      kind: 'problem', lesson: STRUCTURAL_LESSON_UID, contentId: problem.contentId,
-      configPath: STRUCTURAL_CONFIG_PATH, problemId: problem.id, title: problem.title, field: 'answer',
+    { kind: 'lesson', lesson, contentId: selectedBefore.contentId, sourcePath: lessonPath, field: 'body' },
+    ...selectedBefore.problems.filter(problem => problem.contentId !== G3B_TASK.contentId).map((problem): StructuralField => ({
+      kind: 'problem', lesson, contentId: problem.contentId,
+      configPath, problemId: problem.id, title: problem.title, field: 'answer',
     })),
   ]
-  const externalHttpsDestinations = [...new Set(changedSurfaces.flatMap((surface) =>
-    [...surface.before.links, ...surface.after.links]
-      .filter((link) => link.kind === 'external-https')
-      .map((link) => link.href)))].sort()
+  const reviewedLinks = [
+    ...changedSurfaces.flatMap(surface => [...surface.before.links, ...surface.after.links]),
+    ...(nativeSurfaces ? [...nativeSurfaces.answer.links, ...nativeSurfaces.question.links] : []),
+  ]
+  const externalHttpsDestinations = [...new Set(reviewedLinks
+    .filter(link => link.kind === 'external-https').map(link => link.href))].sort()
 
   return {
     changedFiles,
+    ...(additive && !beforeTask && afterTask && nativeSurfaces ? { addition: {
+      contentId: G3B_TASK.contentId, questionSha256: digest(G3B_TASK.question), answerSha256: digest(afterTask.answer),
+      ...nativeSurfaces,
+    } } : {}),
     structural: {
-      changeClass: STRUCTURAL_CHANGE_CLASS,
-      profile: STRUCTURAL_PROFILE,
-      lesson: STRUCTURAL_LESSON_UID,
+      changeClass,
+      profile: additive ? ADDITIVE_PROFILE : STRUCTURAL_PROFILE,
+      lesson,
       allowedChangedFields,
       changedSurfaces,
       anchorConflictProof,
@@ -828,13 +880,38 @@ function structuralScope(baseRoot: string, candidateRoot: string, lesson: string
       limits: [
         'Eligibility and compatibility only; pedagogical correctness, free-feedback sufficiency and human approval are not established.',
         'External HTTPS destinations are syntax-checked and recorded for review, not semantically verified.',
-        'Only the selected TS Basics body and its existing five answer fields are writable in this profile.',
-        'Local fragment links must resolve in both base and candidate source catalogs; links to newly introduced anchors are rejected in this minimum profile.',
+        additive ? 'Only the selected G3B body, three old answers and the complete canonical fourth task are writable; the retained task is immutable.' : 'Only the selected TS Basics body and its existing five answer fields are writable in this profile.',
+        additive ? 'Only the canonical new task card may be a candidate-only link target, after complete creation. All other links must resolve in both source catalogs.' : 'Local fragment links must resolve in both base and candidate source catalogs; links to newly introduced anchors are rejected in this minimum profile.',
         'Recovery plans must retain every H2 anchor present in the current base source. Literal reversal that removes published anchors fails closed; use an explicitly reviewed compatible recovery source instead.',
         'Same-field generated navigation and reader hash behavior still require real reader evidence outside this machine scope check.',
       ],
     },
   }
+}
+
+function validateKnownSourceTask(files: Map<string, Buffer>) {
+  let task: ReturnType<typeof assertG3bSourceTask> | undefined
+  for (const [filename, raw] of files) {
+    const match = /^content\/([^/]+)\/([^/]+)\/_lessons\.json$/.exec(filename)
+    if (!match) continue
+    const config = JSON.parse(raw.toString('utf8'))
+    for (const lesson of config.lessons ?? []) {
+      for (const problem of lesson.problems ?? []) {
+        if (problem.id !== G3B_TASK.id && problem.title !== G3B_TASK.title) continue
+        if (task) throw new Error('Duplicate G3B source task identity')
+        task = assertG3bSourceTask(problem, `/${match[1]}/${match[2]}${lesson.id}`)
+        const selected = parseDetailedConfig(raw, filename).lessons.find(item => item.contentId === G3B_LESSON_CONTENT_ID)
+        if (!selected || !isDeepStrictEqual(selected.problems.map(item => item.contentId), [...G3B_CARD_ORDER])) {
+          throw new Error('G3B requires exactly the three old cards followed by its one native task')
+        }
+      }
+    }
+  }
+  return task
+}
+
+export function assertKnownSourceCatalog(root: string) {
+  return validateKnownSourceTask(payloadFiles(root))
 }
 
 /** Scope is stricter than ordinary MDX validity; semantic independence still needs review. */
@@ -844,11 +921,16 @@ export function assertInPlaceScope(
   options: ReleaseScopeOptions = {},
 ): ScopeReport {
   const normalized = normalizeReleaseScopeOptions(options)
-  if (normalized.changeClass === STRUCTURAL_CHANGE_CLASS) {
-    return structuralScope(baseRoot, candidateRoot, normalized.lesson)
+  if (normalized.changeClass !== DEFAULT_CHANGE_CLASS) {
+    return structuralScope(baseRoot, candidateRoot, normalized.lesson, normalized.changeClass)
   }
   const before = payloadFiles(baseRoot)
   const after = payloadFiles(candidateRoot)
+  const beforeTask = validateKnownSourceTask(before)
+  const afterTask = validateKnownSourceTask(after)
+  if (!isDeepStrictEqual(beforeTask, afterTask)) {
+    throw new Error('The G3B task is immutable outside its approved creation')
+  }
   if (!isDeepStrictEqual([...before.keys()], [...after.keys()])) {
     throw new Error('In-place publishing cannot add, remove or move payload files')
   }

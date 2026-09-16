@@ -18,6 +18,7 @@ import { SLUGIFY_OPTIONS } from '../../constants'
 import { PreserializedMdxRenderer } from '../PreserializedMdxRenderer'
 import { TypeBadge, DifficultyBadge, ThinkingPrompt } from './shared'
 import { trackLearningEvent } from '@/lib/analytics'
+import { isNativeCodingProblem } from '@/lib/problem-presentation'
 
 export type RevealStage = 'collapsed' | 'question' | 'answer'
 
@@ -52,6 +53,7 @@ export const ProblemCard = ({
 
   const problemSlug = slugify(problem.title, SLUGIFY_OPTIONS)
   const isTheory = problem.type === ProblemType.THEORY
+  const isNative = isNativeCodingProblem(problem)
 
   // Handle URL hash navigation
   useEffect(() => {
@@ -136,7 +138,7 @@ export const ProblemCard = ({
               headingId !== undefined && 'scroll-mt-28',
             )}
           >
-            {isTheory ? (
+            {isTheory || isNative ? (
               problem.title
             ) : (
               <a
@@ -200,6 +202,12 @@ export const ProblemCard = ({
         {isPending && <p role="status" className="mt-2 text-sm">Saving progress…</p>}
         {error && <p role="alert" className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
       </div>
+
+      {isNative && isExpanded && (
+        <p className="mt-4 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+          Write and run your solution locally before revealing the answer.
+        </p>
+      )}
 
       {/* Expandable content */}
       <AnimatePresence initial={false}>
@@ -286,7 +294,7 @@ export const ProblemCard = ({
               </AnimatePresence>
 
               {/* External link for coding problems */}
-              {!isTheory && problem.href && (
+              {!isTheory && !isNative && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

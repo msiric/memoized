@@ -123,7 +123,7 @@ export async function publishContent(args = process.argv.slice(2)) {
         record.changes.push(change)
         save()
       })
-      if (plan.changes.length) {
+      if (plan.changes.length || plan.creations.length) {
         record.status = 'indexing'
         save()
         const { indexLessons } = await import('./index-search')
@@ -134,7 +134,7 @@ export async function publishContent(args = process.argv.slice(2)) {
           },
         })
       }
-      record.status = plan.changes.length ? 'published-awaiting-live-acceptance' : 'unchanged'
+      record.status = plan.changes.length || plan.creations.length ? 'published-awaiting-live-acceptance' : 'unchanged'
     }
   } catch (error) {
     record.status = 'failed'

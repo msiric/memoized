@@ -2,7 +2,7 @@
 
 import { trackLearningEvent } from '@/lib/analytics'
 import { PROBLEM_CARD } from '@/constants/designTokens'
-import { CONTENT_STATS } from '@/constants/content-stats'
+import { isNativeCodingProblem } from '@/lib/problem-presentation'
 import { ProblemQuestion } from './ProblemQuestion'
 import { useContentStore } from '@/contexts/progress'
 import { useProblemCompletion } from '@/hooks/useProblemCompletion'
@@ -112,6 +112,7 @@ const ProblemSlideOverContent = ({
   const { isCompleted, isPending, isDisabled, error, setCompleted } = useProblemCompletion(problem.id)
 
   const isTheory = problem.type === 'THEORY'
+  const isNative = isNativeCodingProblem(problem)
 
   const handleRevealAnswer = useCallback(() => {
     setStage('answer')
@@ -134,7 +135,7 @@ const ProblemSlideOverContent = ({
       </div>
 
       {/* Title */}
-      {isTheory ? (
+      {isTheory || isNative ? (
         <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white">
           {problem.title}
         </h2>
@@ -148,6 +149,12 @@ const ProblemSlideOverContent = ({
           {problem.title}
           <HiArrowTopRightOnSquare className="h-3.5 w-3.5 sm:h-4 sm:w-4 opacity-50 transition-opacity group-hover:opacity-100" />
         </a>
+      )}
+
+      {isNative && (
+        <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+          Write and run your solution locally before revealing the answer.
+        </p>
       )}
 
       {/* Completed checkbox */}
@@ -245,7 +252,7 @@ const ProblemSlideOverContent = ({
       </AnimatePresence>
 
       {/* External link for coding problems */}
-      {!isTheory && problem.href && (
+      {!isTheory && !isNative && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -495,7 +502,7 @@ export const ProblemList = ({
         <div className="prose mx-auto mb-8 max-w-[1024px] dark:prose-invert">
           <h1>Welcome to the Problems Page: Master Every Challenge</h1>
           <p className="lead">
-            Browse and filter through {CONTENT_STATS.problems} JavaScript interview problems. Track your progress, reveal solutions and master each topic systematically.
+            Browse and filter through the {allProblems.length} JavaScript interview problems loaded in this view. Track your progress, reveal solutions and master each topic systematically.
           </p>
         </div>
       </article>

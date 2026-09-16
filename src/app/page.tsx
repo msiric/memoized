@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { ContentOverview } from '../components/ContentOverview'
 import { FreeOfferingHighlight } from '../components/FreeOfferingHighlight'
 import { pageMetadata } from '@/lib/seo'
+import { CatalogStatsProvider } from '@/components/CatalogStatsProvider'
 
 export const metadata = pageMetadata({
   title: 'JavaScript & TypeScript Interview Prep',
@@ -233,43 +234,45 @@ export default async function Home() {
   ])
 
   return (
-    <div className="flex w-full flex-col">
-      {unifiedBanners.map((banner) => (
-        <TopBanner
-          key={banner.id}
-          title={banner.title}
-          message={banner.message}
-          type={banner.type}
-          link={
-            banner.linkUrl
-              ? { text: banner.linkText!, url: banner.linkUrl }
-              : undefined
-          }
-          countdownTo={banner.countdownTo}
-          discountPercent={banner.discountPercent}
+    <CatalogStatsProvider>
+      <div className="flex w-full flex-col">
+        {unifiedBanners.map((banner) => (
+          <TopBanner
+            key={banner.id}
+            title={banner.title}
+            message={banner.message}
+            type={banner.type}
+            link={
+              banner.linkUrl
+                ? { text: banner.linkText!, url: banner.linkUrl }
+                : undefined
+            }
+            countdownTo={banner.countdownTo}
+            discountPercent={banner.discountPercent}
+          />
+        ))}
+
+        <LandingHeader />
+
+        <CallToAction
+          codeSnippets={CODE_SNIPPETS}
+          initialSnippet={initialSnippet}
         />
-      ))}
 
-      <LandingHeader />
+        <ContentOverview />
 
-      <CallToAction
-        codeSnippets={CODE_SNIPPETS}
-        initialSnippet={initialSnippet}
-      />
+        <FreeOfferingHighlight />
 
-      <ContentOverview />
+        <CompanyLogos />
 
-      <FreeOfferingHighlight />
+        <SolveProblems />
 
-      <CompanyLogos />
+        <TrackProgress />
 
-      <SolveProblems />
+        <CreatorIntro />
 
-      <TrackProgress />
-
-      <CreatorIntro />
-
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </CatalogStatsProvider>
   )
 }

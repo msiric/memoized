@@ -1,7 +1,6 @@
 import dynamic from 'next/dynamic'
 import { APP_NAME, PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '../../../constants'
-import { CONTENT_STATS } from '@/constants/content-stats'
-import { getActiveCoursesWithProgress } from '../../../services/course'
+import { getCoursesSnapshot } from '@/lib/catalog-request'
 import { retrieveStripeSession } from '../../../services/stripe'
 import { CourseCard } from '../../../components/CourseCard'
 import { SectionContainer } from '@/components/SectionContainer'
@@ -32,11 +31,12 @@ export default async function Courses({ searchParams }: CoursesProps) {
     searchParams[SESSION_QUERY_PARAM]
       ? retrieveStripeSession(searchParams[SESSION_QUERY_PARAM])
       : Promise.resolve(null),
-    getActiveCoursesWithProgress(),
+    getCoursesSnapshot(),
   ])
 
-  const courses =
-    coursesResult.status === 'fulfilled' ? coursesResult.value : null
+  const catalog = coursesResult.status === 'fulfilled' ? coursesResult.value : null
+  const courses = catalog?.status === 'available' ? catalog.courses : null
+  const stats = catalog?.status === 'available' ? catalog.stats : null
 
   const stripeSession =
     stripeSessionResult.status === 'fulfilled'
@@ -75,21 +75,26 @@ export default async function Courses({ searchParams }: CoursesProps) {
         <div className="mx-auto max-w-xl">
           <div className="grid grid-cols-3 items-stretch gap-3 sm:gap-6 lg:gap-8">
             <StatCard
-              value={CONTENT_STATS.courses}
+              value={stats?.courses ?? '—'}
               label="Expert Courses"
               variant="lime"
             />
             <StatCard
-              value={CONTENT_STATS.lessons}
+              value={stats?.lessons ?? '—'}
               label="Interactive Lessons"
               variant="indigo"
             />
             <StatCard
-              value={CONTENT_STATS.problems}
+              value={stats?.problems ?? '—'}
               label="Practice Problems"
               variant="amber"
             />
           </div>
+          {!stats && (
+            <p role="status" className="mt-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
+              Courses and catalog counts are unavailable. Please try again later.
+            </p>
+          )}
         </div>
       </SectionContainer>
 

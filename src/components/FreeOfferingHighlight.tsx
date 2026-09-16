@@ -1,12 +1,16 @@
+'use client'
+
 import { Badge } from './Badge'
 import { GradientText } from './GradientText'
 import { IconContainer } from './IconContainer'
 import { DecorativeBlur } from './DecorativeBlur'
 import { CheckCircleIcon, BookIcon, FlaskIcon, GlobeIcon } from './icons'
 import { SPACING, TYPOGRAPHY } from '@/constants/designTokens'
-import { CONTENT_STATS } from '@/constants/content-stats'
+import { useCatalogStats } from './CatalogStatsProvider'
 
 export const FreeOfferingHighlight = () => {
+  const result = useCatalogStats()
+  const problems = result.status === 'available' ? result.stats.problems : null
   return (
     <section className={`relative ${SPACING.section.vertical}`}>
       <div className={`mx-auto max-w-7xl ${SPACING.section.horizontal}`}>
@@ -23,7 +27,7 @@ export const FreeOfferingHighlight = () => {
 
                   {/* Main message */}
                   <h2 className={`${SPACING.headingMargin.h2} ${TYPOGRAPHY.heading.h2} ${TYPOGRAPHY.color.primary}`}>
-                    <GradientText>{CONTENT_STATS.problems} JavaScript problems</GradientText> are free to solve
+                    <GradientText>{problems === null ? 'All' : problems} JavaScript problems</GradientText> are free to solve
                   </h2>
 
                   <p className={`mx-auto ${SPACING.descriptionMargin.large} max-w-2xl ${TYPOGRAPHY.body.large} ${TYPOGRAPHY.color.secondary}`}>
@@ -42,7 +46,7 @@ export const FreeOfferingHighlight = () => {
                         All Problems Free
                       </h3>
                       <p className={`text-sm ${TYPOGRAPHY.color.secondary}`}>
-                        {CONTENT_STATS.problems} theory and coding questions accessible to everyone
+                        {problems === null ? 'Theory' : `${problems} theory`} and coding questions accessible to everyone
                       </p>
                     </div>
 

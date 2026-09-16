@@ -55,6 +55,29 @@ function confirmation(completed: boolean) {
 }
 
 describe('Explicit practice actions', () => {
+  it('presents native coding as local practice with the existing free reveal and completion controls', async () => {
+    const native: PracticeProblem = { ...problem, type: 'CODING', href: '' }
+    render(<ProblemCard problem={native} defaultExpanded />)
+    expect(screen.getByRole('heading', { name: native.title })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: native.title })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Practice on LeetCode/ })).not.toBeInTheDocument()
+    expect(screen.getByText('Write and run your solution locally before revealing the answer.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^(Run|Submit)$/ })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
+    await screen.findByText('Free answer body')
+    fireEvent.click(screen.getByRole('checkbox'))
+    expect(useAuthStore.getState().isModalOpen).toBe(true)
+    expect(mocks.mark).not.toHaveBeenCalled()
+  })
+
+  it('retains external coding titles and their existing provider action', () => {
+    const external: PracticeProblem = { ...problem, type: 'CODING', href: 'https://leetcode.com/problems/longest-common-prefix/' }
+    render(<ProblemCard problem={external} defaultExpanded />)
+    expect(screen.getByRole('link', { name: external.title })).toHaveAttribute('href', external.href)
+    expect(screen.getByRole('link', { name: /Practice on LeetCode/ })).toHaveAttribute('href', external.href)
+    expect(screen.queryByText('Write and run your solution locally before revealing the answer.')).not.toBeInTheDocument()
+  })
+
   it('keeps existing answer reveals without adding unfinished attempt controls', () => {
     render(<ProblemCard problem={problem} defaultExpanded />)
     expect(screen.getByText(problem.question)).toBeInTheDocument()

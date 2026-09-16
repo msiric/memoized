@@ -1,5 +1,6 @@
 import { getActiveCoupons, getActiveProducts } from '@/services/stripe'
 import { getUserWithSubscriptionDetails } from '@/services/user'
+import { getCatalogStatsSnapshot } from '@/lib/catalog-request'
 import { act, cleanup, render, screen } from '@testing-library/react'
 import { getServerSession } from 'next-auth'
 import Stripe from 'stripe'
@@ -9,6 +10,7 @@ import Premium from './page'
 vi.mock('next-auth')
 vi.mock('@/services/user')
 vi.mock('@/services/stripe')
+vi.mock('@/lib/catalog-request', () => ({ getCatalogStatsSnapshot: vi.fn() }))
 vi.mock('@/components/Footer', () => ({
   Footer: () => <div data-testid="footer">Mocked Footer</div>,
 }))
@@ -30,6 +32,10 @@ describe('Premium page', () => {
     vi.resetAllMocks()
     vi.mocked(getActiveCoupons).mockResolvedValue([])
     vi.mocked(getActiveProducts).mockResolvedValue([])
+    vi.mocked(getCatalogStatsSnapshot).mockResolvedValue({
+      status: 'available',
+      stats: { courses: 2, sections: 8, lessons: 120, problems: 506, resources: 33 },
+    })
   })
 
   afterEach(() => {
@@ -123,5 +129,18 @@ describe('Premium page', () => {
 
     const pricingTable = screen.getByTestId('pricing-table')
     expect(pricingTable.textContent).toContain('Products: 2')
+  })
+
+  it('keeps pricing available when catalog counts are unavailable', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(getCatalogStatsSnapshot).mockResolvedValue({
+      status: 'unavailable', code: 'CATALOG_STATS_UNAVAILABLE',
+    })
+
+    render(await Premium())
+
+    expect(screen.getByTestId('pricing-table')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Catalog counts are unavailable')
+    expect(screen.queryByText('506')).not.toBeInTheDocument()
   })
 })

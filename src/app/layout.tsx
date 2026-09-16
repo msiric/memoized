@@ -1,6 +1,5 @@
 import { Providers } from '@/app/providers'
 import { APP_NAME } from '@/constants'
-import { CONTENT_STATS } from '@/constants/content-stats'
 import '@/styles/tailwind.css'
 import { type Metadata } from 'next'
 import NextTopLoader from 'nextjs-toploader'
@@ -10,7 +9,7 @@ import { SiteAnalytics } from '@/components/SiteAnalytics'
 import { getSiteUrl } from '@/config/env'
 import { isPreviewDeployment } from '@/lib/seo'
 
-const description = `Prepare for JavaScript and TypeScript interviews with ${CONTENT_STATS.problems} theory and coding problems, worked explanations, and data-structure practice.`
+const description = 'Prepare for JavaScript and TypeScript interviews with theory and coding problems, worked explanations, and data-structure practice.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
