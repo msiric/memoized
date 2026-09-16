@@ -16,6 +16,8 @@ describe('MDX comparison tables', () => {
     expect(html).toContain('overflow-x-auto')
     expect(html).toContain('tabindex="0"')
     expect(html).toContain('aria-label="Scrollable data table"')
+    expect(html).toContain('break-normal')
+    expect(html).toContain('[&amp;_code]:whitespace-nowrap')
     expect(html).toContain('<table')
     expect(html).toContain('<td>Value</td>')
   })
