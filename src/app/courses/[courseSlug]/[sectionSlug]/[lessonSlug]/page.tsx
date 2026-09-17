@@ -26,6 +26,8 @@ import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 import { reportErrorSafely } from '@/lib/sentry'
 import { G3bPracticeEntry } from '@/components/G3bPracticeEntry'
 import { hasG3bPractice } from '@/lib/g3b-task'
+import { G3cPracticeEntry } from '@/components/G3cPracticeEntry'
+import { hasG3cPractice } from '@/lib/g3c-task'
 
 // Lesson output depends on the current session and guided-view query.
 export const dynamic = 'force-dynamic'
@@ -141,7 +143,9 @@ export default async function Lesson({
     className="block py-1 text-sm font-medium text-lime-700 underline underline-offset-4 dark:text-lime-300">Open the guided first pass</Link> : null
   const previewAction = entryAction ?? (hasG3bPractice(lesson.contentId, lesson.problems)
     ? <G3bPracticeEntry lessonContentId={lesson.contentId} problems={lesson.problems} />
-    : null)
+    : hasG3cPractice(lesson.contentId, lesson.problems)
+      ? <G3cPracticeEntry lessonContentId={lesson.contentId} problems={lesson.problems} />
+      : null)
   const header = <>
     {breadcrumb}
     {fallbackNotice && <p role="status" className="mb-5 text-sm leading-6 text-zinc-600 dark:text-zinc-300">{fallbackNotice}</p>}

@@ -3,6 +3,7 @@ import { revalidateLessonProgress } from '@/lib/cache'
 import { ServiceError } from '@/lib/sentry'
 import { AccessOptions, ProblemDifficulty, ProblemType, Prisma } from '@prisma/client'
 import { orderG3bPractice } from '@/lib/g3b-task'
+import { orderG3cPractice } from '@/lib/g3c-task'
 
 export type MarkLessonArgs = {
   userId: string
@@ -154,7 +155,10 @@ export const getLessonBySlug = async (
     return null
   }
 
-  return { ...lesson, problems: orderG3bPractice(lesson.contentId, lesson.problems) }
+  return {
+    ...lesson,
+    problems: orderG3cPractice(lesson.contentId, orderG3bPractice(lesson.contentId, lesson.problems)),
+  }
 }
 
 export const getLessonsSlugs = async () => {

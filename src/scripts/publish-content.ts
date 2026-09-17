@@ -4,7 +4,7 @@ import { parseArgs } from 'node:util'
 import prisma from '@/lib/prisma'
 import { archiveContent, fullRevision, verifyAppRevision, verifyEnvironment } from './content-release/inputs'
 import { applyInPlaceRelease, checkReleaseState, describeInPlacePlan, planInPlaceRelease, readReleaseCatalog, type ChangeResult } from './content-release/plan'
-import { DEFAULT_CHANGE_CLASS, STRUCTURAL_CHANGE_CLASS, digest, normalizeReleaseScopeOptions, parseChangeClass } from './content-release/scope'
+import { DEFAULT_CHANGE_CLASS, digest, normalizeReleaseScopeOptions, parseChangeClass } from './content-release/scope'
 
 function required(value: string | undefined, name: string) {
   if (!value?.trim()) throw new Error(`Missing required --${name}`)
@@ -30,7 +30,7 @@ export function parsePublishContentArgs(args: string[]) {
   })
   const changeClass = parseChangeClass(parsed.values['change-class'])
   if (changeClass === DEFAULT_CHANGE_CLASS && parsed.values.lesson !== undefined) {
-    throw new Error(`--lesson is only supported with ${STRUCTURAL_CHANGE_CLASS}`)
+    throw new Error('--lesson is only supported with an explicit structural or additive change class')
   }
   const scope = normalizeReleaseScopeOptions({ changeClass, lesson: parsed.values.lesson })
   return { values: parsed.values, scope }

@@ -2,10 +2,20 @@ import { describe, expect, it, vi } from 'vitest'
 import { parsePublishContentArgs } from './publish-content'
 import { ADDITIVE_CHANGE_CLASS, DEFAULT_CHANGE_CLASS, STRUCTURAL_CHANGE_CLASS, STRUCTURAL_LESSON_UID } from './content-release/scope'
 import { G3B_LESSON_UID } from '@/lib/g3b-task'
+import { G3C_LESSON_UID } from '@/lib/g3c-task'
 
 vi.mock('@/lib/prisma', () => ({ default: { $disconnect: vi.fn() } }))
 
 describe('publish-content CLI change-class contract', () => {
+  it('accepts the exact separate G3C selector without exposing a generic additive publisher', () => {
+    expect(parsePublishContentArgs(['--change-class', ADDITIVE_CHANGE_CLASS, '--lesson', G3C_LESSON_UID]).scope)
+      .toEqual({ changeClass: ADDITIVE_CHANGE_CLASS, lesson: G3C_LESSON_UID })
+    for (const lesson of [`/${G3C_LESSON_UID}`, `${G3C_LESSON_UID} `, `${G3C_LESSON_UID}\nmode=publish`]) {
+      expect(() => parsePublishContentArgs(['--change-class', ADDITIVE_CHANGE_CLASS, '--lesson', lesson])).toThrow(/requires --lesson/)
+    }
+    expect(() => parsePublishContentArgs(['--change-class', STRUCTURAL_CHANGE_CLASS, '--lesson', G3C_LESSON_UID])).toThrow()
+    expect(() => parsePublishContentArgs(['--lesson', G3C_LESSON_UID])).toThrow()
+  })
   it('accepts only the exact G3B class/UID pair without silently accepting aliases', () => {
     expect(parsePublishContentArgs(['--change-class', ADDITIVE_CHANGE_CLASS, '--lesson', G3B_LESSON_UID]).scope)
       .toEqual({ changeClass: ADDITIVE_CHANGE_CLASS, lesson: G3B_LESSON_UID })

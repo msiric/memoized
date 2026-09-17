@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { CodeGroup } from './Code'
 
 function Panel({ code }: { language: string; code: string }) {
@@ -7,6 +7,23 @@ function Panel({ code }: { language: string; code: string }) {
 }
 
 describe('CodeGroup labels', () => {
+  beforeEach(() => { vi.spyOn(window, 'scrollBy').mockImplementation(() => {}) })
+  afterEach(() => { cleanup(); vi.restoreAllMocks() })
+  it('keeps JSX and TSX alternatives separately reachable instead of two Code tabs', async () => {
+    render(
+      <CodeGroup title="">
+        <Panel language="jsx" code="JSX starter" />
+        <Panel language="tsx" code="TSX starter" />
+      </CodeGroup>,
+    )
+    const js = screen.getByRole('tab', { name: 'JavaScript (JSX)' })
+    const ts = screen.getByRole('tab', { name: 'TypeScript (TSX)' })
+    fireEvent.click(ts)
+    await waitFor(() => expect(screen.getByRole('tabpanel')).toHaveTextContent('TSX starter'))
+    fireEvent.click(js)
+    await waitFor(() => expect(screen.getByRole('tabpanel')).toHaveTextContent('JSX starter'))
+  })
+
   it('keeps both distinct JS/TS panels reachable with the shared label helper', async () => {
     render(
       <CodeGroup title="">

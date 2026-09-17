@@ -3,6 +3,7 @@ import * as acorn from 'acorn'
 import { toString } from 'mdast-util-to-string'
 import { mdxAnnotations } from 'mdx-annotations'
 import { visit } from 'unist-util-visit'
+import { rehypeStaticHeadings } from './static-headings.mjs'
 
 const dotenv = {
   displayName: 'dotEnv',
@@ -1652,6 +1653,7 @@ function getSections(node) {
 
 export const rehypePlugins = [
   mdxAnnotations.rehype,
+  rehypeStaticHeadings,
   rehypeParseCodeBlocks,
   rehypeShiki,
   rehypeSlugify,

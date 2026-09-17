@@ -16,6 +16,7 @@ import {
 } from '@/services/lesson'
 import { ServiceError } from '@/lib/sentry'
 import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID } from '@/lib/g3b-task'
+import { G3C_LESSON_CONTENT_ID, G3C_OLD_TASK_IDS, G3C_TASK } from '@/lib/g3c-task'
 import { AccessOptions, ProblemDifficulty, ProblemType, Prisma } from '@prisma/client'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { Mock, afterEach, describe, expect, it, vi } from 'vitest'
@@ -176,6 +177,19 @@ describe('Lesson services', () => {
   })
 
   describe('getLessonBySlug', () => {
+    it('appends the G3C task without reordering the five existing returned rows', async () => {
+      const old = G3C_OLD_TASK_IDS.map((id, index) => ({ id: `old-${index}`, contentId: `${G3C_LESSON_CONTENT_ID}/${id}` }))
+      const native = { id: 'new-native', contentId: G3C_TASK.contentId }
+      const problems = [old[4], old[3], old[2], old[0], native, old[1]]
+      ;(prisma.lesson.findFirst as Mock).mockResolvedValue({
+        id: 'existing-frontend-lesson', contentId: G3C_LESSON_CONTENT_ID, problems,
+      })
+      const result = await getLessonBySlug('js-track', 'frontend-development', 'frontend-interviews')
+      expect(result?.problems.map(problem => problem.id)).toEqual(['old-4', 'old-3', 'old-2', 'old-0', 'old-1', 'new-native'])
+      expect(result?.problems[5]).toBe(native)
+      expect(problems[4]).toBe(native)
+    })
+
     it('places the complete G3B native task fourth without changing database identities', async () => {
       const problems = [
         { id: 'old-prefix', contentId: G3B_CARD_ORDER[0] },
