@@ -232,7 +232,7 @@ implementation prompts are not reclassified.
 ### Binding handoff
 
 `G7_REVIEWED_BINDINGS` binds only the complete local Data Types review candidate
-`558790ecb3d3820c0a5294fa4ea89ab17a02b9b4`. The Type Coercion entry remains
+`d60a2a12817859b0c8b56a9ee1fb99fb4bdb1542`. The Type Coercion entry remains
 absent. This is not owner acceptance of the finished candidate or production
 activation: the active control still selects G3C. Planning, preparation,
 state inspection and application fail closed without a complete binding.

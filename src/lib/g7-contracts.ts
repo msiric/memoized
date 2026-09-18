@@ -144,13 +144,13 @@ export type G7Binding = {
   }[]
 }
 
-// Complete local Data Types review candidate 558790ecb3d3820c0a5294fa4ea89ab17a02b9b4.
+// Complete local Data Types review candidate d60a2a12817859b0c8b56a9ee1fb99fb4bdb1542.
 // Production selection remains G3C. Coercion stays unbound; no runtime overrides.
 export const G7_REVIEWED_BINDINGS: Partial<Record<G7LessonUid, G7Binding>> = {
   [G7_DATA_TYPES]: {
     sourceLessonSha256: '3b38e3da312ced7db557041fcd487d6966b62d165514cf17a4856c7196516b5d',
-    bodySha256: '9e18c364a0327c739a43622ebe2f8a9f89ccde70f5703cda2f33e07e42f137d7',
-    serializedBodySha256: 'e0e975cec61dcc38af1a31e82b2965a1f2c67df1229d3f6a51916d5f3279601f',
+    bodySha256: 'efa4b98f535f271978125573f1ea7a2241f0bbaac1d0853e4974bd535d3fedcc',
+    serializedBodySha256: 'e65ecb28afd40fc3ebe3ea19e925f0a7601b7fc5d29460f13a9fb80ab2b9af7e',
     problems: [
       {
         id: 'primitives-vs-objects', type: 'THEORY',
