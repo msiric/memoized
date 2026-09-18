@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { publishContent } from './publish-content'
 import { ADDITIVE_CHANGE_CLASS } from './content-release/scope'
 import { G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
+import { G7_CHANGE_CLASS, G7_DATA_TYPES, G7_PROFILE } from '@/lib/g7-contracts'
 
 const mocks = vi.hoisted(() => ({
   archive: vi.fn(), appRevision: vi.fn(), prepare: vi.fn(), apply: vi.fn(),
@@ -77,6 +78,7 @@ describe('publisher CLI journal/hash/index sequencing (unit mocks)', () => {
     expect(JSON.parse(fs.readFileSync(report, 'utf8'))).toMatchObject({
       changes: [creation], indexResult: { documents: 120 }, cleanup: 'succeeded',
     })
+
     expect(mocks.apply.mock.invocationCallOrder[0]).toBeLessThan(mocks.index.mock.invocationCallOrder[0])
     expect(mocks.index).toHaveBeenCalledTimes(1)
   })
@@ -146,5 +148,72 @@ describe('publisher CLI journal/hash/index sequencing (unit mocks)', () => {
     const reviewed = await publishContent(args())
     expect((await publishContent(args(true, reviewed.planSha256))).status).toBe('unchanged')
     expect(mocks.index).not.toHaveBeenCalled()
+  })
+})
+
+describe('G7 publisher journal/review gates (explicitly mocked plan and database)', () => {
+  function g7Args(apply = false, plan = '') {
+    return args(apply, plan).map(argument => argument === ADDITIVE_CHANGE_CLASS ? G7_CHANGE_CLASS
+      : argument === G3B_LESSON_UID ? G7_DATA_TYPES : argument)
+  }
+  const receipt = {
+    kind: 'problem', contentId: `/${G7_DATA_TYPES}/implement-deepclone-structural-deep-copy`,
+    field: 'assessment', id: nativeUuid, status: 'updated',
+  }
+  beforeEach(() => {
+    mocks.prepare.mockResolvedValue({ changes: [{ field: 'assessment' }], creations: [] })
+    mocks.describe.mockReturnValue({
+      changeClass: G7_CHANGE_CLASS, profile: G7_PROFILE, lesson: G7_DATA_TYPES,
+      changedEntities: [{ ...receipt, before: { type: 'THEORY' }, after: { type: 'CODING',
+        questionSha256: 'd'.repeat(64), answerSha256: 'e'.repeat(64), serializedAnswerSha256: 'f'.repeat(64) } }],
+      createdEntities: [], inventories: { before: { counts: { problems: 508 } }, candidate: { counts: { problems: 508 } } },
+    })
+    mocks.apply.mockImplementation(async (_plan, onChange) => { onChange(receipt); return [receipt] })
+  })
+  it('plans without writes and durably journals the coupled existing UUID before indexing', async () => {
+    const plan = await publishContent(g7Args())
+    expect(mocks.apply).not.toHaveBeenCalled()
+    expect(mocks.prepare).toHaveBeenCalledWith('/synthetic-source', '/synthetic-source', {
+      changeClass: G7_CHANGE_CLASS, lesson: G7_DATA_TYPES,
+    })
+    const invocation = g7Args(true, plan.planSha256)
+    const result = await publishContent(invocation)
+    expect(result.changes).toEqual([receipt])
+    expect(JSON.parse(fs.readFileSync(invocation[invocation.indexOf('--report') + 1], 'utf8')))
+      .toMatchObject({ changes: [receipt], cleanup: 'succeeded' })
+    expect(mocks.apply.mock.invocationCallOrder[0]).toBeLessThan(mocks.index.mock.invocationCallOrder[0])
+  })
+  it('fails closed on source/unbound preparation failure and always disposes immutable archives', async () => {
+    const dispose = vi.fn()
+    mocks.archive.mockReturnValue({ directory: '/synthetic-source', dispose })
+    mocks.prepare.mockRejectedValueOnce(new Error('G7 inactive: complete binding missing'))
+    const invocation = g7Args()
+    await expect(publishContent(invocation)).rejects.toThrow(/binding missing/)
+    expect(dispose).toHaveBeenCalledTimes(2)
+    expect(mocks.read).not.toHaveBeenCalled()
+    expect(mocks.apply).not.toHaveBeenCalled()
+    expect(mocks.index).not.toHaveBeenCalled()
+    expect(JSON.parse(fs.readFileSync(invocation[invocation.indexOf('--report') + 1], 'utf8')))
+      .toMatchObject({ status: 'failed', changes: [], cleanup: 'succeeded' })
+  })
+  it('binds the complete described assessment and never accepts a changed reviewed-plan payload', async () => {
+    const plan = await publishContent(g7Args())
+    mocks.describe.mockReturnValue({ type: 'CODING', question: 'different complete payload', compiledAnswer: 'different' })
+    await expect(publishContent(g7Args(true, plan.planSha256))).rejects.toThrow(/separately reviewed plan/)
+    expect(mocks.apply).not.toHaveBeenCalled()
+  })
+  it('retains coupled receipt after index failure and retries the original reviewed plan without recreation', async () => {
+    const plan = await publishContent(g7Args())
+    mocks.index.mockRejectedValueOnce(new Error('uncertain indexing receipt'))
+    const invocation = g7Args(true, plan.planSha256)
+    await expect(publishContent(invocation)).rejects.toThrow(/indexing receipt/)
+    expect(JSON.parse(fs.readFileSync(invocation[invocation.indexOf('--report') + 1], 'utf8')))
+      .toMatchObject({ status: 'failed', changes: [receipt] })
+    mocks.apply.mockImplementation(async (_plan, onChange) => {
+      const inspected = { ...receipt, status: 'already-applied' }
+      onChange(inspected)
+      return [inspected]
+    })
+    expect((await publishContent(g7Args(true, plan.planSha256))).changes).toEqual([{ ...receipt, status: 'already-applied' }])
   })
 })

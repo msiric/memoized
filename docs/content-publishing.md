@@ -190,3 +190,141 @@ adding this tool. Unsupported change classes remain blocked.
 Unit tests must not contact production. The email-logo test checks the declared
 URL and repository PNG; the release rehearsal/live smoke probes separately check
 HTTP availability and content type at `/images/brand/logo-dark.png`.
+
+## G7-01 existing-assessment capability (inactive)
+
+```text
+--change-class existing-assessment-update-v1
+--lesson js-track/core-fundamentals/data-types
+profile: g7-values-coercion-minimum
+```
+
+The only other admitted lesson selector is
+`js-track/core-fundamentals/type-coercion`, for a later separately accepted
+candidate. One lesson is selected per publication. This is capability code,
+not candidate acceptance or authorization to deploy/publish. The active control
+configuration remains the existing enabled G3C selection and app pin.
+
+`src/lib/g7-contracts.ts` freezes canonical lesson metadata, ordered problem
+metadata and all original question/answer/body hashes from immutable content
+`a1c613747ff260a2d9fb1d8c7c2932057da9ab7c`. Canonical lesson descriptions
+come from `_lessons.json`, not body exports. Both bodies are FREE and have no
+resources. Source order labels are 1/2, while preparation and the existing
+database store the zero-based positions 0/1. Both representations are frozen
+separately rather than comparing one with the other. No identities, titles,
+order, slugs, hrefs, links, difficulty,
+ownership or access change. The source baseline remains 506; this profile
+requires the complete retained G3B/G3C catalog at 508 and freezes both native
+tasks' entire raw and compiled payloads.
+
+All six answers and the selected body may change. Only these questions may
+change, always as a complete existing assessment:
+
+| Lesson | Existing problem | Approved type |
+| --- | --- | --- |
+| Data Types | `modern-array-methods-at-findlast-findlastindex` | THEORY unchanged |
+| Data Types | `implement-deepclone-structural-deep-copy` | THEORY → CODING, HARD retained |
+| Type Coercion | `implement-deepequal-structural-equality` | THEORY → CODING, HARD retained |
+
+Data Types alone retains 508 problems with 340 THEORY / 168 CODING. Other
+implementation prompts are not reclassified.
+
+### Binding handoff
+
+`G7_REVIEWED_BINDINGS` binds only the complete local Data Types review candidate
+`d60a2a12817859b0c8b56a9ee1fb99fb4bdb1542`. The Type Coercion entry remains
+absent. This is not owner acceptance of the finished candidate or production
+activation: the active control still selects G3C. Planning, preparation,
+state inspection and application fail closed without a complete binding.
+There is no source-supplied, environment, CLI or request override.
+Synthetic test mocks do not activate the profile. The binding fields are:
+
+- `sourceLessonSha256`: `g7ValueHash(selectedLessonObject)` for the complete
+  accepted `_lessons.json` lesson object, including all six full pairs. Never
+  hash the whole shared configuration as the selected checkpoint.
+- `bodySha256`: `g7Digest(exactBodyText)`.
+- `serializedBodySha256`: `g7ValueHash(completeSerializedBody)`.
+- `problems`: six entries in the original source order, each with `id`, exact
+  after `type`, raw `questionSha256` / `answerSha256` from `g7Digest`, and
+  `serializedQuestionSha256` / `serializedAnswerSha256` from `g7ValueHash`.
+  Bind the entire serialized object, not just its `compiledSource`.
+
+`g7ValueHash` hashes UTF-8 JSON with recursively sorted object keys; array order
+is preserved. Raw text hashing does not normalize whitespace. Compile using
+the exact reviewed app through `prepareSnapshot`; review the entire source,
+question, answer, local preparation/check instructions and type before copying
+hashes into code. Binding an unapproved question/type is rejected even when
+all checksums are well formed. The three changed questions must each have new
+question and feedback hashes, not a new question with its old feedback.
+
+### Surfaces and fragments
+
+The approved G7 `HEADINGS.json` contracts are in `G7_CONTRACTS`: exact body H1,
+static `metadata` title/description and eight Data Types / nine Coercion H2
+ID/title pairs. Literal H2s reuse the deployed `staticHeading` parser. Supported
+authoring is Markdown, standalone plain literal H2, bare `CodeGroup` with
+plain JS/TS/text/bash/json fences and optional bare `Note`. CodeGroup labels
+must be distinct. No imports, arbitrary expressions, events, runtime HTML,
+widgets, assets, file disclosures, new components or fence metadata are
+authorized. H3+ is simplest for answer subsections; H2s remain subject to
+whole-lesson mixed-state collision checks.
+
+Only exact frozen legacy bodies may keep their old export/H1 pair and
+unlabelled fences. The exact frozen Coercion body additionally retains its two
+existing Questions/Answers fence annotations. New candidates cannot use those
+exceptions. The body/card collision exception applies only to Coercion body
+SHA256 `6d172b53bb2f6f81d24d35395ef2de28df4aa330c8178b3fb5c0a171b7bb8a1d`,
+and exactly `truthy-and-falsy-values` and `the-operators-dual-nature`.
+No other collision or near-hash is admitted. The revised body uses
+`boolean-contexts` and `addition-and-coercion`; the old shared fragments then
+uniquely target the unchanged cards. Exact legacy recovery restores the old
+ambiguity, not two simultaneously preserved destinations. Every other
+pairwise anchor, uniqueness and both-catalog link check remains enabled.
+
+### Atomic persistence, retries and recovery
+
+`InPlaceChange` is discriminated by `field`. Existing body/answer changes retain
+their old shape; `field: 'assessment'` carries before/after `AssessmentPayload`
+objects with question, answer, type and both complete serialized values.
+`prepareContentRelease`, `describeInPlacePlan`, `checkReleaseState` and
+`applyContentRelease` retain their existing entry points.
+
+Each assessment uses **one conditional `problem.updateMany`**, matching its
+observed UUID, owner, unchanged metadata, both raw texts and both serialized
+values. It sets question, answer, serializedQuestion, serializedAnswer and type
+together. No create, upsert, UUID replacement or catalog-wide write transaction
+is used. A coupled row must match the complete before state or complete after
+state; arbitrary cross-products are rejected. The remaining answers and body
+may be independently before or after.
+
+A zero-write race or recognized uncertain receipt triggers one complete-row
+inspection by both observed UUID and canonical content identity. Only the exact
+same-UUID/same-owner complete candidate is accepted as `already-applied`.
+Missing, ambiguous, still-before or foreign receipts fail closed without
+another write. Unclassified errors also stop; a subsequent deliberate retry
+rechecks the entire catalog. Journals record `field: assessment` and the
+existing UUID, and plan descriptions bind both raw/compiled hashes and types.
+Final verification checks complete payloads and unchanged UUIDs.
+
+Recovery is a separately reviewed reverse-source plan: retain the same 508
+identities and both native tasks, and restore only the selected lesson's
+approved records. Each of the six source assessments may independently be its
+complete frozen-before or reviewed-after question/answer/type state. A hybrid
+within one assessment is never permitted. The body independently uses either
+bound state, admitting exactly the 128 body-plus-six-assessment combinations
+when all six assessments differ. Metadata, ordering and identities remain
+frozen. `sourceLessonSha256` still binds the complete reviewed candidate, not a
+mixed recovery source; the full checksum is verified whenever all six
+assessments are after. The complete-before checksum is also verified.
+
+Selective recovery can restore one assessment or one independent answer while
+retaining the other candidate records and body. It also recovers a partially
+applied database without restoring a database backup or touching legitimate
+user progress. Reuse the original reviewed publication plan after inspecting an
+index failure; a new no-op plan does not repair search.
+
+Focused tests use explicitly synthetic bindings and mocked services. They do
+not establish actual PostgreSQL atomicity, search/cache behavior, browser
+fragments, historical progress preservation, rollback compatibility or final
+candidate correctness. Those remain coordinator-owned isolated integrations
+and independent acceptance gates before any activation.
