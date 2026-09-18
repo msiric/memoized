@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   G7_CHANGE_CLASS, G7_CONTRACTS, G7_DATA_TYPES, G7_TYPE_COERCION, G7_REVIEWED_BINDINGS,
-  assertG7Body, assertG7SourceLesson, g7ValueHash, requireG7Binding,
+  assertG7Body, assertG7SourceLesson, g7LessonMetadata, g7ValueHash, requireG7Binding,
 } from './g7-contracts'
 import { normalizeReleaseScopeOptions } from '@/scripts/content-release/scope'
 
@@ -39,6 +39,8 @@ describe('G7 local candidate contracts (real immutable constants, no synthetic b
       id: '/data-types', title: 'Data Types', description: 'Master JavaScript data types and structures.', order: 1, access: 'FREE',
     })
     expect(G7_CONTRACTS[G7_TYPE_COERCION].metadata.order).toBe(2)
+    expect(g7LessonMetadata(G7_DATA_TYPES).order).toBe(0)
+    expect(g7LessonMetadata(G7_TYPE_COERCION).order).toBe(1)
     expect(G7_CONTRACTS[G7_TYPE_COERCION].bodySha256).toBe('6d172b53bb2f6f81d24d35395ef2de28df4aa330c8178b3fb5c0a171b7bb8a1d')
     for (const contract of Object.values(G7_CONTRACTS)) {
       expect(contract.problems).toHaveLength(6)

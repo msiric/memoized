@@ -209,7 +209,10 @@ configuration remains the existing enabled G3C selection and app pin.
 metadata and all original question/answer/body hashes from immutable content
 `a1c613747ff260a2d9fb1d8c7c2932057da9ab7c`. Canonical lesson descriptions
 come from `_lessons.json`, not body exports. Both bodies are FREE and have no
-resources. No identities, titles, order, slugs, hrefs, links, difficulty,
+resources. Source order labels are 1/2, while preparation and the existing
+database store the zero-based positions 0/1. Both representations are frozen
+separately rather than comparing one with the other. No identities, titles,
+order, slugs, hrefs, links, difficulty,
 ownership or access change. The source baseline remains 506; this profile
 requires the complete retained G3B/G3C catalog at 508 and freezes both native
 tasks' entire raw and compiled payloads.

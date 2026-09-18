@@ -29,6 +29,8 @@ type FrozenProblem = {
 }
 type LessonContract = {
   metadata: { id: string; title: string; description: string; order: number; access: 'FREE' }
+  // Preparation stores the zero-based array position, not the source order label.
+  preparedOrder: number
   bodySha256: string
   sourceLessonSha256: string
   bodyMetadata: { title: string; description: string }
@@ -43,6 +45,7 @@ type LessonContract = {
 export const G7_CONTRACTS: Record<G7LessonUid, LessonContract> = {
   [G7_DATA_TYPES]: {
     metadata: { id: '/data-types', title: 'Data Types', description: 'Master JavaScript data types and structures.', order: 1, access: 'FREE' },
+    preparedOrder: 0,
     bodySha256: '2a5daf4c55e156d2071568da4d653155fa5fb4527c346e1181985049427422a7',
     sourceLessonSha256: '73f53250beb0cf30e1d0dcb2c71ea4f926dd22cb7660a4ed17da8781885d24cb',
     bodyMetadata: {
@@ -84,6 +87,7 @@ export const G7_CONTRACTS: Record<G7LessonUid, LessonContract> = {
   },
   [G7_TYPE_COERCION]: {
     metadata: { id: '/type-coercion', title: 'Type Coercion', description: 'Understand implicit and explicit type conversion, truthy/falsy values, and equality operators.', order: 2, access: 'FREE' },
+    preparedOrder: 1,
     bodySha256: '6d172b53bb2f6f81d24d35395ef2de28df4aa330c8178b3fb5c0a171b7bb8a1d',
     sourceLessonSha256: 'f6d593180f01909369a8d3b3537921cd199298190a2b44587c33c17153b4bf45',
     bodyMetadata: {
@@ -235,8 +239,9 @@ export function g7ProblemMetadata(lesson: G7LessonUid, problem: FrozenProblem, t
 }
 
 export function g7LessonMetadata(lesson: G7LessonUid) {
-  const { id, ...metadata } = G7_CONTRACTS[lesson].metadata
-  return { ...metadata, contentId: `/${lesson}`, slug: id.slice(1), href: `/courses/${lesson}`, sectionContentId: '/js-track/core-fundamentals' }
+  const contract = G7_CONTRACTS[lesson]
+  const { id, ...metadata } = contract.metadata
+  return { ...metadata, order: contract.preparedOrder, contentId: `/${lesson}`, slug: id.slice(1), href: `/courses/${lesson}`, sectionContentId: '/js-track/core-fundamentals' }
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
