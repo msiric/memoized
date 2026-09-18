@@ -30,7 +30,7 @@ export function parsePublishContentArgs(args: string[]) {
   })
   const changeClass = parseChangeClass(parsed.values['change-class'])
   if (changeClass === DEFAULT_CHANGE_CLASS && parsed.values.lesson !== undefined) {
-    throw new Error('--lesson is only supported with an explicit structural or additive change class')
+    throw new Error('--lesson is only supported with an explicit structural, additive or assessment change class')
   }
   const scope = normalizeReleaseScopeOptions({ changeClass, lesson: parsed.values.lesson })
   return { values: parsed.values, scope }

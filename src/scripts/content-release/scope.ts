@@ -14,6 +14,11 @@ import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_LESSON_UID, G3B_TASK } from 
 import { G3C_BODY_DESCRIPTION, G3C_BODY_TITLE, G3C_HEADINGS, G3C_LESSON_CONTENT_ID, G3C_LESSON_UID, G3C_OLD_TASK_IDS, G3C_TASK } from '@/lib/g3c-task'
 import { G3C_CONFIG_PATH, G3C_LEGACY_BODY_SHA256, G3C_LESSON_METADATA, G3C_OLD_CONTRACTS } from '@/lib/g3c-publication'
 import { staticHeading } from '@/mdx/static-headings.mjs'
+import {
+  G7_CHANGE_CLASS, G7_PROFILE, G7_DATA_TYPES, G7_TYPE_COERCION, G7_CONFIG_PATH,
+  G7_CONTRACTS, assertG7Body, assertG7SourceLesson, isG7Lesson, requireG7Binding,
+  g7ValueHash, type G7LessonUid,
+} from '@/lib/g7-contracts'
 import { assertG3bSourceTask, assertG3cSourceTask, G3B_CONFIG_PATH } from './catalog'
 
 const parser = remark().use(remarkMdx).use(remarkGfm)
@@ -30,7 +35,7 @@ export const G3C_ADDITIVE_PROFILE = 'g3c-native-task-minimum'
 
 type DefaultChangeClass = typeof DEFAULT_CHANGE_CLASS
 type StructuralChangeClass = typeof STRUCTURAL_CHANGE_CLASS
-export type ChangeClass = DefaultChangeClass | StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS
+export type ChangeClass = DefaultChangeClass | StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS
 
 export type ReleaseScopeOptions = {
   changeClass?: ChangeClass
@@ -41,7 +46,7 @@ const STRUCTURAL_CONFIG_PATH = 'content/js-track/typescript-introduction/_lesson
 const STRUCTURAL_LESSON_PATH = 'content/js-track/typescript-introduction/ts-basics/page.mdx'
 const ALLOWED_CODE_LANGUAGES = new Set(['bash', 'javascript', 'js', 'json', 'text', 'typescript', 'ts'])
 const G3C_CODE_LANGUAGES = new Set([...ALLOWED_CODE_LANGUAGES, 'jsx', 'tsx', 'css', 'html'])
-type SurfacePolicy = { g3c?: boolean; legacySha256?: string; disclosureLabel?: string }
+type SurfacePolicy = { g3c?: boolean; g7?: G7LessonUid; legacySha256?: string; disclosureLabel?: string }
 
 function answerSurfacePolicy(g3c: boolean, problemId: string): SurfacePolicy {
   if (!g3c) return {}
@@ -57,7 +62,8 @@ export const digest = (value: string | Buffer) =>
 
 export function parseChangeClass(value: unknown): ChangeClass {
   const changeClass = value ?? DEFAULT_CHANGE_CLASS
-  if (changeClass !== DEFAULT_CHANGE_CLASS && changeClass !== STRUCTURAL_CHANGE_CLASS && changeClass !== ADDITIVE_CHANGE_CLASS) {
+  if (changeClass !== DEFAULT_CHANGE_CLASS && changeClass !== STRUCTURAL_CHANGE_CLASS &&
+      changeClass !== ADDITIVE_CHANGE_CLASS && changeClass !== G7_CHANGE_CLASS) {
     throw new Error(`Unsupported content change class: ${String(changeClass)}`)
   }
   return changeClass
@@ -67,10 +73,10 @@ export function normalizeReleaseScopeOptions(options: ReleaseScopeOptions = {}):
   const changeClass = parseChangeClass(options.changeClass)
   const lesson = options.lesson ?? ''
   if (changeClass === DEFAULT_CHANGE_CLASS) {
-    if (lesson) throw new Error('--lesson is only supported with an explicit structural or additive change class')
+    if (lesson) throw new Error('--lesson is only supported with an explicit structural, additive or assessment change class')
     return { changeClass, lesson: '' }
   }
-  const expectedLessons = changeClass === ADDITIVE_CHANGE_CLASS
+  const expectedLessons = changeClass === G7_CHANGE_CLASS ? [G7_DATA_TYPES, G7_TYPE_COERCION] : changeClass === ADDITIVE_CHANGE_CLASS
     ? [G3B_LESSON_UID, G3C_LESSON_UID] : [STRUCTURAL_LESSON_UID]
   if (!expectedLessons.includes(lesson)) {
     throw new Error(`${changeClass} requires --lesson ${expectedLessons.join(' or ')}`)
@@ -269,19 +275,20 @@ export type MdxSurfaceEvidence = {
 export type StructuralField =
   | { kind: 'lesson'; lesson: string; contentId: string; sourcePath: string; field: 'body' }
   | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'answer' }
+  | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'assessment' }
 export type StructuralSurfaceReport = {
-  changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS
-  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE | typeof G3C_ADDITIVE_PROFILE
+  changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS
+  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE | typeof G3C_ADDITIVE_PROFILE | typeof G7_PROFILE
   lesson: string
   allowedChangedFields: StructuralField[]
   changedSurfaces: {
-    kind: 'lesson-body' | 'problem-answer'
+    kind: 'lesson-body' | 'problem-answer' | 'problem-question'
     lesson: string
     contentId: string
     problemId?: string
     title?: string
     sourcePath: string
-    field: 'body' | 'answer'
+    field: 'body' | 'answer' | 'question'
     beforeSha256: string
     afterSha256: string
     before: MdxSurfaceEvidence
@@ -300,6 +307,7 @@ export type StructuralSurfaceReport = {
 export type ScopeReport = {
   changedFiles: { path: string; beforeSha256: string; afterSha256: string }[]
   structural?: StructuralSurfaceReport
+  assessment?: { bindingSha256: string; sourceLessonBeforeSha256: string; sourceLessonAfterSha256: string }
   addition?: {
     contentId: string
     questionSha256: string
@@ -311,6 +319,7 @@ export type ScopeReport = {
 
 type SurfaceState = {
   label: string
+  sha256: string
   evidence: MdxSurfaceEvidence
   ids: Set<string>
 }
@@ -341,14 +350,17 @@ function codeEvidence(node: Record<string, unknown>, inCodeGroup: boolean, polic
       !(policy.g3c ? G3C_CODE_LANGUAGES : ALLOWED_CODE_LANGUAGES).has(node.lang))) {
     throw new Error(`Unsupported code fence language in structural class: ${String(node.lang)}`)
   }
-  if (node.meta !== null && node.meta !== undefined) {
+  const legacyMeta = policy.g7 === G7_TYPE_COERCION &&
+    policy.legacySha256 === G7_CONTRACTS[G7_TYPE_COERCION].bodySha256 &&
+    typeof node.meta === 'string' && /^\{\{ title: '(Questions|Answers)', exec: false \}\}$/.test(node.meta)
+  if (node.meta !== null && node.meta !== undefined && !legacyMeta) {
     throw new Error('Code fence metadata is not supported in the structural class')
   }
   return {
     language: typeof node.lang === 'string' ? node.lang : '',
     lines: node.value.split('\n').length,
     inCodeGroup,
-    hasMeta: false,
+    hasMeta: Boolean(legacyMeta),
   }
 }
 
@@ -362,6 +374,13 @@ function literalG3cHeading(node: Record<string, unknown>, label: string): Anchor
     throw new Error(`Only exact static G3C h2 ID/title pairs with one literal id and plain text are supported: ${label}`)
   }
   return { text: heading.title, id: heading.id }
+}
+
+function literalHeading(node: Record<string, unknown>, label: string, policy: SurfacePolicy): AnchorEvidence {
+  if (!policy.g7) return literalG3cHeading(node, label)
+  const heading = staticHeading(node.type === 'mdxJsxTextElement' ? { ...node, type: 'mdxJsxFlowElement' } : node)
+  if (!heading) throw new Error(`G7 h2 requires one literal id and plain text: ${label}`)
+  return { id: heading.id, text: heading.title }
 }
 
 function validatePhrasingNode(node: unknown, label: string, links: LinkEvidence[], policy: SurfacePolicy = {}): void {
@@ -412,9 +431,9 @@ function validateFlowNode(
     case 'paragraph': {
       const children = childrenOf(node)
       const onlyChild = children[0]
-      if (policy.g3c && children.length === 1 && isRecord(onlyChild) &&
+      if ((policy.g3c || policy.g7) && children.length === 1 && isRecord(onlyChild) &&
           onlyChild.type === 'mdxJsxTextElement' && onlyChild.name === 'h2') {
-        literalG3cHeading(onlyChild, label)
+        literalHeading(onlyChild, label, policy)
         return
       }
       childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links, policy))
@@ -448,8 +467,8 @@ function validateFlowNode(
     case 'mdxJsxFlowElement': {
       const name = node.name
       const attributes = Array.isArray(node.attributes) ? node.attributes : []
-      if (name === 'h2' && policy.g3c) {
-        literalG3cHeading(node, label)
+      if (name === 'h2' && (policy.g3c || policy.g7)) {
+        literalHeading(node, label, policy)
         return
       }
       if (name === 'details' && policy.g3c && policy.disclosureLabel) {
@@ -486,7 +505,9 @@ function validateFlowNode(
             throw new Error(`CodeGroup may contain only code panels in ${label}`)
           }
           const code = codeEvidence(panel, true, policy)
-          const panelLabel = getPanelTitle({ language: code.language })
+          const legacyTitle = code.hasMeta && typeof panel.meta === 'string'
+            ? /title: '(Questions|Answers)'/.exec(panel.meta)?.[1] : undefined
+          const panelLabel = getPanelTitle({ language: code.language, title: legacyTitle })
           if (panelLabels.has(panelLabel)) {
             throw new Error(`Duplicate rendered CodeGroup panel label in ${label}: ${panelLabel}`)
           }
@@ -512,7 +533,7 @@ function topLevelEsmValues(tree: unknown): string[] {
     .map((node) => typeof node.value === 'string' ? node.value : '')
 }
 
-function headingEvidence(tree: unknown) {
+function headingEvidence(tree: unknown, policy: SurfacePolicy = {}) {
   const h1: string[] = []
   const h2: AnchorEvidence[] = []
   const counter = slugifyWithCounter()
@@ -528,7 +549,7 @@ function headingEvidence(tree: unknown) {
           (!isRecord(parent) || parent.type !== 'paragraph' || childrenOf(parent).length !== 1)) {
         throw new Error('A literal G3C h2 must be a standalone heading, not inline phrasing')
       }
-      h2.push(literalG3cHeading(node, 'heading inventory'))
+      h2.push(literalHeading(node, 'heading inventory', policy))
     }
     childrenOf(node).forEach(child => visitNode(child, node))
   }
@@ -560,7 +581,7 @@ function summarizeMdx(markdown: string, label: string, allowMetadataExport: bool
     if (isRecord(child) && child.type === 'mdxjsEsm') continue
     validateFlowNode(child, label, evidence, false, policy)
   }
-  const headings = headingEvidence(tree)
+  const headings = headingEvidence(tree, policy)
   evidence.h1 = headings.h1
   evidence.h2 = headings.h2
   if (policy.g3c && !policy.legacySha256) {
@@ -574,6 +595,14 @@ function summarizeMdx(markdown: string, label: string, allowMetadataExport: bool
       throw new Error(`G3C question/answer sections must use H3 or deeper, not H1/H2: ${label}`)
     }
   }
+  if (policy.g7 && !policy.legacySha256 && allowMetadataExport) {
+    const contract = G7_CONTRACTS[policy.g7]
+    assertG3cBodyMetadata(tree, label, contract.bodyMetadata)
+    if (!isDeepStrictEqual(evidence.h1, [contract.bodyMetadata.title]) ||
+        !isDeepStrictEqual(evidence.h2, contract.headings.map(({ id, title }) => ({ id, text: title })))) {
+      throw new Error(`G7 requires the approved body H1 and exact heading ID/title pairs: ${label}`)
+    }
+  }
   evidence.components = [...new Map(evidence.components.map((item) => [item.name, {
     name: item.name,
     count: evidence.components.filter((component) => component.name === item.name).length,
@@ -581,7 +610,11 @@ function summarizeMdx(markdown: string, label: string, allowMetadataExport: bool
   return evidence
 }
 
-function assertG3cBodyMetadata(tree: unknown, label: string) {
+function assertG3cBodyMetadata(
+  tree: unknown,
+  label: string,
+  expected = { title: G3C_BODY_TITLE, description: G3C_BODY_DESCRIPTION },
+) {
   const esm = childrenOf(tree).find(node => isRecord(node) && node.type === 'mdxjsEsm')
   const program = isRecord(esm) && isRecord(esm.data) ? esm.data.estree : undefined
   const statements = isRecord(program) && Array.isArray(program.body) ? program.body : []
@@ -609,7 +642,7 @@ function assertG3cBodyMetadata(tree: unknown, label: string) {
     if (typeof key !== 'string' || Object.hasOwn(values, key)) throw new Error(`Duplicate G3C metadata property: ${label}`)
     values[key] = property.value.value
   }
-  if (!isDeepStrictEqual(values, { title: G3C_BODY_TITLE, description: G3C_BODY_DESCRIPTION })) {
+  if (!isDeepStrictEqual(values, expected)) {
     throw new Error(`Unapproved G3C body metadata: ${label}`)
   }
 }
@@ -626,17 +659,19 @@ function assertStructuralMdxSurface(
   const afterTree = parser.parse(after)
   const beforeEsm = topLevelEsmValues(beforeTree)
   const afterEsm = topLevelEsmValues(afterTree)
-  if (!policy.g3c && !isDeepStrictEqual(beforeEsm, afterEsm)) {
+  if (!policy.g3c && !policy.g7 && !isDeepStrictEqual(beforeEsm, afterEsm)) {
     throw new Error(`Metadata export/import surface changed in structural class: ${label}`)
   }
   const beforeEvidence = summarizeMdx(before, label, allowMetadataExport, policy)
   const afterEvidence = summarizeMdx(after, label, allowMetadataExport, policy)
-  if (!policy.g3c && !isDeepStrictEqual(beforeEvidence.h1, afterEvidence.h1)) {
+  if (!policy.g3c && !policy.g7 && !isDeepStrictEqual(beforeEvidence.h1, afterEvidence.h1)) {
     throw new Error(`H1 text changed in structural class: ${label}`)
   }
   const afterH2 = new Set(afterEvidence.h2.map((heading) => heading.id))
   const missing = beforeEvidence.h2.filter((heading) => !afterH2.has(heading.id))
-  if (missing.length) {
+  // G7's complete body bindings admit only its exact approved heading mapping,
+  // including the two explicit Coercion legacy destinations on recovery.
+  if (missing.length && !(policy.g7 && allowMetadataExport)) {
     throw new Error(`Existing H2 fragment IDs were not preserved in structural class: ${label}`)
   }
   return { before: beforeEvidence, after: afterEvidence }
@@ -707,11 +742,11 @@ function idsFrom(evidence: MdxSurfaceEvidence, label?: string) {
 
 function state(label: string, markdown: string, allowMetadataExport: boolean, policy: SurfacePolicy = {}): SurfaceState {
   const evidence = summarizeMdx(markdown, label, allowMetadataExport, policy)
-  return { label, evidence, ids: idsFrom(evidence, label) }
+  return { label, sha256: digest(markdown), evidence, ids: idsFrom(evidence, label) }
 }
 
-function looseHeadingIds(markdown: string): Set<string> {
-  return idsFrom({ ...emptyEvidence(), ...headingEvidence(parser.parse(markdown)) })
+function looseHeadingIds(markdown: string, policy: SurfacePolicy = {}): Set<string> {
+  return idsFrom({ ...emptyEvidence(), ...headingEvidence(parser.parse(markdown), policy) })
 }
 
 function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = STRUCTURAL_LESSON_UID): Catalog {
@@ -743,10 +778,11 @@ function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = S
       const bodyRaw = files.get(lesson.bodyPath)
       if (!bodyRaw) throw new Error(`Referenced body missing from payload: ${lesson.bodyPath}`)
       const cardAnchors = lesson.problems.map((problem) => ({ text: problem.title, id: problem.cardAnchor }))
-      const ids = looseHeadingIds(bodyRaw.toString('utf8'))
+      const g7 = isG7Lesson(lesson.sourceUid) ? lesson.sourceUid : undefined
+      const ids = looseHeadingIds(bodyRaw.toString('utf8'), { g7 })
       for (const problem of lesson.problems) {
-        for (const id of looseHeadingIds(problem.question)) ids.add(id)
-        for (const id of looseHeadingIds(problem.answer)) ids.add(id)
+        for (const id of looseHeadingIds(problem.question, { g7 })) ids.add(id)
+        for (const id of looseHeadingIds(problem.answer, { g7 })) ids.add(id)
       }
       for (const anchor of cardAnchors) ids.add(anchor.id)
       if (lesson.problems.length) ids.add(PRACTICE_PROBLEMS_PREFIX.slice(1))
@@ -754,14 +790,15 @@ function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = S
       if (lesson.sourceUid === selectedUid) {
         const g3c = selectedUid === G3C_LESSON_UID
         const body = state(`${label} ${lesson.bodyPath}`, bodyRaw.toString('utf8'), true,
-          g3c ? { g3c, legacySha256: G3C_LEGACY_BODY_SHA256 } : {})
+          g7 ? { g7, legacySha256: G7_CONTRACTS[g7].bodySha256 } : g3c ? { g3c, legacySha256: G3C_LEGACY_BODY_SHA256 } : {})
         const questions = lesson.problems.map((problem) =>
           state(`${label} ${lesson.sourceUid} question ${problem.id}`, problem.question, false, {
-            g3c, disclosureLabel: g3c && problem.id === G3C_TASK.id ? 'Open the complete starter files' : undefined,
+            g3c, g7, disclosureLabel: g3c && problem.id === G3C_TASK.id ? 'Open the complete starter files' : undefined,
           }))
         const answers = lesson.problems.map((problem) =>
           state(`${label} ${lesson.sourceUid} answer ${problem.id}`, problem.answer, false,
-            answerSurfacePolicy(g3c, problem.id)))
+            g7 ? { g7, legacySha256: G7_CONTRACTS[g7].problems.find(item => item.id === problem.id)?.answerSha256 }
+              : answerSurfacePolicy(g3c, problem.id)))
         selectedLesson = { lesson, body, questions, answers, cardAnchors }
       }
     }
@@ -792,6 +829,7 @@ function selectedLessonConfig(config: ParsedConfig, filename: string, selectedUi
 function assertNoPairwiseAnchorConflicts(
   base: LessonState,
   candidate: LessonState,
+  g7?: G7LessonUid,
 ): StructuralSurfaceReport['anchorConflictProof'] {
   const groups: { name: string; variants: SurfaceState[] }[] = [
     { name: 'lesson body', variants: [base.body, candidate.body] },
@@ -799,11 +837,15 @@ function assertNoPairwiseAnchorConflicts(
       name: `answer ${candidate.lesson.problems[index]?.id}`,
       variants: base.answers[index] ? [base.answers[index], answer] : [answer],
     })),
+    ...(g7 ? candidate.questions.map((question, index) => ({
+      name: `question ${candidate.lesson.problems[index]?.id}`,
+      variants: [base.questions[index], question],
+    })) : []),
   ]
   const fixed = [
     { text: 'Practice Problems', id: PRACTICE_PROBLEMS_PREFIX.slice(1) },
     ...candidate.cardAnchors,
-    ...candidate.questions.flatMap((question) => question.evidence.h2),
+    ...(g7 ? [] : candidate.questions.flatMap((question) => question.evidence.h2)),
   ]
   const fixedIds = new Map<string, string>()
   for (const anchor of fixed) {
@@ -816,7 +858,13 @@ function assertNoPairwiseAnchorConflicts(
     for (const variant of group.variants) {
       for (const id of variant.ids) {
         if (fixedIds.has(id)) {
-          throw new Error(`Structural heading anchor collides with fixed reader anchor: ${id}`)
+          const legacyBody = g7 === G7_TYPE_COERCION && group.name === 'lesson body' &&
+            variant.sha256 === G7_CONTRACTS[G7_TYPE_COERCION].bodySha256
+          const legacyIds = ['truthy-and-falsy-values', 'the-operators-dual-nature']
+          const collisions = [...variant.ids].filter(value => fixedIds.has(value)).sort()
+          if (!legacyBody || !isDeepStrictEqual(collisions, [...legacyIds].sort()) || !legacyIds.includes(id)) {
+            throw new Error(`Structural heading anchor collides with fixed reader anchor: ${id}`)
+          }
         }
         compatible.add(id)
       }
@@ -843,7 +891,7 @@ function assertNoPairwiseAnchorConflicts(
   }
 }
 
-function structuralScope(baseRoot: string, candidateRoot: string, lesson: string, changeClass: StructuralSurfaceReport['changeClass']): ScopeReport {
+function structuralScope(baseRoot: string, candidateRoot: string, lesson: string, changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS): ScopeReport {
   normalizeReleaseScopeOptions({ changeClass, lesson })
   const additive = changeClass === ADDITIVE_CHANGE_CLASS
   const g3c = additive && lesson === G3C_LESSON_UID
@@ -1101,6 +1149,113 @@ function validateKnownG3cSourceTask(files: Map<string, Buffer>) {
   return task
 }
 
+function g7Scope(baseRoot: string, candidateRoot: string, lesson: G7LessonUid): ScopeReport {
+  const binding = requireG7Binding(lesson)
+  const contract = G7_CONTRACTS[lesson]
+  const before = payloadFiles(baseRoot)
+  const after = payloadFiles(candidateRoot)
+  const lessonPath = `content/${lesson}/page.mdx`
+  if (!isDeepStrictEqual([...before.keys()], [...after.keys()])) {
+    throw new Error('G7 cannot add, remove or move payload files')
+  }
+  for (const validate of [validateKnownSourceTask, validateKnownG3cSourceTask]) {
+    const retained = validate(before)
+    if (!retained || !isDeepStrictEqual(retained, validate(after))) {
+      throw new Error('G7 requires both complete immutable retained G3B/G3C tasks')
+    }
+  }
+  const changedFiles: ScopeReport['changedFiles'] = []
+  for (const [filename, raw] of before) {
+    const next = after.get(filename)!
+    if (raw.equals(next)) continue
+    if (filename !== G7_CONFIG_PATH && filename !== lessonPath) {
+      throw new Error(`File is outside the selected G7 lesson: ${filename}`)
+    }
+    changedFiles.push({ path: filename, beforeSha256: digest(raw), afterSha256: digest(next) })
+  }
+  function config(files: Map<string, Buffer>) {
+    const raw = files.get(G7_CONFIG_PATH)
+    if (!raw) throw new Error('Missing G7 configuration')
+    const parsed: unknown = JSON.parse(raw.toString('utf8'))
+    if (!isRecord(parsed) || !Array.isArray(parsed.lessons)) throw new Error('Invalid G7 configuration')
+    const selected = parsed.lessons.filter(item => isRecord(item) && item.id === contract.metadata.id)
+    if (selected.length !== 1) throw new Error('G7 requires exactly one selected existing lesson')
+    assertG7SourceLesson(selected[0], lesson)
+    return {
+      selected: selected[0],
+      other: { ...parsed, lessons: parsed.lessons.map(item => item === selected[0] ? null : item) },
+    }
+  }
+  const beforeConfig = config(before), afterConfig = config(after)
+  if (!isDeepStrictEqual(beforeConfig.other, afterConfig.other)) {
+    throw new Error('G7 permits changes only to the selected lesson object, not its shared configuration neighbors')
+  }
+  const beforeBody = before.get(lessonPath)?.toString('utf8')
+  const afterBody = after.get(lessonPath)?.toString('utf8')
+  if (!beforeBody || !afterBody) throw new Error('Missing G7 body')
+  assertG7Body(beforeBody, lesson)
+  assertG7Body(afterBody, lesson)
+  const baseCatalog = buildCatalog(before, 'base', lesson)
+  const candidateCatalog = buildCatalog(after, 'candidate/recovery', lesson)
+  const selectedBefore = baseCatalog.selectedLesson.lesson
+  const selectedAfter = candidateCatalog.selectedLesson.lesson
+  const catalogs = [baseCatalog, candidateCatalog]
+  const changedSurfaces: StructuralSurfaceReport['changedSurfaces'] = []
+  const recordSurface = (
+    oldText: string, nextText: string, field: 'body' | 'question' | 'answer',
+    contentId: string, policy: SurfacePolicy, problem?: ProblemConfig,
+  ) => {
+    const sourcePath = field === 'body' ? lessonPath : G7_CONFIG_PATH
+    const label = `${sourcePath}:${problem?.id ?? 'body'}:${field}`
+    const evidence = assertStructuralMdxSurface(oldText, nextText, label, field === 'body', policy)
+    evidence.before.links = validateLinks(evidence.before, selectedBefore.route, catalogs, label)
+    evidence.after.links = validateLinks(evidence.after, selectedBefore.route, catalogs, label)
+    if (oldText !== nextText) changedSurfaces.push({
+      kind: field === 'body' ? 'lesson-body' : field === 'question' ? 'problem-question' : 'problem-answer',
+      lesson, contentId, sourcePath, field, ...(problem ? { problemId: problem.id, title: problem.title } : {}),
+      beforeSha256: digest(oldText), afterSha256: digest(nextText),
+      before: evidence.before, after: evidence.after,
+    })
+  }
+  recordSurface(beforeBody, afterBody, 'body', selectedBefore.contentId, { g7: lesson, legacySha256: contract.bodySha256 })
+  selectedBefore.problems.forEach((problem, index) => {
+    const next = selectedAfter.problems[index]
+    recordSurface(problem.question, next.question, 'question', problem.contentId, { g7: lesson }, problem)
+    recordSurface(problem.answer, next.answer, 'answer', problem.contentId,
+      { g7: lesson, legacySha256: contract.problems[index].answerSha256 }, problem)
+  })
+  const anchorConflictProof = assertNoPairwiseAnchorConflicts(baseCatalog.selectedLesson, candidateCatalog.selectedLesson, lesson)
+  return {
+    changedFiles,
+    assessment: {
+      bindingSha256: g7ValueHash(binding),
+      sourceLessonBeforeSha256: g7ValueHash(beforeConfig.selected),
+      sourceLessonAfterSha256: g7ValueHash(afterConfig.selected),
+    },
+    structural: {
+      changeClass: G7_CHANGE_CLASS, profile: G7_PROFILE, lesson,
+      allowedChangedFields: [
+        { kind: 'lesson', lesson, contentId: selectedBefore.contentId, sourcePath: lessonPath, field: 'body' },
+        ...selectedBefore.problems.map((problem): StructuralField => ({
+          kind: 'problem', lesson, contentId: problem.contentId, configPath: G7_CONFIG_PATH,
+          problemId: problem.id, title: problem.title,
+          field: contract.changedQuestions.includes(problem.id) ? 'assessment' : 'answer',
+        })),
+      ],
+      changedSurfaces, anchorConflictProof,
+      externalHttpsDestinations: [...new Set(changedSurfaces.flatMap(surface => [...surface.before.links, ...surface.after.links])
+        .filter(link => link.kind === 'external-https').map(link => link.href))].sort(),
+      limits: [
+        'One existing G7 lesson only, with exact reviewed complete source and compiled bindings. No new identities.',
+        'Changed question/answer/type records are indivisible conditional updates; other answers and the body remain independent.',
+        'Only the exact retained Coercion body hash may collide with its two named question cards before or during recovery. Candidate IDs are unique.',
+        'Old shared Coercion fragments intentionally become question-card destinations; recovery restores the legacy ambiguity.',
+        'Links must resolve in both catalogs. Eligibility is not semantic, browser, database, search, progress or owner-acceptance evidence.',
+      ],
+    },
+  }
+}
+
 export function assertKnownSourceCatalog(root: string) {
   const files = payloadFiles(root)
   const g3b = validateKnownSourceTask(files)
@@ -1116,6 +1271,10 @@ export function assertInPlaceScope(
   options: ReleaseScopeOptions = {},
 ): ScopeReport {
   const normalized = normalizeReleaseScopeOptions(options)
+  if (normalized.changeClass === G7_CHANGE_CLASS) {
+    if (!isG7Lesson(normalized.lesson)) throw new Error('Unsupported G7 lesson')
+    return g7Scope(baseRoot, candidateRoot, normalized.lesson)
+  }
   if (normalized.changeClass !== DEFAULT_CHANGE_CLASS) {
     return structuralScope(baseRoot, candidateRoot, normalized.lesson, normalized.changeClass)
   }

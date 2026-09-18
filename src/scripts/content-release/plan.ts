@@ -5,6 +5,8 @@ import prisma from '@/lib/prisma'
 import { assertCompiledMdx } from '@/lib/mdx-result'
 import { G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
 import { G3C_LESSON_UID, G3C_TASK } from '@/lib/g3c-task'
+import { G7_CHANGE_CLASS, G7_CONTRACTS, g7ValueHash, isG7Lesson, requireG7Binding } from '@/lib/g7-contracts'
+import { assertG7PreparedCatalog } from './g7-prepared'
 import { prepareContent, type PreparedContent } from '../sync-content'
 import { prepareResources, type PreparedResource } from '../sync-resources'
 import {
@@ -36,7 +38,7 @@ export type CatalogRow = {
   updatedAt?: Date
   match?: WriteMatch
 }
-export type InPlaceChange = {
+export type TextChange = {
   kind: 'lesson' | 'problem' | 'resource'
   contentId: string
   field: 'body' | 'answer'
@@ -44,6 +46,21 @@ export type InPlaceChange = {
   after: string
   serializedAfter: { compiledSource: string }
 }
+export type AssessmentPayload = {
+  question: string
+  answer: string
+  type: 'THEORY' | 'CODING'
+  serializedQuestion: { compiledSource: string }
+  serializedAnswer: { compiledSource: string }
+}
+export type ExistingAssessmentChange = {
+  kind: 'problem'
+  contentId: string
+  field: 'assessment'
+  before: AssessmentPayload
+  after: AssessmentPayload
+}
+export type InPlaceChange = TextChange | ExistingAssessmentChange
 export type InPlacePlan = {
   changeClass: ChangeClass
   lesson: string
@@ -55,6 +72,22 @@ export type InPlacePlan = {
 }
 
 const key = (row: Pick<CatalogRow, 'kind' | 'contentId'>) => `${row.kind}:${row.contentId}`
+function assessmentPayload(row: CatalogRow): AssessmentPayload {
+  const { question, answer } = row.text
+  const type = row.metadata.type
+  const serializedQuestion = row.serialized.question, serializedAnswer = row.serialized.answer
+  if (row.kind !== 'problem' || !question?.trim() || !answer?.trim() || (type !== 'THEORY' && type !== 'CODING')) {
+    throw new Error('Incomplete existing assessment payload')
+  }
+  assertCompiledMdx(serializedQuestion, `${row.contentId}:question`)
+  assertCompiledMdx(serializedAnswer, `${row.contentId}:answer`)
+  return { question, answer, type, serializedQuestion, serializedAnswer }
+}
+
+function isCoupledAssessment(plan: Pick<InPlacePlan, 'changeClass' | 'lesson'>, row: CatalogRow) {
+  return plan.changeClass === G7_CHANGE_CLASS && isG7Lesson(plan.lesson) && row.kind === 'problem' &&
+    G7_CONTRACTS[plan.lesson].changedQuestions.some(id => row.contentId === `/${plan.lesson}/${id}`)
+}
 const isNativeTask = (contentId: string) => contentId === G3B_TASK.contentId || contentId === G3C_TASK.contentId
 function selectedTask(scope: Pick<InPlacePlan, 'changeClass' | 'lesson'>) {
   if (scope.changeClass !== ADDITIVE_CHANGE_CLASS) return undefined
@@ -128,6 +161,11 @@ export async function planInPlaceRelease(
   }
   const previous = catalogMap(before)
   const candidate = catalogMap(after)
+  if (releaseScope.changeClass === G7_CHANGE_CLASS) {
+    if (!isG7Lesson(releaseScope.lesson)) throw new Error('Unsupported G7 lesson')
+    assertG7PreparedCatalog(before, releaseScope.lesson)
+    assertG7PreparedCatalog(after, releaseScope.lesson)
+  }
   const creations = after.filter(item => !previous.has(key(item)))
   const taskId = selectedTask(releaseScope)
   if (creations.length && (releaseScope.changeClass !== ADDITIVE_CHANGE_CLASS || creations.length !== 1 ||
@@ -138,12 +176,27 @@ export async function planInPlaceRelease(
   const changes: InPlaceChange[] = []
   for (const [id, oldRow] of previous) {
     const next = candidate.get(id)
-    if (!next || !isDeepStrictEqual(oldRow.metadata, next.metadata)) {
+    const coupled = isCoupledAssessment(releaseScope, oldRow)
+    if (!next || (!coupled && !isDeepStrictEqual(oldRow.metadata, next.metadata))) {
       throw new Error(`Unsupported metadata/identity change: ${id}`)
     }
     if (isNativeTask(oldRow.contentId) &&
         (!isDeepStrictEqual(oldRow.text, next.text) || !isDeepStrictEqual(oldRow.serialized, next.serialized))) {
       throw new Error('Retained G3B/G3C complete task payload is immutable')
+    }
+    if (releaseScope.changeClass === G7_CHANGE_CLASS) {
+      for (const field of ['body', 'question', 'answer'] as const) {
+        if (oldRow.text[field] === next.text[field] && !isDeepStrictEqual(oldRow.serialized[field], next.serialized[field])) {
+          throw new Error(`G7 cannot alter compilation of an unchanged authored field: ${id}:${field}`)
+        }
+      }
+    }
+    if (coupled) {
+      const before = assessmentPayload(oldRow), after = assessmentPayload(next)
+      if (!isDeepStrictEqual(before, after)) changes.push({
+        kind: 'problem', contentId: oldRow.contentId, field: 'assessment', before, after,
+      })
+      continue
     }
     for (const field of ['body', 'question', 'answer'] as const) {
       if (oldRow.text[field] === next.text[field]) continue
@@ -161,9 +214,12 @@ export async function planInPlaceRelease(
     }
   }
   if (releaseScope.changeClass !== DEFAULT_CHANGE_CLASS) {
-    const allowed = new Set(scope.structural?.allowedChangedFields.map((field) => field.contentId) ?? [])
-    if (!scope.structural || changes.some((change) => !allowed.has(change.contentId))) {
-      throw new Error(`Structural release plan contains a change outside the selected ${releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS ? 'TS Basics' : releaseScope.lesson === G3C_LESSON_UID ? 'G3C' : 'G3B'} fields`)
+    const allowed = new Set(scope.structural?.allowedChangedFields.map((field) =>
+      releaseScope.changeClass === G7_CHANGE_CLASS ? `${field.contentId}:${field.field}` : field.contentId) ?? [])
+    if (!scope.structural || changes.some((change) => !allowed.has(
+      releaseScope.changeClass === G7_CHANGE_CLASS ? `${change.contentId}:${change.field}` : change.contentId,
+    ))) {
+      throw new Error(`Structural release plan contains a change outside the selected ${releaseScope.changeClass === G7_CHANGE_CLASS ? 'G7' : releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS ? 'TS Basics' : releaseScope.lesson === G3C_LESSON_UID ? 'G3C' : 'G3B'} fields`)
     }
   }
   return { changeClass: releaseScope.changeClass, lesson: releaseScope.lesson, scope, before, after, changes, creations }
@@ -242,8 +298,16 @@ export async function readReleaseCatalog(): Promise<CatalogRow[]> {
 
 const sameAuthoredState = (a: CatalogRow, b: CatalogRow) =>
   isDeepStrictEqual(a.text, b.text) && isDeepStrictEqual(a.serialized, b.serialized)
+const sameCompleteState = (a: CatalogRow, b: CatalogRow) =>
+  isDeepStrictEqual(a.metadata, b.metadata) && sameAuthoredState(a, b)
 
 export function checkReleaseState(plan: InPlacePlan, current: CatalogRow[]) {
+  if (plan.changeClass === G7_CHANGE_CLASS) {
+    requireG7Binding(plan.lesson)
+    if (!isG7Lesson(plan.lesson)) throw new Error('Unsupported G7 lesson')
+    assertG7PreparedCatalog(plan.before, plan.lesson)
+    assertG7PreparedCatalog(plan.after, plan.lesson)
+  }
   const live = catalogMap(current)
   const before = catalogMap(plan.before)
   const after = catalogMap(plan.after)
@@ -263,8 +327,10 @@ export function checkReleaseState(plan: InPlacePlan, current: CatalogRow[]) {
   for (const [id, baseline] of before) {
     const actual = live.get(id)
     const candidate = after.get(id)
-    if (!actual || !candidate || !isDeepStrictEqual(actual.metadata, baseline.metadata) ||
-        (!sameAuthoredState(actual, baseline) && !sameAuthoredState(actual, candidate))) {
+    if (!actual || !candidate || (isCoupledAssessment(plan, baseline)
+      ? !sameCompleteState(actual, baseline) && !sameCompleteState(actual, candidate)
+      : !isDeepStrictEqual(actual.metadata, baseline.metadata) ||
+        (!sameAuthoredState(actual, baseline) && !sameAuthoredState(actual, candidate)))) {
       throw new Error(`Unexpected database content/metadata state; no overwrite permitted: ${id}`)
     }
     if (additions.length && !live.has(`problem:${taskId}`) && !sameAuthoredState(actual, baseline)) {
@@ -279,6 +345,7 @@ export type ChangeResult = {
   contentId: string
   status: 'updated' | 'already-applied' | 'created' | 'already-created'
   id?: string
+  field?: 'assessment'
 }
 
 function inspectCreatedTask(actual: CatalogRow, candidate: CatalogRow, owner: CatalogRow) {
@@ -300,6 +367,34 @@ function mayHaveCreated(error: unknown) {
     return isDeepStrictEqual(target, ['contentId']) || isDeepStrictEqual(target, ['lessonId', 'slug'])
   }
   return ['P1001', 'P1002', 'P1008', 'P1017', 'ECONNRESET', 'ETIMEDOUT', 'EPIPE'].includes(String(error.code))
+}
+
+function uncertainUpdate(error: unknown) {
+  return error !== null && typeof error === 'object' && 'code' in error &&
+    ['P1001', 'P1002', 'P1008', 'P1017', 'ECONNRESET', 'ETIMEDOUT', 'EPIPE'].includes(String(error.code))
+}
+
+async function updateExistingAssessment(actual: CatalogRow, candidate: CatalogRow, change: ExistingAssessmentChange) {
+  if (actual.match?.kind !== 'problem') throw new Error('Missing complete conditional assessment match')
+  try {
+    const result = await prisma.problem.updateMany({ where: actual.match.where, data: change.after })
+    if (result.count === 1) return 'updated' as const
+    if (result.count !== 0) throw new Error('Ambiguous existing assessment update count')
+  } catch (error) {
+    if (!uncertainUpdate(error)) throw error
+  }
+  // A lost receipt or racing publisher permits inspection only, never another
+  // write in this attempt. Include UUID, owner, every metadata and compiled field.
+  const receipts = await prisma.problem.findMany({
+    where: { OR: [{ id: actual.id }, { contentId: actual.contentId }] }, select: problemSelection,
+  })
+  if (receipts.length !== 1) throw new Error('Existing assessment receipt missing or ambiguous; no overwrite permitted')
+  const receipt = databaseProblem(receipts[0])
+  if (receipt.id !== actual.id || receipt.match?.kind !== 'problem' ||
+      receipt.match.where.lessonId !== actual.match.where.lessonId || !sameCompleteState(receipt, candidate)) {
+    throw new Error('Existing assessment receipt unresolved or foreign; inspect before retry, no overwrite permitted')
+  }
+  return 'already-applied' as const
 }
 
 async function createCompleteTask(candidate: CatalogRow, owner: CatalogRow) {
@@ -373,23 +468,33 @@ export async function applyInPlaceRelease(
     const candidate = after.get(id)
     if (!actual?.id || !actual.updatedAt || !candidate) throw new Error(`Missing update identity: ${id}`)
     let status: ChangeResult['status'] = 'already-applied'
-    if (!sameAuthoredState(actual, candidate)) {
+    if (!(change.field === 'assessment' ? sameCompleteState(actual, candidate) : sameAuthoredState(actual, candidate))) {
       if (!actual.match || actual.match.kind !== change.kind) throw new Error(`Missing conditional update: ${id}`)
-      const data = { body: change.after, serializedBody: change.serializedAfter }
-      // Match all observed authored fields, not only updatedAt (Problem does not
-      // currently have an automatic @updatedAt version column).
-      const result = actual.match.kind === 'lesson'
-        ? await prisma.lesson.updateMany({ where: actual.match.where, data })
-        : actual.match.kind === 'resource'
-          ? await prisma.resource.updateMany({ where: actual.match.where, data })
-          : await prisma.problem.updateMany({
-            where: actual.match.where,
-            data: { answer: change.after, serializedAnswer: change.serializedAfter },
-          })
-      if (result.count !== 1) throw new Error(`Concurrent authored change detected: ${id}`)
-      status = 'updated'
+      if (change.field === 'assessment') {
+        if (!isCoupledAssessment(plan, actual) || !isDeepStrictEqual(change.after, assessmentPayload(candidate))) {
+          throw new Error('Unapproved existing assessment group')
+        }
+        status = await updateExistingAssessment(actual, candidate, change)
+      } else {
+        const data = { body: change.after, serializedBody: change.serializedAfter }
+        // Match all observed authored fields, not only updatedAt (Problem does not
+        // currently have an automatic @updatedAt version column).
+        const result = actual.match.kind === 'lesson'
+          ? await prisma.lesson.updateMany({ where: actual.match.where, data })
+          : actual.match.kind === 'resource'
+            ? await prisma.resource.updateMany({ where: actual.match.where, data })
+            : await prisma.problem.updateMany({
+              where: actual.match.where,
+              data: { answer: change.after, serializedAnswer: change.serializedAfter },
+            })
+        if (result.count !== 1) throw new Error(`Concurrent authored change detected: ${id}`)
+        status = 'updated'
+      }
     }
-    const result = { kind: change.kind, contentId: change.contentId, status }
+    const result: ChangeResult = {
+      kind: change.kind, contentId: change.contentId, status,
+      ...(change.field === 'assessment' ? { field: 'assessment', id: actual.id } : {}),
+    }
     results.push(result)
     onChange(result)
   }
@@ -403,7 +508,7 @@ export async function applyInPlaceRelease(
   }
   for (const change of plan.changes) {
     const id = key(change)
-    if (!sameAuthoredState(final.get(id)!, after.get(id)!)) {
+    if (!sameCompleteState(final.get(id)!, after.get(id)!)) {
       throw new Error(`Candidate content was not fully persisted: ${id}`)
     }
   }
@@ -420,7 +525,21 @@ export function describeInPlacePlan(plan: InPlacePlan) {
     questionSha256: digest(item.text.question!), answerSha256: digest(item.text.answer!),
     serializedSha256: digest(JSON.stringify(item.serialized)),
   }))
-  const changedEntities = plan.changes.map((change) => ({
+  const changedEntities = plan.changes.map((change) => change.field === 'assessment' ? ({
+    kind: change.kind, contentId: change.contentId, field: change.field,
+    before: {
+      type: change.before.type,
+      questionSha256: digest(change.before.question), answerSha256: digest(change.before.answer),
+      serializedQuestionSha256: g7ValueHash(change.before.serializedQuestion),
+      serializedAnswerSha256: g7ValueHash(change.before.serializedAnswer),
+    },
+    after: {
+      type: change.after.type,
+      questionSha256: digest(change.after.question), answerSha256: digest(change.after.answer),
+      serializedQuestionSha256: g7ValueHash(change.after.serializedQuestion),
+      serializedAnswerSha256: g7ValueHash(change.after.serializedAnswer),
+    },
+  }) : ({
     kind: change.kind, contentId: change.contentId, field: change.field,
     beforeSha256: digest(change.before), afterSha256: digest(change.after),
   }))

@@ -3,10 +3,23 @@ import { parsePublishContentArgs } from './publish-content'
 import { ADDITIVE_CHANGE_CLASS, DEFAULT_CHANGE_CLASS, STRUCTURAL_CHANGE_CLASS, STRUCTURAL_LESSON_UID } from './content-release/scope'
 import { G3B_LESSON_UID } from '@/lib/g3b-task'
 import { G3C_LESSON_UID } from '@/lib/g3c-task'
+import { G7_CHANGE_CLASS, G7_DATA_TYPES, G7_TYPE_COERCION } from '@/lib/g7-contracts'
 
 vi.mock('@/lib/prisma', () => ({ default: { $disconnect: vi.fn() } }))
 
 describe('publish-content CLI change-class contract', () => {
+  it.each([G7_DATA_TYPES, G7_TYPE_COERCION])('accepts only the exact G7 class/lesson pair for %s and no binding overrides', lesson => {
+    expect(parsePublishContentArgs(['--change-class', G7_CHANGE_CLASS, '--lesson', lesson]).scope)
+      .toEqual({ changeClass: G7_CHANGE_CLASS, lesson })
+    for (const invalid of ['', `/${lesson}`, `${lesson} `, `${lesson}\nmode=publish`, `${G7_DATA_TYPES},${G7_TYPE_COERCION}`]) {
+      expect(() => parsePublishContentArgs(['--change-class', G7_CHANGE_CLASS, '--lesson', invalid])).toThrow()
+    }
+    expect(() => parsePublishContentArgs(['--change-class', ADDITIVE_CHANGE_CLASS, '--lesson', lesson])).toThrow()
+    expect(() => parsePublishContentArgs(['--lesson', lesson])).toThrow()
+    for (const option of ['--question', '--source-hash', '--after-hash', '--binding']) {
+      expect(() => parsePublishContentArgs(['--change-class', G7_CHANGE_CLASS, '--lesson', lesson, option, 'unreviewed'])).toThrow()
+    }
+  })
   it('accepts the exact separate G3C selector without exposing a generic additive publisher', () => {
     expect(parsePublishContentArgs(['--change-class', ADDITIVE_CHANGE_CLASS, '--lesson', G3C_LESSON_UID]).scope)
       .toEqual({ changeClass: ADDITIVE_CHANGE_CLASS, lesson: G3C_LESSON_UID })
