@@ -13,12 +13,11 @@ import {
   HiCodeBracket,
   HiArrowTopRightOnSquare,
 } from 'react-icons/hi2'
-import slugify from 'slugify'
-import { SLUGIFY_OPTIONS } from '../../constants'
+import { contentSlug } from '@/lib/content-slug'
 import { PreserializedMdxRenderer } from '../PreserializedMdxRenderer'
 import { TypeBadge, DifficultyBadge, ThinkingPrompt } from './shared'
 import { trackLearningEvent } from '@/lib/analytics'
-import { isNativeCodingProblem } from '@/lib/problem-presentation'
+import { isNativeCodingProblem, NATIVE_PRACTICE_NOTE } from '@/lib/problem-presentation'
 import { G3bLocalPractice } from '../G3bLocalPractice'
 
 export type RevealStage = 'collapsed' | 'question' | 'answer'
@@ -52,7 +51,7 @@ export const ProblemCard = ({
   )
   const [thinkStartTime, setThinkStartTime] = useState<number | null>(null)
 
-  const problemSlug = slugify(problem.title, SLUGIFY_OPTIONS)
+  const problemSlug = contentSlug(problem.title)
   const isTheory = problem.type === ProblemType.THEORY
   const isNative = isNativeCodingProblem(problem)
 
@@ -60,10 +59,13 @@ export const ProblemCard = ({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const slug = `#${problemSlug}`
-      if (window.location.hash === slug) {
+      const legacySlug = contentSlug(problem.title.replaceAll('/', ''))
+      const legacyMatch = legacySlug !== problemSlug && window.location.hash === `#${legacySlug}` &&
+        !document.getElementById(legacySlug)
+      if (window.location.hash === slug || legacyMatch) {
         setStage('question')
         setTimeout(() => {
-          const el = document.querySelector(slug)
+          const el = document.getElementById(problemSlug)
           if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'start' })
             el.classList.add('animate-borderFlash')
@@ -72,7 +74,7 @@ export const ProblemCard = ({
         }, 100)
       }
     }
-  }, [problemSlug])
+  }, [problemSlug, problem.title])
 
   // Track thinking time
   useEffect(() => {
@@ -206,7 +208,7 @@ export const ProblemCard = ({
 
       {isNative && isExpanded && (
         <p className="mt-4 text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-          Write and run your solution locally before revealing the answer.
+          {NATIVE_PRACTICE_NOTE}
         </p>
       )}
 

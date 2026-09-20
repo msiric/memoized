@@ -212,6 +212,11 @@ export const CourseCard = ({
                 <span>problems</span>
               </p>
             </div>
+            {progress && (
+              <p className="mt-3 text-xs leading-5 text-zinc-600 dark:text-zinc-400">
+                Progress counts your marks across the full course, including optional practice.
+              </p>
+            )}
           </div>
           <div className="flex flex-col items-center justify-center">
             <CourseProgress
@@ -222,7 +227,7 @@ export const CourseCard = ({
             <CourseProgress
               percentage={problemProgressPercentage}
               colorClass="text-indigo-600 dark:text-indigo-500"
-              label="problems"
+              label="all problems"
             />
           </div>
         </div>

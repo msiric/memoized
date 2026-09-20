@@ -11,10 +11,9 @@ import {
   CONTENT_FOLDER,
   RESOURCES_FOLDER,
   SAMPLES_FOLDER,
-  SLUGIFY_OPTIONS,
 } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
-import slugify from 'slugify'
+import { contentSlug } from '@/lib/content-slug'
 
 type SerializedJson = Prisma.NullableJsonNullValueInput | InputJsonValue
 
@@ -35,8 +34,6 @@ interface LessonConfig {
   problems?: any[]
   resources?: LessonResource[]
 }
-
-slugify.extend({ '/': '-' })
 
 type PreparedResource = {
   contentId: string
@@ -210,10 +207,10 @@ async function prepareResources(
   let resourceOrder = 1
 
   for (const course of completeCurriculum) {
-    const courseSlug = slugify(course.title, SLUGIFY_OPTIONS)
+    const courseSlug = contentSlug(course.title)
 
     for (const section of course.sections) {
-      const sectionSlug = slugify(section.title, SLUGIFY_OPTIONS)
+      const sectionSlug = contentSlug(section.title)
       const sectionPath = path.join(contentInfo.path, courseSlug, sectionSlug)
 
       if (!fs.existsSync(sectionPath)) {
@@ -226,7 +223,7 @@ async function prepareResources(
       for (const lesson of lessons) {
         if (lesson.resources && lesson.resources.length > 0) {
           const accessLevel = lesson.access === 'FREE' ? 'FREE' : 'PREMIUM'
-          const lessonSlug = slugify(lesson.title, SLUGIFY_OPTIONS)
+          const lessonSlug = contentSlug(lesson.title)
 
           for (const resource of lesson.resources) {
             const {
@@ -235,7 +232,7 @@ async function prepareResources(
               id: resourceId,
               href: resourceHref,
             } = resource
-            const resourceSlug = slugify(resourceTitle, SLUGIFY_OPTIONS)
+            const resourceSlug = contentSlug(resourceTitle)
 
             const resourcePath = path.join(resourcesDir, resourceId, 'page.mdx')
             if (!fs.existsSync(resourcePath)) {

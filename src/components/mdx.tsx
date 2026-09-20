@@ -76,6 +76,7 @@ export const ResourceLink = _ResourceLink
 export type WrapperProps = {
   lessonId?: string
   problems?: Problem[]
+  groupPractice?: boolean
   children: ReactNode
   header?: ReactNode
   withPadding?: boolean
@@ -86,6 +87,7 @@ export type WrapperProps = {
 export const wrapper = function Wrapper({
   lessonId,
   problems = [],
+  groupPractice = false,
   children,
   header,
   withPadding = true,
@@ -105,7 +107,7 @@ export const wrapper = function Wrapper({
       <Prose>{children}</Prose>
       {problems.length > 0 && (
         <Prose>
-          <PracticeProblems problems={problems} />
+          <PracticeProblems problems={problems} groupPractice={groupPractice} />
         </Prose>
       )}
       {showNextPage && (

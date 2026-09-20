@@ -2,7 +2,6 @@ import {
   CONTENT_FOLDER,
   COURSES_PREFIX,
   SAMPLES_FOLDER,
-  SLUGIFY_OPTIONS,
 } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import prisma from '@/lib/prisma'
@@ -15,15 +14,13 @@ import {
 import { Lesson, Prisma, ProblemDifficulty, ProblemType } from '@prisma/client'
 import fs from 'fs'
 import path from 'path'
-import slugify from 'slugify'
+import { contentSlug } from '@/lib/content-slug'
 import { InputJsonValue } from '@prisma/client/runtime/library'
 import { isProduction } from '../utils/helpers'
 import { serialize } from 'next-mdx-remote-client/serialize'
 import { assertCompiledMdx } from '@/lib/mdx-result'
 
 type SerializedJson = Prisma.NullableJsonNullValueInput | InputJsonValue
-
-slugify.extend({ '/': '-' })
 
 type PreparedCourse = {
   contentId: string
@@ -234,7 +231,7 @@ async function prepareContent(contentInfo: {
       description: courseDescription,
       href: courseHref,
     } = course
-    const courseSlug = slugify(courseTitle, SLUGIFY_OPTIONS)
+    const courseSlug = contentSlug(courseTitle)
 
     // Try to read course page content
     const courseFilePath = path.join(contentInfo.path, courseId, 'page.mdx')
@@ -269,7 +266,7 @@ async function prepareContent(contentInfo: {
         id: sectionId,
         href: sectionHref,
       } = section
-      const sectionSlug = slugify(sectionTitle, SLUGIFY_OPTIONS)
+      const sectionSlug = contentSlug(sectionTitle)
       const sectionContentId = `${courseId}${sectionId}`
       const sectionPath = path.join(contentInfo.path, courseId, sectionId)
       const sectionFilePath = path.join(sectionPath, 'page.mdx')
@@ -301,7 +298,7 @@ async function prepareContent(contentInfo: {
       const detailedLessons = getDetailedLessonConfig(sectionPath)
 
       for (const lesson of detailedLessons) {
-        const lessonSlug = slugify(lesson.title, SLUGIFY_OPTIONS)
+        const lessonSlug = contentSlug(lesson.title)
         const lessonContentId = `${courseId}${sectionId}${lesson.id}`
         const lessonPath = path.join(sectionPath, lesson.id, 'page.mdx')
 
@@ -341,7 +338,7 @@ async function prepareContent(contentInfo: {
         // Process problems from JSON
         if (lesson.problems && lesson.problems.length > 0) {
           for (const problem of lesson.problems) {
-            const problemSlug = slugify(problem.title, SLUGIFY_OPTIONS)
+            const problemSlug = contentSlug(problem.title)
             const problemContentId = `${lessonContentId}/${problem.id || problemSlug}`
             const problemLink = `${COURSES_PREFIX}/${courseSlug}/${sectionSlug}/${lessonSlug}#${problemSlug}`
 

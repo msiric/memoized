@@ -36,12 +36,13 @@ vi.mock('next-mdx-remote-client/csr', () => ({
 
 vi.mock('../../mdx-components', () => ({
   useMDXComponents: vi.fn(() => ({
-    wrapper: vi.fn((props) => (
+    wrapper: vi.fn(({ groupPractice, ...props }) => (
       <div data-testid="mock-wrapper" {...props}>
         {props.header}
         <div data-testid="wrapper-content">{props.children}</div>
         <div data-testid="wrapper-lesson-id">{props.lessonId}</div>
         <div data-testid="wrapper-problems-count">{props.problems?.length || 0}</div>
+        <div data-testid="wrapper-practice-grouping">{String(groupPractice)}</div>
         <div data-testid="wrapper-with-padding">{props.withPadding?.toString()}</div>
         <div data-testid="wrapper-show-next">{props.showNextPage?.toString()}</div>
         <div data-testid="wrapper-show-footer">{props.showFooter?.toString()}</div>
@@ -161,6 +162,27 @@ describe('PreserializedMdxRenderer', () => {
       )
 
       expect(screen.getByTestId('wrapper-problems-count')).toHaveTextContent('0')
+    })
+
+    it('passes the server-selected grouping mode to the hydrated wrapper', () => {
+      render(<PreserializedMdxRenderer serializedContent={mockSerializedContent} groupPractice />)
+      expect(screen.getByTestId('wrapper-practice-grouping')).toHaveTextContent('true')
+    })
+
+    it('keeps practice grouping inactive when no server selection is supplied', () => {
+      render(<PreserializedMdxRenderer serializedContent={mockSerializedContent} />)
+      expect(screen.getByTestId('wrapper-practice-grouping')).toHaveTextContent('false')
+    })
+
+    it.each([false, true])('updates a mounted reader when the server changes grouping from %s', initial => {
+      const { rerender } = render(
+        <PreserializedMdxRenderer serializedContent={mockSerializedContent} groupPractice={initial} />,
+      )
+      expect(screen.getByTestId('wrapper-practice-grouping')).toHaveTextContent(String(initial))
+      rerender(<PreserializedMdxRenderer serializedContent={mockSerializedContent} groupPractice={!initial} />)
+      expect(screen.getByTestId('wrapper-practice-grouping')).toHaveTextContent(String(!initial))
+      rerender(<PreserializedMdxRenderer serializedContent={mockSerializedContent} groupPractice={initial} />)
+      expect(screen.getByTestId('wrapper-practice-grouping')).toHaveTextContent(String(initial))
     })
 
     it('passes withPadding prop to wrapper component', () => {

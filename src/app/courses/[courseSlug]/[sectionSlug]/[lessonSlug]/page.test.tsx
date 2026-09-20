@@ -20,7 +20,9 @@ vi.mock('@/services/search', () => ({ getSearchCatalog: vi.fn() }))
 vi.mock('@/services/user')
 vi.mock('@/utils/helpers')
 vi.mock('@/components/PreserializedMdxRenderer', () => ({
-  PreserializedMdxRenderer: ({ serializedContent, header }: { serializedContent: { compiledSource: string }; header?: ReactNode }) => <article>{header}<div>Mocked MDX Renderer {serializedContent.compiledSource}</div></article>,
+  PreserializedMdxRenderer: ({ serializedContent, header, groupPractice }: {
+    serializedContent: { compiledSource: string }; header?: ReactNode; groupPractice?: boolean
+  }) => <article data-practice-grouped={String(groupPractice)}>{header}<div>Mocked MDX Renderer {serializedContent.compiledSource}</div></article>,
 }))
 vi.mock('@/components/ProblemCard', () => ({
   ProblemCard: ({ problem }: { problem: { question: string } }) => <div>{problem.question}</div>,
@@ -40,11 +42,46 @@ vi.mock('next/navigation', () => ({
 }))
 
 describe('Lesson component', () => {
-  afterEach(cleanup)
+  afterEach(() => {
+    cleanup()
+    vi.unstubAllEnvs()
+  })
 
   beforeEach(() => {
     vi.resetAllMocks()
     vi.mocked(getSearchCatalog).mockResolvedValue({ courses: [], resources: [], posts: [] })
+  })
+
+  it.each([
+    { access: false, enabled: false }, { access: false, enabled: true },
+    { access: true, enabled: false }, { access: true, enabled: true },
+  ])('passes one server-selected practice mode to the correct reader: %j', async ({ access, enabled }) => {
+    vi.stubEnv('PRACTICE_GROUPING_ENABLED', String(enabled))
+    vi.mocked(getServerSession).mockResolvedValue(null)
+    vi.mocked(userHasAccess).mockReturnValue(access)
+    vi.mocked(getLessonBySlug).mockResolvedValue({
+      id: 'lesson', contentId: '/js-track/core-fundamentals/example',
+      title: 'Example lesson', description: 'Public introduction', access: 'PREMIUM',
+      serializedBody: { compiledSource: 'PRIVATE_EXAMPLE_BODY' },
+      section: { slug: 'core-fundamentals', course: { slug: 'js-track' } },
+      problems: [{
+        id: 'question', title: 'Example question', question: 'Public question',
+        type: 'THEORY', difficulty: 'EASY', href: '', serializedQuestion: null, serializedAnswer: null,
+        contentId: '/js-track/core-fundamentals/example/question', lessonId: 'lesson',
+        slug: 'example-question', link: '/courses/js-track/core-fundamentals/example#example-question',
+        createdAt: new Date(0), updatedAt: new Date(0),
+      }],
+    })
+    const { container } = render(await Lesson({
+      params: { courseSlug: 'js-track', sectionSlug: 'core-fundamentals', lessonSlug: 'example' },
+    }))
+    if (access) {
+      expect(container.querySelector('article')).toHaveAttribute('data-practice-grouped', String(enabled))
+    } else {
+      expect(screen.getByText('Public question')).toBeInTheDocument()
+      expect(Boolean(screen.queryByRole('region', { name: 'Theory questions' }))).toBe(enabled)
+      expect(document.body.textContent).not.toContain('PRIVATE_EXAMPLE_BODY')
+    }
   })
 
   it.each([false, true])('renders one server-owned neighbor block without the footer duplicate (access=%s)', async hasAccess => {
@@ -130,7 +167,10 @@ describe('Lesson component', () => {
       serializedBody: { compiledSource: 'PREMIUM_SECRET_CONTENT' },
       description: 'Public lesson introduction',
       access: 'PREMIUM',
-      problems: [{ id: 'free-problem', question: 'A free practice question' }],
+      problems: [{
+        id: 'free-problem', title: 'Free practice question', question: 'A free practice question',
+        type: 'THEORY', difficulty: 'EASY', href: '', serializedQuestion: null, serializedAnswer: null,
+      }],
     } as any)
     vi.mocked(getUserWithSubscriptionDetails).mockResolvedValue({
       id: 'user123',

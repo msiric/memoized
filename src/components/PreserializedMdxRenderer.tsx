@@ -12,6 +12,7 @@ export type PreserializedMdxRendererProps = {
   lessonId?: string
   header?: ReactNode
   problems?: Problem[]
+  groupPractice?: boolean
   withPadding?: boolean
   showNextPage?: boolean
   showFooter?: boolean
@@ -22,16 +23,17 @@ export const PreserializedMdxRenderer = ({
   lessonId,
   header,
   problems = [],
+  groupPractice = false,
   withPadding = true,
   showNextPage = true,
   showFooter = true,
 }: PreserializedMdxRendererProps) => {
   const { wrapper: WrapperComponent, ...baseComponents } = useMDXComponents({})
   
-  // Store hydrated content in a ref so it only hydrates once and persists across re-renders
-  const hydratedContentRef = useRef<ReactNode | null>(null)
+  // Cache ordinary renders without freezing the server's release selection.
+  const hydratedContentRef = useRef<{ content: ReactNode; groupPractice: boolean } | null>(null)
   
-  if (hydratedContentRef.current === null) {
+  if (hydratedContentRef.current === null || hydratedContentRef.current.groupPractice !== groupPractice) {
     const components = {
       ...baseComponents,
       wrapper: (props: WrapperProps) => (
@@ -40,6 +42,7 @@ export const PreserializedMdxRenderer = ({
           lessonId={lessonId}
           header={header}
           problems={problems}
+          groupPractice={groupPractice}
           withPadding={withPadding}
           showNextPage={showNextPage}
           showFooter={showFooter}
@@ -58,8 +61,8 @@ export const PreserializedMdxRenderer = ({
     })
     if (error) throw new Error('Content could not be rendered. The compiled content must be refreshed.')
     
-    hydratedContentRef.current = hydratedContent
+    hydratedContentRef.current = { content: hydratedContent, groupPractice }
   }
 
-  return hydratedContentRef.current
+  return hydratedContentRef.current.content
 }

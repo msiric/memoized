@@ -1,11 +1,7 @@
-import { SLUGIFY_OPTIONS } from '@/constants'
 import { completeCurriculum } from '@/constants/curriculum'
 import fs from 'fs'
 import path from 'path'
-import slugify from 'slugify'
-
-slugify.extend({ '/': '-' })
-const slug = (title: string) => slugify(title, SLUGIFY_OPTIONS)
+import { contentSlug as slug } from './content-slug'
 
 export type ContentIdMaps = {
   course: Record<string, string>

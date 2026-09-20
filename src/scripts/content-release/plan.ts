@@ -7,6 +7,8 @@ import { G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
 import { G3C_LESSON_UID, G3C_TASK } from '@/lib/g3c-task'
 import { G7_CHANGE_CLASS, G7_CONTRACTS, g7ValueHash, isG7Lesson, requireG7Binding } from '@/lib/g7-contracts'
 import { assertG7PreparedCatalog } from './g7-prepared'
+import { PRACTICE_CHANGE_CLASS, isPracticeAssessment, requirePracticeBinding } from '@/lib/practice-publication'
+import { assertPracticePreparedCatalog } from './practice-boundaries'
 import { prepareContent, type PreparedContent } from '../sync-content'
 import { prepareResources, type PreparedResource } from '../sync-resources'
 import {
@@ -85,9 +87,13 @@ function assessmentPayload(row: CatalogRow): AssessmentPayload {
 }
 
 function isCoupledAssessment(plan: Pick<InPlacePlan, 'changeClass' | 'lesson'>, row: CatalogRow) {
-  return plan.changeClass === G7_CHANGE_CLASS && isG7Lesson(plan.lesson) && row.kind === 'problem' &&
+  if (row.kind !== 'problem') return false
+  if (plan.changeClass === PRACTICE_CHANGE_CLASS) return isPracticeAssessment(row.contentId)
+  return plan.changeClass === G7_CHANGE_CLASS && isG7Lesson(plan.lesson) &&
     G7_CONTRACTS[plan.lesson].changedQuestions.some(id => row.contentId === `/${plan.lesson}/${id}`)
 }
+const hasAssessmentGroups = (changeClass: ChangeClass) =>
+  changeClass === G7_CHANGE_CLASS || changeClass === PRACTICE_CHANGE_CLASS
 const isNativeTask = (contentId: string) => contentId === G3B_TASK.contentId || contentId === G3C_TASK.contentId
 function selectedTask(scope: Pick<InPlacePlan, 'changeClass' | 'lesson'>) {
   if (scope.changeClass !== ADDITIVE_CHANGE_CLASS) return undefined
@@ -166,6 +172,10 @@ export async function planInPlaceRelease(
     assertG7PreparedCatalog(before, releaseScope.lesson)
     assertG7PreparedCatalog(after, releaseScope.lesson)
   }
+  if (releaseScope.changeClass === PRACTICE_CHANGE_CLASS) {
+    assertPracticePreparedCatalog(before)
+    assertPracticePreparedCatalog(after)
+  }
   const creations = after.filter(item => !previous.has(key(item)))
   const taskId = selectedTask(releaseScope)
   if (creations.length && (releaseScope.changeClass !== ADDITIVE_CHANGE_CLASS || creations.length !== 1 ||
@@ -184,10 +194,10 @@ export async function planInPlaceRelease(
         (!isDeepStrictEqual(oldRow.text, next.text) || !isDeepStrictEqual(oldRow.serialized, next.serialized))) {
       throw new Error('Retained G3B/G3C complete task payload is immutable')
     }
-    if (releaseScope.changeClass === G7_CHANGE_CLASS) {
+    if (hasAssessmentGroups(releaseScope.changeClass)) {
       for (const field of ['body', 'question', 'answer'] as const) {
         if (oldRow.text[field] === next.text[field] && !isDeepStrictEqual(oldRow.serialized[field], next.serialized[field])) {
-          throw new Error(`G7 cannot alter compilation of an unchanged authored field: ${id}:${field}`)
+          throw new Error(`A reviewed assessment batch cannot alter compilation of an unchanged authored field: ${id}:${field}`)
         }
       }
     }
@@ -215,11 +225,15 @@ export async function planInPlaceRelease(
   }
   if (releaseScope.changeClass !== DEFAULT_CHANGE_CLASS) {
     const allowed = new Set(scope.structural?.allowedChangedFields.map((field) =>
-      releaseScope.changeClass === G7_CHANGE_CLASS ? `${field.contentId}:${field.field}` : field.contentId) ?? [])
+      hasAssessmentGroups(releaseScope.changeClass) ? `${field.contentId}:${field.field}` : field.contentId) ?? [])
     if (!scope.structural || changes.some((change) => !allowed.has(
-      releaseScope.changeClass === G7_CHANGE_CLASS ? `${change.contentId}:${change.field}` : change.contentId,
+      hasAssessmentGroups(releaseScope.changeClass) ? `${change.contentId}:${change.field}` : change.contentId,
     ))) {
-      throw new Error(`Structural release plan contains a change outside the selected ${releaseScope.changeClass === G7_CHANGE_CLASS ? 'G7' : releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS ? 'TS Basics' : releaseScope.lesson === G3C_LESSON_UID ? 'G3C' : 'G3B'} fields`)
+      const label = releaseScope.changeClass === PRACTICE_CHANGE_CLASS ? 'practice batch'
+        : releaseScope.changeClass === G7_CHANGE_CLASS ? 'G7'
+          : releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS ? 'TS Basics'
+            : releaseScope.lesson === G3C_LESSON_UID ? 'G3C' : 'G3B'
+      throw new Error(`Structural release plan contains a change outside the selected ${label} fields`)
     }
   }
   return { changeClass: releaseScope.changeClass, lesson: releaseScope.lesson, scope, before, after, changes, creations }
@@ -302,6 +316,12 @@ const sameCompleteState = (a: CatalogRow, b: CatalogRow) =>
   isDeepStrictEqual(a.metadata, b.metadata) && sameAuthoredState(a, b)
 
 export function checkReleaseState(plan: InPlacePlan, current: CatalogRow[]) {
+  if (plan.changeClass === PRACTICE_CHANGE_CLASS) {
+    requirePracticeBinding()
+    assertPracticePreparedCatalog(plan.before)
+    assertPracticePreparedCatalog(plan.after)
+    assertPracticePreparedCatalog(current)
+  }
   if (plan.changeClass === G7_CHANGE_CLASS) {
     requireG7Binding(plan.lesson)
     if (!isG7Lesson(plan.lesson)) throw new Error('Unsupported G7 lesson')

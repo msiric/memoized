@@ -54,7 +54,6 @@ export const SLUGIFY_OPTIONS = {
   lower: true, // convert to lower case
   strict: true, // strip special characters except replacement
   trim: true, // trim leading and trailing replacement chars
-  // No need to use charmap since the forward slash will be replaced by default
 }
 
 /**

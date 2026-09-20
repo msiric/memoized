@@ -5,6 +5,7 @@ import { useContentStore } from '@/contexts/progress'
 import { useAuthStore } from '@/contexts/auth'
 import type { EnrichedProblem } from '@/types'
 import { G3B_TASK } from '@/lib/g3b-task'
+import { NATIVE_PRACTICE_NOTE } from '@/lib/problem-presentation'
 
 const mocks = vi.hoisted(() => ({
   mark: vi.fn(), session: vi.fn(), track: vi.fn(), router: {},
@@ -57,10 +58,11 @@ afterEach(cleanup)
 describe('Problem bank confirmed controls', () => {
   it('uses the unfiltered loaded catalog total rather than a compiled or filtered count', async () => {
     render(<ProblemList allProblems={questions} filteredProblems={questions} initialLessons={[]} />)
-    expect(screen.getByText(/the 3 JavaScript interview problems loaded in this view/)).toBeInTheDocument()
+    expect(screen.getByText(/Browse 3 theory questions and coding exercises/)).toBeInTheDocument()
+    expect(screen.getByText(/Completion marks record your own progress, not an automatically checked result/)).toBeInTheDocument()
     fireEvent.change(screen.getByPlaceholderText('Search problems...'), { target: { value: questions[0].title } })
     await waitFor(() => expect(within(screen.getByRole('table')).queryByRole('button', { name: questions[1].title })).not.toBeInTheDocument())
-    expect(screen.getByText(/the 3 JavaScript interview problems loaded in this view/)).toBeInTheDocument()
+    expect(screen.getByText(/Browse 3 theory questions and coding exercises/)).toBeInTheDocument()
   })
 
   it('opens a native coding task without an empty external title or invented run action', async () => {
@@ -72,7 +74,7 @@ describe('Problem bank confirmed controls', () => {
     expect(within(dialog).getAllByRole('heading', { name: native.title })).toHaveLength(2)
     expect(within(dialog).queryByRole('link', { name: native.title })).not.toBeInTheDocument()
     expect(within(dialog).queryByRole('link', { name: /Practice on LeetCode/ })).not.toBeInTheDocument()
-    expect(within(dialog).getByText('Write and run your solution locally before revealing the answer.')).toBeInTheDocument()
+    expect(within(dialog).getByText(NATIVE_PRACTICE_NOTE)).toBeInTheDocument()
     expect(within(dialog).getByText('Starter and local commands')).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: /^(Run|Submit)$/ })).not.toBeInTheDocument()
     fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))

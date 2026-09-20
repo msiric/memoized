@@ -9,7 +9,7 @@ export const G7_TYPE_COERCION = 'js-track/core-fundamentals/type-coercion'
 export type G7LessonUid = typeof G7_DATA_TYPES | typeof G7_TYPE_COERCION
 export type G7ProblemType = 'THEORY' | 'CODING'
 
-export const g7Digest = (text: string) => createHash('sha256').update(text).digest('hex')
+export const g7Digest = (text: string | Buffer) => createHash('sha256').update(text).digest('hex')
 export function g7ValueHash(value: unknown): string {
   const canonical = (item: unknown): unknown => Array.isArray(item)
     ? item.map(canonical)
@@ -144,8 +144,8 @@ export type G7Binding = {
   }[]
 }
 
-// Complete local Data Types review candidate d60a2a12817859b0c8b56a9ee1fb99fb4bdb1542.
-// Production selection remains G3C. Coercion stays unbound; no runtime overrides.
+// Published Data Types payload plus local Coercion candidate 63aefb959aaf47865e502520b6b5cf75be820cfd.
+// Production control still selects Data Types. No runtime binding overrides.
 export const G7_REVIEWED_BINDINGS: Partial<Record<G7LessonUid, G7Binding>> = {
   [G7_DATA_TYPES]: {
     sourceLessonSha256: '3b38e3da312ced7db557041fcd487d6966b62d165514cf17a4856c7196516b5d',
@@ -193,6 +193,55 @@ export const G7_REVIEWED_BINDINGS: Partial<Record<G7LessonUid, G7Binding>> = {
         answerSha256: '83ff3c99040ee690c7171ffd4943aa14f81f0ade44244c144ad77daac8bf9207',
         serializedQuestionSha256: '8538e641519f41d1481e6b2846aad53c7b289e99bcff0ae29b0f7a2b36f0b38b',
         serializedAnswerSha256: 'ee1ba624914b6dd6444a761de86379fff67935fa405a7b72fe255f8e44c2e4f8',
+      },
+    ],
+  },
+  [G7_TYPE_COERCION]: {
+    sourceLessonSha256: 'e7e3e4a43e25074074152fdbd9aedd2f7a521e8da5aa65f2891b4410d82d3d4d',
+    bodySha256: '333844aa0d8125422f5313577d897e711ab3d500fb9e8e2eea7dee93b2fbfd45',
+    serializedBodySha256: '4cf20c6ed267158f8befc4e08f87e95026fd6771b1c82bcd1464338cef20220f',
+    problems: [
+      {
+        id: 'truthy-and-falsy-values', type: 'THEORY',
+        questionSha256: '8d67c415b0300634f4156c2d0bb3baa8c2345dfaea29054d2b5d37e878c47e68',
+        answerSha256: '820da6edecff40264db2675fec0a199307b067ae640411ca4d009db29a6be354',
+        serializedQuestionSha256: '1ce2f2a22c5590bb4a2c2749288be893f021063d75b4461eb6f1a3c0b553feff',
+        serializedAnswerSha256: 'c047a8952fddf64964295e80c5199f43ebd78a03e52bd02e4689f6920d3ea180',
+      },
+      {
+        id: 'vs', type: 'THEORY',
+        questionSha256: '0e7ecce955bf23841d9e2510ff40206f7a55121da6578b41d8422d811eacf782',
+        answerSha256: 'c2c740f0f15212c9ff51f000fd8783da08326d8b495b9b15645217dd5e92fd89',
+        serializedQuestionSha256: '6e6489a126f90d683f24ef3daf969af935e4dbe79092cf70a23cc24116267d14',
+        serializedAnswerSha256: '50aaac6bd0db96af07908e35809d158e1addb73a0d4c7a33483af2066691b314',
+      },
+      {
+        id: 'the-operators-dual-nature', type: 'THEORY',
+        questionSha256: '06641134c69bb5566dfd7b795a3d5b4f01d104842c1080ffea7124050cf22c77',
+        answerSha256: '9818cbe356fb7a3a757a5aa00964c1aa0595db56ac4272698c78af6d73664224',
+        serializedQuestionSha256: '519e786909ff6cbf5e08c7981cf1fdf9c0658d089d09628effe187ed2b4b45a9',
+        serializedAnswerSha256: '091467940a260eba653b184238e57574512d165f34f3257082904c5b3827a57e',
+      },
+      {
+        id: 'false-and-if-output-prediction', type: 'THEORY',
+        questionSha256: '512238270ae19f9d12ff3f958404742711444d440b52a9a60f4e2277a3415623',
+        answerSha256: '60641bb35b4c548c4febe12f8d56613f8acf8c6722735f68af782a693b02fcdf',
+        serializedQuestionSha256: '7d9f6c882107f5dc55ebcf99a00b52fe3b77e2518c4fb9be6684c166f0897c09',
+        serializedAnswerSha256: 'd849c415c2fc3a4d95ce2c7a2214972386a3d7b3d86c19adbbd844d6c7f8417e',
+      },
+      {
+        id: 'nan-semantics', type: 'THEORY',
+        questionSha256: '160e6074d728de4d9f73f8d2f268fd21dc3e5bcf20a9a4c93e22bb4a379ca562',
+        answerSha256: '4517faaf7fc5c6c57c205329e4d196bc400450c079b99cbf5a7fe7e9fb808db5',
+        serializedQuestionSha256: '1fb61396bba08989404e960295cd1f984b80d7c7317583456b837fd2d4a64726',
+        serializedAnswerSha256: '126051b90f2a7230414749074960828df69de96c56135641045c1b0c5b2b1acf',
+      },
+      {
+        id: 'implement-deepequal-structural-equality', type: 'CODING',
+        questionSha256: '5f1f4f987b44ff02bcafb674fa3d01496e7ceb3924a7f486e9055c823b4d5c96',
+        answerSha256: '73fe18b77029c801b8225fcf3ddab318653f42fd244701cdca7b9ffbebf10f7a',
+        serializedQuestionSha256: 'd6a2cfd9886596189c750e9208f2702934c1783f5554b93c60fb7a3edb9ddf4b',
+        serializedAnswerSha256: '2652d279f0380f8bd95a33b4869e03b9be5d1a0a6aae3e7a365b17e8994f2ead',
       },
     ],
   },

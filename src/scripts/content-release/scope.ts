@@ -7,8 +7,8 @@ import remarkMdx from 'remark-mdx'
 import remarkGfm from 'remark-gfm'
 import { slugifyWithCounter } from '@sindresorhus/slugify'
 import { toString } from 'mdast-util-to-string'
-import slugify from 'slugify'
-import { PRACTICE_PROBLEMS_PREFIX, SLUGIFY_OPTIONS } from '@/constants'
+import { PRACTICE_PROBLEMS_PREFIX } from '@/constants'
+import { contentSlug } from '@/lib/content-slug'
 import { getPanelTitle } from '@/lib/code-panel-title'
 import { G3B_CARD_ORDER, G3B_LESSON_CONTENT_ID, G3B_LESSON_UID, G3B_TASK } from '@/lib/g3b-task'
 import { G3C_BODY_DESCRIPTION, G3C_BODY_TITLE, G3C_HEADINGS, G3C_LESSON_CONTENT_ID, G3C_LESSON_UID, G3C_OLD_TASK_IDS, G3C_TASK } from '@/lib/g3c-task'
@@ -20,6 +20,11 @@ import {
   g7ValueHash, type G7LessonUid,
 } from '@/lib/g7-contracts'
 import { assertG3bSourceTask, assertG3cSourceTask, G3B_CONFIG_PATH } from './catalog'
+import {
+  PRACTICE_CHANGE_CLASS, PRACTICE_PROFILE, PRACTICE_RETAINED_BODY_CARDS, PRACTICE_PROMISE_DIAGRAM,
+  isPracticeAssessment, requirePracticeBinding, practiceValueHash,
+} from '@/lib/practice-publication'
+import { assertPracticeSource } from './practice-boundaries'
 
 const parser = remark().use(remarkMdx).use(remarkGfm)
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -35,7 +40,7 @@ export const G3C_ADDITIVE_PROFILE = 'g3c-native-task-minimum'
 
 type DefaultChangeClass = typeof DEFAULT_CHANGE_CLASS
 type StructuralChangeClass = typeof STRUCTURAL_CHANGE_CLASS
-export type ChangeClass = DefaultChangeClass | StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS
+export type ChangeClass = DefaultChangeClass | StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS | typeof PRACTICE_CHANGE_CLASS
 
 export type ReleaseScopeOptions = {
   changeClass?: ChangeClass
@@ -46,7 +51,16 @@ const STRUCTURAL_CONFIG_PATH = 'content/js-track/typescript-introduction/_lesson
 const STRUCTURAL_LESSON_PATH = 'content/js-track/typescript-introduction/ts-basics/page.mdx'
 const ALLOWED_CODE_LANGUAGES = new Set(['bash', 'javascript', 'js', 'json', 'text', 'typescript', 'ts'])
 const G3C_CODE_LANGUAGES = new Set([...ALLOWED_CODE_LANGUAGES, 'jsx', 'tsx', 'css', 'html'])
-type SurfacePolicy = { g3c?: boolean; g7?: G7LessonUid; legacySha256?: string; disclosureLabel?: string }
+const PRACTICE_CODE_LANGUAGES = new Set([...G3C_CODE_LANGUAGES, 'sh'])
+type SurfacePolicy = {
+  g3c?: boolean
+  g7?: G7LessonUid
+  practice?: boolean
+  legacySha256?: string
+  disclosureLabel?: string
+  promiseDiagram?: { beforeSha256: string; afterSha256: string }
+  imageUrl?: string
+}
 
 function answerSurfacePolicy(g3c: boolean, problemId: string): SurfacePolicy {
   if (!g3c) return {}
@@ -63,7 +77,7 @@ export const digest = (value: string | Buffer) =>
 export function parseChangeClass(value: unknown): ChangeClass {
   const changeClass = value ?? DEFAULT_CHANGE_CLASS
   if (changeClass !== DEFAULT_CHANGE_CLASS && changeClass !== STRUCTURAL_CHANGE_CLASS &&
-      changeClass !== ADDITIVE_CHANGE_CLASS && changeClass !== G7_CHANGE_CLASS) {
+      changeClass !== ADDITIVE_CHANGE_CLASS && changeClass !== G7_CHANGE_CLASS && changeClass !== PRACTICE_CHANGE_CLASS) {
     throw new Error(`Unsupported content change class: ${String(changeClass)}`)
   }
   return changeClass
@@ -72,6 +86,10 @@ export function parseChangeClass(value: unknown): ChangeClass {
 export function normalizeReleaseScopeOptions(options: ReleaseScopeOptions = {}): Required<ReleaseScopeOptions> {
   const changeClass = parseChangeClass(options.changeClass)
   const lesson = options.lesson ?? ''
+  if (changeClass === PRACTICE_CHANGE_CLASS) {
+    if (lesson) throw new Error('The reviewed practice batch does not accept a lesson override')
+    return { changeClass, lesson: '' }
+  }
   if (changeClass === DEFAULT_CHANGE_CLASS) {
     if (lesson) throw new Error('--lesson is only supported with an explicit structural, additive or assessment change class')
     return { changeClass, lesson: '' }
@@ -117,7 +135,7 @@ export function assertSameMdxSurface(before: string, after: string, label: strin
   }
 }
 
-function payloadFiles(root: string): Map<string, Buffer> {
+export function payloadFiles(root: string): Map<string, Buffer> {
   const files = new Map<string, Buffer>()
   function walk(relative: string) {
     const full = path.join(root, relative)
@@ -219,7 +237,7 @@ function parseDetailedConfig(raw: Buffer, filename: string): ParsedConfig {
     const lessonSlug = lesson.id.slice(1)
     const sourceUid = `${course}/${section}/${lessonSlug}`
     const contentId = `/${sourceUid}`
-    const route = `/courses/${sourceUid}`
+    const route = `/courses/${course}/${section}/${contentSlug(lesson.title)}`
     const problems = lesson.problems.map((problem) => {
       if (!isRecord(problem) || typeof problem.title !== 'string' ||
           typeof problem.question !== 'string' || typeof problem.answer !== 'string' ||
@@ -228,7 +246,7 @@ function parseDetailedConfig(raw: Buffer, filename: string): ParsedConfig {
       }
       const problemId = typeof problem.id === 'string' && problem.id
         ? problem.id
-        : slugify(problem.title, SLUGIFY_OPTIONS)
+        : contentSlug(problem.title)
       return {
         id: problemId,
         title: problem.title,
@@ -238,7 +256,7 @@ function parseDetailedConfig(raw: Buffer, filename: string): ParsedConfig {
         difficulty: problem.difficulty,
         href: typeof problem.href === 'string' ? problem.href : '',
         contentId: `${contentId}/${problemId}`,
-        cardAnchor: slugify(problem.title, SLUGIFY_OPTIONS),
+        cardAnchor: contentSlug(problem.title),
       }
     })
     lessons.push({
@@ -271,14 +289,15 @@ export type MdxSurfaceEvidence = {
   codeBlocks: CodeBlockEvidence[]
   codeGroups: CodeGroupEvidence[]
   components: { name: 'Note' | 'CodeGroup' | 'details'; count: number }[]
+  images?: { url: string; alt: string }[]
 }
 export type StructuralField =
   | { kind: 'lesson'; lesson: string; contentId: string; sourcePath: string; field: 'body' }
   | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'answer' }
   | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'assessment' }
 export type StructuralSurfaceReport = {
-  changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS
-  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE | typeof G3C_ADDITIVE_PROFILE | typeof G7_PROFILE
+  changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS | typeof PRACTICE_CHANGE_CLASS
+  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE | typeof G3C_ADDITIVE_PROFILE | typeof G7_PROFILE | typeof PRACTICE_PROFILE
   lesson: string
   allowedChangedFields: StructuralField[]
   changedSurfaces: {
@@ -341,20 +360,22 @@ function childrenOf(node: unknown): unknown[] {
   return isRecord(node) && Array.isArray(node.children) ? node.children : []
 }
 
-function codeEvidence(node: Record<string, unknown>, inCodeGroup: boolean, policy: SurfacePolicy = {}): CodeBlockEvidence {
+function codeEvidence(node: Record<string, unknown>, inCodeGroup: boolean, policy: SurfacePolicy, label: string): CodeBlockEvidence {
   if (typeof node.value !== 'string' || !node.value.trim()) {
-    throw new Error('Empty code panel is not supported in the structural class')
+    throw new Error(`Empty code panel is not supported in the structural class: ${label}`)
   }
-  const legacyLanguage = policy.legacySha256 && (node.lang == null || node.lang === 'python' || node.lang === 'plaintext')
+  const legacyLanguage = policy.legacySha256 && (node.lang == null || node.lang === 'python' || node.lang === 'plaintext' ||
+    policy.practice && (node.lang === 'http' || node.lang === 'jsonc'))
+  const languages = policy.practice ? PRACTICE_CODE_LANGUAGES : policy.g3c ? G3C_CODE_LANGUAGES : ALLOWED_CODE_LANGUAGES
   if (!legacyLanguage && (typeof node.lang !== 'string' ||
-      !(policy.g3c ? G3C_CODE_LANGUAGES : ALLOWED_CODE_LANGUAGES).has(node.lang))) {
-    throw new Error(`Unsupported code fence language in structural class: ${String(node.lang)}`)
+      !languages.has(node.lang))) {
+    throw new Error(`Unsupported code fence language in structural class: ${String(node.lang)} (${label})`)
   }
   const legacyMeta = policy.g7 === G7_TYPE_COERCION &&
     policy.legacySha256 === G7_CONTRACTS[G7_TYPE_COERCION].bodySha256 &&
     typeof node.meta === 'string' && /^\{\{ title: '(Questions|Answers)', exec: false \}\}$/.test(node.meta)
   if (node.meta !== null && node.meta !== undefined && !legacyMeta) {
-    throw new Error('Code fence metadata is not supported in the structural class')
+    throw new Error(`Code fence metadata is not supported in the structural class: ${label}`)
   }
   return {
     language: typeof node.lang === 'string' ? node.lang : '',
@@ -377,7 +398,7 @@ function literalG3cHeading(node: Record<string, unknown>, label: string): Anchor
 }
 
 function literalHeading(node: Record<string, unknown>, label: string, policy: SurfacePolicy): AnchorEvidence {
-  if (!policy.g7) return literalG3cHeading(node, label)
+  if (!policy.g7 && !policy.practice) return literalG3cHeading(node, label)
   const heading = staticHeading(node.type === 'mdxJsxTextElement' ? { ...node, type: 'mdxJsxFlowElement' } : node)
   if (!heading) throw new Error(`G7 h2 requires one literal id and plain text: ${label}`)
   return { id: heading.id, text: heading.title }
@@ -404,6 +425,13 @@ function validatePhrasingNode(node: unknown, label: string, links: LinkEvidence[
       links.push({ text: toString(node), href: node.url, kind: 'internal' })
       return
     }
+    case 'image':
+      if (!policy.practice || !policy.imageUrl || node.url !== policy.imageUrl ||
+          node.alt !== PRACTICE_PROMISE_DIAGRAM.alt || node.title !== null) {
+        throw new Error(`Only the exact bound Promise diagram is supported: ${label}`)
+      }
+      links.push({ text: PRACTICE_PROMISE_DIAGRAM.alt, href: policy.imageUrl, kind: 'external-https' })
+      return
     default:
       throw new Error(`Unsupported MDX node type in structural class: ${node.type} (${label})`)
   }
@@ -431,7 +459,7 @@ function validateFlowNode(
     case 'paragraph': {
       const children = childrenOf(node)
       const onlyChild = children[0]
-      if ((policy.g3c || policy.g7) && children.length === 1 && isRecord(onlyChild) &&
+      if ((policy.g3c || policy.g7 || policy.practice) && children.length === 1 && isRecord(onlyChild) &&
           onlyChild.type === 'mdxJsxTextElement' && onlyChild.name === 'h2') {
         literalHeading(onlyChild, label, policy)
         return
@@ -462,12 +490,12 @@ function validateFlowNode(
       childrenOf(node).forEach((child) => validatePhrasingNode(child, label, evidence.links, policy))
       return
     case 'code':
-      evidence.codeBlocks.push(codeEvidence(node, inCodeGroup, policy))
+      evidence.codeBlocks.push(codeEvidence(node, inCodeGroup, policy, label))
       return
     case 'mdxJsxFlowElement': {
       const name = node.name
       const attributes = Array.isArray(node.attributes) ? node.attributes : []
-      if (name === 'h2' && (policy.g3c || policy.g7)) {
+      if (name === 'h2' && (policy.g3c || policy.g7 || policy.practice)) {
         literalHeading(node, label, policy)
         return
       }
@@ -504,7 +532,7 @@ function validateFlowNode(
           if (!isRecord(panel) || panel.type !== 'code') {
             throw new Error(`CodeGroup may contain only code panels in ${label}`)
           }
-          const code = codeEvidence(panel, true, policy)
+          const code = codeEvidence(panel, true, policy, label)
           const legacyTitle = code.hasMeta && typeof panel.meta === 'string'
             ? /title: '(Questions|Answers)'/.exec(panel.meta)?.[1] : undefined
           const panelLabel = getPanelTitle({ language: code.language, title: legacyTitle })
@@ -562,9 +590,15 @@ function emptyEvidence(): MdxSurfaceEvidence {
 }
 
 function summarizeMdx(markdown: string, label: string, allowMetadataExport: boolean, requestedPolicy: SurfacePolicy = {}): MdxSurfaceEvidence {
+  const rawSha256 = digest(markdown)
+  const imageUrl = allowMetadataExport && requestedPolicy.promiseDiagram
+    ? rawSha256 === requestedPolicy.promiseDiagram.beforeSha256 ? PRACTICE_PROMISE_DIAGRAM.beforeUrl
+      : rawSha256 === requestedPolicy.promiseDiagram.afterSha256 ? PRACTICE_PROMISE_DIAGRAM.afterUrl : undefined
+    : undefined
   const policy = {
     ...requestedPolicy,
-    legacySha256: requestedPolicy.legacySha256 === digest(markdown) ? requestedPolicy.legacySha256 : undefined,
+    legacySha256: requestedPolicy.legacySha256 === rawSha256 ? requestedPolicy.legacySha256 : undefined,
+    imageUrl,
   }
   const tree = parser.parse(markdown)
   const evidence = emptyEvidence()
@@ -580,6 +614,16 @@ function summarizeMdx(markdown: string, label: string, allowMetadataExport: bool
   for (const child of childrenOf(tree)) {
     if (isRecord(child) && child.type === 'mdxjsEsm') continue
     validateFlowNode(child, label, evidence, false, policy)
+  }
+  if (requestedPolicy.promiseDiagram) {
+    let images = 0
+    const countImages = (node: unknown) => {
+      if (isRecord(node) && node.type === 'image') images++
+      for (const child of childrenOf(node)) countImages(child)
+    }
+    countImages(tree)
+    if (!imageUrl || images !== 1) throw new Error(`The bound Promise diagram must be retained exactly once: ${label}`)
+    evidence.images = [{ url: imageUrl, alt: PRACTICE_PROMISE_DIAGRAM.alt }]
   }
   const headings = headingEvidence(tree, policy)
   evidence.h1 = headings.h1
@@ -749,8 +793,21 @@ function looseHeadingIds(markdown: string, policy: SurfacePolicy = {}): Set<stri
   return idsFrom({ ...emptyEvidence(), ...headingEvidence(parser.parse(markdown), policy) })
 }
 
-function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = STRUCTURAL_LESSON_UID): Catalog {
-  const routes = new Map<string, Set<string>>()
+function promiseDiagramPolicy(contract?: ReturnType<typeof requirePracticeBinding>['lessons'][number]) {
+  return contract?.uid === PRACTICE_PROMISE_DIAGRAM.lesson &&
+    contract.body.before.rawSha256 === PRACTICE_PROMISE_DIAGRAM.beforeBodySha256
+    ? { beforeSha256: contract.body.before.rawSha256, afterSha256: contract.body.after.rawSha256 }
+    : undefined
+}
+
+function buildCatalog(
+  files: Map<string, Buffer>,
+  label: string,
+  selectedUid = STRUCTURAL_LESSON_UID,
+  practiceBinding?: ReturnType<typeof requirePracticeBinding>['lessons'][number],
+  sharedRoutes?: Catalog['routes'],
+): Catalog {
+  const routes = sharedRoutes ?? new Map<string, Set<string>>()
   let selectedLesson: LessonState | undefined
   const addRoute = (route: string, ids: Iterable<string> = []) => {
     const existing = routes.get(route) ?? new Set<string>()
@@ -758,6 +815,7 @@ function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = S
     routes.set(route, existing)
   }
   for (const [filename, raw] of files) {
+    if (sharedRoutes) break
     const coursePage = /^content\/([^/]+)\/page\.mdx$/.exec(filename)
     if (coursePage) {
       addRoute(`/courses/${coursePage[1]}`, looseHeadingIds(raw.toString('utf8')))
@@ -779,26 +837,40 @@ function buildCatalog(files: Map<string, Buffer>, label: string, selectedUid = S
       if (!bodyRaw) throw new Error(`Referenced body missing from payload: ${lesson.bodyPath}`)
       const cardAnchors = lesson.problems.map((problem) => ({ text: problem.title, id: problem.cardAnchor }))
       const g7 = isG7Lesson(lesson.sourceUid) ? lesson.sourceUid : undefined
-      const ids = looseHeadingIds(bodyRaw.toString('utf8'), { g7 })
-      for (const problem of lesson.problems) {
-        for (const id of looseHeadingIds(problem.question, { g7 })) ids.add(id)
-        for (const id of looseHeadingIds(problem.answer, { g7 })) ids.add(id)
+      if (!sharedRoutes) {
+        const ids = looseHeadingIds(bodyRaw.toString('utf8'), { g7 })
+        for (const problem of lesson.problems) {
+          for (const id of looseHeadingIds(problem.question, { g7 })) ids.add(id)
+          for (const id of looseHeadingIds(problem.answer, { g7 })) ids.add(id)
+        }
+        for (const anchor of cardAnchors) ids.add(anchor.id)
+        if (lesson.problems.length) ids.add(PRACTICE_PROBLEMS_PREFIX.slice(1))
+        addRoute(lesson.route, ids)
       }
-      for (const anchor of cardAnchors) ids.add(anchor.id)
-      if (lesson.problems.length) ids.add(PRACTICE_PROBLEMS_PREFIX.slice(1))
-      addRoute(lesson.route, ids)
       if (lesson.sourceUid === selectedUid) {
         const g3c = selectedUid === G3C_LESSON_UID
+        const practice = Boolean(practiceBinding)
         const body = state(`${label} ${lesson.bodyPath}`, bodyRaw.toString('utf8'), true,
-          g7 ? { g7, legacySha256: G7_CONTRACTS[g7].bodySha256 } : g3c ? { g3c, legacySha256: G3C_LEGACY_BODY_SHA256 } : {})
+          g7 ? { g7, practice, legacySha256: G7_CONTRACTS[g7].bodySha256 } : practiceBinding
+            ? { practice, legacySha256: practiceBinding.body.before.rawSha256, promiseDiagram: promiseDiagramPolicy(practiceBinding) }
+            : g3c ? { g3c, legacySha256: G3C_LEGACY_BODY_SHA256 } : {})
         const questions = lesson.problems.map((problem) =>
           state(`${label} ${lesson.sourceUid} question ${problem.id}`, problem.question, false, {
-            g3c, g7, disclosureLabel: g3c && problem.id === G3C_TASK.id ? 'Open the complete starter files' : undefined,
+            g3c, g7, practice,
+            legacySha256: practiceBinding
+              ? practiceBinding.assessments.find(item => item.id === problem.id)?.before.questionSha256 ?? digest(problem.question)
+              : undefined,
+            disclosureLabel: g3c && problem.id === G3C_TASK.id ? 'Open the complete starter files' : undefined,
           }))
         const answers = lesson.problems.map((problem) =>
           state(`${label} ${lesson.sourceUid} answer ${problem.id}`, problem.answer, false,
-            g7 ? { g7, legacySha256: G7_CONTRACTS[g7].problems.find(item => item.id === problem.id)?.answerSha256 }
-              : answerSurfacePolicy(g3c, problem.id)))
+            g7 ? { g7, practice, legacySha256: G7_CONTRACTS[g7].problems.find(item => item.id === problem.id)?.answerSha256 }
+              : practiceBinding ? {
+                practice,
+                // The batch's protected-source hash already freezes every unselected answer.
+                legacySha256: practiceBinding.assessments.find(item => item.id === problem.id)?.before.answerSha256 ?? digest(problem.answer),
+              }
+                : answerSurfacePolicy(g3c, problem.id)))
         selectedLesson = { lesson, body, questions, answers, cardAnchors }
       }
     }
@@ -830,6 +902,8 @@ function assertNoPairwiseAnchorConflicts(
   base: LessonState,
   candidate: LessonState,
   g7?: G7LessonUid,
+  variableQuestions = false,
+  retainedBodyCards?: { ids: readonly string[]; beforeSha256: string; afterSha256: string },
 ): StructuralSurfaceReport['anchorConflictProof'] {
   const groups: { name: string; variants: SurfaceState[] }[] = [
     { name: 'lesson body', variants: [base.body, candidate.body] },
@@ -837,7 +911,7 @@ function assertNoPairwiseAnchorConflicts(
       name: `answer ${candidate.lesson.problems[index]?.id}`,
       variants: base.answers[index] ? [base.answers[index], answer] : [answer],
     })),
-    ...(g7 ? candidate.questions.map((question, index) => ({
+    ...(g7 || variableQuestions ? candidate.questions.map((question, index) => ({
       name: `question ${candidate.lesson.problems[index]?.id}`,
       variants: [base.questions[index], question],
     })) : []),
@@ -845,7 +919,7 @@ function assertNoPairwiseAnchorConflicts(
   const fixed = [
     { text: 'Practice Problems', id: PRACTICE_PROBLEMS_PREFIX.slice(1) },
     ...candidate.cardAnchors,
-    ...(g7 ? [] : candidate.questions.flatMap((question) => question.evidence.h2)),
+    ...(g7 || variableQuestions ? [] : candidate.questions.flatMap((question) => question.evidence.h2)),
   ]
   const fixedIds = new Map<string, string>()
   for (const anchor of fixed) {
@@ -858,11 +932,19 @@ function assertNoPairwiseAnchorConflicts(
     for (const variant of group.variants) {
       for (const id of variant.ids) {
         if (fixedIds.has(id)) {
+          const oldCard = base.lesson.problems.find(problem => problem.cardAnchor === id)
+          const nextCard = candidate.lesson.problems.find(problem => problem.cardAnchor === id)
+          const retainedBodyCard = group.name === 'lesson body' && retainedBodyCards?.ids.includes(id) &&
+            [retainedBodyCards.beforeSha256, retainedBodyCards.afterSha256].includes(variant.sha256) &&
+            base.body.ids.has(id) && candidate.body.ids.has(id) &&
+            oldCard?.type === 'THEORY' && nextCard?.type === 'THEORY' &&
+            !isPracticeAssessment(oldCard.contentId) && isDeepStrictEqual(oldCard, nextCard)
           const legacyBody = g7 === G7_TYPE_COERCION && group.name === 'lesson body' &&
             variant.sha256 === G7_CONTRACTS[G7_TYPE_COERCION].bodySha256
           const legacyIds = ['truthy-and-falsy-values', 'the-operators-dual-nature']
           const collisions = [...variant.ids].filter(value => fixedIds.has(value)).sort()
-          if (!legacyBody || !isDeepStrictEqual(collisions, [...legacyIds].sort()) || !legacyIds.includes(id)) {
+          if (!retainedBodyCard &&
+              (!legacyBody || !isDeepStrictEqual(collisions, [...legacyIds].sort()) || !legacyIds.includes(id))) {
             throw new Error(`Structural heading anchor collides with fixed reader anchor: ${id}`)
           }
         }
@@ -1096,7 +1178,7 @@ function validateKnownSourceTask(files: Map<string, Buffer>) {
     for (const lesson of config.lessons ?? []) {
       for (const problem of lesson.problems ?? []) {
         if (problem.id !== G3B_TASK.id && problem.title !== G3B_TASK.title &&
-            (typeof problem.title !== 'string' || slugify(problem.title, SLUGIFY_OPTIONS) !== G3B_TASK.slug)) continue
+            (typeof problem.title !== 'string' || contentSlug(problem.title) !== G3B_TASK.slug)) continue
         if (task) throw new Error('Duplicate G3B source task identity')
         task = assertG3bSourceTask(problem, `/${match[1]}/${match[2]}${lesson.id}`)
         const selected = parseDetailedConfig(raw, filename).lessons.find(item => item.contentId === G3B_LESSON_CONTENT_ID)
@@ -1137,7 +1219,7 @@ function validateKnownG3cSourceTask(files: Map<string, Buffer>) {
       }
       for (const problem of lesson.problems ?? []) {
         if (problem.id !== G3C_TASK.id && problem.title !== G3C_TASK.title &&
-            (typeof problem.title !== 'string' || slugify(problem.title, SLUGIFY_OPTIONS) !== G3C_TASK.slug)) continue
+            (typeof problem.title !== 'string' || contentSlug(problem.title) !== G3C_TASK.slug)) continue
         if (task) throw new Error('Duplicate G3C source task identity')
         task = assertG3cSourceTask(problem, contentId)
         if (lesson.problems.length !== 6 || lesson.problems[5] !== problem) {
@@ -1264,6 +1346,119 @@ export function assertKnownSourceCatalog(root: string) {
   return g3b
 }
 
+function practiceScope(baseRoot: string, candidateRoot: string): ScopeReport {
+  const binding = requirePracticeBinding()
+  const before = payloadFiles(baseRoot), after = payloadFiles(candidateRoot)
+  assertPracticeSource(before)
+  assertPracticeSource(after)
+  if (!isDeepStrictEqual([...before.keys()], [...after.keys()])) {
+    throw new Error('The practice batch cannot add, remove or move payload files')
+  }
+  for (const validate of [validateKnownSourceTask, validateKnownG3cSourceTask]) {
+    const retained = validate(before)
+    if (!retained || !isDeepStrictEqual(retained, validate(after))) {
+      throw new Error('The practice batch must retain the complete G3B/G3C tasks')
+    }
+  }
+  const allowedPaths = new Set(binding.lessons.flatMap(({ uid }) => [
+    `content/${uid}/page.mdx`, `content/${uid.split('/').slice(0, 2).join('/')}/_lessons.json`,
+  ]))
+  const changedFiles: ScopeReport['changedFiles'] = []
+  for (const [filename, bytes] of before) {
+    const next = after.get(filename)!
+    if (bytes.equals(next)) continue
+    if (!allowedPaths.has(filename)) throw new Error(`File is outside the reviewed practice batch: ${filename}`)
+    changedFiles.push({ path: filename, beforeSha256: digest(bytes), afterSha256: digest(next) })
+  }
+  const changedSurfaces: StructuralSurfaceReport['changedSurfaces'] = []
+  const allowedChangedFields: StructuralField[] = []
+  const proofs: { lesson: string; proof: StructuralSurfaceReport['anchorConflictProof'] }[] = []
+  let beforeRoutes: Catalog['routes'] | undefined
+  let afterRoutes: Catalog['routes'] | undefined
+  for (const contract of binding.lessons) {
+    const lesson = contract.uid
+    const bodyPath = `content/${lesson}/page.mdx`
+    const configPath = `content/${lesson.split('/').slice(0, 2).join('/')}/_lessons.json`
+    const baseCatalog = buildCatalog(before, 'base practice', lesson, contract, beforeRoutes)
+    const candidateCatalog = buildCatalog(after, 'candidate/recovery practice', lesson, contract, afterRoutes)
+    beforeRoutes = baseCatalog.routes
+    afterRoutes = candidateCatalog.routes
+    const oldLesson = baseCatalog.selectedLesson
+    const nextLesson = candidateCatalog.selectedLesson
+    const g7 = isG7Lesson(lesson) ? lesson : undefined
+    const recordSurface = (
+      oldText: string, nextText: string, field: 'body' | 'question' | 'answer',
+      legacySha256: string, problem?: ProblemConfig,
+    ) => {
+      const sourcePath = field === 'body' ? bodyPath : configPath
+      const label = `${sourcePath}:${problem?.id ?? 'body'}:${field}`
+      const policy = {
+        practice: true, g7, legacySha256,
+        ...(field === 'body' ? { promiseDiagram: promiseDiagramPolicy(contract) } : {}),
+      }
+      const evidence = assertStructuralMdxSurface(oldText, nextText, label, field === 'body', policy)
+      evidence.before.links = validateLinks(evidence.before, oldLesson.lesson.route, [baseCatalog, candidateCatalog], label)
+      evidence.after.links = validateLinks(evidence.after, oldLesson.lesson.route, [baseCatalog, candidateCatalog], label)
+      if (oldText !== nextText) changedSurfaces.push({
+        kind: field === 'body' ? 'lesson-body' : field === 'question' ? 'problem-question' : 'problem-answer',
+        lesson, contentId: problem?.contentId ?? `/${lesson}`, sourcePath, field,
+        ...(problem ? { problemId: problem.id, title: problem.title } : {}),
+        beforeSha256: digest(oldText), afterSha256: digest(nextText),
+        before: evidence.before, after: evidence.after,
+      })
+    }
+    recordSurface(before.get(bodyPath)!.toString('utf8'), after.get(bodyPath)!.toString('utf8'), 'body', contract.body.before.rawSha256)
+    allowedChangedFields.push({ kind: 'lesson', lesson, contentId: `/${lesson}`, sourcePath: bodyPath, field: 'body' })
+    for (const assessment of contract.assessments) {
+      const oldProblem = oldLesson.lesson.problems.find(problem => problem.id === assessment.id)
+      const nextProblem = nextLesson.lesson.problems.find(problem => problem.id === assessment.id)
+      if (!oldProblem || !nextProblem) throw new Error('Missing bound practice assessment surface')
+      recordSurface(oldProblem.question, nextProblem.question, 'question', assessment.before.questionSha256, oldProblem)
+      recordSurface(oldProblem.answer, nextProblem.answer, 'answer', assessment.before.answerSha256, oldProblem)
+      allowedChangedFields.push({
+        kind: 'problem', lesson, contentId: oldProblem.contentId, configPath,
+        problemId: oldProblem.id, title: oldProblem.title, field: 'assessment',
+      })
+    }
+    const retained = PRACTICE_RETAINED_BODY_CARDS[lesson]
+    const retainedBodyCards = retained?.beforeBodySha256 === contract.body.before.rawSha256
+      ? { ids: retained.ids, beforeSha256: retained.beforeBodySha256, afterSha256: contract.body.after.rawSha256 }
+      : undefined
+    proofs.push({ lesson, proof: assertNoPairwiseAnchorConflicts(oldLesson, nextLesson, g7, true, retainedBodyCards) })
+  }
+  const qualify = (lesson: string, anchor: AnchorEvidence): AnchorEvidence =>
+    ({ text: anchor.text, id: `${lesson}#${anchor.id}` })
+  return {
+    changedFiles,
+    assessment: {
+      bindingSha256: practiceValueHash(binding),
+      sourceLessonBeforeSha256: practiceValueHash([...before].map(([file, bytes]) => [file, digest(bytes)])),
+      sourceLessonAfterSha256: practiceValueHash([...after].map(([file, bytes]) => [file, digest(bytes)])),
+    },
+    structural: {
+      changeClass: PRACTICE_CHANGE_CLASS, profile: PRACTICE_PROFILE, lesson: '',
+      allowedChangedFields, changedSurfaces,
+      anchorConflictProof: {
+        checked: 'Each selected lesson independently, including every before/after question, answer and body combination. IDs in this aggregate are lesson-qualified.',
+        fixedProblemCardAnchors: proofs.flatMap(({ lesson, proof }) => proof.fixedProblemCardAnchors.map(anchor => qualify(lesson, anchor))),
+        fixedReaderAnchors: proofs.flatMap(({ lesson, proof }) => proof.fixedReaderAnchors.map(anchor => qualify(lesson, anchor))),
+        pairwiseCompatibleIds: proofs.flatMap(({ lesson, proof }) => proof.pairwiseCompatibleIds.map(id => `${lesson}#${id}`)),
+      },
+      externalHttpsDestinations: [...new Set(changedSurfaces.flatMap(surface => [...surface.before.links, ...surface.after.links])
+        .filter(link => link.kind === 'external-https').map(link => link.href))].sort(),
+      limits: [
+        'Only the exact 17 bound lessons and 29 complete existing assessment groups. Exactly 24 reviewed type changes; no new identities.',
+        'All other source and compiled catalog payloads are frozen, including published Data Types and retained G3B/G3C tasks.',
+        'A question, answer, type and both compiled fields are one conditional row update. Body and assessment recovery remain independent.',
+        'The exact Coercion legacy-fragment exception remains scoped to its original body hash and two existing IDs.',
+        'Three unchanged body/theory-card ambiguities remain at their existing destinations: pure-functions, well-known-symbols, registering-a-service-worker. Only the exact bound body versions and unchanged protected theory cards qualify.',
+        'The one existing Promise diagram is retained with its exact alt text. The original before body keeps its old URL; the bound candidate uses the verified canonical MDN image URL. No other image surface is admitted.',
+        'Eligibility is not correctness, pedagogy, browser, database, progress, independent review or production acceptance.',
+      ],
+    },
+  }
+}
+
 /** Scope is stricter than ordinary MDX validity; semantic independence still needs review. */
 export function assertInPlaceScope(
   baseRoot: string,
@@ -1271,6 +1466,7 @@ export function assertInPlaceScope(
   options: ReleaseScopeOptions = {},
 ): ScopeReport {
   const normalized = normalizeReleaseScopeOptions(options)
+  if (normalized.changeClass === PRACTICE_CHANGE_CLASS) return practiceScope(baseRoot, candidateRoot)
   if (normalized.changeClass === G7_CHANGE_CLASS) {
     if (!isG7Lesson(normalized.lesson)) throw new Error('Unsupported G7 lesson')
     return g7Scope(baseRoot, candidateRoot, normalized.lesson)

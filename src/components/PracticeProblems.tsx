@@ -1,13 +1,14 @@
 import { Problem } from '@prisma/client'
 import { PRACTICE_PROBLEMS_PREFIX } from '../constants'
-import { ExpandableAnswer } from './ExpandableAnswer'
+import { PracticeProblemGroups } from './PracticeProblemGroups'
 
 export type PracticeProblemsProps = {
   userId?: string
   problems?: Problem[]
+  groupPractice?: boolean
 }
 
-export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
+export const PracticeProblems = ({ problems, groupPractice = false }: PracticeProblemsProps) => {
   if (!problems?.length) return null
 
   return (
@@ -36,11 +37,7 @@ export const PracticeProblems = ({ problems }: PracticeProblemsProps) => {
           Practice Problems
         </a>
       </h2>
-      <div className="space-y-3">
-        {problems.map((problem) => (
-          <ExpandableAnswer key={problem.id} problem={problem} />
-        ))}
-      </div>
+      <PracticeProblemGroups problems={problems} grouped={groupPractice} />
     </>
   )
 }
