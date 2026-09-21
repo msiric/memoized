@@ -68,6 +68,62 @@ breaking changes, identity moves, new entities and schema changes are unsupporte
 
 ## Inputs and planning
 
+### Fixed platform-practice batch
+
+`existing-practice-batch-v1` is a separate, closed capability for the reviewed
+practice-consistency candidate. It accepts no lesson override:
+
+```text
+--change-class existing-practice-batch-v1
+profile: platform-practice-consistency-2026-09
+```
+
+The app binds 17 existing bodies and 29 complete assessment groups. These cover
+24 THEORY-to-CODING corrections plus the other five already reviewed Type
+Coercion answers. The total remains 508 problems. No identities are created,
+deleted or moved. The published Data Types unit, both retained native tasks,
+all resources and every other complete catalog row are frozen.
+
+The source gate masks only these body and complete-assessment slots before
+checking a frozen whole-payload fingerprint. The prepared gate does the same
+for the whole raw/compiled catalog. Every editable unit must be one exact before
+or after version. A question, answer, type and both serialized fields are an
+indivisible conditional existing-row update. Metadata, access, ownership,
+source ordering and all unselected payloads remain protected.
+
+Bindings live in the trusted app, never in source content, environment variables,
+requests or CLI overrides. An absent complete binding fails closed. Binding
+presence establishes exact scope, not owner acceptance or production readiness.
+All existing approval, environment, revision, plan-hash and receipt gates apply.
+
+Structural inspection retains narrowly pinned existing surfaces rather than
+rewriting unrelated content to fit an earlier pilot:
+
+- Unselected legacy answers retain their exact protected bytes, including their
+  existing language-less, HTTP or JSONC fences.
+- Three unchanged theory cards still share a fragment with a body heading:
+  `pure-functions`, `well-known-symbols` and `registering-a-service-worker`.
+  Only their exact original/bound body versions and unchanged theory cards
+  qualify. This is a recorded legacy ambiguity, not permission for new conflicts.
+- Coercion keeps its separately accepted two-fragment before/recovery exception.
+- The one Promise diagram retains its exact alt text. Its before body keeps the
+  old MDN URL. The candidate corrects that broken URL to the verified canonical
+  Promise-reference image. Other images or arbitrary image attributes are not
+  admitted.
+
+Public lesson routes use the same title-derived `contentSlug` as preparation.
+Source identity and public URL are not interchangeable. Before/after route
+indexes are reused only within one immutable source comparison.
+
+Deploy compatible app support with `PRACTICE_GROUPING_ENABLED` off. After the
+complete source batch, indexing and live acceptance pass, activate grouping for
+both courses together. Disabling grouping restores a functional flat reader.
+It does not undo database content or historical marks.
+
+A local canonical hash of `describeInPlacePlan` is not the CLI's approval hash.
+Use `planSha256` from the actual reviewed CLI journal. That hash also binds the
+app revision, both source revisions and the environment descriptor.
+
 Use clean app code at an approved full commit SHA. The publisher exports content
 and resources directly from immutable Git commits, not mutable working files.
 It prepares the entire base/candidate content and resource pair before writes.
@@ -191,7 +247,7 @@ Unit tests must not contact production. The email-logo test checks the declared
 URL and repository PNG; the release rehearsal/live smoke probes separately check
 HTTP availability and content type at `/images/brand/logo-dark.png`.
 
-## G7-01 existing-assessment capability (inactive)
+## G7-01 bounded existing-assessment capability
 
 ```text
 --change-class existing-assessment-update-v1
@@ -200,10 +256,11 @@ profile: g7-values-coercion-minimum
 ```
 
 The only other admitted lesson selector is
-`js-track/core-fundamentals/type-coercion`, for a later separately accepted
-candidate. One lesson is selected per publication. This is capability code,
-not candidate acceptance or authorization to deploy/publish. The active control
-configuration remains the existing enabled G3C selection and app pin.
+`js-track/core-fundamentals/type-coercion`. One lesson is selected per publication.
+Data Types is published. The Coercion binding below prepares a complete local
+review candidate, not permission to deploy or publish it. The active production
+control still selects Data Types and app
+`43c293248b56e51dee72b19fc94df202a84126f0`.
 
 `src/lib/g7-contracts.ts` freezes canonical lesson metadata, ordered problem
 metadata and all original question/answer/body hashes from immutable content
@@ -226,15 +283,17 @@ change, always as a complete existing assessment:
 | Data Types | `implement-deepclone-structural-deep-copy` | THEORY → CODING, HARD retained |
 | Type Coercion | `implement-deepequal-structural-equality` | THEORY → CODING, HARD retained |
 
-Data Types alone retains 508 problems with 340 THEORY / 168 CODING. Other
+Data Types alone retains 508 problems with 340 THEORY / 168 CODING. The local
+Coercion candidate retains 508 with 339 THEORY / 169 CODING. Other
 implementation prompts are not reclassified.
 
 ### Binding handoff
 
-`G7_REVIEWED_BINDINGS` binds only the complete local Data Types review candidate
-`d60a2a12817859b0c8b56a9ee1fb99fb4bdb1542`. The Type Coercion entry remains
-absent. This is not owner acceptance of the finished candidate or production
-activation: the active control still selects G3C. Planning, preparation,
+`G7_REVIEWED_BINDINGS` preserves the published Data Types payload from
+`d60a2a12817859b0c8b56a9ee1fb99fb4bdb1542` exactly. It also binds the complete
+local Coercion candidate `63aefb959aaf47865e502520b6b5cf75be820cfd`.
+The latter is not owner acceptance of a finished candidate or production
+activation: active control remains Data Types. Planning, preparation,
 state inspection and application fail closed without a complete binding.
 There is no source-supplied, environment, CLI or request override.
 Synthetic test mocks do not activate the profile. The binding fields are:

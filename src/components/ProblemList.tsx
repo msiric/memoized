@@ -2,7 +2,7 @@
 
 import { trackLearningEvent } from '@/lib/analytics'
 import { PROBLEM_CARD } from '@/constants/designTokens'
-import { isNativeCodingProblem } from '@/lib/problem-presentation'
+import { isNativeCodingProblem, NATIVE_PRACTICE_NOTE, PRACTICE_COMPLETION_NOTE } from '@/lib/problem-presentation'
 import { G3bLocalPractice } from './G3bLocalPractice'
 import { ProblemQuestion } from './ProblemQuestion'
 import { useContentStore } from '@/contexts/progress'
@@ -154,7 +154,7 @@ const ProblemSlideOverContent = ({
 
       {isNative && (
         <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-300">
-          Write and run your solution locally before revealing the answer.
+          {NATIVE_PRACTICE_NOTE}
         </p>
       )}
 
@@ -503,10 +503,11 @@ export const ProblemList = ({
       {/* Page Header - using prose for consistent typography styling */}
       <article className="pt-10 md:pt-16">
         <div className="prose mx-auto mb-8 max-w-[1024px] dark:prose-invert">
-          <h1>Welcome to the Problems Page: Master Every Challenge</h1>
+          <h1>Practice problems</h1>
           <p className="lead">
-            Browse and filter through the {allProblems.length} JavaScript interview problems loaded in this view. Track your progress, reveal solutions and master each topic systematically.
+            Browse {allProblems.length} theory questions and coding exercises. Filter by lesson, type or difficulty to choose what to practice.
           </p>
+          <p>{PRACTICE_COMPLETION_NOTE}</p>
         </div>
       </article>
 

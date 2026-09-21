@@ -6,9 +6,10 @@ import {
 import { normalizeReleaseScopeOptions } from '@/scripts/content-release/scope'
 
 describe('G7 local candidate contracts (real immutable constants, no synthetic binding)', () => {
-  it('binds only the complete Data Types review candidate, with Coercion still unavailable', () => {
-    expect(Object.keys(G7_REVIEWED_BINDINGS)).toEqual([G7_DATA_TYPES])
+  it('preserves the published Data Types binding and binds the complete local Coercion candidate', () => {
+    expect(Object.keys(G7_REVIEWED_BINDINGS)).toEqual([G7_DATA_TYPES, G7_TYPE_COERCION])
     const binding = requireG7Binding(G7_DATA_TYPES)
+    expect(g7ValueHash(binding)).toBe('d34ac4f86e55f863f7a3b4a18574147e53e4fa1adf6b3f5a0a5c06a96a57b52b')
     expect(binding.sourceLessonSha256).toBe('3b38e3da312ced7db557041fcd487d6966b62d165514cf17a4856c7196516b5d')
     expect(binding.problems).toHaveLength(6)
     expect(binding.problems.at(-1)).toMatchObject({
@@ -16,11 +17,20 @@ describe('G7 local candidate contracts (real immutable constants, no synthetic b
       questionSha256: '44cee8cf3decdaaf9d37964fb0c9fcf439e5ab912fb92d2aef6bf140f0f3e9bf',
       answerSha256: '83ff3c99040ee690c7171ffd4943aa14f81f0ade44244c144ad77daac8bf9207',
     })
-    expect(() => requireG7Binding(G7_TYPE_COERCION)).toThrow(/inactive.*missing complete reviewed/)
+    const coercion = requireG7Binding(G7_TYPE_COERCION)
+    expect(coercion.sourceLessonSha256).toBe('e7e3e4a43e25074074152fdbd9aedd2f7a521e8da5aa65f2891b4410d82d3d4d')
+    expect(coercion.problems).toHaveLength(6)
+    expect(coercion.problems.at(-1)).toMatchObject({
+      id: 'implement-deepequal-structural-equality', type: 'CODING',
+      questionSha256: '5f1f4f987b44ff02bcafb674fa3d01496e7ceb3924a7f486e9055c823b4d5c96',
+      answerSha256: '73fe18b77029c801b8225fcf3ddab318653f42fd244701cdca7b9ffbebf10f7a',
+    })
+    expect(() => assertG7Body('unreviewed body', G7_TYPE_COERCION)).toThrow(/complete frozen or reviewed/)
   })
   it('requires code-reviewed complete bindings even for no-op/before/recovery plans, with no environment fallback', () => {
-    const bound = G7_REVIEWED_BINDINGS[G7_DATA_TYPES]
+    const bound = { ...G7_REVIEWED_BINDINGS }
     delete G7_REVIEWED_BINDINGS[G7_DATA_TYPES]
+    delete G7_REVIEWED_BINDINGS[G7_TYPE_COERCION]
     vi.stubEnv('G7_QUESTION_SHA256', 'a'.repeat(64))
     vi.stubEnv('G7_SOURCE_SHA256', 'b'.repeat(64))
     try {
@@ -30,7 +40,7 @@ describe('G7 local candidate contracts (real immutable constants, no synthetic b
         expect(() => assertG7SourceLesson({}, lesson)).toThrow(/inactive/)
       }
     } finally {
-      G7_REVIEWED_BINDINGS[G7_DATA_TYPES] = bound
+      Object.assign(G7_REVIEWED_BINDINGS, bound)
       vi.unstubAllEnvs()
     }
   })

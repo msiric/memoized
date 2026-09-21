@@ -17,7 +17,7 @@ import { JsonLd } from '@/components/JsonLd'
 import { getSearchCatalog } from '@/services/search'
 import { extractSectionsFromCompiledSource } from '@/services/section'
 import Link from 'next/link'
-import { isTypescriptFirstPassEnabled } from '@/config/features'
+import { isPracticeGroupingEnabled, isTypescriptFirstPassEnabled } from '@/config/features'
 import { firstPassHref, isTsBasicsRoute, TS_FIRST_PASS_ID, type PathQueryValue } from '@/lib/typescript-first-pass'
 import { resolveTypescriptFirstPass } from '@/services/typescript-first-pass'
 import { TypescriptFirstPass } from '@/components/TypescriptFirstPass'
@@ -127,6 +127,7 @@ export default async function Lesson({
   }
 
   const session = await getServerSession(authOptions)
+  const groupPractice = isPracticeGroupingEnabled()
   const user = session ? await getUserWithSubscriptionDetails(session.userId) : null
   const hasAccess = userHasAccess(user as UserWithSubscriptionsAndProgress | null, lesson.access)
   const serialized = lesson.serializedBody
@@ -160,10 +161,12 @@ export default async function Lesson({
       serializedContent={lesson.serializedBody}
       lessonId={lesson.id}
       problems={lesson.problems as Problem[]}
+      groupPractice={groupPractice}
       showNextPage={false}
     /> : <LessonPreview header={header}
       actions={previewAction}
-      title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems} />}
+      title={lesson.title} description={lesson.description} topics={topics} problems={lesson.problems}
+      groupPractice={groupPractice} />}
       {navigation}
     </>
   )

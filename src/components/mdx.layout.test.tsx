@@ -16,8 +16,8 @@ vi.mock('./LessonFeedback', () => ({
 vi.mock('./NextPage', () => ({
   NextPage: () => <div>Next lesson</div>,
 }))
-vi.mock('./ExpandableAnswer', () => ({
-  ExpandableAnswer: () => <div>Practice card</div>,
+vi.mock('./PracticeProblemGroups', () => ({
+  PracticeProblemGroups: () => <div>Practice cards</div>,
 }))
 
 const problem: Problem = {

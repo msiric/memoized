@@ -11,6 +11,7 @@ import { ProblemCard, type PracticeProblem } from './index'
 import { useContentStore } from '@/contexts/progress'
 import { useAuthStore } from '@/contexts/auth'
 import { G3B_TASK } from '@/lib/g3b-task'
+import { NATIVE_PRACTICE_NOTE } from '@/lib/problem-presentation'
 
 const mocks = vi.hoisted(() => ({
   track: vi.fn(),
@@ -71,7 +72,7 @@ describe('Explicit practice actions', () => {
     expect(screen.getByRole('heading', { name: native.title })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: native.title })).not.toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /Practice on LeetCode/ })).not.toBeInTheDocument()
-    expect(screen.getByText('Write and run your solution locally before revealing the answer.')).toBeInTheDocument()
+    expect(screen.getByText(NATIVE_PRACTICE_NOTE)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^(Run|Submit)$/ })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
     await screen.findByText('Free answer body')
@@ -85,7 +86,7 @@ describe('Explicit practice actions', () => {
     render(<ProblemCard problem={external} defaultExpanded />)
     expect(screen.getByRole('link', { name: external.title })).toHaveAttribute('href', external.href)
     expect(screen.getByRole('link', { name: /Practice on LeetCode/ })).toHaveAttribute('href', external.href)
-    expect(screen.queryByText('Write and run your solution locally before revealing the answer.')).not.toBeInTheDocument()
+    expect(screen.queryByText(NATIVE_PRACTICE_NOTE)).not.toBeInTheDocument()
   })
 
   it('keeps existing answer reveals without adding unfinished attempt controls', () => {
@@ -165,6 +166,45 @@ describe('Explicit practice actions', () => {
     expect(heading).not.toHaveAttribute('tabindex')
     expect(heading).not.toHaveAttribute('id')
     expect(heading).not.toHaveClass('scroll-mt-28')
+  })
+
+  it.each([
+    { title: '3Sum', fragment: '3sum', canonical: '3sum', existingBody: false },
+    { title: 'Pub/Sub', fragment: 'pub-sub', canonical: 'pub-sub', existingBody: false },
+    { title: 'Pub/Sub', fragment: 'pubsub', canonical: 'pub-sub', existingBody: false },
+    { title: 'Pub/Sub', fragment: 'pubsub', canonical: 'pub-sub', existingBody: true },
+  ])('preserves canonical and unambiguous legacy fragment behavior: %j', ({ title, fragment, canonical, existingBody }) => {
+    vi.useFakeTimers()
+    const originalUrl = window.location.href
+    const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView')
+    const scroll = vi.fn()
+    const scrollWindow = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    Object.defineProperty(Element.prototype, 'scrollIntoView', { configurable: true, value: scroll })
+    try {
+      window.history.replaceState(null, '', '#' + fragment)
+      render(<>
+        {existingBody && <h2 id={fragment}>Existing body section</h2>}
+        <ProblemCard problem={{ ...problem, id: 'fragment-task', title, type: 'CODING' }} />
+      </>)
+      act(() => vi.advanceTimersByTime(100))
+      if (existingBody) {
+        expect(scroll).not.toHaveBeenCalled()
+        expect(document.getElementById(fragment)?.tagName).toBe('H2')
+        expect(screen.getByRole('button', { name: 'Expand' })).toBeInTheDocument()
+      } else {
+        expect(scroll).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
+        expect(document.getElementById(canonical)).toHaveClass('animate-borderFlash')
+        expect(screen.getByRole('button', { name: 'Reveal answer' })).toBeInTheDocument()
+      }
+      expect(window.location.hash).toBe('#' + fragment)
+    } finally {
+      cleanup()
+      vi.useRealTimers()
+      scrollWindow.mockRestore()
+      window.history.replaceState(null, '', originalUrl)
+      if (descriptor) Object.defineProperty(Element.prototype, 'scrollIntoView', descriptor)
+      else Reflect.deleteProperty(Element.prototype, 'scrollIntoView')
+    }
   })
 
   it('unmarks explicitly even if an old header returns a completed snapshot', async () => {
