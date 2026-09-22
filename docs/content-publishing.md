@@ -257,10 +257,10 @@ profile: g7-values-coercion-minimum
 
 The only other admitted lesson selector is
 `js-track/core-fundamentals/type-coercion`. One lesson is selected per publication.
-Data Types is published. The Coercion binding below prepares a complete local
-review candidate, not permission to deploy or publish it. The active production
-control still selects Data Types and app
-`43c293248b56e51dee72b19fc94df202a84126f0`.
+Data Types is published. Coercion was subsequently published through the closed
+practice-consistency batch above. The following profile remains a historical
+capability, not the current production selection. Check trusted content control
+for the exact active app/class pairing.
 
 `src/lib/g7-contracts.ts` freezes canonical lesson metadata, ordered problem
 metadata and all original question/answer/body hashes from immutable content
@@ -292,8 +292,8 @@ implementation prompts are not reclassified.
 `G7_REVIEWED_BINDINGS` preserves the published Data Types payload from
 `d60a2a12817859b0c8b56a9ee1fb99fb4bdb1542` exactly. It also binds the complete
 local Coercion candidate `63aefb959aaf47865e502520b6b5cf75be820cfd`.
-The latter is not owner acceptance of a finished candidate or production
-activation: active control remains Data Types. Planning, preparation,
+That historical binding did not itself grant owner acceptance or production
+activation. Planning, preparation,
 state inspection and application fail closed without a complete binding.
 There is no source-supplied, environment, CLI or request override.
 Synthetic test mocks do not activate the profile. The binding fields are:
@@ -387,3 +387,54 @@ not establish actual PostgreSQL atomicity, search/cache behavior, browser
 fragments, historical progress preservation, rollback compatibility or final
 candidate correctness. Those remain coordinator-owned isolated integrations
 and independent acceptance gates before any activation.
+
+## G7-02 closed lexical learning-unit batch
+
+```text
+--change-class existing-lexical-batch-v1
+profile: g7-scope-lookup-closures-2026-09
+```
+
+This class accepts no lesson/resource override. Its local candidate covers only
+Scope & Hoisting, Scope Chain, Closures and the two references attached to
+Closures. Stage B implementation does not activate the production selector or
+authorize publication. The existing practice profile keeps its original meaning.
+
+`lexical-publication.ts` independently names five bodies and thirteen existing
+assessment rows. The other two scoped pairs and all other catalog rows remain
+frozen. Only one exact question clarification and three MEDIUM-to-EASY corrections
+are admitted. All types, identities, titles, ownership, source order and access
+stay unchanged. Difficulty corrections affect the current difficulty-based
+reader order and bank filters, not progress identity.
+
+The trusted binding pins raw and complete serialized values, plus protected
+whole-source and prepared-catalog fingerprints. Bodies are complete pairs.
+Every selected assessment must match a complete before or after state. The
+three regraded rows use `field: calibrated-assessment`, adding difficulty to
+the same conditional existing-row write as question, answer, type and serialized
+fields. The ordinary `assessment` payload and older classes are unchanged.
+Plan descriptions and uncertain-receipt checks include the selected difficulty.
+All change records are checked against their selected identity, exact before
+and after values and field permissions before the first write.
+
+The two original body/card collisions are admitted only for the exact pinned
+legacy bodies. The new headings are `binding-initialization-and-the-tdz` and
+`shadowing-and-first-binding-lookup`. Old shared fragments become card-only.
+Every other scoped H2 destination remains. Literal after-to-original restoration
+is rejected because it would remove the newly published body targets. A
+separately bound compatible recovery restores the earlier teaching while keeping
+the new unique body IDs. It is not permission to create an ambiguous after body.
+
+The source repository's successor guard first validates exact G7-02 states.
+Only then may it substitute approved slots with their pinned before values for
+the immutable historical practice comparison. Unknown selected bytes, retained
+pair drift or any unrelated change fail. The old fixture and prior task-specific
+checks stay intact. Known all-before G7-02 states defer old practice mixtures
+to the historical guard rather than rewriting those neighboring records.
+
+No runtime, environment, request or source binding override exists. No identities
+are created and no global write transaction, prune or progress update is added.
+Source eligibility and a populated binding are not semantic independence,
+runtime correctness, database/search recovery, reader acceptance, owner
+acceptance or production authorization. The normal contextual plan, compatible
+app/control pairing and independent release gates still apply.
