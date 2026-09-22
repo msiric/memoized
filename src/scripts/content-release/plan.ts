@@ -9,6 +9,8 @@ import { G7_CHANGE_CLASS, G7_CONTRACTS, g7ValueHash, isG7Lesson, requireG7Bindin
 import { assertG7PreparedCatalog } from './g7-prepared'
 import { PRACTICE_CHANGE_CLASS, isPracticeAssessment, requirePracticeBinding } from '@/lib/practice-publication'
 import { assertPracticePreparedCatalog } from './practice-boundaries'
+import { LEXICAL_CHANGE_CLASS, isLexicalAssessment, isLexicalRegrade, requireLexicalBinding } from '@/lib/lexical-publication'
+import { assertLexicalPreparedCatalog } from './lexical-boundaries'
 import { prepareContent, type PreparedContent } from '../sync-content'
 import { prepareResources, type PreparedResource } from '../sync-resources'
 import {
@@ -62,7 +64,16 @@ export type ExistingAssessmentChange = {
   before: AssessmentPayload
   after: AssessmentPayload
 }
-export type InPlaceChange = TextChange | ExistingAssessmentChange
+export type CalibratedAssessmentPayload = AssessmentPayload & { difficulty: 'EASY' | 'MEDIUM' }
+export type ExistingCalibratedAssessmentChange = {
+  kind: 'problem'
+  contentId: string
+  field: 'calibrated-assessment'
+  before: CalibratedAssessmentPayload
+  after: CalibratedAssessmentPayload
+}
+type AssessmentChange = ExistingAssessmentChange | ExistingCalibratedAssessmentChange
+export type InPlaceChange = TextChange | AssessmentChange
 export type InPlacePlan = {
   changeClass: ChangeClass
   lesson: string
@@ -86,14 +97,26 @@ function assessmentPayload(row: CatalogRow): AssessmentPayload {
   return { question, answer, type, serializedQuestion, serializedAnswer }
 }
 
+function calibratedAssessmentPayload(row: CatalogRow): CalibratedAssessmentPayload {
+  const difficulty = row.metadata.difficulty
+  if (difficulty !== 'EASY' && difficulty !== 'MEDIUM') throw new Error('Unapproved calibrated difficulty')
+  return { ...assessmentPayload(row), difficulty }
+}
+function isAssessmentChange(change: InPlaceChange): change is AssessmentChange {
+  return change.field === 'assessment' || change.field === 'calibrated-assessment'
+}
+const calibratesAssessment = (plan: Pick<InPlacePlan, 'changeClass'>, row: CatalogRow) =>
+  plan.changeClass === LEXICAL_CHANGE_CLASS && isLexicalRegrade(row.contentId)
+
 function isCoupledAssessment(plan: Pick<InPlacePlan, 'changeClass' | 'lesson'>, row: CatalogRow) {
   if (row.kind !== 'problem') return false
+  if (plan.changeClass === LEXICAL_CHANGE_CLASS) return isLexicalAssessment(row.contentId)
   if (plan.changeClass === PRACTICE_CHANGE_CLASS) return isPracticeAssessment(row.contentId)
   return plan.changeClass === G7_CHANGE_CLASS && isG7Lesson(plan.lesson) &&
     G7_CONTRACTS[plan.lesson].changedQuestions.some(id => row.contentId === `/${plan.lesson}/${id}`)
 }
 const hasAssessmentGroups = (changeClass: ChangeClass) =>
-  changeClass === G7_CHANGE_CLASS || changeClass === PRACTICE_CHANGE_CLASS
+  changeClass === G7_CHANGE_CLASS || changeClass === PRACTICE_CHANGE_CLASS || changeClass === LEXICAL_CHANGE_CLASS
 const isNativeTask = (contentId: string) => contentId === G3B_TASK.contentId || contentId === G3C_TASK.contentId
 function selectedTask(scope: Pick<InPlacePlan, 'changeClass' | 'lesson'>) {
   if (scope.changeClass !== ADDITIVE_CHANGE_CLASS) return undefined
@@ -176,6 +199,10 @@ export async function planInPlaceRelease(
     assertPracticePreparedCatalog(before)
     assertPracticePreparedCatalog(after)
   }
+  if (releaseScope.changeClass === LEXICAL_CHANGE_CLASS) {
+    assertLexicalPreparedCatalog(before)
+    assertLexicalPreparedCatalog(after)
+  }
   const creations = after.filter(item => !previous.has(key(item)))
   const taskId = selectedTask(releaseScope)
   if (creations.length && (releaseScope.changeClass !== ADDITIVE_CHANGE_CLASS || creations.length !== 1 ||
@@ -202,10 +229,17 @@ export async function planInPlaceRelease(
       }
     }
     if (coupled) {
-      const before = assessmentPayload(oldRow), after = assessmentPayload(next)
-      if (!isDeepStrictEqual(before, after)) changes.push({
-        kind: 'problem', contentId: oldRow.contentId, field: 'assessment', before, after,
-      })
+      if (calibratesAssessment(releaseScope, oldRow)) {
+        const before = calibratedAssessmentPayload(oldRow), after = calibratedAssessmentPayload(next)
+        if (!isDeepStrictEqual(before, after)) changes.push({
+          kind: 'problem', contentId: oldRow.contentId, field: 'calibrated-assessment', before, after,
+        })
+      } else {
+        const before = assessmentPayload(oldRow), after = assessmentPayload(next)
+        if (!isDeepStrictEqual(before, after)) changes.push({
+          kind: 'problem', contentId: oldRow.contentId, field: 'assessment', before, after,
+        })
+      }
       continue
     }
     for (const field of ['body', 'question', 'answer'] as const) {
@@ -229,7 +263,8 @@ export async function planInPlaceRelease(
     if (!scope.structural || changes.some((change) => !allowed.has(
       hasAssessmentGroups(releaseScope.changeClass) ? `${change.contentId}:${change.field}` : change.contentId,
     ))) {
-      const label = releaseScope.changeClass === PRACTICE_CHANGE_CLASS ? 'practice batch'
+      const label = releaseScope.changeClass === LEXICAL_CHANGE_CLASS ? 'lexical batch'
+        : releaseScope.changeClass === PRACTICE_CHANGE_CLASS ? 'practice batch'
         : releaseScope.changeClass === G7_CHANGE_CLASS ? 'G7'
           : releaseScope.changeClass === STRUCTURAL_CHANGE_CLASS ? 'TS Basics'
             : releaseScope.lesson === G3C_LESSON_UID ? 'G3C' : 'G3B'
@@ -316,6 +351,12 @@ const sameCompleteState = (a: CatalogRow, b: CatalogRow) =>
   isDeepStrictEqual(a.metadata, b.metadata) && sameAuthoredState(a, b)
 
 export function checkReleaseState(plan: InPlacePlan, current: CatalogRow[]) {
+  if (plan.changeClass === LEXICAL_CHANGE_CLASS) {
+    requireLexicalBinding()
+    assertLexicalPreparedCatalog(plan.before)
+    assertLexicalPreparedCatalog(plan.after)
+    assertLexicalPreparedCatalog(current)
+  }
   if (plan.changeClass === PRACTICE_CHANGE_CLASS) {
     requirePracticeBinding()
     assertPracticePreparedCatalog(plan.before)
@@ -365,7 +406,7 @@ export type ChangeResult = {
   contentId: string
   status: 'updated' | 'already-applied' | 'created' | 'already-created'
   id?: string
-  field?: 'assessment'
+  field?: 'assessment' | 'calibrated-assessment'
 }
 
 function inspectCreatedTask(actual: CatalogRow, candidate: CatalogRow, owner: CatalogRow) {
@@ -394,7 +435,7 @@ function uncertainUpdate(error: unknown) {
     ['P1001', 'P1002', 'P1008', 'P1017', 'ECONNRESET', 'ETIMEDOUT', 'EPIPE'].includes(String(error.code))
 }
 
-async function updateExistingAssessment(actual: CatalogRow, candidate: CatalogRow, change: ExistingAssessmentChange) {
+async function updateExistingAssessment(actual: CatalogRow, candidate: CatalogRow, change: AssessmentChange) {
   if (actual.match?.kind !== 'problem') throw new Error('Missing complete conditional assessment match')
   try {
     const result = await prisma.problem.updateMany({ where: actual.match.where, data: change.after })
@@ -461,7 +502,46 @@ export async function applyInPlaceRelease(
   onChange: (result: ChangeResult) => void = () => {},
 ): Promise<ChangeResult[]> {
   const current = checkReleaseState(plan, await readReleaseCatalog())
+  const before = catalogMap(plan.before)
   const after = catalogMap(plan.after)
+  const expectedCreations = plan.after.filter(row => !before.has(key(row)))
+  if (!isDeepStrictEqual(plan.creations, expectedCreations)) throw new Error('Unapproved planned content creation')
+  const selectedFields = plan.scope.structural && new Set(plan.scope.structural.allowedChangedFields.map(item =>
+    `${item.contentId}:${item.field}`))
+  const seen = new Set<string>()
+  for (const change of plan.changes) {
+    const id = key(change)
+    const baseline = before.get(id), candidate = after.get(id), actual = current.get(id)
+    if (!baseline || !candidate || !actual?.id || !actual.updatedAt || !actual.match ||
+        actual.match.kind !== change.kind || seen.has(id)) {
+      throw new Error(`Missing, duplicate or unsupported planned update: ${id}`)
+    }
+    seen.add(id)
+    if (isAssessmentChange(change)) {
+      const calibrated = calibratesAssessment(plan, baseline)
+      const expectedBefore = calibrated ? calibratedAssessmentPayload(baseline) : assessmentPayload(baseline)
+      const expectedAfter = calibrated ? calibratedAssessmentPayload(candidate) : assessmentPayload(candidate)
+      if (!isCoupledAssessment(plan, baseline) || calibrated !== (change.field === 'calibrated-assessment') ||
+          !isDeepStrictEqual(change.before, expectedBefore) || !isDeepStrictEqual(change.after, expectedAfter)) {
+        throw new Error('Unapproved existing assessment group')
+      }
+    } else if (isCoupledAssessment(plan, baseline) ||
+        change.field !== (change.kind === 'problem' ? 'answer' : 'body') ||
+        baseline.text[change.field] !== change.before || candidate.text[change.field] !== change.after ||
+        !isDeepStrictEqual(candidate.serialized[change.field], change.serializedAfter)) {
+      throw new Error(`Unapproved planned text/compilation pair: ${id}`)
+    }
+    if (selectedFields && !selectedFields.has(`${change.contentId}:${change.field}`)) {
+      throw new Error(`Planned update is outside the selected fields: ${id}`)
+    }
+  }
+  const expectedUpdates = [...before].filter(([id, row]) => {
+    const candidate = after.get(id)
+    return candidate && !sameCompleteState(row, candidate)
+  }).map(([id]) => id)
+  if (!isDeepStrictEqual([...seen].sort(), expectedUpdates.sort())) {
+    throw new Error('Planned updates do not match the complete before/after delta')
+  }
   const results: ChangeResult[] = []
   const nativeTasks = plan.after.filter(item => item.contentId === selectedTask(plan))
   for (const creation of nativeTasks) {
@@ -487,13 +567,18 @@ export async function applyInPlaceRelease(
     const actual = current.get(id)
     const candidate = after.get(id)
     if (!actual?.id || !actual.updatedAt || !candidate) throw new Error(`Missing update identity: ${id}`)
+    if (isAssessmentChange(change)) {
+      const calibrated = calibratesAssessment(plan, actual)
+      const expected = calibrated ? calibratedAssessmentPayload(candidate) : assessmentPayload(candidate)
+      if (!isCoupledAssessment(plan, actual) || calibrated !== (change.field === 'calibrated-assessment') ||
+          !isDeepStrictEqual(change.after, expected)) {
+        throw new Error('Unapproved existing assessment group')
+      }
+    }
     let status: ChangeResult['status'] = 'already-applied'
-    if (!(change.field === 'assessment' ? sameCompleteState(actual, candidate) : sameAuthoredState(actual, candidate))) {
+    if (!(isAssessmentChange(change) ? sameCompleteState(actual, candidate) : sameAuthoredState(actual, candidate))) {
       if (!actual.match || actual.match.kind !== change.kind) throw new Error(`Missing conditional update: ${id}`)
-      if (change.field === 'assessment') {
-        if (!isCoupledAssessment(plan, actual) || !isDeepStrictEqual(change.after, assessmentPayload(candidate))) {
-          throw new Error('Unapproved existing assessment group')
-        }
+      if (isAssessmentChange(change)) {
         status = await updateExistingAssessment(actual, candidate, change)
       } else {
         const data = { body: change.after, serializedBody: change.serializedAfter }
@@ -513,7 +598,7 @@ export async function applyInPlaceRelease(
     }
     const result: ChangeResult = {
       kind: change.kind, contentId: change.contentId, status,
-      ...(change.field === 'assessment' ? { field: 'assessment', id: actual.id } : {}),
+      ...(isAssessmentChange(change) ? { field: change.field, id: actual.id } : {}),
     }
     results.push(result)
     onChange(result)
@@ -526,9 +611,9 @@ export async function applyInPlaceRelease(
     const persisted = final.get(key(creation))
     if (!persisted || !sameAuthoredState(persisted, creation)) throw new Error('Native task was not fully persisted')
   }
-  for (const change of plan.changes) {
-    const id = key(change)
-    if (!sameCompleteState(final.get(id)!, after.get(id)!)) {
+  for (const [id, candidate] of after) {
+    const actual = final.get(id)
+    if (!actual || !sameCompleteState(actual, candidate)) {
       throw new Error(`Candidate content was not fully persisted: ${id}`)
     }
   }
@@ -545,16 +630,18 @@ export function describeInPlacePlan(plan: InPlacePlan) {
     questionSha256: digest(item.text.question!), answerSha256: digest(item.text.answer!),
     serializedSha256: digest(JSON.stringify(item.serialized)),
   }))
-  const changedEntities = plan.changes.map((change) => change.field === 'assessment' ? ({
+  const changedEntities = plan.changes.map((change) => isAssessmentChange(change) ? ({
     kind: change.kind, contentId: change.contentId, field: change.field,
     before: {
       type: change.before.type,
+      ...(change.field === 'calibrated-assessment' ? { difficulty: change.before.difficulty } : {}),
       questionSha256: digest(change.before.question), answerSha256: digest(change.before.answer),
       serializedQuestionSha256: g7ValueHash(change.before.serializedQuestion),
       serializedAnswerSha256: g7ValueHash(change.before.serializedAnswer),
     },
     after: {
       type: change.after.type,
+      ...(change.field === 'calibrated-assessment' ? { difficulty: change.after.difficulty } : {}),
       questionSha256: digest(change.after.question), answerSha256: digest(change.after.answer),
       serializedQuestionSha256: g7ValueHash(change.after.serializedQuestion),
       serializedAnswerSha256: g7ValueHash(change.after.serializedAnswer),

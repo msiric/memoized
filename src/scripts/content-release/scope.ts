@@ -25,6 +25,13 @@ import {
   isPracticeAssessment, requirePracticeBinding, practiceValueHash,
 } from '@/lib/practice-publication'
 import { assertPracticeSource } from './practice-boundaries'
+import {
+  LEXICAL_CHANGE_CLASS, LEXICAL_PROFILE, LEXICAL_BODIES, LEXICAL_BODY_UIDS,
+  LEXICAL_LESSONS, LEXICAL_REMAPS, isLexicalRegrade, requireLexicalBinding,
+  lexicalValueHash, type LexicalBodyUid, type LexicalLessonUid,
+  type LexicalPublicationBinding,
+} from '@/lib/lexical-publication'
+import { assertLexicalSource } from './lexical-boundaries'
 
 const parser = remark().use(remarkMdx).use(remarkGfm)
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -40,7 +47,7 @@ export const G3C_ADDITIVE_PROFILE = 'g3c-native-task-minimum'
 
 type DefaultChangeClass = typeof DEFAULT_CHANGE_CLASS
 type StructuralChangeClass = typeof STRUCTURAL_CHANGE_CLASS
-export type ChangeClass = DefaultChangeClass | StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS | typeof PRACTICE_CHANGE_CLASS
+export type ChangeClass = DefaultChangeClass | StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS | typeof PRACTICE_CHANGE_CLASS | typeof LEXICAL_CHANGE_CLASS
 
 export type ReleaseScopeOptions = {
   changeClass?: ChangeClass
@@ -60,6 +67,7 @@ type SurfacePolicy = {
   disclosureLabel?: string
   promiseDiagram?: { beforeSha256: string; afterSha256: string }
   imageUrl?: string
+  lexicalBody?: LexicalBodyUid
 }
 
 function answerSurfacePolicy(g3c: boolean, problemId: string): SurfacePolicy {
@@ -77,7 +85,8 @@ export const digest = (value: string | Buffer) =>
 export function parseChangeClass(value: unknown): ChangeClass {
   const changeClass = value ?? DEFAULT_CHANGE_CLASS
   if (changeClass !== DEFAULT_CHANGE_CLASS && changeClass !== STRUCTURAL_CHANGE_CLASS &&
-      changeClass !== ADDITIVE_CHANGE_CLASS && changeClass !== G7_CHANGE_CLASS && changeClass !== PRACTICE_CHANGE_CLASS) {
+      changeClass !== ADDITIVE_CHANGE_CLASS && changeClass !== G7_CHANGE_CLASS &&
+      changeClass !== PRACTICE_CHANGE_CLASS && changeClass !== LEXICAL_CHANGE_CLASS) {
     throw new Error(`Unsupported content change class: ${String(changeClass)}`)
   }
   return changeClass
@@ -86,8 +95,10 @@ export function parseChangeClass(value: unknown): ChangeClass {
 export function normalizeReleaseScopeOptions(options: ReleaseScopeOptions = {}): Required<ReleaseScopeOptions> {
   const changeClass = parseChangeClass(options.changeClass)
   const lesson = options.lesson ?? ''
-  if (changeClass === PRACTICE_CHANGE_CLASS) {
-    if (lesson) throw new Error('The reviewed practice batch does not accept a lesson override')
+  if (changeClass === PRACTICE_CHANGE_CLASS || changeClass === LEXICAL_CHANGE_CLASS) {
+    if (lesson) throw new Error(changeClass === PRACTICE_CHANGE_CLASS
+      ? 'The reviewed practice batch does not accept a lesson override'
+      : 'The reviewed lexical batch does not accept a lesson override')
     return { changeClass, lesson: '' }
   }
   if (changeClass === DEFAULT_CHANGE_CLASS) {
@@ -293,15 +304,17 @@ export type MdxSurfaceEvidence = {
 }
 export type StructuralField =
   | { kind: 'lesson'; lesson: string; contentId: string; sourcePath: string; field: 'body' }
+  | { kind: 'resource'; lesson: string; contentId: string; sourcePath: string; field: 'body' }
   | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'answer' }
   | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'assessment' }
+  | { kind: 'problem'; lesson: string; contentId: string; configPath: string; problemId: string; title: string; field: 'calibrated-assessment' }
 export type StructuralSurfaceReport = {
-  changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS | typeof PRACTICE_CHANGE_CLASS
-  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE | typeof G3C_ADDITIVE_PROFILE | typeof G7_PROFILE | typeof PRACTICE_PROFILE
+  changeClass: StructuralChangeClass | typeof ADDITIVE_CHANGE_CLASS | typeof G7_CHANGE_CLASS | typeof PRACTICE_CHANGE_CLASS | typeof LEXICAL_CHANGE_CLASS
+  profile: typeof STRUCTURAL_PROFILE | typeof ADDITIVE_PROFILE | typeof G3C_ADDITIVE_PROFILE | typeof G7_PROFILE | typeof PRACTICE_PROFILE | typeof LEXICAL_PROFILE
   lesson: string
   allowedChangedFields: StructuralField[]
   changedSurfaces: {
-    kind: 'lesson-body' | 'problem-answer' | 'problem-question'
+    kind: 'lesson-body' | 'resource-body' | 'problem-answer' | 'problem-question'
     lesson: string
     contentId: string
     problemId?: string
@@ -713,9 +726,13 @@ function assertStructuralMdxSurface(
   }
   const afterH2 = new Set(afterEvidence.h2.map((heading) => heading.id))
   const missing = beforeEvidence.h2.filter((heading) => !afterH2.has(heading.id))
+  const remap = policy.lexicalBody ? LEXICAL_REMAPS[policy.lexicalBody] : undefined
+  const approvedLexicalRemap = allowMetadataExport && remap &&
+    digest(before) === remap.beforeSha256 && missing.length === 1 &&
+    missing[0].id === remap.oldId && afterH2.has(remap.newId)
   // G7's complete body bindings admit only its exact approved heading mapping,
   // including the two explicit Coercion legacy destinations on recovery.
-  if (missing.length && !(policy.g7 && allowMetadataExport)) {
+  if (missing.length && !(policy.g7 && allowMetadataExport) && !approvedLexicalRemap) {
     throw new Error(`Existing H2 fragment IDs were not preserved in structural class: ${label}`)
   }
   return { before: beforeEvidence, after: afterEvidence }
@@ -806,6 +823,7 @@ function buildCatalog(
   selectedUid = STRUCTURAL_LESSON_UID,
   practiceBinding?: ReturnType<typeof requirePracticeBinding>['lessons'][number],
   sharedRoutes?: Catalog['routes'],
+  lexicalBinding?: LexicalPublicationBinding,
 ): Catalog {
   const routes = sharedRoutes ?? new Map<string, Set<string>>()
   let selectedLesson: LessonState | undefined
@@ -850,21 +868,27 @@ function buildCatalog(
       if (lesson.sourceUid === selectedUid) {
         const g3c = selectedUid === G3C_LESSON_UID
         const practice = Boolean(practiceBinding)
+        const lexicalBody = lexicalBinding?.bodies.find(body => body.uid === selectedUid)
         const body = state(`${label} ${lesson.bodyPath}`, bodyRaw.toString('utf8'), true,
-          g7 ? { g7, practice, legacySha256: G7_CONTRACTS[g7].bodySha256 } : practiceBinding
+          lexicalBody ? { legacySha256: lexicalBody.before.rawSha256, lexicalBody: lexicalBody.uid }
+            : g7 ? { g7, practice, legacySha256: G7_CONTRACTS[g7].bodySha256 } : practiceBinding
             ? { practice, legacySha256: practiceBinding.body.before.rawSha256, promiseDiagram: promiseDiagramPolicy(practiceBinding) }
             : g3c ? { g3c, legacySha256: G3C_LEGACY_BODY_SHA256 } : {})
         const questions = lesson.problems.map((problem) =>
           state(`${label} ${lesson.sourceUid} question ${problem.id}`, problem.question, false, {
             g3c, g7, practice,
-            legacySha256: practiceBinding
+            legacySha256: lexicalBinding
+              ? lexicalBinding.assessments.find(item => item.contentId === problem.contentId)?.before.questionSha256 ?? digest(problem.question)
+              : practiceBinding
               ? practiceBinding.assessments.find(item => item.id === problem.id)?.before.questionSha256 ?? digest(problem.question)
               : undefined,
             disclosureLabel: g3c && problem.id === G3C_TASK.id ? 'Open the complete starter files' : undefined,
           }))
         const answers = lesson.problems.map((problem) =>
           state(`${label} ${lesson.sourceUid} answer ${problem.id}`, problem.answer, false,
-            g7 ? { g7, practice, legacySha256: G7_CONTRACTS[g7].problems.find(item => item.id === problem.id)?.answerSha256 }
+            lexicalBinding ? {
+              legacySha256: lexicalBinding.assessments.find(item => item.contentId === problem.contentId)?.before.answerSha256 ?? digest(problem.answer),
+            } : g7 ? { g7, practice, legacySha256: G7_CONTRACTS[g7].problems.find(item => item.id === problem.id)?.answerSha256 }
               : practiceBinding ? {
                 practice,
                 // The batch's protected-source hash already freezes every unselected answer.
@@ -904,6 +928,7 @@ function assertNoPairwiseAnchorConflicts(
   g7?: G7LessonUid,
   variableQuestions = false,
   retainedBodyCards?: { ids: readonly string[]; beforeSha256: string; afterSha256: string },
+  lexicalLesson?: LexicalLessonUid,
 ): StructuralSurfaceReport['anchorConflictProof'] {
   const groups: { name: string; variants: SurfaceState[] }[] = [
     { name: 'lesson body', variants: [base.body, candidate.body] },
@@ -943,7 +968,13 @@ function assertNoPairwiseAnchorConflicts(
             variant.sha256 === G7_CONTRACTS[G7_TYPE_COERCION].bodySha256
           const legacyIds = ['truthy-and-falsy-values', 'the-operators-dual-nature']
           const collisions = [...variant.ids].filter(value => fixedIds.has(value)).sort()
+          const lexicalRemap = lexicalLesson ? LEXICAL_REMAPS[lexicalLesson] : undefined
+          const legacyLexicalBody = group.name === 'lesson body' && lexicalRemap &&
+            variant.sha256 === lexicalRemap.beforeSha256 &&
+            isDeepStrictEqual(collisions, [lexicalRemap.oldId]) && id === lexicalRemap.oldId &&
+            oldCard?.type === 'THEORY' && nextCard?.type === 'THEORY'
           if (!retainedBodyCard &&
+              !legacyLexicalBody &&
               (!legacyBody || !isDeepStrictEqual(collisions, [...legacyIds].sort()) || !legacyIds.includes(id))) {
             throw new Error(`Structural heading anchor collides with fixed reader anchor: ${id}`)
           }
@@ -1459,6 +1490,138 @@ function practiceScope(baseRoot: string, candidateRoot: string): ScopeReport {
   }
 }
 
+function lexicalScope(baseRoot: string, candidateRoot: string): ScopeReport {
+  const binding = requireLexicalBinding()
+  const before = payloadFiles(baseRoot), after = payloadFiles(candidateRoot)
+  assertLexicalSource(before)
+  assertLexicalSource(after)
+  const allowedPaths = new Set([
+    'content/js-track/core-fundamentals/_lessons.json',
+    ...LEXICAL_BODY_UIDS.map(uid => LEXICAL_BODIES[uid].sourcePath),
+  ])
+  const changedFiles: ScopeReport['changedFiles'] = []
+  for (const [filename, bytes] of before) {
+    const next = after.get(filename)
+    if (!next) throw new Error('Lexical payload identity is missing')
+    if (bytes.equals(next)) continue
+    if (!allowedPaths.has(filename)) throw new Error(`File is outside the closed lexical batch: ${filename}`)
+    changedFiles.push({ path: filename, beforeSha256: digest(bytes), afterSha256: digest(next) })
+  }
+  const changedSurfaces: StructuralSurfaceReport['changedSurfaces'] = []
+  const allowedChangedFields: StructuralField[] = []
+  const proofs: { lesson: string; proof: StructuralSurfaceReport['anchorConflictProof'] }[] = []
+  let beforeCatalog: Catalog | undefined
+  let afterCatalog: Catalog | undefined
+  function verifyBodyHeadings(uid: LexicalBodyUid, raw: string, evidence: MdxSurfaceEvidence) {
+    const body = binding.bodies.find(item => item.uid === uid)!
+    const remap = digest(raw) === body.before.rawSha256 ? undefined : LEXICAL_REMAPS[uid]
+    const expected = LEXICAL_BODIES[uid].headings.map(([id, text]) => ({
+      id: id === remap?.oldId ? remap.newId : id,
+      text: id === remap?.oldId ? remap.title : text,
+    }))
+    const sort = (headings: AnchorEvidence[]) => [...headings].sort((a, b) => a.id.localeCompare(b.id))
+    if (!isDeepStrictEqual(sort(evidence.h2), sort(expected))) {
+      throw new Error(`Unapproved lexical heading destinations: ${uid}`)
+    }
+  }
+  for (const uid of LEXICAL_LESSONS) {
+    const oldCatalog = buildCatalog(before, 'base lexical', uid, undefined, beforeCatalog?.routes, binding)
+    const nextCatalog = buildCatalog(after, 'candidate/recovery lexical', uid, undefined, afterCatalog?.routes, binding)
+    beforeCatalog = oldCatalog
+    afterCatalog = nextCatalog
+    const oldLesson = oldCatalog.selectedLesson, nextLesson = nextCatalog.selectedLesson
+    const bodyContract = binding.bodies.find(body => body.uid === uid)!
+    const bodyPath = LEXICAL_BODIES[uid].sourcePath
+    const recordSurface = (oldText: string, nextText: string, field: 'body' | 'question' | 'answer', legacySha256: string, problem?: ProblemConfig) => {
+      const sourcePath = field === 'body' ? bodyPath : 'content/js-track/core-fundamentals/_lessons.json'
+      const label = `${sourcePath}:${problem?.id ?? 'body'}:${field}`
+      const evidence = assertStructuralMdxSurface(oldText, nextText, label, field === 'body', {
+        legacySha256, ...(field === 'body' ? { lexicalBody: uid } : {}),
+      })
+      if (field === 'body') {
+        verifyBodyHeadings(uid, oldText, evidence.before)
+        verifyBodyHeadings(uid, nextText, evidence.after)
+      } else if (evidence.after.h1.length || evidence.after.h2.length) {
+        throw new Error('Lexical assessment sections must use H3 or deeper')
+      }
+      evidence.before.links = validateLinks(evidence.before, oldLesson.lesson.route, [oldCatalog, nextCatalog], label)
+      evidence.after.links = validateLinks(evidence.after, oldLesson.lesson.route, [oldCatalog, nextCatalog], label)
+      if (oldText !== nextText) changedSurfaces.push({
+        kind: field === 'body' ? 'lesson-body' : field === 'question' ? 'problem-question' : 'problem-answer',
+        lesson: uid, contentId: problem?.contentId ?? `/${uid}`, sourcePath, field,
+        ...(problem ? { problemId: problem.id, title: problem.title } : {}),
+        beforeSha256: digest(oldText), afterSha256: digest(nextText),
+        before: evidence.before, after: evidence.after,
+      })
+    }
+    recordSurface(before.get(bodyPath)!.toString('utf8'), after.get(bodyPath)!.toString('utf8'), 'body', bodyContract.before.rawSha256)
+    allowedChangedFields.push({ kind: 'lesson', lesson: uid, contentId: `/${uid}`, sourcePath: bodyPath, field: 'body' })
+    for (const item of binding.assessments.filter(item => item.contentId.startsWith(`/${uid}/`))) {
+      const oldProblem = oldLesson.lesson.problems.find(problem => problem.contentId === item.contentId)
+      const nextProblem = nextLesson.lesson.problems.find(problem => problem.contentId === item.contentId)
+      if (!oldProblem || !nextProblem) throw new Error('Missing lexical assessment')
+      recordSurface(oldProblem.question, nextProblem.question, 'question', item.before.questionSha256, oldProblem)
+      recordSurface(oldProblem.answer, nextProblem.answer, 'answer', item.before.answerSha256, oldProblem)
+      allowedChangedFields.push({
+        kind: 'problem', lesson: uid, contentId: item.contentId,
+        configPath: 'content/js-track/core-fundamentals/_lessons.json', problemId: oldProblem.id, title: oldProblem.title,
+        field: isLexicalRegrade(item.contentId) ? 'calibrated-assessment' : 'assessment',
+      })
+    }
+    proofs.push({ lesson: uid, proof: assertNoPairwiseAnchorConflicts(oldLesson, nextLesson, undefined, true, undefined, uid) })
+  }
+  if (!beforeCatalog || !afterCatalog) throw new Error('Missing lexical route catalogs')
+  for (const body of binding.bodies) {
+    const contract = LEXICAL_BODIES[body.uid]
+    if (contract.kind !== 'resource') continue
+    const oldText = before.get(contract.sourcePath)!.toString('utf8')
+    const nextText = after.get(contract.sourcePath)!.toString('utf8')
+    const evidence = assertStructuralMdxSurface(oldText, nextText, contract.sourcePath, true, {
+      legacySha256: body.before.rawSha256, lexicalBody: body.uid,
+    })
+    verifyBodyHeadings(body.uid, oldText, evidence.before)
+    verifyBodyHeadings(body.uid, nextText, evidence.after)
+    idsFrom(evidence.before, contract.sourcePath)
+    idsFrom(evidence.after, contract.sourcePath)
+    evidence.before.links = validateLinks(evidence.before, `/${body.uid}`, [beforeCatalog, afterCatalog], contract.sourcePath)
+    evidence.after.links = validateLinks(evidence.after, `/${body.uid}`, [beforeCatalog, afterCatalog], contract.sourcePath)
+    allowedChangedFields.push({ kind: 'resource', lesson: body.uid, contentId: contract.contentId, sourcePath: contract.sourcePath, field: 'body' })
+    if (oldText !== nextText) changedSurfaces.push({
+      kind: 'resource-body', lesson: body.uid, contentId: contract.contentId, sourcePath: contract.sourcePath, field: 'body',
+      beforeSha256: digest(oldText), afterSha256: digest(nextText), before: evidence.before, after: evidence.after,
+    })
+  }
+  const qualify = (lesson: string, anchor: AnchorEvidence) => ({ text: anchor.text, id: `${lesson}#${anchor.id}` })
+  return {
+    changedFiles,
+    assessment: {
+      bindingSha256: lexicalValueHash(binding),
+      sourceLessonBeforeSha256: lexicalValueHash([...before].map(([file, bytes]) => [file, digest(bytes)])),
+      sourceLessonAfterSha256: lexicalValueHash([...after].map(([file, bytes]) => [file, digest(bytes)])),
+    },
+    structural: {
+      changeClass: LEXICAL_CHANGE_CLASS, profile: LEXICAL_PROFILE, lesson: '',
+      allowedChangedFields, changedSurfaces,
+      anchorConflictProof: {
+        checked: 'Exact scoped lesson/body/question/answer variants with fixed cards, plus unique resource heading sets. Only the two pinned original bodies may retain their historical card ambiguity. New body IDs survive recovery.',
+        fixedProblemCardAnchors: proofs.flatMap(({ lesson, proof }) => proof.fixedProblemCardAnchors.map(anchor => qualify(lesson, anchor))),
+        fixedReaderAnchors: proofs.flatMap(({ lesson, proof }) => proof.fixedReaderAnchors.map(anchor => qualify(lesson, anchor))),
+        pairwiseCompatibleIds: proofs.flatMap(({ lesson, proof }) => proof.pairwiseCompatibleIds.map(id => `${lesson}#${id}`)),
+      },
+      externalHttpsDestinations: [...new Set(changedSurfaces.flatMap(surface => [...surface.before.links, ...surface.after.links])
+        .filter(link => link.kind === 'external-https').map(link => link.href))].sort(),
+      limits: [
+        'Only three bound lessons, thirteen complete existing assessments and two existing resources. No new identities or type changes.',
+        'Only the exact Scope Chain question clarification and three MEDIUM-to-EASY changes. All other questions, metadata, source order and access remain frozen.',
+        'All other complete source and prepared catalog rows are protected, including the two retained scoped pairs and every previously released practice task.',
+        'Difficulty changes are conditional complete assessment updates. Resource and lesson bodies keep complete raw/compiled versions.',
+        'The original two ambiguous bodies are before states only. A reverse transition cannot remove the new public body targets.',
+        'Links must resolve in both source catalogs. Eligibility is not content, runtime, reader, database, recovery or owner acceptance.',
+      ],
+    },
+  }
+}
+
 /** Scope is stricter than ordinary MDX validity; semantic independence still needs review. */
 export function assertInPlaceScope(
   baseRoot: string,
@@ -1466,6 +1629,7 @@ export function assertInPlaceScope(
   options: ReleaseScopeOptions = {},
 ): ScopeReport {
   const normalized = normalizeReleaseScopeOptions(options)
+  if (normalized.changeClass === LEXICAL_CHANGE_CLASS) return lexicalScope(baseRoot, candidateRoot)
   if (normalized.changeClass === PRACTICE_CHANGE_CLASS) return practiceScope(baseRoot, candidateRoot)
   if (normalized.changeClass === G7_CHANGE_CLASS) {
     if (!isG7Lesson(normalized.lesson)) throw new Error('Unsupported G7 lesson')
