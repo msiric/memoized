@@ -1,6 +1,6 @@
 import { ProblemList } from '@/components/ProblemList'
 import { ProblemDifficulty, ProblemType } from '@prisma/client'
-import { ProblemStatus } from '@/types'
+import { ProblemBankRow, ProblemStatus } from '@/types'
 import { getProblemBankSnapshot } from '@/lib/catalog-request'
 import { filterAndSortProblems } from '@/utils/helpers'
 
@@ -33,10 +33,22 @@ const ProblemsPage = async ({
   const { allProblems, lessons } = await getProblemBankSnapshot()
   const filteredProblems = filterAndSortProblems(allProblems, filter)
 
+  const rows: ProblemBankRow[] = allProblems.map(
+    ({ id, contentId, title, href, type, difficulty, lessonId }) => ({
+      id,
+      contentId,
+      title,
+      href,
+      type,
+      difficulty,
+      lessonId,
+    }),
+  )
+
   return (
     <ProblemList
-      allProblems={allProblems}
-      filteredProblems={filteredProblems}
+      allProblems={rows}
+      filteredProblemIds={filteredProblems.map((problem) => problem.id)}
       initialLessons={lessons}
     />
   )

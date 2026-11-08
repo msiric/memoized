@@ -315,11 +315,12 @@ export const PROBLEM_CARD = {
 // =============================================================================
 
 export const PROBLEM_TYPE_BADGE = {
-  base: 'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold',
-  
+  // Component classes in styles/tailwind.css (repeated on every bank row)
+  base: 'badge-pill',
+
   // Type variants
-  coding: 'bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200/50 dark:bg-indigo-900/30 dark:text-indigo-300 dark:ring-indigo-500/30',
-  theory: 'bg-lime-100 text-lime-700 ring-1 ring-lime-200/50 dark:bg-lime-900/30 dark:text-lime-300 dark:ring-lime-500/30',
+  coding: 'badge-coding',
+  theory: 'badge-theory',
 } as const
 
 // =============================================================================
@@ -327,12 +328,13 @@ export const PROBLEM_TYPE_BADGE = {
 // =============================================================================
 
 export const DIFFICULTY_BADGE = {
-  base: 'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300',
-  
+  // Component classes in styles/tailwind.css (repeated on every bank row)
+  base: 'badge-difficulty',
+
   // Dot indicator styles
-  dotContainer: 'flex items-center gap-0.5',
-  dotFilled: 'w-1.5 h-1.5 rounded-full bg-zinc-500 dark:bg-zinc-300',
-  dotEmpty: 'w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-500',
+  dotContainer: 'badge-dots',
+  dotFilled: 'badge-dot-on',
+  dotEmpty: 'badge-dot-off',
 } as const
 
 // =============================================================================

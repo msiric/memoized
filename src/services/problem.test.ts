@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { getProblems, markProblemProgress } from '@/services/problem'
+import { getProblemContent, getProblems, markProblemProgress } from '@/services/problem'
 import { ServiceError } from '@/lib/sentry'
 import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemDifficulty } from '@prisma/client'
@@ -133,9 +133,14 @@ describe('Problem services', () => {
       expect(prisma.problem.findMany).toHaveBeenCalledWith(expect.objectContaining({
         select: expect.objectContaining({ contentId: true }),
       }))
+      // The bank list must never carry bodies again; they load per problem.
+      const listSelect = vi.mocked(prisma.problem.findMany).mock.calls[0][0]!.select!
+      for (const key of ['question', 'answer', 'serializedQuestion', 'serializedAnswer', 'link']) {
+        expect(listSelect).not.toHaveProperty(key)
+      }
       expect(prisma.lesson.findMany).toHaveBeenCalledWith({
         orderBy: { title: 'asc' },
-        select: { title: true, slug: true },
+        select: { id: true, title: true, slug: true, href: true },
       })
       expect(filterAndSortProblems).toHaveBeenCalledWith(mockProblems, filter)
     })
@@ -183,9 +188,21 @@ describe('Problem services', () => {
       expect(prisma.problem.findMany).toHaveBeenCalled()
       expect(prisma.lesson.findMany).toHaveBeenCalledWith({
         orderBy: { title: 'asc' },
-        select: { title: true, slug: true },
+        select: { id: true, title: true, slug: true, href: true },
       })
       expect(filterAndSortProblems).toHaveBeenCalledWith(mockProblems, filter)
+    })
+  })
+})
+
+describe('getProblemContent', () => {
+  it('selects only the free question and answer fields for the shared-cache endpoint', async () => {
+
+    vi.mocked(prisma.problem.findUnique).mockResolvedValue(null as any)
+    await getProblemContent('p1')
+    expect(prisma.problem.findUnique).toHaveBeenCalledWith({
+      where: { id: 'p1' },
+      select: { id: true, question: true, serializedQuestion: true, serializedAnswer: true },
     })
   })
 })

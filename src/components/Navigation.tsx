@@ -176,12 +176,9 @@ const NavLink = memo(
         {...(isExternal && { target: '_blank' })}
         aria-current={active ? 'page' : undefined}
         className={clsx(
-          'flex items-center justify-between gap-2 py-1 text-sm transition',
+          'nav-link',
           isAnchorLink ? 'pl-7' : 'pl-4',
-          active && 'font-semibold',
-          active
-            ? 'text-zinc-900 dark:text-white'
-            : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white',
+          active ? 'nav-link-active' : 'nav-link-idle',
         )}
         ref={linkRef}
       >

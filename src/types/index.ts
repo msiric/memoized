@@ -36,10 +36,10 @@ export type LessonResult = {
 
 export type NavigationLink = {
   id: string
-  slug: string
+  slug?: string
   title: string
   href: string
-  description: string | null
+  description?: string | null
   order?: number
   access?: AccessOptions
 }
@@ -115,18 +115,31 @@ export type LessonResource = {
   about: string
 }
 
+// The bank list carries only what the table renders. Question and answer bodies
+// are loaded per problem when the drawer opens (see ProblemContent).
 export type EnrichedProblem = {
   id: string
   contentId?: string | null
   title: string
   href: string
-  question: string
   type: string
   difficulty: ProblemDifficulty
   lesson: { title: string; slug: string; href: string }
   problemProgress: { completed: boolean }[]
-  serializedQuestion?: Prisma.JsonValue | null
-  serializedAnswer?: Prisma.JsonValue | null
+}
+
+// What /problems serializes to the client: each lesson is sent once and rows
+// reference it by id; completion comes from the progress store, not the row.
+export type ProblemBankLesson = { id: string; title: string; slug: string; href: string }
+export type ProblemBankRow = Omit<EnrichedProblem, 'lesson' | 'problemProgress'> & {
+  lessonId: string
+}
+
+export type ProblemContent = {
+  id: string
+  question: string
+  serializedQuestion: Prisma.JsonValue | null
+  serializedAnswer: Prisma.JsonValue | null
 }
 
 export type ProblemStatus = 'INCOMPLETE' | 'COMPLETED'

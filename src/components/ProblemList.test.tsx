@@ -3,9 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ProblemList } from './ProblemList'
 import { useContentStore } from '@/contexts/progress'
 import { useAuthStore } from '@/contexts/auth'
-import type { EnrichedProblem } from '@/types'
+import type { ProblemBankLesson, ProblemBankRow } from '@/types'
 import { G3B_TASK } from '@/lib/g3b-task'
 import { NATIVE_PRACTICE_NOTE } from '@/lib/problem-presentation'
+import { clearProblemContentCacheForTests } from '@/hooks/useProblemContent'
 
 const mocks = vi.hoisted(() => ({
   mark: vi.fn(), session: vi.fn(), track: vi.fn(), router: {},
@@ -25,25 +26,39 @@ vi.mock('@/components/PreserializedMdxRenderer', () => ({
   PreserializedMdxRenderer: () => <div>Free bank answer</div>,
 }))
 
-const problem: EnrichedProblem = {
+const lessons: ProblemBankLesson[] = [{ id: 'l1', title: 'Lesson', slug: 'lesson', href: '/lesson' }]
+const problem: ProblemBankRow = {
   id: 'p1', title: 'Bank question', type: 'THEORY', difficulty: 'EASY',
-  href: '', question: 'Explain bank question.',
-  lesson: { title: 'Lesson', slug: 'lesson', href: '/lesson' },
-  problemProgress: [],
-  serializedAnswer: { compiledSource: 'answer' },
+  href: '',
+  lessonId: 'l1',
 }
-const props = { allProblems: [problem], filteredProblems: [problem], initialLessons: [] }
+const ids = (list: ProblemBankRow[]) => list.map(({ id }) => id)
+const props = { allProblems: [problem], filteredProblemIds: ids([problem]), initialLessons: lessons }
 const confirmation = (completed: boolean, problemId = 'p1') => ({
   success: true, userId: 'a', problemId, completed, message: 'Saved',
 })
-const questions = Array.from({ length: 3 }, (_, index): EnrichedProblem => ({
+const questions = Array.from({ length: 3 }, (_, index): ProblemBankRow => ({
   ...problem,
   id: `p${index + 1}`,
   title: `Question ${index + 1}`,
-  question: `Explain question ${index + 1}.`,
 }))
+// Question/answer bodies are no longer part of the list; the drawer fetches them.
+const questionText = (id: string) => `Explain ${id}.`
+const content = (id: string) => ({
+  id, question: questionText(id), serializedQuestion: null, serializedAnswer: { compiledSource: 'answer' },
+})
+const serveContent = async (url: string) => {
+  const id = decodeURIComponent(url.split('/')[3])
+  return new Response(JSON.stringify(content(id)), { status: 200, headers: { 'content-type': 'application/json' } })
+}
+const fetchMock = vi.fn(serveContent)
+const fetchedIds = () => fetchMock.mock.calls.map(([url]) => decodeURIComponent(String(url).split('/')[3]))
 beforeEach(() => {
   vi.clearAllMocks()
+  clearProblemContentCacheForTests()
+  // mockReset drops queued once-implementations so a failed test cannot leak them.
+  fetchMock.mockReset().mockImplementation(serveContent)
+  vi.stubGlobal('fetch', fetchMock)
   mocks.searchParams = null
   window.history.replaceState({}, '', '/problems')
   useContentStore.setState(useContentStore.getInitialState(), true)
@@ -57,7 +72,7 @@ afterEach(cleanup)
 
 describe('Problem bank confirmed controls', () => {
   it('uses the unfiltered loaded catalog total rather than a compiled or filtered count', async () => {
-    render(<ProblemList allProblems={questions} filteredProblems={questions} initialLessons={[]} />)
+    render(<ProblemList allProblems={questions} filteredProblemIds={ids(questions)} initialLessons={lessons} />)
     expect(screen.getByText(/Browse 3 theory questions and coding exercises/)).toBeInTheDocument()
     expect(screen.getByText(/Completion marks record your own progress, not an automatically checked result/)).toBeInTheDocument()
     fireEvent.change(screen.getByPlaceholderText('Search problems...'), { target: { value: questions[0].title } })
@@ -66,8 +81,8 @@ describe('Problem bank confirmed controls', () => {
   })
 
   it('opens a native coding task without an empty external title or invented run action', async () => {
-    const native: EnrichedProblem = { ...problem, ...G3B_TASK }
-    render(<ProblemList allProblems={[native]} filteredProblems={[native]} initialLessons={[]} />)
+    const native: ProblemBankRow = { ...problem, ...G3B_TASK }
+    render(<ProblemList allProblems={[native]} filteredProblemIds={[native.id]} initialLessons={lessons} />)
     fireEvent.click(screen.getByRole('button', { name: native.title }))
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveAccessibleName(native.title)
@@ -77,7 +92,7 @@ describe('Problem bank confirmed controls', () => {
     expect(within(dialog).getByText(NATIVE_PRACTICE_NOTE)).toBeInTheDocument()
     expect(within(dialog).getByText('Starter and local commands')).toBeInTheDocument()
     expect(within(dialog).queryByRole('button', { name: /^(Run|Submit)$/ })).not.toBeInTheDocument()
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Reveal answer' }))
     await within(dialog).findByText('Free bank answer')
     expect(within(dialog).getByRole('checkbox')).not.toBeDisabled()
   })
@@ -122,7 +137,7 @@ describe('Problem bank confirmed controls', () => {
   it.each([2, 3])('keeps all %i incomplete questions reachable as saves remove their table rows', async (count) => {
     const sequence = questions.slice(0, count)
     mocks.mark.mockImplementation(async ({ problemId, completed }) => confirmation(completed, problemId))
-    render(<ProblemList allProblems={sequence} filteredProblems={sequence} initialLessons={[]} />)
+    render(<ProblemList allProblems={sequence} filteredProblemIds={ids(sequence)} initialLessons={lessons} />)
     fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: 'incomplete' } })
     const table = screen.getByRole('table')
     fireEvent.click(within(table).getByRole('button', { name: sequence[0].title }))
@@ -130,7 +145,7 @@ describe('Problem bank confirmed controls', () => {
 
     for (const [index, question] of sequence.entries()) {
       expect(dialog).toHaveAccessibleName(question.title)
-      expect(within(dialog).getByText(question.question)).toBeInTheDocument()
+      expect(await within(dialog).findByText(questionText(question.id))).toBeInTheDocument()
       expect(within(dialog).queryByText('Free bank answer')).not.toBeInTheDocument()
       fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
       await within(dialog).findByText('Free bank answer')
@@ -159,7 +174,7 @@ describe('Problem bank confirmed controls', () => {
 
   it('preserves both neighbors when the middle question leaves the incomplete table', async () => {
     mocks.mark.mockResolvedValue(confirmation(true, 'p2'))
-    render(<ProblemList allProblems={questions} filteredProblems={questions} initialLessons={[]} />)
+    render(<ProblemList allProblems={questions} filteredProblemIds={ids(questions)} initialLessons={lessons} />)
     fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: 'incomplete' } })
     fireEvent.click(screen.getByRole('button', { name: questions[1].title }))
     const dialog = screen.getByRole('dialog')
@@ -177,13 +192,13 @@ describe('Problem bank confirmed controls', () => {
   })
 
   it('keeps an open sequence stable through sort/filter changes and captures the new order on reopen', async () => {
-    render(<ProblemList allProblems={questions} filteredProblems={questions} initialLessons={[]} />)
+    render(<ProblemList allProblems={questions} filteredProblemIds={ids(questions)} initialLessons={lessons} />)
     const table = screen.getByRole('table')
     fireEvent.click(within(table).getByRole('button', { name: 'Title' }))
     fireEvent.click(within(table).getByRole('button', { name: 'Title' }))
     fireEvent.click(within(table).getByRole('button', { name: questions[2].title }))
     const dialog = screen.getByRole('dialog')
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Reveal answer' }))
     await within(dialog).findByText('Free bank answer')
 
     fireEvent.click(within(table).getByRole('button', { name: 'Title' }))
@@ -213,7 +228,7 @@ describe('Problem bank confirmed controls', () => {
       userId: 'a', completedLessons: [], completedProblems: sequence.map(({ id }) => id),
     })
     mocks.mark.mockResolvedValue(confirmation(false))
-    render(<ProblemList allProblems={sequence} filteredProblems={sequence} initialLessons={[]} />)
+    render(<ProblemList allProblems={sequence} filteredProblemIds={ids(sequence)} initialLessons={lessons} />)
     fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: 'completed' } })
     fireEvent.click(screen.getByRole('button', { name: sequence[0].title }))
     const dialog = screen.getByRole('dialog')
@@ -232,7 +247,7 @@ describe('Problem bank confirmed controls', () => {
     render(<ProblemList {...props} />)
     fireEvent.click(screen.getByRole('button', { name: problem.title }))
     const dialog = screen.getByRole('dialog')
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Reveal answer' }))
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'Reveal answer' }))
     await within(dialog).findByText('Free bank answer')
     const row = within(screen.getByRole('table')).getByRole('checkbox')
     const drawer = within(dialog).getByRole('checkbox')
@@ -262,7 +277,8 @@ describe('Problem bank confirmed controls', () => {
     fireEvent.click(checkbox)
     await screen.findByText('No problems found.')
     expect(mocks.mark).toHaveBeenCalledWith({ problemId: 'p1', completed: false, expectedUserId: 'a' })
-    rerender(<ProblemList {...props} allProblems={[{ ...problem, problemProgress: [{ completed: true }] }]} />)
+    // A fresh server payload carries no completion, so it cannot resurrect the unmarked state.
+    rerender(<ProblemList {...props} allProblems={[{ ...problem }]} />)
     expect(screen.getByText('No problems found.')).toBeInTheDocument()
     fireEvent.change(screen.getByRole('combobox', { name: 'Filter by status' }), { target: { value: '' } })
     await waitFor(() => expect(screen.getByRole('checkbox')).not.toBeChecked())
@@ -286,7 +302,7 @@ describe('Problem bank confirmed controls', () => {
     expect(useAuthStore.getState().isModalOpen).toBe(true)
     expect(mocks.mark).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: problem.title }))
-    fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Reveal answer' }))
     expect(await screen.findByText('Free bank answer')).toBeInTheDocument()
   })
 
@@ -303,5 +319,79 @@ describe('Problem bank confirmed controls', () => {
     await act(async () => { resolve(confirmation(true)) })
     expect(screen.getByRole('checkbox')).not.toBeChecked()
     expect(useContentStore.getState().completedProblems).toEqual(new Set(['b-only']))
+  })
+})
+
+describe('Problem bank content loading', () => {
+  it('fetches one problem body on open and shows a loading status first', async () => {
+    let release!: () => void
+    fetchMock.mockImplementationOnce((url: string) => new Promise((done) => {
+      release = () => done(new Response(JSON.stringify(content('p1')), { status: 200 }))
+      expect(url).toBe('/api/problems/p1/content')
+    }))
+    render(<ProblemList {...props} />)
+    expect(fetchMock).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: problem.title }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByRole('status')).toHaveTextContent('Loading question…')
+    expect(within(dialog).queryByRole('button', { name: 'Reveal answer' })).not.toBeInTheDocument()
+    // The request starts once the drawer settles.
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled())
+    await act(async () => release())
+    expect(await within(dialog).findByText(questionText('p1'))).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows a recoverable error when the body cannot be loaded', async () => {
+    fetchMock.mockResolvedValueOnce(new Response('{}', { status: 503 }))
+    render(<ProblemList {...props} />)
+    fireEvent.click(screen.getByRole('button', { name: problem.title }))
+    const dialog = screen.getByRole('dialog')
+    expect(await within(dialog).findByRole('alert')).toHaveTextContent("This question couldn't be loaded.")
+    expect(within(dialog).queryByRole('button', { name: 'Reveal answer' })).not.toBeInTheDocument()
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Try again' }))
+    expect(await within(dialog).findByText(questionText('p1'))).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: 'Reveal answer' })).toBeInTheDocument()
+  })
+
+  it('does not refetch a body already loaded in this session', async () => {
+    render(<ProblemList allProblems={questions} filteredProblemIds={ids(questions)} initialLessons={lessons} />)
+    fireEvent.click(screen.getByRole('button', { name: questions[0].title }))
+    const dialog = screen.getByRole('dialog')
+    await within(dialog).findByText(questionText('p1'))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Next problem (→)' }))
+    await within(dialog).findByText(questionText('p2'))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Previous problem (←)' }))
+    expect(within(dialog).getByText(questionText('p1'))).toBeInTheDocument()
+    // p2 was prefetched while p1 was on screen; leaving p2 at once cancels its
+    // own neighbour prefetch, and p1 comes from cache. Nothing is fetched twice.
+    await new Promise((resolve) => setTimeout(resolve, 300))
+    expect(fetchedIds().sort()).toEqual(['p1', 'p2'])
+  })
+
+  it('opens the next problem without a loading state because it was prefetched', async () => {
+    render(<ProblemList allProblems={questions} filteredProblemIds={ids(questions)} initialLessons={lessons} />)
+    fireEvent.click(screen.getByRole('button', { name: questions[0].title }))
+    const dialog = screen.getByRole('dialog')
+    await within(dialog).findByText(questionText('p1'))
+    await waitFor(() => expect(fetchedIds()).toContain('p2'))
+    await act(async () => {})
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Next problem (→)' }))
+    expect(within(dialog).getByText(questionText('p2'))).toBeInTheDocument()
+    expect(within(dialog).queryByText('Loading question…')).not.toBeInTheDocument()
+  })
+})
+
+describe('Problem bank payload shape', () => {
+  it('resolves each row lesson from the once-sent lesson list for badges and the lesson filter', async () => {
+    const other: ProblemBankRow = { ...problem, id: 'p2', title: 'Other lesson question', lessonId: 'l2' }
+    const both = [...lessons, { id: 'l2', title: 'Closures', slug: 'closures', href: '/courses/js/closures' }]
+    render(<ProblemList allProblems={[problem, other]} filteredProblemIds={['p1', 'p2']} initialLessons={both} />)
+    const table = screen.getByRole('table')
+    expect(within(table).getByRole('link', { name: 'Closures' })).toHaveAttribute('href', '/courses/js/closures')
+    expect(within(table).getByRole('link', { name: 'Lesson' })).toHaveAttribute('href', '/lesson')
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by lesson' }), { target: { value: 'closures' } })
+    await waitFor(() => expect(within(table).queryByRole('button', { name: problem.title })).not.toBeInTheDocument())
+    expect(within(table).getByRole('button', { name: other.title })).toBeInTheDocument()
   })
 })
