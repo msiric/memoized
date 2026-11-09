@@ -3,6 +3,7 @@ import {
   coursePath,
   lessonMetadata,
   lessonPath,
+  NOINDEX_LESSON_PATHS,
   pageMetadata,
   resourcePath,
 } from './seo'
@@ -42,5 +43,36 @@ describe('Search metadata contract', () => {
       `https://www.memoized.io${path}`,
     )
     expect(coursePath('a&b')).toBe('/courses/a%26b')
+  })
+  it.each([
+    ['js-track', 'core-fundamentals', 'JavaScript Interview Practice'],
+    ['js-track', 'typescript-introduction', 'TypeScript Interview Practice'],
+    ['dsa-track', 'common-techniques', 'DSA in JavaScript'],
+  ])('names the track of %s/%s lessons in the title', (course, section, suffix) => {
+    const meta = lessonMetadata(lessonPath(course, section, 'example'), 'Example', 'Desc')
+    expect(meta.title).toEqual({ absolute: `Example — ${suffix} | Memoized` })
+  })
+  it('noindexes (but still follows) the reviewed thin previews only', () => {
+    expect(NOINDEX_LESSON_PATHS.size).toBe(5)
+    for (const path of NOINDEX_LESSON_PATHS)
+      expect(lessonMetadata(path, 'Thin', null).robots).toEqual({ index: false, follow: true })
+    expect(
+      lessonMetadata(lessonPath('dsa-track', 'advanced-topics', 'tries'), 'Tries', null).robots,
+    ).toEqual({ index: true, follow: true })
+  })
+  it.each([
+    ['dsa-track', 'common-techniques'],
+    ['js-track', 'typescript-introduction'],
+    ['js-track', 'core-fundamentals'],
+  ])('uses the lesson\'s own description on %s/%s when it has one', (course, section) => {
+    const meta = lessonMetadata(lessonPath(course, section, 'x'), 'X', 'Own description.')
+    expect(meta.description).toBe('Own description.')
+    expect(meta.openGraph?.description).toBe('Own description.')
+  })
+  it('keeps fallback descriptions on the lesson track', () => {
+    expect(lessonMetadata(lessonPath('dsa-track', 'common-techniques', 'x'), 'Heaps', null).description)
+      .toBe('Learn Heaps in JavaScript with worked examples and data-structure interview practice.')
+    expect(lessonMetadata(lessonPath('js-track', 'typescript-introduction', 'x'), 'Enums', null).description)
+      .toBe('Explore Enums and related TypeScript interview practice.')
   })
 })

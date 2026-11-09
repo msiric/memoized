@@ -52,6 +52,10 @@ function signIn() {
     userId: 'test-user', completedLessons: ['other-lesson'], completedProblems: ['optional'],
   })
 }
+// Answers are server-rendered inside a hidden container until revealed.
+const revealedAnswers = () => screen.queryAllByText('Free answer body')
+  .filter((node) => !node.closest('[data-practice-answer]')?.hasAttribute('hidden'))
+
 function confirmation(completed: boolean) {
   return { success: true, userId: 'test-user', problemId: problem.id, completed, message: 'Saved' }
 }
@@ -60,9 +64,10 @@ describe('Explicit practice actions', () => {
   it('makes scoped local setup available before the new task answer is revealed', async () => {
     render(<ProblemCard problem={{ ...problem, ...G3B_TASK }} defaultExpanded />)
     expect(screen.getByText('Starter and local commands')).toBeInTheDocument()
-    expect(screen.queryByText('Free answer body')).not.toBeInTheDocument()
+    expect(screen.getByText('Free answer body')).toBeInTheDocument()
+    expect(revealedAnswers()).toHaveLength(0)
     fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
-    await screen.findByText('Free answer body')
+    await waitFor(() => expect(revealedAnswers()).toHaveLength(1))
     expect(screen.getByText('Starter and local commands')).toBeInTheDocument()
   })
 
@@ -75,7 +80,7 @@ describe('Explicit practice actions', () => {
     expect(screen.getByText(NATIVE_PRACTICE_NOTE)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^(Run|Submit)$/ })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
-    await screen.findByText('Free answer body')
+    await waitFor(() => expect(revealedAnswers()).toHaveLength(1))
     fireEvent.click(screen.getByRole('checkbox'))
     expect(useAuthStore.getState().isModalOpen).toBe(true)
     expect(mocks.mark).not.toHaveBeenCalled()
@@ -143,7 +148,7 @@ describe('Explicit practice actions', () => {
     heading.focus()
     expect(heading).toHaveFocus()
     fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
-    await screen.findByText('Free answer body')
+    await waitFor(() => expect(revealedAnswers()).toHaveLength(1))
     const checkbox = screen.getByRole('checkbox')
     fireEvent.click(checkbox)
     fireEvent.click(checkbox)
@@ -154,7 +159,7 @@ describe('Explicit practice actions', () => {
     await act(async () => { resolve(confirmation(true)) })
     expect(checkbox).toBeChecked()
     expect(checkbox).not.toBeDisabled()
-    expect(screen.getByText('Free answer body')).toBeInTheDocument()
+    expect(revealedAnswers()).toHaveLength(1)
     expect(heading).toHaveFocus()
     expect(useContentStore.getState().completedProblems).toEqual(new Set(['optional', problem.id]))
     expect(useContentStore.getState().completedLessons).toEqual(new Set(['other-lesson']))

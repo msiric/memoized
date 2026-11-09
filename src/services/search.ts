@@ -5,6 +5,7 @@ import {
   lessonPath,
   resourcePath,
   siteUrl,
+  NOINDEX_LESSON_PATHS,
 } from '@/lib/seo'
 import { publishedBlogWhere } from '@/lib/blog-publication'
 
@@ -66,8 +67,10 @@ export function searchUrls(catalog: SearchCatalog): string[] {
     paths.push(coursePath(course.slug))
     for (const section of course.sections) {
       paths.push(sectionPath(course.slug, section.slug))
-      for (const lesson of section.lessons)
-        paths.push(lessonPath(course.slug, section.slug, lesson.slug))
+      for (const lesson of section.lessons) {
+        const path = lessonPath(course.slug, section.slug, lesson.slug)
+        if (!NOINDEX_LESSON_PATHS.has(path)) paths.push(path)
+      }
     }
   }
   for (const resource of catalog.resources) {

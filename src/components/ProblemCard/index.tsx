@@ -6,7 +6,7 @@ import { useProblemCompletion } from '@/hooks/useProblemCompletion'
 import { Problem, ProblemType } from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
 import {
   HiCheck,
   HiChevronDown,
@@ -50,6 +50,19 @@ export const ProblemCard = ({
     defaultExpanded ? 'question' : 'collapsed',
   )
   const [thinkStartTime, setThinkStartTime] = useState<number | null>(null)
+  // The answer is shown only after the thinking prompt has finished exiting, so
+  // the card does not jump; focus then moves to the answer that replaced the button.
+  const [promptGone, setPromptGone] = useState(false)
+  const answerRef = useRef<HTMLDivElement>(null)
+  const answerShown = stage === 'answer' && promptGone
+  useEffect(() => {
+    if (stage !== 'answer') setPromptGone(false)
+  }, [stage])
+  useEffect(() => {
+    // Only when the clicked button took focus with it; never steal focus.
+    const lost = !document.activeElement || document.activeElement === document.body
+    if (answerShown && lost) answerRef.current?.focus({ preventScroll: true })
+  }, [answerShown])
 
   const problemSlug = contentSlug(problem.title)
   const isTheory = problem.type === ProblemType.THEORY
@@ -258,8 +271,7 @@ export const ProblemCard = ({
 
               <G3bLocalPractice problem={problem} />
 
-              {/* Stage-specific content */}
-              <AnimatePresence mode="wait">
+              <AnimatePresence onExitComplete={() => setPromptGone(true)}>
                 {stage === 'question' && (
                   <ThinkingPrompt
                     key="thinking"
@@ -267,36 +279,36 @@ export const ProblemCard = ({
                     isTheory={isTheory}
                   />
                 )}
-
-                {stage === 'answer' && (
-                  <motion.div
-                    key="answer"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    {/* Answer content */}
-                    {problem.serializedAnswer && (
-                      <div className="mb-4 space-y-2">
-                        <span className={clsx(
-                          PROBLEM_CARD.sectionLabel,
-                          isTheory ? PROBLEM_CARD.answerLabelTheory : PROBLEM_CARD.answerLabelCoding
-                        )}>
-                          Answer
-                        </span>
-                        <div>
-                          <PreserializedMdxRenderer
-                            serializedContent={problem.serializedAnswer}
-                            withPadding={false}
-                            showFooter={false}
-                            showNextPage={false}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                )}
               </AnimatePresence>
+
+              {/* The free answer is in the server HTML whenever the card is open, so
+                  search engines and Ctrl+F find it; learners still reveal it. */}
+              {problem.serializedAnswer && (
+                <div hidden={!answerShown} data-practice-answer="" ref={answerRef} tabIndex={-1} className="outline-none">
+                  <motion.div
+                    initial={false}
+                    animate={answerShown
+                      ? { opacity: 1, y: 0 }
+                      : { opacity: 0, y: 10 }}
+                    className="mb-4 space-y-2"
+                  >
+                    <span className={clsx(
+                      PROBLEM_CARD.sectionLabel,
+                      isTheory ? PROBLEM_CARD.answerLabelTheory : PROBLEM_CARD.answerLabelCoding
+                    )}>
+                      Answer
+                    </span>
+                    <div>
+                      <PreserializedMdxRenderer
+                        serializedContent={problem.serializedAnswer}
+                        withPadding={false}
+                        showFooter={false}
+                        showNextPage={false}
+                      />
+                    </div>
+                  </motion.div>
+                </div>
+              )}
 
               {/* External link for coding problems */}
               {!isTheory && !isNative && (
