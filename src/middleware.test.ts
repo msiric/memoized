@@ -55,3 +55,57 @@ describe('Public asset rate-limit isolation', () => {
     },
   )
 })
+
+describe('signed-out lesson cache routing', () => {
+  const load = async () => { vi.resetModules(); return (await import('./middleware')).middleware }
+  const req = (url: string, init: { cookie?: string; ua?: string; method?: string; ip?: string } = {}) =>
+    new NextRequest(`https://www.memoized.io${url}`, {
+      method: init.method ?? 'GET',
+      headers: {
+        'x-forwarded-for': init.ip ?? '192.0.2.50',
+        'user-agent': init.ua ?? 'Example browser',
+        ...(init.cookie ? { cookie: init.cookie } : {}),
+      },
+    })
+  const rewrite = (response: Response) => response.headers.get('x-middleware-rewrite')
+
+  it('serves signed-out lesson views from the cached tree, keeping the URL', async () => {
+    const middleware = await load()
+    expect(rewrite(middleware(req('/courses/js-track/core-fundamentals/closures')))).toBe(
+      'https://www.memoized.io/public/courses/js-track/core-fundamentals/closures',
+    )
+  })
+
+  it('also routes crawlers that bypass the rate limit', async () => {
+    const middleware = await load()
+    expect(rewrite(middleware(req('/courses/a/b/c', { ua: 'Mozilla/5.0 (compatible; Googlebot/2.1)' })))).toContain('/public/courses/a/b/c')
+  })
+
+  it.each([
+    ['a session cookie', { cookie: 'next-auth.session-token=abc' }],
+    ['a secure session cookie', { cookie: '__Secure-next-auth.session-token=abc' }],
+    ['a chunked session cookie', { cookie: '__Secure-next-auth.session-token.0=abc' }],
+  ])('keeps the session-aware route for %s', async (_label, init) => {
+    const middleware = await load()
+    expect(rewrite(middleware(req('/courses/a/b/c', init)))).toBeNull()
+  })
+
+  it.each(['/courses/a/b/c?path=typescript-first-pass', '/courses/a/b/c?step=2', '/courses/a/b', '/courses/a', '/problems'])(
+    'does not rewrite %s', async (url) => {
+      const middleware = await load()
+      expect(rewrite(middleware(req(url)))).toBeNull()
+    },
+  )
+
+  it('ignores unrelated cookies', async () => {
+    const middleware = await load()
+    expect(rewrite(middleware(req('/courses/a/b/c', { cookie: 'theme=dark; next-auth.csrf-token=x' })))).toContain('/public/courses/a/b/c')
+  })
+
+  it('redirects direct requests for the internal tree to the canonical URL', async () => {
+    const middleware = await load()
+    const response = middleware(req('/public/courses/a/b/c?x=1'))
+    expect(response.status).toBe(308)
+    expect(response.headers.get('location')).toBe('https://www.memoized.io/courses/a/b/c?x=1')
+  })
+})

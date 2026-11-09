@@ -31,6 +31,38 @@ const ALLOWED_BOTS = [
   'perplexity-user',
 ]
 
+// Signed-out lesson views are served from the cached /public/courses tree.
+// Anything that can personalise the page keeps the session-aware route: a
+// NextAuth session cookie (including chunked .0/.1 cookies) or a guided-view
+// query. The browser URL and canonical URL stay /courses/...
+const SESSION_COOKIE = /^(?:__Secure-)?next-auth\.session-token(?:\.\d+)?$/
+const LESSON_PATH = /^\/courses\/[^/]+\/[^/]+\/[^/]+\/?$/
+const PUBLIC_LESSON_PREFIX = '/public'
+// Marks our own rewrite when the rewritten request passes through middleware
+// again. Sending it by hand only reveals the same public page, whose canonical
+// URL is still /courses/...
+const INTERNAL_REWRITE_HEADER = 'x-memoized-lesson-cache'
+
+function lessonRoute(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl
+  if (pathname === PUBLIC_LESSON_PREFIX || pathname.startsWith(`${PUBLIC_LESSON_PREFIX}/`)) {
+    if (request.headers.get(INTERNAL_REWRITE_HEADER) === '1') return NextResponse.next()
+    // The cached tree is internal; its only public address is the canonical URL.
+    const canonical = request.nextUrl.clone()
+    canonical.pathname = pathname.slice(PUBLIC_LESSON_PREFIX.length) || '/'
+    return NextResponse.redirect(canonical, 308)
+  }
+  if (request.method !== 'GET' && request.method !== 'HEAD') return NextResponse.next()
+  if (!LESSON_PATH.test(pathname)) return NextResponse.next()
+  if (searchParams.has('path') || searchParams.has('step')) return NextResponse.next()
+  if (request.cookies.getAll().some((cookie) => SESSION_COOKIE.test(cookie.name))) return NextResponse.next()
+  const target = request.nextUrl.clone()
+  target.pathname = `${PUBLIC_LESSON_PREFIX}${pathname.replace(/\/$/, '')}`
+  const headers = new Headers(request.headers)
+  headers.set(INTERNAL_REWRITE_HEADER, '1')
+  return NextResponse.rewrite(target, { request: { headers } })
+}
+
 export function middleware(request: NextRequest) {
   const userAgent = request.headers.get('user-agent')?.toLowerCase() || ''
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
@@ -48,7 +80,7 @@ export function middleware(request: NextRequest) {
 
   for (const bot of ALLOWED_BOTS) {
     if (userAgent.includes(bot)) {
-      return NextResponse.next()
+      return lessonRoute(request)
     }
   }
 
@@ -120,7 +152,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next()
+  return lessonRoute(request)
 }
 
 export const config = {

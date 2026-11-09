@@ -1,5 +1,6 @@
 'use client'
 
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { trackLearningEvent } from '@/lib/analytics'
 import { PROBLEM_CARD } from '@/constants/designTokens'
 import { isNativeCodingProblem, NATIVE_PRACTICE_NOTE, PRACTICE_COMPLETION_NOTE } from '@/lib/problem-presentation'
@@ -17,7 +18,7 @@ import { filterAndSortProblems } from '@/utils/helpers'
 import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6'
 import {
@@ -346,7 +347,7 @@ export const ProblemList = ({
       : [],
   })), [allProblems, completedProblems, progressStatus])
   const router = useRouter()
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   const searchParams = useSearchParams()
 
   const [drawer, setDrawer] = useState<{

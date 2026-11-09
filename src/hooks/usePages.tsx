@@ -1,14 +1,15 @@
 'use client'
 
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { useContentStore } from '@/contexts/progress'
 import { LessonResult, SectionResult } from '@/types'
 import { AccessOptions } from '@prisma/client'
-import { usePathname } from 'next/navigation'
+
 import { useCourseSlug } from './useCourseSlug'
 import { getLessonNavigation, type NavigationPage } from '@/lib/lesson-navigation'
 
 export const usePages = () => {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   const fullCurriculum = useContentStore((state) => state.fullCurriculum)
 
   const courseSlug = useCourseSlug()

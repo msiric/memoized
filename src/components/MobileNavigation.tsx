@@ -1,11 +1,12 @@
 'use client'
 
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { Header } from '@/components/Header'
 import { Navigation } from '@/components/Navigation'
 import { NavigationContent } from '@/types'
 import { Dialog, Transition } from '@headlessui/react'
 import { motion } from 'framer-motion'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import {
   Fragment,
   Suspense,
@@ -57,7 +58,7 @@ function MobileNavigationDialog({
   isOpen,
   close,
 }: MobileNavigationDialogProps) {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   const searchParams = useSearchParams()
   const initialPathname = useRef(pathname).current
   const initialSearchParams = useRef(searchParams).current

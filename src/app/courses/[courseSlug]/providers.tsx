@@ -1,9 +1,10 @@
 'use client'
 
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { Logo } from '@/components/Logo'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+
 import { ReactNode } from 'react'
 import { Footer } from '../../../components/Footer'
 import { SectionProvider, Section } from '../../../providers/SectionProvider'
@@ -21,7 +22,7 @@ export const CourseProviders = ({
   allSections,
   children,
 }: CourseProvidersProps) => {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   const formattedPathname = `/${pathname.split('/').slice(3).join('/')}`
 
   return (

@@ -168,6 +168,8 @@ jobs:
           SENTRY_DISABLE: true
           G4_TS_FIRST_PASS_ENABLED: 'true'
           READER_LAYOUT_FIXTURE: '1'
+          # Placeholder for the publish refresh endpoint; not a real credential.
+          REVALIDATE_SECRET: dummy-revalidate-secret-for-ci-000000000000
           READER_LAYOUT_REPORT_DIR: ${{ runner.temp }}/reader-layout
 
       # Opt in with this PR label before a new push. A second production
@@ -245,6 +247,8 @@ jobs:
           SENTRY_DISABLE: true
           G4_TS_FIRST_PASS_ENABLED: 'true'
           READER_LAYOUT_FIXTURE: '1'
+          # Placeholder for the publish refresh endpoint; not a real credential.
+          REVALIDATE_SECRET: dummy-revalidate-secret-for-ci-000000000000
           READER_LAYOUT_REPORT_DIR: ${{ runner.temp }}/reader-layout
 
       - name: Upload reader layout evidence
