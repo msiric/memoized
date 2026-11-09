@@ -2,6 +2,12 @@ import { getActiveCoupons, getActiveProducts } from '@/services/stripe'
 import { ProductWithCoupon } from '@/types'
 import Stripe from 'stripe'
 
+// A coupon is a public sale only when it is explicitly marked in Stripe with
+// metadata public=true. Unmarked coupons (one person, a partner, testing) are
+// never advertised or applied automatically.
+export const isPublicCoupon = (coupon: Stripe.Coupon) =>
+  coupon.valid && coupon.metadata?.public === 'true'
+
 // Prices and discounts always come from Stripe on the server. The browser only
 // says which price it wants; it never supplies amounts or coupon ids.
 export async function getPricingCatalog(): Promise<ProductWithCoupon[]> {
@@ -14,7 +20,7 @@ export async function getPricingCatalog(): Promise<ProductWithCoupon[]> {
     const price = product.default_price as Stripe.Price
     const appliedCoupon = coupons.find(
       (coupon) =>
-        coupon.valid && coupon.applies_to?.products?.includes(product.id),
+        isPublicCoupon(coupon) && coupon.applies_to?.products?.includes(product.id),
     )
 
     return {

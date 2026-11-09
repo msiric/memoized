@@ -95,6 +95,7 @@ describe('Premium page', () => {
         id: 'coupon_1',
         name: 'Test Coupon',
         valid: true,
+        metadata: { public: 'true' },
         percent_off: 10,
         amount_off: null,
         applies_to: { products: ['prod_1'] },
