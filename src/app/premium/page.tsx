@@ -1,8 +1,7 @@
-import { getActiveCoupons, getActiveProducts } from '@/services/stripe'
+import { getPricingCatalog } from '@/services/pricing'
 import { getUserWithSubscriptionDetails } from '@/services/user'
 import { ProductWithCoupon, UserWithSubscriptionsAndProgress } from '@/types'
 import { getServerSession } from 'next-auth'
-import Stripe from 'stripe'
 import { PricingTable } from '../../components/PricingTable'
 import { PricingUrgencyMessages } from '../../components/PricingUrgencyMessages'
 import { TimeLimitedOffer } from '../../components/TimeLimitedOffer'
@@ -33,36 +32,11 @@ export default async function Premium() {
   const user =
     session && (await getUserWithSubscriptionDetails(session?.userId))
 
-  const [coupons, products, catalog] = await Promise.all([
-    getActiveCoupons(),
-    getActiveProducts(),
+  const [productsWithCoupons, catalog] = await Promise.all([
+    getPricingCatalog(),
     getCatalogStatsSnapshot(),
   ])
   const stats = catalog.status === 'available' ? catalog.stats : null
-
-  const productsWithCoupons = products.map((product) => {
-    const price = product.default_price as Stripe.Price
-    const appliedCoupon = coupons.find(
-      (coupon) =>
-        coupon.valid && coupon.applies_to?.products?.includes(product.id),
-    )
-
-    return {
-      ...product,
-      default_price: {
-        ...price,
-        appliedCoupon: appliedCoupon
-          ? {
-              id: appliedCoupon.id,
-              name: appliedCoupon.name,
-              percentOff: appliedCoupon.percent_off,
-              amountOff: appliedCoupon.amount_off,
-              redeemBy: appliedCoupon.redeem_by,
-            }
-          : null,
-      },
-    }
-  })
 
   return (
     <>

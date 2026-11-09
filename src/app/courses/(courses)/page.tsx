@@ -1,7 +1,9 @@
 import dynamic from 'next/dynamic'
 import { APP_NAME, PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '../../../constants'
 import { getCoursesSnapshot } from '@/lib/catalog-request'
-import { retrieveStripeSession } from '../../../services/stripe'
+import { settleCheckoutReturn } from '@/services/checkout-return'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { CourseCard } from '../../../components/CourseCard'
 import { SectionContainer } from '@/components/SectionContainer'
 import { StatCard } from '@/components/StatCard'
@@ -27,9 +29,10 @@ export type CoursesProps = {
 }
 
 export default async function Courses({ searchParams }: CoursesProps) {
-  const [stripeSessionResult, coursesResult] = await Promise.allSettled([
-    searchParams[SESSION_QUERY_PARAM]
-      ? retrieveStripeSession(searchParams[SESSION_QUERY_PARAM])
+  const sessionId = searchParams[SESSION_QUERY_PARAM]
+  const [checkoutResult, coursesResult] = await Promise.allSettled([
+    sessionId
+      ? getServerSession(authOptions).then((auth) => settleCheckoutReturn(sessionId, auth?.userId))
       : Promise.resolve(null),
     getCoursesSnapshot(),
   ])
@@ -38,10 +41,10 @@ export default async function Courses({ searchParams }: CoursesProps) {
   const courses = catalog?.status === 'available' ? catalog.courses : null
   const stats = catalog?.status === 'available' ? catalog.stats : null
 
-  const stripeSession =
-    stripeSessionResult.status === 'fulfilled'
-      ? stripeSessionResult.value
-      : null
+  const checkout =
+    checkoutResult.status === 'fulfilled' && checkoutResult.value
+      ? checkoutResult.value
+      : { state: 'unconfirmed' as const, sessionId: undefined }
 
   return (
     <>
@@ -229,8 +232,8 @@ export default async function Courses({ searchParams }: CoursesProps) {
 
       {searchParams[PREMIUM_QUERY_PARAM] && (
         <PremiumModal
-          upgradedSuccessfully={stripeSession?.status === 'complete'}
-          stripeSessionId={stripeSession?.id}
+          checkoutState={checkout.state}
+          stripeSessionId={checkout.sessionId}
         />
       )}
     </>

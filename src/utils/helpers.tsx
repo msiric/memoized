@@ -212,6 +212,7 @@ export const getStatusFromStripeStatus = (
 ): SubscriptionStatus => {
   switch (status) {
     case 'active':
+    case 'trialing':
       return SubscriptionStatus.ACTIVE
     case 'canceled':
       return SubscriptionStatus.CANCELED

@@ -17,6 +17,7 @@ vi.mock('@/services/webhook', () => ({
 vi.mock('@/services/subscription', () => ({
   updateSubscriptionDetails: vi.fn(),
   createLifetimeAccess: vi.fn(),
+  revokeRefundedLifetimeAccess: vi.fn(),
 }))
 
 vi.mock('@/lib/stripe', () => ({
@@ -132,6 +133,31 @@ describe('Stripe Webhook Handler', () => {
       sessionId: 'cs_123',
       stripeCustomer: 'cus_123',
     })
+  })
+
+  it('grants lifetime access when a delayed payment succeeds later', async () => {
+    mockRequest = createMockRequest('checkout.session.async_payment_succeeded', {
+      id: 'cs_456',
+      mode: 'payment',
+      client_reference_id: 'cus_123',
+    })
+
+    const response = await POST(mockRequest)
+
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.createLifetimeAccess).toHaveBeenCalledWith({
+      sessionId: 'cs_456',
+      stripeCustomer: 'cus_123',
+    })
+  })
+
+  it('revokes lifetime access on a full refund', async () => {
+    mockRequest = createMockRequest('charge.refunded', { id: 'ch_1', refunded: true, payment_intent: 'pi_1' })
+    const response = await POST(mockRequest)
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.revokeRefundedLifetimeAccess).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'ch_1' }),
+    )
   })
 
   it('should handle missing stripe-signature header in non-test environment', async () => {

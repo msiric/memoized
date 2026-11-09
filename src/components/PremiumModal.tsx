@@ -2,23 +2,61 @@
 
 import { PREMIUM_QUERY_PARAM, SESSION_QUERY_PARAM } from '@/constants'
 import { useGAConversion } from '@/hooks/useGAConversion'
+import type { CheckoutReturnState } from '@/services/checkout-return'
 import clsx from 'clsx'
 import { useRouter } from 'next/navigation'
 import { MouseEvent, useEffect, useState } from 'react'
-import { IoCheckmark, IoClose } from 'react-icons/io5'
+import { IoCheckmark, IoClose, IoTimeOutline } from 'react-icons/io5'
 
 export type PremiumModalProps = {
-  upgradedSuccessfully: boolean
+  checkoutState: CheckoutReturnState
   stripeSessionId: string | undefined
 }
 
+const PROCESSING_REFRESH_MS = 3000
+const PROCESSING_MAX_REFRESHES = 10
+
+// Every message states only what the server actually confirmed.
+const COPY: Record<CheckoutReturnState, { title: string; body: string; action: string }> = {
+  upgraded: {
+    title: 'Welcome to Premium!',
+    body: 'You now have unlimited access to all premium content and features. Enjoy your learning journey!',
+    action: 'Start learning',
+  },
+  processing: {
+    title: 'Payment received',
+    body: 'We are activating your Premium access. This usually takes a few seconds.',
+    action: 'Close',
+  },
+  pending_payment: {
+    title: 'Payment pending',
+    body: 'Your bank is still confirming this payment. Premium activates automatically once it clears, and we will email you.',
+    action: 'Close',
+  },
+  unconfirmed: {
+    title: 'Checking your purchase',
+    body: 'We could not confirm this checkout here. If you completed payment, Premium will appear on your account shortly. Contact support if it does not.',
+    action: 'Close',
+  },
+  failed: {
+    title: 'Upgrade not completed',
+    body: 'The checkout was not completed, so you have not been charged. You can try again at any time.',
+    action: 'Close',
+  },
+}
+
+const PROCESSING_TIMEOUT_BODY =
+  'Your payment was received and Premium is still being activated. Refresh in a minute, or contact support if it does not appear.'
+
 export const PremiumModal = ({
-  upgradedSuccessfully,
+  checkoutState,
   stripeSessionId,
 }: PremiumModalProps) => {
   const [isOpen, setIsOpen] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const router = useRouter()
+  const upgraded = checkoutState === 'upgraded'
+  const processing = checkoutState === 'processing'
 
   const reportConversion = useGAConversion()
 
@@ -26,15 +64,27 @@ export const PremiumModal = ({
     setTimeout(() => setIsVisible(true), 10)
   }, [])
 
-  // Refresh server data when upgrade is successful to update header/UI
+  // The header may have rendered before the purchase was recorded in this
+  // request; refresh once so it shows the new plan.
   useEffect(() => {
-    if (upgradedSuccessfully) {
+    if (upgraded) {
       router.refresh()
     }
-  }, [upgradedSuccessfully, router])
+  }, [upgraded, router])
+
+  // Re-check (bounded) while the purchase is being recorded.
+  const [refreshes, setRefreshes] = useState(0)
+  useEffect(() => {
+    if (!processing || refreshes >= PROCESSING_MAX_REFRESHES) return
+    const timer = setTimeout(() => {
+      setRefreshes((count) => count + 1)
+      router.refresh()
+    }, PROCESSING_REFRESH_MS)
+    return () => clearTimeout(timer)
+  }, [processing, refreshes, router])
 
   useEffect(() => {
-    if (upgradedSuccessfully && stripeSessionId) {
+    if (upgraded && stripeSessionId) {
       const reportedConversions = JSON.parse(
         localStorage.getItem('reportedConversions') || '{}',
       )
@@ -49,7 +99,7 @@ export const PremiumModal = ({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [upgradedSuccessfully, stripeSessionId])
+  }, [upgraded, stripeSessionId])
 
   const closeModal = () => {
     setIsVisible(false)
@@ -70,6 +120,10 @@ export const PremiumModal = ({
 
   if (!isOpen) return null
 
+  const copy = COPY[checkoutState]
+  const body = processing && refreshes >= PROCESSING_MAX_REFRESHES ? PROCESSING_TIMEOUT_BODY : copy.body
+  const tone = upgraded || processing ? 'positive' : checkoutState === 'failed' ? 'negative' : 'neutral'
+
   return (
     <div
       id="premium-modal"
@@ -88,6 +142,7 @@ export const PremiumModal = ({
         {/* Close button */}
         <button
           type="button"
+          aria-label="Close"
           className="absolute right-4 top-4 rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
           onClick={closeModal}
         >
@@ -99,28 +154,26 @@ export const PremiumModal = ({
           <div
             className={clsx(
               'flex h-16 w-16 items-center justify-center rounded-full',
-              upgradedSuccessfully
-                ? 'bg-lime-500/20 text-lime-400 shadow-[0_0_30px_rgba(132,204,22,0.3)]'
-                : 'bg-red-500/20 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.3)]'
+              tone === 'positive' && 'bg-lime-500/20 text-lime-400 shadow-[0_0_30px_rgba(132,204,22,0.3)]',
+              tone === 'negative' && 'bg-red-500/20 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.3)]',
+              tone === 'neutral' && 'bg-zinc-700/40 text-zinc-300',
             )}
           >
-            {upgradedSuccessfully ? (
+            {tone === 'positive' ? (
               <IoCheckmark className="h-8 w-8" />
-            ) : (
+            ) : tone === 'negative' ? (
               <IoClose className="h-8 w-8" />
+            ) : (
+              <IoTimeOutline className="h-8 w-8" />
             )}
           </div>
         </div>
 
         {/* Content */}
         <div className="text-center">
-          <h2 className="mb-3 text-xl font-semibold text-white">
-            {upgradedSuccessfully ? 'Welcome to Premium!' : 'Upgrade Failed'}
-          </h2>
-          <p className="mb-6 text-sm leading-relaxed text-zinc-400">
-            {upgradedSuccessfully
-              ? 'You now have unlimited access to all premium content and features. Enjoy your learning journey!'
-              : 'There was a problem processing your payment. Your card has not been charged. Please try again or contact support.'}
+          <h2 className="mb-3 text-xl font-semibold text-white">{copy.title}</h2>
+          <p role="status" className="mb-6 text-sm leading-relaxed text-zinc-400">
+            {body}
           </p>
 
           {/* Action button */}
@@ -128,12 +181,12 @@ export const PremiumModal = ({
             onClick={closeModal}
             className={clsx(
               'w-full rounded-lg py-2.5 text-sm font-medium transition-colors',
-              upgradedSuccessfully
+              upgraded
                 ? 'bg-zinc-800 text-lime-400 hover:bg-zinc-700'
                 : 'bg-zinc-800 text-white hover:bg-zinc-700'
             )}
           >
-            {upgradedSuccessfully ? 'Start learning' : 'Close'}
+            {copy.action}
           </button>
         </div>
       </div>

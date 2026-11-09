@@ -57,6 +57,7 @@ vi.mock('@/services/stripe', () => ({
   getActiveProducts: vi.fn(async () => []),
 }))
 vi.mock('@/services/user', () => ({ getUserWithSubscriptionDetails: vi.fn() }))
+vi.mock('@/services/checkout-return', () => ({ settleCheckoutReturn: vi.fn(async () => ({ state: 'unconfirmed' })) }))
 vi.mock('next-auth', () => ({ getServerSession: vi.fn(async () => null) }))
 vi.mock('@/app/api/auth/[...nextauth]/route', () => ({ authOptions: {} }))
 vi.mock('next/dynamic', () => ({ default: () => () => null }))

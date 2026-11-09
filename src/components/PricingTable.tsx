@@ -48,7 +48,7 @@ export const PricingTable = ({ products, user }: PricingTableProps) => {
         return
       }
 
-      const response = await createCheckout(product)
+      const response = await createCheckout(product.default_price.id)
       if (!response.success) return handleError(response, enqueueSnackbar)
       handleResponse(response as CustomResponse, enqueueSnackbar)
 

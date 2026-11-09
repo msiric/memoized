@@ -1,28 +1,24 @@
 import { cleanup, render, screen } from '@testing-library/react'
-import Stripe from 'stripe'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { getCoursesSnapshot } from '@/lib/catalog-request'
-import { retrieveStripeSession } from '../../../services/stripe'
+import { settleCheckoutReturn } from '@/services/checkout-return'
+import { getServerSession } from 'next-auth'
 import Courses from './page'
 import { COURSES_PREFIX } from '../../../constants'
 
 // Mock the imported modules
 vi.mock('@/lib/catalog-request', () => ({ getCoursesSnapshot: vi.fn() }))
-vi.mock('../../../services/stripe')
+vi.mock('@/services/checkout-return', () => ({ settleCheckoutReturn: vi.fn() }))
+vi.mock('next-auth', () => ({ getServerSession: vi.fn() }))
+vi.mock('@/app/api/auth/[...nextauth]/route', () => ({ authOptions: {} }))
 vi.mock('../../../components/CourseCard', () => ({
   CourseCard: ({ title }: { title: string }) => (
     <div data-testid="course-card">{title}</div>
   ),
 }))
 vi.mock('../../../components/PremiumModal', () => ({
-  PremiumModal: ({
-    upgradedSuccessfully,
-  }: {
-    upgradedSuccessfully: boolean
-  }) => (
-    <div data-testid="premium-modal">
-      {upgradedSuccessfully ? 'Upgrade Success' : 'Upgrade Modal'}
-    </div>
+  PremiumModal: ({ checkoutState }: { checkoutState: string }) => (
+    <div data-testid="premium-modal">{checkoutState}</div>
   ),
 }))
 
@@ -174,9 +170,6 @@ describe('Courses page', () => {
   })
 
   it('renders courses when data is successfully fetched', async () => {
-    vi.mocked(retrieveStripeSession).mockResolvedValue(
-      {} as Stripe.Response<Stripe.Checkout.Session>,
-    )
 
     render(await Courses({ searchParams: {} }))
 
@@ -191,9 +184,6 @@ describe('Courses page', () => {
 
   it('handles failed course fetch gracefully', async () => {
     vi.mocked(getCoursesSnapshot).mockResolvedValue({ status: 'unavailable' })
-    vi.mocked(retrieveStripeSession).mockResolvedValue(
-      {} as Stripe.Response<Stripe.Checkout.Session>,
-    )
 
     render(await Courses({ searchParams: {} }))
 
@@ -204,10 +194,8 @@ describe('Courses page', () => {
   })
 
   it('renders PremiumModal when premium query param is present', async () => {
-    vi.mocked(retrieveStripeSession).mockResolvedValue({
-      id: 'session_123',
-      status: 'complete',
-    } as Stripe.Response<Stripe.Checkout.Session>)
+    vi.mocked(getServerSession).mockResolvedValue({ userId: 'user_1' } as never)
+    vi.mocked(settleCheckoutReturn).mockResolvedValue({ state: 'upgraded', sessionId: 'session_123' })
 
     render(
       await Courses({
@@ -220,13 +208,12 @@ describe('Courses page', () => {
 
     const premiumModals = await screen.findAllByTestId('premium-modal')
     expect(premiumModals).toHaveLength(1)
-    expect(premiumModals[0].textContent).toBe('Upgrade Success')
+    expect(premiumModals[0].textContent).toBe('upgraded')
   })
 
   it('handles failed Stripe session fetch gracefully', async () => {
-    vi.mocked(retrieveStripeSession).mockRejectedValue(
-      new Error('Failed to fetch'),
-    )
+    vi.mocked(getServerSession).mockResolvedValue({ userId: 'user_1' } as never)
+    vi.mocked(settleCheckoutReturn).mockRejectedValue(new Error('Failed to fetch'))
 
     render(
       await Courses({
@@ -239,16 +226,21 @@ describe('Courses page', () => {
 
     const premiumModals = screen.getAllByTestId('premium-modal')
     expect(premiumModals).toHaveLength(1)
-    expect(premiumModals[0].textContent).toBe('Upgrade Modal')
+    expect(premiumModals[0].textContent).toBe('unconfirmed')
   })
 
   it('does not render PremiumModal when premium query param is absent', async () => {
-    vi.mocked(retrieveStripeSession).mockResolvedValue(
-      {} as Stripe.Response<Stripe.Checkout.Session>,
-    )
 
     render(await Courses({ searchParams: {} }))
 
     expect(screen.queryByTestId('premium-modal')).toBeNull()
+  })
+
+  it('settles the buyer\'s own session and shows processing while Stripe confirms', async () => {
+    vi.mocked(getServerSession).mockResolvedValue({ userId: 'user_1' } as never)
+    vi.mocked(settleCheckoutReturn).mockResolvedValue({ state: 'processing', sessionId: 'cs_1' })
+    render(await Courses({ searchParams: { upgradedToPremium: 'true', sessionId: 'cs_1' } }))
+    expect(settleCheckoutReturn).toHaveBeenCalledWith('cs_1', 'user_1')
+    expect(screen.getByTestId('premium-modal').textContent).toBe('processing')
   })
 })
