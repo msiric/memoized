@@ -104,6 +104,13 @@ export function lessonTitleSuffix(path: string) {
   return 'JavaScript Interview Practice'
 }
 
+function fallbackLessonDescription(path: string, title: string) {
+  if (path.startsWith('/courses/dsa-track/'))
+    return `Learn ${title} in JavaScript with worked examples and data-structure interview practice.`
+  const track = lessonTitleSuffix(path).replace(' Interview Practice', '')
+  return `Explore ${title} and related ${track} interview practice.`
+}
+
 export function lessonMetadata(
   path: string,
   title: string,
@@ -111,11 +118,7 @@ export function lessonMetadata(
 ) {
   return pageMetadata({
     title: `${title} — ${lessonTitleSuffix(path)}`,
-    description:
-      description ||
-      path.startsWith('/courses/dsa-track/')
-        ? `Learn ${title} in JavaScript with worked examples and data-structure interview practice.`
-        : `Explore ${title} and related ${lessonTitleSuffix(path).replace(' Interview Practice', '')} interview practice.`,
+    description: description || fallbackLessonDescription(path, title),
     ...lessonSearchCopy[path],
     path,
     index: !NOINDEX_LESSON_PATHS.has(path),

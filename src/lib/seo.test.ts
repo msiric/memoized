@@ -60,6 +60,15 @@ describe('Search metadata contract', () => {
       lessonMetadata(lessonPath('dsa-track', 'advanced-topics', 'tries'), 'Tries', null).robots,
     ).toEqual({ index: true, follow: true })
   })
+  it.each([
+    ['dsa-track', 'common-techniques'],
+    ['js-track', 'typescript-introduction'],
+    ['js-track', 'core-fundamentals'],
+  ])('uses the lesson\'s own description on %s/%s when it has one', (course, section) => {
+    const meta = lessonMetadata(lessonPath(course, section, 'x'), 'X', 'Own description.')
+    expect(meta.description).toBe('Own description.')
+    expect(meta.openGraph?.description).toBe('Own description.')
+  })
   it('keeps fallback descriptions on the lesson track', () => {
     expect(lessonMetadata(lessonPath('dsa-track', 'common-techniques', 'x'), 'Heaps', null).description)
       .toBe('Learn Heaps in JavaScript with worked examples and data-structure interview practice.')
