@@ -50,9 +50,12 @@ describe('bounded catalog architecture', () => {
     ).toBe(false)
   })
 
-  it('preserves homepage hourly ISR and banner/Stripe flow with exactly one local provider', () => {
+  it('keeps homepage ISR with on-demand banner/Stripe refresh and exactly one local provider', () => {
     const home = read('src/app/page.tsx')
-    expect(home).toMatch(/export const revalidate = 3600/)
+    // 6 h window (PERF-COST B3); sales and publishes refresh it on demand.
+    expect(home).toMatch(/export const revalidate = 21600/)
+    expect(read('src/app/api/webhook/route.ts')).toMatch(/coupon\.created[\s\S]*revalidatePath\('\/'\)/)
+    expect(read('src/app/api/revalidate/route.ts')).toContain("revalidatePath('/')")
     expect(home).toContain('getUnifiedBanners()')
     expect(home).toContain('discountPercent={banner.discountPercent}')
     expect(home.match(/<CatalogStatsProvider>/g)).toHaveLength(1)

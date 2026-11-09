@@ -3,7 +3,7 @@ import { CATALOG_CACHE_TAG } from '@/services/search'
 import { timingSafeEqual } from 'node:crypto'
 
 // Called by the content repository's publish workflow after a successful
-// publish, so cached signed-out lesson pages refresh immediately instead of
+// publish, so cached signed-out pages refresh immediately instead of
 // within their 6 h revalidate window. Requires Authorization: Bearer <REVALIDATE_SECRET>.
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +22,9 @@ export async function POST(request: Request) {
   if (!matches(token, secret))
     return Response.json({ revalidated: false }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
   revalidateTag(CATALOG_CACHE_TAG)
-  revalidatePath('/public/courses', 'layout')
-  return Response.json({ revalidated: true, scope: ['catalog', '/public/courses'] }, { headers: { 'Cache-Control': 'no-store' } })
+  // Every cached signed-out page (lessons, /courses, /problems, /resources,
+  // /premium) and the home page show published content or counts.
+  revalidatePath('/public', 'layout')
+  revalidatePath('/')
+  return Response.json({ revalidated: true, scope: ['catalog', '/public', '/'] }, { headers: { 'Cache-Control': 'no-store' } })
 }

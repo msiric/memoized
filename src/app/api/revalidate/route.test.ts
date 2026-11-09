@@ -15,7 +15,8 @@ describe('POST /api/revalidate', () => {
     vi.stubEnv('REVALIDATE_SECRET', SECRET)
     const response = await call(`Bearer ${SECRET}`)
     expect(response.status).toBe(200)
-    expect(revalidatePath).toHaveBeenCalledWith('/public/courses', 'layout')
+    expect(revalidatePath).toHaveBeenCalledWith('/public', 'layout')
+    expect(revalidatePath).toHaveBeenCalledWith('/')
     expect(revalidateTag).toHaveBeenCalledWith('catalog')
   })
 

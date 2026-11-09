@@ -1,3 +1,4 @@
+import { revalidatePath } from 'next/cache'
 import { STRIPE_WEBHOOK, stripe } from '@/lib/stripe'
 import {
   createLifetimeAccess,
@@ -20,6 +21,14 @@ const relevantEvents = new Set([
   'customer.subscription.deleted',
 ])
 
+// Coupons, prices and products feed the home page's cached sale banner.
+// (/premium itself renders live.)
+const pricingEvents = new Set([
+  'coupon.created', 'coupon.updated', 'coupon.deleted',
+  'price.created', 'price.updated', 'price.deleted',
+  'product.created', 'product.updated', 'product.deleted',
+])
+
 export async function POST(req: Request) {
   const body = await req.text()
   const sig = req.headers.get('stripe-signature') as string
@@ -36,6 +45,12 @@ export async function POST(req: Request) {
     }
   } catch (err: unknown) {
     return new Response(`Webhook Error: ${(err as Error)?.message}`, { status: 400 })
+  }
+
+  if (pricingEvents.has(event.type)) {
+    // Idempotent and side-effect free apart from cache refresh; no event log needed.
+    revalidatePath('/')
+    return new Response(JSON.stringify({ received: true, revalidated: true }))
   }
 
   // Idempotency check - skip if already successfully processed

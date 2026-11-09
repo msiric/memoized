@@ -5,15 +5,18 @@ import Stripe from 'stripe'
 import type { MockedFunction } from 'vitest'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { POST } from './route'
+import { revalidatePath } from 'next/cache'
 
 const mockFn = <T extends (...args: any[]) => any>(fn: T) =>
   fn as unknown as MockedFunction<T>
+
 
 vi.mock('@/services/webhook', () => ({
   isWebhookEventProcessed: vi.fn(),
   markWebhookEventProcessed: vi.fn(),
 }))
 
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 vi.mock('@/services/subscription', () => ({
   updateSubscriptionDetails: vi.fn(),
   createLifetimeAccess: vi.fn(),
@@ -158,6 +161,27 @@ describe('Stripe Webhook Handler', () => {
     expect(subscriptionService.revokeRefundedLifetimeAccess).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'ch_1' }),
     )
+  })
+
+  it.each(['coupon.created', 'coupon.deleted', 'price.updated', 'product.updated'])(
+    'refreshes the cached home banner on %s without touching subscriptions', async (type) => {
+      mockRequest = createMockRequest(type, { id: 'obj_1' })
+      const response = await POST(mockRequest)
+      expect(response?.status).toBe(200)
+      expect(revalidatePath).toHaveBeenCalledWith('/')
+      expect(subscriptionService.updateSubscriptionDetails).not.toHaveBeenCalled()
+    },
+  )
+
+  it('never refreshes caches for an unsigned pricing event in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const request = new Request('http://localhost/api/webhook', {
+      method: 'POST', body: JSON.stringify({ id: 'evt_x', type: 'coupon.created', data: { object: {} } }),
+    })
+    const response = await POST(request)
+    expect(response?.status).toBe(400)
+    expect(revalidatePath).not.toHaveBeenCalled()
+    vi.unstubAllEnvs()
   })
 
   it('should handle missing stripe-signature header in non-test environment', async () => {

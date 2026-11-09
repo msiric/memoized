@@ -14,8 +14,10 @@ export const metadata = pageMetadata({
 })
 
 // Revalidate hourly for Stripe coupon changes.
-// Database banners are invalidated on-demand via revalidateBanners().
-export const revalidate = 3600
+// Database banners (edited directly in the DB) appear within the window below.
+// Refreshed on demand by content publishing and Stripe pricing events; the
+// 6 h window only bounds anything else.
+export const revalidate = 21600
 
 const TopBanner = dynamic(
   () => import('../components/TopBanner').then((mod) => mod.TopBanner),
