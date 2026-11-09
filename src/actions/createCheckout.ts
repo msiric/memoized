@@ -11,16 +11,18 @@ import {
   createStripeSession,
 } from '@/services/stripe'
 import { getUserWithSubscriptionDetails } from '@/services/user'
-import { ProductWithCoupon } from '@/types'
+import { resolveCheckoutProduct } from '@/services/pricing'
 import { ServiceError, createCustomError } from '@/lib/sentry'
 import { createCustomResponse } from '@/utils/response'
 import { SubscriptionStatus } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 
-export async function createCheckout(
-  product: ProductWithCoupon,
-  redirectPath: string = `${COURSES_PREFIX}?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`,
-) {
+const CHECKOUT_RETURN_PATH = `${COURSES_PREFIX}?${PREMIUM_QUERY_PARAM}=true&${SESSION_QUERY_PARAM}={CHECKOUT_SESSION_ID}`
+
+// Server actions are public endpoints: any signed-in client can call this with
+// any arguments. Only a price id is accepted; the product, amount and discount
+// are resolved from Stripe here, and the return URL is fixed.
+export async function createCheckout(priceId: string) {
   try {
     const session = await getServerSession(authOptions)
 
@@ -47,6 +49,15 @@ export async function createCheckout(
       })
     }
 
+    const product = await resolveCheckoutProduct(priceId)
+
+    if (!product) {
+      return createCustomError({
+        message: 'This plan is no longer available. Refresh and try again.',
+        showSnackbar: true,
+      })
+    }
+
     const customer = await createOrRetrieveCustomer({
       userId: user.id,
       userEmail: user.email,
@@ -55,7 +66,7 @@ export async function createCheckout(
     const stripeSession = await createStripeSession(
       product,
       customer,
-      redirectPath,
+      CHECKOUT_RETURN_PATH,
     )
 
     if (!stripeSession) {

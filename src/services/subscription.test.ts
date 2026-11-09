@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { sendEmail } from '@/services/email'
 import { stripe } from '@/lib/stripe'
 import {
+  revokeRefundedLifetimeAccess,
   createLifetimeAccess,
   handleFailedOneTimePayment,
   handleFailedRecurringSubscription,
@@ -320,8 +321,8 @@ describe('Subscription services', () => {
       vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(
         mockSubscription as any,
       )
-      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(
-        new Error('Database error'),
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        { id: 'sub_existing', stripeSubscriptionId: 'cs_lifetime_old', plan: SubscriptionPlan.LIFETIME } as any,
       )
       vi.spyOn(stripe.subscriptions, 'cancel').mockRejectedValue(
         new Error('Stripe cancel failed'),
@@ -462,7 +463,7 @@ describe('Subscription services', () => {
       })
     })
 
-    it('should handle failed recurring subscription', async () => {
+    it('cancels and refunds a genuine duplicate subscription', async () => {
       const mockCustomer = {
         id: 'cus_123',
         user: { email: 'test@mail.com', name: 'Test' },
@@ -490,8 +491,8 @@ describe('Subscription services', () => {
       vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue(
         mockSubscription as any,
       )
-      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(
-        new Error('Upsert failed'),
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        { id: 'sub_existing', stripeSubscriptionId: 'cs_lifetime_old', plan: SubscriptionPlan.LIFETIME } as any,
       )
       vi.spyOn(stripe.subscriptions, 'cancel').mockResolvedValue({} as any)
       vi.spyOn(stripe.invoices, 'retrieve').mockResolvedValue(
@@ -510,7 +511,7 @@ describe('Subscription services', () => {
           stripeCustomer: 'cus_123',
           subscriptionId: 'sub_123',
         }),
-      ).rejects.toThrow('Failed to update subscription: Upsert failed')
+      ).rejects.toThrow('User already has an active subscription')
 
       expect(stripe.subscriptions.cancel).toHaveBeenCalledWith('sub_123', {
         idempotencyKey: 'cancel-subscription-sub_123',
@@ -519,6 +520,50 @@ describe('Subscription services', () => {
         { payment_intent: 'pi_123' },
         { idempotencyKey: 'refund-pi_123' },
       )
+    })
+
+    it.each([false, true])('never cancels or refunds on a database error (updateAction=%s)', async (updateAction) => {
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        { id: 'cus_123', user: { email: 'test@mail.com', name: 'Test' } } as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue({
+        id: 'sub_123', items: { data: [{ price: { id: 'price_123' } }] }, status: 'active', metadata: {},
+        cancel_at_period_end: false, cancel_at: null, canceled_at: null, current_period_start: 1,
+        current_period_end: 2, created: 1, ended_at: null, latest_invoice: 'inv_123',
+      } as any)
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(SubscriptionPlan.MONTHLY)
+      vi.mocked(getStatusFromStripeStatus).mockReturnValue(SubscriptionStatus.ACTIVE)
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(null)
+      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(new Error('Database error'))
+      vi.spyOn(stripe.subscriptions, 'cancel').mockResolvedValue({} as any)
+      vi.spyOn(stripe.refunds, 'create').mockResolvedValue({} as any)
+      await expect(
+        updateSubscriptionDetails({ stripeCustomer: 'cus_123', subscriptionId: 'sub_123', updateAction }),
+      ).rejects.toThrow('Failed to update subscription: Database error')
+      expect(stripe.subscriptions.cancel).not.toHaveBeenCalled()
+      expect(stripe.refunds.create).not.toHaveBeenCalled()
+    })
+
+    it('retries once when the created and updated webhooks race on the same subscription', async () => {
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        { id: 'cus_123', user: { email: 'test@mail.com', name: 'Test' } } as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue({
+        id: 'sub_123', items: { data: [{ price: { id: 'price_123' } }] }, status: 'active', metadata: {},
+        cancel_at_period_end: false, cancel_at: null, canceled_at: null, current_period_start: 1,
+        current_period_end: 2, created: 1, ended_at: null,
+      } as any)
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(SubscriptionPlan.MONTHLY)
+      vi.mocked(getStatusFromStripeStatus).mockReturnValue(SubscriptionStatus.ACTIVE)
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(null)
+      vi.spyOn(prisma.subscription, 'upsert')
+        .mockRejectedValueOnce(Object.assign(new Error('Unique constraint'), { code: 'P2002' }))
+        .mockResolvedValueOnce({ id: 'row' } as any)
+      vi.spyOn(stripe.subscriptions, 'cancel').mockResolvedValue({} as any)
+      await expect(
+        updateSubscriptionDetails({ stripeCustomer: 'cus_123', subscriptionId: 'sub_123' }),
+      ).resolves.toEqual({ id: 'row' })
+      expect(stripe.subscriptions.cancel).not.toHaveBeenCalled()
     })
   })
 
@@ -530,6 +575,7 @@ describe('Subscription services', () => {
       }
       const mockSession = {
         id: 'cs_123',
+        payment_status: 'paid',
         created: 1625097600,
         metadata: {},
         line_items: { data: [{ price: { id: 'price_123' } }] },
@@ -571,6 +617,7 @@ describe('Subscription services', () => {
       }
       const mockSession = {
         id: 'cs_123',
+        payment_status: 'paid',
         created: 1625097600,
         metadata: {},
         line_items: { data: [{ price: { id: 'price_123' } }] },
@@ -607,6 +654,7 @@ describe('Subscription services', () => {
       }
       const mockSession = {
         id: 'cs_123',
+        payment_status: 'paid',
         created: 1625097600,
         metadata: {},
         line_items: { data: [{ price: { id: 'price_123' } }] },
@@ -663,6 +711,7 @@ describe('Subscription services', () => {
       }
       const mockSession = {
         id: 'cs_123',
+        payment_status: 'paid',
         created: 1625097600,
         metadata: {},
         line_items: null,
@@ -690,6 +739,7 @@ describe('Subscription services', () => {
       }
       const mockSession = {
         id: 'cs_123',
+        payment_status: 'paid',
         created: 1625097600,
         metadata: {},
         line_items: { data: [{ price: { id: 'unknown_price' } }] },
@@ -711,13 +761,14 @@ describe('Subscription services', () => {
       ).rejects.toThrow('Failed to determine subscription plan')
     })
 
-    it('should handle failed one-time payment with successful refund', async () => {
+    it('refunds a genuine duplicate lifetime purchase', async () => {
       const mockCustomer = {
         id: 'cus_123',
         user: { email: 'test@mail.com', name: 'Test' },
       }
       const mockSession = {
         id: 'cs_123',
+        payment_status: 'paid',
         created: 1625097600,
         metadata: {},
         line_items: { data: [{ price: { id: 'price_123' } }] },
@@ -731,8 +782,8 @@ describe('Subscription services', () => {
       vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
         mockSession as any,
       )
-      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(
-        new Error('Upsert failed'),
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        { id: 'sub_existing', stripeSubscriptionId: 'cs_lifetime_old', plan: SubscriptionPlan.LIFETIME } as any,
       )
       vi.spyOn(stripe.paymentIntents, 'retrieve').mockResolvedValue(
         mockPaymentIntent as any,
@@ -750,7 +801,7 @@ describe('Subscription services', () => {
           sessionId: 'cs_123',
           stripeCustomer: 'cus_123',
         }),
-      ).rejects.toThrow('Failed to create lifetime access: Upsert failed')
+      ).rejects.toThrow('User already has an active subscription')
 
       expect(stripe.refunds.create).toHaveBeenCalledWith(
         { payment_intent: 'pi_123' },
@@ -765,6 +816,7 @@ describe('Subscription services', () => {
       }
       const mockSession = {
         id: 'cs_123',
+        payment_status: 'paid',
         created: 1625097600,
         metadata: {},
         line_items: { data: [{ price: { id: 'price_123' } }] },
@@ -777,8 +829,8 @@ describe('Subscription services', () => {
       vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(
         mockSession as any,
       )
-      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(
-        new Error('Database error'),
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        { id: 'sub_existing', stripeSubscriptionId: 'cs_lifetime_old', plan: SubscriptionPlan.LIFETIME } as any,
       )
       vi.mocked(getPlanFromStripePlan).mockResolvedValue(
         SubscriptionPlan.LIFETIME,
@@ -793,6 +845,75 @@ describe('Subscription services', () => {
           stripeCustomer: 'cus_123',
         }),
       ).rejects.toThrow(/Failed to create lifetime access and handle failure/)
+    })
+
+    const lifetimeSetup = (session: Record<string, unknown> = {}) => {
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(
+        { id: 'cus_123', user: { email: 'test@mail.com', name: 'Test' } } as any,
+      )
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue({
+        id: 'cs_123', payment_status: 'paid', created: 1625097600, metadata: {},
+        line_items: { data: [{ price: { id: 'price_123' } }] }, payment_intent: 'pi_123',
+        ...session,
+      } as any)
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(SubscriptionPlan.LIFETIME)
+      vi.mocked(formatDate).mockImplementation((timestamp) =>
+        timestamp ? new Date(timestamp * 1000).toISOString() : null,
+      )
+      vi.spyOn(stripe.refunds, 'create').mockResolvedValue({} as any)
+      vi.spyOn(stripe.paymentIntents, 'retrieve').mockResolvedValue({ id: 'pi_123', status: 'succeeded' } as any)
+    }
+
+    it('never refunds a paying customer because of a database or API error', async () => {
+      lifetimeSetup()
+      vi.spyOn(prisma.subscription, 'upsert').mockRejectedValue(new Error('Database error'))
+      await expect(
+        createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' }),
+      ).rejects.toThrow('Failed to create lifetime access: Database error')
+      expect(stripe.refunds.create).not.toHaveBeenCalled()
+    })
+
+    it('does not grant access before a delayed payment has succeeded', async () => {
+      lifetimeSetup({ payment_status: 'unpaid' })
+      vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({} as any)
+      await expect(
+        createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' }),
+      ).resolves.toBeNull()
+      expect(prisma.subscription.upsert).not.toHaveBeenCalled()
+      expect(stripe.refunds.create).not.toHaveBeenCalled()
+    })
+
+    it('treats the same purchase recorded twice as idempotent, not a duplicate', async () => {
+      lifetimeSetup()
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(null)
+      vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({ id: 'row' } as any)
+      await createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' })
+      expect(prisma.subscription.findFirst).toHaveBeenCalledWith(expect.objectContaining({
+        where: expect.objectContaining({ NOT: { stripeSubscriptionId: 'cs_123' } }),
+      }))
+      expect(stripe.refunds.create).not.toHaveBeenCalled()
+    })
+
+    it('retries once when a concurrent writer inserted the same purchase first', async () => {
+      lifetimeSetup()
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(null)
+      vi.spyOn(prisma.subscription, 'upsert')
+        .mockRejectedValueOnce(Object.assign(new Error('Unique constraint'), { code: 'P2002' }))
+        .mockResolvedValueOnce({ id: 'row' } as any)
+      await expect(
+        createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' }),
+      ).resolves.toEqual({ id: 'row' })
+      expect(prisma.subscription.upsert).toHaveBeenCalledTimes(2)
+      expect(stripe.refunds.create).not.toHaveBeenCalled()
+    })
+
+    it('leaves duplicate refunds to the webhook when called from the checkout return', async () => {
+      lifetimeSetup()
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue({ id: 'sub_existing', stripeSubscriptionId: 'cs_lifetime_old', plan: SubscriptionPlan.LIFETIME } as any)
+      await expect(
+        createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123', refundDuplicates: false }),
+      ).rejects.toThrow('User already has an active subscription')
+      expect(stripe.refunds.create).not.toHaveBeenCalled()
     })
   })
 
@@ -866,6 +987,79 @@ describe('Subscription services', () => {
       await expect(handleFailedOneTimePayment('cs_123')).rejects.toThrow(
         'Failed to retrieve session',
       )
+    })
+  })
+
+  describe('refund and duplicate safety', () => {
+    const customer = { id: 'cus_row', user: { email: 'test@mail.com', name: 'Test' } }
+    const lifetimeSession = (overrides: Record<string, unknown> = {}) => ({
+      id: 'cs_123', payment_status: 'paid', created: 1625097600, metadata: {}, payment_intent: null,
+      line_items: { data: [{ price: { id: 'price_123' } }] }, ...overrides,
+    })
+    const setup = (session: Record<string, unknown>) => {
+      vi.spyOn(prisma.customer, 'findUnique').mockResolvedValue(customer as any)
+      vi.spyOn(stripe.checkout.sessions, 'retrieve').mockResolvedValue(session as any)
+      vi.mocked(getPlanFromStripePlan).mockResolvedValue(SubscriptionPlan.LIFETIME)
+      vi.mocked(formatDate).mockImplementation((t) => (t ? new Date(t * 1000).toISOString() : null))
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(null)
+      vi.spyOn(prisma.subscription, 'upsert').mockResolvedValue({ status: SubscriptionStatus.ACTIVE } as any)
+      vi.spyOn(stripe.refunds, 'create').mockResolvedValue({} as any)
+    }
+
+    it('never grants a refunded purchase, however often the event or link is replayed', async () => {
+      setup(lifetimeSession({ payment_intent: { latest_charge: { refunded: true, amount_refunded: 9900 } } }))
+      await expect(createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' })).resolves.toBeNull()
+      expect(prisma.subscription.upsert).not.toHaveBeenCalled()
+    })
+
+    it('never grants a partially refunded purchase', async () => {
+      setup(lifetimeSession({ payment_intent: { latest_charge: { refunded: false, amount_refunded: 100 } } }))
+      await expect(createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' })).resolves.toBeNull()
+    })
+
+    it('grants a 100%-off purchase that needed no payment', async () => {
+      setup(lifetimeSession({ payment_status: 'no_payment_required' }))
+      await createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' })
+      expect(prisma.subscription.upsert).toHaveBeenCalled()
+    })
+
+    it('does not refund when the "existing" plan is a stale row already cancelled in Stripe', async () => {
+      setup(lifetimeSession({ payment_intent: 'pi_123' }))
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        { id: 'row', stripeSubscriptionId: 'sub_old_monthly', plan: SubscriptionPlan.MONTHLY } as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue({ id: 'sub_old_monthly', status: 'canceled' } as any)
+      await expect(createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' }))
+        .rejects.toThrow('User already has an active subscription')
+      expect(stripe.refunds.create).not.toHaveBeenCalled()
+    })
+
+    it('refunds when the existing monthly plan is really still active in Stripe', async () => {
+      setup(lifetimeSession({ payment_intent: 'pi_123' }))
+      vi.spyOn(prisma.subscription, 'findFirst').mockResolvedValue(
+        { id: 'row', stripeSubscriptionId: 'sub_live', plan: SubscriptionPlan.MONTHLY } as any,
+      )
+      vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue({ id: 'sub_live', status: 'active' } as any)
+      vi.spyOn(stripe.paymentIntents, 'retrieve').mockResolvedValue({ id: 'pi_123', status: 'succeeded' } as any)
+      await expect(createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' }))
+        .rejects.toThrow('User already has an active subscription')
+      expect(stripe.refunds.create).toHaveBeenCalledWith({ payment_intent: 'pi_123' }, { idempotencyKey: 'refund-pi_123' })
+    })
+
+    it('revokes lifetime access when its charge is fully refunded', async () => {
+      vi.spyOn(stripe.checkout.sessions, 'list').mockResolvedValue({ data: [{ id: 'cs_123', mode: 'payment' }] } as any)
+      vi.spyOn(prisma.subscription, 'updateMany').mockResolvedValue({ count: 1 } as any)
+      await expect(revokeRefundedLifetimeAccess({ refunded: true, payment_intent: 'pi_123' } as any)).resolves.toBe(1)
+      expect(prisma.subscription.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+        where: { stripeSubscriptionId: 'cs_123', plan: SubscriptionPlan.LIFETIME },
+        data: expect.objectContaining({ status: SubscriptionStatus.CANCELED }),
+      }))
+    })
+
+    it('keeps access on a partial refund', async () => {
+      vi.spyOn(prisma.subscription, 'updateMany').mockResolvedValue({ count: 0 } as any)
+      await expect(revokeRefundedLifetimeAccess({ refunded: false, payment_intent: 'pi_123' } as any)).resolves.toBeNull()
+      expect(prisma.subscription.updateMany).not.toHaveBeenCalled()
     })
   })
 })

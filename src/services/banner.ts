@@ -4,6 +4,7 @@ import { BannerType } from '@prisma/client'
 import { isAfter, isBefore, parseISO } from 'date-fns'
 import { revalidateBanners } from '@/lib/cache'
 import { getActiveCoupons } from './stripe'
+import { isPublicCoupon } from './pricing'
 import { UnifiedBanner } from '../types'
 
 export const getActiveBanners = async () => {
@@ -55,7 +56,7 @@ export const getUnifiedBanners = async (): Promise<UnifiedBanner[]> => {
     ])
 
     const discountBanners = activeCoupons
-      .filter((coupon) => coupon.valid && coupon.percent_off)
+      .filter((coupon) => isPublicCoupon(coupon) && coupon.percent_off)
       .map((coupon) => {
         const redeemBy = coupon.redeem_by ? new Date(coupon.redeem_by * 1000) : null
         const message = 'Save on Premium'

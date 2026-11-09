@@ -9,10 +9,57 @@ import {
   isProduction,
 } from '@/utils/helpers'
 import { getPlanFromStripePlan } from '@/lib/stripe-plans'
-import { SubscriptionStatus } from '@prisma/client'
+import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import { format } from 'date-fns'
 import Stripe from 'stripe'
 import { CustomerWithUser } from '../types'
+
+// The only failure that justifies cancelling and refunding: the customer already
+// had a different active plan, so this purchase is a genuine duplicate. Every
+// other failure (database, Stripe API, races) is retried by Stripe and must
+// never refund a paying customer.
+export class DuplicateActiveSubscriptionError extends ServiceError {
+  constructor(
+    message: string,
+    public conflicting: { stripeSubscriptionId: string; plan: SubscriptionPlan },
+  ) {
+    super(message, true, { feature: 'subscription', action: 'duplicate-active-subscription' })
+    this.name = 'DuplicateActiveSubscriptionError'
+  }
+}
+
+// Refund only when the plan that makes this purchase a duplicate is really still
+// active in Stripe. A stale ACTIVE row (its cancellation webhook not processed
+// yet) must not cost a customer their new purchase; the event is retried instead.
+const isGenuineDuplicate = async (error: DuplicateActiveSubscriptionError) => {
+  const { stripeSubscriptionId, plan } = error.conflicting
+  if (plan === SubscriptionPlan.LIFETIME) return true
+  try {
+    const existing = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+    return ['active', 'trialing', 'past_due'].includes(existing.status)
+  } catch {
+    return false
+  }
+}
+
+const shouldRefundDuplicate = async (error: unknown, refundDuplicates: boolean) =>
+  refundDuplicates &&
+  error instanceof DuplicateActiveSubscriptionError &&
+  (await isGenuineDuplicate(error))
+
+const isUniqueViolation = (error: unknown) =>
+  typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002'
+
+// The webhook and the checkout return can record the same purchase at the same
+// moment; the loser of the insert race retries and becomes an update.
+const withUniqueRetry = async <T>(write: () => Promise<T>): Promise<T> => {
+  try {
+    return await write()
+  } catch (error) {
+    if (!isUniqueViolation(error)) throw error
+    return write()
+  }
+}
 
 export const getCustomerWithUserOrThrow = async (
   stripeCustomerId: string,
@@ -140,12 +187,14 @@ type SubscriptionManagerArgs = {
   stripeCustomer?: string | Stripe.Customer | Stripe.DeletedCustomer | null
   subscriptionId?: string | Stripe.Subscription | null
   updateAction?: boolean
+  refundDuplicates?: boolean
 }
 
 export const updateSubscriptionDetails = async ({
   stripeCustomer,
   subscriptionId,
   updateAction = false,
+  refundDuplicates = true,
 }: SubscriptionManagerArgs) => {
   try {
     const stripeCustomerId =
@@ -196,20 +245,23 @@ export const updateSubscriptionDetails = async ({
     }
 
     // Use transaction for atomic check + upsert
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await withUniqueRetry(() => prisma.$transaction(async (tx) => {
       const existingActiveSubscription = await tx.subscription.findFirst({
         where: {
           customerId: customer.id,
           status: SubscriptionStatus.ACTIVE,
           NOT: {
-            stripeSubscriptionId: subscriptionId?.toString() ?? '',
+            stripeSubscriptionId: subscription.id,
           },
         },
-        select: { id: true },
+        select: { id: true, stripeSubscriptionId: true, plan: true },
       })
 
       if (existingActiveSubscription?.id && !updateAction) {
-        throw new ServiceError(`User already has an active subscription`)
+        throw new DuplicateActiveSubscriptionError(
+          `User already has an active subscription`,
+          existingActiveSubscription,
+        )
       }
 
       return tx.subscription.upsert({
@@ -217,7 +269,7 @@ export const updateSubscriptionDetails = async ({
         update: subscriptionData,
         create: subscriptionData,
       })
-    })
+    }))
 
     // Revalidation and email AFTER transaction commits
     revalidateSubscription({
@@ -237,7 +289,7 @@ export const updateSubscriptionDetails = async ({
 
     return result
   } catch (err: unknown) {
-    try {
+    if (await shouldRefundDuplicate(err, refundDuplicates)) try {
       await handleFailedRecurringSubscription(subscriptionId)
     } catch (refundErr: unknown) {
       throw new ServiceError(
@@ -261,14 +313,45 @@ export const updateSubscriptionDetails = async ({
   }
 }
 
+const isRefunded = (session: Stripe.Checkout.Session) => {
+  const intent = session.payment_intent
+  const charge =
+    intent && typeof intent === 'object' && intent.latest_charge && typeof intent.latest_charge === 'object'
+      ? intent.latest_charge
+      : null
+  return !!charge && (charge.refunded || charge.amount_refunded > 0)
+}
+
+// A fully refunded one-time purchase loses the lifetime access it granted.
+// (Recurring plans end through Stripe's own subscription events.)
+export const revokeRefundedLifetimeAccess = async (charge: Stripe.Charge) => {
+  if (!charge.refunded || !charge.payment_intent) return null
+  const paymentIntent =
+    typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent.id
+  const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntent, limit: 1 })
+  const session = sessions.data[0]
+  if (!session || session.mode !== 'payment') return null
+  const result = await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId: session.id, plan: SubscriptionPlan.LIFETIME },
+    data: {
+      status: SubscriptionStatus.CANCELED,
+      canceledAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+      updatedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
+    },
+  })
+  return result.count
+}
+
 type OneTimePurchaseManagerArgs = {
   stripeCustomer?: string | null
   sessionId?: string | null
+  refundDuplicates?: boolean
 }
 
 export const createLifetimeAccess = async ({
   stripeCustomer,
   sessionId,
+  refundDuplicates = true,
 }: OneTimePurchaseManagerArgs) => {
   try {
     const stripeCustomerId = stripeCustomer ?? ''
@@ -277,9 +360,17 @@ export const createLifetimeAccess = async ({
 
     // Retrieve Stripe session (external call, outside transaction)
     const session = await stripe.checkout.sessions.retrieve(sessionId ?? '', {
-      expand: ['line_items'],
+      expand: ['line_items', 'payment_intent.latest_charge'],
     })
     const lineItems = session?.line_items
+
+    // Delayed payment methods complete checkout before the money arrives; access
+    // is granted by checkout.session.async_payment_succeeded instead.
+    if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required')
+      return null
+    // A refunded purchase (e.g. refunded as a duplicate) is never granted, however
+    // often the event is retried or the success URL is revisited.
+    if (isRefunded(session)) return null
 
     if (!lineItems)
       throw new ServiceError(`Failed to retrieve subscription details`)
@@ -312,17 +403,21 @@ export const createLifetimeAccess = async ({
     }
 
     // Use transaction for atomic check + upsert
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await withUniqueRetry(() => prisma.$transaction(async (tx) => {
       const existingSubscription = await tx.subscription.findFirst({
         where: {
           customerId: customer.id,
           status: SubscriptionStatus.ACTIVE,
+          NOT: { stripeSubscriptionId: session.id },
         },
-        select: { id: true },
+        select: { id: true, stripeSubscriptionId: true, plan: true },
       })
 
       if (existingSubscription?.id) {
-        throw new ServiceError(`User already has an active subscription`)
+        throw new DuplicateActiveSubscriptionError(
+          `User already has an active subscription`,
+          existingSubscription,
+        )
       }
 
       return tx.subscription.upsert({
@@ -330,7 +425,7 @@ export const createLifetimeAccess = async ({
         update: subscriptionData,
         create: subscriptionData,
       })
-    })
+    }))
 
     // Revalidation and email AFTER transaction commits
     revalidateSubscription({
@@ -350,7 +445,7 @@ export const createLifetimeAccess = async ({
 
     return result
   } catch (err: unknown) {
-    try {
+    if (await shouldRefundDuplicate(err, refundDuplicates)) try {
       await handleFailedOneTimePayment(sessionId)
     } catch (refundErr: unknown) {
       throw new ServiceError(

@@ -305,6 +305,7 @@ export type ActiveCoupon = {
   name: string
   percentOff: number | null
   amountOff: number | null
+  redeemBy?: number | null
 }
 
 export type ProductWithCoupon = Stripe.Product & {

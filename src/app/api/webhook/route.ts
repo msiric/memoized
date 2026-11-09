@@ -1,6 +1,7 @@
 import { STRIPE_WEBHOOK, stripe } from '@/lib/stripe'
 import {
   createLifetimeAccess,
+  revokeRefundedLifetimeAccess,
   updateSubscriptionDetails,
 } from '@/services/subscription'
 import {
@@ -12,6 +13,8 @@ import Stripe from 'stripe'
 
 const relevantEvents = new Set([
   'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'charge.refunded',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
@@ -56,7 +59,8 @@ export async function POST(req: Request) {
           })
           break
         }
-        case 'checkout.session.completed': {
+        case 'checkout.session.completed':
+        case 'checkout.session.async_payment_succeeded': {
           const checkoutSession = event.data.object as Stripe.Checkout.Session
 
           const { id: sessionId, client_reference_id: stripeCustomer } =
@@ -64,6 +68,10 @@ export async function POST(req: Request) {
           if (checkoutSession.mode === 'payment') {
             await createLifetimeAccess({ sessionId, stripeCustomer })
           }
+          break
+        }
+        case 'charge.refunded': {
+          await revokeRefundedLifetimeAccess(event.data.object as Stripe.Charge)
           break
         }
         default:

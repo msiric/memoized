@@ -14,7 +14,6 @@ import {
 import { ServiceError } from '@/lib/sentry'
 import { getURL } from '@/utils/helpers'
 import { revalidateCustomer } from '@/lib/cache'
-import { revalidatePath } from 'next/cache'
 import Stripe from 'stripe'
 
 const createCustomerInStripe = async (userId: string, userEmail: string) => {
@@ -149,10 +148,8 @@ export const createStripeSession = async (
     // This allows retries within the same minute but blocks rapid duplicates
     const timestamp = Math.floor(Date.now() / 60000)
     const checkoutSession = await stripe.checkout.sessions.create(params, {
-      idempotencyKey: `checkout-${customer}-${product.id}-${timestamp}`,
+      idempotencyKey: `checkout-${customer}-${product.default_price?.id}-${product.default_price?.appliedCoupon?.id ?? 'none'}-${timestamp}`,
     })
-
-    revalidatePath('/', 'layout')
 
     return checkoutSession
   } catch (error) {
@@ -184,7 +181,7 @@ export const createBillingPortalSession = async (customer: string) => {
 
 export const getActiveCoupons = async () => {
   try {
-    const coupons = await stripe.coupons.list({ expand: ['data.applies_to'] })
+    const coupons = await stripe.coupons.list({ expand: ['data.applies_to'], limit: 100 })
     return coupons.data
   } catch (error) {
     throw new ServiceError(
@@ -200,6 +197,7 @@ export const getActiveProducts = async () => {
   try {
     const products = await stripe.products.list({
       active: true,
+      limit: 100,
       expand: ['data.default_price'],
     })
     return products.data

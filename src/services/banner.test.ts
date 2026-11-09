@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
-import { getActiveBanners, upsertBanner } from '@/services/banner'
+import { getActiveBanners, getUnifiedBanners, upsertBanner } from '@/services/banner'
+import { getActiveCoupons } from '@/services/stripe'
 import { ServiceError } from '@/lib/sentry'
 import { Banner, BannerType } from '@prisma/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -8,6 +9,8 @@ vi.mock('next/cache', () => ({
   revalidateTag: vi.fn(),
   revalidatePath: vi.fn(),
 }))
+
+vi.mock('@/services/stripe', () => ({ getActiveCoupons: vi.fn() }))
 
 // Mock the Prisma client
 vi.mock('@/lib/prisma', () => ({
@@ -215,6 +218,19 @@ describe('Banner services', () => {
           priority: 1,
         }),
       ).rejects.toThrow(ServiceError)
+    })
+  })
+
+  describe('discount banners', () => {
+    it('advertises only coupons explicitly marked public in Stripe', async () => {
+      vi.mocked(prisma.banner.findMany).mockResolvedValue([])
+      vi.mocked(getActiveCoupons).mockResolvedValue([
+        { id: 'SALE20', name: 'Spring', valid: true, percent_off: 20, redeem_by: null, metadata: { public: 'true' } },
+        { id: 'FRIEND100', name: 'Friend', valid: true, percent_off: 100, redeem_by: null, metadata: {} },
+        { id: 'OLD', name: 'Old', valid: false, percent_off: 50, redeem_by: null, metadata: { public: 'true' } },
+      ] as never)
+      const banners = await getUnifiedBanners()
+      expect(banners.map((banner) => banner.id)).toEqual(['coupon-SALE20'])
     })
   })
 })
