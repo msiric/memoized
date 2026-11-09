@@ -1,10 +1,11 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Problem, ProblemType } from '@prisma/client'
 import { useContentStore } from '@/contexts/progress'
 import { PRACTICE_COMPLETION_NOTE } from '@/lib/problem-presentation'
 import { LessonPreview } from './LessonPreview'
 import { PracticeProblems } from './PracticeProblems'
+import { renderToString } from 'react-dom/server'
 
 const mocks = vi.hoisted(() => ({ session: vi.fn(), mark: vi.fn() }))
 vi.mock('next-auth/react', () => ({ useSession: mocks.session }))
@@ -46,6 +47,11 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+
+// Answers are server-rendered inside a hidden container until revealed.
+const revealedAnswers = () => screen.queryAllByText('Free answer body')
+  .filter((node) => !node.closest('[data-practice-answer]')?.hasAttribute('hidden'))
+
 describe.each(['full', 'preview'] as const)('%s lesson practice', kind => {
   it('uses the same groups, card hierarchy and original question anchors', () => {
     const { container } = render(reader(kind, mixed))
@@ -86,16 +92,16 @@ describe.each(['full', 'preview'] as const)('%s lesson practice', kind => {
     expect(screen.getAllByRole('checkbox')).toHaveLength(mixed.length)
     if (kind === 'full') fireEvent.click(screen.getAllByRole('button', { name: 'Expand' })[0])
     fireEvent.click(screen.getAllByRole('button', { name: 'Reveal answer' })[0])
-    expect(await screen.findByText('Free answer body')).toBeInTheDocument()
+    await waitFor(() => expect(revealedAnswers()).toHaveLength(1))
   })
 
   it('keeps free answer reveal available without revealing it automatically', async () => {
     render(reader(kind, [problem('question', 'CODING')]))
-    expect(screen.queryByText('Free answer body')).not.toBeInTheDocument()
+    expect(revealedAnswers()).toHaveLength(0)
     if (kind === 'full') fireEvent.click(screen.getByRole('button', { name: 'Expand' }))
     expect(screen.getByText('Attempt question.')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Reveal answer' }))
-    expect(await screen.findByText('Free answer body')).toBeInTheDocument()
+    await waitFor(() => expect(revealedAnswers()).toHaveLength(1))
   })
 })
 
@@ -113,4 +119,18 @@ it('preserves an existing mark when a question moves between groups without chan
   expect(useContentStore.getState().completedProblems).toEqual(new Set(['existing-task', 'unrelated']))
   expect(useContentStore.getState().completedLessons).toEqual(new Set(['lesson']))
   expect(mocks.mark).not.toHaveBeenCalled()
+})
+
+describe('preview answers in server HTML', () => {
+  it('serves every free answer collapsed in the initial HTML, before any click', () => {
+    mocks.session.mockReturnValue({ data: null, status: 'unauthenticated' })
+    const html = renderToString(reader('preview', mixed))
+    const hiddenAnswers = html.match(/<div hidden="" data-practice-answer=""[^>]*>/g) ?? []
+    expect(hiddenAnswers).toHaveLength(mixed.length)
+    expect(html.split('Free answer body').length - 1).toBe(mixed.length)
+  })
+  it('does not add answers to collapsed full-lesson cards', () => {
+    mocks.session.mockReturnValue({ data: null, status: 'unauthenticated' })
+    expect(renderToString(reader('full', mixed))).not.toContain('data-practice-answer')
+  })
 })

@@ -86,17 +86,38 @@ const lessonSearchCopy: Partial<
   },
 }
 
+// Owner decision O2 (2026-11-08): premium previews whose free practice does not
+// yet stand on its own. They stay reachable and followed, but are kept out of
+// the index and the sitemap until their content wave expands them.
+export const NOINDEX_LESSON_PATHS: ReadonlySet<string> = new Set([
+  '/courses/dsa-track/advanced-topics/maximum-flow',
+  '/courses/dsa-track/advanced-topics/bloom-filters',
+  '/courses/dsa-track/advanced-topics/randomized-algorithms',
+  '/courses/dsa-track/advanced-topics/union-find',
+  '/courses/dsa-track/common-techniques/graph-dfs',
+])
+
+export function lessonTitleSuffix(path: string) {
+  if (path.startsWith('/courses/js-track/typescript-introduction/'))
+    return 'TypeScript Interview Practice'
+  if (path.startsWith('/courses/dsa-track/')) return 'DSA in JavaScript'
+  return 'JavaScript Interview Practice'
+}
+
 export function lessonMetadata(
   path: string,
   title: string,
   description: string | null,
 ) {
   return pageMetadata({
-    title: `${title} — JavaScript Interview Practice`,
+    title: `${title} — ${lessonTitleSuffix(path)}`,
     description:
       description ||
-      `Explore ${title} and related JavaScript and TypeScript interview practice.`,
+      path.startsWith('/courses/dsa-track/')
+        ? `Learn ${title} in JavaScript with worked examples and data-structure interview practice.`
+        : `Explore ${title} and related ${lessonTitleSuffix(path).replace(' Interview Practice', '')} interview practice.`,
     ...lessonSearchCopy[path],
     path,
+    index: !NOINDEX_LESSON_PATHS.has(path),
   })
 }

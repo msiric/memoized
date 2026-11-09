@@ -17,4 +17,29 @@ describe('Public asset rate-limit isolation', () => {
     expect(middleware(request('/private/file.png')).status).toBe(429)
     expect(middleware(request('/og-image.png', 'SemrushBot')).status).toBe(403)
   })
+
+  it.each(['Mozilla/5.0 (compatible; GPTBot/1.2)', 'Mozilla/5.0 (compatible; ClaudeBot/1.0)', 'CCBot/2.0'])(
+    'admits AI training crawler %s but keeps it inside the per-IP cost guard',
+    async (userAgent) => {
+      vi.resetModules()
+      const { middleware } = await import('./middleware')
+      const request = () => new NextRequest('https://www.memoized.io/courses', {
+        headers: { 'x-forwarded-for': '192.0.2.20', 'user-agent': userAgent },
+      })
+      for (let i = 0; i < 120; i++) expect(middleware(request()).status).toBe(200)
+      expect(middleware(request()).status).toBe(429)
+    },
+  )
+
+  it('lets blocked crawlers read robots.txt so they can see their Disallow', async () => {
+    vi.resetModules()
+    const { middleware } = await import('./middleware')
+    const request = new NextRequest('https://www.memoized.io/robots.txt', {
+      headers: { 'x-forwarded-for': '192.0.2.30', 'user-agent': 'Mozilla/5.0 (compatible; Bytespider)' },
+    })
+    expect(middleware(request).status).toBe(200)
+    expect(middleware(new NextRequest('https://www.memoized.io/courses', {
+      headers: { 'x-forwarded-for': '192.0.2.30', 'user-agent': 'Mozilla/5.0 (compatible; Bytespider)' },
+    })).status).toBe(403)
+  })
 })

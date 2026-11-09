@@ -68,6 +68,32 @@ describe('Search inventory', () => {
     )
     expect(new Set(urls).size).toBe(urls.length)
   })
+  it('leaves noindexed previews out of the sitemap inventory', () => {
+    const urls = searchUrls({
+      ...catalog,
+      courses: [
+        {
+          slug: 'dsa-track',
+          title: 'DSA',
+          description: 'DSA',
+          sections: [
+            {
+              slug: 'advanced-topics',
+              title: 'Advanced',
+              description: 'Advanced',
+              lessons: [
+                { slug: 'union-find', title: 'Union-Find', description: null, access: 'PREMIUM' },
+                { slug: 'tries', title: 'Tries', description: null, access: 'PREMIUM' },
+              ],
+            },
+          ],
+        },
+      ],
+    } as SearchCatalog)
+    expect(urls).not.toContain('https://www.memoized.io/courses/dsa-track/advanced-topics/union-find')
+    expect(urls).toContain('https://www.memoized.io/courses/dsa-track/advanced-topics/tries')
+    expect(urls).toContain('https://www.memoized.io/courses/dsa-track/advanced-topics')
+  })
   it('does not promote an empty blog', () => {
     expect(searchUrls({ ...catalog, posts: [] })).not.toContain(
       'https://www.memoized.io/blog',

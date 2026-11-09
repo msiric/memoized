@@ -72,7 +72,13 @@ export default function RootLayout({
                 url,
                 name: APP_NAME,
                 logo: `${url}/images/brand/logo-dark.png`,
-                founder: { '@type': 'Person', name: 'Mario Siric' },
+                // Confirmed official profiles only (owner decision O6).
+                sameAs: ['https://github.com/msiric/memoized'],
+                founder: {
+                  '@type': 'Person',
+                  name: 'Mario Siric',
+                  sameAs: ['https://github.com/msiric'],
+                },
               },
             ],
           }}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { BLOCKED_CRAWLERS } from '@/lib/crawlers'
 
 // Simple in-memory rate limiting for aggressive crawlers
 // Note: This resets on each serverless cold start
@@ -11,22 +12,8 @@ const MAX_TRACKED_IPS = 10000
 const RATE_LIMIT_WINDOW = 60 * 1000 // 1 minute
 const MAX_REQUESTS_PER_WINDOW = 120 // 120 requests per minute per IP (2 per second)
 
-// Known aggressive bot user agents to block entirely
-const BLOCKED_BOTS = [
-  'bytespider',
-  'petalbot',
-  'semrushbot',
-  'ahrefsbot',
-  'mj12bot',
-  'dotbot',
-  'blexbot',
-  'seekport',
-  'megaindex',
-  'yandexbot',
-  'sogou',
-  'baiduspider',
-  'seznambot',
-]
+// Blocked crawlers are shared with robots.txt (src/lib/crawlers.ts)
+const BLOCKED_BOTS = BLOCKED_CRAWLERS
 
 // Known good bots that should not be rate limited
 const ALLOWED_BOTS = [
@@ -38,8 +25,10 @@ const ALLOWED_BOTS = [
   'twitterbot',
   'facebookexternalhit',
   'linkedinbot',
+  // Fetches made for a person in an AI assistant (not crawls)
   'chatgpt-user',
-  'claude-web',
+  'claude-user',
+  'perplexity-user',
 ]
 
 export function middleware(request: NextRequest) {
@@ -47,6 +36,9 @@ export function middleware(request: NextRequest) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
              request.headers.get('x-real-ip')?.trim() || 
              'unknown'
+
+  // Every crawler may read robots.txt; a 4xx there would mean "no rules".
+  if (request.nextUrl.pathname === '/robots.txt') return NextResponse.next()
 
   for (const bot of BLOCKED_BOTS) {
     if (userAgent.includes(bot)) {
