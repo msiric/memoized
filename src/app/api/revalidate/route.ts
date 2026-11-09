@@ -1,4 +1,5 @@
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
+import { CATALOG_CACHE_TAG } from '@/services/search'
 import { timingSafeEqual } from 'node:crypto'
 
 // Called by the content repository's publish workflow after a successful
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
   const token = header.startsWith('Bearer ') ? header.slice('Bearer '.length) : ''
   if (!matches(token, secret))
     return Response.json({ revalidated: false }, { status: 401, headers: { 'Cache-Control': 'no-store' } })
+  revalidateTag(CATALOG_CACHE_TAG)
   revalidatePath('/public/courses', 'layout')
-  return Response.json({ revalidated: true, scope: '/public/courses' }, { headers: { 'Cache-Control': 'no-store' } })
+  return Response.json({ revalidated: true, scope: ['catalog', '/public/courses'] }, { headers: { 'Cache-Control': 'no-store' } })
 }

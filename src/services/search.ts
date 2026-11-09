@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { unstable_cache } from 'next/cache'
 import {
   coursePath,
   sectionPath,
@@ -9,8 +10,10 @@ import {
 } from '@/lib/seo'
 import { publishedBlogWhere } from '@/lib/blog-publication'
 
+export const CATALOG_CACHE_TAG = 'catalog'
+
 /** Public catalog metadata only; no lesson bodies, answers or user progress. */
-export async function getSearchCatalog() {
+export async function readSearchCatalog() {
   const [courses, resources, posts] = await Promise.all([
     prisma.course.findMany({
       where: { isActive: true },
@@ -51,7 +54,17 @@ export async function getSearchCatalog() {
   return { courses, resources, posts }
 }
 
-export type SearchCatalog = Awaited<ReturnType<typeof getSearchCatalog>>
+export type SearchCatalog = Awaited<ReturnType<typeof readSearchCatalog>>
+
+// The catalog only changes when content is published, yet every uncached page
+// (signed-in lessons, sections, resources, sitemap) read it from the database
+// on each request. Cache it across requests; publishing clears the tag through
+// /api/revalidate, and an hourly revalidate bounds staleness (e.g. a scheduled
+// blog post becomes visible within the hour).
+export const getSearchCatalog = unstable_cache(readSearchCatalog, ['search-catalog-v1'], {
+  tags: [CATALOG_CACHE_TAG],
+  revalidate: 3600,
+})
 
 export function searchUrls(catalog: SearchCatalog): string[] {
   const paths = [

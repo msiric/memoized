@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { POST } from './route'
 
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('next/cache', () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }))
+vi.mock('@/services/search', () => ({ CATALOG_CACHE_TAG: 'catalog' }))
 const SECRET = 'x'.repeat(48)
 const call = (auth?: string) =>
   POST(new Request('https://www.memoized.io/api/revalidate', { method: 'POST', headers: auth ? { authorization: auth } : {} }))
@@ -15,6 +16,7 @@ describe('POST /api/revalidate', () => {
     const response = await call(`Bearer ${SECRET}`)
     expect(response.status).toBe(200)
     expect(revalidatePath).toHaveBeenCalledWith('/public/courses', 'layout')
+    expect(revalidateTag).toHaveBeenCalledWith('catalog')
   })
 
   it.each([undefined, 'Bearer wrong', `Basic ${SECRET}`, `Bearer ${SECRET}x`])('refuses %s', async (auth) => {
