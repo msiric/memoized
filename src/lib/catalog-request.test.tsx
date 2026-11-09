@@ -80,11 +80,11 @@ vi.mock('@/components/CourseCard', () => ({
   ),
 }))
 vi.mock('@/components/ProblemList', () => ({
-  ProblemList: ({ allProblems, filteredProblems }: any) => (
+  ProblemList: ({ allProblems, filteredProblemIds }: any) => (
     <div>
       <div data-testid="all-problems">{allProblems.length}</div>
       <div data-testid="filtered-problems">
-        {filteredProblems.map((p: any) => p.id).join(',')}
+        {filteredProblemIds.join(',')}
       </div>
     </div>
   ),

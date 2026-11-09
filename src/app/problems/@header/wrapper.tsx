@@ -3,51 +3,19 @@
 import { Header } from '@/components/Header'
 import { useProgressInitialization } from '@/hooks/useProblemCompletion'
 import type { ProgressSnapshotResult } from '@/types/progress'
-import { useContentStore } from '@/contexts/progress'
-import {
-  LessonConfig,
-  LessonWithProblems,
-  ProblemConfig,
-  UserWithSubscriptionsAndProgress,
-} from '@/types'
-import { problemListToNavigation } from '@/utils/helpers'
-import { useEffect } from 'react'
+import { UserWithSubscriptionsAndProgress } from '@/types'
+import { useProblemNavigationStore } from '../navigation-store'
 
 export type LayoutProps = {
   userData?: UserWithSubscriptionsAndProgress | null
   progressData?: ProgressSnapshotResult
-  completedLessons?: string[]
-  completedProblems?: string[]
-  problemList?: LessonWithProblems[]
-  allLessons?: LessonConfig[]
-  allProblems?: ProblemConfig[]
 }
 
-export function Wrapper({
-  userData,
-  progressData,
-  problemList,
-  allLessons,
-  allProblems,
-}: LayoutProps) {
+// Catalog totals and the navigation tree arrive once, through the sidebar slot.
+export function Wrapper({ userData, progressData }: LayoutProps) {
   useProgressInitialization(progressData, userData)
-  const updateContent = useContentStore((state) => state.updateContent)
-
-  const navigation = problemListToNavigation(problemList)
-
-  useEffect(() => {
-    updateContent(
-      undefined,
-      undefined,
-      undefined,
-      allLessons,
-      allProblems,
-    )
-  }, [
-    updateContent,
-    allLessons,
-    allProblems,
-  ])
+  // Mobile menu only; populated by the sidebar slot after hydration.
+  const navigation = useProblemNavigationStore((state) => state.navigation)
 
   return <Header navigation={navigation} />
 }

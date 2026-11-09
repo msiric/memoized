@@ -220,3 +220,69 @@
   }
 }
 
+
+/*
+ * Repeated per-row styles for the problem bank and badges. Kept as component
+ * classes so 500+ server-rendered rows do not each carry the full utility list.
+ * Visual output is identical to the utilities they replace.
+ */
+@layer components {
+  .pl-row {
+    @apply border-b border-zinc-200 bg-white transition-colors last:border-b-0 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700/50;
+  }
+  .pl-cell {
+    @apply px-6 py-4 text-center;
+  }
+  .pl-title-cell {
+    @apply max-w-[300px] whitespace-nowrap px-6 py-4 font-medium text-zinc-900 dark:text-white;
+  }
+  .pl-title {
+    @apply whitespace-pre-wrap text-left transition-colors;
+  }
+  .pl-title-theory {
+    @apply text-lime-600 hover:text-lime-700 dark:text-lime-400 dark:hover:text-lime-300;
+  }
+  .pl-title-coding {
+    @apply text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300;
+  }
+  .pl-check {
+    @apply h-4 w-4 cursor-pointer accent-lime-500;
+  }
+  .badge-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+  .badge-coding {
+    @apply bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200/50 dark:bg-indigo-900/30 dark:text-indigo-300 dark:ring-indigo-500/30;
+  }
+  .badge-theory {
+    @apply bg-lime-100 text-lime-700 ring-1 ring-lime-200/50 dark:bg-lime-900/30 dark:text-lime-300 dark:ring-lime-500/30;
+  }
+  .badge-difficulty {
+    @apply badge-pill bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300;
+  }
+  .badge-dots {
+    @apply flex items-center gap-0.5;
+  }
+  .badge-dot-on {
+    @apply h-1.5 w-1.5 rounded-full bg-zinc-500 dark:bg-zinc-300;
+  }
+  .badge-dot-off {
+    @apply h-1.5 w-1.5 rounded-full bg-zinc-300 dark:bg-zinc-500;
+  }
+  .badge-lesson {
+    @apply inline-flex items-center gap-1 rounded-full bg-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-300 hover:text-zinc-900 dark:bg-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-500 dark:hover:text-zinc-100;
+  }
+}
+
+/* Sidebar links repeat hundreds of times per page (lessons and the problem bank). */
+@layer components {
+  .nav-link {
+    @apply flex items-center justify-between gap-2 py-1 text-sm transition;
+  }
+  .nav-link-active {
+    @apply font-semibold text-zinc-900 dark:text-white;
+  }
+  .nav-link-idle {
+    @apply text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white;
+  }
+}

@@ -10,10 +10,10 @@ import ProblemsPage from './page'
 vi.mock('@/lib/catalog-request', () => ({ getProblemBankSnapshot: vi.fn() }))
 vi.mock('@/utils/helpers', () => ({ filterAndSortProblems: vi.fn() }))
 vi.mock('@/components/ProblemList', () => ({
-  ProblemList: ({ allProblems, filteredProblems, initialLessons }: any) => (
+  ProblemList: ({ allProblems, filteredProblemIds, initialLessons }: any) => (
     <div data-testid="problem-list">
-      Mocked ProblemList (All Problems: {allProblems.length}, Filtered Problems:{' '}
-      {filteredProblems.length}, Lessons: {initialLessons.length})
+      Mocked ProblemList (All Problems: {allProblems.length}, Filtered IDs:{' '}
+      {filteredProblemIds.join(',')}, Lessons: {initialLessons.length})
     </div>
   ),
 }))
@@ -21,6 +21,7 @@ vi.mock('@/components/ProblemList', () => ({
 describe('ProblemsPage component', () => {
   beforeEach(() => {
     vi.resetAllMocks()
+    vi.mocked(filterAndSortProblems).mockReturnValue([])
   })
 
   it('renders ProblemList with correct props', async () => {
@@ -48,7 +49,8 @@ describe('ProblemsPage component', () => {
     const problemList = screen.getByTestId('problem-list')
     expect(problemList).toBeDefined()
     expect(problemList.textContent).toContain('All Problems: 2')
-    expect(problemList.textContent).toContain('Filtered Problems: 1')
+    // Only IDs cross to the client for the filtered view; rows are sent once.
+    expect(problemList.textContent).toContain('Filtered IDs: 1,')
     expect(problemList.textContent).toContain('Lessons: 2')
   })
 

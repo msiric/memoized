@@ -7,9 +7,14 @@ import { G3bLocalPractice } from './G3bLocalPractice'
 import { ProblemQuestion } from './ProblemQuestion'
 import { useContentStore } from '@/contexts/progress'
 import { useProblemCompletion } from '@/hooks/useProblemCompletion'
-import { ProblemFilter, EnrichedProblem, ProblemStatus } from '@/types'
+import {
+  PROBLEM_CONTENT_SETTLE_MS,
+  prefetchProblemContent,
+  useProblemContent,
+} from '@/hooks/useProblemContent'
+import { ProblemFilter, EnrichedProblem, ProblemBankLesson, ProblemBankRow, ProblemStatus } from '@/types'
 import { filterAndSortProblems } from '@/utils/helpers'
-import { Lesson, ProblemDifficulty, ProblemType } from '@prisma/client'
+import { ProblemDifficulty, ProblemType } from '@prisma/client'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
@@ -28,6 +33,7 @@ import {
   TypeBadge,
   DifficultyBadge,
   LessonBadge,
+  ProblemTypeIconSprite,
   ThinkingPrompt,
 } from './ProblemCard/shared'
 
@@ -49,33 +55,25 @@ const ProblemRow = memo(
     const isTheory = problem.type === ProblemType.THEORY
     const { isCompleted, isPending, isDisabled, error, setCompleted } = useProblemCompletion(problem.id)
     return (
-      <tr
-        key={problem.id}
-        className="border-b border-zinc-200 bg-white last:border-b-0 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700/50"
-      >
-        <td className="max-w-[300px] whitespace-nowrap px-6 py-4 font-medium text-zinc-900 dark:text-white">
+      <tr key={problem.id} className="pl-row">
+        <td className="pl-title-cell">
           <button
             onClick={() => handleShowAnswer(problem)}
-            className={clsx(
-              'whitespace-pre-wrap text-left transition-colors',
-              isTheory
-                ? 'text-lime-600 hover:text-lime-700 dark:text-lime-400 dark:hover:text-lime-300'
-                : 'text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300',
-            )}
+            className={clsx('pl-title', isTheory ? 'pl-title-theory' : 'pl-title-coding')}
           >
             {problem.title}
           </button>
         </td>
-        <td className="px-6 py-4 text-center">
+        <td className="pl-cell">
           <DifficultyBadge difficulty={problem.difficulty} />
         </td>
-        <td className="px-6 py-4 text-center">
-          <LessonBadge title={problem.lesson.title} href={problem.lesson.href} />
+        <td className="pl-cell">
+          {problem.lesson.href && <LessonBadge title={problem.lesson.title} href={problem.lesson.href} />}
         </td>
-        <td className="px-6 py-4 text-center">
-          <TypeBadge type={problem.type} />
+        <td className="pl-cell">
+          <TypeBadge type={problem.type} spriteIcons />
         </td>
-        <td className="px-6 py-4 text-center">
+        <td className="pl-cell">
           <input
             type="checkbox"
             aria-label={`Mark "${problem.title}" complete`}
@@ -88,7 +86,7 @@ const ProblemRow = memo(
                 trackLearningEvent('problem_marked_complete', { content_id: problem.id, source: 'practice' })
               }
             }}
-            className="form-checkbox h-4 w-4 cursor-pointer accent-lime-500"
+            className="form-checkbox pl-check"
           />
           {isPending && <span role="status" className="block text-xs">Saving progress…</span>}
           {error && <span role="alert" className="block text-xs text-red-600 dark:text-red-400">{error}</span>}
@@ -104,13 +102,31 @@ type RevealStage = 'question' | 'answer'
 
 type ProblemSlideOverContentProps = {
   problem: EnrichedProblem
+  /** [previous, next] problem ids in the drawer sequence. */
+  neighbourIds?: [string | undefined, string | undefined]
 }
 
 const ProblemSlideOverContent = ({
   problem,
+  neighbourIds = [undefined, undefined],
 }: ProblemSlideOverContentProps) => {
   const [stage, setStage] = useState<RevealStage>('question')
   const { isCompleted, isPending, isDisabled, error, setCompleted } = useProblemCompletion(problem.id)
+  const content = useProblemContent(problem.id)
+  const loaded = content.status === 'ready' ? content.content : null
+  const [previousId, nextId] = neighbourIds
+
+  // Once this problem has stayed on screen, warm prev/next so stepping is
+  // instant. Waiting for the drawer to settle keeps a held arrow key from
+  // chaining one prefetch per step.
+  useEffect(() => {
+    if (!loaded) return
+    const timer = setTimeout(() => {
+      prefetchProblemContent(nextId)
+      prefetchProblemContent(previousId)
+    }, PROBLEM_CONTENT_SETTLE_MS)
+    return () => clearTimeout(timer)
+  }, [loaded, nextId, previousId])
 
   const isTheory = problem.type === 'THEORY'
   const isNative = isNativeCodingProblem(problem)
@@ -195,8 +211,26 @@ const ProblemSlideOverContent = ({
       {isPending && <p role="status" className="text-sm">Saving progress…</p>}
       {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
+      {content.status === 'loading' && (
+        <p role="status" className="text-sm text-zinc-500 dark:text-zinc-400">
+          Loading question…
+        </p>
+      )}
+      {content.status === 'error' && (
+        <div role="alert" className="space-y-2 text-sm text-red-600 dark:text-red-400">
+          <p>This question couldn&apos;t be loaded.</p>
+          <button
+            type="button"
+            onClick={content.retry}
+            className="rounded-md px-2 py-1 font-medium text-zinc-700 ring-1 ring-zinc-300 hover:bg-zinc-50 dark:text-zinc-200 dark:ring-zinc-600 dark:hover:bg-zinc-800"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
       {/* Question */}
-      {problem.question && (
+      {loaded?.question && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -207,8 +241,8 @@ const ProblemSlideOverContent = ({
           </span>
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 sm:p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
             <ProblemQuestion
-              question={problem.question}
-              serializedQuestion={problem.serializedQuestion}
+              question={loaded.question}
+              serializedQuestion={loaded.serializedQuestion}
               className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
             />
           </div>
@@ -219,11 +253,11 @@ const ProblemSlideOverContent = ({
 
       {/* Stage-specific content */}
       <AnimatePresence mode="wait">
-        {stage === 'question' && (
+        {stage === 'question' && loaded && (
           <ThinkingPrompt key="thinking" onReveal={handleRevealAnswer} isTheory={isTheory} />
         )}
 
-        {stage === 'answer' && (
+        {stage === 'answer' && loaded && (
           <motion.div
             key="answer"
             initial={{ opacity: 0, y: 10 }}
@@ -232,7 +266,7 @@ const ProblemSlideOverContent = ({
             className="space-y-4"
           >
             {/* Answer content */}
-            {problem.serializedAnswer && (
+            {loaded.serializedAnswer && (
               <div className="space-y-2">
                 <span className={clsx(
                   PROBLEM_CARD.sectionLabel,
@@ -242,7 +276,7 @@ const ProblemSlideOverContent = ({
                 </span>
                 <div className="rounded-lg bg-white p-3 sm:p-4 ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700">
                   <PreserializedMdxRenderer
-                    serializedContent={problem.serializedAnswer}
+                    serializedContent={loaded.serializedAnswer}
                     withPadding={false}
                     showFooter={false}
                     showNextPage={false}
@@ -279,16 +313,30 @@ const ProblemSlideOverContent = ({
 }
 
 type ProblemListProps = {
-  allProblems: EnrichedProblem[]
-  filteredProblems: EnrichedProblem[]
-  initialLessons: Partial<Lesson>[]
+  allProblems: ProblemBankRow[]
+  // IDs rather than a second copy of the rows keeps the server payload single.
+  filteredProblemIds: string[]
+  initialLessons: ProblemBankLesson[]
 }
 
+const MISSING_LESSON = { title: '', slug: '', href: '' }
+
 export const ProblemList = ({
-  allProblems,
-  filteredProblems,
+  allProblems: rows,
+  filteredProblemIds,
   initialLessons,
 }: ProblemListProps) => {
+  const allProblems = useMemo<EnrichedProblem[]>(() => {
+    const lessonById = new Map(initialLessons.map((lesson) => [lesson.id, lesson]))
+    return rows.map(({ lessonId, ...row }) => {
+      const lesson = lessonById.get(lessonId) ?? MISSING_LESSON
+      return {
+        ...row,
+        lesson: { title: lesson.title, slug: lesson.slug, href: lesson.href },
+        problemProgress: [],
+      }
+    })
+  }, [rows, initialLessons])
   const completedProblems = useContentStore((state) => state.completedProblems)
   const progressStatus = useContentStore((state) => state.progressStatus)
   const confirmedProblems = useMemo(() => allProblems.map((problem) => ({
@@ -311,8 +359,11 @@ export const ProblemList = ({
   )
   const selectedProblem = drawerProblems[selectedProblemIndex]
 
-  const [problems, setProblems] = useState<EnrichedProblem[]>(filteredProblems)
-  const [lessons] = useState<Partial<Lesson>[]>(initialLessons)
+  const [problems, setProblems] = useState<EnrichedProblem[]>(() => {
+    const byId = new Map(allProblems.map((problem) => [problem.id, problem]))
+    return filteredProblemIds.flatMap((id) => byId.get(id) ?? [])
+  })
+  const lessons = initialLessons
   const [search, setSearch] = useState(
     searchParams?.get('search')?.toLowerCase() || '',
   )
@@ -595,6 +646,7 @@ export const ProblemList = ({
             Reset Filters
           </button>
         </div>
+        <ProblemTypeIconSprite />
         <div className="relative mx-auto max-w-[1024px] overflow-x-auto rounded-lg border border-zinc-300 shadow-lg dark:border-zinc-600">
           <table className="w-full overflow-hidden rounded-lg text-left text-sm text-zinc-500 rtl:text-right dark:text-zinc-400">
             <thead className="border-b border-zinc-300 bg-zinc-50 text-xs uppercase text-zinc-700 dark:border-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
@@ -673,6 +725,10 @@ export const ProblemList = ({
           <ProblemSlideOverContent
             key={selectedProblem.id}
             problem={selectedProblem}
+            neighbourIds={[
+              drawerProblems[selectedProblemIndex - 1]?.id,
+              drawerProblems[selectedProblemIndex + 1]?.id,
+            ]}
           />
         )}
       </SlideOverPanel>

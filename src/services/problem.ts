@@ -53,33 +53,42 @@ export const markProblemProgress = async ({
   return result
 }
 
+// Bodies are excluded: sending all 508 serialized questions and answers made
+// /problems a 32 MB document. The drawer fetches one problem via getProblemContent.
+const problemListSelect = {
+  id: true,
+  lessonId: true,
+  contentId: true,
+  title: true,
+  href: true,
+  difficulty: true,
+  type: true,
+  lesson: {
+    select: {
+      title: true,
+      slug: true,
+      href: true,
+    },
+  },
+} as const
+
+export const getProblemContent = async (id: string) =>
+  prisma.problem.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      question: true,
+      serializedQuestion: true,
+      serializedAnswer: true,
+    },
+  })
+
 const getAllProblemsAndLessons = async () => {
   const [problems, lessons] = await Promise.all([
-    prisma.problem.findMany({
-      select: {
-        id: true,
-        contentId: true,
-        title: true,
-        href: true,
-        link: true,
-        difficulty: true,
-        question: true,
-        type: true,
-        slug: true,
-        serializedQuestion: true,
-        serializedAnswer: true,
-        lesson: {
-          select: {
-            title: true,
-            slug: true,
-            href: true,
-          },
-        },
-      },
-    }),
+    prisma.problem.findMany({ select: problemListSelect }),
     prisma.lesson.findMany({
       orderBy: { title: 'asc' },
-      select: { title: true, slug: true },
+      select: { id: true, title: true, slug: true, href: true },
     }),
   ])
   return { problems, lessons }
@@ -116,24 +125,7 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
   const [problems, lessons] = await Promise.all([
     prisma.problem.findMany({
       select: {
-        id: true,
-        contentId: true,
-        title: true,
-        href: true,
-        link: true,
-        difficulty: true,
-        question: true,
-        type: true,
-        slug: true,
-        serializedQuestion: true,
-        serializedAnswer: true,
-        lesson: {
-          select: {
-            title: true,
-            slug: true,
-            href: true,
-          },
-        },
+        ...problemListSelect,
         problemProgress: {
           where: {
             userId,
@@ -147,7 +139,7 @@ export const getProblems = async (filter: ProblemFilter = {}) => {
     }),
     prisma.lesson.findMany({
       orderBy: { title: 'asc' },
-      select: { title: true, slug: true },
+      select: { id: true, title: true, slug: true, href: true },
     }),
   ])
 

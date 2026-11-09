@@ -1,4 +1,4 @@
-import { Curriculum, LessonConfig, ProblemConfig } from '@/types'
+import { Curriculum, ProblemConfig } from '@/types'
 import type { ProgressSnapshot, ProgressSnapshotResult } from '@/types/progress'
 import { create } from 'zustand'
 
@@ -13,7 +13,7 @@ interface ContentStore {
   confirmedLessonChanges: Map<string, boolean>
   confirmedProblemChanges: Map<string, boolean>
   fullCurriculum: Curriculum[]
-  allLessons: LessonConfig[]
+  allLessons: ProblemConfig[]
   allProblems: ProblemConfig[]
   currentLessonProgress: number
   currentProblemProgress: number
@@ -27,14 +27,14 @@ interface ContentStore {
     completedLessons?: string[],
     completedProblems?: string[],
     fullCurriculum?: Curriculum[],
-    allLessons?: LessonConfig[],
+    allLessons?: ProblemConfig[],
     allProblems?: ProblemConfig[],
   ) => void
   initializeContent: (
     completedLessons: string[],
     completedProblems: string[],
     fullCurriculum: Curriculum[],
-    allLessons: LessonConfig[],
+    allLessons: ProblemConfig[],
     allProblems: ProblemConfig[],
   ) => void
   toggleCompletedLesson: (lessonId: string) => void
