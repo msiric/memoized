@@ -90,7 +90,7 @@ describe('signed-out lesson cache routing', () => {
     expect(rewrite(middleware(req('/courses/a/b/c', init)))).toBeNull()
   })
 
-  it.each(['/courses/a/b/c?path=typescript-first-pass', '/courses/a/b/c?step=2', '/courses/a/b', '/courses/a', '/problems'])(
+  it.each(['/courses/a/b/c?path=typescript-first-pass', '/courses/a/b/c?step=2', '/courses/a/b', '/courses/a'])(
     'does not rewrite %s', async (url) => {
       const middleware = await load()
       expect(rewrite(middleware(req(url)))).toBeNull()
@@ -107,5 +107,60 @@ describe('signed-out lesson cache routing', () => {
     const response = middleware(req('/public/courses/a/b/c?x=1'))
     expect(response.status).toBe(308)
     expect(response.headers.get('location')).toBe('https://www.memoized.io/courses/a/b/c?x=1')
+  })
+})
+
+describe('signed-out cache routing for public pages', () => {
+  const load = async () => { vi.resetModules(); return (await import('./middleware')).middleware }
+  const req = (url: string, cookie?: string) => new NextRequest(`https://www.memoized.io${url}`, {
+    headers: { 'x-forwarded-for': '192.0.2.60', 'user-agent': 'Example browser', ...(cookie ? { cookie } : {}) },
+  })
+  const rewrite = (response: Response) => response.headers.get('x-middleware-rewrite')
+
+  it.each(['/courses', '/problems', '/resources', '/resources/promise-internals', '/problems?_rsc=abc'])(
+    'serves %s to signed-out visitors from the cached tree', async (url) => {
+      const middleware = await load()
+      expect(rewrite(middleware(req(url)))).toContain(`/public${url.split('?')[0]}`)
+    },
+  )
+
+  it.each([
+    '/courses?upgradedToPremium=true&sessionId=cs_1',
+    '/problems?difficulty=EASY',
+    '/problems?utm_source=x',
+    '/premium',
+    '/courses/js-track',
+    '/blog',
+    '/',
+  ])('keeps the live route for %s', async (url) => {
+    const middleware = await load()
+    expect(rewrite(middleware(req(url)))).toBeNull()
+  })
+
+  it('keeps the live route for signed-in visitors', async () => {
+    const middleware = await load()
+    expect(rewrite(middleware(req('/problems', '__Secure-next-auth.session-token=x')))).toBeNull()
+  })
+})
+
+describe('signed-out cache routing edge cases', () => {
+  const load = async () => { vi.resetModules(); return (await import('./middleware')).middleware }
+  const req = (url: string, init: { method?: string; cookie?: string } = {}) => new NextRequest(`https://www.memoized.io${url}`, {
+    method: init.method ?? 'GET',
+    headers: { 'x-forwarded-for': '192.0.2.70', 'user-agent': 'Example browser', ...(init.cookie ? { cookie: init.cookie } : {}) },
+  })
+  const rewrite = (response: Response) => response.headers.get('x-middleware-rewrite')
+  it('serves HEAD from the cached tree too', async () => {
+    expect(rewrite((await load())(req('/courses', { method: 'HEAD' })))).toContain('/public/courses')
+  })
+  it('keeps the live route when _rsc comes with a real query', async () => {
+    expect(rewrite((await load())(req('/problems?_rsc=x&difficulty=EASY')))).toBeNull()
+  })
+  it('keeps the live route for chunked session cookies on public pages', async () => {
+    expect(rewrite((await load())(req('/resources', { cookie: '__Secure-next-auth.session-token.0=x' })))).toBeNull()
+  })
+  it('leaves the /resources/intro redirect on the live route', async () => {
+    expect(rewrite((await load())(req('/resources/intro')))).toBeNull()
+    expect(rewrite((await load())(req('/resources/introduction')))).toContain('/public/resources/introduction')
   })
 })

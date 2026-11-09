@@ -47,7 +47,9 @@ export const TopBanner: React.FC<TopBannerProps> = ({
       const difference = countdownTo - now
 
       if (difference <= 0) {
+        // The sale is over: hide it even if a cached page still carries it.
         setTimeLeft('')
+        setIsVisible(false)
         return
       }
 
