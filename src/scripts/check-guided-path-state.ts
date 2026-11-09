@@ -265,7 +265,15 @@ class Reader {
       interceptResponse = true
       this.holdNextMark = false
     }
-    await this.cdp.send('Fetch.continueRequest', { requestId: event.requestId, interceptResponse })
+    try {
+      await this.cdp.send('Fetch.continueRequest', { requestId: event.requestId, interceptResponse })
+    } catch (error) {
+      // A read held by pace() (e.g. a problem-drawer prefetch) is cancelled by
+      // the browser when the page navigates before its slot opens. That is not
+      // an app failure. Progress saves still fail loudly.
+      if (!interceptResponse && /Invalid InterceptionId/.test(String(error))) return
+      throw error
+    }
   }
 
   assertConfirmation(index: number) {
