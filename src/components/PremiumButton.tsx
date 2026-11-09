@@ -1,5 +1,6 @@
 'use client'
 
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { createPortal } from '@/actions/createPortal'
 import { useAuthStore } from '@/contexts/auth'
 import { CustomError, handleError } from '@/lib/sentry'
@@ -8,7 +9,7 @@ import { CustomResponse, handleResponse } from '@/utils/response'
 import { SubscriptionPlan, SubscriptionStatus } from '@prisma/client'
 import clsx from 'clsx'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { useState } from 'react'
 import { HiSparkles } from 'react-icons/hi2'
@@ -25,7 +26,7 @@ export const PREMIUM_BUTTON_STYLES = {
 }
 
 export const PremiumButton = () => {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const user = useAuthStore((state) => state.user)

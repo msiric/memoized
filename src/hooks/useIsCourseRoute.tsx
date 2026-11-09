@@ -1,8 +1,8 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { useSitePathname } from '@/hooks/useSitePathname'
 
 export const useIsCourseRoute = (): boolean => {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   return pathname.startsWith('/course')
 }

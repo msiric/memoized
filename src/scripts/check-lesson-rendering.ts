@@ -78,6 +78,24 @@ function cachePolicy(value: string | null | undefined) {
   assert(!/(?:^|,)\s*s-maxage\s*=\s*[1-9]\d*/i.test(value), 'Shared caches must not retain session-dependent responses')
 }
 
+// Signed-out, non-guided lesson reads are served from the cached /public tree
+// (owner decision P1/P2, 2026-11-09): shared caches may keep them, and content
+// publishing refreshes them through the secured revalidate endpoint.
+function publicCachePolicy(value: string | null | undefined) {
+  assert(value, 'Cached signed-out responses must declare Cache-Control')
+  assert(/(?:^|,)\s*s-maxage\s*=\s*[1-9]\d*/i.test(value), 'Signed-out lessons must be cacheable by the CDN')
+  assert(!/(?:^|,)\s*(?:private|no-store)(?:\s*,|$)/i.test(value), 'Signed-out lessons must not be marked private/no-store')
+}
+
+async function revalidatePublicLessons(origin: string) {
+  const secret = process.env.REVALIDATE_SECRET
+  assert(secret && secret.length >= 32, 'CI must configure REVALIDATE_SECRET for the publish refresh path')
+  const response = await fetch(`${origin}/api/revalidate`, {
+    method: 'POST', headers: { authorization: `Bearer ${secret}` }, signal: AbortSignal.timeout(30_000),
+  })
+  assert.equal(response.status, 200, 'The publish refresh endpoint must accept the configured secret')
+}
+
 function checkManifests() {
   const prerender: unknown = JSON.parse(fs.readFileSync('.next/prerender-manifest.json', 'utf8'))
   const appPaths: unknown = JSON.parse(fs.readFileSync('.next/server/app-paths-manifest.json', 'utf8'))
@@ -210,6 +228,9 @@ async function main() {
     ])
     assert(isDeepStrictEqual(await readFixture(prisma), original), 'Exact fixture restoration failed')
     mutationAttempted = false
+    // Cached signed-out pages must not keep serving the mutated fixture to
+    // later cases or to the next server process (the ISR cache is on disk).
+    await revalidatePublicLessons(origin)
   }
   const run = async (name: string, test: (page: Page) => Promise<void>, user: typeof profiles[number] = null, width = 375) => {
     const result = { name, successful: false }
@@ -350,6 +371,9 @@ async function main() {
         assert(original)
         const isGuided = guided && mode === 'on'
         const hasBody = user === 'g4-ci-premium' && !isGuided
+        // Only signed-out reads without a guided query take the cached route.
+        const cachedSignedOut = user === null && !guided
+        const policy = cachedSignedOut ? publicCachePolicy : cachePolicy
         const url = `${origin}${guided ? firstPassHref(TS_FIRST_PASS_STEPS[0].id) : `${TS_BASICS_HREF}#${TS_FIRST_PASS_STEPS[0].id}`}`
         for (const fresh of [false, true]) {
           const expectedDescription: string | null = fresh ? newDescription : original.lesson.description
@@ -358,7 +382,7 @@ async function main() {
           const result = await readDocument(page, url, fresh)
           assert.equal(result.response.status(), 200)
           assert.equal(page.url(), url, 'Freshness must not use a different URL or cache-busting query')
-          cachePolicy(result.response.headers()['cache-control'])
+          policy(result.response.headers()['cache-control'])
           assert.equal(result.text.includes(oldBody), hasBody && !fresh, 'Raw document/embedded RSC old body projection differs')
           assert.equal(result.text.includes(newBody), hasBody && fresh, 'Raw document/embedded RSC new body projection differs')
           await page.waitForSelector(`#${TS_FIRST_PASS_STEPS[0].id}`)
@@ -408,7 +432,7 @@ async function main() {
           publish()
           assert.equal(rsc.status, 200)
           assert(rsc.contentType?.includes('text/x-component'), 'Expected an actual RSC representation')
-          cachePolicy(rsc.cacheControl)
+          policy(rsc.cacheControl)
           assert.deepEqual(rsc.markers, [hasBody && !fresh, hasBody && fresh, fresh, true], 'Flight projection/freshness differs')
           await page.screenshot({ path: path.join(output, `lesson-rendering-${mode}-${name}-${fresh ? 'fresh' : 'original'}.png`) })
           if (!fresh) {
@@ -429,6 +453,8 @@ async function main() {
                 updatedAt: new Date(),
               } }),
             ])
+            // What content publishing does after a release.
+            if (cachedSignedOut) await revalidatePublicLessons(origin)
           }
         }
       }, user, guided ? 1024 : 375)

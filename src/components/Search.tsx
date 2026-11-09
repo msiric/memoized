@@ -1,11 +1,12 @@
 'use client'
 
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { useAuthStore } from '@/contexts/auth'
 import { useContentStore } from '@/contexts/progress'
 import { useDebounce } from '@/hooks/useDebounce'
 import { Dialog, Transition } from '@headlessui/react'
 import clsx from 'clsx'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Fragment,
   Suspense,
@@ -329,7 +330,7 @@ function SearchDialog({
         setOpen(false)
       },
     })
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   const searchParams = useSearchParams()
 
   useEffect(() => {

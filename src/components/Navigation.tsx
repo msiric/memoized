@@ -1,5 +1,6 @@
 'use client'
 
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { createPortal } from '@/actions/createPortal'
 import { useIsInsideMobileNavigation } from '@/components/MobileNavigation'
 import { useSectionStore } from '@/providers/SectionProvider'
@@ -25,7 +26,7 @@ import {
 import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
 import { memo, useEffect, useRef, useState } from 'react'
 import { AuthButton } from './AuthButton'
@@ -56,7 +57,7 @@ const SectionLink = memo(
     completedKey?: CompletedKey
     children: React.ReactNode
   }) => {
-    const pathname = usePathname()
+    const pathname = useSitePathname()
 
     const completedItems = useContentStore((state) => state[completedKey])
 
@@ -143,7 +144,7 @@ const NavLink = memo(
     isAnchorLink?: boolean
     completedKey?: CompletedKey
   }) => {
-    const pathname = usePathname()
+    const pathname = useSitePathname()
 
     const userData = useAuthStore((state) => state.user)
     const completedItems = useContentStore((state) => state[completedKey])
@@ -280,7 +281,7 @@ const NavigationGroup = memo(
     // The state will still update when we re-open (re-render) the navigation.
     const isInsideMobileNavigation = useIsInsideMobileNavigation()
     const [pathname, sections] = useInitialValue(
-      [usePathname(), useSectionStore((s) => s.sections)],
+      [useSitePathname(), useSectionStore((s) => s.sections)],
       isInsideMobileNavigation,
     )
 
@@ -448,7 +449,7 @@ export const NavPremiumButton = memo(() => {
 NavPremiumButton.displayName = 'NavPremiumButton'
 
 export const Navigation = ({ navigation, ...props }: NavigationProps) => {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
   const navigationLinks = useNavigationLinks()
 
   const completedItems = useContentStore((state) => state.completedLessons)

@@ -1,6 +1,7 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { useSitePathname } from '@/hooks/useSitePathname'
+
 import { COURSES_PREFIX, PROBLEMS_PREFIX, RESOURCES_PREFIX } from '../constants'
 
 export const useNavigationLinks = (
@@ -10,7 +11,7 @@ export const useNavigationLinks = (
     { title: 'Resources', href: RESOURCES_PREFIX },
   ],
 ) => {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
 
   return options.filter((option) => !pathname.startsWith(option.href))
 }

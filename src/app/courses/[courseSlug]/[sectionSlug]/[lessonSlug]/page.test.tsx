@@ -4,6 +4,7 @@ import { userHasAccess } from '@/utils/helpers'
 import { cleanup, render, screen } from '@testing-library/react'
 import { getServerSession } from 'next-auth'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { LessonView } from '@/app/courses/lesson-view'
 import Lesson, { generateMetadata } from './page'
 import * as lessonRoute from './page'
 import type { ReactNode } from 'react'
@@ -121,6 +122,27 @@ describe('Lesson component', () => {
     expect(screen.getByRole('link', { name: `Next: ${titles[2]}` })).toHaveAttribute('href', `/courses/dsa-track/common-techniques/${slugs[2]}`)
     expect(document.body.textContent?.includes('PREMIUM_SECRET_CONTENT')).toBe(hasAccess)
   })
+
+  it.each([['PREMIUM', false], ['FREE', true]] as const)(
+    'cached signed-out render shows a %s body only when free, never reads the session',
+    async (access, bodyShown) => {
+      // Even if a premium session existed and access checks said yes, the
+      // signed-out render must not use them.
+      vi.mocked(getServerSession).mockResolvedValue({ userId: 'premium-user' } as never)
+      vi.mocked(userHasAccess).mockReturnValue(true)
+      vi.mocked(getLessonBySlug).mockResolvedValue({
+        id: 'lesson', contentId: 'lesson', title: 'Example lesson', description: 'Public introduction',
+        serializedBody: { compiledSource: 'PREMIUM_SECRET_CONTENT' }, access, problems: [],
+        section: { slug: 'common-techniques', course: { slug: 'dsa-track' } },
+      } as never)
+      const page = await LessonView({
+        params: { courseSlug: 'dsa-track', sectionSlug: 'common-techniques', lessonSlug: 'example' },
+        signedOut: true,
+      })
+      expect(renderToStaticMarkup(page).includes('PREMIUM_SECRET_CONTENT')).toBe(bodyShown)
+      expect(getServerSession).not.toHaveBeenCalled()
+    },
+  )
 
   it('declares request-time rendering without build-time lesson enumeration', () => {
     expect(lessonRoute.dynamic).toBe('force-dynamic')

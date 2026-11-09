@@ -1,10 +1,10 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { useSitePathname } from '@/hooks/useSitePathname'
 import { COURSES_PREFIX } from '../constants'
 
 export const useCourseSlug = (): string | null => {
-  const pathname = usePathname()
+  const pathname = useSitePathname()
 
   if (!pathname.startsWith(COURSES_PREFIX)) {
     return null

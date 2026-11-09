@@ -1,5 +1,5 @@
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { getUserProgressWithCurriculum } from '@/services/user'
+import { getCourseNavigationSnapshot } from '@/lib/course-navigation-request'
 import { Curriculum, LessonConfig, ProblemConfig } from '@/types'
 import { getServerSession } from 'next-auth'
 import { Wrapper } from './wrapper'
@@ -13,7 +13,7 @@ export default async function Header({
 
   const session = await getServerSession(authOptions)
 
-  const data = await getUserProgressWithCurriculum(session?.userId)
+  const data = await getCourseNavigationSnapshot(session?.userId)
 
   return (
     <Wrapper

@@ -86,7 +86,10 @@ async function main() {
                 const response = await page.goto(new URL(route, base).href, { waitUntil: 'networkidle0' })
                 assert(response, 'Expected a document navigation')
                 if (response.status() !== 429) {
-                  assert.equal(response.status(), 200, 'Reader response')
+                  // Signed-out lessons are cacheable, so a browser that already
+                  // holds the page revalidates it and may get 304 Not Modified;
+                  // the full document is still rendered from its cache.
+                  assert([200, 304].includes(response.status()), `Reader response ${response.status()}`)
                   loaded = true
                   break
                 }
