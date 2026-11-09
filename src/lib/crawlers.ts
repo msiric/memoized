@@ -1,11 +1,9 @@
 // One list for robots.txt and the middleware, so the two never disagree.
-// Owner decision O1 (2026-11-08) allows every other crawler, including AI
-// training crawlers. These stay excluded for load: SEO-tool crawlers and
-// crawlers with a history of ignoring crawl budgets, plus search engines that
-// send this English-language site negligible traffic.
+// Owner decisions (2026-11-08/09): every search engine and AI crawler may
+// crawl. Only SEO-tool crawlers and Bytespider stay excluded: they add load
+// without sending visitors.
 export const BLOCKED_CRAWLERS = [
   'bytespider',
-  'petalbot',
   'semrushbot',
   'ahrefsbot',
   'mj12bot',
@@ -13,8 +11,4 @@ export const BLOCKED_CRAWLERS = [
   'blexbot',
   'seekport',
   'megaindex',
-  'yandexbot',
-  'sogou',
-  'baiduspider',
-  'seznambot',
 ] as const

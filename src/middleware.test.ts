@@ -42,4 +42,16 @@ describe('Public asset rate-limit isolation', () => {
       headers: { 'x-forwarded-for': '192.0.2.30', 'user-agent': 'Mozilla/5.0 (compatible; Bytespider)' },
     })).status).toBe(403)
   })
+
+  it.each(['Mozilla/5.0 (compatible; YandexBot/3.0)', 'Mozilla/5.0 (compatible; Baiduspider/2.0)', 'SeznamBot/4.0', 'Sogou web spider/4.0', 'Mozilla/5.0 (compatible; PetalBot)'])(
+    'admits search engine %s under the normal rate limit',
+    async (userAgent) => {
+      vi.resetModules()
+      const { middleware } = await import('./middleware')
+      const request = () => new NextRequest('https://www.memoized.io/courses', {
+        headers: { 'x-forwarded-for': '192.0.2.40', 'user-agent': userAgent },
+      })
+      expect(middleware(request()).status).toBe(200)
+    },
+  )
 })
