@@ -364,6 +364,10 @@ class Reader {
   }
 
   async reveal(scope = '[data-guided-path]') {
+    // The problem-bank drawer loads question content on demand, so the
+    // control can appear a moment after the drawer opens.
+    await this.page.waitForFunction(query => [...document.querySelectorAll(`${query} button`)]
+      .some(button => button.textContent?.trim() === 'Reveal answer'), {}, scope)
     await clickText(this.page, `${scope} button`, 'Reveal answer')
     // Framer's exiting ThinkingPrompt precedes mounting the actual answer.
     await this.page.waitForFunction((query, text) =>
