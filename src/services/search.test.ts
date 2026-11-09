@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { getSearchCatalog, searchUrls, type SearchCatalog } from './search'
+import { readSearchCatalog, searchUrls, type SearchCatalog } from './search'
+import { unstable_cache } from 'next/cache'
 import prisma from '@/lib/prisma'
 vi.mock('@/lib/prisma', () => ({
   default: {
@@ -8,6 +9,7 @@ vi.mock('@/lib/prisma', () => ({
     blogPost: { findMany: vi.fn() },
   },
 }))
+vi.mock('next/cache', () => ({ unstable_cache: vi.fn((fn: unknown) => fn) }))
 vi.mock('@/config/env', () => ({ getSiteUrl: () => 'https://www.memoized.io' }))
 
 const catalog: SearchCatalog = {
@@ -103,7 +105,7 @@ describe('Search inventory', () => {
     vi.mocked(prisma.course.findMany).mockResolvedValue([])
     vi.mocked(prisma.resource.findMany).mockResolvedValue([])
     vi.mocked(prisma.blogPost.findMany).mockResolvedValue([])
-    await getSearchCatalog()
+    await readSearchCatalog()
     expect(prisma.course.findMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { isActive: true } }),
     )
@@ -121,5 +123,10 @@ describe('Search inventory', () => {
     expect(
       JSON.stringify(vi.mocked(prisma.course.findMany).mock.calls),
     ).not.toContain('serializedBody')
+  })
+  it('caches the catalog across requests under a tag that publishing clears', () => {
+    expect(unstable_cache).toHaveBeenCalledWith(readSearchCatalog, ['search-catalog-v1'], {
+      tags: ['catalog'], revalidate: 3600,
+    })
   })
 })
