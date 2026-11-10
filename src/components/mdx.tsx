@@ -1,7 +1,7 @@
 import { Heading } from '@/components/Heading'
 import { LessonStatus } from '@/components/LessonStatus'
 import { Prose } from '@/components/Prose'
-import { Problem } from '@prisma/client'
+import type { Problem } from '@prisma/client'
 import clsx from 'clsx'
 import Link from 'next/link'
 import { ReactNode } from 'react'

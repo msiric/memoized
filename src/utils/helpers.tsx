@@ -15,11 +15,8 @@ import {
   EnrichedProblem,
   UserWithSubscriptionsAndProgress,
 } from '@/types'
-import {
-  AccessOptions,
-  Subscription,
-  SubscriptionStatus,
-} from '@prisma/client'
+import type { Subscription } from '@prisma/client'
+import { AccessOptions, SubscriptionStatus } from '@/lib/prisma-enums'
 import { format, fromUnixTime, isBefore, parseISO } from 'date-fns'
 import type Stripe from 'stripe'
 

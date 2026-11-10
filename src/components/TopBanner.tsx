@@ -1,6 +1,6 @@
 'use client'
 
-import { BannerType } from '@prisma/client'
+import { BannerType } from '@/lib/prisma-enums'
 import Link from 'next/link'
 import React, { useState, useEffect } from 'react'
 import { CiWarning } from 'react-icons/ci'

@@ -18,13 +18,9 @@ import {
 import { CustomError, handleError } from '@/lib/sentry'
 import { capitalizeFirstLetter, remToPx } from '@/utils/helpers'
 import { CustomResponse, handleResponse } from '@/utils/response'
-import {
-  AccessOptions,
-  SubscriptionPlan,
-  SubscriptionStatus,
-} from '@prisma/client'
+import { AccessOptions, SubscriptionPlan, SubscriptionStatus } from '@/lib/prisma-enums'
 import clsx from 'clsx'
-import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
+import { AnimatePresence, m, useIsPresent } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { enqueueSnackbar } from 'notistack'
@@ -231,7 +227,7 @@ const VisibleSectionHighlight = memo(
       firstVisibleSectionIndex * itemHeight
 
     return (
-      <motion.div
+      <m.div
         layout
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: 0.2 } }}
@@ -254,7 +250,7 @@ const ActivePageMarker = memo(
     const top = offset + activePageIndex * itemHeight
 
     return (
-      <motion.div
+      <m.div
         layout
         className="absolute left-2 h-6 w-px bg-lime-500"
         initial={{ opacity: 0 }}
@@ -314,7 +310,7 @@ const NavigationGroup = memo(
               />
             )}
           </AnimatePresence>
-          <motion.div
+          <m.div
             layout
             className="absolute inset-y-0 left-2 w-px bg-zinc-900/10 dark:bg-white/5"
           />
@@ -325,7 +321,7 @@ const NavigationGroup = memo(
           </AnimatePresence>
           <ul role="list" className="border-l border-transparent">
             {section.links?.map((link) => (
-              <motion.li key={link.href} layout="position" className="relative">
+              <m.li key={link.href} layout="position" className="relative">
                 <NavLink
                   id={link.id}
                   href={link.href}
@@ -336,7 +332,7 @@ const NavigationGroup = memo(
                 </NavLink>
                 <AnimatePresence mode="popLayout" initial={false}>
                   {link.href === pathname && sections.length > 0 && (
-                    <motion.ul
+                    <m.ul
                       role="list"
                       initial={{ opacity: 0 }}
                       animate={{
@@ -360,10 +356,10 @@ const NavigationGroup = memo(
                           </NavLink>
                         </li>
                       ))}
-                    </motion.ul>
+                    </m.ul>
                   )}
                 </AnimatePresence>
-              </motion.li>
+              </m.li>
             ))}
           </ul>
         </div>

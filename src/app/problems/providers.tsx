@@ -3,7 +3,7 @@
 import { Footer } from '@/components/Footer'
 import { Logo } from '@/components/Logo'
 import { SectionProvider } from '@/providers/SectionProvider'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 
@@ -22,7 +22,7 @@ export const ProblemProviders = ({
     <>
       <SectionProvider sections={[]}>
         <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl h-full">
-          <motion.header
+          <m.header
             layoutScroll
             className="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex"
           >
@@ -35,7 +35,7 @@ export const ProblemProviders = ({
               {header}
               {navigation}
             </div>
-          </motion.header>
+          </m.header>
           <div className="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
             <main className="flex-auto">{table}</main>
             <Footer />

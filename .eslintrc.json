@@ -21,7 +21,46 @@
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-empty-object-type": "off",
     "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-require-imports": "off"
+    "@typescript-eslint/no-require-imports": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "framer-motion",
+            "importNames": ["motion"],
+            "message": "Use `m` (rendered inside <LazyMotion> in app/providers.tsx) so the animation engine loads lazily."
+          }
+        ]
+      }
+    ]
   },
-  "ignorePatterns": [".next", "node_modules"]
+  "ignorePatterns": [".next", "node_modules"],
+  "overrides": [
+    {
+      "files": [
+        "src/components/**",
+        "src/hooks/**",
+        "src/constants/**",
+        "src/utils/**",
+        "src/types/**",
+        "src/lib/stripe-plans.ts"
+      ],
+      "excludedFiles": ["*.test.ts", "*.test.tsx"],
+      "rules": {
+        "@typescript-eslint/no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@prisma/client",
+                "allowTypeImports": true,
+                "message": "Client code: use `import type` for Prisma types and '@/lib/prisma-enums' for enum values (keeps Prisma's runtime out of the browser bundle)."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }

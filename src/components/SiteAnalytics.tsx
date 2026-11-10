@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import Script from 'next/script'
-import { GoogleAnalytics as GoogleTag } from '@next/third-parties/google'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { productionAnalyticsAllowed } from '@/lib/analytics'
+import { GOOGLE_ADS_SCRIPT_SRC, initGoogleAds } from '@/lib/google-ads'
 import { WebVitals } from './WebVitals'
 
 export function SiteAnalytics() {
   const [enabled, setEnabled] = useState(false)
   useEffect(() => {
-    setEnabled(productionAnalyticsAllowed(window.location.hostname))
+    const allowed = productionAnalyticsAllowed(window.location.hostname)
+    if (allowed) initGoogleAds()
+    setEnabled(allowed)
   }, [])
   if (!enabled) return null
   return (
@@ -27,8 +29,13 @@ export function SiteAnalytics() {
         data-exclude-hash="true"
         strategy="afterInteractive"
       />
-      {/* Preserve the existing Ads destination; this is not a configured GA4 property. */}
-      <GoogleTag gaId="AW-16659115277" />
+      {/* Google Ads loads after the page has finished loading; commands
+          queued before then are replayed. See src/lib/google-ads.ts. */}
+      <Script
+        id="google-ads"
+        src={GOOGLE_ADS_SCRIPT_SRC}
+        strategy="lazyOnload"
+      />
     </>
   )
 }

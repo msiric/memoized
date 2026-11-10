@@ -1,7 +1,7 @@
 'use client'
 
 import { Logo } from '@/components/Logo'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import Link from 'next/link'
 import { ReactNode } from 'react'
 import { Footer } from '../../../components/Footer'
@@ -17,7 +17,7 @@ export const CoursesProviders = ({
 }: CoursesProvidersProps) => {
   return (
     <div className="h-full">
-      <motion.header
+      <m.header
         layoutScroll
         className="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex"
       >
@@ -29,7 +29,7 @@ export const CoursesProviders = ({
           </div>
           {header}
         </div>
-      </motion.header>
+      </m.header>
       <div className="relative flex h-full flex-col pt-14">
         <main className="flex-auto">{children}</main>
         <Footer />

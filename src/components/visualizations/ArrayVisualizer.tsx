@@ -1,7 +1,7 @@
 'use client'
 
 import clsx from 'clsx'
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useEffect, useMemo, useRef } from 'react'
 import { VizControls } from './primitives/VizControls'
 import { VizFrame } from './primitives/VizFrame'
@@ -131,7 +131,7 @@ export function ArrayVisualizer({ data, windowSize, label }: ArrayVisualizerProp
         <div className="relative mx-auto" style={{ width: rowW, height: CELL }}>
           {hasWindow ? (
             mounted ? (
-              <motion.div
+              <m.div
                 aria-hidden
                 initial={false}
                 animate={{ x: frameX, width: frameW }}
@@ -159,7 +159,7 @@ export function ArrayVisualizer({ data, windowSize, label }: ArrayVisualizerProp
               )
               const style = { width: CELL, height: CELL }
               return mounted ? (
-                <motion.div
+                <m.div
                   key={i}
                   data-testid="cell"
                   animate={cellPulse(i)}
@@ -168,7 +168,7 @@ export function ArrayVisualizer({ data, windowSize, label }: ArrayVisualizerProp
                   style={style}
                 >
                   {value}
-                </motion.div>
+                </m.div>
               ) : (
                 <div key={i} data-testid="cell" className={className} style={style}>
                   {value}

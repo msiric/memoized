@@ -1,4 +1,4 @@
-import { Problem } from '@prisma/client'
+import type { Problem } from '@prisma/client'
 import { PRACTICE_PROBLEMS_PREFIX } from '../constants'
 import { PracticeProblemGroups } from './PracticeProblemGroups'
 

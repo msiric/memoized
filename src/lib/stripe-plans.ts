@@ -1,5 +1,5 @@
 import { stripe } from '@/lib/stripe'
-import { SubscriptionPlan } from '@prisma/client'
+import { SubscriptionPlan } from '@/lib/prisma-enums'
 import type Stripe from 'stripe'
 
 // Server consumers import this module directly, never through client utilities.

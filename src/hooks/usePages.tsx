@@ -3,7 +3,7 @@
 import { useSitePathname } from '@/hooks/useSitePathname'
 import { useContentStore } from '@/contexts/progress'
 import { LessonResult, SectionResult } from '@/types'
-import { AccessOptions } from '@prisma/client'
+import { AccessOptions } from '@/lib/prisma-enums'
 
 import { useCourseSlug } from './useCourseSlug'
 import { getLessonNavigation, type NavigationPage } from '@/lib/lesson-navigation'
