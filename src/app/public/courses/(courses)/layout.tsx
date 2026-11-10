@@ -3,4 +3,4 @@
 // read resolves to "signed out" and nothing personal can be rendered here.
 export { default, generateMetadata } from '@/app/courses/(courses)/layout'
 export const dynamic = 'force-static'
-export const revalidate = 21600 // publishing revalidates /public on demand
+export const revalidate = 604800 // 7 d safety net; publishing revalidates /public on demand

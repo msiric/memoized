@@ -6,7 +6,7 @@ import { LessonView, lessonPageMetadata, type LessonParams } from '@/app/courses
 // force-static makes any accidental cookie/session read a build error.
 export const dynamic = 'force-static'
 export const dynamicParams = true
-export const revalidate = 21600 // 6 h; publishing also revalidates on demand
+export const revalidate = 604800 // 7 d safety net; publishing revalidates /public on demand
 
 export function generateStaticParams(): LessonParams[] {
   return [] // rendered on first request, then served from cache
