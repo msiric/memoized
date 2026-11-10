@@ -1,4 +1,4 @@
-import { ProblemDifficulty } from '@prisma/client'
+import { ProblemDifficulty } from '@/lib/prisma-enums'
 
 export const APP_NAME = 'Memoized'
 

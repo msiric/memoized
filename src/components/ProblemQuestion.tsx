@@ -1,6 +1,6 @@
 'use client'
 
-import { Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { PreserializedMdxRenderer } from './PreserializedMdxRenderer'
 
 export type ProblemQuestionProps = {

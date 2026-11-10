@@ -1,11 +1,5 @@
-import {
-  AccessOptions,
-  BannerType,
-  Prisma,
-  ProblemDifficulty,
-  ProblemType,
-  SubscriptionPlan,
-} from '@prisma/client'
+import type { Prisma } from '@prisma/client'
+import { AccessOptions, BannerType, ProblemDifficulty, ProblemType, SubscriptionPlan } from '@/lib/prisma-enums'
 import Stripe from 'stripe'
 
 export type AuthProvider = 'google' | 'github'

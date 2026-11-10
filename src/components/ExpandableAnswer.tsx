@@ -1,6 +1,6 @@
 'use client'
 
-import { Problem } from '@prisma/client'
+import type { Problem } from '@prisma/client'
 import { ProblemCard } from './ProblemCard'
 
 export type ExpandableAnswerProps = {

@@ -19,12 +19,30 @@ Sentry.init({
   // in development and sample at a lower rate in production
   replaysSessionSampleRate: 0.1,
 
-  // You can remove this option if you're not planning to use the Sentry Session Replay feature:
-  integrations: [
-    Sentry.replayIntegration({
-      // Additional Replay configuration goes in here, for example:
-      maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
+  // Session Replay is added after load (below), not here: bundling it costs
+  // every page ~116 KB of JavaScript before anything is interactive.
+  integrations: [],
 })
+
+// Error reporting starts immediately; the replay recorder is fetched from
+// Sentry's CDN once the browser is idle, then uses the sample rates above.
+// Errors thrown before it arrives are still reported, just without a replay.
+function loadReplay() {
+  Sentry.lazyLoadIntegration('replayIntegration')
+    .then((replayIntegration) =>
+      Sentry.addIntegration(
+        replayIntegration({ maskAllText: true, blockAllMedia: true }),
+      ),
+    )
+    .catch(() => {
+      // Blocked by an ad blocker or offline: run without replay.
+    })
+}
+
+if (typeof window !== 'undefined' && process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(loadReplay, { timeout: 5000 })
+  } else {
+    setTimeout(loadReplay, 3000)
+  }
+}

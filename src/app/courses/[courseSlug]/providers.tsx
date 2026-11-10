@@ -2,7 +2,7 @@
 
 import { useSitePathname } from '@/hooks/useSitePathname'
 import { Logo } from '@/components/Logo'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import Link from 'next/link'
 
 import { ReactNode } from 'react'
@@ -28,7 +28,7 @@ export const CourseProviders = ({
   return (
     <SectionProvider sections={allSections?.[formattedPathname] ?? []}>
       <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl h-full">
-        <motion.header
+        <m.header
           layoutScroll
           className="contents lg:pointer-events-none lg:fixed lg:inset-0 lg:z-40 lg:flex"
         >
@@ -41,7 +41,7 @@ export const CourseProviders = ({
             {header}
             {navigation}
           </div>
-        </motion.header>
+        </m.header>
         <div className="relative flex h-full flex-col px-4 pt-14 sm:px-6 lg:px-8">
           <main className="flex-auto">{children}</main>
           <Footer width="prose" />

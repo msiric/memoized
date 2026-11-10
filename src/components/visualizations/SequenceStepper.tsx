@@ -1,7 +1,7 @@
 'use client'
 
 import clsx from 'clsx'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { useMemo } from 'react'
 import { VizControls } from './primitives/VizControls'
 import { VizFrame } from './primitives/VizFrame'
@@ -81,7 +81,7 @@ function Lane({
   // the data if a lesson ever needs them.
   const items = chips.map((chip) =>
     mounted ? (
-      <motion.div
+      <m.div
         key={chip}
         layout={!reduce}
         initial={reduce ? false : { opacity: 0, scale: 0.85 }}
@@ -91,7 +91,7 @@ function Lane({
         className={clsx('min-w-0', itemClass)}
       >
         <Chip text={chip} chipClass={chipClass} />
-      </motion.div>
+      </m.div>
     ) : (
       <div key={chip} className={clsx('min-w-0', itemClass)}>
         <Chip text={chip} chipClass={chipClass} />

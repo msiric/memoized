@@ -13,7 +13,7 @@ import {
 } from './index'
 import { AngleBracketsIcon } from '../components/icons/AngleBracketsIcon'
 import { CodingIcon } from '../components/icons/CodingIcon'
-import { AccessOptions } from '@prisma/client'
+import { AccessOptions } from '@/lib/prisma-enums'
 import { LessonConfig } from '@/types'
 import { SVGProps } from 'react'
 

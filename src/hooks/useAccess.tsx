@@ -2,7 +2,7 @@
 
 import { UserWithSubscriptionsAndProgress } from '@/types'
 import { userHasAccess } from '@/utils/helpers'
-import { AccessOptions } from '@prisma/client'
+import { AccessOptions } from '@/lib/prisma-enums'
 
 export const useAccess = (
   user: UserWithSubscriptionsAndProgress | null | undefined,

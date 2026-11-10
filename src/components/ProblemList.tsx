@@ -15,9 +15,9 @@ import {
 } from '@/hooks/useProblemContent'
 import { ProblemFilter, EnrichedProblem, ProblemBankLesson, ProblemBankRow, ProblemStatus } from '@/types'
 import { filterAndSortProblems } from '@/utils/helpers'
-import { ProblemDifficulty, ProblemType } from '@prisma/client'
+import { ProblemDifficulty, ProblemType } from '@/lib/prisma-enums'
 import clsx from 'clsx'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6'
@@ -232,7 +232,7 @@ const ProblemSlideOverContent = ({
 
       {/* Question */}
       {loaded?.question && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-2"
@@ -247,7 +247,7 @@ const ProblemSlideOverContent = ({
               className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"
             />
           </div>
-        </motion.div>
+        </m.div>
       )}
 
       <G3bLocalPractice problem={problem} />
@@ -259,7 +259,7 @@ const ProblemSlideOverContent = ({
         )}
 
         {stage === 'answer' && loaded && (
-          <motion.div
+          <m.div
             key="answer"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -285,13 +285,13 @@ const ProblemSlideOverContent = ({
                 </div>
               </div>
             )}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* External link for coding problems */}
       {!isTheory && !isNative && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -307,7 +307,7 @@ const ProblemSlideOverContent = ({
             Practice on LeetCode
             <HiArrowTopRightOnSquare className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
           </a>
-        </motion.div>
+        </m.div>
       )}
     </div>
   )

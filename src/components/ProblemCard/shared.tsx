@@ -5,9 +5,9 @@ import {
   THINKING_PROMPT,
 } from '@/constants/designTokens'
 import { capitalizeFirstLetter } from '@/utils/helpers'
-import { ProblemDifficulty, ProblemType } from '@prisma/client'
+import { ProblemDifficulty, ProblemType } from '@/lib/prisma-enums'
 import clsx from 'clsx'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { HiBookOpen, HiCodeBracket } from 'react-icons/hi2'
 
 export type TypeBadgeProps = {
@@ -92,7 +92,7 @@ export type ThinkingPromptProps = {
 }
 
 export const ThinkingPrompt = ({ onReveal, isTheory }: ThinkingPromptProps) => (
-  <motion.div
+  <m.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -10 }}
@@ -118,7 +118,7 @@ export const ThinkingPrompt = ({ onReveal, isTheory }: ThinkingPromptProps) => (
     >
       Reveal answer
     </button>
-  </motion.div>
+  </m.div>
 )
 
 export type LessonBadgeProps = {

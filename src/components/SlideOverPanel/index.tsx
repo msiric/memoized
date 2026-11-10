@@ -1,7 +1,7 @@
 'use client'
 
 import { SLIDE_OVER } from '@/constants/designTokens'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { HiChevronLeft, HiChevronRight, HiXMark } from 'react-icons/hi2'
 import clsx from 'clsx'
@@ -83,7 +83,7 @@ export const SlideOverPanel = ({
       {isOpen && (
         <>
           {/* Backdrop */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -94,7 +94,7 @@ export const SlideOverPanel = ({
           />
 
           {/* Panel */}
-          <motion.div
+          <m.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -195,7 +195,7 @@ export const SlideOverPanel = ({
                 </span>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         </>
       )}
     </AnimatePresence>

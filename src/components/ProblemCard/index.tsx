@@ -3,9 +3,10 @@
 import { PROBLEM_CARD } from '@/constants/designTokens'
 import { ProblemQuestion } from '../ProblemQuestion'
 import { useProblemCompletion } from '@/hooks/useProblemCompletion'
-import { Problem, ProblemType } from '@prisma/client'
+import type { Problem } from '@prisma/client'
+import { ProblemType } from '@/lib/prisma-enums'
 import clsx from 'clsx'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
 import {
   HiCheck,
@@ -121,7 +122,7 @@ export const ProblemCard = ({
   const isExpanded = stage !== 'collapsed'
 
   return (
-    <motion.div
+    <m.div
       id={problemSlug}
       className={clsx(
         PROBLEM_CARD.base,
@@ -205,12 +206,12 @@ export const ProblemCard = ({
               onClick={handleToggle}
               className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition-colors"
             >
-              <motion.span
+              <m.span
                 animate={{ rotate: isExpanded ? 180 : 0 }}
                 transition={{ duration: 0.2 }}
               >
                 <HiChevronDown className="h-4 w-4" />
-              </motion.span>
+              </m.span>
               {isExpanded ? 'Collapse' : 'Expand'}
             </button>
           )}
@@ -228,7 +229,7 @@ export const ProblemCard = ({
       {/* Expandable content */}
       <AnimatePresence initial={false}>
         {isExpanded && (
-          <motion.div
+          <m.div
             key="content"
             initial={defaultExpanded ? false : { height: 0, opacity: 0 }}
             animate={{ 
@@ -252,7 +253,7 @@ export const ProblemCard = ({
             <div className="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-700">
               {/* Question */}
               {problem.question && (
-                <motion.div
+                <m.div
                   initial={defaultExpanded ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
@@ -266,7 +267,7 @@ export const ProblemCard = ({
                     serializedQuestion={problem.serializedQuestion}
                     className="text-sm font-medium leading-relaxed text-zinc-900 dark:text-zinc-100"
                   />
-                </motion.div>
+                </m.div>
               )}
 
               <G3bLocalPractice problem={problem} />
@@ -285,7 +286,7 @@ export const ProblemCard = ({
                   search engines and Ctrl+F find it; learners still reveal it. */}
               {problem.serializedAnswer && (
                 <div hidden={!answerShown} data-practice-answer="" ref={answerRef} tabIndex={-1} className="outline-none">
-                  <motion.div
+                  <m.div
                     initial={false}
                     animate={answerShown
                       ? { opacity: 1, y: 0 }
@@ -306,13 +307,13 @@ export const ProblemCard = ({
                         showNextPage={false}
                       />
                     </div>
-                  </motion.div>
+                  </m.div>
                 </div>
               )}
 
               {/* External link for coding problems */}
               {!isTheory && !isNative && (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.2 }}
@@ -328,13 +329,13 @@ export const ProblemCard = ({
                     Practice on LeetCode
                     <HiArrowTopRightOnSquare className="h-3.5 w-3.5" />
                   </a>
-                </motion.div>
+                </m.div>
               )}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </m.div>
   )
 }
 

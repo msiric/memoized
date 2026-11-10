@@ -1,13 +1,15 @@
 'use client'
 
-import { sendGAEvent } from '@next/third-parties/google'
+import { GOOGLE_ADS_CONVERSION, gtag } from '@/lib/google-ads'
 import { useCallback } from 'react'
 
 export function useGAConversion() {
   const reportConversion = useCallback((stripeSessionId: string) => {
-    sendGAEvent({
-      event: 'conversion',
-      send_to: 'AW-16659115277/bQ1KCJajgMcZEI3a14c-',
+    // Google's documented Ads conversion call. The previous
+    // sendGAEvent({ event: 'conversion', ... }) queued a bare object, which
+    // gtag.js does not treat as an event command.
+    gtag('event', 'conversion', {
+      send_to: GOOGLE_ADS_CONVERSION,
       value: 1.0,
       currency: 'EUR',
       transaction_id: stripeSessionId,

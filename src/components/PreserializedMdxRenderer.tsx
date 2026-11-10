@@ -1,7 +1,7 @@
 'use client'
 
 import { hydrate, HydrateProps } from 'next-mdx-remote-client/csr'
-import { Problem, Prisma } from '@prisma/client'
+import type { Problem, Prisma } from '@prisma/client'
 import { useRef, ReactNode } from 'react'
 import { useMDXComponents } from '../../mdx-components'
 import { WrapperProps } from './mdx'

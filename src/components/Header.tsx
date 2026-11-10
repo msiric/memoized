@@ -9,7 +9,7 @@ import { MobileSearch, Search } from '@/components/Search'
 import { useNavigationLinks } from '@/hooks/useNavigationLinks'
 import { NavigationContent } from '@/types'
 import clsx from 'clsx'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { m, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import { forwardRef } from 'react'
 import { AuthButton } from './AuthButton'
@@ -45,7 +45,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
 
     return (
       <div className={clsx('relative', withSubheader && 'mb-10 md:mb-0')}>
-        <motion.div
+        <m.div
           ref={ref}
           className={clsx(
             className,
@@ -116,7 +116,7 @@ export const Header = forwardRef<React.ElementRef<'div'>, HeaderProps>(
               </div>
             )}
           </div>
-        </motion.div>
+        </m.div>
 
         {withSubheader && (
           <div className="fixed inset-x-0 top-14 z-40 block bg-white/[var(--bg-opacity-light)] backdrop-blur-sm xs:block md:hidden dark:bg-zinc-900/[var(--bg-opacity-dark)] dark:backdrop-blur">

@@ -1,5 +1,5 @@
 import { ProblemList } from '@/components/ProblemList'
-import { ProblemDifficulty, ProblemType } from '@prisma/client'
+import { ProblemDifficulty, ProblemType } from '@/lib/prisma-enums'
 import { ProblemBankRow, ProblemStatus } from '@/types'
 import { getProblemBankSnapshot } from '@/lib/catalog-request'
 import { filterAndSortProblems } from '@/utils/helpers'
