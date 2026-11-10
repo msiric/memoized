@@ -78,7 +78,7 @@ export const completeCurriculum: CurriculumCourse[] = [
     order: 1,
     icon: AngleBracketsIcon,
     seo: {
-      title: 'JavaScript/TypeScript Track - Advanced Concepts & Patterns',
+      title: 'JavaScript & TypeScript Interview Track',
       description:
         'Deep dive into advanced JavaScript and TypeScript concepts. Learn closures, async patterns, performance optimization, and language-specific gotchas for technical interviews.',
       keywords: [
@@ -156,9 +156,9 @@ export const completeCurriculum: CurriculumCourse[] = [
     order: 2,
     icon: CodingIcon,
     seo: {
-      title: 'Data Structures & Algorithms Track - Master Coding Interviews',
+      title: 'Data Structures & Algorithms in JavaScript',
       description:
-        'Master data structures and algorithms with JavaScript implementations. 165 problems covering arrays, trees, graphs, dynamic programming, and more. Perfect for technical interviews.',
+        'Data structures and algorithms in JavaScript: built-in structures, linked lists to tries, interview patterns and advanced algorithms, with practice problems.',
       keywords: [
         'data structures javascript',
         'algorithms javascript',
