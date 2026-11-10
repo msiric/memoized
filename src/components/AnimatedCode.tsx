@@ -2,7 +2,7 @@
 
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import type { Highlighter } from 'shiki'
+import type { HighlighterCore } from 'shiki/core'
 import 'shiki-magic-move/dist/style.css'
 import { ShikiMagicMove } from 'shiki-magic-move/react'
 
@@ -22,7 +22,7 @@ export const AnimatedCode = ({
 }: AnimatedCodeProps) => {
   const [tab, setTab] = useState(initialTab)
   const [code, setCode] = useState(codeSnippets[0].code)
-  const [highlighter, setHighlighter] = useState<Highlighter>()
+  const [highlighter, setHighlighter] = useState<HighlighterCore>()
   const [index, setIndex] = useState(0)
   const [flip, setFlip] = useState(false)
   const [animate, setAnimate] = useState(false)
@@ -45,8 +45,8 @@ export const AnimatedCode = ({
     let mounted = true
     const initializeHighlighter = async () => {
       try {
-        const { getSharedHighlighter } = await import('@/lib/shiki')
-        const highlighter = await getSharedHighlighter()
+        const { getAnimatedCodeHighlighter } = await import('@/lib/shiki-client')
+        const highlighter = await getAnimatedCodeHighlighter()
         if (mounted) setHighlighter(highlighter)
       } catch {
         console.warn('Animated highlighting is unavailable; the server-rendered example remains visible.')
