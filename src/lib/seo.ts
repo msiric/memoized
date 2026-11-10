@@ -56,7 +56,7 @@ export function pageMetadata({
 
 // Editorial search headlines stay separate from curriculum titles: changing a
 // curriculum title can change its synced URL slug.
-const lessonSearchCopy: Partial<
+export const lessonSearchCopy: Partial<
   Record<string, { title: string; description: string }>
 > = {
   '/courses/dsa-track/built-in-data-structures/maps': {
@@ -74,6 +74,11 @@ const lessonSearchCopy: Partial<
     description:
       'Work out JavaScript this with binding rules, strict-mode and module examples, and free interview practice.',
   },
+  '/courses/js-track/core-fundamentals/scope-and-hoisting': {
+    title: 'JavaScript Scope & Hoisting: var, let, const and the TDZ',
+    description:
+      'Understand JavaScript scope and hoisting: var versus let and const, function hoisting and the temporal dead zone, with examples and free interview questions.',
+  },
   '/courses/js-track/core-fundamentals/closures': {
     title: 'JavaScript Closures: Examples & Interview Questions',
     description:
@@ -84,6 +89,62 @@ const lessonSearchCopy: Partial<
     description:
       'Trace JavaScript execution through the call stack, Promise microtasks and timers, with worked examples and free interview practice.',
   },
+}
+
+// Section hubs, chosen from Search Console queries (R2, 2026-11-10). Titles
+// carry the language because searchers type it ("advanced javascript
+// concepts"); descriptions name only lessons the section actually contains.
+export const sectionSearchCopy: Partial<
+  Record<string, { title: string; description: string }>
+> = {
+  '/courses/js-track/core-fundamentals': {
+    title: 'JavaScript Fundamentals: Scope, Closures & the Event Loop',
+    description:
+      'Core JavaScript for interviews: types and coercion, scope and hoisting, closures, this, prototypes, modules, the call stack and the event loop.',
+  },
+  '/courses/js-track/advanced-concepts': {
+    title: 'Advanced JavaScript Concepts: Async, Generators & Patterns',
+    description:
+      'Advanced JavaScript concepts for interviews: promise patterns, async/await, generators, metaprogramming, web workers, memory leaks and design patterns.',
+  },
+  '/courses/js-track/typescript-introduction': {
+    title: 'TypeScript Fundamentals: Types, Generics & Type Guards',
+    description:
+      'Learn TypeScript from basic types to generics, conditional and utility types, type guards, declarations and project configuration, with interview practice.',
+  },
+  '/courses/js-track/frontend-development': {
+    title: 'Frontend Interview Topics: Rendering to Security',
+    description:
+      'Frontend interview topics: component architecture, state management, the virtual DOM, web APIs, CORS, server-side rendering, performance and accessibility.',
+  },
+  '/courses/dsa-track/built-in-data-structures': {
+    title: 'JavaScript Built-in Data Structures: Arrays, Maps & Sets',
+    description:
+      'How JavaScript strings, numbers, arrays, objects, sets and maps behave, and when to use each one in coding interviews, with worked examples.',
+  },
+  '/courses/dsa-track/user-defined-data-structures': {
+    title: 'Data Structures in JavaScript: Linked Lists to Tries',
+    description:
+      'Implement linked lists, stacks, queues, hash tables, trees, graphs, heaps and tries in JavaScript, with worked examples and interview practice.',
+  },
+  '/courses/dsa-track/common-techniques': {
+    title: 'Coding Interview Patterns in JavaScript',
+    description:
+      'Coding interview patterns in JavaScript: sliding window, two pointers, binary search, tree and graph traversal, heaps, backtracking, greedy and memoization.',
+  },
+  '/courses/dsa-track/advanced-topics': {
+    title: 'Advanced Algorithms in JavaScript: DP, Graphs & More',
+    description:
+      'Advanced algorithms in JavaScript: dynamic programming, segment trees, shortest paths, minimum spanning trees, network flow and bit manipulation.',
+  },
+}
+
+export function sectionMetadata(
+  path: string,
+  title: string,
+  description: string,
+) {
+  return pageMetadata({ title, description, ...sectionSearchCopy[path], path })
 }
 
 // Owner decision O2 (2026-11-08): premium previews whose free practice does not

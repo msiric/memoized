@@ -6,7 +6,7 @@ import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getSearchCatalog } from '@/services/search'
 import { CatalogDirectory } from '@/components/CatalogDirectory'
-import { lessonPath, pageMetadata, sectionPath } from '@/lib/seo'
+import { lessonPath, sectionMetadata, sectionPath } from '@/lib/seo'
 import { isTypescriptFirstPassEnabled } from '@/config/features'
 import { firstPassHref, isTsBasicsRoute } from '@/lib/typescript-first-pass'
 
@@ -43,9 +43,7 @@ export async function generateMetadata({
   const description =
     section.description || `Learn about ${section.title} in this section.`
 
-  return {
-    ...pageMetadata({ title, description, path: sectionPath(courseSlug, sectionSlug) }),
-  }
+  return sectionMetadata(sectionPath(courseSlug, sectionSlug), title, description)
 }
 
 export default async function Section({

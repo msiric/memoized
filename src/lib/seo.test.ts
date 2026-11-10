@@ -6,7 +6,11 @@ import {
   NOINDEX_LESSON_PATHS,
   pageMetadata,
   resourcePath,
+  lessonSearchCopy,
+  sectionMetadata,
+  sectionSearchCopy,
 } from './seo'
+import { completeCurriculum } from '@/constants/curriculum'
 
 vi.mock('@/config/env', () => ({ getSiteUrl: () => 'https://www.memoized.io' }))
 afterEach(() => vi.unstubAllEnvs())
@@ -74,5 +78,48 @@ describe('Search metadata contract', () => {
       .toBe('Learn Heaps in JavaScript with worked examples and data-structure interview practice.')
     expect(lessonMetadata(lessonPath('js-track', 'typescript-introduction', 'x'), 'Enums', null).description)
       .toBe('Explore Enums and related TypeScript interview practice.')
+  })
+})
+
+describe('Hand-written search copy (R2)', () => {
+  const entries = [
+    ...Object.entries(lessonSearchCopy),
+    ...Object.entries(sectionSearchCopy),
+  ]
+
+  it.each(entries)('%s fits search result limits', (_path, copy) => {
+    // "<title> | Memoized" stays within ~70 characters before truncation.
+    expect(`${copy!.title} | Memoized`.length).toBeLessThanOrEqual(70)
+    expect(copy!.description.length).toBeGreaterThanOrEqual(100)
+    expect(copy!.description.length).toBeLessThanOrEqual(160)
+  })
+
+  it('only targets sections that exist in the curriculum', () => {
+    const sections = new Set(
+      completeCurriculum.flatMap((course) => course.sections.map((s) => s.href)),
+    )
+    for (const path of Object.keys(sectionSearchCopy)) {
+      expect(sections, path).toContain(path)
+    }
+  })
+
+  it('uses the hand-written copy for a section hub', () => {
+    const meta = sectionMetadata(
+      '/courses/js-track/advanced-concepts',
+      'Advanced Concepts - JS Track',
+      'fallback',
+    )
+    expect(meta.title).toEqual({
+      absolute: 'Advanced JavaScript Concepts: Async, Generators & Patterns | Memoized',
+    })
+    expect(meta.alternates?.canonical).toBe(
+      'https://www.memoized.io/courses/js-track/advanced-concepts',
+    )
+  })
+
+  it('keeps the curriculum title for sections without hand-written copy', () => {
+    const meta = sectionMetadata('/courses/x/y', 'Y - X', 'Y description')
+    expect(meta.title).toEqual({ absolute: 'Y - X | Memoized' })
+    expect(meta.description).toBe('Y description')
   })
 })
