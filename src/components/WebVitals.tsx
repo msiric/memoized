@@ -35,16 +35,8 @@ function sendToAnalytics(metric: Metric) {
       })
     }
 
-    if (typeof window !== 'undefined' && window.Sentry) {
-      const transaction = window.Sentry.getCurrentHub().getScope().getTransaction()
-      if (transaction) {
-        transaction.setMeasurement(
-          metric.name,
-          metric.value,
-          metric.name === 'CLS' ? '' : 'millisecond'
-        )
-      }
-    }
+    // Sentry records web vitals itself (browser tracing). Never read
+    // window.Sentry here: the lazy Replay loader defines a partial one.
   }
 }
 
@@ -71,27 +63,9 @@ interface UmamiAnalytics {
   track: (event: string, properties: Record<string, string | number>) => void
 }
 
-interface SentryHub {
-  getScope: () => SentryScope
-}
-
-interface SentryScope {
-  getTransaction: () => SentryTransaction | null
-}
-
-interface SentryTransaction {
-  setMeasurement: (name: string, value: number, unit?: string) => void
-}
-
-interface SentryGlobal {
-  getCurrentHub: () => SentryHub
-  captureException: (error: Error, context?: Record<string, unknown>) => void
-}
-
 declare global {
   interface Window {
     vercelAnalytics?: VercelAnalytics
     umami?: UmamiAnalytics
-    Sentry?: SentryGlobal
   }
 }
