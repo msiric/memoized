@@ -5,4 +5,4 @@ export { default, metadata } from '@/app/resources/layout'
 export const dynamic = 'force-static'
 // Pages reading the hourly catalog cache regenerate hourly; publishing also
 // revalidates /public on demand.
-export const revalidate = 21600
+export const revalidate = 604800 // 7 d safety net; publishing revalidates /public on demand

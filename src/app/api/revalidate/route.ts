@@ -4,7 +4,7 @@ import { timingSafeEqual } from 'node:crypto'
 
 // Called by the content repository's publish workflow after a successful
 // publish, so cached signed-out pages refresh immediately instead of
-// within their 6 h revalidate window. Requires Authorization: Bearer <REVALIDATE_SECRET>.
+// within their 7-day revalidate window. Requires Authorization: Bearer <REVALIDATE_SECRET>.
 export const dynamic = 'force-dynamic'
 
 const matches = (given: string, expected: string) => {
