@@ -158,7 +158,7 @@ export const completeCurriculum: CurriculumCourse[] = [
     seo: {
       title: 'Data Structures & Algorithms in JavaScript',
       description:
-        'Data structures and algorithms in JavaScript: built-in structures, linked lists to tries, coding interview patterns and advanced algorithms, with practice problems.',
+        'Data structures and algorithms in JavaScript: built-in structures, linked lists to tries, interview patterns and advanced algorithms, with practice problems.',
       keywords: [
         'data structures javascript',
         'algorithms javascript',
