@@ -85,76 +85,9 @@ const nextConfig = {
       use: ['@svgr/webpack'],
     })
 
-    if (!isServer && !dev) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        maxInitialRequests: 25,
-        minSize: 20000,
-        maxSize: 244000,
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          framework: {
-            name: 'framework',
-            chunks: 'all',
-            test: /[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|next|@next)[\\/]/,
-            priority: 40,
-            enforce: true,
-          },
-          ui: {
-            name: 'ui-components',
-            test: /[\\/]node_modules[\\/](@headlessui|notistack|framer-motion)[\\/]/,
-            chunks: 'async',
-            priority: 30,
-            enforce: true,
-          },
-          mdx: {
-            name: 'mdx-related',
-            test: /[\\/]node_modules[\\/](@mdx-js|remark|unist|mdast|micromark|shiki)[\\/]/,
-            chunks: 'async',
-            priority: 25,
-            enforce: true,
-          },
-          utils: {
-            name: 'utils',
-            test: /[\\/]node_modules[\\/](date-fns|lodash|clsx)[\\/]/,
-            chunks: 'async',
-            priority: 20,
-            enforce: true,
-          },
-          commons: {
-            name: 'commons',
-            minChunks: 3,
-            priority: 15,
-            reuseExistingChunk: true,
-          },
-          largeChunks: {
-            name: 'large-chunks',
-            test: (module) => {
-              return (
-                module.resource &&
-                (module.resource.includes('6577-f35813091d1b0c22.js') ||
-                  module.resource.includes('5715-bc3de2c505c87d72.js') ||
-                  module.resource.includes('9790-777668a2459600ad.js'))
-              )
-            },
-            chunks: 'async',
-            priority: 50,
-            enforce: true,
-          },
-          lib: {
-            test: /[\\/]node_modules[\\/]/,
-            chunks: 'async',
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-        },
-      }
-
-      config.optimization.minimize = true
-      config.optimization.usedExports = true
-    }
-
+    // Client chunking is left to Next's defaults, which are tuned for the App
+    // Router. A custom splitChunks here pulled every lazily-loaded Shiki grammar
+    // (~2 MB) into shared chunks loaded on every page.
     config.ignoreWarnings = [
       {
         module: /picocolors/,
