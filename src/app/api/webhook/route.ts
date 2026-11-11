@@ -2,7 +2,9 @@ import { revalidatePath } from 'next/cache'
 import { STRIPE_WEBHOOK, stripe } from '@/lib/stripe'
 import {
   createLifetimeAccess,
+  restoreWonDisputeAccess,
   revokeRefundedLifetimeAccess,
+  suspendDisputedAccess,
   updateSubscriptionDetails,
 } from '@/services/subscription'
 import {
@@ -16,6 +18,8 @@ const relevantEvents = new Set([
   'checkout.session.completed',
   'checkout.session.async_payment_succeeded',
   'charge.refunded',
+  'charge.dispute.created',
+  'charge.dispute.closed',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
@@ -87,6 +91,16 @@ export async function POST(req: Request) {
         }
         case 'charge.refunded': {
           await revokeRefundedLifetimeAccess(event.data.object as Stripe.Charge)
+          break
+        }
+        // Chargebacks: access ends when the dispute opens and lifetime access
+        // returns if it is won (see suspendDisputedAccess).
+        case 'charge.dispute.created': {
+          await suspendDisputedAccess(event.data.object as Stripe.Dispute)
+          break
+        }
+        case 'charge.dispute.closed': {
+          await restoreWonDisputeAccess(event.data.object as Stripe.Dispute)
           break
         }
         default:

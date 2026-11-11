@@ -313,33 +313,104 @@ export const updateSubscriptionDetails = async ({
   }
 }
 
-const isRefunded = (session: Stripe.Checkout.Session) => {
+// Refunded or charged back (whatever the dispute's outcome): never (re)granted
+// from the checkout session. A won dispute restores access through
+// restoreWonDisputeAccess instead.
+const isReversed = (session: Stripe.Checkout.Session) => {
   const intent = session.payment_intent
   const charge =
     intent && typeof intent === 'object' && intent.latest_charge && typeof intent.latest_charge === 'object'
       ? intent.latest_charge
       : null
-  return !!charge && (charge.refunded || charge.amount_refunded > 0)
+  return !!charge && (charge.refunded || charge.amount_refunded > 0 || charge.disputed)
+}
+
+const timestamp = () => format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx")
+
+const idOf = (value: string | { id?: string } | null | undefined) =>
+  typeof value === 'string' ? value : (value?.id ?? null)
+
+// The checkout session behind a one-time (lifetime) charge, if it is one.
+const lifetimeSessionIdFor = async (charge: Stripe.Charge) => {
+  const paymentIntent = idOf(charge.payment_intent)
+  if (!paymentIntent) return null
+  const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntent, limit: 1 })
+  const session = sessions.data[0]
+  return session?.mode === 'payment' ? session.id : null
+}
+
+// The subscription a recurring charge paid for, if it is one.
+const subscriptionIdFor = async (charge: Stripe.Charge) => {
+  if (!charge.invoice) return null
+  const invoice =
+    typeof charge.invoice === 'string' ? await stripe.invoices.retrieve(charge.invoice) : charge.invoice
+  return idOf(invoice.subscription)
+}
+
+const setLifetimeStatus = async (sessionId: string, from: SubscriptionStatus, to: SubscriptionStatus) => {
+  const result = await prisma.subscription.updateMany({
+    where: { stripeSubscriptionId: sessionId, plan: SubscriptionPlan.LIFETIME, status: from },
+    data: {
+      status: to,
+      canceledAt: to === SubscriptionStatus.CANCELED ? timestamp() : null,
+      updatedAt: timestamp(),
+    },
+  })
+  return result.count
 }
 
 // A fully refunded one-time purchase loses the lifetime access it granted.
 // (Recurring plans end through Stripe's own subscription events.)
 export const revokeRefundedLifetimeAccess = async (charge: Stripe.Charge) => {
-  if (!charge.refunded || !charge.payment_intent) return null
-  const paymentIntent =
-    typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent.id
-  const sessions = await stripe.checkout.sessions.list({ payment_intent: paymentIntent, limit: 1 })
-  const session = sessions.data[0]
-  if (!session || session.mode !== 'payment') return null
+  if (!charge.refunded) return null
+  const sessionId = await lifetimeSessionIdFor(charge)
+  if (!sessionId) return null
   const result = await prisma.subscription.updateMany({
-    where: { stripeSubscriptionId: session.id, plan: SubscriptionPlan.LIFETIME },
-    data: {
-      status: SubscriptionStatus.CANCELED,
-      canceledAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
-      updatedAt: format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSxxx"),
-    },
+    where: { stripeSubscriptionId: sessionId, plan: SubscriptionPlan.LIFETIME },
+    data: { status: SubscriptionStatus.CANCELED, canceledAt: timestamp(), updatedAt: timestamp() },
   })
   return result.count
+}
+
+// Owner policy (2026-11-11): a chargeback takes the money back the moment it is
+// opened, so the access it paid for ends then too.
+// - Lifetime: access is suspended, and restored if the dispute is won.
+// - Subscription: cancelled immediately in Stripe so it cannot renew (and be
+//   disputed again); Stripe's customer.subscription.deleted event records it
+//   too. A cancelled subscription cannot be revived, so winning does not
+//   restore it; the customer can subscribe again.
+export const suspendDisputedAccess = async (dispute: Stripe.Dispute) => {
+  const charge = await stripe.charges.retrieve(idOf(dispute.charge) ?? '')
+
+  const subscriptionId = await subscriptionIdFor(charge)
+  if (subscriptionId) {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    if (subscription.status !== 'canceled') {
+      await stripe.subscriptions.cancel(subscriptionId, undefined, {
+        idempotencyKey: `cancel-disputed-${subscriptionId}`,
+      })
+    }
+    const result = await prisma.subscription.updateMany({
+      where: { stripeSubscriptionId: subscriptionId, status: SubscriptionStatus.ACTIVE },
+      data: { status: SubscriptionStatus.CANCELED, canceledAt: timestamp(), updatedAt: timestamp() },
+    })
+    return result.count
+  }
+
+  const sessionId = await lifetimeSessionIdFor(charge)
+  if (!sessionId) return null
+  return setLifetimeStatus(sessionId, SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELED)
+}
+
+// A won dispute (or an inquiry closed without a chargeback) gives back lifetime
+// access, unless the purchase has since been refunded.
+export const restoreWonDisputeAccess = async (dispute: Stripe.Dispute) => {
+  if (dispute.status !== 'won' && dispute.status !== 'warning_closed') return null
+  const charge = await stripe.charges.retrieve(idOf(dispute.charge) ?? '')
+  if (charge.refunded || charge.amount_refunded > 0) return null
+  const sessionId = await lifetimeSessionIdFor(charge)
+  if (!sessionId) return null
+  return setLifetimeStatus(sessionId, SubscriptionStatus.CANCELED, SubscriptionStatus.ACTIVE)
 }
 
 type OneTimePurchaseManagerArgs = {
@@ -368,9 +439,9 @@ export const createLifetimeAccess = async ({
     // is granted by checkout.session.async_payment_succeeded instead.
     if (session.payment_status !== 'paid' && session.payment_status !== 'no_payment_required')
       return null
-    // A refunded purchase (e.g. refunded as a duplicate) is never granted, however
+    // A refunded or charged-back purchase is never granted, however
     // often the event is retried or the success URL is revisited.
-    if (isRefunded(session)) return null
+    if (isReversed(session)) return null
 
     if (!lineItems)
       throw new ServiceError(`Failed to retrieve subscription details`)
