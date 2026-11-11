@@ -21,6 +21,8 @@ vi.mock('@/services/subscription', () => ({
   updateSubscriptionDetails: vi.fn(),
   createLifetimeAccess: vi.fn(),
   revokeRefundedLifetimeAccess: vi.fn(),
+  suspendDisputedAccess: vi.fn(),
+  restoreWonDisputeAccess: vi.fn(),
 }))
 
 vi.mock('@/lib/stripe', () => ({
@@ -161,6 +163,29 @@ describe('Stripe Webhook Handler', () => {
     expect(subscriptionService.revokeRefundedLifetimeAccess).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'ch_1' }),
     )
+  })
+
+  it('suspends access when a chargeback is opened', async () => {
+    mockRequest = createMockRequest('charge.dispute.created', { id: 'dp_1', charge: 'ch_1', status: 'needs_response' })
+    const response = await POST(mockRequest)
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.suspendDisputedAccess).toHaveBeenCalledWith(expect.objectContaining({ id: 'dp_1' }))
+    expect(webhookService.markWebhookEventProcessed).toHaveBeenCalledWith('evt_test_123', 'charge.dispute.created')
+  })
+
+  it('passes a closed dispute on so a won one can restore access', async () => {
+    mockRequest = createMockRequest('charge.dispute.closed', { id: 'dp_1', charge: 'ch_1', status: 'won' })
+    const response = await POST(mockRequest)
+    expect(response?.status).toBe(200)
+    expect(subscriptionService.restoreWonDisputeAccess).toHaveBeenCalledWith(expect.objectContaining({ status: 'won' }))
+  })
+
+  it('fails (so Stripe retries) when suspending a disputed purchase fails', async () => {
+    vi.mocked(subscriptionService.suspendDisputedAccess).mockRejectedValue(new Error('db down'))
+    mockRequest = createMockRequest('charge.dispute.created', { id: 'dp_1', charge: 'ch_1' })
+    const response = await POST(mockRequest)
+    expect(response?.status).toBe(400)
+    expect(webhookService.markWebhookEventProcessed).not.toHaveBeenCalled()
   })
 
   it.each(['coupon.created', 'coupon.deleted', 'price.updated', 'product.updated'])(

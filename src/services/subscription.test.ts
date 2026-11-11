@@ -2,7 +2,9 @@ import prisma from '@/lib/prisma'
 import { sendEmail } from '@/services/email'
 import { stripe } from '@/lib/stripe'
 import {
+  restoreWonDisputeAccess,
   revokeRefundedLifetimeAccess,
+  suspendDisputedAccess,
   createLifetimeAccess,
   handleFailedOneTimePayment,
   handleFailedRecurringSubscription,
@@ -1054,6 +1056,80 @@ describe('Subscription services', () => {
         where: { stripeSubscriptionId: 'cs_123', plan: SubscriptionPlan.LIFETIME },
         data: expect.objectContaining({ status: SubscriptionStatus.CANCELED }),
       }))
+    })
+
+    describe('chargebacks', () => {
+      const lifetimeCharge = (extra = {}) =>
+        ({ id: 'ch_1', payment_intent: 'pi_1', invoice: null, refunded: false, amount_refunded: 0, ...extra }) as any
+      const lifetimeSessionFor = () =>
+        vi.spyOn(stripe.checkout.sessions, 'list').mockResolvedValue({ data: [{ id: 'cs_1', mode: 'payment' }] } as any)
+
+      it('suspends lifetime access as soon as a dispute opens', async () => {
+        vi.spyOn(stripe.charges, 'retrieve').mockResolvedValue(lifetimeCharge())
+        lifetimeSessionFor()
+        vi.spyOn(prisma.subscription, 'updateMany').mockResolvedValue({ count: 1 } as any)
+        await expect(suspendDisputedAccess({ charge: 'ch_1', status: 'needs_response' } as any)).resolves.toBe(1)
+        expect(prisma.subscription.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+          where: { stripeSubscriptionId: 'cs_1', plan: SubscriptionPlan.LIFETIME, status: SubscriptionStatus.ACTIVE },
+          data: expect.objectContaining({ status: SubscriptionStatus.CANCELED }),
+        }))
+      })
+
+      it('cancels a disputed subscription in Stripe so it cannot renew, and ends access', async () => {
+        vi.spyOn(stripe.charges, 'retrieve').mockResolvedValue(lifetimeCharge({ invoice: 'in_1' }))
+        vi.spyOn(stripe.invoices, 'retrieve').mockResolvedValue({ id: 'in_1', subscription: 'sub_1' } as any)
+        vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue({ id: 'sub_1', status: 'active' } as any)
+        const cancel = vi.spyOn(stripe.subscriptions, 'cancel').mockResolvedValue({ id: 'sub_1' } as any)
+        vi.spyOn(prisma.subscription, 'updateMany').mockResolvedValue({ count: 1 } as any)
+        await expect(suspendDisputedAccess({ charge: 'ch_1' } as any)).resolves.toBe(1)
+        expect(cancel).toHaveBeenCalledWith('sub_1', undefined, { idempotencyKey: 'cancel-disputed-sub_1' })
+        expect(prisma.subscription.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+          where: { stripeSubscriptionId: 'sub_1', status: SubscriptionStatus.ACTIVE },
+          data: expect.objectContaining({ status: SubscriptionStatus.CANCELED }),
+        }))
+      })
+
+      it('does not cancel a subscription twice', async () => {
+        vi.spyOn(stripe.charges, 'retrieve').mockResolvedValue(lifetimeCharge({ invoice: 'in_1' }))
+        vi.spyOn(stripe.invoices, 'retrieve').mockResolvedValue({ id: 'in_1', subscription: 'sub_1' } as any)
+        vi.spyOn(stripe.subscriptions, 'retrieve').mockResolvedValue({ id: 'sub_1', status: 'canceled' } as any)
+        const cancel = vi.spyOn(stripe.subscriptions, 'cancel')
+        vi.spyOn(prisma.subscription, 'updateMany').mockResolvedValue({ count: 0 } as any)
+        await suspendDisputedAccess({ charge: 'ch_1' } as any)
+        expect(cancel).not.toHaveBeenCalled()
+      })
+
+      it('restores suspended lifetime access when the dispute is won', async () => {
+        vi.spyOn(stripe.charges, 'retrieve').mockResolvedValue(lifetimeCharge())
+        lifetimeSessionFor()
+        vi.spyOn(prisma.subscription, 'updateMany').mockResolvedValue({ count: 1 } as any)
+        await expect(restoreWonDisputeAccess({ charge: 'ch_1', status: 'won' } as any)).resolves.toBe(1)
+        expect(prisma.subscription.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+          where: { stripeSubscriptionId: 'cs_1', plan: SubscriptionPlan.LIFETIME, status: SubscriptionStatus.CANCELED },
+          data: expect.objectContaining({ status: SubscriptionStatus.ACTIVE, canceledAt: null }),
+        }))
+      })
+
+      it.each(['lost', 'needs_response', 'under_review'])('keeps access suspended when the dispute closes as %s', async (status) => {
+        const retrieve = vi.spyOn(stripe.charges, 'retrieve')
+        vi.spyOn(prisma.subscription, 'updateMany')
+        await expect(restoreWonDisputeAccess({ charge: 'ch_1', status } as any)).resolves.toBeNull()
+        expect(retrieve).not.toHaveBeenCalled()
+        expect(prisma.subscription.updateMany).not.toHaveBeenCalled()
+      })
+
+      it('does not restore a won dispute whose purchase was refunded', async () => {
+        vi.spyOn(stripe.charges, 'retrieve').mockResolvedValue(lifetimeCharge({ refunded: true, amount_refunded: 1000 }))
+        vi.spyOn(prisma.subscription, 'updateMany')
+        await expect(restoreWonDisputeAccess({ charge: 'ch_1', status: 'won' } as any)).resolves.toBeNull()
+        expect(prisma.subscription.updateMany).not.toHaveBeenCalled()
+      })
+
+      it('never re-grants a charged-back purchase from its checkout session', async () => {
+        setup(lifetimeSession({ payment_intent: { id: 'pi_1', latest_charge: { refunded: false, amount_refunded: 0, disputed: true } } }))
+        await expect(createLifetimeAccess({ sessionId: 'cs_123', stripeCustomer: 'cus_123' })).resolves.toBeNull()
+        expect(prisma.subscription.upsert).not.toHaveBeenCalled()
+      })
     })
 
     it('keeps access on a partial refund', async () => {
