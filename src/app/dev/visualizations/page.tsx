@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { DynamicImage } from '@/components/DynamicImage'
+import { Prose } from '@/components/Prose'
+import { Viz } from '@/components/visualizations/Viz'
+import { ClientOnly } from './ClientOnly'
 import {
   ArrayVisualizer,
   SequenceStepper,
@@ -15,8 +18,12 @@ import {
  * is a maintainer tool, not lesson content — it is gated out of production and never
  * shipped to readers. Add a specimen here whenever a new component lands.
  */
-export default function VisualizationGalleryPage() {
-  if (process.env.NODE_ENV === 'production') notFound()
+type GalleryParams = { mount?: string; spacer?: string; preset?: string }
+
+export default function VisualizationGalleryPage({ searchParams = {} }: { searchParams?: GalleryParams }) {
+  // Production builds 404 unless explicitly built for end-to-end checks
+  // (`VIZ_GALLERY=1 yarn build`); never set in deployed environments.
+  if (process.env.NODE_ENV === 'production' && process.env.VIZ_GALLERY !== '1') notFound()
 
   const { frames, code } = buildEventLoopSteps()
   const inorder = buildInorderTraversalSteps()
@@ -41,7 +48,13 @@ export default function VisualizationGalleryPage() {
     {
       name: 'StructureVisualizer',
       note: 'Hierarchical — binary trees, BSTs, heaps (D3 auto-layout).',
-      node: <StructureVisualizer tree={inorder.tree} frames={inorder.frames} label="Binary search tree · in-order traversal" />,
+      node: (
+        <StructureVisualizer
+          tree={inorder.tree}
+          frames={inorder.frames}
+          label="Binary search tree · in-order traversal"
+        />
+      ),
     },
     {
       name: 'Mermaid → committed SVG',
@@ -50,23 +63,43 @@ export default function VisualizationGalleryPage() {
     },
   ]
 
-  return (
-    <div className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Visualization gallery</h1>
-      <p className="mb-10 text-slate-500 dark:text-slate-400">
-        Every visualization component, rendered from the same shared primitives (frame, controls, stepper,
-        tokens), in one place — so consistency and drift are easy to review. Dev-only; not shipped to lessons.
-      </p>
+  const viz = <Viz id="event-loop" preset={searchParams.preset} />
 
-      <div className="space-y-12">
-        {specimens.map((specimen) => (
-          <section key={specimen.name}>
-            <h2 className="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">{specimen.name}</h2>
-            <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">{specimen.note}</p>
-            {specimen.node}
-          </section>
-        ))}
+  return (
+    <>
+      {/* v2 specimens, inside the real lesson column (sidebar offset, gutters
+          and Prose), so widths and breakout match a lesson page exactly. */}
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>StepThrough v2 specimen</h1>
+            <p>
+              The event-loop step-through through the lazy <code>{'<Viz id preset>'}</code> mount. Its trace is recorded
+              from a real Node run and re-verified by unit tests.
+            </p>
+            {searchParams.spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+            {searchParams.mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz}
+            <p>Text after the visual, to show it never moves while stepping.</p>
+          </Prose>
+        </div>
       </div>
-    </div>
+      <div className="mx-auto max-w-3xl px-6 py-12">
+        <h1 className="mb-2 text-2xl font-bold text-slate-900 dark:text-white">Visualization gallery</h1>
+        <p className="mb-10 text-slate-500 dark:text-slate-400">
+          Every visualization component, rendered from the same shared primitives (frame, controls, stepper, tokens), in
+          one place — so consistency and drift are easy to review. Dev-only; not shipped to lessons.
+        </p>
+
+        <div className="space-y-12">
+          {specimens.map((specimen) => (
+            <section key={specimen.name}>
+              <h2 className="mb-1 text-sm font-semibold text-slate-700 dark:text-slate-200">{specimen.name}</h2>
+              <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">{specimen.note}</p>
+              {specimen.node}
+            </section>
+          ))}
+        </div>
+      </div>
+    </>
   )
 }

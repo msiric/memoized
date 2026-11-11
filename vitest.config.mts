@@ -14,6 +14,7 @@ export default defineConfig({
       '**/dist/**',
       'src/resources/**', // Symlinked to memoized-content, no tests here
       'src/content/**', // Symlinked to memoized-content, no tests here
+      'e2e/**', // Playwright specs (yarn test:e2e)
     ],
   },
   resolve: {

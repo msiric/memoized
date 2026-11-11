@@ -147,3 +147,7 @@ dist
 .env.sentry-build-plugin
 .vercel
 .aider*
+
+# Playwright (yarn test:e2e)
+/test-results/
+/playwright-report/

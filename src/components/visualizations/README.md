@@ -3,6 +3,39 @@
 Reusable, data-driven visual components for interview-prep lessons. Full
 rationale in the audit repo's `ADR-001-visualization-framework.md`.
 
+## v2 system (VIZ-01)
+
+The production system from the VIZ-01 design spec (audit repo,
+`program-runs/VIZ/2026-11-11-plan/D-DESIGN-SPEC.md`). Lessons embed a visual
+only as `<Viz id="event-loop" preset="basic-ordering" />`; the definitions,
+step logs and presets live here and are listed at `/viz-manifest.json` for
+content CI.
+
+```
+Viz.tsx              the lazy mount: the only up-front code (server HTML, then
+                     the engine chunk within 800 px of the viewport)
+entry-table.ts       id -> [loader, narrow height, wide height] (kept tiny)
+registry.ts          id -> descriptor, presets, footprint, text alternative,
+                     manifest (React-free)
+registry.server.tsx  server renderers for the static Start frame
+primitives/tokens-v2.ts  roles, type, space, motion (contrast-tested)
+step-log/            the step-log contract, authoring lint, Node truth harness,
+                     pre-computed Shiki tokens (`yarn viz:tokens`)
+shell/               StepThrough: frame, dock, scrubber, checkpoints,
+                     narration, footprint, motion gate, FLIP moves
+substrates/          reusable glyph regions (Lane)
+engines/<name>/      model, layout, stage renderer, logs, descriptor
+```
+
+Adding a visual: write the logs (record `observed.log` from a real run; the
+truth test re-runs it), a descriptor and a stage, register it in
+`registry.ts`, `registry.server.tsx` and `entry-table.ts` (the registry test
+prints the footprint to use), then check it on `/dev/visualizations` and with
+`yarn test:e2e`.
+
+The v1 components below still back the dev gallery and the MDX exports; they
+are scheduled to be ported onto the v2 shell.
+
 ## Principle
 
 Three concerns stay separate:
