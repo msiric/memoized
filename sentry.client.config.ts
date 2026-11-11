@@ -7,17 +7,18 @@ import * as Sentry from '@sentry/nextjs'
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN ?? '',
 
-  // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: 1,
+  // Errors only, no performance tracing: nothing used Sentry's tracing data, and
+  // Vercel Speed Insights covers page speed. Each trace was also an extra
+  // request through the /monitoring tunnel, i.e. a Vercel function invocation.
+  tracesSampleRate: 0,
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,
 
+  // Replays only for sessions with an error. Random 10% sampling used the
+  // free plan's 50 replays/month (mostly on bots), so error replays were dropped.
   replaysOnErrorSampleRate: 1.0,
-
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
+  replaysSessionSampleRate: 0,
 
   // Session Replay is added after load (below), not here: bundling it costs
   // every page ~116 KB of JavaScript before anything is interactive.
