@@ -37,7 +37,8 @@ test('instant paths render without tweens', async ({ page }) => {
     )
     const anims = animsOf(r.cap).filter((a) => a.duration !== 0)
     out[name] = { step: await f.getAttribute('data-viz-step'), tweened, anims }
-    strictCheck(`${name}: nothing tweens (D7)`, tweened)
+    // A drag is a run of instant seeks: its frames step, they do not tween.
+    if (!name.startsWith('drag')) strictCheck(`${name}: nothing tweens (D7)`, tweened)
     strictCheck(
       `${name}: no transform or opacity animation runs (D7)`,
       anims

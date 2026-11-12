@@ -61,6 +61,17 @@ async function scenario(
   const settled = await snap(page, EL)
   const tweensAfter: Record<string, string[]> = {}
   const glyphsAfter: Record<string, string[]> = {}
+  const animsAfter: Record<string, string[]> = {}
+  const order = Object.entries(marks).sort((a, b) => a[1] - b[1])
+  for (const [i, [label, at]] of order.entries()) {
+    // What actually animates between this command and the next one (a burst's
+    // later instant jumps are not tweens of this command).
+    const until = order[i + 1]?.[1] ?? Infinity
+    animsAfter[label] = cap.anims
+      .filter((a) => a.t >= at && a.t < until && Number(a.duration) > 0)
+      .filter((a) => a.name === 'viz-move' || 'opacity' in a.to || 'transform' in a.to)
+      .map((a) => `${a.label.slice(0, 60)} ${a.name} ${a.duration}`)
+  }
   for (const [label, at] of Object.entries(marks)) {
     const all = motionsAfter(cap, at)
     const ms = animated(all).filter((e) => e.props.some((p) => p.delay < 60 + 0))
@@ -81,12 +92,13 @@ async function scenario(
     partialOpacity,
     tweensAfter,
     glyphsAfter,
+    animsAfter,
     diffVsSlowWalk: diff,
   }
   strictCheck(`${name}: nothing left running`, settled.running.map((r) => r.label))
   strictCheck(`${name}: nothing left half-faded`, partialOpacity)
   if (diff) strictCheck(`${name}: settles exactly like a slow walk`, diff)
-  for (const label of strict.instant ?? []) strictCheck(`${name}: nothing tweens after ${label}`, tweensAfter[label] ?? [])
+  for (const label of strict.instant ?? []) strictCheck(`${name}: nothing animates after ${label}`, animsAfter[label] ?? [])
   for (const [label, max] of Object.entries(strict.maxGlyphs ?? {}))
     strictCheck(
       `${name}: at most ${max} glyphs animate after ${label}`,

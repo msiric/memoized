@@ -608,7 +608,10 @@ export function liftShadow(k: number): string {
 /** CSS twins for class-driven transitions. */
 export const transitionCls = {
   /** D11: platform `transition` (150 ms, default curve), plus the press step. */
-  feedback: 'transition motion-reduce:transition-none',
+  // Colors and the press filter only: availability (opacity) snaps, so an
+  // instant render never fades a control in or out (D7).
+  feedback:
+    'transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow,filter] motion-reduce:transition-none',
   press: 'active:brightness-98',
   highlight:
     'transition-[background-color,opacity,transform,clip-path] duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',

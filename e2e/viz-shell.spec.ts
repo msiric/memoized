@@ -409,12 +409,13 @@ test('text zoom 150 % and 200 %: shell geometry scales with the root font size (
     const g = await frame(page).evaluate((el) => {
       const h = (q: string) => el.querySelector(q)!.getBoundingClientRect().height
       return {
-        bar: h('[data-viz-region="bar"]'),
+        slider: h('[role="slider"]'),
         stepbar: h('[data-viz-region="stepbar"]'),
         thumb: h('[data-viz-part="scrubber-thumb"]'),
       }
     })
-    expect(g.bar).toBeCloseTo(96 * zoom, 0)
+    // The button row may wrap to a second row under large text; the targets keep their size.
+    expect(g.slider).toBeCloseTo(44 * zoom, 0)
     expect(g.stepbar).toBeCloseTo(20 * zoom, 0)
     expect(g.thumb).toBeCloseTo(28 * zoom, 0)
     // The shell's own regions stay inside the frame (the stage's content at

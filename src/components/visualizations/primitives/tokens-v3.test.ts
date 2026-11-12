@@ -178,7 +178,8 @@ describe('tokens v3: motion (§4, D10, D11)', () => {
   it('gives control feedback the platform 150 ms (D11)', () => {
     const f = motion.feedback.full
     expect(f.type === 'tween' && f.duration).toBe(0.15)
-    expect(tokens.transitionCls.feedback).toMatch(/^transition\b/)
+    expect(tokens.transitionCls.feedback).toMatch(/^transition-\[color,background-color/)
+    expect(tokens.transitionCls.feedback).not.toMatch(/opacity/)
   })
 
   it('keeps every tween at or under 300 ms and the reduced variant at or under 150 ms', () => {
