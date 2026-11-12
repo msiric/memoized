@@ -203,6 +203,19 @@ describe('tokens v3: motion (§4, D10, D11)', () => {
     expect(m.settleMs).toBeLessThan(motionRules.maxTransitionMs)
   })
 
+  it('keeps the one reveal (D21) inside 800 ms with room for its beats', () => {
+    const r = tokens.reveal
+    expect(r.maxMs).toBe(800)
+    // Four outputs in order, then the caption, inside the cap.
+    const enter = motion.enter.full.type === 'tween' ? motion.enter.full.duration * 1000 : 0
+    expect(3 * r.staggerMs + enter + 120).toBeLessThanOrEqual(r.maxMs)
+    // Two riders, then the tick on landing, inside the cap.
+    expect(r.ride.duration * 1000 + r.riderGapMs + 120).toBeLessThanOrEqual(r.maxMs)
+    // The stagger reads as an order but never as a wait.
+    expect(r.staggerMs).toBeGreaterThan(motionRules.maxStaggerMs)
+    expect(r.staggerMs).toBeLessThanOrEqual(100)
+  })
+
   it('composes the one lift shadow and ramps it with k (D6)', () => {
     expect(tokens.liftShadow(0)).toBe('none')
     expect(tokens.liftShadow(1)).toBe('0 6px 16px rgb(0 0 0 / 0.45)')

@@ -593,6 +593,39 @@ export const motionRules = {
 } as const
 
 /**
+ * D21: the one designed reveal per visual. It is the single explicit
+ * exception to the per-step budget (`maxAnimatedPerStep`) and to the 300 ms
+ * cap: a sequenced moment that runs only on the step that pays off the
+ * visual (the event loop's last step, the list-keys reveal), never on load,
+ * and lands at once on any instant command (D7) or on Back. Under reduced
+ * motion it is a crossfade of at most the reduced `enter` (120 ms) or
+ * instant. Each beat inside it still uses a stage token (`enter`, `draw`,
+ * `highlight`, `caption`); only these values are new.
+ */
+export const reveal = {
+  /** The whole sequence, first beat to last frame (D21). */
+  maxMs: 800,
+  /**
+   * Between items the reveal plays in order (the console outputs, left to
+   * right). `maxStaggerMs` (40) is for chips that enter together; at 40 ms
+   * four outputs resolve in 120 ms, faster than the eye reads them as an
+   * order. 80 ms reads as playback and keeps four outputs inside 500 ms.
+   * The shell shortens it so a long console still ends inside `maxMs`.
+   */
+  staggerMs: 80,
+  /**
+   * The carried glyph's ride along its match line (list keys). It crosses
+   * the whole stage (about 400 px at 1280), so the 280 ms `move` spring
+   * would cover it at 1.4 px/ms, too fast to follow with the eye. It starts
+   * from rest after the lift, so it eases in and out on the platform's own
+   * curve (Tailwind `transition`, P: Button.tsx:48).
+   */
+  ride: { duration: 0.42, ease: [0.4, 0, 0.2, 1] as const },
+  /** A second carried glyph leaves this much later, so two riders on crossing lines never meet. */
+  riderGapMs: 120,
+} as const
+
+/**
  * D6: the one functional shadow. Only a glyph moving between regions carries
  * it, ramped in and out with the move (`k` 0 to 1), and the moving glyph gets
  * an opaque raised backing (`vz-frame`, the lighter elevated surface) so
