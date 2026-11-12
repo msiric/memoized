@@ -98,6 +98,12 @@ export default {
     plugin(({ addVariant }) => {
       addVariant('can-hover', '@media (hover: hover) { &:hover }')
       addVariant('group-can-hover', '@media (hover: hover) { :merge(.group):hover & }')
+      // The visualization dock lays its checkpoint out by its own width, in
+      // rem (VIZ-H D19): beside the choices from 37rem (592 px at the default
+      // size, the dock at a 768 px viewport), stacked below it or under
+      // large text. The dock is the size container (\`vz-dock\`).
+      addVariant('dock-wide', '@container vz-dock (min-width: 37rem)')
+      addVariant('dock-narrow', '@container vz-dock (max-width: 36.999rem)')
     }),
   ],
 } satisfies Config

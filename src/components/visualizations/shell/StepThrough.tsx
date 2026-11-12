@@ -415,7 +415,12 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       {/* 4. Dock: one slot shared by the caption, the checkpoint (prompt,
           choices, Skip) and the reveal (feedback over the marked choices). A
           ghost stack of every variant of every preset holds its height (D15). */}
-      <div data-viz-region="dock" className="relative grid print:hidden" style={{ marginTop: rem(FRAME.dockGap) }}>
+      <div
+        data-viz-region="dock"
+        className="relative grid print:hidden"
+        // The checkpoint picks its layout from the dock's width (D19), not the viewport's.
+        style={{ marginTop: rem(FRAME.dockGap), containerType: 'inline-size', containerName: 'vz-dock' }}
+      >
         <DockGhosts def={def} />
         {mode === 'controls' ? (
           <m.p
@@ -612,15 +617,16 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
 // ---------------------------------------------------------------------------
 
 /** Two columns of 44 px choices; from 768, two 168 px columns beside the text. */
-const CHOICES_CLS = 'grid shrink-0 grid-cols-2 [grid-area:choices] md:w-[var(--vz-choices-w)]'
+const CHOICES_CLS = 'grid shrink-0 grid-cols-2 [grid-area:choices] dock-wide:w-[var(--vz-choices-w)]'
 const choicesStyle = {
   gap: rem(CHOICE.gap),
   ['--vz-choices-w' as string]: rem(2 * CHOICE.wideWidth + CHOICE.gap),
 }
 
 /**
- * The checkpoint block (D9). Below 768: the text with "Skip" at its right,
- * the choices under both. From 768: text, choices, Skip in one row. The text
+ * The checkpoint block (D9). In a dock under 37rem (phones, or large text):
+ * the text with "Skip" at its right, the choices under both. From 37rem
+ * (the dock at a 768 px viewport): text, choices, Skip in one row. The text
  * cell holds the prompt and every feedback of this checkpoint (invisible but
  * one), so the choices never move between asking and the reveal; the text
  * sits on the choices. DOM order is text, choices, Skip, so focus reaches the
@@ -649,13 +655,13 @@ function CheckpointBlock({
       data-viz-part={ghost ? undefined : 'viz-checkpoint'}
       className={cn(
         'grid min-w-0 items-end [grid-template-areas:"text_skip""choices_choices"] [grid-template-columns:minmax(0,1fr)_auto]',
-        'md:items-center md:[grid-template-areas:"text_choices_skip"] md:[grid-template-columns:minmax(0,1fr)_auto_auto]',
+        'dock-wide:items-center dock-wide:[grid-template-areas:"text_choices_skip"] dock-wide:[grid-template-columns:minmax(0,1fr)_auto_auto]',
         className,
       )}
       style={{ columnGap: rem(CHOICE.textGap), rowGap: rem(CHOICE.textGap) }}
     >
-      {/* Below 768 the text's last line sits level with Skip's label (8 px under it, 44 px target). */}
-      <div className="grid min-w-0 content-end [grid-area:text] max-md:pb-2 md:pr-2">
+      {/* Stacked, the text's last line sits level with Skip's label (8 px under it, 44 px target). */}
+      <div className="grid min-w-0 content-end [grid-area:text] dock-narrow:pb-2 dock-wide:pr-2">
         <p aria-hidden className={cn('invisible col-start-1 row-start-1', promptCls)}>
           {cp.prompt}
         </p>
