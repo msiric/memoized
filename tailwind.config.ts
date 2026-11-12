@@ -1,6 +1,8 @@
 import headlessuiPlugin from '@headlessui/tailwindcss'
 import typographyPlugin from '@tailwindcss/typography'
 import { type Config } from 'tailwindcss'
+import colors from 'tailwindcss/colors'
+import plugin from 'tailwindcss/plugin'
 import typographyStyles from './typography'
 
 export default {
@@ -33,6 +35,16 @@ export default {
     },
     typography: typographyStyles,
     extend: {
+      colors: {
+        // Lesson visualizations (VIZ-H decision 4): the frame surface
+        // (zinc-800/40 over the zinc-900 page) as one opaque color, derived
+        // from the palette, for fills that must mask what is under them.
+        'vz-frame': `color-mix(in srgb, ${colors.zinc[800]} 40%, ${colors.zinc[900]})`,
+      },
+      brightness: {
+        // Lesson visualizations: press feedback (VIZ-H decision 11).
+        98: '.98',
+      },
       animation: {
         flipVertical: 'flipVertical 0.3s ease-in-out',
         borderFlash: 'borderFlash 3s ease-in-out',
@@ -78,5 +90,14 @@ export default {
       },
     },
   },
-  plugins: [typographyPlugin, headlessuiPlugin],
+  plugins: [
+    typographyPlugin,
+    headlessuiPlugin,
+    // Hover styles only on devices that can hover (VIZ-H decision 11), so a
+    // tap never leaves a control stuck in its hover state.
+    plugin(({ addVariant }) => {
+      addVariant('can-hover', '@media (hover: hover) { &:hover }')
+      addVariant('group-can-hover', '@media (hover: hover) { :merge(.group):hover & }')
+    }),
+  ],
 } satisfies Config
