@@ -3,13 +3,15 @@ import { allFeedback } from './feedback'
 import type { PerVariant, StepThroughDescriptor, Variant } from './types'
 
 /**
- * Fixed footprint of the StepThrough frame (spec §3.3). Every region has an
- * explicit height derived from the visual's own content (the largest step,
- * prompt and feedback of every preset), so the frame never moves while
- * stepping, switching presets or answering, and the lazy mount reserves the
- * same box before the engine loads. Reserves are tight: text is wrapped with
- * conservative glyph widths at the narrowest width of each variant, and the
- * end-to-end suite checks that nothing overflows at any width.
+ * Footprint of the StepThrough frame (spec §3.3). The header, stage, step bar
+ * and controls have explicit heights derived from the visual's own content,
+ * emitted in rem so they follow the reader's text size (D19).
+ *
+ * The dock is not reserved from these numbers any more (D15): the shell
+ * measures it with a ghost stack of every caption, prompt and feedback, so it
+ * is exactly the worst case at the current width and text size. `dockSlot`
+ * stays as the estimate at the narrowest width of each variant, which sizes
+ * the lazy mount's client-only placeholder (`entry-table.ts`).
  *
  * Pure: imported by the shell, by tests and by the registry-table check.
  */
@@ -45,6 +47,8 @@ export const GLYPH = { caption: 7.2, prompt: 8.4 } as const
 
 /** Choices sit in two columns; from 768 they sit beside the prompt. */
 export const CHOICE = { height: TARGET_PX, gap: TARGET_GAP_PX, wideWidth: 168, textGap: 8, sideGap: 16 } as const
+/** The checkpoint's "Skip" text button (44 px target, about 46 px wide at 14/500). */
+export const SKIP_WIDTH = 52
 
 /**
  * The controls bar: scrubber row, then the button row, in flow at every
@@ -89,8 +93,11 @@ export function choicesHeight(count: number): number {
   return rows * CHOICE.height + Math.max(0, rows - 1) * CHOICE.gap
 }
 
-/** Width of the text column beside the choices, from 768. */
-export const WIDE_SIDE_TEXT = MIN_TEXT_WIDTH.wide - CHOICE.sideGap - (2 * CHOICE.wideWidth + CHOICE.gap)
+/** Width of the checkpoint text below 768: beside "Skip". */
+export const NARROW_SIDE_TEXT = MIN_TEXT_WIDTH.narrow - SKIP_WIDTH - CHOICE.textGap
+/** Width of the checkpoint text from 768: beside the choices and "Skip" (8 px gaps plus 8 px padding). */
+export const WIDE_SIDE_TEXT =
+  MIN_TEXT_WIDTH.wide - 3 * CHOICE.textGap - (2 * CHOICE.wideWidth + CHOICE.gap) - SKIP_WIDTH
 
 export type DockText = { captions: string[]; prompts: string[]; feedback: string[]; maxChoices: number }
 
@@ -110,23 +117,24 @@ export function dockText<S>(def: StepThroughDescriptor<S>): DockText {
 const maxLines = (texts: string[], maxChars: number) => Math.max(0, ...texts.map((t) => wrapLines(t, maxChars)))
 
 /**
- * The dock body: one slot shared by the caption, the checkpoint (prompt and
- * choices) and the reveal (feedback and marked choices). Below 768 the
- * choices sit under the text; from 768 beside it.
+ * The dock estimate at the narrowest width of a variant: the taller of the
+ * caption and the checkpoint block. The checkpoint's text cell holds its
+ * prompt and every feedback; below 768 the choices sit under it (it shares
+ * its row with "Skip"), from 768 beside it.
  */
 export function dockSlot(t: DockText, variant: Variant): number {
   const width = MIN_TEXT_WIDTH[variant]
   const caption = maxLines(t.captions, chars(width, GLYPH.caption)) * CAPTION_LINE
   if (t.maxChoices === 0) return caption
   const choices = choicesHeight(t.maxChoices)
-  if (variant === 'narrow') {
-    const ask = maxLines(t.prompts, chars(width, GLYPH.prompt)) * PROMPT_LINE + CHOICE.textGap + choices
-    const reveal = maxLines(t.feedback, chars(width, GLYPH.caption)) * CAPTION_LINE + CHOICE.textGap + choices
-    return Math.max(caption, ask, reveal)
-  }
-  const ask = maxLines(t.prompts, chars(WIDE_SIDE_TEXT, GLYPH.prompt)) * PROMPT_LINE
-  const reveal = maxLines(t.feedback, chars(WIDE_SIDE_TEXT, GLYPH.caption)) * CAPTION_LINE
-  return Math.max(caption, ask, reveal, choices)
+  const side = variant === 'narrow' ? NARROW_SIDE_TEXT : WIDE_SIDE_TEXT
+  const text = Math.max(
+    maxLines(t.prompts, chars(side, GLYPH.prompt)) * PROMPT_LINE,
+    maxLines(t.feedback, chars(side, GLYPH.caption)) * CAPTION_LINE,
+  )
+  const checkpoint =
+    variant === 'narrow' ? Math.max(text, TARGET_PX) + CHOICE.textGap + choices : Math.max(text, choices)
+  return Math.max(caption, checkpoint)
 }
 
 export function headerHeight(presetCount: number, variant: Variant): number {

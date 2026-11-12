@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import {
   useCallback,
   useEffect,
@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
 } from 'react'
 import { BackIcon, Button, NextIcon, PauseIcon, PlayIcon, RestartIcon } from '../primitives/Button'
 import { captionCls, promptCls } from '../primitives/Caption'
@@ -21,9 +22,10 @@ import { Frame } from '../primitives/Frame'
 import { Provenance } from '../primitives/Provenance'
 import { SegmentedControl } from '../primitives/SegmentedControl'
 import { TARGET_GAP_PX, ink, motionRules, type as typeScale } from '../primitives/tokens-v3'
+import type { Checkpoint } from '../step-log/types'
 import { CodePane } from './CodePane'
 import { CHOICE, FRAME, STEP_BAR, definitionMetrics } from './footprint'
-import { feedbackText } from './feedback'
+import { allFeedback, feedbackText } from './feedback'
 import {
   dockMode,
   initialState,
@@ -33,11 +35,12 @@ import {
   type MachineState,
   type PresetShape,
 } from './machine'
-import { transitionFor, type MotionGate } from './motion'
+import { motionBudget, transitionFor, type MotionGate } from './motion'
+import { BURST_WINDOW_MS, INITIAL_PACE, escapePauses, pace, type Pace } from './pace'
 import { Scrubber } from './Scrubber'
 import { StepsAsText, runtimeName } from './StepsAsText'
 import type { StepThroughDefinition } from './types'
-import { H_CLS, heights } from './vars'
+import { H_CLS, heights, rem } from './vars'
 
 /**
  * StepThrough: the single shell for every step-through visual (spec §6.1).
@@ -48,6 +51,20 @@ import { H_CLS, heights } from './vars'
  *
  * `interactive={false}` renders the static Start frame for the server: the
  * controls keep their space but are hidden and `aria-disabled` (§3.5).
+ *
+ * Behavior (VIZ-H):
+ * - D7: scrub, Home, End, Restart and preset switches render instantly, and
+ *   so does a burst (two commands within the shared 250 ms window, D13).
+ * - D8: the gate carries the direction, so Back plays Next mirrored.
+ * - Spec §4 rule 1: per step at most two stage glyphs animate (`motionBudget`).
+ * - D9: the control row never changes shape. At a checkpoint Next stays in
+ *   place, `aria-disabled`; the choices and "Skip" appear in the dock.
+ * - D15: the dock reserves the tallest of every caption, prompt and feedback
+ *   of every preset as measured at the current width and text size (an
+ *   invisible ghost stack in the same grid cell), so there is no shift across
+ *   steps, presets and checkpoint modes, and no reserve beyond the real worst
+ *   case at this width.
+ * - Narration is announced once input settles (one burst window), not per press.
  */
 
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
@@ -64,8 +81,14 @@ const NAV_ACTIONS = new Set<Action['type']>([
   'preset',
 ])
 
-/** `epoch` counts instant renders: glyphs keyed by it remount at their end state, which snaps any transition still in flight. */
-type Nav = { state: MachineState; instant: boolean; at: number; epoch: number }
+/**
+ * State plus the motion decision for the render it produced. `pace.epoch`
+ * counts instant renders: glyphs keyed by it remount at their end state, which
+ * snaps any transition still in flight. `allow` is the step's motion budget.
+ */
+type Nav = { state: MachineState; pace: Pace; direction: 1 | -1; allow: ReadonlySet<string> }
+
+const NOTHING: ReadonlySet<string> = new Set()
 
 export type StepThroughProps<S> = {
   def: StepThroughDefinition<S>
@@ -89,16 +112,30 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   )
 
   // State plus the motion decision for the render it produced. Two commands
-  // inside one transition window render instantly (§4 rule 3).
+  // inside the shared burst window render instantly (§4 rule 3, D13).
   const [nav, send] = useReducer(
     (prev: Nav, a: Action & { forceInstant?: boolean; now: number }): Nav => {
       const state = reduce(shapes, prev.state, a)
-      if (!NAV_ACTIONS.has(a.type)) return state === prev.state ? prev : { ...prev, state }
-      const instant = Boolean(a.forceInstant) || a.now - prev.at < motionRules.maxTransitionMs
-      return { state, instant, at: a.now, epoch: instant ? prev.epoch + 1 : prev.epoch }
+      const from = prev.state
+      // Play advances at once (D10), so it navigates like Next.
+      const moved = state.index !== from.index || state.preset !== from.preset
+      if (!NAV_ACTIONS.has(a.type) && !moved) return state === prev.state ? prev : { ...prev, state }
+      const p = pace(prev.pace, a.now, Boolean(a.forceInstant))
+      const direction = state.index < from.index ? -1 : 1
+      let allow = NOTHING
+      if (!p.instant && state.preset === from.preset && Math.abs(state.index - from.index) === 1) {
+        const steps = def.presets[state.preset].log.steps
+        const ids = def.engine.introspect.ids
+        allow = motionBudget(
+          ids(steps[from.index].state),
+          ids(steps[state.index].state),
+          steps[Math.max(from.index, state.index)].focus,
+        )
+      }
+      return { state, pace: p, direction, allow }
     },
     undefined,
-    () => ({ state: initialState(shapes, startPreset), instant: true, at: -Infinity, epoch: 0 }),
+    () => ({ state: initialState(shapes, startPreset), pace: INITIAL_PACE, direction: 1 as const, allow: NOTHING }),
   )
   const dispatch = useCallback(
     (a: Action, forceInstant = false) => send({ ...a, forceInstant, now: performance.now() }),
@@ -107,7 +144,13 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const s = nav.state
 
   const prefersReduced = useReducedMotion() ?? false
-  const gate: MotionGate = { reduce: prefersReduced, instant: nav.instant || !interactive, epoch: nav.epoch }
+  const gate: MotionGate = {
+    reduce: prefersReduced,
+    instant: nav.pace.instant || !interactive,
+    epoch: nav.pace.epoch,
+    direction: nav.direction,
+    allow: nav.allow,
+  }
   const animate = !gate.instant && !gate.reduce
 
   const current = def.presets[s.preset]
@@ -185,7 +228,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     }
   }, [s.playing, dispatch])
 
-  // ---- narration: once per step, polite, never on load (§5.3) -------------
+  // ---- narration: once input settles, polite, never on load (§5.3, M21) ---
   const [live, setLive] = useState('')
   const firstRender = useRef(true)
   useEffect(() => {
@@ -200,7 +243,9 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       const f = feedbackText(cp, s.picked[cpIndex])
       text = `${f.lead} ${f.body} ${where} ${step.narration}`
     }
-    setLive(text)
+    // One announcement for a burst: only the step the reader settles on.
+    const id = window.setTimeout(() => setLive(text), BURST_WINDOW_MS)
+    return () => window.clearTimeout(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.index, s.preset, mode])
 
@@ -210,10 +255,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     const target = e.target as HTMLElement
     const ownKeys = target.closest('[data-viz-own-keys]')
     if (e.key === 'Escape') {
-      if (s.playing) {
-        e.preventDefault()
-        dispatch({ type: 'pause' })
-      }
+      escapePauses(e, s.playing, () => dispatch({ type: 'pause' }))
       return
     }
     if (/^[1-4]$/.test(e.key) && mode === 'ask' && cp && target.tagName !== 'SELECT') {
@@ -290,6 +332,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const picked = checkpointIndex >= 0 ? s.picked[checkpointIndex] : null
   const lastTime = checkpointIndex >= 0 ? s.memory[`${s.preset}:${checkpointIndex}`] : undefined
   const feedback = mode === 'reveal' && cp ? feedbackText(cp, picked) : null
+  const atCheckpoint = mode === 'ask'
 
   return (
     <Frame
@@ -306,27 +349,33 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       {/* 1. Header: title, then the preset switcher (right from 768). */}
       <header
         className={cn('flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4', H_CLS)}
-        style={heights({ narrow: metrics.narrow.header, wide: metrics.wide.header })}
+        style={heights({
+          narrow: metrics.narrow.header,
+          wide: metrics.wide.header,
+        })}
       >
         <p id={titleId} className={cn('m-0 truncate', typeScale.title.cls, ink.base)}>
           {def.title}
         </p>
-        <div className={cn('self-start md:self-auto', hidden && 'invisible')}>
-          <SegmentedControl
-            label="Example"
-            options={def.presets}
-            value={s.preset}
-            interactive={interactive}
-            onChange={(i) => dispatch({ type: 'preset', preset: i }, true)}
-          />
-        </div>
+        {/* One preset has no switcher, and no gap reserved for one (A5). */}
+        {def.presets.length > 1 ? (
+          <div className={cn('self-start md:self-auto', hidden && 'invisible')}>
+            <SegmentedControl
+              label="Example"
+              options={def.presets}
+              value={s.preset}
+              interactive={interactive}
+              onChange={(i) => dispatch({ type: 'preset', preset: i }, true)}
+            />
+          </div>
+        ) : null}
       </header>
 
       {/* 2. Stage: fixed footprint, code pane inside the stage grid. */}
       <div
         data-viz-region="stage"
         className={cn('relative', H_CLS)}
-        style={heights({ narrow: metrics.narrow.stage, wide: metrics.wide.stage }, { marginTop: FRAME.headerGap })}
+        style={heights({ narrow: metrics.narrow.stage, wide: metrics.wide.stage }, { marginTop: rem(FRAME.headerGap) })}
       >
         <Stage
           log={log}
@@ -345,7 +394,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       <div
         data-viz-region="stepbar"
         className={cn('flex items-center justify-between gap-4', typeScale.status.cls, ink.secondary)}
-        style={{ height: STEP_BAR, marginTop: FRAME.stageGap }}
+        style={{ height: rem(STEP_BAR), marginTop: rem(FRAME.stageGap) }}
       >
         <span className="min-w-0 truncate" data-viz-part="viz-event">
           {s.index === 0 ? '' : step.event}
@@ -355,117 +404,125 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         </span>
       </div>
 
-      {/* Narration: one polite status per step, outside the stage. */}
+      {/* Narration: one polite status once input settles, outside the stage. */}
       <div role="status" className="sr-only" data-viz-part="viz-live">
         {live}
       </div>
 
-      {/* 4. Dock: one reserved slot shared by the caption, the checkpoint
-          (prompt and choices) and the reveal (feedback over marked choices).
-          Below 768 the choices sit under the text, from 768 beside it. */}
-      <div
-        data-viz-region="dock"
-        className={cn('relative grid print:hidden', H_CLS)}
-        style={heights({ narrow: metrics.narrow.dock, wide: metrics.wide.dock }, { marginTop: FRAME.dockGap })}
-      >
-        <div
-          data-inactive={mode !== 'controls' || undefined}
-          className={cn('col-start-1 row-start-1 grid content-start', mode !== 'controls' && 'invisible')}
-        >
-          <AnimatePresence initial={false} custom={captionT}>
-            <m.p
-              key={`${s.preset}:${s.index}:${nav.epoch}`}
-              data-viz-part="viz-caption"
-              className={cn('col-start-1 row-start-1', captionCls)}
-              initial={gate.instant ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit="out"
-              custom={captionT}
-              variants={{ out: (t: typeof captionT) => ({ opacity: 0, transition: t }) }}
-              transition={captionT}
-            >
-              {step.why}
-            </m.p>
-          </AnimatePresence>
-        </div>
-        <div
-          data-inactive={mode === 'controls' || undefined}
-          className={cn(
-            'col-start-1 row-start-1 flex min-w-0 flex-col self-start md:flex-row md:items-center',
-            mode === 'controls' && 'invisible',
-          )}
-          style={{ gap: CHOICE.textGap }}
-        >
-          <div className="min-w-0 md:flex-1 md:pr-2">
-            {feedback ? (
-              <p className={captionCls} data-viz-part="viz-feedback">
-                <span className={cn('font-semibold', ink.base)}>{feedback.lead}</span> {feedback.body}
-              </p>
-            ) : (
-              <p id={promptId} className={promptCls} data-viz-part="viz-prompt">
-                {cp?.prompt}
-              </p>
-            )}
-          </div>
-          <div
-            ref={choicesRef}
-            role="radiogroup"
-            aria-labelledby={promptId}
-            data-viz-own-keys
-            className="grid shrink-0 grid-cols-2 md:w-[var(--vz-choices-w)]"
-            style={{ gap: CHOICE.gap, ['--vz-choices-w' as string]: `${2 * CHOICE.wideWidth + CHOICE.gap}px` }}
+      {/* 4. Dock: one slot shared by the caption, the checkpoint (prompt,
+          choices, Skip) and the reveal (feedback over the marked choices). A
+          ghost stack of every variant of every preset holds its height (D15). */}
+      <div data-viz-region="dock" className="relative grid print:hidden" style={{ marginTop: rem(FRAME.dockGap) }}>
+        <DockGhosts def={def} />
+        {mode === 'controls' ? (
+          <m.p
+            key={`${s.preset}:${s.index}:${nav.pace.epoch}`}
+            data-viz-part="viz-caption"
+            className={cn('col-start-1 row-start-1 self-start', captionCls)}
+            // The old sentence goes at once and the new one fades in: two
+            // sentences never share the cell (M15).
+            initial={gate.instant || gate.reduce ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={captionT}
           >
-            {(cp?.choices ?? []).map((choice, i) => {
-              const isPicked = picked === choice.id
-              const isAnswer = cp?.answer === choice.id
-              const revealed = mode === 'reveal'
-              return (
-                <ChoiceRow
-                  key={choice.id}
-                  ref={(el) => {
-                    choiceRefs.current[i] = el
-                  }}
-                  index={i}
-                  label={choice.label}
-                  state={revealed ? 'resolved' : 'ask'}
-                  picked={revealed && isPicked}
-                  // The number slot becomes the result (D9): ✓ on the answer, × on a wrong pick.
-                  mark={revealed ? (isAnswer ? 'right' : isPicked ? 'wrong' : null) : null}
-                  tag={!revealed && lastTime === choice.id ? 'last time' : undefined}
-                  tabIndex={mode === 'ask' && i === choiceFocus ? 0 : -1}
-                  onClick={() => mode === 'ask' && dispatch({ type: 'answer', choice: choice.id })}
-                  onKeyDown={(e) => {
-                    if (mode === 'ask') onChoiceKey(e, i, cp?.choices.length ?? 0)
-                  }}
-                  onFocus={() => setChoiceFocus(i)}
-                  data-choice={choice.id}
-                />
+            {step.why}
+          </m.p>
+        ) : null}
+        {cp ? (
+          <CheckpointBlock
+            cp={cp}
+            className="col-start-1 row-start-1 self-start"
+            text={
+              feedback ? (
+                <p className={captionCls} data-viz-part="viz-feedback">
+                  <span className={cn('font-semibold', ink.base)}>{feedback.lead}</span> {feedback.body}
+                </p>
+              ) : (
+                <p id={promptId} className={promptCls} data-viz-part="viz-prompt">
+                  {cp.prompt}
+                </p>
               )
-            })}
-          </div>
-        </div>
+            }
+            choices={
+              <div
+                ref={choicesRef}
+                role="radiogroup"
+                aria-labelledby={promptId}
+                data-viz-own-keys
+                className={CHOICES_CLS}
+                style={choicesStyle}
+              >
+                {cp.choices.map((choice, i) => {
+                  const isPicked = picked === choice.id
+                  const isAnswer = cp.answer === choice.id
+                  const revealed = mode === 'reveal'
+                  return (
+                    <ChoiceRow
+                      key={choice.id}
+                      ref={(el) => {
+                        choiceRefs.current[i] = el
+                      }}
+                      index={i}
+                      label={choice.label}
+                      state={revealed ? 'resolved' : 'ask'}
+                      picked={revealed && isPicked}
+                      // The number slot becomes the result (D9): ✓ on the answer, × on a wrong pick.
+                      mark={revealed ? (isAnswer ? 'right' : isPicked ? 'wrong' : null) : null}
+                      tag={!revealed && lastTime === choice.id ? 'last time' : undefined}
+                      tabIndex={mode === 'ask' && i === choiceFocus ? 0 : -1}
+                      onClick={() => mode === 'ask' && dispatch({ type: 'answer', choice: choice.id })}
+                      onKeyDown={(e) => {
+                        if (mode === 'ask') onChoiceKey(e, i, cp.choices.length)
+                      }}
+                      onFocus={() => setChoiceFocus(i)}
+                      data-choice={choice.id}
+                    />
+                  )
+                })}
+              </div>
+            }
+            skip={
+              <Button
+                variant="text"
+                tabIndex={atCheckpoint ? 0 : -1}
+                aria-label="Skip, show me"
+                data-inactive={!atCheckpoint || undefined}
+                unavailable={!atCheckpoint}
+                onClick={() => dispatch({ type: 'skip' })}
+                className={cn(!atCheckpoint && 'invisible')}
+                data-viz-part="viz-skip"
+              >
+                Skip
+              </Button>
+            }
+          />
+        ) : null}
       </div>
 
       {/* Controls bar: scrubber, then Restart, Back, Next, Play. In flow at
-          every width: the sticky dock is gone (D14), and the speed toggle (D10). */}
+          every width (D14) and never changing shape (D9): at a checkpoint
+          Next and Play stay in place, unavailable. */}
       <div
         data-viz-region="bar"
         className={cn('flex flex-col print:hidden', H_CLS, hidden && 'invisible')}
-        style={heights({ narrow: metrics.narrow.bar, wide: metrics.wide.bar }, { marginTop: FRAME.barGap })}
+        style={heights({ narrow: metrics.narrow.bar, wide: metrics.wide.bar }, { marginTop: rem(FRAME.barGap) })}
       >
         <Scrubber
           ref={sliderRef}
           index={s.index}
           total={total}
           events={log.steps.map((st) => st.event)}
-          checkpoints={log.checkpoints.map((c, k) => ({ at: c.beforeStep - 0.5, status: s.status[k] }))}
+          checkpoints={log.checkpoints.map((c, k) => ({
+            at: c.beforeStep,
+            status: s.status[k],
+          }))}
           valueText={valueText}
           label={`${def.title}: step`}
           interactive={interactive}
           animate={animate}
           onSeek={(to) => dispatch({ type: 'seek', to }, true)}
         />
-        <div className="flex items-center" style={{ marginTop: TARGET_GAP_PX, gap: TARGET_GAP_PX }}>
+        <div className="flex items-center" style={{ marginTop: rem(TARGET_GAP_PX), gap: rem(TARGET_GAP_PX) }}>
           <Button
             size="icon"
             tabIndex={-1}
@@ -486,45 +543,31 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             <BackIcon />
             <span>Back</span>
           </Button>
-          {/* Next and "Skip, show me" share one slot; both stay mounted so
-              focus can be handed over deliberately (§5.2). */}
-          <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] md:w-32 md:flex-none">
-            <Button
-              ref={nextRef}
-              variant="primary"
-              tabIndex={-1}
-              aria-label="Next"
-              aria-keyshortcuts="ArrowRight"
-              data-inactive={mode === 'ask' || undefined}
-              unavailable={!interactive || s.index >= last || mode === 'ask'}
-              onClick={() => dispatch({ type: 'next' })}
-              className={cn('col-start-1 row-start-1', mode === 'ask' && 'invisible')}
-              data-viz-part="viz-next"
-            >
-              <span>Next</span>
-              <NextIcon />
-            </Button>
-            <Button
-              variant="text"
-              tabIndex={mode === 'ask' ? 0 : -1}
-              data-inactive={mode !== 'ask' || undefined}
-              unavailable={mode !== 'ask'}
-              onClick={() => dispatch({ type: 'skip' })}
-              className={cn('col-start-1 row-start-1', mode !== 'ask' && 'invisible')}
-              data-viz-part="viz-skip"
-            >
-              Skip, show me
-            </Button>
-          </div>
+          <Button
+            ref={nextRef}
+            variant="primary"
+            tabIndex={-1}
+            aria-label="Next"
+            aria-keyshortcuts="ArrowRight"
+            // At a checkpoint Next stays in place, unavailable; if it had
+            // focus, focus moves to the first choice (§5.2).
+            data-inactive={atCheckpoint || undefined}
+            unavailable={!interactive || s.index >= last || atCheckpoint}
+            onClick={() => dispatch({ type: 'next' })}
+            className="min-w-0 flex-1 md:w-32 md:flex-none"
+            data-viz-part="viz-next"
+          >
+            <span>Next</span>
+            <NextIcon />
+          </Button>
           <Button
             size="icon"
             tabIndex={-1}
             aria-label={s.playing ? 'Pause' : 'Play'}
             aria-keyshortcuts="Space K"
-            unavailable={!interactive || (!s.playing && (s.index >= last || mode === 'ask'))}
+            unavailable={!interactive || (!s.playing && (s.index >= last || atCheckpoint))}
             onClick={() => dispatch({ type: 'toggle' })}
-            // Play cannot run at an open checkpoint; its slot goes to "Skip, show me".
-            className={cn(mode === 'ask' && 'hidden')}
+            data-viz-part="viz-play"
           >
             {s.playing ? <PauseIcon /> : <PlayIcon />}
           </Button>
@@ -532,7 +575,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       </div>
 
       {/* 5. Footer: steps as text and provenance. */}
-      <footer className="relative" style={{ marginTop: FRAME.footerGap }}>
+      <footer className="relative" style={{ marginTop: rem(FRAME.footerGap) }}>
         <Disclosure data-viz-own-keys summary="Steps as text" summaryProps={{ 'data-viz-focus': 'text-alternative' }}>
           <StepsAsText log={log} />
         </Disclosure>
@@ -544,5 +587,109 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         <StepsAsText log={log} />
       </div>
     </Frame>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Dock parts. The live checkpoint and its ghosts share one component, so the
+// reserved height is the rendered height by construction.
+// ---------------------------------------------------------------------------
+
+/** Two columns of 44 px choices; from 768, two 168 px columns beside the text. */
+const CHOICES_CLS = 'grid shrink-0 grid-cols-2 [grid-area:choices] md:w-[var(--vz-choices-w)]'
+const choicesStyle = {
+  gap: rem(CHOICE.gap),
+  ['--vz-choices-w' as string]: rem(2 * CHOICE.wideWidth + CHOICE.gap),
+}
+
+/**
+ * The checkpoint block (D9). Below 768: the text with "Skip" at its right,
+ * the choices under both. From 768: text, choices, Skip in one row. The text
+ * cell holds the prompt and every feedback of this checkpoint (invisible but
+ * one), so the choices never move between asking and the reveal; the text
+ * sits on the choices. DOM order is text, choices, Skip, so focus reaches the
+ * choices before Skip.
+ */
+function CheckpointBlock({
+  cp,
+  text,
+  choices,
+  skip,
+  className,
+  ghost = false,
+}: {
+  cp: Checkpoint
+  text: ReactNode
+  choices: ReactNode
+  skip: ReactNode
+  className?: string
+  ghost?: boolean
+}) {
+  const variants = [cp.prompt, ...allFeedback(cp)]
+  return (
+    <div
+      data-viz-part={ghost ? undefined : 'viz-checkpoint'}
+      className={cn(
+        'grid min-w-0 items-end [grid-template-areas:"text_skip""choices_choices"] [grid-template-columns:minmax(0,1fr)_auto]',
+        'md:items-center md:[grid-template-areas:"text_choices_skip"] md:[grid-template-columns:minmax(0,1fr)_auto_auto]',
+        className,
+      )}
+      style={{ columnGap: rem(CHOICE.textGap), rowGap: rem(CHOICE.textGap) }}
+    >
+      <div className="grid min-w-0 content-end [grid-area:text] md:pr-2">
+        {variants.map((t, k) => (
+          <p key={k} aria-hidden className={cn('invisible col-start-1 row-start-1', k === 0 ? promptCls : captionCls)}>
+            {t}
+          </p>
+        ))}
+        <div className="col-start-1 row-start-1 self-end">{text}</div>
+      </div>
+      {choices}
+      {/* Skip's label sits on the text's last line (its 44 px target reaches into the row gap). */}
+      <div className="[grid-area:skip] max-md:-mb-2">{skip}</div>
+    </div>
+  )
+}
+
+/**
+ * Every caption, prompt and feedback of every preset, invisible in the dock's
+ * grid cell: the cell is as tall as the tallest of them at this width and
+ * text size, and never changes while stepping, switching presets or answering.
+ */
+function DockGhosts<S>({ def }: { def: StepThroughDefinition<S> }) {
+  const ghosts = useMemo(() => {
+    const captions = [...new Set(def.presets.flatMap((p) => p.log.steps.map((st) => st.why)))]
+    const checkpoints = def.presets.flatMap((p) => p.log.checkpoints)
+    return { captions, checkpoints }
+  }, [def])
+  return (
+    <div aria-hidden data-viz-part="dock-ghosts" className="invisible col-start-1 row-start-1 grid">
+      {ghosts.captions.map((t) => (
+        <p key={t} className={cn('col-start-1 row-start-1', captionCls)}>
+          {t}
+        </p>
+      ))}
+      {ghosts.checkpoints.map((c, k) => (
+        <CheckpointBlock
+          key={k}
+          ghost
+          cp={c}
+          className="col-start-1 row-start-1"
+          text={null}
+          choices={
+            <div className={CHOICES_CLS} style={choicesStyle}>
+              {c.choices.map((ch) => (
+                <div key={ch.id} className="h-11" />
+              ))}
+            </div>
+          }
+          skip={
+            <Button variant="text" tabIndex={-1} unavailable>
+              Skip
+            </Button>
+          }
+        />
+      ))}
+    </div>
   )
 }

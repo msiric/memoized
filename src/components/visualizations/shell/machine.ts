@@ -130,8 +130,9 @@ export function reduce(presets: readonly PresetShape[], s: MachineState, a: Acti
       return { ...s, status, index: presets[s.preset].checkpoints[open].beforeStep, reveal: open, playing: false }
     }
     case 'play':
+      // D10: Play advances at once, then follows the cadence (`tick`).
       if (s.index >= last || open !== -1) return { ...s, playing: false }
-      return { ...s, playing: true }
+      return reduce(presets, { ...s, playing: true }, { type: 'tick' })
     case 'pause':
       return s.playing ? { ...s, playing: false } : s
     case 'toggle':

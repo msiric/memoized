@@ -1,5 +1,5 @@
 import { act, cleanup, configure, fireEvent, render, screen, within } from '@testing-library/react'
-import { afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import EventLoopViz from '../engines/event-loop'
 
 beforeAll(() => {
@@ -16,7 +16,18 @@ beforeAll(() => {
 })
 
 configure({ testIdAttribute: 'data-viz-part' })
-afterEach(cleanup)
+// Narration waits for input to settle (one burst window), so tests drive the clock.
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+})
+afterEach(() => {
+  cleanup()
+  vi.useRealTimers()
+})
+const settle = () =>
+  act(() => {
+    vi.advanceTimersByTime(300)
+  })
 
 function setup() {
   const utils = render(<EventLoopViz />)
@@ -46,6 +57,7 @@ describe('StepThrough (event-loop specimen)', () => {
     expect(slider).toHaveAttribute('aria-valuetext', 'Step 1 of 8')
     const live = screen.getByTestId('viz-live')
     expect(live).toHaveAttribute('role', 'status')
+    settle()
     expect(live).toHaveTextContent('Step 1 of 8. The script starts on the call stack and logs A.')
     key('ArrowLeft')
     expect(frame.dataset.vizStep).toBe('0')
@@ -61,6 +73,7 @@ describe('StepThrough (event-loop specimen)', () => {
     for (let i = 0; i < 5; i++) key('ArrowRight')
     expect(frame.dataset.vizMode).toBe('ask')
     expect(document.activeElement).toBe(slider)
+    settle()
     expect(screen.getByTestId('viz-live')).toHaveTextContent('Checkpoint: D has logged. What logs next?')
     key('ArrowRight')
     const group = screen.getByRole('radiogroup', { name: 'D has logged. What logs next?' })
@@ -107,14 +120,59 @@ describe('StepThrough (event-loop specimen)', () => {
     expect(frame.dataset.vizStep).toBe('0')
   })
 
-  it('Space toggles play and Escape pauses without resetting', () => {
+  it('Space plays (advancing at once, D10) and Escape pauses without resetting (D13)', () => {
     const { frame, slider, key } = setup()
     slider.focus()
     key('ArrowRight')
     key(' ')
+    expect(frame.dataset.vizStep).toBe('2')
     expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
     key('Escape')
     expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument()
-    expect(frame.dataset.vizStep).toBe('1')
+    expect(frame.dataset.vizStep).toBe('2')
+    // Esc with nothing playing does nothing at all.
+    key('Escape')
+    expect(frame.dataset.vizStep).toBe('2')
+  })
+
+  it('announces a burst once, for the step the reader settles on (M21)', () => {
+    const { slider, key } = setup()
+    slider.focus()
+    const live = screen.getByTestId('viz-live')
+    for (let i = 0; i < 4; i++) key('ArrowRight')
+    expect(live).toHaveTextContent('')
+    settle()
+    expect(live).toHaveTextContent(/^Step 4 of 8\./)
+  })
+
+  it('keeps the control row in shape at a checkpoint: Next and Play stay, unavailable; Skip is in the dock (D9)', () => {
+    const { frame, slider, key, container } = setup()
+    slider.focus()
+    const bar = container.querySelector('[data-viz-region="bar"]')!
+    const names = () => [...bar.querySelectorAll('button')].map((b) => b.getAttribute('aria-label'))
+    const before = names()
+    for (let i = 0; i < 5; i++) key('ArrowRight')
+    expect(frame.dataset.vizMode).toBe('ask')
+    expect(names()).toEqual(before)
+    const next = screen.getByRole('button', { name: 'Next' })
+    expect(next).toHaveAttribute('aria-disabled', 'true')
+    expect(next.className).not.toMatch(/\b(invisible|hidden)\b/)
+    expect(screen.getByRole('button', { name: 'Play' })).toHaveAttribute('aria-disabled', 'true')
+    const dock = container.querySelector('[data-viz-region="dock"]')!
+    expect(within(dock as HTMLElement).getByRole('button', { name: 'Skip, show me' })).toBeVisible()
+    // Number slots become the marks after the answer.
+    key('1')
+    expect(document.querySelector('[data-choice="b"] [data-choice-slot]')).toHaveTextContent('×')
+    expect(document.querySelector('[data-choice="c"] [data-choice-slot]')).toHaveTextContent('✓')
+  })
+
+  it('reserves the dock with a ghost of every caption and checkpoint of every preset (D15)', () => {
+    const { container } = setup()
+    const ghosts = container.querySelector('[data-viz-part="dock-ghosts"]')!
+    expect(ghosts).toHaveAttribute('aria-hidden', 'true')
+    expect(ghosts.className).toMatch(/\binvisible\b/)
+    // Every caption of both presets is in the stack; ghosts carry no ids, roles or parts.
+    expect(ghosts.textContent).toContain('The promise is already fulfilled')
+    expect(ghosts.querySelectorAll('[data-viz-part], [data-choice], [role="radio"], [id]')).toHaveLength(0)
   })
 })

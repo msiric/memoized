@@ -65,6 +65,20 @@ describe('StepThrough machine', () => {
     expect(manual.playing).toBe(false)
   })
 
+  it('Play advances at once, then follows the cadence (D10)', () => {
+    expect(run([{ type: 'play' }])).toMatchObject({ index: 1, playing: true })
+    expect(run([{ type: 'toggle' }])).toMatchObject({ index: 1, playing: true })
+    // One step before the checkpoint: the immediate advance opens it and stops.
+    const atCheckpoint = run([...nexts(4), { type: 'play' }])
+    expect(atCheckpoint).toMatchObject({ index: 5, playing: false })
+    expect(dockMode(presets, atCheckpoint)).toBe('ask')
+    // One step before the end: lands on the end, stopped.
+    const end = run([{ type: 'seek', to: 7 }, { type: 'play' }])
+    expect(end).toMatchObject({ index: 8, playing: false })
+    // Pause never moves.
+    expect(run([{ type: 'play' }, { type: 'pause' }])).toMatchObject({ index: 1, playing: false })
+  })
+
   it('cannot play at an open checkpoint or the end', () => {
     expect(run([...nexts(5), { type: 'play' }]).playing).toBe(false)
     expect(run([{ type: 'end' }, { type: 'play' }]).playing).toBe(false)
