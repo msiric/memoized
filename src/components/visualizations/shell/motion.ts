@@ -29,6 +29,13 @@ export type MotionGate = {
   direction?: 1 | -1
   /** Defaults to `null` (every glyph may animate). */
   allow?: ReadonlySet<string> | null
+  /**
+   * This render is the visual's one designed reveal (D21): a forward,
+   * non-instant arrival at the step that pays the visual off. The engine may
+   * play its reveal sequence on this render only; it is the single
+   * exception to `allow`. Never set on load, on Back or on an instant render.
+   */
+  reveal?: boolean
 }
 
 export const STATIC_GATE: MotionGate = {

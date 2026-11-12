@@ -5,6 +5,7 @@ import { eventLoopMetrics } from './layout'
 import { basicOrdering } from './presets/basic-ordering'
 import { microtaskQueuedDuringDrain } from './presets/microtask-queued-during-drain'
 import {
+  consoleReveal,
   describeEventLoop,
   eventLoopIntrospection,
   type EventLoopState,
@@ -20,6 +21,7 @@ export const eventLoopEngineCore: EngineCore<EventLoopState> = {
   describe: describeEventLoop,
   layout: (logs) => eventLoopMetrics(logs).layout,
   introspect: eventLoopIntrospection,
+  revealMs: (state) => consoleReveal(state.console.length).settleMs,
 }
 
 export const eventLoopDescriptor: StepThroughDescriptor<EventLoopState> = {

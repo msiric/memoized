@@ -50,6 +50,12 @@ export type EngineCore<S> = {
   describe: (state: S) => string
   layout: (logs: readonly StepLog<S>[]) => EngineLayout
   introspect: StateIntrospection<S>
+  /**
+   * The engine's reveal (D21), if it has one: ms from the reveal render until
+   * its sequence has resolved, when the shell lands the end caption (the
+   * recap). Without it the caption lands as on any step.
+   */
+  revealMs?: (state: S) => number
 }
 
 export type Engine<S> = EngineCore<S> & {

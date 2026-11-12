@@ -12,7 +12,7 @@ import {
   type as typeScale,
 } from '../../primitives/tokens-v3'
 import { useFlip } from '../../shell/flip'
-import { presence } from '../../shell/motion'
+import { presence, transitionFor } from '../../shell/motion'
 import type { PerVariant, StageProps } from '../../shell/types'
 import { Lane, showCls, type LaneChip } from '../../substrates/Lane'
 import { remHeights, toRem } from '../../substrates/units'
@@ -26,6 +26,7 @@ import {
   type LaneKind,
 } from './layout'
 import {
+  consoleReveal,
   eventLoopIntrospection,
   outId,
   type ElChip,
@@ -44,6 +45,13 @@ import {
  * content. Output is amber from the step it appears on and never changes
  * color (D4); the newest output carries a quiet amber tint, and its arrival
  * is the enter motion, so there is no `new` tag (D22).
+ *
+ * The reveal (D21): on the last step the console plays the output back, left
+ * to right. Each output's quiet amber tint (the one the newest output wears)
+ * comes up in turn, `consoleReveal` apart, so the whole order resolves as one
+ * read. No new color, no movement: the text never changes, only its ground.
+ * Under reduced motion every tint crossfades at once; Back and instant
+ * renders land it in one frame.
  */
 
 const both = { narrow: true, wide: true }
@@ -79,6 +87,8 @@ function laneChips(
 }
 
 export function EventLoopStage({
+  log,
+  index,
   step,
   previous,
   codePane,
@@ -111,6 +121,10 @@ export function EventLoopStage({
   const root = useRef<HTMLDivElement>(null)
   useFlip(root, gate, step)
   const consoleFocused = focus.has('console')
+  // The end of the run: every output is part of the answer (D21).
+  const resolved = index === log.steps.length - 1
+  const sweep = consoleReveal(state.console.length)
+  const prevNew = new Set(previous?.focus ?? [])
 
   const rows = G.queueRows
   const micro = laneChips(
@@ -267,6 +281,16 @@ export function EventLoopStage({
           >
             {out.map((text, k) => {
               const isNew = focus.has(outId(k))
+              const lit = isNew || resolved
+              // Only the reveal tweens a tint; everything else lands (an
+              // output that stops being newest, Back, a jump).
+              const wasLit = prevNew.has(outId(k))
+              const tint =
+                gate.reveal && lit && !wasLit
+                  ? gate.reduce
+                    ? transitionFor('enter', gate)
+                    : { ...transitionFor('enter', gate), delay: (k * sweep.staggerMs) / 1000 }
+                  : { duration: 0 }
               const show = {
                 narrow: k >= firstShown.narrow,
                 wide: k >= firstShown.wide,
@@ -297,16 +321,21 @@ export function EventLoopStage({
                       // The newest output is never the one truncated (F4): the
                       // lint keeps outputs short, and a guard only truncates older ones.
                       isNew ? 'break-all' : 'min-w-0 truncate',
+                      // Room for the tint without moving the text.
+                      'relative -mx-1 px-1',
                       ink.result,
-                      isNew &&
-                        clsx(
-                          '-mx-1 px-1',
-                          radius.chip.cls,
-                          'bg-amber-400/10 print:bg-transparent',
-                        ),
                     )}
                   >
-                    {text}
+                    <m.span
+                      aria-hidden
+                      // The reveal's part (D21); it tweens only on the reveal.
+                      data-viz-reveal="out"
+                      className={clsx('absolute inset-0 bg-amber-400/10 print:hidden', radius.chip.cls)}
+                      initial={false}
+                      animate={{ opacity: lit ? 1 : 0 }}
+                      transition={tint}
+                    />
+                    <span className="relative">{text}</span>
                   </span>
                 </m.li>
               )

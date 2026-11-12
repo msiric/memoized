@@ -1,5 +1,5 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../primitives/tokens-v3'
-import { allFeedback } from './feedback'
+import { allFeedback, allRecaps } from './feedback'
 import type { PerVariant, StepThroughDescriptor, Variant } from './types'
 
 /**
@@ -105,6 +105,9 @@ export function dockText<S>(def: StepThroughDescriptor<S>): DockText {
   const out: DockText = { captions: [], prompts: [], feedback: [], maxChoices: 0 }
   for (const p of def.presets) {
     for (const st of p.log.steps) out.captions.push(st.why)
+    // The end caption leads with a recap of the predictions (D21).
+    const end = p.log.steps[p.log.steps.length - 1].why
+    for (const r of allRecaps(p.log.checkpoints)) out.captions.push(`${r} ${end}`)
     for (const cp of p.log.checkpoints) {
       out.prompts.push(cp.prompt)
       out.feedback.push(...allFeedback(cp))

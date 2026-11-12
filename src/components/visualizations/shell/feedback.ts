@@ -20,3 +20,46 @@ export function allFeedback(cp: Checkpoint): string[] {
     return `${f.lead} ${f.body}`
   })
 }
+
+/**
+ * The end-of-run recap (D21): one plain line naming what the learner
+ * predicted at each checkpoint in this pass and how it went. Pure, so the
+ * dock can reserve room for every variant. Returns null when nothing was
+ * predicted (every checkpoint skipped or jumped over): then the shell shows
+ * a neutral invitation instead.
+ */
+export function recapText(
+  checkpoints: readonly Checkpoint[],
+  picked: readonly (string | null)[],
+): string | null {
+  const lines = checkpoints.flatMap((cp, k) => {
+    const p = picked[k]
+    if (!p) return []
+    const value = (id: string) => {
+      const c = cp.choices.find((x) => x.id === id)
+      return c?.value ?? c?.label ?? id
+    }
+    if (p === cp.answer) {
+      const others = cp.choices.filter((c) => c.id !== cp.answer)
+      return others.length === 1
+        ? [`You predicted ${value(p)} before ${value(others[0].id)}. Right.`]
+        : [`You predicted ${value(p)}. Right.`]
+    }
+    return [`You predicted ${value(p)}; it was ${value(cp.answer)}.`]
+  })
+  return lines.length ? lines.join(' ') : null
+}
+
+/** The recap when no checkpoint was answered in this pass. */
+export const RECAP_NONE = 'Replay to make the prediction yourself.'
+
+/** Every recap the end step can show (for the dock's ghost stack): the longest answer per checkpoint, and none. */
+export function allRecaps(checkpoints: readonly Checkpoint[]): string[] {
+  if (!checkpoints.length) return []
+  const per = checkpoints.map((cp) => cp.choices.map((c) => recapText([cp], [c.id])!))
+  const out = new Set<string>([RECAP_NONE])
+  per.forEach((variants) => variants.forEach((v) => out.add(v)))
+  // Every checkpoint answered, each with its longest line.
+  out.add(per.map((v) => v.reduce((a, b) => (b.length > a.length ? b : a))).join(' '))
+  return [...out]
+}

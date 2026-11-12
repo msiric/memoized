@@ -25,7 +25,7 @@ import { TARGET_GAP_PX, ink, motionRules, type as typeScale } from '../primitive
 import type { Checkpoint } from '../step-log/types'
 import { CodePane, codeRows } from './CodePane'
 import { CHOICE, FRAME, STEP_BAR, definitionMetrics } from './footprint'
-import { feedbackText } from './feedback'
+import { RECAP_NONE, allRecaps, feedbackText, recapText } from './feedback'
 import {
   dockMode,
   initialState,
@@ -86,7 +86,16 @@ const NAV_ACTIONS = new Set<Action['type']>([
  * counts instant renders: glyphs keyed by it remount at their end state, which
  * snaps any transition still in flight. `allow` is the step's motion budget.
  */
-type Nav = { state: MachineState; pace: Pace; direction: 1 | -1; allow: ReadonlySet<string> }
+type Nav = {
+  state: MachineState
+  pace: Pace
+  direction: 1 | -1
+  allow: ReadonlySet<string>
+  /** This render plays the visual's reveal (D21): Next or Play onto the last step. */
+  reveal: boolean
+  /** When the last navigation happened (`performance.now()`). */
+  at: number
+}
 
 const NOTHING: ReadonlySet<string> = new Set()
 
@@ -122,6 +131,11 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       if (!NAV_ACTIONS.has(a.type) && !moved) return state === prev.state ? prev : { ...prev, state }
       const p = pace(prev.pace, a.now, Boolean(a.forceInstant))
       const direction = state.index < from.index ? -1 : 1
+      const last = def.presets[state.preset].log.steps.length - 1
+      // The one reveal (D21): a forward, paced step onto the last step. Never
+      // on load, a jump, Back or a burst (those are instant or mirrored).
+      const reveal =
+        !p.instant && state.preset === from.preset && state.index === last && from.index === last - 1
       let allow = NOTHING
       if (!p.instant && state.preset === from.preset && Math.abs(state.index - from.index) === 1) {
         const steps = def.presets[state.preset].log.steps
@@ -132,10 +146,17 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           steps[Math.max(from.index, state.index)].focus,
         )
       }
-      return { state, pace: p, direction, allow }
+      return { state, pace: p, direction, allow, reveal, at: a.now }
     },
     undefined,
-    () => ({ state: initialState(shapes, startPreset), pace: INITIAL_PACE, direction: 1 as const, allow: NOTHING }),
+    () => ({
+      state: initialState(shapes, startPreset),
+      pace: INITIAL_PACE,
+      direction: 1 as const,
+      allow: NOTHING,
+      reveal: false,
+      at: -Infinity,
+    }),
   )
   const dispatch = useCallback(
     (a: Action, forceInstant = false) => send({ ...a, forceInstant, now: performance.now() }),
@@ -150,6 +171,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     epoch: nav.pace.epoch,
     direction: nav.direction,
     allow: nav.allow,
+    reveal: nav.reveal && interactive,
   }
   const animate = !gate.instant && !gate.reduce
 
@@ -172,6 +194,16 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     }
     return undefined
   }, [log, s.index])
+
+  // The end (D21): the primary becomes Replay in the same slot, and the
+  // caption leads with a recap of this pass's predictions.
+  const atEnd = interactive && s.index === last && mode !== 'ask'
+  const recap =
+    atEnd && mode === 'controls' && log.checkpoints.length
+      ? (recapText(log.checkpoints, s.picked) ?? RECAP_NONE)
+      : null
+  // The caption (and the recap in it) lands once the stage's reveal has resolved.
+  const revealMs = gate.reveal && !gate.reduce ? (def.engine.revealMs?.(step.state) ?? 0) : 0
 
   const counter = s.index === 0 ? 'Start' : `${s.index} / ${last}`
   const valueText = s.index === 0 ? 'Start' : `Step ${s.index} of ${last}`
@@ -238,6 +270,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     if (key === spoken.current) return
     const where = s.index === 0 ? 'Start.' : `Step ${s.index} of ${last}.`
     let text = `${where} ${step.narration} ${step.why}`
+    if (recap) text = `${where} ${step.narration} ${recap} ${step.why}`
     if (mode === 'ask' && cp) text += ` Checkpoint: ${cp.prompt}`
     if (mode === 'reveal' && cp && cpIndex !== null) {
       const f = feedbackText(cp, s.picked[cpIndex])
@@ -434,8 +467,16 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             // sentences never share the cell (M15).
             initial={gate.instant || gate.reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={captionT}
+            transition={revealMs ? { ...captionT, delay: revealMs / 1000 } : captionT}
+            data-viz-reveal={revealMs ? 'recap' : undefined}
           >
+            {recap ? (
+              <>
+                <span className={cn('font-semibold', ink.base)} data-viz-part="viz-recap">
+                  {recap}
+                </span>{' '}
+              </>
+            ) : null}
             {step.why}
           </m.p>
         ) : null}
@@ -569,20 +610,46 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             ref={nextRef}
             variant="primary"
             tabIndex={-1}
-            aria-label="Next"
-            aria-keyshortcuts="ArrowRight"
+            aria-label={atEnd ? 'Replay' : 'Next'}
+            aria-keyshortcuts={atEnd ? 'Home' : 'ArrowRight'}
             // At a checkpoint Next stays in place, unavailable; if it had
             // focus, focus moves to the first choice (§5.2).
             data-inactive={atCheckpoint || undefined}
-            unavailable={!interactive || s.index >= last || atCheckpoint}
-            onClick={() => dispatch({ type: 'next' })}
+            unavailable={!interactive || (s.index >= last && !atEnd) || atCheckpoint}
+            onClick={() => {
+              if (!atEnd) return dispatch({ type: 'next' })
+              // A second press of Next that lands on Replay while the reveal
+              // plays is not a request to start over.
+              if (performance.now() - nav.at < Math.max(BURST_WINDOW_MS, revealMs)) return
+              dispatch({ type: 'restart' }, true)
+            }}
             // Fills the row below 768; from 768 an 8 rem pill that may shrink
             // (at 200 % text the row is wider than the frame otherwise).
             className="flex-auto vz-wide:w-32 vz-wide:flex-initial"
             data-viz-part="viz-next"
+            data-viz-end={atEnd || undefined}
           >
-            <span>Next</span>
-            <NextIcon />
+            {/* Same slot, same width (D9): only the label changes, fading in
+                on the caption token as the press lands. */}
+            <m.span
+              key={atEnd ? 'replay' : 'next'}
+              className="inline-flex items-center gap-1"
+              initial={atEnd && animate ? { opacity: 0 } : false}
+              animate={{ opacity: 1 }}
+              transition={captionT}
+            >
+              {/* Replay is a word only: Restart beside it already carries
+                  the arrow, and the label must be no wider than "Next" plus
+                  its arrow, or the row wraps at 320 (D9). */}
+              {atEnd ? (
+                <span>Replay</span>
+              ) : (
+                <>
+                  <span>Next</span>
+                  <NextIcon />
+                </>
+              )}
+            </m.span>
           </Button>
           <Button
             size="icon"
@@ -690,13 +757,23 @@ function DockGhosts<S>({ def }: { def: StepThroughDefinition<S> }) {
   const ghosts = useMemo(() => {
     const captions = [...new Set(def.presets.flatMap((p) => p.log.steps.map((st) => st.why)))]
     const checkpoints = def.presets.flatMap((p) => p.log.checkpoints)
-    return { captions, checkpoints }
+    // The end caption with every recap it can lead with (D21).
+    const recaps = def.presets.flatMap((p) => {
+      const end = p.log.steps[p.log.steps.length - 1].why
+      return allRecaps(p.log.checkpoints).map((r) => ({ r, end }))
+    })
+    return { captions, checkpoints, recaps }
   }, [def])
   return (
     <div aria-hidden data-viz-part="dock-ghosts" className="invisible col-start-1 row-start-1 grid">
       {ghosts.captions.map((t) => (
         <p key={t} className={cn('col-start-1 row-start-1', captionCls)}>
           {t}
+        </p>
+      ))}
+      {ghosts.recaps.map(({ r, end }) => (
+        <p key={`${r} ${end}`} className={cn('col-start-1 row-start-1', captionCls)}>
+          <span className={cn('font-semibold', ink.base)}>{r}</span> {end}
         </p>
       ))}
       {ghosts.checkpoints.map((c, k) => (

@@ -42,8 +42,12 @@ export async function walkStepThrough(page: Page, rec: Recorder, scope: string, 
       let target: string
       if (mode === 'ask') target = `${frame} [data-viz-part="viz-skip"]`
       else {
-        const done = await page.getAttribute(`${frame} [data-viz-part="viz-next"]`, 'aria-disabled')
-        if (done === 'true') break
+        const next = `${frame} [data-viz-part="viz-next"]`
+        // The last step: Next is unavailable, or it became Replay (D21).
+        const done =
+          (await page.getAttribute(next, 'aria-disabled')) === 'true' ||
+          (await page.getAttribute(next, 'data-viz-end')) !== null
+        if (done) break
         target = `${frame} [data-viz-part="viz-next"]`
       }
       const r = await domClick(page, target)

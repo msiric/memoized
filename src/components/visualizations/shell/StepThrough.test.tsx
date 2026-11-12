@@ -1,6 +1,8 @@
 import { act, cleanup, configure, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import EventLoopViz from '../engines/event-loop'
+import { basicOrdering } from '../engines/event-loop/presets/basic-ordering'
+import { RECAP_NONE, allRecaps, recapText } from './feedback'
 
 beforeAll(() => {
   // jsdom has no matchMedia (framer-motion's reduced-motion probe).
@@ -174,5 +176,70 @@ describe('StepThrough (event-loop specimen)', () => {
     // Every caption of both presets is in the stack; ghosts carry no ids, roles or parts.
     expect(ghosts.textContent).toContain('The promise is already fulfilled')
     expect(ghosts.querySelectorAll('[data-viz-part], [data-choice], [role="radio"], [id]')).toHaveLength(0)
+  })
+
+  it('ends on Replay in the same slot with a recap of the prediction (D21)', () => {
+    const { frame, slider, key, container } = setup()
+    slider.focus()
+    const bar = container.querySelector('[data-viz-region="bar"]')!
+    const names = () => [...bar.querySelectorAll('button')].map((b) => b.getAttribute('aria-label'))
+    for (let i = 0; i < 5; i++) key('ArrowRight')
+    key('2') // C, the answer
+    key('ArrowRight')
+    key('ArrowRight')
+    expect(frame.dataset.vizStep).toBe('8')
+    const replay = screen.getByRole('button', { name: 'Replay' })
+    expect(replay).not.toHaveAttribute('aria-disabled')
+    expect(replay).toHaveAttribute('aria-keyshortcuts', 'Home')
+    expect(names()).toEqual(['Restart', 'Back', 'Replay', 'Play'])
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent('You predicted C before B. Right.')
+    expect(screen.getByTestId('viz-caption')).toHaveTextContent(/Right\. The order is always sync code first/)
+    settle()
+    expect(screen.getByTestId('viz-live')).toHaveTextContent('You predicted C before B. Right.')
+    // A press that lands on Replay while the reveal plays does not start over.
+    act(() => {
+      fireEvent.click(replay)
+    })
+    expect(frame.dataset.vizStep).toBe('8')
+    const now = performance.now()
+    const spy = vi.spyOn(performance, 'now').mockReturnValue(now + 2_000)
+    act(() => {
+      fireEvent.click(replay)
+    })
+    spy.mockRestore()
+    expect(frame.dataset.vizStep).toBe('0')
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
+    // The answer is kept: the checkpoint marks it as last time.
+    slider.focus()
+    for (let i = 0; i < 5; i++) key('ArrowRight')
+    expect(document.querySelector('[data-choice="c"]')).toHaveTextContent('last time')
+  })
+
+  it('recaps a wrong prediction with what happened, and a skipped one neutrally', () => {
+    const { slider, key } = setup()
+    slider.focus()
+    for (let i = 0; i < 5; i++) key('ArrowRight')
+    key('1') // B
+    key('ArrowRight')
+    key('ArrowRight')
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent('You predicted B; it was C.')
+    key('Home')
+    key('End')
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent(RECAP_NONE)
+  })
+
+  it('reserves every recap in the dock ghosts', () => {
+    const { container } = setup()
+    const ghosts = container.querySelector('[data-viz-part="dock-ghosts"]')!
+    for (const r of allRecaps(basicOrdering.checkpoints)) expect(ghosts.textContent).toContain(r)
+  })
+})
+
+describe('recapText (D21)', () => {
+  const cps = basicOrdering.checkpoints
+  it('names the prediction and how it went', () => {
+    expect(recapText(cps, ['c'])).toBe('You predicted C before B. Right.')
+    expect(recapText(cps, ['b'])).toBe('You predicted B; it was C.')
+    expect(recapText(cps, [null])).toBeNull()
   })
 })
