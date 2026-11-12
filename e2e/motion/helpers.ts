@@ -118,11 +118,16 @@ export function strictCheck(name: string, problems: string[]) {
   if (STRICT) expect.soft(problems, name).toEqual([])
 }
 
+/** An element of a visual's designed reveal (`data-viz-reveal`, D21). */
+export const REVEAL = /\bviz-reveal=(\S+)/
 const STAGE_REGION = /\bin=(stack|host|micro|tasks|console)\b/
 const GLYPH_KEY = /\b(?:glyph|flip-id|chip)=(\S+)|\bout=(\d+)/
 
 /** The stage glyph an element belongs to (`then`, `out-2`), or null for chrome. */
 export function glyphKey(label: string): string | null {
+  // The reveal (D21) is the one explicit exception to the budget; it is
+  // asserted on its own (reveal.spec.ts).
+  if (REVEAL.test(label)) return null
   if (!STAGE_REGION.test(label)) return null
   const m = label.match(GLYPH_KEY)
   if (!m) return null

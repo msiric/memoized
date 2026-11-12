@@ -223,6 +223,8 @@ export const TOKENS = {
   caption: 120,
   max: 300,
   hardMax: 400,
+  /** D21: the one designed reveal, end to end. */
+  reveal: 800,
 } as const
 
 export type Flag = { kind: string; detail: string }
@@ -246,7 +248,10 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean } = {}):
         flags.push({ kind: 'size-tween', detail: `${e.label}: ${p.prop} ${p.start}->${p.end} over ${p.duration}ms` })
       if (['op', 'tx', 'ty', 'd', 'dash', 'sc'].includes(p.prop) && tweened) {
         animatedRoots.add(`${e.id}`)
-        if (p.duration > TOKENS.max)
+        // The reveal (D21) is the one sequence allowed past 300 ms; reveal.spec.ts
+        // holds it to 800 ms end to end.
+        const revealPart = /\bviz-reveal=/.test(e.label)
+        if (p.duration > (revealPart ? TOKENS.reveal : TOKENS.max))
           flags.push({ kind: 'too-long', detail: `${e.label}: ${p.prop} ${p.duration}ms` })
         if ((p.prop === 'tx' || p.prop === 'ty') && (p.overshootPx ?? 0) > 0.5)
           flags.push({ kind: 'overshoot', detail: `${e.label}: ${p.prop} overshoot ${p.overshootPx}px` })

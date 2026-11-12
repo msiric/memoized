@@ -102,6 +102,28 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   glyphs, a Back that does not mirror Next, a tween after an instant
   command, or a settled frame that differs from a slow walk.
 
+### Payoff moments (VIZ-H WS4, D21)
+
+Each visual has one designed reveal, the single explicit exception to the
+two-glyph budget and the 300 ms cap (`reveal` in `tokens-v3.ts`): at most
+800 ms, only on the step that pays the visual off, never on load, landed at
+once by Back and by every instant command, a crossfade or nothing under
+reduced motion, and it never moves the page. Elements that play it carry
+`data-viz-reveal`; the strict motion harness asserts them separately.
+
+- **Event loop.** Next onto the last step (`gate.reveal`) plays the console
+  back left to right (`consoleReveal`), then the caption lands leading with a
+  recap of this pass's predictions (`recapText`, or a neutral invitation).
+  The primary becomes Replay in the same slot (restart, answers kept as
+  "last time"); a press inside the reveal is ignored.
+- **List keys.** Each carried checkbox rides its own match line into the
+  After row its instance now renders (`CheckRider.tsx`, Web Animations,
+  lifted), and the row ticks as it lands.
+- **Closures.** No script: function objects are focusable and named, and
+  hover or focus dims everything but the function's `[[Environment]]` path
+  and, in the factory preset, its aliases (`engines/env-records/paths.ts`
+  writes the per-figure rules, `.vz-s` in `tailwind.css` the generic dim).
+
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for
 the lint, manifest and text alternative. `engines/list-keys/` is the first: its

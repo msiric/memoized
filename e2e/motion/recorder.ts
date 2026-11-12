@@ -24,7 +24,7 @@ export const RECORDER = String.raw`
     if (!v) { v = nextId++; ids.set(el, v) }
     return v
   }
-  const ATTRS = ['data-glyph','data-flip-id','data-chip','data-out','data-viz-part','data-viz-region','data-link','data-row','data-choice','data-line','data-checkpoint','role','aria-label']
+  const ATTRS = ['data-viz-reveal','data-glyph','data-flip-id','data-chip','data-out','data-viz-part','data-viz-region','data-link','data-row','data-choice','data-line','data-checkpoint','role','aria-label']
   const labelOf = (el) => {
     const parts = [el.tagName.toLowerCase()]
     for (const a of ATTRS) { const v = el.getAttribute && el.getAttribute(a); if (v !== null && v !== undefined) parts.push(a.replace('data-','') + '=' + String(v).slice(0, 30)) }
