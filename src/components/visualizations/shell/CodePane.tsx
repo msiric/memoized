@@ -79,7 +79,14 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
       )}
       style={heights(
         height ?? { narrow: codePaneHeight(rows.narrow), wide: codePaneHeight(rows.wide) },
-        cols ? { ['--vz-cols' as string]: String(cols), ['--vz-gutter' as string]: rem(CODE_GUTTER) } : undefined,
+        cols
+          ? {
+              ['--vz-cols' as string]: String(cols),
+              // One px of slack: layout rounds the width down to 1/64 px,
+              // which would wrap a line exactly `cols` wide.
+              ['--vz-gutter' as string]: rem(CODE_GUTTER + 1),
+            }
+          : undefined,
       )}
     >
       <div
