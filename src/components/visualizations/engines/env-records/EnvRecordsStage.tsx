@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { ink, radius, type as typeScale } from '../../primitives/tokens-v3'
 import type { StaticStageProps } from '../../shell/static-types'
 import {
   HEADING,
@@ -74,7 +75,7 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
           y={Y}
           width={W}
           height={H}
-          rx={8}
+          rx={radius.glyph.px}
           className={slot ? clsx('vz-d fill-none', C.line) : C.glyph}
         />
         <text
@@ -105,11 +106,11 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
         y={Y}
         width={W}
         height={H}
-        rx={8}
+        rx={radius.glyph.px}
         className={clsx(C.glyph, box.unused && 'vz-d')}
       />
       {box.unused ? (
-        <rect x={X} y={Y} width={W} height={H} rx={8} fill={`url(#${hatch})`} />
+        <rect x={X} y={Y} width={W} height={H} rx={radius.glyph.px} fill={`url(#${hatch})`} />
       ) : null}
       {box.title.map((line, i) => (
         <text
@@ -287,7 +288,7 @@ function Heading({ text, emphasis }: { text: string; emphasis?: string }) {
   return (
     <>
       {text.slice(0, at)}
-      <span className="text-zinc-100 print:text-zinc-900">{emphasis}</span>
+      <span className={ink.base}>{emphasis}</span>
       {text.slice(at + emphasis.length)}
     </>
   )
@@ -320,7 +321,8 @@ function VariantStage({ scene, uid }: { scene: DiagramScene; uid: string }) {
           className="min-w-0 [container-type:inline-size]"
         >
           <p
-            className="m-0 truncate font-mono text-[13px] leading-5 text-zinc-400 print:text-zinc-600"
+            // The heading is code (a loop header, a declaration), so it is mono (D3).
+            className={clsx('m-0 truncate', typeScale.value.cls, ink.muted)}
             style={{ marginBottom: HEADING.gap }}
           >
             <Heading text={section.heading} emphasis={section.emphasis} />

@@ -94,7 +94,7 @@ describe('visualization registry', () => {
 
   it('documents the footprint arithmetic for the specimen', () => {
     const m = definitionMetrics(VIZ_DESCRIPTORS['event-loop'])
-    expect(m.narrow).toMatchObject({ header: 72, bar: 112, footer: 60 })
+    expect(m.narrow).toMatchObject({ header: 80, bar: 113, footer: 64 })
     expect(m.wide).toMatchObject({ header: 44, bar: 96, footer: 44 })
   })
 })

@@ -1,7 +1,7 @@
 'use client'
 
 import { useLayoutEffect, useRef, type RefObject } from 'react'
-import { motion as motionTokens, motionRules } from '../primitives/tokens-v2'
+import { motion as motionTokens, motionRules } from '../primitives/tokens-v3'
 import type { MotionGate } from './motion'
 
 /**

@@ -1,9 +1,10 @@
 'use client'
 
-import clsx from 'clsx'
 import { AnimatePresence, m, useIsPresent, type MotionProps } from 'framer-motion'
 import { forwardRef, type ReactNode } from 'react'
-import { ink, stroke, surface, type as typeScale } from '../primitives/tokens-v2'
+import { cn as clsx } from '../primitives/cn'
+import { Tag } from '../primitives/Tag'
+import { ink, now, radius, stroke, surface, type as typeScale } from '../primitives/tokens-v3'
 import { transitionFor, travel, type MotionGate } from '../shell/motion'
 import type { PerVariant } from '../shell/types'
 import { H_CLS, heights } from '../shell/vars'
@@ -12,7 +13,9 @@ import { H_CLS, heights } from '../shell/vars'
  * Lanes substrate (spec §6.1): a labelled region holding chips. Glyphs follow
  * §2.2: stack frames are full-width neutral bars, task chips have 4 px corners
  * (`queued`), microtasks are pills (`micro`), host slots are dashed. Changed
- * elements get a `now` ring; elements created this step get a `new` tag, so
+ * elements get the `now` emphasis inside the glyph (a lime border doubled by
+ * an inset ring, and a tint, D5): never an outline, so it can never be
+ * mistaken for keyboard focus. Elements created this step get a `new` tag, so
  * the change never depends on color alone (A7).
  *
  * Motion: a chip that changes place keeps its `data-flip-id`, and the stage's
@@ -25,11 +28,12 @@ import { H_CLS, heights } from '../shell/vars'
 export type ChipKind = 'frame' | 'task' | 'micro' | 'host'
 export type LaneChip = { id: string; label: string }
 
+/** Chips: 4 px corners (S: §2.2), pills for microtasks, at most 12 rem (`max-w-48`). */
 const chipCls: Record<ChipKind, string> = {
-  frame: clsx('w-full rounded px-2', stroke.line, surface.chipHost, 'h-7 md:h-8'),
-  task: clsx('max-w-[12rem] rounded px-2', stroke.queued, surface.chipQueued, 'h-7'),
-  micro: clsx('max-w-[12rem] rounded-full px-3', stroke.micro, surface.chipMicro, 'h-7'),
-  host: clsx('max-w-[12rem] rounded border-dashed px-2', stroke.line, surface.chipHost, 'h-7'),
+  frame: clsx('w-full px-2', radius.chip.cls, stroke.line, surface.glyph, 'h-7 md:h-8'),
+  task: clsx('max-w-48 px-2', radius.chip.cls, stroke.queued, surface.chipQueued, 'h-7'),
+  micro: clsx('max-w-48 rounded-full px-3', stroke.micro, surface.chipMicro, 'h-7'),
+  host: clsx('max-w-48 border-dashed px-2', radius.chip.cls, stroke.line, surface.glyph, 'h-7'),
 }
 
 export type LaneProps = {
@@ -63,15 +67,24 @@ const Chip = forwardRef<
       data-chip={chip.id}
       data-focus={focused || undefined}
       className={clsx(
-        'flex min-w-0 items-center gap-2 border font-mono text-[13px] leading-5',
+        'flex min-w-0 items-center gap-2 border',
+        typeScale.value.cls,
         ink.base,
         chipCls[kind],
-        focused && 'outline outline-2 outline-offset-1 outline-lime-400 print:outline-lime-700',
+        focused && now.glyph,
       )}
     >
       <span className="min-w-0 truncate">{chip.label}</span>
-      {isNew ? <span className={clsx('shrink-0 text-[12px] leading-4', ink.now)}>new</span> : null}
-      {top ? <span className={clsx('ml-auto shrink-0 text-[12px] leading-4', ink.muted)}>top</span> : null}
+      {isNew ? (
+        <Tag tone="now" className="h-4 bg-transparent px-0">
+          new
+        </Tag>
+      ) : null}
+      {top ? (
+        <Tag tone="muted" className="ml-auto h-4 bg-transparent px-0">
+          top
+        </Tag>
+      ) : null}
     </div>
   )
 })
@@ -129,11 +142,13 @@ export function Lane(props: LaneProps) {
     <div
       data-viz-region={id}
       className={clsx(
-        'relative flex min-w-0 rounded-lg border border-zinc-700/60 p-2 print:border-zinc-300',
+        'relative flex min-w-0 border p-2',
+        radius.row.cls,
+        stroke.hairline,
         surface.panel,
         labelAt.narrow === 'top' ? 'flex-col gap-2' : 'flex-row items-center gap-2',
         labelAt.wide === 'top' ? 'md:flex-col md:items-stretch md:gap-2' : 'md:flex-row md:items-center md:gap-2',
-        focus.has(id) && 'outline outline-2 outline-offset-1 outline-lime-400',
+        focus.has(id) && now.panel,
         H_CLS,
         className,
       )}
@@ -142,10 +157,10 @@ export function Lane(props: LaneProps) {
       <span
         className={clsx(
           'shrink-0',
-          typeScale.regionLabel.cls,
+          typeScale.label.cls,
           ink.secondary,
-          labelAt.narrow === 'inline' ? 'w-[104px]' : 'h-4',
-          labelAt.wide === 'inline' ? 'md:h-auto md:w-[104px]' : 'md:h-4 md:w-auto',
+          labelAt.narrow === 'inline' ? 'w-24' : 'h-4',
+          labelAt.wide === 'inline' ? 'md:h-auto md:w-24' : 'md:h-4 md:w-auto',
         )}
       >
         {label}
@@ -162,7 +177,8 @@ export function Lane(props: LaneProps) {
         <span
           aria-hidden
           className={clsx(
-            'pointer-events-none absolute left-0 flex h-7 items-center text-[12px] leading-4',
+            'pointer-events-none absolute left-0 flex h-7 items-center',
+            typeScale.tag.cls,
             vertical && labelAt.narrow === 'top' ? 'bottom-0' : 'top-1/2 -translate-y-1/2',
             vertical && labelAt.wide === 'inline' && 'md:bottom-auto md:top-1/2 md:-translate-y-1/2',
             ink.muted,

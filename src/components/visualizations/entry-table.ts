@@ -21,12 +21,12 @@ export type VizEntry = readonly [
 ]
 
 export const VIZ_TABLE: Record<string, VizEntry> = {
-  'event-loop': [() => import('./engines/event-loop'), 886, 646],
+  'event-loop': [() => import('./engines/event-loop'), 911, 658],
   'environment-records': [
     () => import('./engines/env-records'),
-    846,
-    532,
-    { 'var-vs-let-loop': [846, 532], 'factory-calls-vs-aliases': [822, 562] },
+    870,
+    548,
+    { 'var-vs-let-loop': [870, 548], 'factory-calls-vs-aliases': [846, 578] },
   ],
-  'list-keys': [() => import('./engines/list-keys'), 866, 558],
+  'list-keys': [() => import('./engines/list-keys'), 894, 574],
 }

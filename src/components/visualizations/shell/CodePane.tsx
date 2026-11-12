@@ -1,19 +1,22 @@
-import clsx from 'clsx'
+import { cn as clsx } from '../primitives/cn'
 import type { CodeToken, StepLine } from '../step-log/types'
-import { transitionCls } from '../primitives/tokens-v2'
+import { radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
 import { LINE } from './footprint'
 import type { PerVariant } from './types'
 import { H_CLS, TRANSLATE_Y_CLS, heights, translateY } from './vars'
 
 /**
  * Code pane with line sync (spec §5.5). Reuses the lesson code-block surface
- * (zinc-900, mono 13/24). The current line gets a 3 px `now` bar, a 10 % `now`
+ * (zinc-900, mono 13/24, P: Code.tsx:297) with the one hairline as its edge (D4). The
+ * current line gets a 2 px `now` bar, a 10 % `now`
  * background and a ▸ in the gutter, in the same frame as the stage. Windowed
  * panes keep the current line centred by translating the list; the pane never
  * scrolls, and neither does the page.
  */
 
 export const CODE_PAD = 8
+/** Gutter: 8 inset + 12 marker + 24 line number + 8 gap, from 768. */
+export const CODE_GUTTER = 8 + 12 + 24 + 8
 /** A 16 px status line under the code (plus the bottom padding), so the host note never covers code. */
 export const CODE_STATUS = 16
 
@@ -54,17 +57,19 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
     <div
       data-viz-region="code"
       className={clsx(
-        'relative overflow-hidden rounded-lg bg-zinc-900 font-mono text-[13px] print:border print:border-zinc-300',
+        'relative overflow-hidden bg-zinc-900 ring-1 ring-zinc-700 print:border print:border-zinc-300',
+        radius.row.cls,
+        typeScale.code.cls,
         // From 768 the pane is exactly as wide as the widest line of any preset
-        // (gutter 8 + marker 12 + number 24 + 8), so presets never move the stage.
-        cols && 'md:w-[calc(var(--vz-cols)*1ch+52px)] xl:w-auto',
+        // plus the gutter, so presets never move the stage.
+        cols && 'md:w-[calc(var(--vz-cols)*1ch+var(--vz-gutter))] xl:w-auto',
         // From 768 the pane hugs this preset's code and sits at the top.
         'md:self-start',
         H_CLS,
       )}
       style={heights(
         height ?? { narrow: codePaneHeight(rows.narrow), wide: codePaneHeight(rows.wide) },
-        cols ? { ['--vz-cols' as string]: String(cols) } : undefined,
+        cols ? { ['--vz-cols' as string]: String(cols), ['--vz-gutter' as string]: `${CODE_GUTTER}px` } : undefined,
       )}
     >
       <ol
@@ -88,18 +93,18 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
             >
               <span
                 aria-hidden
-                className={clsx('absolute inset-y-0 left-0 w-[3px]', active ? 'bg-lime-400' : 'bg-transparent')}
+                className={clsx('absolute inset-y-0 left-0 w-0.5', active ? 'bg-lime-400 print:bg-lime-700' : 'bg-transparent')}
               />
-              <span aria-hidden className="w-3 shrink-0 select-none font-mono text-[12px] leading-6 text-lime-400">
+              <span aria-hidden className="w-3 shrink-0 select-none font-mono text-2xs leading-6 text-lime-400">
                 {active && n === from ? '▸' : ''}
               </span>
               <span
                 aria-hidden
-                className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-[12px] tabular-nums leading-6 text-zinc-400 md:inline"
+                className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 md:inline"
               >
                 {n}
               </span>
-              <code className="min-w-0 whitespace-pre bg-transparent p-0 font-mono text-[12px] leading-6 text-zinc-100 xs:text-[13px]">
+              <code className={clsx('min-w-0 whitespace-pre bg-transparent p-0 text-zinc-100', typeScale.code.cls)}>
                 {tokens?.[i]
                   ? tokens[i].map((t, k) => (
                       <span key={k} style={t.color ? { color: t.color } : undefined}>
@@ -118,7 +123,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
         style={{ height: CODE_STATUS + CODE_PAD }}
       >
         <span
-          className={clsx('font-sans text-[12px] leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}
+          className={clsx('font-sans text-2xs leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}
         >
           host: not a line of your code
         </span>

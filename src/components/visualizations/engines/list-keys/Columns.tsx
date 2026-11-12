@@ -1,6 +1,5 @@
 'use client'
 
-import clsx from 'clsx'
 import { m } from 'framer-motion'
 import {
   useEffect,
@@ -9,7 +8,22 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { focusRing, ink, transitionCls } from '../../primitives/tokens-v2'
+import { buttonClasses } from '../../primitives/Button'
+import { cn as clsx } from '../../primitives/cn'
+import { Tag as Badge } from '../../primitives/Tag'
+import {
+  DASH,
+  focusRingHas,
+  ink,
+  now,
+  radius,
+  stroke,
+  strokeWidth,
+  surface,
+  svgInk,
+  transitionCls,
+  type as typeScale,
+} from '../../primitives/tokens-v3'
 import { transitionFor, type MotionGate } from '../../shell/motion'
 import { CARD, COLUMNS, COLUMNS_HEIGHT, rowTop } from './layout'
 import type { ExploreAction, ExploreState } from './machine'
@@ -34,9 +48,10 @@ import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
  *   is dashed. An unmounted instance is dashed and tagged `× unmounted`.
  * - Match lines: solid = reused, a dashed stub = mounted, a × stub = unmounted.
  *   The state chip (☑ or the count) rides on its line.
- * - The row now showing the tracked check carries the `now` outline. A row
- *   that shows another item's state, or lost its own, is tagged in words, so
- *   the mismatch never depends on color (A7).
+ * - The row now showing the tracked check carries the `now` emphasis inside
+ *   the card (D5). A row that shows another item's state, or lost its own,
+ *   carries an in-row badge (× or ✓, D17) with the words for assistive tech
+ *   and on hover, so the mismatch never depends on color (A7).
  */
 
 const useIsoLayoutEffect =
@@ -117,10 +132,7 @@ export function Columns({
 function ColumnLabel({ children }: { children: ReactNode }) {
   return (
     <p
-      className={clsx(
-        'm-0 h-4 font-sans text-[12px] font-semibold leading-4',
-        ink.secondary,
-      )}
+      className={clsx('m-0 h-4', typeScale.label.cls, ink.secondary)}
       style={{ marginBottom: COLUMNS.labelGap }}
     >
       {children}
@@ -141,21 +153,17 @@ function Spine({
     <span
       aria-hidden
       className={clsx(
-        'flex w-7 shrink-0 flex-col items-center justify-center whitespace-nowrap border-r font-mono text-[12px] font-semibold leading-4',
-        dashed ? 'border-dashed border-zinc-500' : 'border-zinc-600',
+        'flex w-7 shrink-0 flex-col items-center justify-center whitespace-nowrap border-r',
+        typeScale.glyphHeader.cls,
+        dashed ? 'border-dashed border-zinc-500' : stroke.hairline,
         label === '?' ? ink.muted : ink.base,
       )}
     >
       {label}
       {mounted ? (
-        <span
-          className={clsx(
-            'font-sans text-[12px] font-medium leading-4',
-            ink.now,
-          )}
-        >
+        <Badge tone="now" className="h-4 bg-transparent px-0">
           new
-        </span>
+        </Badge>
       ) : null}
     </span>
   )
@@ -170,7 +178,9 @@ function CheckGlyph({ state }: { state: boolean | '?' }) {
       <span
         aria-hidden
         className={clsx(
-          'flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border border-dashed border-zinc-500 font-mono text-[12px] leading-4',
+          'flex h-4 w-4 shrink-0 items-center justify-center border border-dashed border-zinc-500',
+          radius.chip.cls,
+          typeScale.meta.cls,
           ink.muted,
         )}
       >
@@ -181,7 +191,8 @@ function CheckGlyph({ state }: { state: boolean | '?' }) {
     <span
       aria-hidden
       className={clsx(
-        'flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border',
+        'flex h-4 w-4 shrink-0 items-center justify-center border',
+        radius.chip.cls,
         state
           ? 'border-zinc-100 bg-zinc-100 print:border-zinc-900 print:bg-zinc-900'
           : 'border-zinc-400',
@@ -208,39 +219,39 @@ function CheckGlyph({ state }: { state: boolean | '?' }) {
   )
 }
 
-/** A word tag on a card's top border (status in text, so never color alone). */
-function Tag({
-  tone,
-  children,
-}: {
-  tone: 'removed' | 'kept' | 'now'
-  children: ReactNode
-}) {
+/**
+ * An in-row status badge (D17): one glyph, in flow at the end of the card's
+ * key line, never on the border. The words travel as the accessible name and
+ * the tooltip.
+ */
+function StatusBadge({ tone, words }: { tone: 'removed' | 'kept'; words: string }) {
   return (
-    <span
-      aria-hidden
-      className={clsx(
-        'pointer-events-none absolute -top-2 right-2 whitespace-nowrap bg-[#1e1e21] px-1 font-sans text-[12px] font-medium leading-4 print:bg-zinc-50',
-        tone === 'removed'
-          ? ink.removed
-          : tone === 'now'
-            ? ink.now
-            : ink.secondary,
-      )}
-    >
-      {children}
-    </span>
+    <Badge tone={tone === 'removed' ? 'removed' : 'neutral'} className="ml-auto w-5 justify-center px-0">
+      <span aria-hidden title={words}>
+        {tone === 'removed' ? '×' : '✓'}
+      </span>
+      <span className="sr-only">{words}</span>
+    </Badge>
   )
 }
 
-const cardCls =
-  'relative flex min-w-0 overflow-visible rounded-lg border bg-zinc-900/60 print:bg-white'
+/** A word tag in a wrapper box's header line (in flow, D17). */
+function HeaderTag({ tone, children }: { tone: 'kept' | 'now' | 'removed'; children: ReactNode }) {
+  return (
+    <Badge tone={tone === 'kept' ? 'neutral' : tone} className="h-4 bg-transparent px-0">
+      {children}
+    </Badge>
+  )
+}
+
+/** Cards are glyphs: zinc-800 fill, 8 px corners, 1 px `line` outline (D1, drift C10). */
+const cardCls = clsx('relative flex min-w-0 overflow-visible border', radius.glyph.cls, surface.glyph)
 const cardStyle = { height: CARD.height }
 
 const STATUS_TEXT: Record<NonNullable<AfterRow['status']>, string> = {
-  foreign: '✕ not its check',
-  lost: '✕ lost its check',
-  kept: '✓ kept its check',
+  foreign: 'not its check',
+  lost: 'lost its check',
+  kept: 'kept its check',
 }
 
 function ListColumns({
@@ -289,12 +300,10 @@ function ListColumns({
                 <label
                   className={clsx(
                     cardCls,
-                    'cursor-pointer has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-lime-400',
-                    isGone
-                      ? 'border-dashed border-rose-400 print:border-rose-700'
-                      : 'border-zinc-500',
-                    isLostFocus &&
-                      'outline outline-2 outline-offset-1 outline-lime-400 print:outline-lime-700',
+                    'cursor-pointer',
+                    focusRingHas,
+                    isGone ? clsx('border-dashed', stroke.removed) : stroke.line,
+                    isLostFocus && now.glyph,
                     !interactive && 'cursor-default',
                   )}
                   style={cardStyle}
@@ -314,7 +323,7 @@ function ListColumns({
                           }
                           aria-label={`${ITEMS[id].text}, instance ${BEFORE_INSTANCES[i]}, key ${key}`}
                           className={clsx(
-                            'peer m-0 h-4 w-4 cursor-[inherit] appearance-none rounded-[4px] border border-zinc-400 bg-transparent outline-none',
+                            'peer m-0 h-4 w-4 cursor-[inherit] appearance-none rounded border border-zinc-400 bg-transparent outline-none',
                             transitionCls.feedback,
                             'checked:border-zinc-100 checked:bg-zinc-100 print:checked:border-zinc-900 print:checked:bg-zinc-900',
                           )}
@@ -336,23 +345,15 @@ function ListColumns({
                           />
                         </svg>
                       </span>
-                      <span
-                        className={clsx(
-                          'min-w-0 truncate font-sans text-[13px] leading-5',
-                          ink.base,
-                        )}
-                      >
+                      <span className={clsx('min-w-0 truncate', typeScale.item.cls, ink.base)}>
                         {ITEMS[id].text}
                       </span>
                     </span>
-                    <span
-                      className={clsx(
-                        'truncate font-mono text-[12px] leading-4',
-                        ink.muted,
-                      )}
-                    >{`key=${key}`}</span>
+                    <span className="flex min-w-0 items-center gap-1">
+                      <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${key}`}</span>
+                      {isGone ? <StatusBadge tone="removed" words="unmounted" /> : null}
+                    </span>
                   </span>
-                  {isGone ? <Tag tone="removed">× unmounted</Tag> : null}
                 </label>
               </li>
             )
@@ -378,7 +379,7 @@ function ListColumns({
                     mounted
                       ? `new instance ${r.instance}`
                       : `instance ${r.instance} reused from ${ITEMS[BEFORE[r.from!]].text}`
-                  }${r.status ? `, ${STATUS_TEXT[r.status].slice(2)}` : ''}`
+                  }${r.status ? `, ${STATUS_TEXT[r.status]}` : ''}`
                 : `${ITEMS[r.item].text}, state unknown until you predict`
               return (
                 <li
@@ -391,11 +392,8 @@ function ListColumns({
                   className={clsx(
                     cardCls,
                     'm-0 p-0',
-                    revealed && mounted
-                      ? 'border-dashed border-zinc-500'
-                      : 'border-zinc-500',
-                    isDest &&
-                      'outline outline-2 outline-offset-1 outline-lime-400 print:outline-lime-700',
+                    revealed && mounted ? 'border-dashed border-zinc-500' : stroke.line,
+                    isDest && now.glyph,
                   )}
                   style={cardStyle}
                 >
@@ -411,27 +409,17 @@ function ListColumns({
                   >
                     <span className="flex min-w-0 items-center gap-1.5 xs:gap-2">
                       <CheckGlyph state={revealed ? r.checked : '?'} />
-                      <span
-                        className={clsx(
-                          'min-w-0 truncate font-sans text-[13px] leading-5',
-                          ink.base,
-                        )}
-                      >
+                      <span className={clsx('min-w-0 truncate', typeScale.item.cls, ink.base)}>
                         {ITEMS[r.item].text}
                       </span>
                     </span>
-                    <span
-                      className={clsx(
-                        'truncate font-mono text-[12px] leading-4',
-                        ink.muted,
-                      )}
-                    >{`key=${r.key}`}</span>
+                    <span className="flex min-w-0 items-center gap-1">
+                      <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${r.key}`}</span>
+                      {revealed && r.status ? (
+                        <StatusBadge tone={r.status === 'kept' ? 'kept' : 'removed'} words={STATUS_TEXT[r.status]} />
+                      ) : null}
+                    </span>
                   </span>
-                  {revealed && r.status ? (
-                    <Tag tone={r.status === 'kept' ? 'kept' : 'removed'}>
-                      {STATUS_TEXT[r.status]}
-                    </Tag>
-                  ) : null}
                 </li>
               )
             })}
@@ -446,7 +434,10 @@ function Placeholder({ children }: { children: ReactNode }) {
   return (
     <div
       className={clsx(
-        'flex items-center justify-center rounded-lg border border-dashed border-zinc-700 px-2 text-center font-sans text-[13px] leading-5 print:border-zinc-300',
+        'flex items-center justify-center border border-dashed px-2 text-center',
+        radius.glyph.cls,
+        stroke.hairline,
+        typeScale.item.cls,
         ink.muted,
       )}
       style={{ height: COLUMNS_HEIGHT - COLUMNS.label - COLUMNS.labelGap }}
@@ -472,26 +463,20 @@ function WrapperBox({
   return (
     <div
       className={clsx(
-        'relative rounded-lg border px-2',
-        removed
-          ? 'border-dashed border-rose-400 print:border-rose-700'
-          : dashed
-            ? 'border-dashed border-zinc-500'
-            : 'border-zinc-500',
+        'relative border px-2',
+        radius.glyph.cls,
+        removed ? clsx('border-dashed', stroke.removed) : dashed ? 'border-dashed border-zinc-500' : stroke.line,
       )}
       style={{ paddingTop: BOX.pad, paddingBottom: BOX.bottom }}
     >
       <p
-        className={clsx(
-          'm-0 h-4 truncate font-mono text-[12px] leading-4',
-          ink.secondary,
-        )}
+        className={clsx('m-0 flex h-4 items-center justify-between gap-2', typeScale.meta.cls, ink.secondary)}
         style={{ marginBottom: BOX.gap }}
       >
-        {tag}
+        <span className="min-w-0 truncate">{tag}</span>
+        {badge}
       </p>
       {children}
-      {badge}
     </div>
   )
 }
@@ -513,25 +498,15 @@ function CounterCard({
       data-focus={focus || undefined}
       className={clsx(
         cardCls,
-        mounted ? 'border-dashed border-zinc-500' : 'border-zinc-500',
-        focus &&
-          'outline outline-2 outline-offset-1 outline-lime-400 print:outline-lime-700',
+        mounted ? 'border-dashed border-zinc-500' : stroke.line,
+        focus && now.glyph,
       )}
       style={cardStyle}
     >
       <Spine label={instance} mounted={mounted} dashed={mounted} />
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1.5 xs:px-2">
-        <span
-          className={clsx('truncate font-sans text-[13px] leading-5', ink.base)}
-        >
-          Counter
-        </span>
-        <span
-          className={clsx(
-            'truncate font-mono text-[12px] leading-4',
-            ink.secondary,
-          )}
-        >
+        <span className={clsx('truncate', typeScale.item.cls, ink.base)}>Counter</span>
+        <span className={clsx('truncate', typeScale.meta.cls, ink.secondary)}>
           {count}
         </span>
       </span>
@@ -560,7 +535,7 @@ function WrapperColumns({
         <WrapperBox
           tag="<div>"
           removed={Boolean(lost)}
-          badge={lost ? <Tag tone="removed">× unmounted</Tag> : null}
+          badge={lost ? <HeaderTag tone="removed">× unmounted</HeaderTag> : null}
         >
           <CounterCard instance="A" count={`count ${s.count}`} />
         </WrapperBox>
@@ -571,11 +546,7 @@ function WrapperColumns({
           aria-disabled={!interactive || undefined}
           tabIndex={interactive ? 0 : -1}
           onClick={() => interactive && dispatch({ type: 'increment' })}
-          className={clsx(
-            'mt-2 inline-flex h-11 w-full items-center justify-center rounded-[10px] border border-zinc-500 font-mono text-[13px] font-semibold text-zinc-100 hover:bg-zinc-700/60',
-            focusRing,
-            transitionCls.feedback,
-          )}
+          className={clsx(buttonClasses({ variant: 'secondary', unavailable: !interactive }), 'mt-2 w-full')}
         >
           Add 1
         </button>
@@ -604,9 +575,9 @@ function WrapperColumns({
                 dashed={revealed && !o.wrapperReused}
                 badge={
                   action === 'class' ? (
-                    <Tag tone="kept">className=&quot;on&quot;</Tag>
+                    <HeaderTag tone="kept">className=&quot;on&quot;</HeaderTag>
                   ) : revealed && !o.wrapperReused ? (
-                    <Tag tone="now">new</Tag>
+                    <HeaderTag tone="now">new</HeaderTag>
                   ) : null
                 }
               >
@@ -718,15 +689,13 @@ function Lines({
               <g
                 key={k}
                 data-link="reused"
-                className={
-                  l.now ? 'text-lime-400 print:text-lime-700' : 'text-zinc-500'
-                }
+                className={l.now ? svgInk.now : svgInk.line}
               >
                 <m.path
                   d={d}
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth={l.now ? 2.5 : 1.5}
+                  strokeWidth={l.now ? strokeWidth.nowConnector : strokeWidth.connector}
                   strokeLinecap="round"
                   initial={play && !gate.reduce ? { pathLength: 0 } : false}
                   animate={{ pathLength: 1 }}
@@ -743,19 +712,19 @@ function Lines({
               <g
                 key={k}
                 data-link="unmounted"
-                className="text-rose-400 print:text-rose-700"
+                className={svgInk.removed}
               >
                 <path
                   d={`M0 ${l.y} H ${x - 3}`}
                   stroke="currentColor"
-                  strokeWidth={1.5}
-                  strokeDasharray="3 3"
+                  strokeWidth={strokeWidth.connector}
+                  strokeDasharray={DASH}
                   fill="none"
                 />
                 <path
                   d={`M${x - 3} ${l.y - 4} l7 8 M${x + 4} ${l.y - 4} l-7 8`}
                   stroke="currentColor"
-                  strokeWidth={1.75}
+                  strokeWidth={strokeWidth.connector}
                   strokeLinecap="round"
                   fill="none"
                 />
@@ -763,20 +732,20 @@ function Lines({
             )
           }
           return (
-            <g key={k} data-link="mounted" className="text-zinc-400">
+            <g key={k} data-link="mounted" className={svgInk.muted}>
               <circle
                 cx={w - stub}
                 cy={l.y}
                 r={3}
                 fill="none"
                 stroke="currentColor"
-                strokeWidth={1.5}
+                strokeWidth={strokeWidth.connector}
               />
               <path
                 d={`M${w - stub + 3} ${l.y} H ${w}`}
                 stroke="currentColor"
-                strokeWidth={1.5}
-                strokeDasharray="3 3"
+                strokeWidth={strokeWidth.connector}
+                strokeDasharray={DASH}
                 fill="none"
               />
             </g>
@@ -795,11 +764,11 @@ function Lines({
             <span
               data-viz-part="state-chip"
               className={clsx(
-                'absolute left-0 top-0 flex h-5 min-w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded px-1 font-mono text-[12px] font-semibold leading-4',
+                'absolute left-0 top-0 flex h-5 min-w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center px-1 font-semibold',
+                radius.chip.cls,
+                typeScale.meta.cls,
                 'bg-zinc-100 text-zinc-900 print:bg-zinc-900 print:text-white',
-                l.now
-                  ? 'ring-2 ring-lime-400 print:ring-lime-700'
-                  : 'ring-1 ring-zinc-500',
+                l.now ? now.chip : 'ring-1 ring-zinc-500',
               )}
             >
               {l.chip}

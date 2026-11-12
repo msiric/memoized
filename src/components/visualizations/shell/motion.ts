@@ -1,5 +1,5 @@
 import type { Transition } from 'framer-motion'
-import { motion, type MotionTokenName } from '../primitives/tokens-v2'
+import { motion, type MotionTokenName } from '../primitives/tokens-v3'
 
 /**
  * The motion gate (spec §4). Engines never pick durations: they ask the gate

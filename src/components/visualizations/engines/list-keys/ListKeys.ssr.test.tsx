@@ -19,7 +19,7 @@ describe('list-keys on the server', () => {
     expect(html).toContain('Outcomes as text')
     expect(html).toContain('moves to Wake up (wrong item)')
     expect(html).toContain('lost (Buy milk remounts unchecked)')
-    expect(html).toContain('Verified in React 18.3.1 and 19.3.1')
+    expect(html).toContain('Recorded from real runs in React 18.3.1 and 19.3.1')
   })
 
   it('renders each preset', () => {

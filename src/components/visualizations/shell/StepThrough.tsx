@@ -1,6 +1,5 @@
 'use client'
 
-import clsx from 'clsx'
 import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import {
   useCallback,
@@ -13,17 +12,16 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
-import {
-  TARGET_GAP_PX,
-  focusRing,
-  ink,
-  motionRules,
-  surface,
-  transitionCls,
-  type as typeScale,
-} from '../primitives/tokens-v2'
+import { BackIcon, Button, NextIcon, PauseIcon, PlayIcon, RestartIcon } from '../primitives/Button'
+import { captionCls, promptCls } from '../primitives/Caption'
+import { ChoiceRow } from '../primitives/ChoiceRow'
+import { cn } from '../primitives/cn'
+import { Disclosure } from '../primitives/Disclosure'
+import { Frame } from '../primitives/Frame'
+import { Provenance } from '../primitives/Provenance'
+import { SegmentedControl } from '../primitives/SegmentedControl'
+import { TARGET_GAP_PX, ink, motionRules, stroke, surface, type as typeScale } from '../primitives/tokens-v3'
 import { CodePane } from './CodePane'
-import { BackIcon, DockButton, NextIcon, PauseIcon, PlayIcon, RestartIcon } from './controls'
 import { CHOICE, FRAME, STEP_BAR, definitionMetrics } from './footprint'
 import { feedbackText } from './feedback'
 import {
@@ -34,10 +32,8 @@ import {
   type Action,
   type MachineState,
   type PresetShape,
-  type Speed,
 } from './machine'
 import { transitionFor, type MotionGate } from './motion'
-import { PresetSwitcher } from './PresetSwitcher'
 import { Scrubber } from './Scrubber'
 import { StepsAsText, runtimeName } from './StepsAsText'
 import type { StepThroughDefinition } from './types'
@@ -144,7 +140,6 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const nextRef = useRef<HTMLButtonElement>(null)
   const choiceRefs = useRef<(HTMLButtonElement | null)[]>([])
   const [choiceFocus, setChoiceFocus] = useState(0)
-  const [hint, setHint] = useState<'never' | 'show' | 'hide'>('never')
 
   useIsoLayoutEffect(() => {
     const active = typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null)
@@ -166,9 +161,9 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   // ---- play cadence and stops (§4 rule 5) ---------------------------------
   useEffect(() => {
     if (!s.playing) return
-    const id = window.setTimeout(() => dispatch({ type: 'tick' }), motionRules.playIntervalMs[s.speed])
+    const id = window.setTimeout(() => dispatch({ type: 'tick' }), motionRules.playIntervalMs)
     return () => window.clearTimeout(id)
-  }, [s.playing, s.index, s.speed, dispatch])
+  }, [s.playing, s.index, dispatch])
 
   useEffect(() => {
     if (!s.playing) return
@@ -297,7 +292,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const feedback = mode === 'reveal' && cp ? feedbackText(cp, picked) : null
 
   return (
-    <section
+    <Frame
       ref={frameRef}
       aria-labelledby={titleId}
       aria-roledescription="step-through"
@@ -307,23 +302,19 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       data-viz-mode={mode}
       data-viz-interactive={interactive ? 'true' : 'false'}
       onKeyDown={onKeyDown}
-      className={clsx(
-        'not-prose relative -mx-4 border-y border-zinc-700/60 p-4 sm:mx-0 sm:rounded-xl sm:border-x print:break-inside-avoid',
-        surface.frame,
-      )}
-      style={{ paddingTop: FRAME.padding, paddingBottom: FRAME.padding }}
     >
       {/* 1. Header: title, then the preset switcher (right from 768). */}
       <header
-        className={clsx('flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4', H_CLS)}
+        className={cn('flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4', H_CLS)}
         style={heights({ narrow: metrics.narrow.header, wide: metrics.wide.header })}
       >
-        <p id={titleId} className={clsx('m-0 truncate', typeScale.title.cls, ink.base)}>
+        <p id={titleId} className={cn('m-0 truncate', typeScale.title.cls, ink.base)}>
           {def.title}
         </p>
-        <div className={clsx('self-start md:self-auto', hidden && 'invisible')}>
-          <PresetSwitcher
-            presets={def.presets}
+        <div className={cn('self-start md:self-auto', hidden && 'invisible')}>
+          <SegmentedControl
+            label="Example"
+            options={def.presets}
             value={s.preset}
             interactive={interactive}
             onChange={(i) => dispatch({ type: 'preset', preset: i }, true)}
@@ -334,7 +325,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       {/* 2. Stage: fixed footprint, code pane inside the stage grid. */}
       <div
         data-viz-region="stage"
-        className={clsx('relative', H_CLS)}
+        className={cn('relative', H_CLS)}
         style={heights({ narrow: metrics.narrow.stage, wide: metrics.wide.stage }, { marginTop: FRAME.headerGap })}
       >
         <Stage
@@ -350,20 +341,14 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         />
       </div>
 
-      {/* 3. Step bar: event (what) left, counter right. */}
+      {/* 3. Step bar: event (what) left, counter right. Sans UI wording (D3). */}
       <div
         data-viz-region="stepbar"
-        className={clsx('flex items-center justify-between gap-4', typeScale.index.cls, ink.secondary)}
+        className={cn('flex items-center justify-between gap-4', typeScale.status.cls, ink.secondary)}
         style={{ height: STEP_BAR, marginTop: FRAME.stageGap }}
       >
         <span className="min-w-0 truncate" data-viz-part="viz-event">
           {s.index === 0 ? '' : step.event}
-        </span>
-        <span
-          aria-hidden
-          className={clsx('hidden min-w-0 truncate md:inline', ink.muted, hint === 'show' ? 'visible' : 'invisible')}
-        >
-          ← → to step
         </span>
         <span className="shrink-0" data-viz-part="viz-counter">
           {counter}
@@ -380,18 +365,18 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           Below 768 the choices sit under the text, from 768 beside it. */}
       <div
         data-viz-region="dock"
-        className={clsx('relative grid print:hidden', H_CLS)}
+        className={cn('relative grid print:hidden', H_CLS)}
         style={heights({ narrow: metrics.narrow.dock, wide: metrics.wide.dock }, { marginTop: FRAME.dockGap })}
       >
         <div
           data-inactive={mode !== 'controls' || undefined}
-          className={clsx('col-start-1 row-start-1 grid content-start', mode !== 'controls' && 'invisible')}
+          className={cn('col-start-1 row-start-1 grid content-start', mode !== 'controls' && 'invisible')}
         >
           <AnimatePresence initial={false} custom={captionT}>
             <m.p
               key={`${s.preset}:${s.index}:${nav.epoch}`}
               data-viz-part="viz-caption"
-              className={clsx('col-start-1 row-start-1 m-0', typeScale.caption.cls, ink.base)}
+              className={cn('col-start-1 row-start-1', captionCls)}
               initial={gate.instant ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit="out"
@@ -405,7 +390,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         </div>
         <div
           data-inactive={mode === 'controls' || undefined}
-          className={clsx(
+          className={cn(
             'col-start-1 row-start-1 flex min-w-0 flex-col self-start md:flex-row md:items-center',
             mode === 'controls' && 'invisible',
           )}
@@ -413,11 +398,11 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         >
           <div className="min-w-0 md:flex-1 md:pr-2">
             {feedback ? (
-              <p className={clsx('m-0', typeScale.caption.cls, ink.base)} data-viz-part="viz-feedback">
-                <span className="font-semibold">{feedback.lead}</span> {feedback.body}
+              <p className={captionCls} data-viz-part="viz-feedback">
+                <span className={cn('font-semibold', ink.base)}>{feedback.lead}</span> {feedback.body}
               </p>
             ) : (
-              <p id={promptId} className={clsx('m-0', typeScale.prompt.cls, ink.base)} data-viz-part="viz-prompt">
+              <p id={promptId} className={promptCls} data-viz-part="viz-prompt">
                 {cp?.prompt}
               </p>
             )}
@@ -434,17 +419,19 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
               const isPicked = picked === choice.id
               const isAnswer = cp?.answer === choice.id
               const revealed = mode === 'reveal'
-              const badge = revealed && isAnswer ? 'answer' : !revealed && lastTime === choice.id ? 'last time' : null
               return (
-                <button
+                <ChoiceRow
                   key={choice.id}
                   ref={(el) => {
                     choiceRefs.current[i] = el
                   }}
-                  type="button"
-                  role="radio"
-                  aria-checked={revealed ? isPicked : false}
-                  aria-disabled={revealed || undefined}
+                  index={i}
+                  label={choice.label}
+                  state={revealed ? 'resolved' : 'ask'}
+                  picked={revealed && isPicked}
+                  // The number slot becomes the result (D9): ✓ on the answer, × on a wrong pick.
+                  mark={revealed ? (isAnswer ? 'right' : isPicked ? 'wrong' : null) : null}
+                  tag={!revealed && lastTime === choice.id ? 'last time' : undefined}
                   tabIndex={mode === 'ask' && i === choiceFocus ? 0 : -1}
                   onClick={() => mode === 'ask' && dispatch({ type: 'answer', choice: choice.id })}
                   onKeyDown={(e) => {
@@ -452,58 +439,20 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
                   }}
                   onFocus={() => setChoiceFocus(i)}
                   data-choice={choice.id}
-                  className={clsx(
-                    'relative flex h-11 min-w-0 items-center gap-2 rounded-[10px] border pl-2 pr-3 text-left',
-                    focusRing,
-                    transitionCls.feedback,
-                    revealed && isAnswer
-                      ? 'border-amber-400 shadow-[inset_0_0_0_1px_theme(colors.amber.400)]'
-                      : revealed && isPicked
-                        ? 'border-rose-400 shadow-[inset_0_0_0_1px_theme(colors.rose.400)]'
-                        : 'border-zinc-600',
-                    mode === 'ask' ? 'hover:border-zinc-400 hover:bg-zinc-800' : 'cursor-default',
-                  )}
-                >
-                  <span
-                    aria-hidden
-                    className={clsx(
-                      'flex h-5 w-5 shrink-0 items-center justify-center rounded-md',
-                      revealed && isPicked
-                        ? clsx('text-[16px] font-semibold leading-5', isAnswer ? ink.now : ink.removed)
-                        : clsx('bg-zinc-800 font-mono text-[12px] leading-4', revealed ? 'invisible' : ink.secondary),
-                    )}
-                  >
-                    {revealed ? (isPicked ? (isAnswer ? '✓' : '×') : '') : i + 1}
-                  </span>
-                  <span className={clsx('line-clamp-2 min-w-0 flex-1 text-[14px] leading-5', ink.base)}>
-                    {choice.label}
-                    {badge ? <span className="sr-only">{`, ${badge}`}</span> : null}
-                  </span>
-                  {badge ? (
-                    <span
-                      aria-hidden
-                      className={clsx(
-                        'absolute -top-2 right-2 px-1 text-[12px] font-medium leading-4',
-                        surface.frameOpaque,
-                        badge === 'answer' ? ink.result : ink.muted,
-                      )}
-                    >
-                      {badge}
-                    </span>
-                  ) : null}
-                </button>
+                />
               )
             })}
           </div>
         </div>
       </div>
 
-      {/* Controls bar: scrubber, then Restart, Back, Next, Play (+ speed
-          from 768). Sticky to the viewport bottom below 768 (§3.4). */}
+      {/* Controls bar: scrubber, then Restart, Back, Next, Play. Sticky to
+          the viewport bottom below 768 (§3.4). The speed toggle is gone (D10). */}
       <div
         data-viz-region="bar"
-        className={clsx(
-          'sticky bottom-0 z-10 -mx-4 flex flex-col border-t border-zinc-700/60 px-4 pb-2 pt-[7px] md:static md:mx-0 md:border-t-0 md:px-0 md:py-0 print:hidden',
+        className={cn(
+          'sticky bottom-0 z-10 -mx-4 box-border flex flex-col border-t px-4 pb-2 pt-2 md:static md:mx-0 md:border-t-0 md:bg-transparent md:px-0 md:py-0 print:hidden',
+          stroke.hairline,
           surface.frameOpaque,
           'md:bg-transparent',
           H_CLS,
@@ -522,20 +471,20 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           interactive={interactive}
           animate={animate}
           onSeek={(to) => dispatch({ type: 'seek', to }, true)}
-          onFocus={() => setHint((h) => (h === 'never' ? 'show' : h))}
-          onBlur={() => setHint((h) => (h === 'show' ? 'hide' : h))}
         />
         <div className="flex items-center" style={{ marginTop: TARGET_GAP_PX, gap: TARGET_GAP_PX }}>
-          <DockButton
-            icon
+          <Button
+            size="icon"
+            tabIndex={-1}
             aria-label="Restart"
             aria-keyshortcuts="Home"
             unavailable={!interactive || s.index === 0}
             onClick={() => dispatch({ type: 'restart' }, true)}
           >
             <RestartIcon />
-          </DockButton>
-          <DockButton
+          </Button>
+          <Button
+            tabIndex={-1}
             aria-label="Back"
             aria-keyshortcuts="ArrowLeft"
             unavailable={!interactive || s.index === 0}
@@ -543,104 +492,64 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           >
             <BackIcon />
             <span>Back</span>
-          </DockButton>
+          </Button>
           {/* Next and "Skip, show me" share one slot; both stay mounted so
               focus can be handed over deliberately (§5.2). */}
-          <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] md:w-40 md:flex-none">
-            <DockButton
+          <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)] md:w-32 md:flex-none">
+            <Button
               ref={nextRef}
               variant="primary"
+              tabIndex={-1}
               aria-label="Next"
               aria-keyshortcuts="ArrowRight"
               data-inactive={mode === 'ask' || undefined}
               unavailable={!interactive || s.index >= last || mode === 'ask'}
               onClick={() => dispatch({ type: 'next' })}
-              className={clsx('col-start-1 row-start-1', mode === 'ask' && 'invisible')}
+              className={cn('col-start-1 row-start-1', mode === 'ask' && 'invisible')}
               data-viz-part="viz-next"
             >
               <span>Next</span>
               <NextIcon />
-            </DockButton>
-            <DockButton
-              variant="quiet"
+            </Button>
+            <Button
+              variant="text"
               tabIndex={mode === 'ask' ? 0 : -1}
               data-inactive={mode !== 'ask' || undefined}
               unavailable={mode !== 'ask'}
               onClick={() => dispatch({ type: 'skip' })}
-              className={clsx('col-start-1 row-start-1 whitespace-nowrap px-2', mode !== 'ask' && 'invisible')}
+              className={cn('col-start-1 row-start-1', mode !== 'ask' && 'invisible')}
               data-viz-part="viz-skip"
             >
               Skip, show me
-            </DockButton>
+            </Button>
           </div>
-          <DockButton
-            icon
+          <Button
+            size="icon"
+            tabIndex={-1}
             aria-label={s.playing ? 'Pause' : 'Play'}
             aria-keyshortcuts="Space K"
             unavailable={!interactive || (!s.playing && (s.index >= last || mode === 'ask'))}
             onClick={() => dispatch({ type: 'toggle' })}
             // Play cannot run at an open checkpoint; its slot goes to "Skip, show me".
-            className={clsx(mode === 'ask' && 'hidden')}
+            className={cn(mode === 'ask' && 'hidden')}
           >
             {s.playing ? <PauseIcon /> : <PlayIcon />}
-          </DockButton>
-          {/* Speed lives with Play: a quiet toggle, from 768 only (§5.1). */}
-          <DockButton
-            variant="quiet"
-            aria-label={`Speed ${s.speed}×, switch to ${s.speed === 1 ? 2 : 1}×`}
-            unavailable={!interactive}
-            onClick={() => dispatch({ type: 'speed', speed: (s.speed === 1 ? 2 : 1) as Speed })}
-            className={clsx(
-              'hidden w-11 justify-center px-0 font-mono text-[13px] font-medium tabular-nums text-zinc-300 no-underline hover:text-zinc-50 md:inline-flex',
-              mode === 'ask' && 'md:hidden',
-            )}
-          >
-            {s.speed}×
-          </DockButton>
+          </Button>
         </div>
       </div>
 
       {/* 5. Footer: steps as text and provenance. */}
       <footer className="relative" style={{ marginTop: FRAME.footerGap }}>
-        <details data-viz-own-keys className="group">
-          <summary
-            data-viz-focus="text-alternative"
-            className={clsx(
-              'flex h-11 w-max cursor-pointer list-none items-center gap-2 rounded-[10px] pr-2 text-[14px] font-semibold leading-5 [&::-webkit-details-marker]:hidden',
-              ink.base,
-              focusRing,
-            )}
-          >
-            <svg aria-hidden width="16" height="16" viewBox="0 0 16 16" className="shrink-0 group-open:rotate-90">
-              <path
-                d="m6 4 4 4-4 4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Steps as text
-          </summary>
+        <Disclosure data-viz-own-keys summary="Steps as text" summaryProps={{ 'data-viz-focus': 'text-alternative' }}>
           <StepsAsText log={log} />
-        </details>
-        <p
-          className={clsx(
-            'm-0 md:absolute md:right-0 md:top-0 md:flex md:h-11 md:items-center',
-            typeScale.index.cls,
-            'font-sans font-normal',
-            ink.muted,
-          )}
-        >
-          {`Recorded from a real run in ${runtimeName(log.source.runtime)}`}
-        </p>
+        </Disclosure>
+        <Provenance runtimes={[runtimeName(log.source.runtime)]} />
       </footer>
 
       {/* Print: every step, with checkpoint answers (§3.5). */}
       <div className="hidden print:mt-4 print:block">
         <StepsAsText log={log} />
       </div>
-    </section>
+    </Frame>
   )
 }

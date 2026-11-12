@@ -1,4 +1,4 @@
-import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../primitives/tokens-v2'
+import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../primitives/tokens-v3'
 import { allFeedback } from './feedback'
 import type { PerVariant, StepThroughDescriptor, Variant } from './types'
 
@@ -25,8 +25,13 @@ export const FRAME = {
 } as const
 
 export const HEADER = { title: typeScale.title.line, presetRowGap: 8 } as const
-export const STEP_BAR = 16
+export const STEP_BAR = typeScale.status.line
+/** A code line (P: Code.tsx:137, 13/24). */
 export const LINE = 24
+/** Caption and reveal feedback lines (D3: 14/28). */
+export const CAPTION_LINE = typeScale.caption.line
+/** Checkpoint prompt lines (16/28). */
+export const PROMPT_LINE = typeScale.prompt.line
 
 /** Narrowest text width per variant: the stage at 320 px and at 768 px. */
 export const MIN_TEXT_WIDTH: PerVariant<number> = { narrow: 288, wide: 606 }
@@ -43,17 +48,17 @@ export const CHOICE = { height: TARGET_PX, gap: TARGET_GAP_PX, wideWidth: 168, t
 
 /**
  * The controls bar: scrubber row, then the button row. Below 768 it is sticky
- * to the viewport bottom while the frame is on screen: a 1 px hairline, 7 px
+ * to the viewport bottom while the frame is on screen: a 1 px hairline, 8 px
  * above and 8 px below, so it never sits on the screen edge.
  */
 export const BAR: PerVariant<number> = {
-  narrow: 1 + 7 + TARGET_PX + TARGET_GAP_PX + TARGET_PX + 8,
+  narrow: 1 + 8 + TARGET_PX + TARGET_GAP_PX + TARGET_PX + 8,
   wide: TARGET_PX + TARGET_GAP_PX + TARGET_PX,
 }
 
 export const FOOTER: PerVariant<number> = {
-  /** "Steps as text" (44) with the provenance line below it. */
-  narrow: TARGET_PX + 16,
+  /** "Steps as text" (44) with the provenance line (12/20) below it. */
+  narrow: TARGET_PX + typeScale.provenance.line,
   /** Disclosure and provenance on one row. */
   wide: TARGET_PX,
 }
@@ -112,16 +117,16 @@ const maxLines = (texts: string[], maxChars: number) => Math.max(0, ...texts.map
  */
 export function dockSlot(t: DockText, variant: Variant): number {
   const width = MIN_TEXT_WIDTH[variant]
-  const caption = maxLines(t.captions, chars(width, GLYPH.caption)) * LINE
+  const caption = maxLines(t.captions, chars(width, GLYPH.caption)) * CAPTION_LINE
   if (t.maxChoices === 0) return caption
   const choices = choicesHeight(t.maxChoices)
   if (variant === 'narrow') {
-    const ask = maxLines(t.prompts, chars(width, GLYPH.prompt)) * LINE + CHOICE.textGap + choices
-    const reveal = maxLines(t.feedback, chars(width, GLYPH.caption)) * LINE + CHOICE.textGap + choices
+    const ask = maxLines(t.prompts, chars(width, GLYPH.prompt)) * PROMPT_LINE + CHOICE.textGap + choices
+    const reveal = maxLines(t.feedback, chars(width, GLYPH.caption)) * CAPTION_LINE + CHOICE.textGap + choices
     return Math.max(caption, ask, reveal)
   }
-  const ask = maxLines(t.prompts, chars(WIDE_SIDE_TEXT, GLYPH.prompt)) * LINE
-  const reveal = maxLines(t.feedback, chars(WIDE_SIDE_TEXT, GLYPH.caption)) * LINE
+  const ask = maxLines(t.prompts, chars(WIDE_SIDE_TEXT, GLYPH.prompt)) * PROMPT_LINE
+  const reveal = maxLines(t.feedback, chars(WIDE_SIDE_TEXT, GLYPH.caption)) * CAPTION_LINE
   return Math.max(caption, ask, reveal, choices)
 }
 

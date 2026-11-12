@@ -1,3 +1,6 @@
+import { cn } from '../primitives/cn'
+import { disclosureBodyCls } from '../primitives/Disclosure'
+import { ink } from '../primitives/tokens-v3'
 import type { StepLog } from '../step-log/types'
 
 /**
@@ -42,18 +45,18 @@ export function runtimeName(runtime: string): string {
 export function StepsAsText<S>({ log }: { log: StepLog<S> }) {
   const alt = textAlternative(log)
   return (
-    <div className="pb-2 pt-1 text-[14px] leading-6 text-zinc-100 print:text-zinc-900">
+    <div className={disclosureBodyCls}>
       <ol className="m-0 list-none space-y-2 p-0">
         {alt.items.map((item, k) => (
           <li key={k} className="m-0 p-0">
-            <span className="font-semibold">{`${item.label}.`}</span> {item.text}
+            <span className={cn('font-semibold', ink.base)}>{`${item.label}.`}</span> {item.text}
           </li>
         ))}
       </ol>
       {alt.output ? (
         <p className="m-0 mt-3">
-          <span className="font-semibold">{`Verified output (${runtimeName(log.source.runtime)}):`}</span>{' '}
-          <span className="font-mono text-[13px]">{alt.output}</span>
+          <span className={cn('font-semibold', ink.base)}>{`Verified output (${runtimeName(log.source.runtime)}):`}</span>{' '}
+          <span className="font-mono text-xs">{alt.output}</span>
         </p>
       ) : null}
     </div>

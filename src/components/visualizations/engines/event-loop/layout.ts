@@ -25,6 +25,11 @@ export const G = {
   frame: { narrow: 28, wide: 32 } as PerVariant<number>,
   frameGap: 4,
   consoleRow: 20,
+  /** Console columns: two, each at most 13 rem (208 px). */
+  consoleCol: 208,
+  /** Wide grid: code column min width (from 768, from 1280), regions min width. */
+  codeMin: { md: 280, xl: 360 },
+  regionsMin: 240,
   codeRowsNarrow: 5,
   codeRowsMax: 14,
   codeRowsWindow: 12,

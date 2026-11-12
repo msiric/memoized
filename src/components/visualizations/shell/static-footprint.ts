@@ -1,9 +1,9 @@
-import { type as typeScale } from '../primitives/tokens-v2'
+import { type as typeScale } from '../primitives/tokens-v3'
 import {
   FOOTER,
+  CAPTION_LINE,
   FRAME,
   GLYPH,
-  LINE,
   MIN_TEXT_WIDTH,
   wrapLines,
 } from './footprint'
@@ -28,7 +28,7 @@ export type StaticMetrics = {
 export function captionHeight(caption: string, variant: Variant): number {
   return (
     wrapLines(caption, Math.floor(MIN_TEXT_WIDTH[variant] / GLYPH.caption)) *
-    LINE
+    CAPTION_LINE
   )
 }
 

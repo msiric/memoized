@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { motion, motionRules } from '../primitives/tokens-v2'
+import { motion, motionRules } from '../primitives/tokens-v3'
 import { springCurve } from './flip'
 
 describe('move spring keyframes', () => {

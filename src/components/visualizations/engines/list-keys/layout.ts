@@ -1,12 +1,13 @@
-import { TARGET_GAP_PX, TARGET_PX } from '../../primitives/tokens-v2'
+import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../../primitives/tokens-v3'
 import { codePaneHeight } from '../../shell/CodePane'
 import {
+  CAPTION_LINE,
   CHOICE,
   FOOTER,
   FRAME,
   GLYPH,
-  LINE,
   MIN_TEXT_WIDTH,
+  PROMPT_LINE,
   headerHeight,
   wrapLines,
 } from '../../shell/footprint'
@@ -74,7 +75,8 @@ export const STAGE: PerVariant<number> = {
   wide: KEY_ROW + STAGE_GAP.wide + Math.max(CODE_HEIGHT, COLUMNS_HEIGHT),
 }
 
-export const STATUS = 16
+/** The status line: sans 12/20 (D3). */
+export const STATUS = typeScale.status.line
 export const GAPS = { header: 16, status: 8, dock: 16, footer: 16 } as const
 const PARA_GAP = 8
 
@@ -155,26 +157,26 @@ export function dockModes(variant: Variant) {
   const w = MIN_TEXT_WIDTH[variant]
   const actionRows = variant === 'narrow' ? 2 : 1
   const actions = actionRows * TARGET_PX + (actionRows - 1) * TARGET_GAP_PX
-  const hint = maxOf(s.hints.map((t) => lines(t, w, GLYPH.caption))) * LINE
+  const hint = maxOf(s.hints.map((t) => lines(t, w, GLYPH.caption))) * CAPTION_LINE
   const pick = hint + PARA_GAP + actions
   const choices = choicesHeight(s.maxChoices)
   let ask: number
   let reveal: number
   if (variant === 'narrow') {
-    const prompt = maxOf(s.prompts.map((t) => lines(t, w, GLYPH.prompt))) * LINE
+    const prompt = maxOf(s.prompts.map((t) => lines(t, w, GLYPH.prompt))) * PROMPT_LINE
     ask = prompt + PARA_GAP + choices + PARA_GAP + TARGET_PX
     const text = maxOf(
       s.reveals.map(
         (r) =>
           (lines(r.feedback, w, GLYPH.caption) +
             lines(r.rule, w, GLYPH.caption)) *
-          LINE,
+          CAPTION_LINE,
       ),
     )
     reveal = text + PARA_GAP + PARA_GAP + TARGET_PX
   } else {
     const prompt =
-      maxOf(s.prompts.map((t) => lines(t, WIDE_SIDE, GLYPH.prompt))) * LINE
+      maxOf(s.prompts.map((t) => lines(t, WIDE_SIDE, GLYPH.prompt))) * PROMPT_LINE
     ask = Math.max(prompt + PARA_GAP + TARGET_PX, choices)
     const side = w - CHOICE.sideGap - REVEAL_BUTTON
     const text = maxOf(
@@ -182,7 +184,7 @@ export function dockModes(variant: Variant) {
         (r) =>
           (lines(r.feedback, side, GLYPH.caption) +
             lines(r.rule, side, GLYPH.caption)) *
-          LINE,
+          CAPTION_LINE,
       ),
     )
     reveal = Math.max(text + PARA_GAP, TARGET_PX)

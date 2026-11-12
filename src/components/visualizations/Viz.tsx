@@ -2,6 +2,7 @@
 
 import { createElement, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from 'react'
 import { VIZ_TABLE } from './entry-table'
+import { frameCls } from './primitives/frame-cls'
 import type { VizComponentProps } from './shell/types'
 
 /**
@@ -114,7 +115,8 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
         <div
           aria-hidden
           data-viz-placeholder=""
-          className="-mx-4 h-[var(--vz-n)] border-y border-zinc-700/60 bg-zinc-800/40 sm:mx-0 sm:rounded-xl sm:border-x md:h-[var(--vz-w)]"
+          // The frame's own box (border-box: padding never changes the height).
+          className={`${frameCls} h-[var(--vz-n)] md:h-[var(--vz-w)]`}
           style={{ ['--vz-n' as string]: `${narrow}px`, ['--vz-w' as string]: `${wide}px` }}
         />
       )}

@@ -1,8 +1,8 @@
 'use client'
 
-import clsx from 'clsx'
 import { forwardRef, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { transitionCls } from '../primitives/tokens-v2'
+import { cn as clsx } from '../primitives/cn'
+import { focusRingGroup, radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
 import type { CheckpointStatus } from './machine'
 
 /**
@@ -10,6 +10,11 @@ import type { CheckpointStatus } from './machine'
  * per step, diamond ticks for checkpoints (hollow open, filled answered,
  * crossed skipped). Thumb 28 px inside a 44 px hit area. Keys are handled by
  * the frame so they keep working after a button is clicked.
+ *
+ * Colors (VDS v3): the track is `line`, progress and thumb are the accent
+ * fill (lime-500, the platform filled control, drift C05), the thumb's gap
+ * ring and hollow diamonds use the opaque frame color (`vz-frame`), and focus
+ * is the shared ring drawn around the thumb.
  */
 
 const THUMB = 28
@@ -25,8 +30,6 @@ export type ScrubberProps = {
   interactive: boolean
   animate: boolean
   onSeek: (to: number) => void
-  onFocus?: () => void
-  onBlur?: () => void
 }
 
 function Diamond({ status }: { status: CheckpointStatus }) {
@@ -37,7 +40,7 @@ function Diamond({ status }: { status: CheckpointStatus }) {
         strokeWidth="1.5"
         className={clsx(
           'stroke-zinc-100 print:stroke-zinc-900',
-          status === 'answered' ? 'fill-zinc-100 print:fill-zinc-900' : 'fill-[#1e1e21] print:fill-white',
+          status === 'answered' ? 'fill-zinc-100 print:fill-zinc-900' : 'fill-vz-frame print:fill-white',
         )}
       />
       {status === 'skipped' ? <path d="M4 4 L8 8 M8 4 L4 8" strokeWidth="1.5" className="stroke-zinc-100" /> : null}
@@ -46,7 +49,7 @@ function Diamond({ status }: { status: CheckpointStatus }) {
 }
 
 export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrubber(
-  { index, total, events, checkpoints, valueText, label, interactive, animate, onSeek, onFocus, onBlur },
+  { index, total, events, checkpoints, valueText, label, interactive, animate, onSeek },
   ref,
 ) {
   const trackRef = useRef<HTMLDivElement>(null)
@@ -97,8 +100,6 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
       onPointerUp={endDrag}
       onPointerCancel={endDrag}
       onPointerLeave={() => setHover(null)}
-      onFocus={onFocus}
-      onBlur={onBlur}
       // Focus shows as a 2 px `now` ring around the thumb (offset 2), not a
       // box around the whole track.
       className={clsx(
@@ -117,7 +118,7 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
           style={{ left: THUMB / 2, right: THUMB / 2 }}
         >
           <div
-            className={clsx('h-full w-full bg-lime-400', animate && transitionCls.highlight)}
+            className={clsx('h-full w-full bg-lime-500 print:bg-lime-700', animate && transitionCls.highlight)}
             style={{ transform: `translateX(${(fraction(index) - 1) * 100}%)` }}
           />
         </div>
@@ -130,7 +131,7 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
                   aria-hidden
                   className={clsx(
                     'absolute top-1/2 h-2 w-0.5 -translate-x-1/2 -translate-y-1/2',
-                    n <= index ? 'bg-lime-400' : 'bg-zinc-500',
+                    n <= index ? 'bg-lime-500 print:bg-lime-700' : 'bg-zinc-500',
                   )}
                   style={{ left: `${fraction(n) * 100}%` }}
                 />
@@ -156,14 +157,21 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
           >
             <span
               aria-hidden
-              className="absolute left-0 top-1/2 block h-7 w-7 -translate-y-1/2 rounded-full border-2 border-[#1e1e21] bg-lime-400 group-focus-visible:outline group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-lime-400 print:border-white print:bg-lime-700"
+              className={clsx(
+                'absolute left-0 top-1/2 block h-7 w-7 -translate-y-1/2 rounded-full border-2 border-vz-frame bg-lime-500 print:border-white print:bg-lime-700',
+                focusRingGroup,
+              )}
             />
           </div>
         </div>
         {tip !== null && interactive ? (
           <div
             aria-hidden
-            className="pointer-events-none absolute bottom-full z-10 mb-1 -translate-x-1/2 whitespace-nowrap rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 font-mono text-[12px] leading-4 text-zinc-100"
+            className={clsx(
+              'pointer-events-none absolute bottom-full z-10 mb-1 -translate-x-1/2 whitespace-nowrap border border-zinc-700 bg-zinc-900 px-2 text-zinc-100',
+              radius.row.cls,
+              typeScale.status.cls,
+            )}
             style={{ left: `calc(${THUMB / 2}px + (100% - ${THUMB}px) * ${fraction(tip)})` }}
           >
             {tip === 0 ? 'Start' : `Step ${tip}: ${events[tip]}`}

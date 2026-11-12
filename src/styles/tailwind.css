@@ -294,7 +294,7 @@
  */
 @layer components {
   .vz-g { @apply fill-zinc-800 stroke-zinc-500 print:fill-white; }
-  .vz-hl { @apply stroke-zinc-700 print:stroke-zinc-300; }
+  .vz-hl { @apply stroke-zinc-700 print:stroke-zinc-200; }
   .vz-h { @apply fill-zinc-300 print:fill-zinc-700; }
   .vz-i { @apply fill-zinc-100 print:fill-zinc-900; }
   .vz-m { @apply fill-zinc-400 print:fill-zinc-600; }
@@ -303,7 +303,7 @@
   .vz-n { @apply stroke-lime-400 print:stroke-lime-700; }
   .vz-nf { @apply fill-lime-400 print:fill-lime-700; }
   .vz-r { @apply fill-amber-400 print:fill-amber-700; }
-  .vz-x { @apply stroke-zinc-600 print:stroke-zinc-300; }
+  .vz-x { @apply stroke-zinc-500 print:stroke-zinc-500; }
   .vz-e { fill: none; stroke-linecap: round; stroke-width: 1.5px; }
   .vz-e.vz-n { stroke-width: 2.5px; }
   .vz-d { stroke-dasharray: 4 4; }

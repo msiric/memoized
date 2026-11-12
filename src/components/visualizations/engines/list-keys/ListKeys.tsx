@@ -1,6 +1,5 @@
 'use client'
 
-import clsx from 'clsx'
 import { useReducedMotion } from 'framer-motion'
 import {
   useCallback,
@@ -13,19 +12,18 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
-import {
-  focusRing,
-  ink,
-  motionRules,
-  surface,
-  transitionCls,
-  type as typeScale,
-} from '../../primitives/tokens-v2'
+import { Button } from '../../primitives/Button'
+import { captionCls, promptCls } from '../../primitives/Caption'
+import { ChoiceRow } from '../../primitives/ChoiceRow'
+import { cn as clsx } from '../../primitives/cn'
+import { Disclosure } from '../../primitives/Disclosure'
+import { Frame } from '../../primitives/Frame'
+import { Provenance } from '../../primitives/Provenance'
+import { SegmentedControl } from '../../primitives/SegmentedControl'
+import { ink, motionRules, type as typeScale } from '../../primitives/tokens-v3'
 import { CodePane } from '../../shell/CodePane'
-import { DockButton } from '../../shell/controls'
-import { CHOICE, FRAME } from '../../shell/footprint'
+import { CHOICE } from '../../shell/footprint'
 import type { MotionGate } from '../../shell/motion'
-import { PresetSwitcher } from '../../shell/PresetSwitcher'
 import { H_CLS, heights } from '../../shell/vars'
 import {
   CODE,
@@ -83,7 +81,7 @@ import {
   unmountedRows,
 } from './model'
 import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
-import { OutcomesAsText, RECORDED_LINE } from './OutcomesAsText'
+import { OutcomesAsText, RECORDED_RUNTIMES } from './OutcomesAsText'
 
 /**
  * The React list-keys explorable (spec §8.3): the learner sets the starting
@@ -347,7 +345,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       : WRAPPER_ACTIONS.map((a) => ({ id: a, label: WRAPPER_LABEL[a] }))
 
   return (
-    <section
+    <Frame
       ref={frameRef}
       aria-labelledby={titleId}
       aria-roledescription="explorable"
@@ -359,11 +357,6 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       data-viz-mode={phase}
       data-viz-interactive={interactive ? 'true' : 'false'}
       onKeyDown={onKeyDown}
-      className={clsx(
-        'not-prose relative -mx-4 border-y border-zinc-700/60 p-4 sm:mx-0 sm:rounded-xl sm:border-x print:break-inside-avoid',
-        surface.frame,
-      )}
-      style={{ paddingTop: FRAME.padding, paddingBottom: FRAME.padding }}
     >
       {/* 1. Header: title, then the scene switcher (right from 768). */}
       <header
@@ -386,9 +379,9 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           className={clsx('self-start md:self-auto', hidden && 'invisible')}
           data-viz-part="scene"
         >
-          <PresetSwitcher
+          <SegmentedControl
             label="Scene"
-            presets={SCENES}
+            options={SCENES}
             value={s.scene === 'list' ? 0 : 1}
             interactive={interactive}
             onChange={(i) => dispatch({ type: 'scene', scene: SCENES[i].id })}
@@ -413,15 +406,15 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           {s.scene === 'list' ? (
             <>
               <span
-                className={clsx(typeScale.regionLabel.cls, ink.secondary)}
+                className={clsx(typeScale.label.cls, ink.secondary)}
                 aria-hidden
               >
                 Key
               </span>
               <div className={clsx(hidden && 'invisible')} data-viz-part="keys">
-                <PresetSwitcher
+                <SegmentedControl
                   label="Key strategy"
-                  presets={KEYS}
+                  options={KEYS}
                   value={KEY_STRATEGIES.indexOf(s.key)}
                   interactive={interactive}
                   onChange={(i) =>
@@ -432,10 +425,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             </>
           ) : (
             <p
-              className={clsx(
-                'm-0 line-clamp-2 font-sans text-[13px] leading-5',
-                ink.secondary,
-              )}
+              className={clsx('m-0 line-clamp-2', typeScale.item.cls, ink.secondary)}
             >
               {WRAPPER_SETUP}
             </p>
@@ -470,15 +460,19 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
         data-viz-region="status"
         className={clsx(
           'flex items-center justify-between gap-4',
-          typeScale.index.cls,
+          typeScale.status.cls,
           ink.secondary,
         )}
         style={{ height: STATUS, marginTop: GAPS.status }}
       >
         <span className="min-w-0 truncate" data-viz-part="viz-event">
           {event}
+          {/* The key expression is code, so it stays mono inside the sans status (D3). */}
           {eventKey ? (
-            <span className="hidden sm:inline">{eventKey}</span>
+            <span className="hidden sm:inline">
+              {', '}
+              <span className="font-mono">{eventKey.slice(2)}</span>
+            </span>
           ) : null}
         </span>
         <span className="shrink-0" data-viz-part="viz-counts">
@@ -506,7 +500,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             style={{ gap: 8 }}
             data-viz-part="dock-pick"
           >
-            <p className={clsx('m-0', typeScale.caption.cls, ink.base)}>
+            <p className={captionCls}>
               {s.scene === 'list' ? PICK_HINT.list : PICK_HINT.wrapper}
             </p>
             <div
@@ -520,7 +514,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               aria-label="Actions"
             >
               {actions.map((a) => (
-                <DockButton
+                <Button
                   key={a.id}
                   tabIndex={interactive ? 0 : -1}
                   unavailable={!interactive}
@@ -542,12 +536,12 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                       'truncate',
                       s.scene === 'wrapper' &&
                         a.id === 'type' &&
-                        'font-mono text-[13px]',
+                        'font-mono text-xs',
                     )}
                   >
                     {a.label}
                   </span>
-                </DockButton>
+                </Button>
               ))}
             </div>
           </div>
@@ -562,11 +556,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           >
             <p
               id={promptId}
-              className={clsx(
-                'm-0 md:col-start-1 md:row-start-1',
-                typeScale.prompt.cls,
-                ink.base,
-              )}
+              className={clsx(promptCls, 'md:col-start-1 md:row-start-1')}
               data-viz-part="viz-prompt"
             >
               {prompt}
@@ -581,79 +571,39 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               style={{ gap: CHOICE.gap }}
               data-viz-part="choices"
             >
-              {choices.map((c, i) => {
-                const badge = lastTime === c.id ? 'last time' : null
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={false}
-                    data-choice={c.id}
-                    data-choice-index={i}
-                    data-viz-focus={`choice-${i}`}
-                    tabIndex={canPredict && i === choiceFocus ? 0 : -1}
-                    onClick={() =>
-                      fromDock({ type: 'answer', choice: c.id }, 'again')
-                    }
-                    onKeyDown={(e) => onChoiceKey(e, i)}
-                    onFocus={() => setChoiceFocus(i)}
-                    className={clsx(
-                      'relative flex h-11 min-w-0 items-center gap-2 rounded-[10px] border border-zinc-600 pl-2 pr-3 text-left hover:border-zinc-400 hover:bg-zinc-800',
-                      focusRing,
-                      transitionCls.feedback,
-                    )}
-                  >
-                    <span
-                      aria-hidden
-                      className={clsx(
-                        'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-zinc-800 font-mono text-[12px] leading-4',
-                        ink.secondary,
-                      )}
-                    >
-                      {i + 1}
-                    </span>
-                    <span
-                      className={clsx(
-                        'min-w-0 flex-1 truncate text-[14px] leading-5',
-                        ink.base,
-                        s.scene === 'wrapper' && 'font-mono text-[13px]',
-                      )}
-                    >
-                      {c.label}
-                      {badge ? (
-                        <span className="sr-only">{`, ${badge}`}</span>
-                      ) : null}
-                    </span>
-                    {badge ? (
-                      <span
-                        aria-hidden
-                        className={clsx(
-                          'absolute -top-2 right-2 px-1 text-[12px] font-medium leading-4',
-                          surface.frameOpaque,
-                          ink.muted,
-                        )}
-                      >
-                        {badge}
-                      </span>
-                    ) : null}
-                  </button>
-                )
-              })}
+              {choices.map((c, i) => (
+                <ChoiceRow
+                  key={c.id}
+                  index={i}
+                  label={c.label}
+                  wrap="truncate"
+                  mono={s.scene === 'wrapper'}
+                  tag={lastTime === c.id ? 'last time' : undefined}
+                  data-choice={c.id}
+                  data-choice-index={i}
+                  data-viz-focus={`choice-${i}`}
+                  tabIndex={canPredict && i === choiceFocus ? 0 : -1}
+                  onClick={() =>
+                    fromDock({ type: 'answer', choice: c.id }, 'again')
+                  }
+                  onKeyDown={(e) => onChoiceKey(e, i)}
+                  onFocus={() => setChoiceFocus(i)}
+                />
+              ))}
             </div>
             <div className="flex items-center gap-2 md:col-start-1 md:row-start-2">
-              <DockButton
-                variant="quiet"
+              <Button
+                variant="text"
                 tabIndex={interactive ? 0 : -1}
                 data-viz-focus="skip"
                 data-viz-part="viz-skip"
                 onClick={() => fromDock({ type: 'skip' }, 'again')}
-                className="-ml-1 px-1"
+                className="-ml-2"
               >
                 {canPredict ? 'Skip, show me' : 'Show me'}
-              </DockButton>
-              <DockButton
-                variant="quiet"
+              </Button>
+              <Button
+                variant="text"
                 tabIndex={interactive ? 0 : -1}
                 data-viz-part="viz-back"
                 aria-keyshortcuts="Escape"
@@ -663,10 +613,9 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                     `action-${lastAction.current ?? action}`,
                   )
                 }
-                className="px-1"
-              >
+>
                 Pick another action
-              </DockButton>
+              </Button>
             </div>
           </div>
         ) : (
@@ -676,25 +625,15 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             data-viz-part="dock-reveal"
           >
             <div className="min-w-0 md:flex-1 md:pr-2">
-              <p
-                className={clsx('m-0', typeScale.caption.cls, ink.base)}
-                data-viz-part="viz-feedback"
-              >
+              <p className={clsx(captionCls, ink.base)} data-viz-part="viz-feedback">
                 {lead ? <span className="font-semibold">{lead}</span> : null}{' '}
                 {outcomeSentence}
               </p>
-              <p
-                className={clsx(
-                  'm-0 mt-2',
-                  typeScale.caption.cls,
-                  ink.secondary,
-                )}
-                data-viz-part="viz-caption"
-              >
+              <p className={clsx(captionCls, 'mt-2')} data-viz-part="viz-caption">
                 {rule}
               </p>
             </div>
-            <DockButton
+            <Button
               tabIndex={interactive ? 0 : -1}
               data-viz-focus="again"
               data-viz-part="viz-again"
@@ -708,57 +647,22 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               style={{ ['--lk-again-w' as string]: `${REVEAL_BUTTON}px` }}
             >
               Try another action
-            </DockButton>
+            </Button>
           </div>
         )}
       </div>
 
       {/* 5. Footer: outcomes as text, and provenance. */}
       <footer className="relative" style={{ marginTop: GAPS.footer }}>
-        <details className="group">
-          <summary
-            data-viz-focus="text-alternative"
-            className={clsx(
-              'flex h-11 w-max cursor-pointer list-none items-center gap-2 rounded-[10px] pr-2 text-[14px] font-semibold leading-5 [&::-webkit-details-marker]:hidden',
-              ink.base,
-              focusRing,
-            )}
-          >
-            <svg
-              aria-hidden
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              className="shrink-0 group-open:rotate-90"
-            >
-              <path
-                d="m6 4 4 4-4 4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            Outcomes as text
-          </summary>
+        <Disclosure summary="Outcomes as text" summaryProps={{ 'data-viz-focus': 'text-alternative' }}>
           <OutcomesAsText />
-        </details>
-        <p
-          className={clsx(
-            'm-0 md:absolute md:right-0 md:top-0 md:flex md:h-11 md:items-center',
-            typeScale.index.cls,
-            'font-sans font-normal',
-            ink.muted,
-          )}
-        >
-          {RECORDED_LINE}
-        </p>
+        </Disclosure>
+        <Provenance runtimes={RECORDED_RUNTIMES} />
       </footer>
 
       <div className="hidden print:mt-4 print:block">
         <OutcomesAsText />
       </div>
-    </section>
+    </Frame>
   )
 }

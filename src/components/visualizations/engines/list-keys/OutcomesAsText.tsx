@@ -1,3 +1,7 @@
+import { cn } from '../../primitives/cn'
+import { disclosureBodyCls } from '../../primitives/Disclosure'
+import { provenanceText } from '../../primitives/Provenance'
+import { ink } from '../../primitives/tokens-v3'
 import {
   LIST_RULE,
   WRAPPER_RULE,
@@ -39,11 +43,13 @@ export function checkLandsOn(key: KeyStrategy, action: ListAction): string {
     : `moves to ${ITEMS[item].text} (wrong item)`
 }
 
-export const RECORDED_LINE = `Verified in React ${RECORDED_WITH.react.join(' and ')}`
+/** Runtimes the outcomes were recorded in, for the shared provenance line. */
+export const RECORDED_RUNTIMES = RECORDED_WITH.react.map((v, i) => (i === 0 ? `React ${v}` : v))
+export const RECORDED_LINE = provenanceText(RECORDED_RUNTIMES)
 
 export function OutcomesAsText() {
   return (
-    <div className="pb-2 pt-1 font-sans text-[14px] leading-6 text-zinc-100 print:text-zinc-900">
+    <div className={disclosureBodyCls}>
       <p className="m-0">
         Start: Buy milk is checked and Walk dog is not, rendered by the TodoList
         code above. Each row’s checkbox is DOM state held by that row’s
@@ -52,14 +58,14 @@ export function OutcomesAsText() {
       <ul className="m-0 mt-2 list-none space-y-3 p-0">
         {KEY_STRATEGIES.map((key) => (
           <li key={key} className="m-0 p-0">
-            <p className="m-0 font-mono text-[13px] font-semibold">
+            <p className={cn('m-0 font-mono text-xs font-semibold', ink.base)}>
               {keyPhrase(key)}
             </p>
             <ul className="m-0 list-disc pl-5">
               {LIST_ACTIONS.map((action) => (
                 <li key={action} className="m-0">
                   {`${ACTION_LABEL[action]}: ${checkLandsOn(key, action)}. `}
-                  <span className="text-zinc-300 print:text-zinc-700">
+                  <span className={ink.muted}>
                     {listOutcomeSentence(
                       action,
                       LIST_OUTCOMES[`${key}/${action}`],
@@ -73,7 +79,7 @@ export function OutcomesAsText() {
           </li>
         ))}
         <li className="m-0 p-0">
-          <p className="m-0 font-mono text-[13px] font-semibold">
+          <p className={cn('m-0 font-mono text-xs font-semibold', ink.base)}>
             {'<div><Counter /></div>, count 7'}
           </p>
           <ul className="m-0 list-disc pl-5">
@@ -82,7 +88,7 @@ export function OutcomesAsText() {
           </ul>
         </li>
       </ul>
-      <p className="m-0 mt-3 text-[13px] text-zinc-300 print:text-zinc-700">
+      <p className={cn('m-0 mt-3 text-xs', ink.muted)}>
         {`${RECORDED_LINE} (react-dom with jsdom), for every starting set of checks, with the state held both in the DOM and in useState.`}
       </p>
     </div>

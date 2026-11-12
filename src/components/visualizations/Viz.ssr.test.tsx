@@ -70,7 +70,7 @@ describe('<Viz> static figure on the server', () => {
     expect(html).toContain('Factory calls vs aliases')
     expect(html).toMatch(/<figcaption[^>]*>Each factory call creates a new record/)
     expect(html).toContain('Diagram as text')
-    expect(html).toContain('Output verified in Node 24.x')
+    expect(html).toContain('Recorded from a real run in Node 24.x')
     expect(html).not.toContain('data-viz-interactive')
     expect(html).not.toContain('xl:max-w-[960px]')
   })
