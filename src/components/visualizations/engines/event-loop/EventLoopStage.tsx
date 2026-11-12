@@ -124,7 +124,7 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
               ['--vz-r-w' as string]: `repeat(${metrics.consoleRows.wide}, ${G.consoleRow}px)`,
             }}
           >
-            <AnimatePresence initial={false} mode="popLayout" custom={{ gate }}>
+            <AnimatePresence key={gate.epoch} initial={false} mode="popLayout" custom={{ gate }}>
               {state.console.map((text, k) => {
                 const isNew = focus.has(outId(k))
                 return (

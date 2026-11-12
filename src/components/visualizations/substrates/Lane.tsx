@@ -164,7 +164,9 @@ export function Lane(props: LaneProps) {
           vertical ? 'flex flex-col-reverse justify-start gap-1 self-stretch' : 'flex items-center gap-2 self-stretch',
         )}
       >
-        <AnimatePresence initial={false} mode="popLayout" custom={custom}>
+        {/* Keyed by the instant epoch: an instant render drops chips that are
+            still leaving from an earlier step, so nothing old stays visible (D7). */}
+        <AnimatePresence key={gate.epoch} initial={false} mode="popLayout" custom={custom}>
           {items}
         </AnimatePresence>
         <span

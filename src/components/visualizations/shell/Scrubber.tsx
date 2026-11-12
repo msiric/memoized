@@ -221,14 +221,13 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
       >
         {/* Track: a 2 px `line` rule between the thumb centres, progress in the accent. */}
         <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-zinc-500" />
-        <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 overflow-hidden">
-          <div
-            className={clsx('h-full w-full bg-lime-500 print:bg-lime-700', animate && transitionCls.highlight)}
-            style={{
-              transform: `translateX(${(fraction(index) - 1) * 100}%)`,
-            }}
-          />
-        </div>
+        <div
+          className={clsx(
+            'absolute inset-x-0 top-1/2 h-0.5 origin-left bg-lime-500 print:bg-lime-700',
+            animate ? transitionCls.highlight : transitionCls.instant,
+          )}
+          style={{ transform: `translateY(-50%) scaleX(${fraction(index)})` }}
+        />
         {showTicks
           ? Array.from({ length: total }, (_, n) =>
               gated.has(n) ? null : (
@@ -264,7 +263,7 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
             'absolute left-0 top-1/2 flex items-center justify-center rounded-full border-2 border-vz-frame print:border-white print:bg-lime-700',
             dragging ? 'bg-lime-600' : 'bg-lime-500 group-active:bg-lime-600',
             focusRingGroup,
-            animate && transitionCls.highlight,
+            animate ? transitionCls.highlight : transitionCls.instant,
           )}
           style={thumbStyle}
         >

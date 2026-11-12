@@ -89,7 +89,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
       >
         <ol
           aria-label={`Code, current: ${current}`}
-          className={clsx('m-0 list-none p-0', TRANSLATE_Y_CLS, animate && transitionCls.highlight)}
+          className={clsx('m-0 list-none p-0', TRANSLATE_Y_CLS, animate ? transitionCls.highlight : transitionCls.instant)}
           style={translateY(offset)}
         >
           {lines.map((text, i) => {
@@ -102,7 +102,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                 data-line={n}
                 className={clsx(
                   'relative flex h-6 items-center pl-2 pr-2',
-                  animate && transitionCls.highlight,
+                  animate ? transitionCls.highlight : transitionCls.instant,
                   active ? 'bg-lime-400/10' : 'bg-transparent',
                 )}
               >

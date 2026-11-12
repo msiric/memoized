@@ -614,4 +614,10 @@ export const transitionCls = {
     'transition-[background-color,opacity,transform] duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
   /** P: ProblemCard/index.tsx:210-211 (rotate 180 over 200 ms). */
   disclosure: 'transition-transform duration-200 motion-reduce:transition-none',
+  /**
+   * An instant render (D7). Dropping the transition class is not enough: the
+   * default `transition-property: all` keeps a transition already running;
+   * `none` cancels it, so the value lands in the same frame.
+   */
+  instant: 'transition-none',
 } as const
