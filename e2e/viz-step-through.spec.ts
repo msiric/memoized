@@ -9,7 +9,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 
 const GALLERY = '/dev/visualizations'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
-const FOOTPRINT = { narrow: 886, wide: 646 } // entry-table.ts, checked against the DOM below
+const FOOTPRINT = { narrow: 911, wide: 658 } // entry-table.ts, checked against the DOM below
 
 const mount = (page: Page) => page.locator('[data-viz="event-loop"]')
 const frame = (page: Page) => mount(page).locator('section')
@@ -100,7 +100,8 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   await expect(f.getByRole('radio', { name: 'Basics' })).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(slider(page)).toBeFocused()
-  await expect(f.getByText('← → to step')).toBeVisible()
+  // The floating key hint is cut (VIZ-H D22): the shortcuts live in aria-keyshortcuts.
+  await expect(f.getByText('← → to step')).toHaveCount(0)
   // Focus shows on the thumb (2 px ring, offset 2), not as a box around the track.
   const ring = await slider(page).evaluate((el) => ({
     track: getComputedStyle(el).outlineColor,
@@ -176,24 +177,32 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   expect(await focusIsInFrame(page)).toBe(true)
 })
 
+/** The segmented control a target belongs to, if it is a segment. */
+const segmentGroup = (t: Locator) =>
+  t.evaluate((el) =>
+    el.hasAttribute('data-segment') ? (el.closest('[role="radiogroup"]')?.getAttribute('aria-label') ?? null) : null,
+  )
+
 test('touch targets are at least 44×44 with 8 px between them (A5)', async ({ page }) => {
   for (const width of [320, 375, 1024]) {
     // Tall enough that the sticky controls bar sits in flow, not over the dock.
     await open(page, width, '', 1200)
     const check = async (where: string) => {
       const targets = frame(page).locator('button, [role="slider"], summary')
-      const boxes: { name: string; x: number; y: number; w: number; h: number }[] = []
+      const boxes: { name: string; x: number; y: number; w: number; h: number; seg: string | null }[] = []
       for (const t of await targets.all()) {
         if (!(await t.isVisible())) continue
         const b = (await t.boundingBox())!
         const name = (await t.getAttribute('aria-label')) ?? (await t.innerText())
         expect(b.width, `${where} ${width}: ${name} width`).toBeGreaterThanOrEqual(44)
         expect(b.height, `${where} ${width}: ${name} height`).toBeGreaterThanOrEqual(44)
-        boxes.push({ name, x: b.x, y: b.y, w: b.width, h: b.height })
+        boxes.push({ name, x: b.x, y: b.y, w: b.width, h: b.height, seg: await segmentGroup(t) })
       }
       for (const a of boxes)
         for (const b of boxes) {
-          if (a === b) continue
+          // Segments of one segmented control touch, as in the platform's
+          // LessonStatus control (VIZ-H D2); each is still a 44 px target.
+          if (a === b || (a.seg && a.seg === b.seg)) continue
           const dx = Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w))
           const dy = Math.max(b.y - (a.y + a.h), a.y - (b.y + b.h))
           expect(Math.max(dx, dy), `${where} ${width}: ${a.name} / ${b.name} spacing`).toBeGreaterThanOrEqual(7.5)

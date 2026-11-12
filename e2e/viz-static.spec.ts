@@ -17,8 +17,8 @@ const FOOTPRINT: Record<
   (typeof PRESETS)[number],
   { narrow: number; wide: number }
 > = {
-  'var-vs-let-loop': { narrow: 846, wide: 532 },
-  'factory-calls-vs-aliases': { narrow: 822, wide: 562 },
+  'var-vs-let-loop': { narrow: 870, wide: 548 },
+  'factory-calls-vs-aliases': { narrow: 846, wide: 578 },
 }
 /** The section layout each width shows (stage 288/343 stacked; 606/638/734 in two columns). */
 const SECTION_WIDTH: Record<(typeof WIDTHS)[number], number> = {

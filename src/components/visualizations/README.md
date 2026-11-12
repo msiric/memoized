@@ -18,7 +18,16 @@ entry-table.ts       id -> [loader, narrow height, wide height] (kept tiny)
 registry.ts          id -> descriptor, presets, footprint, text alternative,
                      manifest (React-free)
 registry.server.tsx  server renderers for the static Start frame
-primitives/tokens-v2.ts  roles, type, space, motion (contrast-tested)
+primitives/          the Visualization Design System (VDS, VIZ-H WS1)
+  tokens-v3.ts       the only vocabulary: color roles, type, space, radii,
+                     strokes, focus vs now, motion; each value traced to a
+                     platform file or an H1 decision (contrast-tested)
+  tokens-lint.test.ts  fails on raw hex/rgb, arbitrary sizes and literal
+                     durations in shell/, engines/, substrates/, primitives/
+  cn.ts              class merging (tailwind-merge, taught the project theme)
+  Frame, Button, SegmentedControl, ChoiceRow, Disclosure, Tag, Caption,
+  Provenance         the primitives; every state is on the specimen page
+                     /dev/visualizations/system (the visual contract)
 step-log/            the step-log contract, authoring lint, Node truth harness,
                      pre-computed Shiki tokens (`yarn viz:tokens`)
 shell/               StepThrough: frame, dock, scrubber, checkpoints,
@@ -136,7 +145,9 @@ hold its footprint perfectly still. The rules, learned the hard way:
 
 
 
-- Consume `tokens.ts` for all color, spacing, and motion. No inline hex.
+- v2 code consumes `primitives/tokens-v3.ts` and the VDS primitives; the
+  token lint enforces it. The v1 files (`tokens.ts`, `VizFrame.tsx`,
+  `VizControls.tsx`, `useStepper.ts`) are legacy and excluded from the lint.
 - Every interactive visual composes `VizFrame` + `VizControls` + `useStepper`.
 - Respect `prefers-reduced-motion`.
 - Keep visuals compact and responsive for a lesson page.

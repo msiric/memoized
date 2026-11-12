@@ -261,6 +261,7 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({
         y: number
         w: number
         h: number
+        seg: string | null
       }[] = []
       for (const t of await targets.all()) {
         if (!(await t.isVisible())) continue
@@ -276,11 +277,18 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({
           b.height,
           `${where} ${width}: ${name} height`,
         ).toBeGreaterThanOrEqual(44)
-        boxes.push({ name, x: b.x, y: b.y, w: b.width, h: b.height })
+        const seg = await t.evaluate((el) =>
+          el.hasAttribute('data-segment')
+            ? (el.closest('[role="radiogroup"]')?.getAttribute('aria-label') ?? null)
+            : null,
+        )
+        boxes.push({ name, x: b.x, y: b.y, w: b.width, h: b.height, seg })
       }
       for (const a of boxes)
         for (const b of boxes) {
-          if (a === b) continue
+          // Segments of one segmented control touch, as in the platform's
+          // LessonStatus control (VIZ-H D2); each is still a 44 px target.
+          if (a === b || (a.seg && a.seg === b.seg)) continue
           const dx = Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w))
           const dy = Math.max(b.y - (a.y + a.h), a.y - (b.y + b.h))
           expect(
