@@ -145,6 +145,12 @@ function propMotion(prop: string, base: number | string | undefined, seq: { t: n
   const distinct = new Set(values.slice(changedIdx, lastChange + 1))
   distinct.delete(end)
   distinct.delete(start)
+  // Sub-pixel float noise (a fractional box measured under a transform reads
+  // 62.62 for 62.63) is not an intermediate value; a real tween moves more.
+  const NOISE = 0.05
+  if (typeof start === 'number' && typeof end === 'number')
+    for (const v of [...distinct])
+      if (typeof v === 'number' && (Math.abs(v - start) <= NOISE || Math.abs(v - end) <= NOISE)) distinct.delete(v)
   const pm: PropMotion = {
     prop,
     start,
