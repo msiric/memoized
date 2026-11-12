@@ -1,9 +1,12 @@
 import clsx from 'clsx'
+import { Fragment } from 'react'
 import { ink, radius, type as typeScale } from '../../primitives/tokens-v3'
 import type { StaticStageProps } from '../../shell/static-types'
 import {
   HEADING,
+  HINT,
   SECTION_GAP,
+  hasHint,
   SIZE,
   edgeEnds,
   layoutDiagramSafe,
@@ -14,7 +17,7 @@ import {
   type SectionScene,
 } from './layout'
 import { isFunction, type EnvDiagram, type EnvSection } from './model'
-import { pathCss, pathLabel } from './paths'
+import { litRows, pathCss, pathLabel } from './paths'
 
 /**
  * The environment-records stage: one SVG per section per sub-width, chosen by
@@ -45,31 +48,45 @@ export const CONTAINER: Record<number, { show: string; hide: string }> = {
   },
 }
 
-/** Role classes (`src/styles/tailwind.css`, `.vz-*`): §2.1 roles with print twins, kept short for the markup budget. */
+/**
+ * Role classes (`src/styles/tailwind.css`, `.vz-*`): §2.1 roles with print
+ * twins, kept short for the markup budget. Links and glyph outlines draw in
+ * `currentColor`, which is `line` grey at rest; the hover path sets it to
+ * the `now` lime on what a function remembers (R1, R11, `paths.ts`).
+ */
 const C = {
   glyph: 'vz-g',
+  /** A function object: its fill takes the traced tint. */
+  fnGlyph: 'vz-fb',
+  /** The 44 px touch target around a function object (R11). */
+  hit: 'vz-hit',
   hairline: 'vz-hl',
-  header: 'vz-h',
-  ink: 'vz-i',
   muted: 'vz-m',
   line: 'vz-l',
-  lineFill: 'vz-lf',
-  now: 'vz-n',
-  nowFill: 'vz-nf',
+  /** Arrowheads and reference dots: filled in the link's colour. */
+  head: 'vz-ah',
+  /** A binding row's tint: clear until the row is traced. */
+  rowTint: 'vz-rt',
+  /** An unused (hatched) record: its text is knocked out of the hatch. */
+  unused: 'vz-u',
   result: 'vz-r',
   hatch: 'vz-x',
 } as const
 
 const r1 = (n: number) => Math.round(n * 10) / 10
 
+/** The touch band around a function object: 31 + 2 x 7 = 45 px (R11, WCAG 2.5.5). */
+export const HIT = 7
+
 const px = (n: number) => Math.round(n) + 0.5
 
 /**
  * Each box group carries `data-node` (its id), which the stress harness
- * reads. A function box is focusable and named (`label`): hovering or
- * focusing it brings its `[[Environment]]` path forward (`paths.ts`).
+ * reads. A function box is focusable and named (`label`): hovering,
+ * focusing or tapping it traces its `[[Environment]]` path (`paths.ts`).
+ * Rows a function can read carry a tint (`data-b`, the binding name).
  */
-function Box({ box, hatch, label }: { box: LaidBox; hatch: string; label?: string }) {
+function Box({ box, hatch, label, tints }: { box: LaidBox; hatch: string; label?: string; tints?: Set<string> }) {
   const { x, y, w, h } = box.rect
   const X = px(x)
   const Y = px(y)
@@ -79,25 +96,32 @@ function Box({ box, hatch, label }: { box: LaidBox; hatch: string; label?: strin
     const slot = box.kind === 'slot'
     return (
       <g data-node={box.id} tabIndex={label ? 0 : undefined} role={label ? 'img' : undefined} aria-label={label}>
+        {slot ? null : (
+          // A transparent band HIT px around the box: a 45 px target on touch
+          // (R11). The group's focus ring is drawn inset by the same band
+          // (tailwind.css), so it still sits 2 px outside the box.
+          <rect x={X - HIT} y={Y - HIT} width={W + 2 * HIT} height={H + 2 * HIT} className={C.hit} />
+        )}
         <rect
           x={X}
           y={Y}
           width={W}
           height={H}
           rx={radius.glyph.px}
-          className={slot ? clsx('vz-d fill-none', C.line) : C.glyph}
+          className={slot ? clsx('vz-d fill-none', C.line) : C.fnGlyph}
         />
         <text
           x={r1(x + w / 2)}
           y={r1(y + h / 2 + 4)}
-          // `vz-f`: 12 px medium, centred (tailwind.css, the markup budget).
-          className={slot ? clsx('vz-12 vz-c italic', C.muted) : 'vz-f'}
+          // `vz-f`: the 12 px medium title, centred (tailwind.css, the markup budget).
+          className={slot ? clsx('vz-12 vz-c', C.muted) : 'vz-f'}
         >
           {slot ? (
             box.title[0]
           ) : (
             <>
-              <tspan className={C.muted}>ƒ</tspan>
+              {/* `.vz-f > tspan`: the ƒ glyph in the muted role. */}
+              <tspan>ƒ</tspan>
               {` ${box.title[0]}`}
             </>
           )}
@@ -107,8 +131,9 @@ function Box({ box, hatch, label }: { box: LaidBox; hatch: string; label?: strin
   }
   const headerH = 2 * SIZE.headerPad + box.title.length * SIZE.headerLine
   return (
-    // Row text inherits 13 px ink from the svg (markup budget); unused records mute it.
-    <g data-node={box.id} className={box.unused ? C.muted : undefined}>
+    // Row text inherits 13 px ink from the svg (markup budget); unused records
+    // mute it, upright (no italic as a state, N10), knocked out of the hatch.
+    <g data-node={box.id} className={box.unused ? clsx(C.muted, C.unused) : undefined}>
       <rect
         x={X}
         y={Y}
@@ -126,7 +151,7 @@ function Box({ box, hatch, label }: { box: LaidBox; hatch: string; label?: strin
           x={r1(x + SIZE.cellPad)}
           y={r1(y + SIZE.headerPad + 12 + i * SIZE.headerLine)}
           // `vz-t`: the header role, 12 px medium (tailwind.css).
-          className={box.unused ? clsx('vz-t italic', C.muted) : 'vz-t'}
+          className="vz-t"
         >
           {line}
         </text>
@@ -145,7 +170,20 @@ function Box({ box, hatch, label }: { box: LaidBox; hatch: string; label?: strin
         />
       ) : null}
       {box.rows.map((row) => (
-        <g key={row.name}>
+        <Fragment key={row.name}>
+          {tints?.has(row.name) ? (
+            // Inset inside the row's dividers, chip radius, so it never
+            // fights the record's rounded corners.
+            <rect
+              data-b={row.name}
+              x={X + 3}
+              y={row.top + 3.5}
+              width={W - 6}
+              height={SIZE.row - 6}
+              rx={radius.chip.px}
+              className={C.rowTint}
+            />
+          ) : null}
           <text
             x={r1(x + SIZE.cellPad)}
             y={r1(row.top + 18.5)}
@@ -156,43 +194,28 @@ function Box({ box, hatch, label }: { box: LaidBox; hatch: string; label?: strin
             <text
               x={r1(x + row.nameWidth + SIZE.cellPad)}
               y={r1(row.top + 18.5)}
-              className={row.uninitialized ? clsx('vz-12 italic', C.muted) : undefined}
+              className={row.uninitialized ? clsx('vz-12', C.muted) : undefined}
             >
               {row.value}
             </text>
           ) : null}
-        </g>
+        </Fragment>
       ))}
     </g>
   )
 }
 
-function Edge({ edge, section }: { edge: LaidEdge; section: EnvSection }) {
+/** A link and the label that names its kind: the label rides the link's hover path. */
+function Edge({ edge, section, labels }: { edge: LaidEdge; section: EnvSection; labels: LaidText[] }) {
   const ends = edgeEnds(section, edge.id)
   return (
-    <g
-      data-edge={edge.id}
-      data-from={ends.from}
-      data-to={ends.to}
-      data-now={edge.now ? '' : undefined}
-    >
-      <path
-        d={edge.d}
-        className={clsx(
-          'vz-e',
-          edge.now ? C.now : C.line,
-          edge.dashed && 'vz-d',
-        )}
-      />
-      <path d={edge.head} className={edge.now ? C.nowFill : C.lineFill} />
-      {edge.dot ? (
-        <circle
-          cx={r1(edge.dot.x)}
-          cy={r1(edge.dot.y)}
-          r={SIZE.dot}
-          className={edge.now ? C.nowFill : C.lineFill}
-        />
-      ) : null}
+    <g data-edge={edge.id} data-from={ends.from} data-to={ends.to}>
+      <path d={edge.d} className={clsx('vz-e', edge.dashed && 'vz-d')} />
+      <path d={edge.head} className={C.head} />
+      {edge.dot ? <circle cx={r1(edge.dot.x)} cy={r1(edge.dot.y)} r={SIZE.dot} className={C.head} /> : null}
+      {labels.map((t, i) => (
+        <Text key={i} t={t} />
+      ))}
     </g>
   )
 }
@@ -212,7 +235,15 @@ function Text({ t }: { t: LaidText }) {
       data-o={t.node}
       className={clsx(cls, t.kind !== 'output' && t.anchor === 'middle' && 'vz-c')}
     >
-      {t.text}
+      {t.kind === 'output' && t.text.startsWith('› ') ? (
+        // One output glyph across visuals (N12): a muted prompt (`.vz-r > tspan`), the value in amber.
+        <>
+          <tspan>›</tspan>
+          {t.text.slice(1)}
+        </>
+      ) : (
+        t.text
+      )}
     </text>
   )
 }
@@ -230,16 +261,16 @@ function SectionSvg({
 }) {
   const note = scene.texts.find((t) => t.kind === 'note')
   const hatched = scene.boxes.some((b) => b.unused) || (scene.noteMark === 'hatch' && note)
-  // Quiet links first, the highlight on top. References start at a dot inside
+  // Every link rests in the line role (R1). References start at a dot inside
   // their record, so they are drawn over the boxes.
-  const order = (es: LaidEdge[]) =>
-    [...es].sort((a, b) => Number(a.now) - Number(b.now))
-  const links = order(scene.edges.filter((e) => e.kind !== 'ref'))
-  const refs = order(scene.edges.filter((e) => e.kind === 'ref'))
+  const links = scene.edges.filter((e) => e.kind !== 'ref')
+  const refs = scene.edges.filter((e) => e.kind === 'ref')
   const fns = scene.boxes.filter((b) => b.kind === 'function')
+  const labelsOf = (e: LaidEdge) => scene.texts.filter((t) => t.kind === 'label' && t.edge === e.id)
+  const tints = litRows(section)
   return (
     // Only the function objects are exposed (focusable, named); the rest of
-    // the picture is described by "Diagram as text". `vz-s`: 13 px mono ink,
+    // the picture is described by "Diagram as text". `vz-s`: mono ink,
     // overflow visible, centred, never wider than its column (tailwind.css).
     <svg
       width={scene.width}
@@ -248,8 +279,12 @@ function SectionSvg({
       data-viz-width={scene.width}
       // Sized in rem so the figure follows the reader's text size (D19), and
       // never wider than its column: then it scales down as one picture.
+      // Type is in user units like the geometry it was laid out with
+      // (`SIZE.value`), and the classes are in em of it: one user unit is
+      // 1/16 rem, so the text follows text zoom with the drawing.
       className={clsx('vz-s', className)}
       style={{ width: `${scene.width / 16}rem` }}
+      fontSize={SIZE.value}
     >
       {hatched ? (
         <defs>
@@ -273,12 +308,12 @@ function SectionSvg({
       ) : null}
       <g aria-hidden>
         {links.map((e) => (
-          <Edge key={e.id} edge={e} section={section} />
+          <Edge key={e.id} edge={e} section={section} labels={labelsOf(e)} />
         ))}
         {scene.boxes
           .filter((b) => b.kind !== 'function')
           .map((b) => (
-            <Box key={b.id} box={b} hatch={hatch} />
+            <Box key={b.id} box={b} hatch={hatch} tints={tints.get(b.id)} />
           ))}
       </g>
       {fns.map((b) => {
@@ -289,7 +324,7 @@ function SectionSvg({
       })}
       <g aria-hidden>
       {refs.map((e) => (
-        <Edge key={e.id} edge={e} section={section} />
+        <Edge key={e.id} edge={e} section={section} labels={labelsOf(e)} />
       ))}
       {scene.noteMark === 'hatch' && note ? (
         <rect
@@ -298,14 +333,16 @@ function SectionSvg({
           y={r1(note.rect.y + 2) + 0.5}
           width={SIZE.swatch - 1}
           height={SIZE.swatch - 1}
-          rx={2}
+          rx={radius.chip.px}
           fill={`url(#${hatch})`}
           className={C.line}
         />
       ) : null}
-      {scene.texts.map((t, i) => (
-        <Text key={i} t={t} />
-      ))}
+      {scene.texts
+        .filter((t) => t.kind !== 'label')
+        .map((t, i) => (
+          <Text key={i} t={t} />
+        ))}
       </g>
     </svg>
   )
@@ -329,46 +366,58 @@ function visibility(widths: readonly number[], i: number): string {
   return clsx(own, next !== undefined && CONTAINER[next]?.hide)
 }
 
-function VariantStage({ scene, uid }: { scene: DiagramScene; uid: string }) {
+function VariantStage({ data, scene, uid }: { data: EnvDiagram; scene: DiagramScene; uid: string }) {
   const wide = scene.variant === 'wide'
   return (
-    <div
-      data-viz-variant={scene.variant}
-      className={clsx(
-        wide ? 'hidden vz-wide:grid' : 'grid vz-wide:hidden',
-        wide && scene.columns === 2 && 'grid-cols-2',
-      )}
-      style={{
-        columnGap: SECTION_GAP.wide,
-        rowGap: SECTION_GAP[scene.variant],
-      }}
-    >
-      {scene.sections.map(({ section, scenes }) => (
-        <div
-          key={section.id}
-          data-viz-section={section.id}
-          className="min-w-0 [container-type:inline-size]"
+    <div data-viz-variant={scene.variant} className={wide ? 'hidden vz-wide:block' : 'vz-wide:hidden'}>
+      {hasHint(data) ? (
+        // The figure's only instruction (R11), worded for the reader's input.
+        // Paper cannot be hovered: print keeps the space, not the words.
+        <p
+          data-viz-part="hint"
+          className={clsx('m-0 font-sans text-2xs leading-5 print:invisible', ink.muted)}
+          style={{ marginBottom: HINT.gap }}
         >
-          <p
-            // The heading is code (a loop header, a declaration), so it is mono (D3).
-            // The lint keeps it within the section width; truncation is the guard.
-            className={clsx('m-0 truncate', typeScale.value.cls, ink.muted)}
-            style={{ marginBottom: HEADING.gap }}
-            title={section.heading}
+          <span className="[@media(hover:none)]:hidden">{HINT.hover}</span>
+          <span className="hidden [@media(hover:none)]:inline">{HINT.tap}</span>
+        </p>
+      ) : null}
+      <div
+        className={clsx('grid', wide && scene.columns === 2 && 'grid-cols-2')}
+        style={{
+          columnGap: SECTION_GAP.wide,
+          rowGap: SECTION_GAP[scene.variant],
+        }}
+      >
+        {scene.sections.map(({ section, scenes }) => (
+          <div
+            key={section.id}
+            data-viz-section={section.id}
+            className="min-w-0 [container-type:inline-size]"
           >
-            <Heading text={section.heading} emphasis={section.emphasis} />
-          </p>
-          {scenes.map((s, i) => (
-            <SectionSvg
-              key={s.width}
-              scene={s}
-              section={section}
-              hatch={`${uid}-${scene.variant}-${section.id}-${s.width}-hatch`}
-              className={visibility(scene.widths, i)}
-            />
-          ))}
-        </div>
-      ))}
+            <p
+              // The heading is code (a loop header, a declaration), so it is
+              // mono (D3), in the label role (T11). The lint keeps it on one
+              // line at 1:1; under large text it wraps instead of truncating
+              // (R9, R17): the svg below is then capped by its column, which
+              // frees more height than the extra line takes.
+              className={clsx('m-0 break-words', typeScale.value.cls, ink.secondary)}
+              style={{ marginBottom: HEADING.gap }}
+            >
+              <Heading text={section.heading} emphasis={section.emphasis} />
+            </p>
+            {scenes.map((s, i) => (
+              <SectionSvg
+                key={s.width}
+                scene={s}
+                section={section}
+                hatch={`${uid}-${scene.variant}-${section.id}-${s.width}-hatch`}
+                className={visibility(scene.widths, i)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -385,7 +434,7 @@ function Variant({ data, variant, uid }: { data: EnvDiagram; variant: 'narrow' |
         Too wide to draw at this size. “Diagram as text” below describes it.
       </p>
     )
-  return <VariantStage scene={scene} uid={uid} />
+  return <VariantStage data={data} scene={scene} uid={uid} />
 }
 
 export function EnvRecordsStage({ data, uid }: StaticStageProps<EnvDiagram>) {

@@ -58,7 +58,6 @@ const longNames: EnvSection = {
     ], null),
     fn('f0', ['handleExtraordinarilyLongCallbackIdentifier'], 'call', 'ResponsePayloadReceivedFromUpstream'),
   ],
-  highlight: ['env:f0'],
 }
 const erLongNames = preset('er-long-names', { sections: [longNames], align: 'top' })
 
@@ -76,7 +75,6 @@ const manyBindings: EnvSection = {
     rec('call', ['factory() call'], [['n', '1']], 'module'),
     fn('f', ['f'], 'call', '1'),
   ],
-  highlight: ['env:f'],
 }
 const refsSection: EnvSection = {
   id: 'refs',
@@ -94,7 +92,6 @@ const refsSection: EnvSection = {
     ),
     ...[0, 1, 2, 3].map((k) => fn(`g${k}`, [`g${k}`], `c${k}`)),
   ],
-  highlight: ['ref:module.ref0', 'ref:module.ref4'],
 }
 const erManyBindings = preset('er-many-bindings', { sections: [manyBindings, refsSection], align: 'top' })
 
@@ -110,7 +107,6 @@ const wideTier: EnvSection = {
     ),
     ...Array.from({ length: 8 }, (_, k) => fn(`f${k}`, [`anonymous #${k}`, `#${k}`], `it${k}`, String(k))),
   ],
-  highlight: ['env:f0'],
 }
 const erWideTier = preset('er-wide-tier', { sections: [wideTier], align: 'top' })
 
@@ -122,7 +118,6 @@ const deepChain: EnvSection = {
     ...[1, 2, 3, 4, 5].map((k) => rec(`l${k}`, [`level${k}() call`], [[`v${k}`, String(k)]], `l${k - 1}`)),
     fn('inner', ['inner'], 'l5', '5'),
   ],
-  highlight: ['outer:l5', 'env:inner'],
 }
 const erDeep = preset('er-deep-chain', { sections: [deepChain], align: 'top' })
 
@@ -138,7 +133,6 @@ const unicode: EnvSection = {
     ], null),
     fn('f', ['関数 🚀'], 'call', '🎉🎉🎉'),
   ],
-  highlight: ['env:f'],
 }
 const erUnicode = preset('er-unicode', { sections: [unicode], align: 'top' })
 
@@ -154,7 +148,6 @@ const nearLimit: EnvSection = {
     fn('f', ['accumulateIntoTotal', 'accumulate'], 'call', 'accumulated'),
     fn('g', ['resetRunningTotal', 'reset'], 'call', 'undefined'),
   ],
-  highlight: ['env:f'],
 }
 const erNearLimit = preset('er-near-limit', { sections: [nearLimit, { ...nearLimit, id: 'near2' }], align: 'bottom' })
 
@@ -167,7 +160,6 @@ const noted: EnvSection = {
   heading: 'for (let index = 0; index < items.length; index++) { handlers.push(() => index) }',
   emphasis: 'let',
   nodes: [rec('call', ['build() call'], [['index', '0']], null), fn('f', ['handler'], 'call', '0')],
-  highlight: ['env:f'],
   note: 'Hatched: index = 3 · the loop test fails, so no function is saved, and this note is long enough to wrap twice.',
 }
 const erTextLimit = preset(

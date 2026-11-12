@@ -86,9 +86,9 @@ const varSection: EnvSection = {
       title: fnTitle(k),
       env: 'call',
       logs: '3',
+      reads: 'i',
     })),
   ],
-  highlight: ['env:f0', 'env:f1', 'env:f2'],
 }
 
 const letSection: EnvSection = {
@@ -117,6 +117,7 @@ const letSection: EnvSection = {
       title: fnTitle(k),
       env: `it${k}`,
       logs: String(k),
+      reads: 'i',
     })),
     {
       kind: 'slot',
@@ -125,7 +126,6 @@ const letSection: EnvSection = {
       title: ['no function saved', 'no ƒ saved', 'no ƒ'],
     },
   ],
-  highlight: ['env:f0', 'env:f1', 'env:f2'],
   note: 'i = 3 · the loop test fails, so no function is saved.',
   noteMark: 'hatch',
 }
@@ -267,10 +267,9 @@ const countersSection: EnvSection = {
       outer: 'module',
       drawOuter: false,
     },
-    { kind: 'function', id: 'fA', title: ['A'], env: 'callA' },
-    { kind: 'function', id: 'fB', title: ['B'], env: 'callB' },
+    { kind: 'function', id: 'fA', title: ['A'], env: 'callA', reads: 'count' },
+    { kind: 'function', id: 'fB', title: ['B'], env: 'callB', reads: 'count' },
   ],
-  highlight: ['ref:module.counter1', 'ref:module.sameCounter'],
 }
 
 const methods = ['deposit', 'withdraw', 'getBalance'] as const
@@ -292,9 +291,9 @@ const accountSection: EnvSection = {
       id: name,
       title: [name] as const,
       env: 'call',
+      reads: 'balance',
     })),
   ],
-  highlight: [],
 }
 
 /** What calling a counter name prints next: its record's count plus one. */

@@ -290,44 +290,83 @@
 /*
  * Static visualization roles (VIZ-01 spec §2.1) as short classes: an inline
  * SVG repeats them on every glyph, so full utility lists would blow the
- * 30 KB markup budget. Dark is the product; `print:` carries the light roles.
+ * markup budget. Dark is the product; `print:` carries the light roles.
+ * Owned by engines/env-records (the closures figure).
  */
 @layer components {
-  .vz-g { @apply fill-zinc-800 stroke-zinc-500 print:fill-white; }
+  .vz-g { @apply fill-zinc-800 print:fill-white; stroke: currentColor; }
   .vz-hl { @apply fill-none stroke-zinc-700 print:stroke-zinc-200; }
-  .vz-h { @apply fill-zinc-300 print:fill-zinc-700; }
-  .vz-i { @apply fill-zinc-100 print:fill-zinc-900; }
   .vz-m { @apply fill-zinc-400 print:fill-zinc-600; }
-  .vz-l { @apply stroke-zinc-500; }
-  .vz-lf { @apply fill-zinc-500; }
-  .vz-n { @apply stroke-lime-400 print:stroke-lime-700; }
-  .vz-nf { @apply fill-lime-400 print:fill-lime-700; }
+  .vz-l { @apply stroke-zinc-500 print:stroke-zinc-600; }
   .vz-r { @apply fill-amber-400 print:fill-amber-700; }
-  .vz-x { @apply stroke-zinc-500 print:stroke-zinc-500; }
-  .vz-e { fill: none; stroke-linecap: round; stroke-width: 1.5px; }
-  .vz-e.vz-n { stroke-width: 2.5px; }
+  .vz-x { @apply stroke-zinc-500 print:stroke-zinc-400; }
   .vz-d { stroke-dasharray: 4 4; }
-  .vz-12 { font-size: 12px; }
-  .vz-13 { font-size: 13px; }
   .vz-c { text-anchor: middle; }
-  /* A record header and a function title (12 px medium), one class each for the markup budget. */
-  .vz-t { @apply fill-zinc-300 font-medium print:fill-zinc-700; font-size: 12px; }
-  .vz-f { @apply font-medium; font-size: 12px; text-anchor: middle; }
-  /* The figure's svg: 13 px mono ink, drawn past its box, centred, never wider than its column. */
-  .vz-s { @apply mx-auto h-auto max-w-full font-mono fill-zinc-100 print:fill-zinc-900; font-size: 13px; overflow: visible; }
   /*
-   * VIZ-H D21, the closures moment: hovering or focusing a function object
-   * dims everything but its [[Environment]] path (the figure's own rules in
-   * engines/env-records/paths.ts keep the path at full strength). Opacity
-   * only, on the `highlight` token (120 ms, the stage curve), none under
-   * reduced motion; print never hovers.
+   * Type in em of the svg's own size, which the stage sets in user units
+   * (`font-size={SIZE.value}`, 13): the geometry is laid out at those sizes
+   * and the svg is sized in rem, so the text follows text zoom with the
+   * drawing. rem here would scale it twice.
+   */
+  .vz-12 { font-size: calc(12em / 13); }
+  /* A record header and a function title (12 medium), one class each for the markup budget. */
+  .vz-t { @apply fill-zinc-300 font-medium print:fill-zinc-700; font-size: calc(12em / 13); }
+  .vz-f { @apply font-medium; font-size: calc(12em / 13); text-anchor: middle; }
+  /* The ƒ before a function's name and the › before an output: the muted role (N12). */
+  :is(.vz-f, .vz-r) > tspan { @apply fill-zinc-400 print:fill-zinc-600; }
+  /*
+   * The figure's svg: mono ink, drawn past its box, centred, never wider than
+   * its column. Links and glyph outlines draw in `currentColor`: the `line`
+   * role at rest (H3 R1: lime only on the traced path), the `now` lime when
+   * a function's path is traced (`--vz-k`, set by engines/env-records/paths.ts).
+   */
+  .vz-s {
+    @apply mx-auto h-auto max-w-full font-mono fill-zinc-100 print:fill-zinc-900;
+    overflow: visible;
+    --vz-k: theme('colors.lime.400');
+    --vz-kt: theme('colors.lime.400 / 10%');
+  }
+  .vz-s :is([data-edge], [data-node]) { @apply text-zinc-500 print:text-zinc-600; }
+  .vz-e { fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: var(--vz-sw, 1.5px); }
+  .vz-ah { fill: currentColor; }
+  /* A function object: the glyph, tinted when traced (D5: a lime border plus the lime-400/10 fill). */
+  .vz-fb { fill: var(--vz-t, theme('colors.zinc.800')); stroke: currentColor; @apply print:fill-white; }
+  /* Its touch target: a transparent band 7 px around the box, 45 px tall (R11, `HIT` in the stage). */
+  .vz-hit { fill: transparent; }
+  /* A row a function can read: clear until traced, then the lime tint. */
+  .vz-rt { color: transparent; fill: currentColor; fill-opacity: 0.16; }
+  /* An unused record's text is knocked out of its hatch (R16), on screen and paper. */
+  .vz-u text { @apply stroke-zinc-800 print:stroke-white; paint-order: stroke; stroke-width: 4px; stroke-linejoin: round; }
+  /*
+   * VIZ-H D21 and H3 R11, the closures moment: hovering a function, focusing
+   * it from the keyboard (`:focus-visible`, so a mouse click never sticks)
+   * or tapping it on a device that cannot hover dims everything but its
+   * path; the figure's own rules (paths.ts) bring the path back and light
+   * it. One path at a time: a hovered function wins over a keyboard focus.
+   * Opacity and colour on the `highlight` token (120 ms, the stage curve),
+   * none under reduced motion; print never hovers.
    */
   .vz-s [tabindex] { outline: none; }
-  .vz-s [tabindex]:focus-visible { outline: 2px solid theme('colors.lime.500'); outline-offset: 2px; border-radius: 8px; }
-  .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) { transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1); }
-  .vz-s:has([tabindex]:is(:hover, :focus)) :is([data-edge], [data-node]),
-  .vz-s:has([tabindex]:is(:hover, :focus)) > g[aria-hidden] > :is(text, rect) { opacity: 0.4; }
+  /*
+   * The focus ring (D5: 2 px lime-500, 2 px off the glyph). The group's box
+   * includes the 7 px touch band, so the ring is drawn 5 px inside it, and
+   * its 15 px radius shrinks by the same 5 to the glyph's 8 plus 2.
+   */
+  .vz-s [tabindex]:focus-visible { outline: 2px solid theme('colors.lime.500'); outline-offset: -5px; border-radius: 15px; }
+  /* Press (R13): the traced tint deepens while held. */
+  .vz-s [tabindex]:active > .vz-fb { fill: theme('colors.lime.400 / 20%'); }
+  .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) {
+    transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .vz-e, .vz-fb { transition: stroke-width 120ms cubic-bezier(0.2, 0, 0, 1), fill 120ms cubic-bezier(0.2, 0, 0, 1); }
+  .vz-s:is(:has([tabindex]:hover), :has([tabindex]:focus-visible)) :is([data-edge], [data-node]),
+  .vz-s:is(:has([tabindex]:hover), :has([tabindex]:focus-visible)) > g[aria-hidden] > :is(text, rect) { opacity: 0.4; }
+  @media (hover: none) {
+    .vz-s:has([tabindex]:focus) :is([data-edge], [data-node]),
+    .vz-s:has([tabindex]:focus) > g[aria-hidden] > :is(text, rect) { opacity: 0.4; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) { transition: none; }
+    .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect), .vz-e, .vz-fb { transition: none; }
   }
 }
+
