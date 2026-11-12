@@ -167,8 +167,8 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
  * server places the window by source lines, which is exact unless a line
  * wraps. After layout, and whenever the pane's width or the text size
  * changes, the list is placed again at whole rows with the anchor row where
- * `windowOffset` puts it. A re-measure snaps (D7); a step change takes the
- * list's own transition.
+ * `windowOffset` puts it, never opening on a continuation row. A re-measure
+ * snaps (D7); a step change takes the list's own transition.
  */
 function useWindow(
   view: RefObject<HTMLDivElement>,
@@ -191,8 +191,18 @@ function useWindow(
       const a = anchor ? (ol.children[anchor - 1] as HTMLElement | undefined) : undefined
       let top = 0
       if (a && total > rows) {
-        const at = Math.round((a.offsetTop - first.offsetTop) / row)
+        const rowOf = (el: HTMLElement) => Math.round((el.offsetTop - first.offsetTop) / row)
+        const at = rowOf(a)
+        const atEnd = at + Math.round(a.offsetHeight / row)
         top = Math.max(0, Math.min(total - rows, at - Math.floor((rows - 1) / 2)))
+        // Never open the window on a wrapped line's continuation: move up to
+        // that line's first row while the anchor line still fits, else down
+        // to the next line's first row (the anchor line stays in view).
+        const starts = Array.from(ol.children, (li) => rowOf(li as HTMLElement))
+        const up = Math.max(...starts.filter((r) => r <= top))
+        const down = Math.min(...starts.filter((r) => r >= top))
+        if (up < top && atEnd - up <= rows) top = up
+        else if (down > top && down <= at) top = down
       }
       if (snap) ol.style.transition = 'none'
       ol.style.transform = `translateY(${-top * row}px)`
