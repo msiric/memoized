@@ -47,12 +47,11 @@ export const GLYPH = { caption: 7.2, prompt: 8.4 } as const
 export const CHOICE = { height: TARGET_PX, gap: TARGET_GAP_PX, wideWidth: 168, textGap: 8, sideGap: 16 } as const
 
 /**
- * The controls bar: scrubber row, then the button row. Below 768 it is sticky
- * to the viewport bottom while the frame is on screen: a 1 px hairline, 8 px
- * above and 8 px below, so it never sits on the screen edge.
+ * The controls bar: scrubber row, then the button row, in flow at every
+ * width (the sticky dock is removed, D14).
  */
 export const BAR: PerVariant<number> = {
-  narrow: 1 + 8 + TARGET_PX + TARGET_GAP_PX + TARGET_PX + 8,
+  narrow: TARGET_PX + TARGET_GAP_PX + TARGET_PX,
   wide: TARGET_PX + TARGET_GAP_PX + TARGET_PX,
 }
 

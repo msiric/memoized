@@ -20,7 +20,7 @@ import { Disclosure } from '../primitives/Disclosure'
 import { Frame } from '../primitives/Frame'
 import { Provenance } from '../primitives/Provenance'
 import { SegmentedControl } from '../primitives/SegmentedControl'
-import { TARGET_GAP_PX, ink, motionRules, stroke, surface, type as typeScale } from '../primitives/tokens-v3'
+import { TARGET_GAP_PX, ink, motionRules, type as typeScale } from '../primitives/tokens-v3'
 import { CodePane } from './CodePane'
 import { CHOICE, FRAME, STEP_BAR, definitionMetrics } from './footprint'
 import { feedbackText } from './feedback'
@@ -446,18 +446,11 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         </div>
       </div>
 
-      {/* Controls bar: scrubber, then Restart, Back, Next, Play. Sticky to
-          the viewport bottom below 768 (§3.4). The speed toggle is gone (D10). */}
+      {/* Controls bar: scrubber, then Restart, Back, Next, Play. In flow at
+          every width: the sticky dock is gone (D14), and the speed toggle (D10). */}
       <div
         data-viz-region="bar"
-        className={cn(
-          'sticky bottom-0 z-10 -mx-4 box-border flex flex-col border-t px-4 pb-2 pt-2 md:static md:mx-0 md:border-t-0 md:bg-transparent md:px-0 md:py-0 print:hidden',
-          stroke.hairline,
-          surface.frameOpaque,
-          'md:bg-transparent',
-          H_CLS,
-          hidden && 'invisible',
-        )}
+        className={cn('flex flex-col print:hidden', H_CLS, hidden && 'invisible')}
         style={heights({ narrow: metrics.narrow.bar, wide: metrics.wide.bar }, { marginTop: FRAME.barGap })}
       >
         <Scrubber

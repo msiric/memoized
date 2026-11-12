@@ -3,7 +3,7 @@ import type { StateIntrospection, Step, StepLog } from '../step-log/types'
 import type { MotionGate } from './motion'
 
 /**
- * Layout variants. `narrow` below 768 px (code above the stage, sticky dock),
+ * Layout variants. `narrow` below 768 px (code above the stage),
  * `wide` from 768 px (code beside the stage). Heights are fixed per variant
  * and never depend on the exact width, so the footprint is known before any
  * JavaScript runs (spec §3.3, §3.4).

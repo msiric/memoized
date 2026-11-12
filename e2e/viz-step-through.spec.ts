@@ -9,7 +9,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 
 const GALLERY = '/dev/visualizations'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
-const FOOTPRINT = { narrow: 911, wide: 658 } // entry-table.ts, checked against the DOM below
+const FOOTPRINT = { narrow: 894, wide: 658 } // entry-table.ts, checked against the DOM below
 
 const mount = (page: Page) => page.locator('[data-viz="event-loop"]')
 const frame = (page: Page) => mount(page).locator('section')
@@ -45,14 +45,9 @@ async function focusIsInFrame(page: Page) {
   })
 }
 
-/**
- * Page-relative boxes of the frame, its regions and the paragraph after it.
- * Below 768 the controls bar is sticky, so its page position follows the
- * scroll by design; its size is still checked.
- */
+/** Page-relative boxes of the frame, its regions and the paragraph after it. */
 async function layoutSnapshot(page: Page) {
   return page.evaluate(() => {
-    const sticky = window.innerWidth < 768
     const root = document.querySelector('[data-viz="event-loop"]')!
     const els: [string, Element | null][] = [
       ['frame', root.querySelector('section')],
@@ -64,7 +59,7 @@ async function layoutSnapshot(page: Page) {
     return Object.fromEntries(
       els.map(([k, el]) => {
         const r = el!.getBoundingClientRect()
-        const y = sticky && k === 'bar' ? 0 : Math.round(r.y + window.scrollY)
+        const y = Math.round(r.y + window.scrollY)
         // The code pane hugs each preset's code inside the fixed stage; only
         // its position and width must hold.
         const h = k === 'code' ? 0 : Math.round(r.height)
@@ -185,7 +180,6 @@ const segmentGroup = (t: Locator) =>
 
 test('touch targets are at least 44×44 with 8 px between them (A5)', async ({ page }) => {
   for (const width of [320, 375, 1024]) {
-    // Tall enough that the sticky controls bar sits in flow, not over the dock.
     await open(page, width, '', 1200)
     const check = async (where: string) => {
       const targets = frame(page).locator('button, [role="slider"], summary')
@@ -389,7 +383,9 @@ test('nothing overflows its reserved box at any width or step', async ({ page })
   }
 })
 
-test('375×667 fit: code line, focused element, caption and Next stay visible', async ({ page }) => {
+// The sticky dock that made this pass is removed (VIZ-H D14); the fit comes
+// back through layout (D16: 2x2 lanes on phones, WS3). Re-enable with WS3.
+test.fixme('375×667 fit: code line, focused element, caption and Next stay visible', async ({ page }) => {
   await open(page, 375, '', 667)
   const code = frame(page).locator('[data-viz-region="code"]')
   await slider(page).focus()
@@ -514,5 +510,5 @@ test('screenshots at 320, 375, 768, 1024 and 1440', async ({ page }, testInfo) =
   await frame(page)
     .locator('[data-viz-region="code"]')
     .evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY))
-  await page.screenshot({ path: testInfo.outputPath('viz-375x667-sticky-dock.png'), animations: 'disabled' })
+  await page.screenshot({ path: testInfo.outputPath('viz-375x667-fit.png'), animations: 'disabled' })
 })
