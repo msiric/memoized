@@ -43,6 +43,12 @@ truth test re-runs it), a descriptor and a stage, register it in
 prints the footprint to use), then check it on `/dev/visualizations` and with
 `yarn test:e2e`.
 
+Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
+and report their footprint directly; their presets still carry step-logs for
+the lint, manifest and text alternative. `engines/list-keys/` is the first: its
+outcomes are recorded from real React 18 and 19 renders (`truth/`) and
+re-verified by `list-keys.truth.test.ts`.
+
 The v1 components below still back the dev gallery and the MDX exports; they
 are scheduled to be ported onto the v2 shell.
 

@@ -28,4 +28,5 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     532,
     { 'var-vs-let-loop': [846, 532], 'factory-calls-vs-aliases': [822, 562] },
   ],
+  'list-keys': [() => import('./engines/list-keys'), 866, 558],
 }

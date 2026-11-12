@@ -17,11 +17,14 @@ export function PresetSwitcher({
   value,
   onChange,
   interactive,
+  label = 'Example',
 }: {
   presets: readonly { id: string; label: string }[]
   value: number
   onChange: (index: number) => void
   interactive: boolean
+  /** Accessible name of the group. */
+  label?: string
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([])
   if (presets.length < 2) return null
@@ -29,7 +32,7 @@ export function PresetSwitcher({
   if (presets.length > 3) {
     return (
       <select
-        aria-label="Example"
+        aria-label={label}
         data-viz-own-keys
         disabled={!interactive}
         value={value}
@@ -47,7 +50,11 @@ export function PresetSwitcher({
 
   const move = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
     const delta =
-      e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
+      e.key === 'ArrowRight' || e.key === 'ArrowDown'
+        ? 1
+        : e.key === 'ArrowLeft' || e.key === 'ArrowUp'
+          ? -1
+          : 0
     if (!delta) return
     e.preventDefault()
     const n = (i + delta + presets.length) % presets.length
@@ -58,7 +65,7 @@ export function PresetSwitcher({
   return (
     <div
       role="radiogroup"
-      aria-label="Example"
+      aria-label={label}
       data-viz-own-keys
       className="relative flex h-11 items-center gap-2 px-0.5"
     >
@@ -80,7 +87,7 @@ export function PresetSwitcher({
             tabIndex={interactive && checked ? 0 : -1}
             onClick={() => interactive && onChange(i)}
             onKeyDown={(e) => move(e, i)}
-            className="group relative flex h-11 items-center outline-none"
+            className="group relative flex h-11 min-w-11 items-center justify-center outline-none"
           >
             <span
               className={clsx(

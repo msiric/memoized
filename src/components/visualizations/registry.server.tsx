@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import EnvRecordsViz from './engines/env-records'
 import EventLoopViz from './engines/event-loop'
+import ListKeysViz from './engines/list-keys'
 import type { VizComponentProps } from './shell/types'
 
 /**
@@ -13,4 +14,5 @@ import type { VizComponentProps } from './shell/types'
 export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'event-loop': EventLoopViz,
   'environment-records': EnvRecordsViz,
+  'list-keys': ListKeysViz,
 }
