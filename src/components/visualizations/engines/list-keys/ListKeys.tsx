@@ -241,11 +241,14 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
   const frameRef = useRef<HTMLElement>(null)
   const dockRef = useRef<HTMLDivElement>(null)
   const pendingFocus = useRef<string | null>(null)
+  const pendingByPointer = useRef(false)
   const [choiceFocus, setChoiceFocus] = useState(0)
   const lastAction = useRef<string | null>(null)
 
-  const fromDock = (a: ExploreAction, focusTarget: string) => {
+  /** `e`: the activating click; a pointer click has `detail > 0`, a key press 0. */
+  const fromDock = (a: ExploreAction, focusTarget: string, e?: { detail: number }) => {
     pendingFocus.current = focusTarget
+    pendingByPointer.current = (e?.detail ?? 0) > 0
     dispatch(a)
   }
 
@@ -262,9 +265,11 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       return
     const el = frameRef.current.querySelector<HTMLElement>(`[data-viz-focus="${target}"]`)
     if (!el) return
-    // Never scroll the page on a handover (F10): focus in place, and bring
-    // the control into view only if it is entirely off screen.
+    // Never scroll the page on a handover (F10): focus in place. A keyboard
+    // user's focus is brought into view only if it lands entirely off
+    // screen; a pointer user's page never moves (they see where they clicked).
     el.focus({ preventScroll: true })
+    if (pendingByPointer.current) return
     const r = el.getBoundingClientRect()
     if (r.bottom < 0 || r.top > window.innerHeight) el.scrollIntoView({ block: 'nearest' })
   }, [s.phase, s.scene])
@@ -509,7 +514,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                     tabIndex={interactive ? 0 : -1}
                     unavailable={!interactive}
                     data-viz-focus={`action-${a.id}`}
-                    onClick={() => {
+                    onClick={(e) => {
                       lastAction.current = a.id
                       setChoiceFocus(0)
                       const nothingToFollow =
@@ -517,6 +522,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                       fromDock(
                         { type: 'apply', action: a.id },
                         nothingToFollow ? 'skip' : 'choice-0',
+                        e,
                       )
                     }}
                     className="min-w-0 px-2"
@@ -565,7 +571,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                     tabIndex={canPredict && i === choiceFocus ? 0 : -1}
                     // The choice is replaced by the reveal, so focus moves to the
                     // control in its place (§5.2), as the shell hands it on.
-                    onClick={() => fromDock({ type: 'answer', choice: c.id }, 'again')}
+                    onClick={(e) => fromDock({ type: 'answer', choice: c.id }, 'again', e)}
                     onKeyDown={(e) => onChoiceKey(e, i)}
                     onFocus={() => setChoiceFocus(i)}
                   />
@@ -577,7 +583,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                   tabIndex={interactive ? 0 : -1}
                   data-viz-focus="skip"
                   data-viz-part="viz-skip"
-                  onClick={() => fromDock({ type: 'skip' }, 'again')}
+                  onClick={(e) => fromDock({ type: 'skip' }, 'again', e)}
                 >
                   {canPredict ? SKIP_LABEL : SHOW_LABEL}
                 </Button>
@@ -585,7 +591,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                   variant="text"
                   tabIndex={interactive ? 0 : -1}
                   data-viz-part="viz-back"
-                  onClick={() => fromDock({ type: 'back' }, `action-${lastAction.current ?? action}`)}
+                  onClick={(e) => fromDock({ type: 'back' }, `action-${lastAction.current ?? action}`, e)}
                 >
                   {BACK_LABEL}
                 </Button>
@@ -605,7 +611,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 tabIndex={interactive ? 0 : -1}
                 data-viz-focus="again"
                 data-viz-part="viz-again"
-                onClick={() => fromDock({ type: 'again' }, `action-${lastAction.current ?? action}`)}
+                onClick={(e) => fromDock({ type: 'again' }, `action-${lastAction.current ?? action}`, e)}
                 className={DOCK.again}
                 style={DOCK.againStyle}
               >
