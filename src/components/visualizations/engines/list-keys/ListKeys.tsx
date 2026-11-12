@@ -257,9 +257,13 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       !frameRef.current.contains(active)
     )
       return
-    frameRef.current
-      .querySelector<HTMLElement>(`[data-viz-focus="${target}"]`)
-      ?.focus()
+    const el = frameRef.current.querySelector<HTMLElement>(`[data-viz-focus="${target}"]`)
+    if (!el) return
+    // Never scroll the page on a handover (F10): focus in place, and bring
+    // the control into view only if it is entirely off screen.
+    el.focus({ preventScroll: true })
+    const r = el.getBoundingClientRect()
+    if (r.bottom < 0 || r.top > window.innerHeight) el.scrollIntoView({ block: 'nearest' })
   }, [s.phase, s.scene])
 
   // ---- narration (§5.3): polite, never on load -----------------------------
