@@ -5,13 +5,13 @@
  */
 import fs from 'fs'
 import path from 'path'
-import { VIZ_DESCRIPTORS } from '../components/visualizations/registry'
+import { stepThroughLogs } from '../components/visualizations/registry'
 import { tokensFor } from '../components/visualizations/step-log/code-tokens'
 
 export const TOKENS_FILE = path.join('src', 'components', 'visualizations', 'code-tokens.json')
 
 async function main() {
-  const logs = Object.values(VIZ_DESCRIPTORS).flatMap((d) => d.presets.map((p) => p.log))
+  const logs = stepThroughLogs()
   const tokens = await tokensFor(logs)
   fs.writeFileSync(TOKENS_FILE, `${JSON.stringify(tokens, null, 1)}\n`)
   console.log(`Wrote tokens for ${Object.keys(tokens).length} presets to ${TOKENS_FILE}`)

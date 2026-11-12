@@ -18,7 +18,7 @@ import {
  * is a maintainer tool, not lesson content — it is gated out of production and never
  * shipped to readers. Add a specimen here whenever a new component lands.
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string }
 
 export default function VisualizationGalleryPage({ searchParams = {} }: { searchParams?: GalleryParams }) {
   // Production builds 404 unless explicitly built for end-to-end checks
@@ -64,6 +64,22 @@ export default function VisualizationGalleryPage({ searchParams = {} }: { search
   ]
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
+  // Static figures: final server markup, no client JavaScript. `?static=1`
+  // shows them alone (the e2e suite checks no visualization chunk loads).
+  const statics = (
+    <>
+      <h2>Static diagrams</h2>
+      <p>
+        Environment records for the Closures lesson, rendered on the server as SVG. Every value drawn is checked
+        against a real Node run by unit tests.
+      </p>
+      <Viz id="environment-records" preset="var-vs-let-loop" />
+      <p>Between the two closures panels.</p>
+      <Viz id="environment-records" preset="factory-calls-vs-aliases" />
+      <p>Text after the static diagrams.</p>
+    </>
+  )
+  const onlyStatic = searchParams.static === '1'
 
   return (
     <>
@@ -72,14 +88,17 @@ export default function VisualizationGalleryPage({ searchParams = {} }: { search
       <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
         <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
           <Prose>
-            <h1>StepThrough v2 specimen</h1>
-            <p>
-              The event-loop step-through through the lazy <code>{'<Viz id preset>'}</code> mount. Its trace is recorded
-              from a real Node run and re-verified by unit tests.
-            </p>
+            <h1>{onlyStatic ? 'Static diagram specimens' : 'StepThrough v2 specimen'}</h1>
+            {onlyStatic ? null : (
+              <p>
+                The event-loop step-through through the lazy <code>{'<Viz id preset>'}</code> mount. Its trace is
+                recorded from a real Node run and re-verified by unit tests.
+              </p>
+            )}
             {searchParams.spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
-            {searchParams.mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz}
-            <p>Text after the visual, to show it never moves while stepping.</p>
+            {onlyStatic ? null : searchParams.mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz}
+            {onlyStatic ? null : <p>Text after the visual, to show it never moves while stepping.</p>}
+            {onlyStatic && searchParams.mount === 'client' ? <ClientOnly>{statics}</ClientOnly> : statics}
           </Prose>
         </div>
       </div>

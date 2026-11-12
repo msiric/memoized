@@ -52,3 +52,44 @@ describe('<Viz> on the server', () => {
     expect(renderToString(<Viz id="nope" />)).toBe('')
   })
 })
+
+/**
+ * Static figures (spec §3.3, §6.4): final server markup, an image role named
+ * by the title and described by the full text alternative, and nothing that
+ * needs JavaScript.
+ */
+describe('<Viz> static figure on the server', () => {
+  let html = ''
+  beforeAll(() => {
+    html = renderToString(<Viz id="environment-records" preset="factory-calls-vs-aliases" />)
+  })
+
+  it('renders the figure with title, caption and "Diagram as text"', () => {
+    expect(html).toContain('data-viz-kind="static"')
+    expect(html).toContain('data-viz-preset="factory-calls-vs-aliases"')
+    expect(html).toContain('Factory calls vs aliases')
+    expect(html).toMatch(/<figcaption[^>]*>Each factory call creates a new record/)
+    expect(html).toContain('Diagram as text')
+    expect(html).toContain('Output verified in Node 24.x')
+    expect(html).not.toContain('data-viz-interactive')
+    expect(html).not.toContain('xl:max-w-[960px]')
+  })
+
+  it('names the stage image by the title and describes it with the text alternative', () => {
+    const stage = html.match(/<div data-viz-region="stage" role="img" aria-labelledby="([^"]+)" aria-describedby="([^"]+)"/)
+    expect(stage).not.toBeNull()
+    const [, title, desc] = stage!
+    expect(html).toContain(`id="${title}"`)
+    expect(html).toMatch(new RegExp(`<div id="${desc}"[^>]*>.*sameCounter → ƒ A`))
+    expect(html).toContain('Verified output, counters (Node 24.x):')
+    // Every SVG is decorative inside the image role.
+    expect(html.match(/<svg aria-hidden="true" focusable="false"/g)?.length).toBe(8)
+  })
+
+  it('defaults to the first preset and renders the SVG for both layout variants', () => {
+    const d = renderToString(<Viz id="environment-records" />)
+    expect(d).toContain('data-viz-preset="var-vs-let-loop"')
+    expect(d).toContain('data-viz-variant="narrow"')
+    expect(d).toContain('data-viz-variant="wide"')
+  })
+})

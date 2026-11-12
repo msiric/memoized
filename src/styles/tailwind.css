@@ -286,3 +286,27 @@
     @apply text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white;
   }
 }
+
+/*
+ * Static visualization roles (VIZ-01 spec §2.1) as short classes: an inline
+ * SVG repeats them on every glyph, so full utility lists would blow the
+ * 30 KB markup budget. Dark is the product; `print:` carries the light roles.
+ */
+@layer components {
+  .vz-g { @apply fill-zinc-800 stroke-zinc-500 print:fill-white; }
+  .vz-hl { @apply stroke-zinc-700 print:stroke-zinc-300; }
+  .vz-h { @apply fill-zinc-300 print:fill-zinc-700; }
+  .vz-i { @apply fill-zinc-100 print:fill-zinc-900; }
+  .vz-m { @apply fill-zinc-400 print:fill-zinc-600; }
+  .vz-l { @apply stroke-zinc-500; }
+  .vz-lf { @apply fill-zinc-500; }
+  .vz-n { @apply stroke-lime-400 print:stroke-lime-700; }
+  .vz-nf { @apply fill-lime-400 print:fill-lime-700; }
+  .vz-r { @apply fill-amber-400 print:fill-amber-700; }
+  .vz-x { @apply stroke-zinc-600 print:stroke-zinc-300; }
+  .vz-e { fill: none; stroke-linecap: round; stroke-width: 1.5px; }
+  .vz-e.vz-n { stroke-width: 2.5px; }
+  .vz-d { stroke-dasharray: 4 4; }
+  .vz-12 { font-size: 12px; }
+  .vz-13 { font-size: 13px; }
+}

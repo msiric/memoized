@@ -3,10 +3,10 @@ import colors from 'tailwindcss/colors'
 import { describe, expect, it } from 'vitest'
 import committed from '../code-tokens.json'
 import { contrastRatio, parseHex } from '../primitives/contrast'
-import { VIZ_DESCRIPTORS } from '../registry'
+import { stepThroughLogs } from '../registry'
 import { tokensFor } from './code-tokens'
 
-const logs = Object.values(VIZ_DESCRIPTORS).flatMap((d) => d.presets.map((p) => p.log))
+const logs = stepThroughLogs()
 
 describe('pre-computed code tokens', () => {
   it('match a fresh Shiki run for every preset (run `yarn viz:tokens` after editing code)', async () => {
