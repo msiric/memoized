@@ -502,20 +502,33 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     const width = svg.getAttribute('data-viz-width') ?? ''
     const ids = opts.boxIds?.[`${variant}:${section}:${width}`]
     const spec = opts.edges?.[section]
-    const boxEls = [...svg.querySelectorAll(':scope > g:not([data-edge]) > rect:first-child')] as SVGRectElement[]
-    if (!ids || !spec || ids.length !== boxEls.length) {
-      push({
-        detector: 'edge-untestable',
-        sig: `${variant}:${section}:${width}`,
-        msg: `boxes carry no ids (${boxEls.length} boxes, ${ids?.length ?? 'no'} expected ids): edge endpoints can only be checked against the layout model`,
-        rects: [],
-      })
-      continue
+    // Boxes name themselves (`data-node`) and arrows their ends (`data-from`,
+    // `data-to`) since WS3; the layout model is only the fallback.
+    const named = [...svg.querySelectorAll(':scope > g[data-node]')]
+    let boxR: Map<string, R>
+    if (named.length) {
+      boxR = new Map(
+        named.map((g) => [g.getAttribute('data-node')!, R((g.querySelector('rect') as SVGRectElement).getBoundingClientRect())]),
+      )
+    } else {
+      const boxEls = [...svg.querySelectorAll(':scope > g:not([data-edge]) > rect:first-child')] as SVGRectElement[]
+      if (!ids || !spec || ids.length !== boxEls.length) {
+        push({
+          detector: 'edge-untestable',
+          sig: `${variant}:${section}:${width}`,
+          msg: `boxes carry no ids (${boxEls.length} boxes, ${ids?.length ?? 'no'} expected ids): edge endpoints can only be checked against the layout model`,
+          rects: [],
+        })
+        continue
+      }
+      boxR = new Map(ids.map((id, i) => [id, R(boxEls[i].getBoundingClientRect())]))
     }
-    const boxR = new Map(ids.map((id, i) => [id, R(boxEls[i].getBoundingClientRect())]))
     for (const g of edges) {
       const id = g.getAttribute('data-edge')!
-      const want = spec[id]
+      const kind = id.slice(0, id.indexOf(':')) as 'env' | 'outer' | 'ref'
+      const fromAttr = g.getAttribute('data-from')
+      const toAttr = g.getAttribute('data-to')
+      const want = fromAttr && toAttr ? { from: fromAttr, to: toAttr, kind } : spec?.[id]
       const [line, head] = [...g.querySelectorAll('path')] as SVGPathElement[]
       const m = line.getScreenCTM()
       if (!want || !m) continue

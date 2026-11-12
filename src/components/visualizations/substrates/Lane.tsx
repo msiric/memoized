@@ -7,7 +7,8 @@ import { Tag } from '../primitives/Tag'
 import { ink, now, radius, stroke, surface, type as typeScale } from '../primitives/tokens-v3'
 import { transitionFor, travel, type MotionGate } from '../shell/motion'
 import type { PerVariant } from '../shell/types'
-import { H_CLS, heights } from '../shell/vars'
+import { H_CLS } from '../shell/vars'
+import { remHeights } from './units'
 
 /**
  * Lanes substrate (spec §6.1): a labelled region holding chips. Glyphs follow
@@ -170,7 +171,7 @@ export function Lane(props: LaneProps) {
         H_CLS,
         className,
       )}
-      style={heights(height)}
+      style={remHeights(height)}
     >
       <span
         className={clsx(

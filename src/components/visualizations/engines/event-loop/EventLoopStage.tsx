@@ -3,7 +3,14 @@
 import { AnimatePresence, m } from 'framer-motion'
 import { useEffect, useMemo, useRef } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { ink, now as nowCls, radius, stroke, surface, type as typeScale } from '../../primitives/tokens-v3'
+import {
+  ink,
+  now as nowCls,
+  radius,
+  stroke,
+  surface,
+  type as typeScale,
+} from '../../primitives/tokens-v3'
 import { useFlip } from '../../shell/flip'
 import { transitionFor, travel } from '../../shell/motion'
 import type { PerVariant, StageProps } from '../../shell/types'
@@ -18,7 +25,12 @@ import {
   type EventLoopMetrics,
   type LaneKind,
 } from './layout'
-import { eventLoopIntrospection, outId, type ElChip, type EventLoopState } from './model'
+import {
+  eventLoopIntrospection,
+  outId,
+  type ElChip,
+  type EventLoopState,
+} from './model'
 
 /**
  * Event-loop renderer: state -> lanes (VIZ-H D16).
@@ -44,10 +56,16 @@ function laneChips(
   width: PerVariant<number>,
   rows: number,
 ): LaneChip[] {
-  const k = { narrow: queueVisible(chips, kind, width.narrow, rows), wide: queueVisible(chips, kind, width.wide, rows) }
+  const k = {
+    narrow: queueVisible(chips, kind, width.narrow, rows),
+    wide: queueVisible(chips, kind, width.wide, rows),
+  }
   const out: LaneChip[] = chips.map((c, i) => ({
     ...c,
-    show: i < k.narrow && i < k.wide ? undefined : { narrow: i < k.narrow, wide: i < k.wide },
+    show:
+      i < k.narrow && i < k.wide
+        ? undefined
+        : { narrow: i < k.narrow, wide: i < k.wide },
   }))
   for (const v of ['narrow', 'wide'] as const)
     if (k[v] < chips.length)
@@ -60,15 +78,26 @@ function laneChips(
   return out
 }
 
-export function EventLoopStage({ step, previous, codePane, layout, motion: gate, label }: StageProps<EventLoopState>) {
+export function EventLoopStage({
+  step,
+  previous,
+  codePane,
+  layout,
+  motion: gate,
+  label,
+}: StageProps<EventLoopState>) {
   // Region heights cover every preset of the visual (computed over all
   // logs), so switching presets never moves anything.
   const metrics = layout.detail as EventLoopMetrics
   const state = step.state
   const focus = useMemo(() => new Set(step.focus), [step.focus])
   const ids = eventLoopIntrospection.ids(state)
-  const prevIds = previous ? eventLoopIntrospection.ids(previous.state) : new Set<string>()
-  const created = new Set([...focus].filter((f) => !prevIds.has(f) && !f.startsWith('out-')))
+  const prevIds = previous
+    ? eventLoopIntrospection.ids(previous.state)
+    : new Set<string>()
+  const created = new Set(
+    [...focus].filter((f) => !prevIds.has(f) && !f.startsWith('out-')),
+  )
 
   // What was on stage in the last render, so a moved chip slides instead of
   // fading in (scrubs and jumps included).
@@ -86,8 +115,20 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
   const consoleFocused = focus.has('console')
 
   const rows = G.queueRows
-  const micro = laneChips('micro', state.micro, 'micro', metrics.queueWidth, rows)
-  const tasks = laneChips('tasks', state.tasks, 'task', metrics.queueWidth, rows)
+  const micro = laneChips(
+    'micro',
+    state.micro,
+    'micro',
+    metrics.queueWidth,
+    rows,
+  )
+  const tasks = laneChips(
+    'tasks',
+    state.tasks,
+    'task',
+    metrics.queueWidth,
+    rows,
+  )
   const host = laneChips('host', state.host, 'host', metrics.hostWidth, rows)
 
   // The console keeps the newest outputs; the oldest collapse into `N earlier`.
@@ -96,7 +137,10 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
     narrow: consoleVisible(out, metrics.consoleWidth.narrow, G.consoleRows),
     wide: consoleVisible(out, metrics.consoleWidth.wide, G.consoleRows),
   }
-  const firstShown = { narrow: out.length - kept.narrow, wide: out.length - kept.wide }
+  const firstShown = {
+    narrow: out.length - kept.narrow,
+    wide: out.length - kept.wide,
+  }
 
   return (
     <div
@@ -112,7 +156,9 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
         ['--vz-cols-xl' as string]: `minmax(${toRem(G.codeMin.xl)}, max-content) minmax(0, 1fr)`,
       }}
     >
-      <div className="flex min-w-0 flex-col md:col-start-1 md:row-start-1">{codePane}</div>
+      <div className="flex min-w-0 flex-col md:col-start-1 md:row-start-1">
+        {codePane}
+      </div>
 
       {/* The machine. Its accessible name describes every region, the console included. */}
       <div
@@ -127,7 +173,10 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
           label="Call stack"
           kind="frame"
           chips={state.stack}
-          labelAt={{ narrow: 'top', wide: metrics.stackLabelTopWide ? 'top' : 'inline' }}
+          labelAt={{
+            narrow: 'top',
+            wide: metrics.stackLabelTopWide ? 'top' : 'inline',
+          }}
           height={metrics.stackLane}
           from={{ y: -1 }}
           to={{ y: -1 }}
@@ -183,7 +232,11 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
         )}
         style={remHeights(metrics.console, { gap: toRem(G.labelGap) })}
       >
-        <span className={clsx('h-4 shrink-0', typeScale.label.cls, ink.secondary)}>Console</span>
+        <span
+          className={clsx('h-4 shrink-0', typeScale.label.cls, ink.secondary)}
+        >
+          Console
+        </span>
         <ol
           className="m-0 flex min-h-0 min-w-0 list-none flex-wrap content-start items-center p-0"
           style={{ columnGap: toRem(G.outGap), rowGap: toRem(G.outRowGap) }}
@@ -209,7 +262,10 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
           <AnimatePresence initial={false} mode="popLayout">
             {out.map((text, k) => {
               const isNew = focus.has(outId(k))
-              const show = { narrow: k >= firstShown.narrow, wide: k >= firstShown.wide }
+              const show = {
+                narrow: k >= firstShown.narrow,
+                wide: k >= firstShown.wide,
+              }
               return (
                 <m.li
                   key={`${k}:${gate.epoch}`}
@@ -235,7 +291,12 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
                       // lint keeps outputs short, and a guard only truncates older ones.
                       isNew ? 'break-all' : 'min-w-0 truncate',
                       ink.result,
-                      isNew && clsx('-mx-1 px-1', radius.chip.cls, 'bg-amber-400/10 print:bg-transparent'),
+                      isNew &&
+                        clsx(
+                          '-mx-1 px-1',
+                          radius.chip.cls,
+                          'bg-amber-400/10 print:bg-transparent',
+                        ),
                     )}
                   >
                     {text}
@@ -245,7 +306,14 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
             })}
           </AnimatePresence>
           {out.length === 0 ? (
-            <li aria-hidden className={clsx('m-0 flex h-5 items-center p-0', typeScale.tag.cls, ink.muted)}>
+            <li
+              aria-hidden
+              className={clsx(
+                'm-0 flex h-5 items-center p-0',
+                typeScale.tag.cls,
+                ink.muted,
+              )}
+            >
               no output yet
             </li>
           ) : null}

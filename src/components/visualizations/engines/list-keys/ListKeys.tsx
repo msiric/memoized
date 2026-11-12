@@ -587,7 +587,6 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 data-viz-focus="skip"
                 data-viz-part="viz-skip"
                 onClick={() => fromDock({ type: 'skip' }, 'again')}
-                className="-ml-2"
               >
                 {canPredict ? 'Skip, show me' : 'Show me'}
               </Button>
