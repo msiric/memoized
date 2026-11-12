@@ -4,7 +4,9 @@ import type { MotionGate } from './motion'
 
 /**
  * Layout variants. `narrow` below 768 px (code above the stage),
- * `wide` from 768 px (code beside the stage). Heights are fixed per variant
+ * `wide` from 768 px (code beside the stage). "768" is shorthand: the frame
+ * picks the variant by its own width in rem (`vz-wide` from 37.875rem, its
+ * content at a 768 px viewport and the default text size, D19). Heights are fixed per variant
  * and never depend on the exact width, so the footprint is known before any
  * JavaScript runs (spec §3.3, §3.4).
  */

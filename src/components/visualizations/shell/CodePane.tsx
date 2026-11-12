@@ -72,9 +72,9 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
         typeScale.code.cls,
         // From 768 the pane is exactly as wide as the widest line of any preset
         // plus the gutter, so presets never move the stage.
-        cols && 'md:w-[calc(var(--vz-cols)*1ch+var(--vz-gutter))] xl:w-auto',
+        cols && 'vz-wide:w-[calc(var(--vz-cols)*1ch+var(--vz-gutter))] vz-xl:w-auto',
         // From 768 the pane hugs this preset's code and sits at the top.
-        'md:self-start',
+        'vz-wide:self-start',
         H_CLS,
       )}
       style={heights(
@@ -118,7 +118,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                 </span>
                 <span
                   aria-hidden
-                  className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 md:inline"
+                  className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 vz-wide:inline"
                 >
                   {n}
                 </span>

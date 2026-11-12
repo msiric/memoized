@@ -24,7 +24,7 @@ export function Provenance({ runtimes, className }: { runtimes: readonly string[
     <p
       data-viz-part="viz-provenance"
       className={cn(
-        'm-0 md:absolute md:right-0 md:top-0 md:flex md:h-11 md:items-center',
+        'm-0 vz-wide:absolute vz-wide:right-0 vz-wide:top-0 vz-wide:flex vz-wide:h-11 vz-wide:items-center',
         typeScale.provenance.cls,
         ink.muted,
         className,

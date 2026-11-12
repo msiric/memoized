@@ -145,7 +145,7 @@ export function EventLoopStage({
       ref={root}
       className={clsx(
         'relative flex h-full flex-col',
-        'md:grid md:[grid-template-columns:var(--vz-cols-md)] md:[grid-template-rows:auto_minmax(0,1fr)] xl:[grid-template-columns:var(--vz-cols-xl)]',
+        'vz-wide:grid vz-wide:[grid-template-columns:var(--vz-cols-md)] vz-wide:[grid-template-rows:auto_minmax(0,1fr)] vz-xl:[grid-template-columns:var(--vz-cols-xl)]',
       )}
       style={{
         gap: toRem(G.gap),
@@ -156,7 +156,7 @@ export function EventLoopStage({
     >
       {/* From 768 the pane fills the fixed code column, so its edges line up
           with the console under it. */}
-      <div className="flex min-w-0 flex-col md:col-start-1 md:row-start-1 md:[&>*]:!w-full md:[&>*]:self-stretch">
+      <div className="flex min-w-0 flex-col vz-wide:col-start-1 vz-wide:row-start-1 vz-wide:[&>*]:!w-full vz-wide:[&>*]:self-stretch">
         {codePane}
       </div>
 
@@ -164,7 +164,7 @@ export function EventLoopStage({
       <div
         role="img"
         aria-label={label}
-        className="grid min-w-0 grid-cols-2 md:col-start-2 md:row-span-2 md:row-start-1 md:flex md:flex-col"
+        className="grid min-w-0 grid-cols-2 vz-wide:col-start-2 vz-wide:row-span-2 vz-wide:row-start-1 vz-wide:flex vz-wide:flex-col"
         style={{ gap: toRem(G.gap) }}
       >
         <Lane
@@ -223,8 +223,8 @@ export function EventLoopStage({
         className={clsx(
           // From 768 the console fills the rest of the left column, so both
           // columns end on one line whatever the preset's code length.
-          'relative flex min-w-0 flex-col border p-2 md:col-start-1 md:row-start-2 md:min-h-[var(--vz-h-w)] md:self-stretch',
-          'h-[var(--vz-h-n)] md:h-auto',
+          'relative flex min-w-0 flex-col border p-2 vz-wide:col-start-1 vz-wide:row-start-2 vz-wide:min-h-[var(--vz-h-w)] vz-wide:self-stretch',
+          'h-[var(--vz-h-n)] vz-wide:h-auto',
           radius.row.cls,
           stroke.hairline,
           surface.panel,

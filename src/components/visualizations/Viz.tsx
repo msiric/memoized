@@ -115,11 +115,14 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
         <div
           aria-hidden
           data-viz-placeholder=""
-          // The frame's own box (border-box: padding never changes the height).
-          className={`${frameCls} h-[var(--vz-n)] md:h-[var(--vz-w)]`}
+          className={frameCls}
           // In rem, so the reserve follows the reader's text size like the frame (D19).
           style={{ ['--vz-n' as string]: `${narrow / 16}rem`, ['--vz-w' as string]: `${wide / 16}rem` }}
-        />
+        >
+          {/* The frame is the variant's size container, so the reserve sits inside
+              it: the footprint less the frame's 1rem padding and 1 px borders. */}
+          <div className="h-[calc(var(--vz-n)-2rem-2px)] vz-wide:h-[calc(var(--vz-w)-2rem-2px)]" />
+        </div>
       )}
     </div>
   )

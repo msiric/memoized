@@ -98,12 +98,14 @@ export default {
     plugin(({ addVariant }) => {
       addVariant('can-hover', '@media (hover: hover) { &:hover }')
       addVariant('group-can-hover', '@media (hover: hover) { :merge(.group):hover & }')
-      // The visualization dock lays its checkpoint out by its own width, in
-      // rem (VIZ-H D19): beside the choices from 37rem (592 px at the default
-      // size, the dock at a 768 px viewport), stacked below it or under
-      // large text. The dock is the size container (\`vz-dock\`).
-      addVariant('dock-wide', '@container vz-dock (min-width: 37rem)')
-      addVariant('dock-narrow', '@container vz-dock (max-width: 36.999rem)')
+      // Lesson visualizations pick their layout variant by the frame's own
+      // width in rem (VIZ-H D19), so 150 % or 200 % text gets the layout that
+      // fits. The frame is the size container `vz` (primitives/frame-cls.ts).
+      // vz-wide: from 37.875rem (606 px at the default size, the frame's
+      // content at a 768 px viewport). vz-xl: from 53.875rem (862 px, at 1280).
+      addVariant('vz-wide', '@container vz (min-width: 37.875rem)')
+      addVariant('vz-narrow', '@container vz (max-width: 37.874rem)')
+      addVariant('vz-xl', '@container vz (min-width: 53.875rem)')
     }),
   ],
 } satisfies Config

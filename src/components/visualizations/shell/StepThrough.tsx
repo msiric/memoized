@@ -351,7 +351,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     >
       {/* 1. Header: title, then the preset switcher (right from 768). */}
       <header
-        className={cn('flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4', H_CLS)}
+        className={cn('flex flex-col gap-2 vz-wide:flex-row vz-wide:items-center vz-wide:justify-between vz-wide:gap-4', H_CLS)}
         style={heights({
           narrow: metrics.narrow.header,
           wide: metrics.wide.header,
@@ -362,7 +362,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         </p>
         {/* One preset has no switcher, and no gap reserved for one (A5). */}
         {def.presets.length > 1 ? (
-          <div className={cn('self-start md:self-auto', hidden && 'invisible')}>
+          <div className={cn('self-start vz-wide:self-auto', hidden && 'invisible')}>
             <SegmentedControl
               label="Example"
               options={def.presets}
@@ -418,8 +418,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       <div
         data-viz-region="dock"
         className="relative grid print:hidden"
-        // The checkpoint picks its layout from the dock's width (D19), not the viewport's.
-        style={{ marginTop: rem(FRAME.dockGap), containerType: 'inline-size', containerName: 'vz-dock' }}
+        style={{ marginTop: rem(FRAME.dockGap) }}
       >
         <DockGhosts def={def} />
         {mode === 'controls' ? (
@@ -575,7 +574,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             onClick={() => dispatch({ type: 'next' })}
             // Fills the row below 768; from 768 an 8 rem pill that may shrink
             // (at 200 % text the row is wider than the frame otherwise).
-            className="flex-auto md:w-32 md:flex-initial"
+            className="flex-auto vz-wide:w-32 vz-wide:flex-initial"
             data-viz-part="viz-next"
           >
             <span>Next</span>
@@ -617,16 +616,16 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
 // ---------------------------------------------------------------------------
 
 /** Two columns of 44 px choices; from 768, two 168 px columns beside the text. */
-const CHOICES_CLS = 'grid shrink-0 grid-cols-2 [grid-area:choices] dock-wide:w-[var(--vz-choices-w)]'
+const CHOICES_CLS = 'grid shrink-0 grid-cols-2 [grid-area:choices] vz-wide:w-[var(--vz-choices-w)]'
 const choicesStyle = {
   gap: rem(CHOICE.gap),
   ['--vz-choices-w' as string]: rem(2 * CHOICE.wideWidth + CHOICE.gap),
 }
 
 /**
- * The checkpoint block (D9). In a dock under 37rem (phones, or large text):
- * the text with "Skip" at its right, the choices under both. From 37rem
- * (the dock at a 768 px viewport): text, choices, Skip in one row. The text
+ * The checkpoint block (D9). In the narrow variant (phones, or large text):
+ * the text with "Skip" at its right, the choices under both. In the wide
+ * variant (the frame from 37.875rem, D19): text, choices, Skip in one row. The text
  * cell holds the prompt and every feedback of this checkpoint (invisible but
  * one), so the choices never move between asking and the reveal; the text
  * sits on the choices. DOM order is text, choices, Skip, so focus reaches the
@@ -655,13 +654,13 @@ function CheckpointBlock({
       data-viz-part={ghost ? undefined : 'viz-checkpoint'}
       className={cn(
         'grid min-w-0 items-end [grid-template-areas:"text_skip""choices_choices"] [grid-template-columns:minmax(0,1fr)_auto]',
-        'dock-wide:items-center dock-wide:[grid-template-areas:"text_choices_skip"] dock-wide:[grid-template-columns:minmax(0,1fr)_auto_auto]',
+        'vz-wide:items-center vz-wide:[grid-template-areas:"text_choices_skip"] vz-wide:[grid-template-columns:minmax(0,1fr)_auto_auto]',
         className,
       )}
       style={{ columnGap: rem(CHOICE.textGap), rowGap: rem(CHOICE.textGap) }}
     >
       {/* Stacked, the text's last line sits level with Skip's label (8 px under it, 44 px target). */}
-      <div className="grid min-w-0 content-end [grid-area:text] dock-narrow:pb-2 dock-wide:pr-2">
+      <div className="grid min-w-0 content-end [grid-area:text] vz-narrow:pb-2 vz-wide:pr-2">
         <p aria-hidden className={cn('invisible col-start-1 row-start-1', promptCls)}>
           {cp.prompt}
         </p>

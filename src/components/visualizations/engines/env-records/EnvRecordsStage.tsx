@@ -17,7 +17,7 @@ import type { EnvDiagram, EnvSection } from './model'
 
 /**
  * The environment-records stage: one SVG per section per sub-width, chosen by
- * CSS alone (the 768 px breakpoint picks the variant, a container query on
+ * CSS alone (the frame's `vz-wide` container query picks the variant, D19, a container query on
  * the section picks the width), so the server markup is final and no script
  * ever measures anything. Colors come from §2.1 roles as classes, with
  * `print:` twins for the light print roles.
@@ -321,7 +321,7 @@ function VariantStage({ scene, uid }: { scene: DiagramScene; uid: string }) {
     <div
       data-viz-variant={scene.variant}
       className={clsx(
-        wide ? 'hidden md:grid' : 'grid md:hidden',
+        wide ? 'hidden vz-wide:grid' : 'grid vz-wide:hidden',
         wide && scene.columns === 2 && 'grid-cols-2',
       )}
       style={{
@@ -366,7 +366,7 @@ function Variant({ data, variant, uid }: { data: EnvDiagram; variant: 'narrow' |
       <p
         data-viz-variant={variant}
         data-viz-layout-failed={scene.failed}
-        className={clsx('m-0', variant === 'wide' ? 'hidden md:block' : 'md:hidden', typeScale.item.cls, ink.muted)}
+        className={clsx('m-0', variant === 'wide' ? 'hidden vz-wide:block' : 'vz-wide:hidden', typeScale.item.cls, ink.muted)}
       >
         Too wide to draw at this size. “Diagram as text” below describes it.
       </p>

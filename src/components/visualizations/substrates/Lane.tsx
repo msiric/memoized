@@ -59,8 +59,8 @@ export type LaneChip = {
 /** Classes that show an element only in the variants where `show` is true. */
 export function showCls(show?: PerVariant<boolean>): string | undefined {
   if (!show || (show.narrow && show.wide)) return undefined
-  if (show.narrow) return 'md:hidden'
-  if (show.wide) return 'hidden md:block'
+  if (show.narrow) return 'vz-wide:hidden'
+  if (show.wide) return 'hidden vz-wide:block'
   return 'hidden'
 }
 
@@ -80,7 +80,7 @@ const chipCls: Record<ChipKind, string> = {
     radius.chip.cls,
     stroke.line,
     surface.glyph,
-    'h-7 md:h-8',
+    'h-7 vz-wide:h-8',
   ),
   task: clsx(
     'max-w-48 px-2',
@@ -223,8 +223,8 @@ export function Lane(props: LaneProps) {
           ? 'flex-col gap-1'
           : 'flex-row items-center gap-2',
         labelAt.wide === 'top'
-          ? 'md:flex-col md:items-stretch md:gap-1'
-          : 'md:flex-row md:items-center md:gap-2',
+          ? 'vz-wide:flex-col vz-wide:items-stretch vz-wide:gap-1'
+          : 'vz-wide:flex-row vz-wide:items-center vz-wide:gap-2',
         focus.has(id) && now.panel,
         H_CLS,
         className,
@@ -237,7 +237,7 @@ export function Lane(props: LaneProps) {
           typeScale.label.cls,
           ink.secondary,
           labelAt.narrow === 'inline' ? 'w-24' : 'h-4',
-          labelAt.wide === 'inline' ? 'md:h-auto md:w-24' : 'md:h-4 md:w-auto',
+          labelAt.wide === 'inline' ? 'vz-wide:h-auto vz-wide:w-24' : 'vz-wide:h-4 vz-wide:w-auto',
         )}
       >
         {label}
@@ -270,7 +270,7 @@ export function Lane(props: LaneProps) {
               : 'top-1/2 -translate-y-1/2',
             vertical &&
               labelAt.wide === 'inline' &&
-              'md:bottom-auto md:top-1/2 md:-translate-y-1/2',
+              'vz-wide:bottom-auto vz-wide:top-1/2 vz-wide:-translate-y-1/2',
             ink.muted,
             chips.length === 0 ? 'visible' : 'invisible',
           )}

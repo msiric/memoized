@@ -424,7 +424,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             </p>
           )}
         </div>
-        <div className="mt-2 grid min-w-0 grid-cols-1 items-start gap-4 md:mt-4 md:grid-cols-[auto_minmax(0,1fr)]">
+        <div className="mt-2 grid min-w-0 grid-cols-1 items-start gap-4 vz-wide:mt-4 vz-wide:grid-cols-[auto_minmax(0,1fr)]">
           <CodePane
             lines={code.lines}
             tokens={CODE_TOKENS[codeVariant]}
@@ -462,7 +462,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           {event}
           {/* The key expression is code, so it stays mono inside the sans status (D3). */}
           {eventKey ? (
-            <span className="hidden sm:inline">
+            <span className="hidden vz-wide:inline">
               {', '}
               <span className="font-mono">{eventKey.slice(2)}</span>
             </span>
@@ -500,7 +500,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               className={clsx(
                 'grid gap-2',
                 s.scene === 'list'
-                  ? 'grid-cols-2 md:grid-cols-4'
+                  ? 'grid-cols-2 vz-wide:grid-cols-4'
                   : 'grid-cols-2',
               )}
               role="group"
@@ -540,7 +540,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           </div>
         ) : !revealed ? (
           <div
-            className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_var(--lk-choices-w)] md:gap-x-4"
+            className="grid grid-cols-1 vz-wide:grid-cols-[minmax(0,1fr)_var(--lk-choices-w)] vz-wide:gap-x-4"
             style={{
               rowGap: toRem(CHOICE.textGap),
               ['--lk-choices-w' as string]: toRem(WIDE_CHOICES),
@@ -549,7 +549,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           >
             <p
               id={promptId}
-              className={clsx(promptCls, 'md:col-start-1 md:row-start-1')}
+              className={clsx(promptCls, 'vz-wide:col-start-1 vz-wide:row-start-1')}
               data-viz-part="viz-prompt"
             >
               {prompt}
@@ -558,7 +558,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               role="radiogroup"
               aria-labelledby={promptId}
               className={clsx(
-                'grid grid-cols-2 md:col-start-2 md:row-span-2 md:row-start-1 md:self-start',
+                'grid grid-cols-2 vz-wide:col-start-2 vz-wide:row-span-2 vz-wide:row-start-1 vz-wide:self-start',
                 !canPredict && 'invisible',
               )}
               style={{ gap: toRem(CHOICE.gap) }}
@@ -584,7 +584,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 />
               ))}
             </div>
-            <div className="flex items-center gap-2 md:col-start-1 md:row-start-2">
+            <div className="flex items-center gap-2 vz-wide:col-start-1 vz-wide:row-start-2">
               <Button
                 variant="text"
                 tabIndex={interactive ? 0 : -1}
@@ -605,8 +605,8 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col md:flex-row md:items-start" style={{ gap: toRem(8) }} data-viz-part="dock-reveal">
-            <div className="min-w-0 md:flex-1 md:pr-2">
+          <div className="flex flex-col vz-wide:flex-row vz-wide:items-start" style={{ gap: toRem(8) }} data-viz-part="dock-reveal">
+            <div className="min-w-0 vz-wide:flex-1 vz-wide:pr-2">
               <p className={clsx(captionCls, ink.base)} data-viz-part="viz-feedback">
                 {lead ? <span className="font-semibold">{lead}</span> : null} {outcomeSentence}
               </p>
@@ -619,7 +619,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               data-viz-focus="again"
               data-viz-part="viz-again"
               onClick={() => fromDock({ type: 'again' }, `action-${lastAction.current ?? action}`)}
-              className="mt-2 self-start md:mt-0 md:w-[var(--lk-again-w)]"
+              className="mt-2 self-start vz-wide:mt-0 vz-wide:w-[var(--lk-again-w)]"
               style={{ ['--lk-again-w' as string]: toRem(REVEAL_BUTTON) }}
             >
               Try another action
