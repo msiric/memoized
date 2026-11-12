@@ -1,20 +1,30 @@
 'use client'
 
-import { useLayoutEffect, useRef, type RefObject } from 'react'
-import { motion as motionTokens, motionRules } from '../primitives/tokens-v3'
-import type { MotionGate } from './motion'
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
+import { LIFT, liftShadow, motion as motionTokens, motionRules } from '../primitives/tokens-v3'
+import { animates, type MotionGate } from './motion'
 
 /**
  * The `move` token (spec §4) as FLIP on the Web Animations API: a glyph that
- * changes place (a callback moving from a queue to the stack, a queue
- * shifting) is laid out at its new position and translated from where it
- * was. Only `transform` animates, the curve is the critically damped
- * `move` spring sampled into keyframes, and an instant render finishes any
- * move still in flight in the same frame.
+ * changes place (a callback moving from a queue to the stack) is laid out at
+ * its new position and translated from where it was. Only `transform` (and,
+ * between regions, the lift shadow) animates; the curve is the critically
+ * damped `move` spring sampled into keyframes.
  *
- * Glyphs opt in with `data-flip-id`. Exiting copies drop the attribute, so
- * a moved glyph is measured once, at its new home.
+ * - Instant renders (D7) finish every move under the root, including moves
+ *   of glyphs that are leaving and have dropped their `data-flip-id` (M02).
+ * - A resize, a font swap or a layout change re-measures and finishes moves
+ *   in flight, so the next step never starts from stale positions (M03, M23).
+ * - A glyph that moves again while still moving continues from where it is.
+ * - A glyph that moves between regions renders above every lane, with an
+ *   opaque raised backing and the one lift shadow (D6, M04).
+ * - Only glyphs the gate allows (the per-step budget) animate; the rest land.
+ *
+ * Glyphs opt in with `data-flip-id`. Exiting copies drop the attribute, so a
+ * moved glyph is measured once, at its new home.
  */
+
+const MOVE_ID = 'viz-move'
 
 type Spring = { stiffness: number; damping: number; mass: number }
 type Curve = { duration: number; offsets: number[]; progress: number[] }
@@ -22,9 +32,10 @@ type Curve = { duration: number; offsets: number[]; progress: number[] }
 const curves = new Map<string, Curve>()
 
 /**
- * Samples a unit spring from 0 to 1 until it is within 0.5 % and slow, capped
- * at the 300 ms transition limit (the residual there is under 1 %, a
- * sub-pixel step for any move on a stage).
+ * Samples a unit spring until it is within 0.5 % and slow, capped at the
+ * 300 ms transition limit, then normalizes the samples so the last one is
+ * exactly 1. The curve stays monotonic and ends where the glyph rests: there
+ * is no end snap however the cap falls (M08).
  */
 export function springCurve({ stiffness, damping, mass }: Spring, stepMs = 1000 / 120): Curve {
   const key = `${stiffness}:${damping}:${mass}`
@@ -41,9 +52,14 @@ export function springCurve({ stiffness, damping, mass }: Spring, stepMs = 1000 
     samples.push(1 - x)
     if (Math.abs(x) < 0.005 && Math.abs(v) < 0.05) break
   }
-  samples[samples.length - 1] = 1
+  const end = samples[samples.length - 1]
+  const progress = samples.map((p) => p / end)
   const duration = (samples.length - 1) * stepMs
-  const curve = { duration, offsets: samples.map((_, i) => i / (samples.length - 1)), progress: samples }
+  const curve = {
+    duration,
+    offsets: progress.map((_, i) => i / (progress.length - 1)),
+    progress,
+  }
   curves.set(key, curve)
   return curve
 }
@@ -54,10 +70,18 @@ function moveSpring(): Spring {
   return m
 }
 
-type Rect = { x: number; y: number }
+/** Lift strength over the move (0 to 1): up in the first 20 %, down over the last 30 %. */
+export function liftAt(t: number): number {
+  if (t <= 0 || t >= 1) return 0
+  if (t < 0.2) return t / 0.2
+  if (t > 0.7) return (1 - t) / 0.3
+  return 1
+}
+
+type Pos = { x: number; y: number; region: string | null }
 
 /** Layout position relative to `root`: offsets ignore transforms, so moves and enters in flight never skew it. */
-function layoutPosition(node: HTMLElement, root: HTMLElement): Rect {
+function layoutPosition(node: HTMLElement, root: HTMLElement): { x: number; y: number } {
   let x = 0
   let y = 0
   let n: HTMLElement | null = node
@@ -69,42 +93,160 @@ function layoutPosition(node: HTMLElement, root: HTMLElement): Rect {
   return { x, y }
 }
 
+function regionOf(node: HTMLElement, root: HTMLElement): HTMLElement | null {
+  const r = node.parentElement?.closest<HTMLElement>('[data-viz-region]')
+  return r && root.contains(r) ? r : null
+}
+
+function measure(root: HTMLElement): Map<string, Pos> {
+  const out = new Map<string, Pos>()
+  for (const node of root.querySelectorAll<HTMLElement>('[data-flip-id]')) {
+    out.set(node.dataset.flipId!, {
+      ...layoutPosition(node, root),
+      region: regionOf(node, root)?.dataset.vizRegion ?? null,
+    })
+  }
+  return out
+}
+
+/** Finishes every move under `root`, on live glyphs and on copies that are leaving (M02). */
+export function finishMoves(root: HTMLElement) {
+  if (typeof root.getAnimations !== 'function') return
+  for (const a of root.getAnimations({ subtree: true })) if (a.id === MOVE_ID) a.finish()
+}
+
+function translateNow(node: HTMLElement): { x: number; y: number } {
+  const tf = getComputedStyle(node).transform
+  if (!tf || tf === 'none' || typeof DOMMatrixReadOnly === 'undefined') return { x: 0, y: 0 }
+  const m = new DOMMatrixReadOnly(tf)
+  return { x: m.m41, y: m.m42 }
+}
+
+const raised = new WeakMap<HTMLElement, number>()
+
+/** D6: the moving glyph and its region render above every lane, on an opaque raised backing. */
+function lift(node: HTMLElement, region: HTMLElement | null): () => void {
+  const shape = node.firstElementChild ? getComputedStyle(node.firstElementChild).borderRadius : ''
+  node.style.position = 'relative'
+  node.style.zIndex = '1'
+  node.style.borderRadius = shape
+  node.classList.add(LIFT.backingCls)
+  if (region) {
+    raised.set(region, (raised.get(region) ?? 0) + 1)
+    region.style.zIndex = '10'
+  }
+  return () => {
+    node.style.position = ''
+    node.style.zIndex = ''
+    node.style.borderRadius = ''
+    node.classList.remove(LIFT.backingCls)
+    if (region) {
+      const n = (raised.get(region) ?? 1) - 1
+      raised.set(region, n)
+      if (n <= 0) region.style.zIndex = ''
+    }
+  }
+}
+
+type Move = {
+  node: HTMLElement
+  id: string
+  dx: number
+  dy: number
+  between: boolean
+}
+
+function play(root: HTMLElement, { node, dx, dy, between }: Move) {
+  const curve = springCurve(moveSpring())
+  const frames = curve.progress.map((p, i) => {
+    const frame: Keyframe = {
+      offset: curve.offsets[i],
+      transform: `translate(${(dx * (1 - p)).toFixed(2)}px, ${(dy * (1 - p)).toFixed(2)}px)`,
+    }
+    if (between) frame.boxShadow = liftShadow(liftAt(curve.offsets[i]))
+    return frame
+  })
+  const lower = between ? lift(node, regionOf(node, root)) : () => {}
+  const anim = node.animate(frames, {
+    duration: curve.duration,
+    easing: 'linear',
+  })
+  anim.id = MOVE_ID
+  let done = false
+  const end = () => {
+    if (done) return
+    done = true
+    lower()
+  }
+  anim.addEventListener('finish', end)
+  anim.addEventListener('cancel', end)
+}
+
 /**
- * After each change of `key` (the step), measures every `[data-flip-id]`
- * inside `root` and plays a move for any glyph whose layout position changed.
- * An instant render finishes every move in flight instead.
+ * After each change of `key` (the step) or of the gate's epoch, measures
+ * every `[data-flip-id]` inside `root` and plays a move for each allowed glyph
+ * whose layout position changed.
  */
 export function useFlip(root: RefObject<HTMLElement>, gate: MotionGate, key: unknown) {
-  const last = useRef(new Map<string, Rect>())
+  const last = useRef(new Map<string, Pos>())
   useLayoutEffect(() => {
     const el = root.current
     if (!el) return
-    const nodes = el.querySelectorAll<HTMLElement>('[data-flip-id]')
-    const next = new Map<string, Rect>()
-    const moves: [HTMLElement, number, number][] = []
-    for (const node of nodes) {
-      if (gate.instant && typeof node.getAnimations === 'function') {
-        for (const a of node.getAnimations()) if (a.id === 'viz-move') a.finish()
-      }
-      const at = layoutPosition(node, el)
+    if (gate.instant) finishMoves(el)
+    const canAnimate = !gate.instant && !gate.reduce && typeof Element.prototype.animate === 'function'
+    const next = new Map<string, Pos>()
+    const moves: Move[] = []
+    for (const node of el.querySelectorAll<HTMLElement>('[data-flip-id]')) {
       const id = node.dataset.flipId!
+      const at: Pos = {
+        ...layoutPosition(node, el),
+        region: regionOf(node, el)?.dataset.vizRegion ?? null,
+      }
       next.set(id, at)
       const was = last.current.get(id)
-      if (was && (Math.abs(was.x - at.x) > 0.5 || Math.abs(was.y - at.y) > 0.5))
-        moves.push([node, was.x - at.x, was.y - at.y])
+      // A move still in flight: continue from where the glyph is now.
+      const running =
+        typeof node.getAnimations === 'function' ? node.getAnimations().find((a) => a.id === MOVE_ID) : undefined
+      const now = running ? translateNow(node) : { x: 0, y: 0 }
+      running?.cancel()
+      if (!was) continue
+      const dx = was.x - at.x + now.x
+      const dy = was.y - at.y + now.y
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) moves.push({ node, id, dx, dy, between: was.region !== at.region })
     }
     last.current = next
-    if (gate.instant || gate.reduce || typeof Element.prototype.animate !== 'function') return
-    const curve = springCurve(moveSpring())
-    for (const [node, dx, dy] of moves) {
-      const frames = curve.progress.map((p, i) => ({
-        offset: curve.offsets[i],
-        transform: `translate(${(dx * (1 - p)).toFixed(2)}px, ${(dy * (1 - p)).toFixed(2)}px)`,
-      }))
-      const anim = node.animate(frames, { duration: curve.duration, easing: 'linear' })
-      anim.id = 'viz-move'
-    }
+    if (!canAnimate) return
+    for (const m of moves) if (animates(gate, m.id)) play(el, m)
     // Runs once per step (and per instant epoch), not on unrelated re-renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, gate.epoch])
+
+  // A layout change outside a step (resize, font swap) lands every move and
+  // re-measures, so the next step starts from where glyphs really are.
+  useEffect(() => {
+    const el = root.current
+    if (!el || typeof window === 'undefined') return
+    let width = el.offsetWidth
+    let height = el.offsetHeight
+    const remeasure = () => {
+      finishMoves(el)
+      last.current = measure(el)
+    }
+    const onResize = () => {
+      if (el.offsetWidth === width && el.offsetHeight === height) return
+      width = el.offsetWidth
+      height = el.offsetHeight
+      remeasure()
+    }
+    // Only a real change of the stage box counts: a phone's toolbar resizing
+    // the window while scrolling must not cut a move short.
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(onResize)
+    ro?.observe(el)
+    let live = true
+    document.fonts?.ready.then(() => live && remeasure())
+    return () => {
+      live = false
+      ro?.disconnect()
+    }
+  }, [root])
 }

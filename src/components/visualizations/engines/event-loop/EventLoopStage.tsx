@@ -6,7 +6,7 @@ import { cn as clsx } from '../../primitives/cn'
 import { Tag } from '../../primitives/Tag'
 import { ink, now as nowCls, radius, stroke, surface, type as typeScale } from '../../primitives/tokens-v3'
 import { useFlip } from '../../shell/flip'
-import { transitionFor, travel } from '../../shell/motion'
+import { presence } from '../../shell/motion'
 import type { StageProps } from '../../shell/types'
 import { H_CLS, heights } from '../../shell/vars'
 import { Lane } from '../../substrates/Lane'
@@ -44,8 +44,6 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
   const common = { focus, created, present: ids, before, gate }
   const root = useRef<HTMLDivElement>(null)
   useFlip(root, gate, step)
-  const enterT = transitionFor('enter', gate)
-  const dIn = travel('enter', gate)
   const consoleFocused = focus.has('console')
 
   return (
@@ -126,7 +124,7 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
               ['--vz-r-w' as string]: `repeat(${metrics.consoleRows.wide}, ${G.consoleRow}px)`,
             }}
           >
-            <AnimatePresence initial={false} mode="popLayout">
+            <AnimatePresence initial={false} mode="popLayout" custom={{ gate }}>
               {state.console.map((text, k) => {
                 const isNew = focus.has(outId(k))
                 return (
@@ -134,9 +132,8 @@ export function EventLoopStage({ step, previous, codePane, layout, motion: gate,
                     key={`${k}:${gate.epoch}`}
                     data-out={k}
                     className={clsx('m-0 flex min-w-0 items-center gap-2 p-0', typeScale.value.cls)}
-                    initial={gate.instant ? false : { opacity: 0, y: dIn }}
-                    animate={{ opacity: 1, y: 0, transition: enterT }}
-                    exit={{ opacity: 0, transition: { duration: 0 } }}
+                    // Rises into place; on Back it leaves the way it came (D8).
+                    {...presence(outId(k), gate, { from: { y: 1 }, to: { y: 1 } })}
                   >
                     <span className={clsx('w-4 shrink-0 text-right tabular-nums', typeScale.meta.cls, ink.muted)}>
                       {k + 1}

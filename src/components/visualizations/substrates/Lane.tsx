@@ -5,7 +5,7 @@ import { forwardRef, type ReactNode } from 'react'
 import { cn as clsx } from '../primitives/cn'
 import { Tag } from '../primitives/Tag'
 import { ink, now, radius, stroke, surface, type as typeScale } from '../primitives/tokens-v3'
-import { transitionFor, travel, type MotionGate } from '../shell/motion'
+import { presence, type MotionGate, type PresenceCustom } from '../shell/motion'
 import type { PerVariant } from '../shell/types'
 import { H_CLS, heights } from '../shell/vars'
 
@@ -18,11 +18,14 @@ import { H_CLS, heights } from '../shell/vars'
  * mistaken for keyboard focus. Elements created this step get a `new` tag, so
  * the change never depends on color alone (A7).
  *
- * Motion: a chip that changes place keeps its `data-flip-id`, and the stage's
- * `useFlip` plays the `move` spring from its old position (transform only).
- * New chips `enter` from their arrival side; removed chips `exit`. A chip
- * that moved elsewhere leaves its old lane instantly, so it is never drawn
- * twice.
+ * Motion (shell/motion `presence`): a chip that changes place keeps its
+ * `data-flip-id`, and the stage's `useFlip` plays the `move` spring from its
+ * old position (transform only), lifted above every lane while it crosses
+ * regions. New chips `enter` from their arrival side; removed chips `exit`
+ * toward their departure side; Back mirrors both (D8). The exit is resolved
+ * from the live gate, so scrubs, Home, End and preset switches snap leaving
+ * chips too (D7). Only glyphs inside the step's budget animate. A chip that
+ * moved elsewhere leaves its old lane instantly, so it is never drawn twice.
  */
 
 export type ChipKind = 'frame' | 'task' | 'micro' | 'host'
@@ -51,7 +54,7 @@ export type LaneProps = {
   /** Ids that were on stage in the previous render (moved chips do not fade in). */
   before: ReadonlySet<string>
   gate: MotionGate
-  /** Arrival side for `enter`, departure side for `exit`. */
+  /** Arrival side for `enter` and departure side for `exit`, going forward (Back mirrors them). */
   from: { x?: number; y?: number }
   to: { x?: number; y?: number }
   className?: string
@@ -104,10 +107,8 @@ const LaneItem = forwardRef<HTMLDivElement, { id: string; className: string; chi
 export function Lane(props: LaneProps) {
   const { id, label, kind, chips, labelAt, height, focus, created, present, before, gate, from, to, className } = props
   const vertical = kind === 'frame'
-  const enterT = transitionFor('enter', gate)
-  const exitT = transitionFor('exit', gate)
-  const dIn = travel('enter', gate)
-  const dOut = travel('exit', gate)
+  // The live gate and the ids on stage, handed to chips that are leaving.
+  const custom: PresenceCustom = { gate, present }
 
   const items: ReactNode[] = chips.map((chip, i) => {
     const moved = before.has(chip.id)
@@ -116,16 +117,8 @@ export function Lane(props: LaneProps) {
         key={`${chip.id}:${gate.epoch}`}
         id={chip.id}
         className={clsx('min-w-0', vertical ? 'w-full' : 'flex-none')}
-        initial={moved || gate.instant ? false : { opacity: 0, x: (from.x ?? 0) * dIn, y: (from.y ?? 0) * dIn }}
-        animate={{ opacity: 1, x: 0, y: 0, transition: enterT }}
-        exit="leave"
-        custom={present}
-        variants={{
-          leave: (stillPresent: ReadonlySet<string> | undefined) =>
-            (stillPresent ?? present).has(chip.id)
-              ? { opacity: 0, transition: { duration: 0 } }
-              : { opacity: 0, x: (to.x ?? 0) * dOut, y: (to.y ?? 0) * dOut, transition: exitT },
-        }}
+        {...presence(chip.id, gate, { from, to }, { moved })}
+        custom={custom}
       >
         <Chip
           chip={chip}
@@ -171,7 +164,7 @@ export function Lane(props: LaneProps) {
           vertical ? 'flex flex-col-reverse justify-start gap-1 self-stretch' : 'flex items-center gap-2 self-stretch',
         )}
       >
-        <AnimatePresence initial={false} mode="popLayout" custom={present}>
+        <AnimatePresence initial={false} mode="popLayout" custom={custom}>
           {items}
         </AnimatePresence>
         <span
