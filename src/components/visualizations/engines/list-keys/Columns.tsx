@@ -226,7 +226,7 @@ function CheckGlyph({ state }: { state: boolean | '?' }) {
  */
 function StatusBadge({ tone, words }: { tone: 'removed' | 'kept'; words: string }) {
   return (
-    <Badge tone={tone === 'removed' ? 'removed' : 'neutral'} className="ml-auto w-5 justify-center px-0">
+    <Badge tone={tone === 'removed' ? 'removed' : 'neutral'} className="ml-auto h-4 w-3 justify-center bg-transparent px-0">
       <span aria-hidden title={words}>
         {tone === 'removed' ? '×' : '✓'}
       </span>
@@ -236,9 +236,9 @@ function StatusBadge({ tone, words }: { tone: 'removed' | 'kept'; words: string 
 }
 
 /** A word tag in a wrapper box's header line (in flow, D17). */
-function HeaderTag({ tone, children }: { tone: 'kept' | 'now' | 'removed'; children: ReactNode }) {
+function HeaderTag({ children }: { children: ReactNode }) {
   return (
-    <Badge tone={tone === 'kept' ? 'neutral' : tone} className="h-4 bg-transparent px-0">
+    <Badge tone="now" className="h-4 bg-transparent px-0">
       {children}
     </Badge>
   )
@@ -309,7 +309,7 @@ function ListColumns({
                   style={cardStyle}
                 >
                   <Spine label={BEFORE_INSTANCES[i]} dashed={isGone} />
-                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1.5 xs:px-2">
+                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2">
                     <span className="flex min-w-0 items-center gap-1.5 xs:gap-2">
                       <span className="relative flex h-4 w-4 shrink-0">
                         <input
@@ -405,7 +405,7 @@ function ListColumns({
                   />
                   <span
                     aria-hidden
-                    className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1.5 xs:px-2"
+                    className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2"
                   >
                     <span className="flex min-w-0 items-center gap-1.5 xs:gap-2">
                       <CheckGlyph state={revealed ? r.checked : '?'} />
@@ -470,7 +470,7 @@ function WrapperBox({
       style={{ paddingTop: BOX.pad, paddingBottom: BOX.bottom }}
     >
       <p
-        className={clsx('m-0 flex h-4 items-center justify-between gap-2', typeScale.meta.cls, ink.secondary)}
+        className={clsx('m-0 flex h-4 items-center justify-between gap-1', typeScale.meta.cls, ink.secondary)}
         style={{ marginBottom: BOX.gap }}
       >
         <span className="min-w-0 truncate">{tag}</span>
@@ -504,7 +504,7 @@ function CounterCard({
       style={cardStyle}
     >
       <Spine label={instance} mounted={mounted} dashed={mounted} />
-      <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1.5 xs:px-2">
+      <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2">
         <span className={clsx('truncate', typeScale.item.cls, ink.base)}>Counter</span>
         <span className={clsx('truncate', typeScale.meta.cls, ink.secondary)}>
           {count}
@@ -535,7 +535,7 @@ function WrapperColumns({
         <WrapperBox
           tag="<div>"
           removed={Boolean(lost)}
-          badge={lost ? <HeaderTag tone="removed">× unmounted</HeaderTag> : null}
+          badge={lost ? <StatusBadge tone="removed" words="unmounted" /> : null}
         >
           <CounterCard instance="A" count={`count ${s.count}`} />
         </WrapperBox>
@@ -574,10 +574,11 @@ function WrapperColumns({
                 tag={afterTag}
                 dashed={revealed && !o.wrapperReused}
                 badge={
-                  action === 'class' ? (
-                    <HeaderTag tone="kept">className=&quot;on&quot;</HeaderTag>
-                  ) : revealed && !o.wrapperReused ? (
-                    <HeaderTag tone="now">new</HeaderTag>
+                  // The className change has no room beside the tag name at any
+                  // width (it used to sit on the border); it is shown by the code
+                  // pane and the reveal text. The scene leaves the frame in WS3 (D17).
+                  revealed && !o.wrapperReused ? (
+                    <HeaderTag>new</HeaderTag>
                   ) : null
                 }
               >
