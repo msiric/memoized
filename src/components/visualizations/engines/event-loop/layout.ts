@@ -1,5 +1,5 @@
 import type { StepLog } from '../../step-log/types'
-import { codePaneHeight } from '../../shell/CodePane'
+import { CODE_GUTTER, NARROW_CODE_COLS, codePaneHeight, codeRows as visualRows } from '../../shell/code-geometry'
 import type { EngineLayout, PerVariant, Variant } from '../../shell/types'
 import { monoWidth } from '../../substrates/text-metrics'
 import type { ElChip, EventLoopState } from './model'
@@ -186,8 +186,17 @@ export type EventLoopMetrics = {
  * never move it, and the console under the code shares its exact width.
  */
 export function codeColumn(codeCols: number): { md: number; xl: number } {
-  const code = Math.ceil(monoWidth('x'.repeat(codeCols), G.text)) + 52
+  const code = Math.ceil(monoWidth('x'.repeat(wideCodeCols(codeCols)), G.text)) + CODE_GUTTER
   return { md: Math.max(G.codeMin.md, code), xl: Math.max(G.codeMin.xl, code) }
+}
+
+/** The widest code column the wide grid allows: the lanes keep `regionsMin` (A4). */
+const CODE_COLUMN_MAX = STAGE_MIN.wide - 16 - G.regionsMin
+
+/** Columns of the wide code pane: the widest line, capped so the lanes keep their room; longer lines wrap (A4). */
+export function wideCodeCols(codeCols: number): number {
+  const fit = Math.floor((CODE_COLUMN_MAX - CODE_GUTTER) / monoWidth('x', G.text))
+  return Math.min(codeCols, fit)
 }
 
 /** Content widths at the narrowest width of each variant. */
@@ -213,10 +222,8 @@ export function eventLoopMetrics(
   logs: readonly StepLog<EventLoopState>[],
 ): EventLoopMetrics & { layout: EngineLayout } {
   let maxStack = 1
-  let maxLines = 1
   let maxCols = 1
   for (const log of logs) {
-    maxLines = Math.max(maxLines, log.code?.lines.length ?? 0)
     for (const l of log.code?.lines ?? [])
       maxCols = Math.max(maxCols, [...l].length)
     for (const step of log.steps)
@@ -266,9 +273,17 @@ export function eventLoopMetrics(
   }
   const rows = per(rowsFor)
 
+  // Rows count soft-wrapped lines at each variant's narrowest pane (A4).
+  const wideCols = wideCodeCols(maxCols)
+  let narrowRows = 1
+  let wideRows = 1
+  for (const log of logs) {
+    narrowRows = Math.max(narrowRows, visualRows(log.code?.lines ?? [], NARROW_CODE_COLS))
+    wideRows = Math.max(wideRows, visualRows(log.code?.lines ?? [], wideCols))
+  }
   const codeRows: PerVariant<number> = {
-    narrow: Math.min(G.codeRowsNarrow, maxLines),
-    wide: maxLines <= G.codeRowsMax ? maxLines : G.codeRowsWindow,
+    narrow: Math.min(G.codeRowsNarrow, narrowRows),
+    wide: wideRows <= G.codeRowsMax ? wideRows : G.codeRowsWindow,
   }
   const code = per((v) => codePaneHeight(codeRows[v]))
   const stackContent = (v: Variant) =>
@@ -323,7 +338,7 @@ export function eventLoopMetrics(
     layout: {
       stage: { narrow: narrowStage, wide: wideStage },
       codeRows,
-      codeCols: maxCols,
+      codeCols: wideCols,
       detail: metrics,
     },
   }

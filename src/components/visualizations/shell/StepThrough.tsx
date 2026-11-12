@@ -23,7 +23,7 @@ import { Provenance } from '../primitives/Provenance'
 import { SegmentedControl } from '../primitives/SegmentedControl'
 import { TARGET_GAP_PX, ink, motionRules, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint } from '../step-log/types'
-import { CodePane } from './CodePane'
+import { CodePane, codeRows } from './CodePane'
 import { CHOICE, FRAME, STEP_BAR, definitionMetrics } from './footprint'
 import { feedbackText } from './feedback'
 import {
@@ -321,7 +321,8 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       anchor={anchor}
       rows={{
         narrow: layout.codeRows.narrow,
-        wide: Math.min(layout.codeRows.wide, log.code.lines.length),
+        // This preset's rows, soft-wrapped at the pane's columns (A4).
+        wide: Math.min(layout.codeRows.wide, codeRows(log.code.lines, layout.codeCols ?? Infinity)),
       }}
       cols={layout.codeCols}
       animate={animate}

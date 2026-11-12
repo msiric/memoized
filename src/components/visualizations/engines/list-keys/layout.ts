@@ -1,5 +1,5 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../../primitives/tokens-v3'
-import { codePaneHeight } from '../../shell/CodePane'
+import { codePaneHeight } from '../../shell/code-geometry'
 import {
   CAPTION_LINE,
   CHOICE,

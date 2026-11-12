@@ -1,6 +1,8 @@
+import { useEffect, useLayoutEffect, useRef, type CSSProperties, type RefObject } from 'react'
 import { cn as clsx } from '../primitives/cn'
 import type { CodeToken, StepLine } from '../step-log/types'
 import { radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
+import { CODE_GUTTER, CODE_PAD, CODE_STATUS, HANG, codePaneHeight, lineIndent, windowOffset } from './code-geometry'
 import { LINE } from './footprint'
 import type { PerVariant } from './types'
 import { H_CLS, TRANSLATE_Y_CLS, heights, rem, translateY } from './vars'
@@ -16,24 +18,22 @@ import { H_CLS, TRANSLATE_Y_CLS, heights, rem, translateY } from './vars'
  * The window clips at whole rows (F6): the list sits in a viewport exactly
  * `rows` lines tall, with the pane's padding outside it, so no part of the
  * previous or next line ever shows in the padding.
+ *
+ * Soft wrap (A4): a line wider than the pane wraps, and its continuation rows
+ * hang after the gutter, indented two columns past the line's own indent,
+ * with a hairline in the marker column beside them.
+ * The current-line highlight covers every row of the line. Footprints count
+ * wrapped rows at each variant's narrowest pane (`codeRows`), so real data
+ * never needs more; when the pane is narrower than that (large text in a
+ * narrow lesson column), the window measures the rows the browser drew and
+ * keeps the anchor line in view, still at whole rows. The lint keeps
+ * authored lines short (authoring guidance), so real presets do not wrap at
+ * the default text size.
  */
 
-export const CODE_PAD = 8
-/** Gutter: 8 inset + 12 marker + 24 line number + 8 gap, from 768. */
-export const CODE_GUTTER = 8 + 12 + 24 + 8
-/** A 16 px status line under the code (plus the bottom padding), so the host note never covers code. */
-export const CODE_STATUS = 16
+export * from './code-geometry'
 
-export function codePaneHeight(rows: number): number {
-  return rows * LINE + 2 * CODE_PAD + CODE_STATUS
-}
-
-/** Rows to translate so `anchor` (1-based) sits in the middle of a `rows`-tall window. */
-export function windowOffset(anchor: number | undefined, total: number, rows: number): number {
-  if (!anchor || total <= rows) return 0
-  const top = anchor - 1 - Math.floor((rows - 1) / 2)
-  return Math.max(0, Math.min(total - rows, top))
-}
+const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 export type CodePaneProps = {
   lines: readonly string[]
@@ -55,12 +55,12 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
     narrow: -windowOffset(anchor, lines.length, rows.narrow) * LINE,
     wide: -windowOffset(anchor, lines.length, rows.wide) * LINE,
   }
-  // Clip to whole rows only when the code is longer than the window.
-  const windowed = lines.length > Math.min(rows.narrow, rows.wide)
-  const windowRows: PerVariant<number> = {
-    narrow: Math.min(rows.narrow, lines.length) * LINE,
-    wide: Math.min(rows.wide, lines.length) * LINE,
-  }
+  // The window is always `rows` whole lines, so wrapped rows have room and
+  // the clip never cuts a row (F6).
+  const windowRows: PerVariant<number> = { narrow: rows.narrow * LINE, wide: rows.wide * LINE }
+  const view = useRef<HTMLDivElement>(null)
+  const list = useRef<HTMLOListElement>(null)
+  useWindow(view, list, anchor, lines)
   const current =
     from > 0 ? (from === to ? `line ${from}` : `lines ${from} to ${to}`) : line === 'host' ? 'host' : 'none'
   return (
@@ -84,10 +84,12 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
     >
       <div
         data-viz-part="code-window"
-        className={clsx('overflow-y-clip', windowed && H_CLS)}
-        style={windowed ? heights(windowRows, { marginTop: rem(CODE_PAD) }) : { marginTop: rem(CODE_PAD) }}
+        ref={view}
+        className={clsx('overflow-y-clip', H_CLS)}
+        style={heights(windowRows, { marginTop: rem(CODE_PAD) })}
       >
         <ol
+          ref={list}
           aria-label={`Code, current: ${current}`}
           className={clsx('m-0 list-none p-0', TRANSLATE_Y_CLS, animate ? transitionCls.highlight : transitionCls.instant)}
           style={translateY(offset)}
@@ -101,7 +103,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                 aria-current={active ? 'true' : undefined}
                 data-line={n}
                 className={clsx(
-                  'relative flex h-6 items-center pl-2 pr-2',
+                  'relative flex min-h-6 items-start pl-2 pr-2',
                   animate ? transitionCls.highlight : transitionCls.instant,
                   active ? 'bg-lime-400/10' : 'bg-transparent',
                 )}
@@ -113,6 +115,9 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                     active ? 'bg-lime-400 print:bg-lime-700' : 'bg-transparent',
                   )}
                 />
+                {/* Continuation rows of a wrapped line: a hairline under the marker
+                    column, so a wrapped row never reads as a line of its own (A4). */}
+                <span aria-hidden className="absolute bottom-1.5 left-3.5 top-6 w-px bg-zinc-700" />
                 <span aria-hidden className="w-3 shrink-0 select-none font-mono text-2xs leading-6 text-lime-400">
                   {active && n === from ? '▸' : ''}
                 </span>
@@ -122,7 +127,15 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                 >
                   {n}
                 </span>
-                <code className={clsx('min-w-0 whitespace-pre bg-transparent p-0 text-zinc-100', typeScale.code.cls)}>
+                <code
+                  className={clsx(
+                    'min-w-0 flex-1 whitespace-pre-wrap bg-transparent p-0 text-zinc-100 [overflow-wrap:anywhere]',
+                    // The hanging indent: continuation rows start past the line's own indent.
+                    'pl-[var(--vz-hang)] [text-indent:calc(-1*var(--vz-hang))]',
+                    typeScale.code.cls,
+                  )}
+                  style={{ ['--vz-hang' as string]: `${lineIndent(text) + HANG}ch` } as CSSProperties}
+                >
                   {tokens?.[i]
                     ? tokens[i].map((t, k) => (
                         <span key={k} style={t.color ? { color: t.color } : undefined}>
@@ -147,4 +160,59 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
       </div>
     </div>
   )
+}
+
+/**
+ * Keeps the anchor line in the window by the rows the browser drew (A4): the
+ * server places the window by source lines, which is exact unless a line
+ * wraps. After layout, and whenever the pane's width or the text size
+ * changes, the list is placed again at whole rows with the anchor row where
+ * `windowOffset` puts it. A re-measure snaps (D7); a step change takes the
+ * list's own transition.
+ */
+function useWindow(
+  view: RefObject<HTMLDivElement>,
+  list: RefObject<HTMLOListElement>,
+  anchor: number | undefined,
+  lines: readonly string[],
+) {
+  useIsoLayoutEffect(() => {
+    const v = view.current
+    const ol = list.current
+    if (!v || !ol) return
+    const place = (snap: boolean) => {
+      const first = ol.firstElementChild as HTMLElement | null
+      const code = first?.querySelector('code')
+      if (!first || !code) return
+      const row = parseFloat(getComputedStyle(code).lineHeight)
+      if (!row) return
+      const rows = Math.round(v.clientHeight / row)
+      const total = Math.round(ol.scrollHeight / row)
+      const a = anchor ? (ol.children[anchor - 1] as HTMLElement | undefined) : undefined
+      let top = 0
+      if (a && total > rows) {
+        const at = Math.round((a.offsetTop - first.offsetTop) / row)
+        top = Math.max(0, Math.min(total - rows, at - Math.floor((rows - 1) / 2)))
+      }
+      if (snap) ol.style.transition = 'none'
+      ol.style.transform = `translateY(${-top * row}px)`
+      if (snap) {
+        void ol.offsetHeight
+        ol.style.transition = ''
+      }
+    }
+    place(false)
+    if (typeof ResizeObserver === 'undefined') return
+    let width = v.clientWidth
+    let size = getComputedStyle(ol).fontSize
+    const ro = new ResizeObserver(() => {
+      const f = getComputedStyle(ol).fontSize
+      if (v.clientWidth === width && f === size) return
+      width = v.clientWidth
+      size = f
+      place(true)
+    })
+    ro.observe(v)
+    return () => ro.disconnect()
+  }, [anchor, lines])
 }
