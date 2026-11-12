@@ -238,7 +238,10 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
         data: { scrollWidth: h.scrollWidth, clientWidth: h.clientWidth, text: node.data.slice(0, 120) },
       })
     }
-    // Clipping by overflow ancestors (the truncating element excluded).
+    // Clipping by overflow ancestors (the truncating element excluded). A line
+    // wholly outside a nearer clipping box is already hidden (a code window's
+    // rows above or below it), so farther ancestors do not see it.
+    const hidden = new Set<(typeof rects)[number]>()
     for (let e: Element | null = el; e; e = e.parentElement) {
       if (e === truncatedBy) continue
       const s = styleOf(e)
@@ -261,8 +264,13 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
       }
       if (clipY) {
         for (const line of rects) {
+          if (hidden.has(line)) continue
           const partial = line.t < box.t - 1 !== line.b > box.b + 1 && (line.t < box.t - 1 || line.b > box.b + 1)
           const inside = line.b > box.t && line.t < box.b
+          if (!inside) {
+            hidden.add(line)
+            continue
+          }
           if (partial && inside && !reported.has(key + 'y')) {
             reported.add(key + 'y')
             push({
