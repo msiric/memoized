@@ -1,6 +1,6 @@
 import { test, type Page } from '@playwright/test'
 import { motionsAfter } from './analyze'
-import { EL, LK, animated, hydrateListKeys, mark, openGallery, save, startRec, stopRec } from './helpers'
+import { EL, LK, animated, animatedGlyphs, hydrateListKeys, mark, openGallery, save, startRec, stopRec, strictCheck } from './helpers'
 import { diffGlyphs, snap } from './settle'
 
 /**
@@ -9,6 +9,12 @@ import { diffGlyphs, snap } from './settle'
  * step (glyph lanes, positions, opacity, captions), that nothing is left
  * running or half-faded, and which elements still tweened after the
  * interrupting command (spec §4 rule 3: they must snap).
+ *
+ * MOTION_STRICT=1 asserts, for the event-loop scenarios: the settled frame
+ * equals the slow walk, nothing is left running or half-faded, nothing tweens
+ * after an instant command (the burst's later presses, a scrub, a preset
+ * switch, Back inside the burst window, a resize mid-move: D7, D13, M23), and
+ * a Next after a resize animates at most the two glyphs of its budget (M03).
  */
 
 const results: Record<string, unknown> = {}
@@ -35,7 +41,15 @@ async function reference(page: Page, step: number) {
 }
 
 /** Runs `act` while recording; returns tweens that started after the mark named `after`. */
-async function scenario(page: Page, name: string, act: (m: (label: string) => Promise<void>) => Promise<void>, refStep?: number | (() => Promise<number>)) {
+type Strict = { instant?: string[]; maxGlyphs?: Record<string, number> }
+
+async function scenario(
+  page: Page,
+  name: string,
+  act: (m: (label: string) => Promise<void>) => Promise<void>,
+  refStep?: number | (() => Promise<number>),
+  strict: Strict = {},
+) {
   const marks: Record<string, number> = {}
   await startRec(page, EL)
   await page.waitForTimeout(50)
@@ -45,10 +59,13 @@ async function scenario(page: Page, name: string, act: (m: (label: string) => Pr
   await page.waitForTimeout(900)
   const cap = await stopRec(page)
   const settled = await snap(page, EL)
-  const tweensAfter: Record<string, unknown> = {}
+  const tweensAfter: Record<string, string[]> = {}
+  const glyphsAfter: Record<string, string[]> = {}
   for (const [label, at] of Object.entries(marks)) {
-    const ms = animated(motionsAfter(cap, at)).filter((e) => e.props.some((p) => p.delay < 60 + 0))
+    const all = motionsAfter(cap, at)
+    const ms = animated(all).filter((e) => e.props.some((p) => p.delay < 60 + 0))
     tweensAfter[label] = ms.map((e) => `${e.label.slice(0, 60)} ${e.props.map((p) => `${p.prop}:${p.duration}ms@${p.delay}`).join(',')}`)
+    glyphsAfter[label] = animatedGlyphs(all)
   }
   let diff: string[] | undefined
   if (refStep !== undefined) {
@@ -56,14 +73,25 @@ async function scenario(page: Page, name: string, act: (m: (label: string) => Pr
     const ref = await reference(page, step)
     diff = diffGlyphs(settled, ref)
   }
+  const partialOpacity = settled.partial.filter((p) => !p.includes('opacity-'))
   results[name] = {
     settledStep: settled.step,
     mode: settled.mode,
     running: settled.running,
-    partialOpacity: settled.partial.filter((p) => !p.includes('opacity-')),
+    partialOpacity,
     tweensAfter,
+    glyphsAfter,
     diffVsSlowWalk: diff,
   }
+  strictCheck(`${name}: nothing left running`, settled.running.map((r) => r.label))
+  strictCheck(`${name}: nothing left half-faded`, partialOpacity)
+  if (diff) strictCheck(`${name}: settles exactly like a slow walk`, diff)
+  for (const label of strict.instant ?? []) strictCheck(`${name}: nothing tweens after ${label}`, tweensAfter[label] ?? [])
+  for (const [label, max] of Object.entries(strict.maxGlyphs ?? {}))
+    strictCheck(
+      `${name}: at most ${max} glyphs animate after ${label}`,
+      (glyphsAfter[label] ?? []).length > max ? glyphsAfter[label] : [],
+    )
   return results[name]
 }
 
@@ -84,7 +112,7 @@ test('event-loop interruptions', async ({ page }) => {
       await page.keyboard.press('ArrowRight')
       await page.waitForTimeout(40)
     }
-  }, async () => Number(await f.getAttribute('data-viz-step')))
+  }, async () => Number(await f.getAttribute('data-viz-step')), { instant: ['press1', 'press2', 'press3', 'press4'] })
 
   // 2. Key repeat (held ArrowRight, repeat events every 33 ms).
   await walkTo(page, 0)
@@ -95,7 +123,7 @@ test('event-loop interruptions', async ({ page }) => {
       await page.waitForTimeout(33)
     }
     await page.keyboard.up('ArrowRight')
-  }, async () => Number(await f.getAttribute('data-viz-step')))
+  }, async () => Number(await f.getAttribute('data-viz-step')), { instant: ['repeat1', 'repeat2', 'repeat3', 'repeat4', 'repeat5'] })
 
   // 3. Back 100 ms into the move transition 6 -> 7.
   await walkTo(page, 6)
@@ -105,7 +133,7 @@ test('event-loop interruptions', async ({ page }) => {
     await page.waitForTimeout(100)
     await m('back')
     await page.keyboard.press('ArrowLeft')
-  }, 6)
+  }, 6, { instant: ['back'] })
 
   // 3b. Back after 320 ms (outside the burst window but the 300 ms move is just ending).
   await walkTo(page, 6)
@@ -127,7 +155,7 @@ test('event-loop interruptions', async ({ page }) => {
     const x = box.x + 14 + ((box.width - 28) * 2) / 8
     await m('scrub')
     await page.mouse.click(x, box.y + box.height / 2)
-  }, 2)
+  }, 2, { instant: ['scrub'] })
 
   // 5. Preset switch 80 ms into a transition.
   await walkTo(page, 6)
@@ -137,7 +165,7 @@ test('event-loop interruptions', async ({ page }) => {
     await page.waitForTimeout(80)
     await m('preset')
     await f.getByRole('radio', { name: 'Drain' }).click()
-  })
+  }, undefined, { instant: ['preset'] })
   results['preset-mid-transition-after'] = { preset: await f.getAttribute('data-viz-preset'), step: await f.getAttribute('data-viz-step') }
   await f.getByRole('radio', { name: 'Basics' }).click()
   await page.waitForTimeout(300)
@@ -207,7 +235,7 @@ test('event-loop resize', async ({ page }) => {
     await page.waitForTimeout(80)
     await m('resize')
     await page.setViewportSize({ width: 700, height: 900 })
-  }, 7)
+  }, 7, { instant: ['resize'] })
 
   // 10. Resize at rest, then one Next: only the glyphs that change should animate.
   await page.setViewportSize({ width: 1024, height: 900 })
@@ -217,7 +245,7 @@ test('event-loop resize', async ({ page }) => {
   await scenario(page, 'resize-at-rest-then-next', async (m) => {
     await m('next')
     await page.keyboard.press('ArrowRight')
-  })
+  }, undefined, { maxGlyphs: { next: 2 } })
 })
 
 test('list-keys interruptions', async ({ page }) => {

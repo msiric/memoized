@@ -247,7 +247,8 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean } = {}):
         if (p.prop === 'sc') flags.push({ kind: 'scale', detail: `${e.label}: scale ${p.start}->${p.end}` })
         if (opts.reduced && p.prop !== 'op')
           flags.push({ kind: 'reduced-motion-move', detail: `${e.label}: ${p.prop} ${p.start}->${p.end} ${p.duration}ms` })
-        if (opts.reduced && p.prop === 'op' && p.duration > 130)
+        // Reduced enter and exit are 120 ms; frame sampling adds up to two frames.
+        if (opts.reduced && p.prop === 'op' && p.duration > 150)
           flags.push({ kind: 'reduced-motion-long', detail: `${e.label}: opacity ${p.duration}ms` })
       }
       if (p.prop === 'eff' && !p.monotonic && !e.removed)

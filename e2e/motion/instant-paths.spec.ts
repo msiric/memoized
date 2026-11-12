@@ -1,10 +1,15 @@
 import { test } from '@playwright/test'
-import { EL, LK, animated, animsOf, hydrateListKeys, openGallery, recordAction, save } from './helpers'
+import { EL, LK, animated, animsOf, hydrateListKeys, openGallery, recordAction, save, strictCheck } from './helpers'
 
 /**
  * Spec §4 rule 3: scrubbing, Home/End (Restart, End), preset changes and
  * bursts must render instantly. Records each instant path from a settled
  * step and lists anything that still tweened, with its Web Animation timing.
+ *
+ * MOTION_STRICT=1 asserts D7: after each instant command nothing on the
+ * frame tweens opacity or translate (glyphs entering, leaving or moving,
+ * caption, code line, scrubber thumb), and no transform or opacity Web
+ * Animation with a duration runs. Mount and hydration never animate.
  */
 
 test('instant paths render without tweens', async ({ page }) => {
@@ -27,13 +32,18 @@ test('instant paths render without tweens', async ({ page }) => {
   }
   const run = async (name: string, act: () => Promise<unknown>) => {
     const r = await recordAction(page, EL, act, 500)
-    out[name] = {
-      step: await f.getAttribute('data-viz-step'),
-      tweened: animated(r.motions).map(
-        (e) => `${e.label.slice(0, 60)} | ${e.props.map((p) => `${p.prop} ${p.start}->${p.end} ${p.duration}ms`).join('; ')}`,
-      ),
-      anims: animsOf(r.cap).filter((a) => a.duration !== 0),
-    }
+    const tweened = animated(r.motions).map(
+      (e) => `${e.label.slice(0, 60)} | ${e.props.map((p) => `${p.prop} ${p.start}->${p.end} ${p.duration}ms`).join('; ')}`,
+    )
+    const anims = animsOf(r.cap).filter((a) => a.duration !== 0)
+    out[name] = { step: await f.getAttribute('data-viz-step'), tweened, anims }
+    strictCheck(`${name}: nothing tweens (D7)`, tweened)
+    strictCheck(
+      `${name}: no transform or opacity animation runs (D7)`,
+      anims
+        .filter((a) => a.name === 'viz-move' || /transform|opacity|translate/.test(String(a.name)) || 'opacity' in a.to || 'transform' in a.to)
+        .map((a) => `${a.label} ${a.name} ${a.duration}`),
+    )
   }
   await to(3)
   await run('scrub-3-to-0', async () => {
@@ -91,6 +101,7 @@ test('mount and hydration swap do not animate', async ({ page }) => {
   const cap = await page.evaluate(() => (window as any).__vizRec.stop())
   const { motionsAfter } = await import('./analyze')
   const ms = animated(motionsAfter(cap, 0))
+  strictCheck('mount: nothing tweens', ms.map((e) => e.label))
   save('mount.json', {
     tweened: ms.map((e) => `${e.label.slice(0, 60)} | ${e.props.map((p) => `${p.prop} ${p.start}->${p.end} ${p.duration}ms`).join('; ')}`),
     anims: cap.anims.filter((a: any) => a.duration !== 0).map((a: any) => `${a.kind} ${a.name} ${a.duration} ${a.label.slice(0, 60)}`),

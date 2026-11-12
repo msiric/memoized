@@ -104,3 +104,37 @@ export function animsOf(cap: Capture) {
     to: a.to,
   }))
 }
+
+// ---------------------------------------------------------------------------
+// Strict mode (VIZ-H WS2). MOTION_STRICT=1 turns the recorded facts into
+// assertions for the rules the shell implements; without it the specs only
+// record. Failures are soft, so one run lists every violation.
+// ---------------------------------------------------------------------------
+
+export const STRICT = process.env.MOTION_STRICT === '1'
+
+/** Fails (softly) with the list of problems, in strict mode only. */
+export function strictCheck(name: string, problems: string[]) {
+  if (STRICT) expect.soft(problems, name).toEqual([])
+}
+
+const STAGE_REGION = /\bin=(stack|host|micro|tasks|console)\b/
+const GLYPH_KEY = /\b(?:glyph|flip-id|chip)=(\S+)|\bout=(\d+)/
+
+/** The stage glyph an element belongs to (`then`, `out-2`), or null for chrome. */
+export function glyphKey(label: string): string | null {
+  if (!STAGE_REGION.test(label)) return null
+  const m = label.match(GLYPH_KEY)
+  if (!m) return null
+  return m[1] ?? `out-${m[2]}`
+}
+
+/** Distinct stage glyphs that tweened opacity or translate (spec §4 rule 1 counts these). */
+export function animatedGlyphs(ms: ElementMotion[]): string[] {
+  const keys = new Set<string>()
+  for (const e of animated(ms)) {
+    const k = glyphKey(e.label)
+    if (k && e.props.some((p) => ['op', 'tx', 'ty'].includes(p.prop))) keys.add(k)
+  }
+  return [...keys].sort()
+}

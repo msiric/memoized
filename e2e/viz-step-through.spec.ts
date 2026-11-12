@@ -9,7 +9,9 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 
 const GALLERY = '/dev/visualizations'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
-const FOOTPRINT = { narrow: 894, wide: 658 } // entry-table.ts, checked against the DOM below
+// entry-table.ts: the client-only placeholder's estimate, an upper bound. The
+// live dock is measured (a ghost stack, D15), so the frame is at most this tall.
+const FOOTPRINT = { narrow: 930, wide: 686 }
 
 const mount = (page: Page) => page.locator('[data-viz="event-loop"]')
 const frame = (page: Page) => mount(page).locator('section')
@@ -303,7 +305,7 @@ test('the frame never moves: stepping, checkpoint, preset switch, bursts and pla
       }).observe({ type: 'layout-shift' })
     })
     const base = await layoutSnapshot(page)
-    expect(base.frame[3], `frame height at ${width}`).toBe(width < 768 ? FOOTPRINT.narrow : FOOTPRINT.wide)
+    expect(base.frame[3], `frame height at ${width}`).toBeLessThanOrEqual(width < 768 ? FOOTPRINT.narrow : FOOTPRINT.wide)
     const same = async (label: string) => {
       await page.waitForTimeout(350)
       expect(await layoutSnapshot(page), `${label} at ${width}`).toEqual(base)
@@ -431,7 +433,9 @@ test('lazy mount: server HTML first, engine near the viewport, same footprint', 
   })
   expect(after).toEqual({ y: before!.y, height: before!.height })
 
-  // Client-only render (soft navigation): the placeholder reserves the same box.
+  // Client-only render (soft navigation): the placeholder reserves the
+  // estimate (in rem), an upper bound for the measured frame. The swap happens
+  // 800 px before the frame reaches the viewport.
   for (const [width, h] of [
     [375, FOOTPRINT.narrow],
     [1024, FOOTPRINT.wide],
@@ -443,7 +447,7 @@ test('lazy mount: server HTML first, engine near the viewport, same footprint', 
     expect((await placeholder.boundingBox())!.height).toBe(h)
     await mount(page).scrollIntoViewIfNeeded()
     await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
-    expect((await frame(page).boundingBox())!.height).toBe(h)
+    expect((await frame(page).boundingBox())!.height).toBeLessThanOrEqual(h)
   }
 })
 
@@ -454,7 +458,7 @@ test.describe('without JavaScript', () => {
     await page.goto(GALLERY)
     const f = frame(page)
     await expect(f).toHaveAttribute('data-viz-interactive', 'false')
-    expect((await f.boundingBox())!.height).toBe(FOOTPRINT.narrow)
+    expect((await f.boundingBox())!.height).toBeLessThanOrEqual(FOOTPRINT.narrow)
     await expect(f.getByText('Event loop: sync, microtasks, tasks')).toBeVisible()
     await expect(f.locator('[data-viz-region="bar"]')).toBeHidden()
     await f.locator('summary').click()
