@@ -117,7 +117,8 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
           data-viz-placeholder=""
           // The frame's own box (border-box: padding never changes the height).
           className={`${frameCls} h-[var(--vz-n)] md:h-[var(--vz-w)]`}
-          style={{ ['--vz-n' as string]: `${narrow}px`, ['--vz-w' as string]: `${wide}px` }}
+          // In rem, so the reserve follows the reader's text size like the frame (D19).
+          style={{ ['--vz-n' as string]: `${narrow / 16}rem`, ['--vz-w' as string]: `${wide / 16}rem` }}
         />
       )}
     </div>

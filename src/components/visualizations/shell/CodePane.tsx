@@ -3,7 +3,7 @@ import type { CodeToken, StepLine } from '../step-log/types'
 import { radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
 import { LINE } from './footprint'
 import type { PerVariant } from './types'
-import { H_CLS, TRANSLATE_Y_CLS, heights, translateY } from './vars'
+import { H_CLS, TRANSLATE_Y_CLS, heights, rem, translateY } from './vars'
 
 /**
  * Code pane with line sync (spec §5.5). Reuses the lesson code-block surface
@@ -12,6 +12,10 @@ import { H_CLS, TRANSLATE_Y_CLS, heights, translateY } from './vars'
  * background and a ▸ in the gutter, in the same frame as the stage. Windowed
  * panes keep the current line centred by translating the list; the pane never
  * scrolls, and neither does the page.
+ *
+ * The window clips at whole rows (F6): the list sits in a viewport exactly
+ * `rows` lines tall, with the pane's padding outside it, so no part of the
+ * previous or next line ever shows in the padding.
  */
 
 export const CODE_PAD = 8
@@ -51,6 +55,12 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
     narrow: -windowOffset(anchor, lines.length, rows.narrow) * LINE,
     wide: -windowOffset(anchor, lines.length, rows.wide) * LINE,
   }
+  // Clip to whole rows only when the code is longer than the window.
+  const windowed = lines.length > Math.min(rows.narrow, rows.wide)
+  const windowRows: PerVariant<number> = {
+    narrow: Math.min(rows.narrow, lines.length) * LINE,
+    wide: Math.min(rows.wide, lines.length) * LINE,
+  }
   const current =
     from > 0 ? (from === to ? `line ${from}` : `lines ${from} to ${to}`) : line === 'host' ? 'host' : 'none'
   return (
@@ -69,62 +79,69 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
       )}
       style={heights(
         height ?? { narrow: codePaneHeight(rows.narrow), wide: codePaneHeight(rows.wide) },
-        cols ? { ['--vz-cols' as string]: String(cols), ['--vz-gutter' as string]: `${CODE_GUTTER}px` } : undefined,
+        cols ? { ['--vz-cols' as string]: String(cols), ['--vz-gutter' as string]: rem(CODE_GUTTER) } : undefined,
       )}
     >
-      <ol
-        aria-label={`Code, current: ${current}`}
-        className={clsx('m-0 list-none p-0', TRANSLATE_Y_CLS, animate && transitionCls.highlight)}
-        style={translateY(offset, { paddingTop: CODE_PAD, paddingBottom: CODE_PAD })}
+      <div
+        data-viz-part="code-window"
+        className={clsx('overflow-hidden', windowed && H_CLS)}
+        style={windowed ? heights(windowRows, { marginTop: rem(CODE_PAD) }) : { marginTop: rem(CODE_PAD) }}
       >
-        {lines.map((text, i) => {
-          const n = i + 1
-          const active = n >= from && n <= to
-          return (
-            <li
-              key={i}
-              aria-current={active ? 'true' : undefined}
-              data-line={n}
-              className={clsx(
-                'relative flex h-6 items-center pl-2 pr-2',
-                animate && transitionCls.highlight,
-                active ? 'bg-lime-400/10' : 'bg-transparent',
-              )}
-            >
-              <span
-                aria-hidden
-                className={clsx('absolute inset-y-0 left-0 w-0.5', active ? 'bg-lime-400 print:bg-lime-700' : 'bg-transparent')}
-              />
-              <span aria-hidden className="w-3 shrink-0 select-none font-mono text-2xs leading-6 text-lime-400">
-                {active && n === from ? '▸' : ''}
-              </span>
-              <span
-                aria-hidden
-                className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 md:inline"
+        <ol
+          aria-label={`Code, current: ${current}`}
+          className={clsx('m-0 list-none p-0', TRANSLATE_Y_CLS, animate && transitionCls.highlight)}
+          style={translateY(offset)}
+        >
+          {lines.map((text, i) => {
+            const n = i + 1
+            const active = n >= from && n <= to
+            return (
+              <li
+                key={i}
+                aria-current={active ? 'true' : undefined}
+                data-line={n}
+                className={clsx(
+                  'relative flex h-6 items-center pl-2 pr-2',
+                  animate && transitionCls.highlight,
+                  active ? 'bg-lime-400/10' : 'bg-transparent',
+                )}
               >
-                {n}
-              </span>
-              <code className={clsx('min-w-0 whitespace-pre bg-transparent p-0 text-zinc-100', typeScale.code.cls)}>
-                {tokens?.[i]
-                  ? tokens[i].map((t, k) => (
-                      <span key={k} style={t.color ? { color: t.color } : undefined}>
-                        {t.text}
-                      </span>
-                    ))
-                  : text || ' '}
-              </code>
-            </li>
-          )
-        })}
-      </ol>
+                <span
+                  aria-hidden
+                  className={clsx(
+                    'absolute inset-y-0 left-0 w-0.5',
+                    active ? 'bg-lime-400 print:bg-lime-700' : 'bg-transparent',
+                  )}
+                />
+                <span aria-hidden className="w-3 shrink-0 select-none font-mono text-2xs leading-6 text-lime-400">
+                  {active && n === from ? '▸' : ''}
+                </span>
+                <span
+                  aria-hidden
+                  className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 md:inline"
+                >
+                  {n}
+                </span>
+                <code className={clsx('min-w-0 whitespace-pre bg-transparent p-0 text-zinc-100', typeScale.code.cls)}>
+                  {tokens?.[i]
+                    ? tokens[i].map((t, k) => (
+                        <span key={k} style={t.color ? { color: t.color } : undefined}>
+                          {t.text}
+                        </span>
+                      ))
+                    : text || ' '}
+                </code>
+              </li>
+            )
+          })}
+        </ol>
+      </div>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 flex items-start justify-end bg-zinc-900 px-2"
-        style={{ height: CODE_STATUS + CODE_PAD }}
+        style={{ height: rem(CODE_STATUS + CODE_PAD) }}
       >
-        <span
-          className={clsx('font-sans text-2xs leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}
-        >
+        <span className={clsx('font-sans text-2xs leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}>
           host: not a line of your code
         </span>
       </div>
