@@ -442,7 +442,9 @@ function ListColumns({
                     </span>
                     <span className="flex min-w-0 items-center gap-1">
                       <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${r.key}`}</span>
-                      {revealed && r.status && !waiting ? (
+                      {/* The verdicts (kept, lost, not its check) arrive once every
+                          carried checkbox has landed: the ride tells it first. */}
+                      {revealed && r.status && !pending.length ? (
                         <m.span
                           className="ml-auto flex"
                           initial={landing ? { opacity: 0 } : false}
