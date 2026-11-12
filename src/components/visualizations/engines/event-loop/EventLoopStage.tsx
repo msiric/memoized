@@ -152,11 +152,13 @@ export function EventLoopStage({
       style={{
         gap: toRem(G.gap),
         columnGap: toRem(16),
-        ['--vz-cols-md' as string]: `minmax(${toRem(G.codeMin.md)}, max-content) minmax(${toRem(G.regionsMin)}, 1fr)`,
-        ['--vz-cols-xl' as string]: `minmax(${toRem(G.codeMin.xl)}, max-content) minmax(0, 1fr)`,
+        ['--vz-cols-md' as string]: `${toRem(metrics.codeColumn.md)} minmax(0, 1fr)`,
+        ['--vz-cols-xl' as string]: `${toRem(metrics.codeColumn.xl)} minmax(0, 1fr)`,
       }}
     >
-      <div className="flex min-w-0 flex-col md:col-start-1 md:row-start-1">
+      {/* From 768 the pane fills the fixed code column, so its edges line up
+          with the console under it. */}
+      <div className="flex min-w-0 flex-col md:col-start-1 md:row-start-1 md:[&>*]:!w-full md:[&>*]:self-stretch">
         {codePane}
       </div>
 

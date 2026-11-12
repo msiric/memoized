@@ -68,7 +68,12 @@ export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
 export type LaneKind = 'frame' | 'host' | 'micro' | 'task'
 
 /** Horizontal padding inside a chip, per kind (pills are rounder). */
-const CHIP_PAD: Record<LaneKind, number> = { frame: 8, host: 8, micro: 12, task: 8 }
+const CHIP_PAD: Record<LaneKind, number> = {
+  frame: 8,
+  host: 8,
+  micro: 12,
+  task: 8,
+}
 
 export function chipWidth(label: string, kind: LaneKind): number {
   return Math.ceil(monoWidth(label, G.text) + 2 * CHIP_PAD[kind] + 2 * G.border)
@@ -83,7 +88,11 @@ export function outWidth(text: string): number {
 }
 
 /** Rows a left-to-right flow of `widths` takes in `width`, with `gap` between items. */
-export function flowRows(widths: readonly number[], width: number, gap: number): number {
+export function flowRows(
+  widths: readonly number[],
+  width: number,
+  gap: number,
+): number {
   if (!widths.length) return 0
   let rows = 1
   let used = 0
@@ -103,11 +112,19 @@ export function flowRows(widths: readonly number[], width: number, gap: number):
  * How many chips of a queue are visible in `rows` rows of `width`: all of
  * them, or the head of the queue followed by a `+N more` chip.
  */
-export function queueVisible(chips: readonly ElChip[], kind: LaneKind, width: number, rows: number): number {
+export function queueVisible(
+  chips: readonly ElChip[],
+  kind: LaneKind,
+  width: number,
+  rows: number,
+): number {
   const ws = chips.map((c) => chipWidth(c.label, kind))
   if (flowRows(ws, width, G.chipGap) <= rows) return chips.length
   for (let k = chips.length - 1; k >= 0; k--) {
-    const withMore = [...ws.slice(0, k), chipWidth(moreLabel(chips.length - k), 'task')]
+    const withMore = [
+      ...ws.slice(0, k),
+      chipWidth(moreLabel(chips.length - k), 'task'),
+    ]
     if (flowRows(withMore, width, G.chipGap) <= rows) return k
   }
   return 0
@@ -117,21 +134,30 @@ export function queueVisible(chips: readonly ElChip[], kind: LaneKind, width: nu
  * How many of the newest console outputs are visible in `rows` rows: all of
  * them, or an `N earlier` token followed by the newest outputs.
  */
-export function consoleVisible(out: readonly string[], width: number, rows: number): number {
+export function consoleVisible(
+  out: readonly string[],
+  width: number,
+  rows: number,
+): number {
   const ws = out.map(outWidth)
   if (flowRows(ws, width, G.outGap) <= rows) return out.length
   for (let k = out.length - 1; k >= 1; k--) {
-    const tail = [outWidth(earlierLabel(out.length - k)), ...ws.slice(out.length - k)]
+    const tail = [
+      outWidth(earlierLabel(out.length - k)),
+      ...ws.slice(out.length - k),
+    ]
     if (flowRows(tail, width, G.outGap) <= rows) return k
   }
   return 1
 }
 
 /** A lane: border, padding, a 16 px label above (4 px gap), then `content`. */
-const laneTop = (content: number) => 2 * G.border + 2 * G.pad + G.label + G.labelGap + content
+const laneTop = (content: number) =>
+  2 * G.border + 2 * G.pad + G.label + G.labelGap + content
 /** A lane with its label inline (wide queues): border, padding, content. */
 const laneInline = (content: number) => 2 * G.border + 2 * G.pad + content
-const rowsHeight = (rows: number, line: number, gap: number) => Math.max(1, rows) * line + (Math.max(1, rows) - 1) * gap
+const rowsHeight = (rows: number, line: number, gap: number) =>
+  Math.max(1, rows) * line + (Math.max(1, rows) - 1) * gap
 
 export type EventLoopMetrics = {
   code: PerVariant<number>
@@ -150,6 +176,18 @@ export type EventLoopMetrics = {
   /** Label on top of the stack lane from 768 (it holds frames or spare height). */
   stackLabelTopWide: boolean
   maxStack: number
+  /** The fixed code column width from 768 and from 1280. */
+  codeColumn: { md: number; xl: number }
+}
+
+/**
+ * The code column from 768 and from 1280: the widest line of any preset
+ * plus the pane's gutter, at least the column minimum. Fixed, so presets
+ * never move it, and the console under the code shares its exact width.
+ */
+export function codeColumn(codeCols: number): { md: number; xl: number } {
+  const code = Math.ceil(monoWidth('x'.repeat(codeCols), G.text)) + 52
+  return { md: Math.max(G.codeMin.md, code), xl: Math.max(G.codeMin.xl, code) }
 }
 
 /** Content widths at the narrowest width of each variant. */
@@ -157,9 +195,10 @@ function widths(codeCols: number) {
   const half = (STAGE_MIN.narrow - G.gap) / 2
   const laneContentNarrow = half - 2 * G.border - 2 * G.pad
   // From 768 the code column is at least `codeMin.md`, or as wide as the code.
-  const codeCol = Math.max(G.codeMin.md, Math.ceil(monoWidth('x'.repeat(codeCols), G.text)) + 52)
+  const codeCol = codeColumn(codeCols).md
   const right = STAGE_MIN.wide - codeCol - 16
-  const laneContentWide = right - 2 * G.border - 2 * G.pad - G.inlineLabel - G.gap
+  const laneContentWide =
+    right - 2 * G.border - 2 * G.pad - G.inlineLabel - G.gap
   return {
     queueWidth: { narrow: laneContentNarrow, wide: laneContentWide },
     hostWidth: { narrow: laneContentNarrow, wide: laneContentWide },
@@ -170,17 +209,24 @@ function widths(codeCols: number) {
   }
 }
 
-export function eventLoopMetrics(logs: readonly StepLog<EventLoopState>[]): EventLoopMetrics & { layout: EngineLayout } {
+export function eventLoopMetrics(
+  logs: readonly StepLog<EventLoopState>[],
+): EventLoopMetrics & { layout: EngineLayout } {
   let maxStack = 1
   let maxLines = 1
   let maxCols = 1
   for (const log of logs) {
     maxLines = Math.max(maxLines, log.code?.lines.length ?? 0)
-    for (const l of log.code?.lines ?? []) maxCols = Math.max(maxCols, [...l].length)
-    for (const step of log.steps) maxStack = Math.max(maxStack, step.state.stack.length)
+    for (const l of log.code?.lines ?? [])
+      maxCols = Math.max(maxCols, [...l].length)
+    for (const step of log.steps)
+      maxStack = Math.max(maxStack, step.state.stack.length)
   }
   const w = widths(maxCols)
-  const per = <T,>(f: (v: Variant) => T): PerVariant<T> => ({ narrow: f('narrow'), wide: f('wide') })
+  const per = <T>(f: (v: Variant) => T): PerVariant<T> => ({
+    narrow: f('narrow'),
+    wide: f('wide'),
+  })
 
   // Rows each flow needs under the overflow policy, over every step.
   const rowsFor = (v: Variant) => {
@@ -195,16 +241,25 @@ export function eventLoopMetrics(logs: readonly StepLog<EventLoopState>[]): Even
         ] as const) {
           const k = queueVisible(chips, kind, w.queueWidth[v], G.queueRows)
           const shown = chips.slice(0, k).map((c) => chipWidth(c.label, kind))
-          if (k < chips.length) shown.push(chipWidth(moreLabel(chips.length - k), 'task'))
+          if (k < chips.length)
+            shown.push(chipWidth(moreLabel(chips.length - k), 'task'))
           queue = Math.max(queue, flowRows(shown, w.queueWidth[v], G.chipGap))
         }
         const hk = queueVisible(state.host, 'host', w.hostWidth[v], G.queueRows)
-        const hs = state.host.slice(0, hk).map((c) => chipWidth(c.label, 'host'))
-        if (hk < state.host.length) hs.push(chipWidth(moreLabel(state.host.length - hk), 'task'))
+        const hs = state.host
+          .slice(0, hk)
+          .map((c) => chipWidth(c.label, 'host'))
+        if (hk < state.host.length)
+          hs.push(chipWidth(moreLabel(state.host.length - hk), 'task'))
         host = Math.max(host, flowRows(hs, w.hostWidth[v], G.chipGap))
-        const ok = consoleVisible(state.console, w.consoleWidth[v], G.consoleRows)
+        const ok = consoleVisible(
+          state.console,
+          w.consoleWidth[v],
+          G.consoleRows,
+        )
         const os = state.console.slice(state.console.length - ok).map(outWidth)
-        if (ok < state.console.length) os.unshift(outWidth(earlierLabel(state.console.length - ok)))
+        if (ok < state.console.length)
+          os.unshift(outWidth(earlierLabel(state.console.length - ok)))
         out = Math.max(out, flowRows(os, w.consoleWidth[v], G.outGap))
       }
     return { queue, host, out }
@@ -216,26 +271,37 @@ export function eventLoopMetrics(logs: readonly StepLog<EventLoopState>[]): Even
     wide: maxLines <= G.codeRowsMax ? maxLines : G.codeRowsWindow,
   }
   const code = per((v) => codePaneHeight(codeRows[v]))
-  const stackContent = (v: Variant) => maxStack * G.frame[v] + (maxStack - 1) * G.frameGap
-  const queueContent = (v: Variant) => rowsHeight(rows[v].queue, G.chip, G.chipGap)
-  const hostContent = (v: Variant) => rowsHeight(rows[v].host, G.chip, G.chipGap)
-  const consoleH = per((v) => laneTop(rowsHeight(rows[v].out, G.outLine, G.outRowGap)))
+  const stackContent = (v: Variant) =>
+    maxStack * G.frame[v] + (maxStack - 1) * G.frameGap
+  const queueContent = (v: Variant) =>
+    rowsHeight(rows[v].queue, G.chip, G.chipGap)
+  const hostContent = (v: Variant) =>
+    rowsHeight(rows[v].host, G.chip, G.chipGap)
+  const consoleH = per((v) =>
+    laneTop(rowsHeight(rows[v].out, G.outLine, G.outRowGap)),
+  )
 
   // Narrow: two grid rows, each as tall as its taller lane.
-  const row1 = Math.max(laneTop(stackContent('narrow')), laneTop(hostContent('narrow')))
+  const row1 = Math.max(
+    laneTop(stackContent('narrow')),
+    laneTop(hostContent('narrow')),
+  )
   const row2 = laneTop(queueContent('narrow'))
-  const narrowStage = code.narrow + G.gap + row1 + G.gap + row2 + G.gap + consoleH.narrow
+  const narrowStage =
+    code.narrow + G.gap + row1 + G.gap + row2 + G.gap + consoleH.narrow
 
   // Wide: queues and host inline; the stack lane takes whatever height the
   // left column (code over console) needs beyond the other three lanes.
   const hostWide = laneInline(hostContent('wide'))
   const queueWide = laneInline(queueContent('wide'))
-  const stackNatural = maxStack > 1 ? laneTop(stackContent('wide')) : laneInline(G.frame.wide)
+  const stackNatural =
+    maxStack > 1 ? laneTop(stackContent('wide')) : laneInline(G.frame.wide)
   const left = code.wide + G.gap + consoleH.wide
   const others = hostWide + 2 * queueWide + 3 * G.gap
   const wideStage = Math.max(left, stackNatural + others)
   const stackWide = wideStage - others
-  const stackLabelTopWide = maxStack > 1 || stackWide >= laneTop(stackContent('wide'))
+  const stackLabelTopWide =
+    maxStack > 1 || stackWide >= laneTop(stackContent('wide'))
 
   const metrics: EventLoopMetrics = {
     code,
@@ -250,6 +316,7 @@ export function eventLoopMetrics(logs: readonly StepLog<EventLoopState>[]): Even
     consoleWidth: w.consoleWidth,
     stackLabelTopWide,
     maxStack,
+    codeColumn: codeColumn(maxCols),
   }
   return {
     ...metrics,

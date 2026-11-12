@@ -1,5 +1,13 @@
 import type { StepLog } from '../../step-log/types'
-import { G, chipWidth, consoleVisible, eventLoopMetrics, outWidth, queueVisible, type LaneKind } from './layout'
+import {
+  G,
+  chipWidth,
+  consoleVisible,
+  eventLoopMetrics,
+  outWidth,
+  queueVisible,
+  type LaneKind,
+} from './layout'
 import type { EventLoopState } from './model'
 
 /**
@@ -15,10 +23,16 @@ export const EL_LIMITS = {
   stackDepth: 4,
 } as const
 
-export function lintEventLoopLogs(logs: readonly StepLog<EventLoopState>[]): string[] {
+export function lintEventLoopLogs(
+  logs: readonly StepLog<EventLoopState>[],
+): string[] {
   const errors: string[] = []
   const m = eventLoopMetrics(logs)
-  const lanes: [keyof EventLoopState & ('stack' | 'host' | 'micro' | 'tasks'), LaneKind, number][] = [
+  const lanes: [
+    keyof EventLoopState & ('stack' | 'host' | 'micro' | 'tasks'),
+    LaneKind,
+    number,
+  ][] = [
     ['stack', 'frame', m.queueWidth.narrow],
     ['host', 'host', m.hostWidth.narrow],
     ['micro', 'micro', m.queueWidth.narrow],
@@ -35,22 +49,40 @@ export function lintEventLoopLogs(logs: readonly StepLog<EventLoopState>[]): str
     log.steps.forEach(({ state }, i) => {
       const at = `${log.id} ${i === 0 ? 'Start' : `step ${i}`}`
       if (state.stack.length > EL_LIMITS.stackDepth)
-        once(`${at}: call stack is ${state.stack.length} deep > ${EL_LIMITS.stackDepth}`)
+        once(
+          `${at}: call stack is ${state.stack.length} deep > ${EL_LIMITS.stackDepth}`,
+        )
       for (const [lane, kind, width] of lanes) {
         for (const c of state[lane]) {
           const w = chipWidth(c.label, kind)
-          if (w > width) once(`${log.id}: ${lane} chip "${c.label}" is ${w}px > ${width}px at 320 (it would truncate)`)
+          if (w > width)
+            once(
+              `${log.id}: ${lane} chip "${c.label}" is ${w}px > ${width}px at 320 (it would truncate)`,
+            )
         }
-        if (lane !== 'stack' && queueVisible(state[lane], kind, width, G.queueRows) < state[lane].length)
-          once(`${at}: ${lane} holds ${state[lane].length} items, more than ${G.queueRows} rows at 320 (it would collapse)`)
+        if (
+          lane !== 'stack' &&
+          queueVisible(state[lane], kind, width, G.queueRows) <
+            state[lane].length
+        )
+          once(
+            `${at}: ${lane} holds ${state[lane].length} items, more than ${G.queueRows} rows at 320 (it would collapse)`,
+          )
       }
       for (const out of state.console) {
         const w = outWidth(out)
         if (w > m.consoleWidth.narrow)
-          once(`${log.id}: console output "${out}" is ${w}px > ${m.consoleWidth.narrow}px at 320 (it would truncate)`)
+          once(
+            `${log.id}: console output "${out}" is ${w}px > ${m.consoleWidth.narrow}px at 320 (it would truncate)`,
+          )
       }
-      if (consoleVisible(state.console, m.consoleWidth.narrow, G.consoleRows) < state.console.length)
-        once(`${at}: ${state.console.length} outputs need more than ${G.consoleRows} rows at 320 (older ones would collapse)`)
+      if (
+        consoleVisible(state.console, m.consoleWidth.narrow, G.consoleRows) <
+        state.console.length
+      )
+        once(
+          `${at}: ${state.console.length} outputs need more than ${G.consoleRows} rows at 320 (older ones would collapse)`,
+        )
     })
   return errors
 }
