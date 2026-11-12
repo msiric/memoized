@@ -1,30 +1,57 @@
 'use client'
 
-import { forwardRef, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  forwardRef,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { cn as clsx } from '../primitives/cn'
-import { focusRingGroup, radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
+import { focusRingGroup, motionRules, radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
 import type { CheckpointStatus } from './machine'
 
 /**
- * The stepper: a single tab stop, `role="slider"` (spec §5.1, §5.2). One tick
- * per step, diamond ticks for checkpoints (hollow open, filled answered,
- * crossed skipped). Thumb 28 px inside a 44 px hit area. Keys are handled by
- * the frame so they keep working after a button is clicked.
+ * The stepper: a single tab stop, `role="slider"` (spec §5.1, §5.2, D12). One
+ * tick per step; a checkpoint is a diamond drawn on the step it gates, in
+ * place of that step's tick (hollow open, filled answered, crossed skipped).
+ * Thumb 28 px inside a 44 px hit area. Keys are handled by the frame so they
+ * keep working after a button is clicked.
  *
- * Colors (VDS v3): the track is `line`, progress and thumb are the accent
- * fill (lime-500, the platform filled control, drift C05), the thumb's gap
- * ring and hollow diamonds use the opaque frame color (`vz-frame`), and focus
- * is the shared ring drawn around the thumb.
+ * Geometry (F1): the thumb travels on a rail inset by half a thumb on each
+ * side; it is the only element that translates, by a share of the rail's own
+ * width (`cqw`), so nothing ever extends past the slider. Sizes are in rem, so
+ * the slider scales with the reader's text size (D19).
+ *
+ * Pointer (D12, M18): `touch-action: pan-y`, so a vertical swipe that starts
+ * on the slider scrolls the page. A mouse or pen seeks on press and drags. A
+ * touch seeks only on a tap, or once the finger has moved `SLOP_PX`
+ * horizontally more than vertically; a vertical gesture never changes the
+ * step. While dragging, hovering (mouse) or stepping from the keyboard (it
+ * lingers `tooltipLingerMs` after the last key, so it never sits over the
+ * dock), a tooltip above the thumb names the step, clamped inside the slider.
+ *
+ * When the thumb sits on a checkpoint's step it carries the diamond itself,
+ * so the thumb never hides whether that checkpoint was answered or skipped.
  */
 
-const THUMB = 28
+/** Thumb diameter in rem (28 px at the default 16 px root). */
+const THUMB_REM = 1.75
+/** Finger travel (px) before a touch counts as a horizontal drag, or as a scroll. */
+const SLOP_PX = 8
 const MAX_TICKS = 24
+const STEP_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End'])
+
+export type ScrubberCheckpoint = { at: number; status: CheckpointStatus }
 
 export type ScrubberProps = {
   index: number
   total: number
   events: readonly string[]
-  checkpoints: readonly { at: number; status: CheckpointStatus }[]
+  /** Each checkpoint on the step it gates (its reveal step). */
+  checkpoints: readonly ScrubberCheckpoint[]
   valueText: string
   label: string
   interactive: boolean
@@ -32,55 +59,128 @@ export type ScrubberProps = {
   onSeek: (to: number) => void
 }
 
-function Diamond({ status }: { status: CheckpointStatus }) {
+function Diamond({ status, onThumb = false }: { status: CheckpointStatus; onThumb?: boolean }) {
+  const ink = onThumb ? 'stroke-zinc-900' : 'stroke-zinc-100 print:stroke-zinc-900'
+  const fill =
+    status === 'answered'
+      ? onThumb
+        ? 'fill-zinc-900'
+        : 'fill-zinc-100 print:fill-zinc-900'
+      : onThumb
+        ? 'fill-transparent'
+        : 'fill-vz-frame print:fill-white'
   return (
-    <svg aria-hidden width="12" height="12" viewBox="0 0 12 12" className="block">
-      <path
-        d="M6 1 L11 6 L6 11 L1 6 Z"
-        strokeWidth="1.5"
-        className={clsx(
-          'stroke-zinc-100 print:stroke-zinc-900',
-          status === 'answered' ? 'fill-zinc-100 print:fill-zinc-900' : 'fill-vz-frame print:fill-white',
-        )}
-      />
-      {status === 'skipped' ? <path d="M4 4 L8 8 M8 4 L4 8" strokeWidth="1.5" className="stroke-zinc-100" /> : null}
+    <svg aria-hidden viewBox="0 0 12 12" className="block h-3 w-3" data-diamond={status}>
+      <path d="M6 1 L11 6 L6 11 L1 6 Z" strokeWidth="1.5" className={clsx(ink, fill)} />
+      {status === 'skipped' ? <path d="M4 4 L8 8 M8 4 L4 8" strokeWidth="1.5" className={ink} /> : null}
     </svg>
   )
 }
+
+type Gesture = { id: number; x: number; y: number; drag: boolean }
 
 export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrubber(
   { index, total, events, checkpoints, valueText, label, interactive, animate, onSeek },
   ref,
 ) {
-  const trackRef = useRef<HTMLDivElement>(null)
+  const railRef = useRef<HTMLDivElement>(null)
+  const tipRef = useRef<HTMLDivElement>(null)
+  const gesture = useRef<Gesture | null>(null)
   const [hover, setHover] = useState<number | null>(null)
   const [dragging, setDragging] = useState(false)
+  const [keyTip, setKeyTip] = useState(false)
+  const keyTimer = useRef<number>()
+  useEffect(() => () => window.clearTimeout(keyTimer.current), [])
   const last = Math.max(1, total - 1)
   const fraction = (n: number) => n / last
+
   const stepAt = (clientX: number) => {
-    const rect = trackRef.current?.getBoundingClientRect()
-    if (!rect || rect.width <= THUMB) return index
-    const f = (clientX - rect.left - THUMB / 2) / (rect.width - THUMB)
+    const rect = railRef.current?.getBoundingClientRect()
+    if (!rect || rect.width <= 0) return index
+    const f = (clientX - rect.left) / rect.width
     return Math.max(0, Math.min(last, Math.round(f * last)))
   }
+
+  const startDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    setDragging(true)
+    const n = stepAt(e.clientX)
+    if (n !== index) onSeek(n)
+  }
+
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!interactive || e.button !== 0) return
-    e.currentTarget.setPointerCapture(e.pointerId)
-    setDragging(true)
-    onSeek(stepAt(e.clientX))
+    gesture.current = {
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      drag: false,
+    }
+    // A mouse or a pen has no scroll gesture to compete with: seek on press.
+    if (e.pointerType !== 'touch') {
+      gesture.current.drag = true
+      startDrag(e)
+    }
   }
+
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     if (!interactive) return
+    if (e.pointerType === 'mouse') setHover(stepAt(e.clientX))
+    const g = gesture.current
+    if (!g || g.id !== e.pointerId) return
+    if (!g.drag) {
+      const dx = Math.abs(e.clientX - g.x)
+      const dy = Math.abs(e.clientY - g.y)
+      if (dx > SLOP_PX && dx > dy) {
+        g.drag = true
+        startDrag(e)
+      } else if (dy > SLOP_PX) {
+        // A vertical swipe: the page scrolls (pan-y) and the step stays.
+        gesture.current = null
+      }
+      return
+    }
     const n = stepAt(e.clientX)
-    if (e.pointerType === 'mouse') setHover(n)
-    if (dragging && n !== index) onSeek(n)
+    if (n !== index) onSeek(n)
   }
-  const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
+
+  const endGesture = (e: ReactPointerEvent<HTMLDivElement>, commit: boolean) => {
+    const g = gesture.current
+    if (g && g.id === e.pointerId && !g.drag && commit) {
+      // A tap: seek where the finger lifted.
+      const n = stepAt(e.clientX)
+      if (n !== index) onSeek(n)
+    }
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId)
+    gesture.current = null
     setDragging(false)
   }
-  const tip = dragging ? index : hover
+
+  const tip = !interactive ? null : dragging ? index : (hover ?? (keyTip ? index : null))
   const showTicks = total <= MAX_TICKS
+  const gated = new Set(checkpoints.map((c) => c.at))
+  const onThumb = checkpoints.find((c) => c.at === index)
+
+  // Keep the tooltip inside the slider: centred on the thumb, clamped at the ends.
+  useLayoutEffect(() => {
+    const t = tipRef.current
+    const rail = railRef.current
+    if (tip === null || !t || !rail) return
+    const host = rail.parentElement!.getBoundingClientRect()
+    const r = rail.getBoundingClientRect()
+    const centre = r.left - host.left + fraction(tip) * r.width
+    const w = t.offsetWidth
+    t.style.left = `${Math.max(0, Math.min(host.width - w, centre - w / 2))}px`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tip, total])
+
+  const half = `${THUMB_REM / 2}rem`
+  const thumbStyle: CSSProperties = {
+    width: `${THUMB_REM}rem`,
+    height: `${THUMB_REM}rem`,
+    marginLeft: `-${half}`,
+    transform: `translate(calc(${fraction(index)} * 100cqw), -50%)`,
+  }
 
   return (
     <div
@@ -97,35 +197,41 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
       data-viz-focus="stepper"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerCancel={endDrag}
+      onPointerUp={(e) => endGesture(e, true)}
+      onPointerCancel={(e) => endGesture(e, false)}
       onPointerLeave={() => setHover(null)}
-      // Focus shows as a 2 px `now` ring around the thumb (offset 2), not a
-      // box around the whole track.
+      onBlur={() => setKeyTip(false)}
+      onKeyDown={(e) => {
+        if (!STEP_KEYS.has(e.key)) return
+        setKeyTip(true)
+        window.clearTimeout(keyTimer.current)
+        keyTimer.current = window.setTimeout(() => setKeyTip(false), motionRules.tooltipLingerMs)
+      }}
+      // Focus shows as the shared ring around the thumb, not a box around the track.
       className={clsx(
-        'group relative h-11 w-full touch-none select-none outline-none',
+        'group relative h-11 w-full touch-pan-y select-none outline-none',
         interactive && 'cursor-pointer',
       )}
     >
-      <div ref={trackRef} className="absolute inset-0">
-        {/* Track: a 2 px `line` rule between the thumb centres. */}
-        <div
-          className="absolute top-1/2 h-0.5 -translate-y-1/2 bg-zinc-500"
-          style={{ left: THUMB / 2, right: THUMB / 2 }}
-        />
-        <div
-          className="absolute top-1/2 h-0.5 -translate-y-1/2 overflow-hidden"
-          style={{ left: THUMB / 2, right: THUMB / 2 }}
-        >
+      <div
+        ref={railRef}
+        data-viz-part="scrubber-rail"
+        className="absolute inset-y-0"
+        style={{ left: half, right: half, containerType: 'inline-size' }}
+      >
+        {/* Track: a 2 px `line` rule between the thumb centres, progress in the accent. */}
+        <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-zinc-500" />
+        <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 overflow-hidden">
           <div
             className={clsx('h-full w-full bg-lime-500 print:bg-lime-700', animate && transitionCls.highlight)}
-            style={{ transform: `translateX(${(fraction(index) - 1) * 100}%)` }}
+            style={{
+              transform: `translateX(${(fraction(index) - 1) * 100}%)`,
+            }}
           />
         </div>
-        {/* Ticks and checkpoint diamonds, centred on each step position. */}
-        <div className="absolute inset-y-0" style={{ left: THUMB / 2, right: THUMB / 2 }}>
-          {showTicks
-            ? Array.from({ length: total }, (_, n) => (
+        {showTicks
+          ? Array.from({ length: total }, (_, n) =>
+              gated.has(n) ? null : (
                 <span
                   key={n}
                   aria-hidden
@@ -135,49 +241,50 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
                   )}
                   style={{ left: `${fraction(n) * 100}%` }}
                 />
-              ))
-            : null}
-          {checkpoints.map((cp) => (
-            <span
-              key={cp.at}
-              aria-hidden
-              data-checkpoint={cp.status}
-              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
-              style={{ left: `${fraction(cp.at) * 100}%` }}
-            >
-              <Diamond status={cp.status} />
-            </span>
-          ))}
-        </div>
-        {/* Thumb: moves by translate only. */}
-        <div className="pointer-events-none absolute inset-y-0 left-0" style={{ right: THUMB }}>
-          <div
-            className={clsx('absolute inset-y-0 left-0 w-full', animate && transitionCls.highlight)}
-            style={{ transform: `translateX(${fraction(index) * 100}%)` }}
-          >
-            <span
-              aria-hidden
-              className={clsx(
-                'absolute left-0 top-1/2 block h-7 w-7 -translate-y-1/2 rounded-full border-2 border-vz-frame bg-lime-500 print:border-white print:bg-lime-700',
-                focusRingGroup,
-              )}
-            />
-          </div>
-        </div>
-        {tip !== null && interactive ? (
-          <div
+              ),
+            )
+          : null}
+        {checkpoints.map((cp) => (
+          <span
+            key={cp.at}
             aria-hidden
-            className={clsx(
-              'pointer-events-none absolute bottom-full z-10 mb-1 -translate-x-1/2 whitespace-nowrap border border-zinc-700 bg-zinc-900 px-2 text-zinc-100',
-              radius.row.cls,
-              typeScale.status.cls,
-            )}
-            style={{ left: `calc(${THUMB / 2}px + (100% - ${THUMB}px) * ${fraction(tip)})` }}
+            data-checkpoint={cp.status}
+            data-checkpoint-step={cp.at}
+            className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{ left: `${fraction(cp.at) * 100}%` }}
           >
-            {tip === 0 ? 'Start' : `Step ${tip}: ${events[tip]}`}
-          </div>
-        ) : null}
+            <Diamond status={cp.status} />
+          </span>
+        ))}
+        {/* Thumb: the only element that translates. */}
+        <span
+          aria-hidden
+          data-viz-part="scrubber-thumb"
+          className={clsx(
+            'absolute left-0 top-1/2 flex items-center justify-center rounded-full border-2 border-vz-frame print:border-white print:bg-lime-700',
+            dragging ? 'bg-lime-600' : 'bg-lime-500 group-active:bg-lime-600',
+            focusRingGroup,
+            animate && transitionCls.highlight,
+          )}
+          style={thumbStyle}
+        >
+          {onThumb ? <Diamond status={onThumb.status} onThumb /> : null}
+        </span>
       </div>
+      {tip !== null ? (
+        <div
+          ref={tipRef}
+          aria-hidden
+          data-viz-part="scrubber-tip"
+          className={clsx(
+            'pointer-events-none absolute bottom-full left-0 z-10 mb-1 whitespace-nowrap border border-zinc-700 bg-zinc-900 px-2 text-zinc-100',
+            radius.row.cls,
+            typeScale.status.cls,
+          )}
+        >
+          {tip === 0 ? 'Start' : `Step ${tip}: ${events[tip]}`}
+        </div>
+      ) : null}
     </div>
   )
 })

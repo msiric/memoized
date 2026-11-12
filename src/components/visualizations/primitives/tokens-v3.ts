@@ -588,6 +588,8 @@ export const motionRules = {
   maxTransitionShareOfInterval: 0.4,
   /** P: ProblemCard/index.tsx:210 (chevron, 200 ms). */
   disclosureMs: 200,
+  /** D12: the scrubber's step tooltip stays this long after the last key press. */
+  tooltipLingerMs: 1000,
 } as const
 
 /**
