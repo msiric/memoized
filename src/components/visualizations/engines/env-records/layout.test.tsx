@@ -8,7 +8,9 @@ import {
   segments,
   textWidth,
 } from '../../substrates/box-arrow'
+import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
+import { lintEnvDiagram } from './lint'
 import { CONTAINER, EnvRecordsStage } from './EnvRecordsStage'
 import { SIZE, layoutDiagram, layoutSection, type SectionScene } from './layout'
 import type { EnvSection } from './model'
@@ -157,6 +159,84 @@ describe('the layout follows the links', () => {
     for (const e of s.edges.filter((x) => x.kind === 'outer'))
       expect(e.points[e.points.length - 1].y).toBeLessThan(e.points[0].y)
     expect(s.edges.find((e) => e.id === 'outer:it3')!.dashed).toBe(true)
+  })
+})
+
+describe('factory: functions beside the module (D18)', () => {
+  const [counters] = envRecordsDescriptor.presets[1].data.sections
+  it.each([288, 295, 343, 359])('aliases converge on one function without a detour @ %i', (w) => {
+    const s = layoutSection(counters, w, Math.min(w, 288), new Set(counters.highlight))
+    const box = (id: string) => s.boxes.find((b) => b.id === id)!.rect
+    const mod = box('module')
+    for (const f of ['fA', 'fB']) expect(box(f).x).toBeGreaterThan(mod.x + mod.w)
+    const fA = box('fA')
+    for (const name of ['counter1', 'sameCounter']) {
+      const e = s.edges.find((x) => x.id === `ref:module.${name}`)!
+      const end = e.points[e.points.length - 1]
+      expect(end.x).toBe(fA.x)
+      expect(end.y).toBe(fA.y + fA.h / 2)
+      // From the dot to the function: no route under the figure.
+      const len = segments(e.points).reduce((t, g) => t + Math.abs(g.a.x - g.b.x) + Math.abs(g.a.y - g.b.y), 0)
+      expect(len).toBeLessThan(120)
+    }
+    // Records sit above their functions, so [[Environment]] still points up.
+    for (const k of ['A', 'B']) {
+      const e = s.edges.find((x) => x.id === `env:f${k}`)!
+      expect(e.points[e.points.length - 1].y).toBeLessThan(e.points[0].y)
+    }
+  })
+})
+
+describe('geometry is crisp (F-ER-08)', () => {
+  it.each(cases)('%s: no jog shorter than two corner radii, box edges on whole pixels', (_n, data, variant) => {
+    for (const { scenes } of layoutDiagram(data, variant).sections)
+      for (const s of scenes) {
+        for (const b of s.boxes) expect(Number.isInteger(b.rect.x), b.id).toBe(true)
+        for (const e of s.edges)
+          for (const g of segments(e.points)) {
+            const len = Math.abs(g.a.x - g.b.x) + Math.abs(g.a.y - g.b.y)
+            if (e.kind !== 'ref') expect(len === 0 || len >= 8, `${e.id} @ ${s.width}`).toBe(true)
+          }
+      }
+  })
+})
+
+describe('adversarial data the layout accepts never collides (A3)', () => {
+  const fixtures = ENV_PRESETS.flatMap((p) => (['narrow', 'wide'] as const).map((v) => [`${p.id} ${v}`, p.data, v] as const))
+  it.each(fixtures)('%s', (_n, data, variant) => {
+    let scene
+    try {
+      scene = layoutDiagram(data, variant)
+    } catch {
+      return // rejected by the lint before rendering
+    }
+    for (const { scenes } of scene.sections)
+      for (const s of scenes)
+        for (let i = 0; i < s.boxes.length; i++)
+          for (let j = i + 1; j < s.boxes.length; j++)
+            expect(intersects(s.boxes[i].rect, s.boxes[j].rect, 7), `${s.boxes[i].id} x ${s.boxes[j].id} @ ${s.width}`).toBe(
+              false,
+            )
+  })
+})
+
+describe('authoring lint (A3, A9, A10)', () => {
+  it.each(envRecordsDescriptor.presets.map((p) => [p.id, p.data] as const))('%s passes', (_id, data) => {
+    expect(lintEnvDiagram(data)).toEqual([])
+  })
+  it('names the over-long heading and the tier that does not fit', () => {
+    const byId = Object.fromEntries(ENV_PRESETS.map((p) => [p.id, lintEnvDiagram(p.data).join('\n')]))
+    expect(byId['er-text-limit']).toMatch(/heading \(narrow\): \d+px > 288px/)
+    expect(byId['er-long-names']).toMatch(/does not fit/)
+  })
+})
+
+describe('text width model (A6)', () => {
+  it('measures CJK at 1 em and emoji at 1.25 em, one cluster per ZWJ sequence', () => {
+    expect(textWidth('漢字', 10)).toBeCloseTo(20)
+    expect(textWidth('🎉', 10)).toBeCloseTo(12.5)
+    expect(textWidth('👩‍👩‍👧', 10)).toBeCloseTo(12.5)
+    expect(textWidth('é', 10)).toBeCloseTo(6.1)
   })
 })
 

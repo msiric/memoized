@@ -343,14 +343,16 @@ test('list-keys keyboard, focus and checkpoint flow', async ({ page }) => {
   await f.getByRole('button', { name: 'Append', exact: true }).click()
   await page.waitForTimeout(300)
   flow.noCheckApply = { ...(await st()), live: await takeLive(page) }
-  // Scene switch by keyboard.
-  await f.getByRole('radiogroup', { name: 'Scene' }).getByRole('radio', { checked: true }).focus()
+  // Key strategy switch by keyboard (the wrapper scene is its own preset, D17).
+  await toPick()
+  await f.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { checked: true }).focus()
   await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(300)
-  flow.sceneArrow = { ...(await st()), live: await takeLive(page) }
+  flow.keyArrow = { ...(await st()), live: await takeLive(page) }
+  await page.keyboard.press('End')
   await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(300)
-  flow.sceneArrowWrap = await st()
+  flow.keyArrowWrap = await st()
   out.listKeysFlow = flow
 })
 
@@ -372,7 +374,6 @@ test('hover, press and focus styles of equivalent controls', async ({ page }) =>
   r['el:preset segment (unselected)'] = await feedback(page, el.getByRole('radio', { name: 'Drain' }), 'span')
   r['el:Steps as text'] = await feedback(page, el.locator('summary'))
   await lk.scrollIntoViewIfNeeded()
-  r['lk:scene segment (unselected)'] = await feedback(page, lk.getByRole('radio', { name: 'Wrapper type' }), 'span')
   r['lk:key segment (unselected)'] = await feedback(page, lk.getByRole('radio', { name: 'Id' }), 'span')
   r['lk:choice row'] = await feedback(page, lk.locator('[data-choice-index="0"]'))
   r['lk:Skip (quiet)'] = await feedback(page, lk.locator('[data-viz-part="viz-skip"]'))
@@ -406,7 +407,6 @@ test('hover, press and focus styles of equivalent controls', async ({ page }) =>
   await focusRing('el:preset', el.getByRole('radio', { checked: true }))
   await focusRing('el:choice', el.locator('[data-choice]').first())
   await focusRing('el:summary', el.locator('summary'))
-  await focusRing('lk:scene', lk.getByRole('radiogroup', { name: 'Scene' }).getByRole('radio', { checked: true }))
   await focusRing('lk:key', lk.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { checked: true }))
   await focusRing('lk:checkbox', lk.locator('input[type="checkbox"]').first())
   await focusRing('lk:action', lk.getByRole('button', { name: 'Append', exact: true }))

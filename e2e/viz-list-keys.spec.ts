@@ -55,6 +55,13 @@ const keyRadio = (page: Page, k: KeyStrategy) =>
       exact: true,
     })
 
+/** The wrapper-type case is its own preset (D17), opened through the mount's preset. */
+async function openWrapper(page: Page, width: number) {
+  await open(page, width, '?lk=parent-type-change')
+  await expect(frame(page)).toHaveAttribute('data-viz-scene', 'wrapper')
+  await frame(page).getByTestId('viz-back').click()
+}
+
 async function setKey(page: Page, k: KeyStrategy) {
   await keyRadio(page, k).click()
 }
@@ -188,12 +195,8 @@ test('keyboard only: every control, focus never lost (§5.2)', async ({
             a.tagName)
         : 'outside'
     })
-  // Into the frame: scene switcher, then the key strategy.
-  await f
-    .getByRole('radiogroup', { name: 'Scene' })
-    .getByRole('radio', { checked: true })
-    .focus()
-  await page.keyboard.press('Tab')
+  // Into the frame: the key strategy is the first stop (no scene tabs, D17).
+  await keyRadio(page, 'index').focus()
   await expect(keyRadio(page, 'index')).toBeFocused()
   await page.keyboard.press('ArrowRight')
   await expect(f).toHaveAttribute('data-viz-key', 'id')
@@ -228,20 +231,21 @@ test('keyboard only: every control, focus never lost (§5.2)', async ({
   expect(await active()).toBe('action-delete-first')
   await page.keyboard.press('Enter')
   expect(await active()).toBe('choice-0')
+  // Esc never resets (D13): the prediction and focus stay.
   await page.keyboard.press('Escape')
-  await expect(f).toHaveAttribute('data-viz-mode', 'pick')
-  expect(await active()).toBe('action-delete-first')
-  await page.keyboard.press('Enter')
+  await expect(f).toHaveAttribute('data-viz-mode', 'ask')
+  expect(await active()).toBe('choice-0')
   await page.keyboard.press('1')
   await expect(f).toHaveAttribute('data-viz-mode', 'reveal')
-  expect(await active()).toBe('again')
-  // The scene switcher by arrows.
-  await f
-    .getByRole('radiogroup', { name: 'Scene' })
-    .getByRole('radio', { checked: true })
-    .focus()
-  await page.keyboard.press('ArrowRight')
-  await expect(f).toHaveAttribute('data-viz-scene', 'wrapper')
+  expect(await active(), 'the answered choice was replaced').toBe('again')
+  // A digit answer from outside the dock leaves focus where it is (M19).
+  await page.keyboard.press('Enter')
+  await expect(f).toHaveAttribute('data-viz-mode', 'pick')
+  await f.locator('[data-viz-focus="action-insert-top"]').click()
+  await keyRadio(page, 'id').focus()
+  await page.keyboard.press('2')
+  await expect(f).toHaveAttribute('data-viz-mode', 'reveal')
+  await expect(keyRadio(page, 'id')).toBeFocused()
   // The text alternative opens from the keyboard.
   await f.locator('summary').focus()
   await page.keyboard.press('Enter')
@@ -279,7 +283,8 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({
         ).toBeGreaterThanOrEqual(44)
         const seg = await t.evaluate((el) =>
           el.hasAttribute('data-segment')
-            ? (el.closest('[role="radiogroup"]')?.getAttribute('aria-label') ?? null)
+            ? (el.closest('[role="radiogroup"]')?.getAttribute('aria-label') ??
+              null)
             : null,
         )
         boxes.push({ name, x: b.x, y: b.y, w: b.width, h: b.height, seg })
@@ -302,7 +307,7 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({
     await check('reveal')
     await frame(page).getByTestId('viz-again').click()
     await check('pick')
-    await frame(page).getByRole('radio', { name: 'Wrapper type' }).click()
+    await openWrapper(page, width)
     await check('wrapper pick')
   }
 })
@@ -396,10 +401,11 @@ test('layout stability: nothing moves across every scene, key, action and phase'
     for (let i = 0; i < 10; i++)
       await f.locator('[data-viz-focus="check-dog"]').click()
     await same('burst')
-    await f.getByRole('radio', { name: 'Wrapper type' }).click()
+    // The wrapper case is its own preset (D17) with the same footprint.
+    await openWrapper(page, width)
     const wrapper = { ...base }
     const w = await layoutSnapshot(page)
-    // The key row holds the setup sentence in this scene; the outer regions hold still.
+    // The key row holds the setup sentence in this preset; the outer regions hold still.
     for (const k of ['frame', 'stage', 'status', 'dock', 'after'] as const)
       expect(w[k], `wrapper ${k}`).toEqual(wrapper[k])
     for (const a of ['type', 'class'] as const) {
@@ -460,7 +466,7 @@ test('no overflow or clipped text at 5 widths, in every phase and scene', async 
     }
     await f.getByTestId('viz-again').click()
     await check('pick')
-    await f.getByRole('radio', { name: 'Wrapper type' }).click()
+    await openWrapper(page, width)
     await check('wrapper pick')
     for (const a of ['type', 'class'] as const) {
       await reveal(page, a)
@@ -499,7 +505,7 @@ test('zero axe violations in every phase (§7)', async ({ page }) => {
     await scan('reveal')
     await f.getByTestId('viz-again').click()
     await scan('pick')
-    await f.getByRole('radio', { name: 'Wrapper type' }).click()
+    await openWrapper(page, width)
     await reveal(page, 'type')
     await scan('wrapper reveal')
     await f.locator('summary').click()
@@ -550,7 +556,7 @@ test('screenshots at 320, 375, 768, 1024 and 1440', async ({
     await shot(f, `lk-${width}-reveal-random`)
     await f.getByTestId('viz-again').click()
     await shot(f, `lk-${width}-pick`)
-    await f.getByRole('radio', { name: 'Wrapper type' }).click()
+    await openWrapper(page, width)
     await reveal(page, 'type')
     await page.waitForTimeout(400)
     await shot(f, `lk-${width}-wrapper-type`)

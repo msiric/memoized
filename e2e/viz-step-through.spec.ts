@@ -11,7 +11,7 @@ const GALLERY = '/dev/visualizations'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
 // entry-table.ts: the client-only placeholder's estimate, an upper bound. The
 // live dock is measured (a ghost stack, D15), so the frame is at most this tall.
-const FOOTPRINT = { narrow: 930, wide: 686 }
+const FOOTPRINT = { narrow: 900, wide: 732 }
 
 const mount = (page: Page) => page.locator('[data-viz="event-loop"]')
 const frame = (page: Page) => mount(page).locator('section')
@@ -32,18 +32,25 @@ test.afterEach(() => {
 async function open(page: Page, width: number, query = '', height = 900) {
   await page.setViewportSize({ width, height })
   await page.goto(GALLERY + query)
-  await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
+  await expect(
+    mount(page).locator('[data-viz-interactive="true"]'),
+  ).toBeVisible()
 }
 
 async function state(page: Page) {
   const f = frame(page)
-  return { step: await f.getAttribute('data-viz-step'), mode: await f.getAttribute('data-viz-mode') }
+  return {
+    step: await f.getAttribute('data-viz-step'),
+    mode: await f.getAttribute('data-viz-mode'),
+  }
 }
 
 async function focusIsInFrame(page: Page) {
   return page.evaluate(() => {
     const a = document.activeElement
-    return Boolean(a && a !== document.body && a.closest('[data-viz="event-loop"]'))
+    return Boolean(
+      a && a !== document.body && a.closest('[data-viz="event-loop"]'),
+    )
   })
 }
 
@@ -53,8 +60,23 @@ async function layoutSnapshot(page: Page) {
     const root = document.querySelector('[data-viz="event-loop"]')!
     const els: [string, Element | null][] = [
       ['frame', root.querySelector('section')],
-      ...['stage', 'stepbar', 'dock', 'bar', 'code', 'stack', 'host', 'micro', 'tasks', 'console'].map(
-        (r) => [r, root.querySelector(`[data-viz-region="${r}"]`)] as [string, Element | null],
+      ...[
+        'stage',
+        'stepbar',
+        'dock',
+        'bar',
+        'code',
+        'stack',
+        'host',
+        'micro',
+        'tasks',
+        'console',
+      ].map(
+        (r) =>
+          [r, root.querySelector(`[data-viz-region="${r}"]`)] as [
+            string,
+            Element | null,
+          ],
       ),
       ['after', root.nextElementSibling],
     ]
@@ -63,7 +85,18 @@ async function layoutSnapshot(page: Page) {
         const r = el!.getBoundingClientRect()
         const y = Math.round(r.y + window.scrollY)
         // The code pane hugs each preset's code inside the fixed stage; only
-        // its position and width must hold.
+        // its position and width must hold. From 768 the console fills the
+        // left column under it (D16), so it holds its column and its bottom.
+        if (k === 'console')
+          return [
+            k,
+            [
+              Math.round(r.x),
+              Math.round(r.bottom + window.scrollY),
+              Math.round(r.width),
+              0,
+            ],
+          ]
         const h = k === 'code' ? 0 : Math.round(r.height)
         return [k, [Math.round(r.x), y, Math.round(r.width), h]]
       }),
@@ -79,7 +112,9 @@ async function stepTo(page: Page, n: number) {
   }
 }
 
-test('loads paused at Start and stays paused (no autoplay, A1)', async ({ page }) => {
+test('loads paused at Start and stays paused (no autoplay, A1)', async ({
+  page,
+}) => {
   await page.clock.install()
   await open(page, 1024)
   await page.clock.fastForward(10_000)
@@ -87,7 +122,9 @@ test('loads paused at Start and stays paused (no autoplay, A1)', async ({ page }
   await expect(frame(page).getByRole('button', { name: 'Play' })).toBeVisible()
 })
 
-test('keyboard-only walkthrough (tab order, every key, focus never lost)', async ({ page }) => {
+test('keyboard-only walkthrough (tab order, every key, focus never lost)', async ({
+  page,
+}) => {
   await open(page, 1024)
   const f = frame(page)
 
@@ -122,11 +159,15 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight')
   expect(await state(page)).toEqual({ step: '5', mode: 'ask' })
   await expect(slider(page)).toBeFocused()
-  await expect(f.getByTestId('viz-live')).toContainText('Checkpoint: D has logged. What logs next?')
+  await expect(f.getByTestId('viz-live')).toContainText(
+    'Checkpoint: D has logged. What logs next?',
+  )
 
   // → moves focus to the first choice; arrows move between choices; Enter commits.
   await page.keyboard.press('ArrowRight')
-  const choices = f.getByRole('radiogroup', { name: 'D has logged. What logs next?' }).getByRole('radio')
+  const choices = f
+    .getByRole('radiogroup', { name: 'D has logged. What logs next?' })
+    .getByRole('radio')
   await expect(choices.first()).toBeFocused()
   await page.keyboard.press('ArrowDown')
   await expect(choices.nth(1)).toBeFocused()
@@ -138,7 +179,13 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   // Finish: the console holds the verified order.
   for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight')
   await expect(f.getByTestId('viz-counter')).toHaveText('8 / 8')
-  await expect(f.locator('[data-viz-region="console"] li')).toHaveText(['1› A', '2› D', '3› C', '4› B'])
+  await expect(f.locator('[data-viz-region="console"] li')).toHaveText([
+    // One left-to-right strip in log order: the position is the order (D16).
+    '›A',
+    '›D',
+    '›C',
+    '›B',
+  ])
 
   // Home restarts and re-asks with memory; End skips the open checkpoint.
   await page.keyboard.press('Home')
@@ -148,7 +195,10 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   await page.keyboard.press('Home')
   await page.keyboard.press('End')
   expect((await state(page)).step).toBe('8')
-  await expect(f.locator('[data-checkpoint]')).toHaveAttribute('data-checkpoint', 'skipped')
+  await expect(f.locator('[data-checkpoint]')).toHaveAttribute(
+    'data-checkpoint',
+    'skipped',
+  )
 
   // Space and K toggle play; Escape pauses without resetting.
   await page.keyboard.press('Home')
@@ -177,22 +227,47 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
 /** The segmented control a target belongs to, if it is a segment. */
 const segmentGroup = (t: Locator) =>
   t.evaluate((el) =>
-    el.hasAttribute('data-segment') ? (el.closest('[role="radiogroup"]')?.getAttribute('aria-label') ?? null) : null,
+    el.hasAttribute('data-segment')
+      ? (el.closest('[role="radiogroup"]')?.getAttribute('aria-label') ?? null)
+      : null,
   )
 
-test('touch targets are at least 44×44 with 8 px between them (A5)', async ({ page }) => {
+test('touch targets are at least 44×44 with 8 px between them (A5)', async ({
+  page,
+}) => {
   for (const width of [320, 375, 1024]) {
     await open(page, width, '', 1200)
     const check = async (where: string) => {
       const targets = frame(page).locator('button, [role="slider"], summary')
-      const boxes: { name: string; x: number; y: number; w: number; h: number; seg: string | null }[] = []
+      const boxes: {
+        name: string
+        x: number
+        y: number
+        w: number
+        h: number
+        seg: string | null
+      }[] = []
       for (const t of await targets.all()) {
         if (!(await t.isVisible())) continue
         const b = (await t.boundingBox())!
-        const name = (await t.getAttribute('aria-label')) ?? (await t.innerText())
-        expect(b.width, `${where} ${width}: ${name} width`).toBeGreaterThanOrEqual(44)
-        expect(b.height, `${where} ${width}: ${name} height`).toBeGreaterThanOrEqual(44)
-        boxes.push({ name, x: b.x, y: b.y, w: b.width, h: b.height, seg: await segmentGroup(t) })
+        const name =
+          (await t.getAttribute('aria-label')) ?? (await t.innerText())
+        expect(
+          b.width,
+          `${where} ${width}: ${name} width`,
+        ).toBeGreaterThanOrEqual(44)
+        expect(
+          b.height,
+          `${where} ${width}: ${name} height`,
+        ).toBeGreaterThanOrEqual(44)
+        boxes.push({
+          name,
+          x: b.x,
+          y: b.y,
+          w: b.width,
+          h: b.height,
+          seg: await segmentGroup(t),
+        })
       }
       for (const a of boxes)
         for (const b of boxes) {
@@ -201,7 +276,10 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({ p
           if (a === b || (a.seg && a.seg === b.seg)) continue
           const dx = Math.max(b.x - (a.x + a.w), a.x - (b.x + b.w))
           const dy = Math.max(b.y - (a.y + a.h), a.y - (b.y + b.h))
-          expect(Math.max(dx, dy), `${where} ${width}: ${a.name} / ${b.name} spacing`).toBeGreaterThanOrEqual(7.5)
+          expect(
+            Math.max(dx, dy),
+            `${where} ${width}: ${a.name} / ${b.name} spacing`,
+          ).toBeGreaterThanOrEqual(7.5)
         }
     }
     await check('start')
@@ -210,19 +288,29 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({ p
   }
 })
 
-test('reduced motion: no translation, information unchanged (A4)', async ({ page }) => {
+test('reduced motion: no translation, information unchanged (A4)', async ({
+  page,
+}) => {
   const sample = async () => {
     await stepTo(page, 0)
     await slider(page).press('ArrowRight')
     await page.waitForTimeout(40)
     return page.evaluate(() => {
-      const chip = document.querySelector<HTMLElement>('[data-viz="event-loop"] [data-glyph="script"]')!
-      return { transform: getComputedStyle(chip).transform, focused: chip.querySelector('[data-focus]') !== null }
+      const chip = document.querySelector<HTMLElement>(
+        '[data-viz="event-loop"] [data-glyph="script"]',
+      )!
+      return {
+        transform: getComputedStyle(chip).transform,
+        focused: chip.querySelector('[data-focus]') !== null,
+      }
     })
   }
   await open(page, 1024)
   const full = await sample()
-  expect(full.transform, 'full motion translates the entering frame').not.toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/)
+  expect(
+    full.transform,
+    'full motion translates the entering frame',
+  ).not.toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/)
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, 1024)
@@ -249,22 +337,35 @@ test('a callback that changes region slides there with the move spring (none und
     await slider(page).press('ArrowRight')
     await page.waitForTimeout(30)
     return page.evaluate(() => {
-      const el = document.querySelector<HTMLElement>('[data-viz="event-loop"] [data-flip-id="timer"]')!
+      const el = document.querySelector<HTMLElement>(
+        '[data-viz="event-loop"] [data-flip-id="timer"]',
+      )!
       const moving = el.getAnimations().filter((a) => a.id === 'viz-move')
-      return { moving: moving.length, lane: el.closest('[data-viz-region]')!.getAttribute('data-viz-region') }
+      return {
+        moving: moving.length,
+        lane: el.closest('[data-viz-region]')!.getAttribute('data-viz-region'),
+      }
     })
   }
   await open(page, 1024)
   expect(await moveAfterStep5()).toEqual({ moving: 1, lane: 'tasks' })
   await page.waitForTimeout(400)
-  expect(await page.evaluate(() => document.querySelector('[data-flip-id="timer"]')!.getAnimations().length)).toBe(0)
+  expect(
+    await page.evaluate(
+      () =>
+        document.querySelector('[data-flip-id="timer"]')!.getAnimations()
+          .length,
+    ),
+  ).toBe(0)
 
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await open(page, 1024)
   expect(await moveAfterStep5()).toEqual({ moving: 0, lane: 'tasks' })
 })
 
-test('interrupting a transition lands on the next end state within one frame', async ({ page }) => {
+test('interrupting a transition lands on the next end state within one frame', async ({
+  page,
+}) => {
   await open(page, 1024)
   await slider(page).focus()
   await page.keyboard.press('ArrowRight')
@@ -276,12 +377,17 @@ test('interrupting a transition lands on the next end state within one frame', a
         requestAnimationFrame(() =>
           requestAnimationFrame(() => {
             const chips = [
-              ...document.querySelectorAll('[data-viz="event-loop"] [data-glyph], [data-viz="event-loop"] [data-out]'),
+              ...document.querySelectorAll(
+                '[data-viz="event-loop"] [data-glyph], [data-viz="event-loop"] [data-out]',
+              ),
             ]
             resolve(
               chips.every((c) => {
                 const s = getComputedStyle(c)
-                return Number(s.opacity) === 1 && /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/.test(s.transform)
+                return (
+                  Number(s.opacity) === 1 &&
+                  /^(none|matrix\(1, 0, 0, 1, 0, 0\))$/.test(s.transform)
+                )
               }),
             )
           }),
@@ -292,7 +398,9 @@ test('interrupting a transition lands on the next end state within one frame', a
   expect(settled).toBe(true)
 })
 
-test('the frame never moves: stepping, checkpoint, preset switch, bursts and play', async ({ page }) => {
+test('the frame never moves: stepping, checkpoint, preset switch, bursts and play', async ({
+  page,
+}) => {
   test.setTimeout(120_000)
   for (const width of [375, 1024]) {
     await open(page, width)
@@ -300,12 +408,18 @@ test('the frame never moves: stepping, checkpoint, preset switch, bursts and pla
       ;(window as unknown as { __shifts: number }).__shifts = 0
       // CLS semantics: shifts within 500 ms of input are expected and excluded.
       new PerformanceObserver((list) => {
-        for (const e of list.getEntries() as unknown as { value: number; hadRecentInput: boolean }[])
-          if (!e.hadRecentInput) (window as unknown as { __shifts: number }).__shifts += e.value
+        for (const e of list.getEntries() as unknown as {
+          value: number
+          hadRecentInput: boolean
+        }[])
+          if (!e.hadRecentInput)
+            (window as unknown as { __shifts: number }).__shifts += e.value
       }).observe({ type: 'layout-shift' })
     })
     const base = await layoutSnapshot(page)
-    expect(base.frame[3], `frame height at ${width}`).toBeLessThanOrEqual(width < 768 ? FOOTPRINT.narrow : FOOTPRINT.wide)
+    expect(base.frame[3], `frame height at ${width}`).toBeLessThanOrEqual(
+      width < 768 ? FOOTPRINT.narrow : FOOTPRINT.wide,
+    )
     const same = async (label: string) => {
       await page.waitForTimeout(350)
       expect(await layoutSnapshot(page), `${label} at ${width}`).toEqual(base)
@@ -328,18 +442,23 @@ test('the frame never moves: stepping, checkpoint, preset switch, bursts and pla
     await same('click burst')
     await page.keyboard.press('2')
     await slider(page).focus()
-    for (let i = 0; i < 10; i++) await page.keyboard.press('ArrowRight', { delay: 0 })
+    for (let i = 0; i < 10; i++)
+      await page.keyboard.press('ArrowRight', { delay: 0 })
     await same('10-key burst')
     await frame(page).getByRole('button', { name: 'Restart' }).click()
     await frame(page).getByRole('button', { name: 'Play' }).click()
     await page.waitForTimeout(3_500)
     await same('playing')
-    const shifts = await page.evaluate(() => (window as unknown as { __shifts: number }).__shifts)
+    const shifts = await page.evaluate(
+      () => (window as unknown as { __shifts: number }).__shifts,
+    )
     expect(shifts, 'cumulative layout shift').toBe(0)
   }
 })
 
-test('nothing overflows its reserved box at any width or step', async ({ page }) => {
+test('nothing overflows its reserved box at any width or step', async ({
+  page,
+}) => {
   test.setTimeout(180_000)
   for (const width of WIDTHS) {
     await open(page, width)
@@ -349,7 +468,9 @@ test('nothing overflows its reserved box at any width or step', async ({ page })
       for (let i = 0; i < 10; i++) {
         await page.waitForTimeout(350) // measure settled states
         const problems = await page.evaluate(() => {
-          const root = document.querySelector('[data-viz="event-loop"] section')!
+          const root = document.querySelector(
+            '[data-viz="event-loop"] section',
+          )!
           const out: string[] = []
           for (const el of root.querySelectorAll<HTMLElement>(
             '[data-viz-region], [data-viz-part="viz-caption"], [data-viz-part="viz-feedback"], [data-viz-part="viz-prompt"]',
@@ -357,7 +478,9 @@ test('nothing overflows its reserved box at any width or step', async ({ page })
             // The code pane is a window by design; its current line must be inside it.
             if (el.dataset.vizRegion === 'code') continue
             if (el.scrollHeight > el.clientHeight + 1)
-              out.push(`${el.dataset.vizRegion ?? el.dataset.vizPart} clips vertically`)
+              out.push(
+                `${el.dataset.vizRegion ?? el.dataset.vizPart} clips vertically`,
+              )
           }
           for (const p of root.querySelectorAll<HTMLElement>(
             '[data-viz-part="viz-caption"], [data-viz-part="viz-feedback"], [data-viz-part="viz-prompt"]',
@@ -366,12 +489,19 @@ test('nothing overflows its reserved box at any width or step', async ({ page })
             if (p.getBoundingClientRect().bottom > slot.bottom + 1)
               out.push(`${p.dataset.vizPart} taller than its slot`)
           }
-          const pane = root.querySelector('[data-viz-region="code"]')!.getBoundingClientRect()
-          for (const line of root.querySelectorAll('[data-viz-region="code"] [aria-current="true"]')) {
+          const pane = root
+            .querySelector('[data-viz-region="code"]')!
+            .getBoundingClientRect()
+          for (const line of root.querySelectorAll(
+            '[data-viz-region="code"] [aria-current="true"]',
+          )) {
             const r = line.getBoundingClientRect()
-            if (r.top < pane.top - 0.5 || r.bottom > pane.bottom + 0.5) out.push(`current line outside the code window`)
+            if (r.top < pane.top - 0.5 || r.bottom > pane.bottom + 0.5)
+              out.push(`current line outside the code window`)
           }
-          for (const code of root.querySelectorAll('[data-viz-region="code"] code')) {
+          for (const code of root.querySelectorAll(
+            '[data-viz-region="code"] code',
+          )) {
             if (code.getBoundingClientRect().right > pane.right + 0.5)
               out.push(`code line clipped: ${code.textContent}`)
           }
@@ -385,38 +515,57 @@ test('nothing overflows its reserved box at any width or step', async ({ page })
   }
 })
 
-// The sticky dock that made this pass is removed (VIZ-H D14); the fit comes
-// back through layout (D16: 2x2 lanes on phones, WS3). Re-enable with WS3.
-test.fixme('375×667 fit: code line, focused element, caption and Next stay visible', async ({ page }) => {
+// The fit comes from layout, not a sticky bar (D14, D16): on phones the
+// lanes form a 2x2 grid and the console is one strip. Spec §3.4: with the
+// code pane at the top of the viewport, every step of both presets.
+test('375×667 fit: code line, focused element, caption and Next stay visible', async ({
+  page,
+}) => {
   await open(page, 375, '', 667)
   const code = frame(page).locator('[data-viz-region="code"]')
-  await slider(page).focus()
-  for (let i = 0; i <= 8; i++) {
-    await code.evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY))
-    const v = await page.evaluate(() => {
-      const root = document.querySelector('[data-viz="event-loop"] section')!
-      const bar = root.querySelector('[data-viz-region="bar"]')!.getBoundingClientRect()
-      const visible = (el: Element | null) => {
-        if (!el) return true
-        const r = el.getBoundingClientRect()
-        return r.top >= 0 && r.bottom <= bar.top + 1
-      }
-      const next = root.querySelector('[data-viz-part="viz-next"]')!.getBoundingClientRect()
-      return {
-        line: visible(root.querySelector('[aria-current="true"]')),
-        focus: [...root.querySelectorAll('[data-focus]')].every(visible),
-        caption: visible(root.querySelector('[data-viz-part="viz-caption"]')),
-        next: next.top >= 0 && next.bottom <= window.innerHeight,
-      }
-    })
-    expect(v, `step ${i}`).toEqual({ line: true, focus: true, caption: true, next: true })
-    const { mode } = await state(page)
-    await page.keyboard.press(mode === 'ask' ? '2' : 'ArrowRight')
-    await page.waitForTimeout(30)
+  for (const preset of ['Basics', 'Drain']) {
+    await frame(page).getByRole('radio', { name: preset }).click()
+    await slider(page).focus()
+    for (let i = 0; i <= 9; i++) {
+      await code.evaluate((el) =>
+        window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY),
+      )
+      const v = await page.evaluate(() => {
+        const root = document.querySelector('[data-viz="event-loop"] section')!
+        const bar = root
+          .querySelector('[data-viz-region="bar"]')!
+          .getBoundingClientRect()
+        const visible = (el: Element | null) => {
+          if (!el) return true
+          const r = el.getBoundingClientRect()
+          return r.top >= 0 && r.bottom <= bar.top + 1
+        }
+        const next = root
+          .querySelector('[data-viz-part="viz-next"]')!
+          .getBoundingClientRect()
+        return {
+          line: visible(root.querySelector('[aria-current="true"]')),
+          focus: [...root.querySelectorAll('[data-focus]')].every(visible),
+          caption: visible(root.querySelector('[data-viz-part="viz-caption"]')),
+          next: next.top >= 0 && next.bottom <= window.innerHeight,
+        }
+      })
+      expect(v, `${preset} step ${i}`).toEqual({
+        line: true,
+        focus: true,
+        caption: true,
+        next: true,
+      })
+      const { mode } = await state(page)
+      await page.keyboard.press(mode === 'ask' ? '2' : 'ArrowRight')
+      await page.waitForTimeout(30)
+    }
   }
 })
 
-test('lazy mount: server HTML first, engine near the viewport, same footprint', async ({ page }) => {
+test('lazy mount: server HTML first, engine near the viewport, same footprint', async ({
+  page,
+}) => {
   // Far below the fold: the server's static Start frame stays until scrolled near.
   await page.setViewportSize({ width: 1024, height: 900 })
   await page.goto(`${GALLERY}?spacer=1`)
@@ -426,7 +575,9 @@ test('lazy mount: server HTML first, engine near the viewport, same footprint', 
   await expect(staticFrame).toHaveCount(1)
   const before = await mount(page).boundingBox()
   await mount(page).scrollIntoViewIfNeeded()
-  await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
+  await expect(
+    mount(page).locator('[data-viz-interactive="true"]'),
+  ).toBeVisible()
   const after = await mount(page).evaluate((el) => {
     const r = el.getBoundingClientRect()
     return { y: r.y + window.scrollY, height: r.height }
@@ -446,36 +597,58 @@ test('lazy mount: server HTML first, engine near the viewport, same footprint', 
     await expect(placeholder).toHaveCount(1)
     expect((await placeholder.boundingBox())!.height).toBe(h)
     await mount(page).scrollIntoViewIfNeeded()
-    await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
+    await expect(
+      mount(page).locator('[data-viz-interactive="true"]'),
+    ).toBeVisible()
     expect((await frame(page).boundingBox())!.height).toBeLessThanOrEqual(h)
   }
 })
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
-  test('the Start frame and a working "Steps as text" are server-rendered', async ({ page }) => {
+  test('the Start frame and a working "Steps as text" are server-rendered', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 375, height: 900 })
     await page.goto(GALLERY)
     const f = frame(page)
     await expect(f).toHaveAttribute('data-viz-interactive', 'false')
-    expect((await f.boundingBox())!.height).toBeLessThanOrEqual(FOOTPRINT.narrow)
-    await expect(f.getByText('Event loop: sync, microtasks, tasks')).toBeVisible()
+    expect((await f.boundingBox())!.height).toBeLessThanOrEqual(
+      FOOTPRINT.narrow,
+    )
+    await expect(
+      f.getByText('Event loop: sync, microtasks, tasks'),
+    ).toBeVisible()
     await expect(f.locator('[data-viz-region="bar"]')).toBeHidden()
     await f.locator('summary').click()
-    await expect(f.locator('details').getByText('Verified output (Node 24.x):')).toBeVisible()
+    await expect(
+      f.locator('details').getByText('Verified output (Node 24.x):'),
+    ).toBeVisible()
   })
 })
 
-test('zero axe violations at Start, at a checkpoint and at a reveal', async ({ page }) => {
+test('zero axe violations at Start, at a checkpoint and at a reveal', async ({
+  page,
+}) => {
   for (const width of [375, 1024]) {
     await open(page, width)
     const scan = async (label: string) => {
       const result = await new AxeBuilder({ page })
         .include('[data-viz="event-loop"]')
-        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'])
+        .withTags([
+          'wcag2a',
+          'wcag2aa',
+          'wcag21a',
+          'wcag21aa',
+          'wcag22aa',
+          'best-practice',
+        ])
         .analyze()
       expect(
-        result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
+        result.violations.map(
+          (v) =>
+            `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`,
+        ),
         `${label} at ${width}`,
       ).toEqual([])
     }
@@ -493,7 +666,9 @@ test('zero axe violations at Start, at a checkpoint and at a reveal', async ({ p
   }
 })
 
-test('screenshots at 320, 375, 768, 1024 and 1440', async ({ page }, testInfo) => {
+test('screenshots at 320, 375, 768, 1024 and 1440', async ({
+  page,
+}, testInfo) => {
   const shot = async (locator: Locator, name: string) => {
     const path = testInfo.outputPath(`${name}.png`)
     await locator.screenshot({ path, animations: 'disabled' })
@@ -510,9 +685,16 @@ test('screenshots at 320, 375, 768, 1024 and 1440', async ({ page }, testInfo) =
   }
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto(GALLERY)
-  await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
+  await expect(
+    mount(page).locator('[data-viz-interactive="true"]'),
+  ).toBeVisible()
   await frame(page)
     .locator('[data-viz-region="code"]')
-    .evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY))
-  await page.screenshot({ path: testInfo.outputPath('viz-375x667-fit.png'), animations: 'disabled' })
+    .evaluate((el) =>
+      window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY),
+    )
+  await page.screenshot({
+    path: testInfo.outputPath('viz-375x667-fit.png'),
+    animations: 'disabled',
+  })
 })

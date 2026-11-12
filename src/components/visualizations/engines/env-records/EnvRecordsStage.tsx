@@ -5,14 +5,15 @@ import {
   HEADING,
   SECTION_GAP,
   SIZE,
-  layoutDiagram,
+  edgeEnds,
+  layoutDiagramSafe,
   type DiagramScene,
   type LaidBox,
   type LaidEdge,
   type LaidText,
   type SectionScene,
 } from './layout'
-import type { EnvDiagram } from './model'
+import type { EnvDiagram, EnvSection } from './model'
 
 /**
  * The environment-records stage: one SVG per section per sub-width, chosen by
@@ -27,17 +28,19 @@ import type { EnvDiagram } from './model'
  * them; `stage.test.ts` fails if a layout asks for a width missing here.
  */
 export const CONTAINER: Record<number, { show: string; hide: string }> = {
+  // In rem (width / 16), so at a larger root font size a narrower layout is
+  // picked and drawn larger (D19): the SVG is sized in rem too.
   343: {
-    show: '[@container(min-width:343px)]:block',
-    hide: '[@container(min-width:343px)]:hidden',
+    show: '[@container(min-width:21.4375rem)]:block',
+    hide: '[@container(min-width:21.4375rem)]:hidden',
   },
   359: {
-    show: '[@container(min-width:359px)]:block',
-    hide: '[@container(min-width:359px)]:hidden',
+    show: '[@container(min-width:22.4375rem)]:block',
+    hide: '[@container(min-width:22.4375rem)]:hidden',
   },
   734: {
-    show: '[@container(min-width:734px)]:block',
-    hide: '[@container(min-width:734px)]:hidden',
+    show: '[@container(min-width:45.875rem)]:block',
+    hide: '[@container(min-width:45.875rem)]:hidden',
   },
 }
 
@@ -60,6 +63,7 @@ const r1 = (n: number) => Math.round(n * 10) / 10
 
 const px = (n: number) => Math.round(n) + 0.5
 
+/** Each box group carries `data-node` (its id), which the stress harness reads. */
 function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
   const { x, y, w, h } = box.rect
   const X = px(x)
@@ -69,7 +73,7 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
   if (box.kind === 'function' || box.kind === 'slot') {
     const slot = box.kind === 'slot'
     return (
-      <g>
+      <g data-node={box.id}>
         <rect
           x={X}
           y={Y}
@@ -84,7 +88,7 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
           textAnchor="middle"
           className={clsx(
             'vz-12',
-            slot ? clsx('italic', C.muted) : clsx('font-medium', C.ink),
+            slot ? clsx('italic', C.muted) : 'font-medium',
           )}
         >
           {slot ? (
@@ -100,7 +104,8 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
   }
   const headerH = 2 * SIZE.headerPad + box.title.length * SIZE.headerLine
   return (
-    <g>
+    // Row text inherits 13 px ink from the svg (markup budget); unused records mute it.
+    <g data-node={box.id} className={box.unused ? C.muted : undefined}>
       <rect
         x={X}
         y={Y}
@@ -126,36 +131,23 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
         </text>
       ))}
       {box.rows.length ? (
-        <line
-          x1={r1(x + 1)}
-          x2={r1(x + w - 1)}
-          y1={px(y + headerH)}
-          y2={px(y + headerH)}
-          className={C.hairline}
+        // Every divider of the record in one path (the markup budget, §6.5).
+        <path
+          d={box.rows
+            .map((row, i) => {
+              const sep = i === 0 ? y + headerH : row.top
+              const bottomY = row.top + SIZE.row - (i === box.rows.length - 1 ? 1 : 0)
+              return `M${r1(x + 1)} ${px(sep)}H${r1(x + w - 1)}M${px(x + row.nameWidth)} ${row.top + 1}V${bottomY}`
+            })
+            .join('')}
+          className={clsx('fill-none', C.hairline)}
         />
       ) : null}
-      {box.rows.map((row, i) => (
+      {box.rows.map((row) => (
         <g key={row.name}>
-          {i > 0 ? (
-            <line
-              x1={r1(x + 1)}
-              x2={r1(x + w - 1)}
-              y1={px(row.top)}
-              y2={px(row.top)}
-              className={C.hairline}
-            />
-          ) : null}
-          <line
-            x1={px(x + row.nameWidth)}
-            x2={px(x + row.nameWidth)}
-            y1={row.top + 1}
-            y2={row.top + SIZE.row - (i === box.rows.length - 1 ? 1 : 0)}
-            className={C.hairline}
-          />
           <text
             x={r1(x + SIZE.cellPad)}
             y={r1(row.top + 18.5)}
-            className={clsx('vz-13', box.unused ? C.muted : C.ink)}
           >
             {row.name}
           </text>
@@ -163,10 +155,7 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
             <text
               x={r1(x + row.nameWidth + SIZE.cellPad)}
               y={r1(row.top + 18.5)}
-              className={clsx(
-                row.uninitialized ? clsx('vz-12 italic', C.muted) : 'vz-13',
-                box.unused ? C.muted : C.ink,
-              )}
+              className={row.uninitialized ? clsx('vz-12 italic', C.muted) : undefined}
             >
               {row.value}
             </text>
@@ -177,9 +166,15 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
   )
 }
 
-function Edge({ edge }: { edge: LaidEdge }) {
+function Edge({ edge, section }: { edge: LaidEdge; section: EnvSection }) {
+  const ends = edgeEnds(section, edge.id)
   return (
-    <g data-edge={edge.id} data-now={edge.now ? '' : undefined}>
+    <g
+      data-edge={edge.id}
+      data-from={ends.from}
+      data-to={ends.to}
+      data-now={edge.now ? '' : undefined}
+    >
       <path
         d={edge.d}
         className={clsx(
@@ -202,12 +197,13 @@ function Edge({ edge }: { edge: LaidEdge }) {
 }
 
 function Text({ t }: { t: LaidText }) {
+  // The note is a legend: upright sans, not italic mono (D22).
   const cls =
     t.kind === 'output'
-      ? clsx('vz-13', C.result)
+      ? C.result
       : t.kind === 'label'
         ? clsx('vz-12', C.muted)
-        : clsx('vz-12 italic', C.muted)
+        : clsx('vz-12 font-sans', C.muted)
   return (
     <text
       x={r1(t.x)}
@@ -222,13 +218,17 @@ function Text({ t }: { t: LaidText }) {
 
 function SectionSvg({
   scene,
+  section,
   hatch,
   className,
 }: {
   scene: SectionScene
+  section: EnvSection
   hatch: string
   className: string
 }) {
+  const note = scene.texts.find((t) => t.kind === 'note')
+  const hatched = scene.boxes.some((b) => b.unused) || (scene.noteMark === 'hatch' && note)
   // Quiet links first, the highlight on top. References start at a dot inside
   // their record, so they are drawn over the boxes.
   const order = (es: LaidEdge[]) =>
@@ -244,9 +244,12 @@ function SectionSvg({
       viewBox={`0 0 ${scene.width} ${scene.height}`}
       overflow="visible"
       data-viz-width={scene.width}
-      className={clsx('mx-auto font-mono', className)}
+      // Sized in rem so the figure follows the reader's text size (D19), and
+      // never wider than its column: then it scales down as one picture.
+      className={clsx('vz-13 mx-auto h-auto max-w-full font-mono', C.ink, className)}
+      style={{ width: `${scene.width / 16}rem` }}
     >
-      {scene.boxes.some((b) => b.unused) ? (
+      {hatched ? (
         <defs>
           <pattern
             id={hatch}
@@ -267,14 +270,26 @@ function SectionSvg({
         </defs>
       ) : null}
       {links.map((e) => (
-        <Edge key={e.id} edge={e} />
+        <Edge key={e.id} edge={e} section={section} />
       ))}
       {scene.boxes.map((b) => (
         <Box key={b.id} box={b} hatch={hatch} />
       ))}
       {refs.map((e) => (
-        <Edge key={e.id} edge={e} />
+        <Edge key={e.id} edge={e} section={section} />
       ))}
+      {scene.noteMark === 'hatch' && note ? (
+        <rect
+          data-viz-part="legend-swatch"
+          x={0.5}
+          y={r1(note.rect.y + 2) + 0.5}
+          width={SIZE.swatch - 1}
+          height={SIZE.swatch - 1}
+          rx={2}
+          fill={`url(#${hatch})`}
+          className={C.line}
+        />
+      ) : null}
       {scene.texts.map((t, i) => (
         <Text key={i} t={t} />
       ))}
@@ -322,8 +337,10 @@ function VariantStage({ scene, uid }: { scene: DiagramScene; uid: string }) {
         >
           <p
             // The heading is code (a loop header, a declaration), so it is mono (D3).
+            // The lint keeps it within the section width; truncation is the guard.
             className={clsx('m-0 truncate', typeScale.value.cls, ink.muted)}
             style={{ marginBottom: HEADING.gap }}
+            title={section.heading}
           >
             <Heading text={section.heading} emphasis={section.emphasis} />
           </p>
@@ -331,6 +348,7 @@ function VariantStage({ scene, uid }: { scene: DiagramScene; uid: string }) {
             <SectionSvg
               key={s.width}
               scene={s}
+              section={section}
               hatch={`${uid}-${scene.variant}-${section.id}-${s.width}-hatch`}
               className={visibility(scene.widths, i)}
             />
@@ -341,11 +359,26 @@ function VariantStage({ scene, uid }: { scene: DiagramScene; uid: string }) {
   )
 }
 
+function Variant({ data, variant, uid }: { data: EnvDiagram; variant: 'narrow' | 'wide'; uid: string }) {
+  const scene = layoutDiagramSafe(data, variant)
+  if ('failed' in scene)
+    return (
+      <p
+        data-viz-variant={variant}
+        data-viz-layout-failed={scene.failed}
+        className={clsx('m-0', variant === 'wide' ? 'hidden md:block' : 'md:hidden', typeScale.item.cls, ink.muted)}
+      >
+        Too wide to draw at this size. “Diagram as text” below describes it.
+      </p>
+    )
+  return <VariantStage scene={scene} uid={uid} />
+}
+
 export function EnvRecordsStage({ data, uid }: StaticStageProps<EnvDiagram>) {
   return (
     <>
-      <VariantStage scene={layoutDiagram(data, 'narrow')} uid={uid} />
-      <VariantStage scene={layoutDiagram(data, 'wide')} uid={uid} />
+      <Variant data={data} variant="narrow" uid={uid} />
+      <Variant data={data} variant="wide" uid={uid} />
     </>
   )
 }

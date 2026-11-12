@@ -20,6 +20,12 @@ import {
  */
 
 export const TITLE = 'React keys: where row state goes'
+/**
+ * The wrapper-type case is its own preset (D17), not a tab in the list
+ * frame: it serves the diffing question (a type change at a slot remounts
+ * the subtree), so it gets its own title and layout.
+ */
+export const WRAPPER_TITLE = 'React identity: type at a slot'
 
 /** One rule per combination, at most 140 characters. */
 export const LIST_RULE: Record<`${KeyStrategy}/${ListAction}`, string> = {
@@ -57,7 +63,7 @@ export const WRAPPER_RULE: Record<WrapperAction, string> = {
 
 export const PICK_HINT = {
   list: 'Check a row, then pick an action. You predict before it runs.',
-  wrapper: 'Click +1 to change the count, then pick a change.',
+  wrapper: 'Press Add 1 to change the count, then pick a change.',
 } as const
 
 /** The setup line in the key row's place for the wrapper scene. */

@@ -4,7 +4,11 @@ import { withCodeTokens } from '../../step-log/with-tokens'
 import { eventLoopMetrics } from './layout'
 import { basicOrdering } from './presets/basic-ordering'
 import { microtaskQueuedDuringDrain } from './presets/microtask-queued-during-drain'
-import { describeEventLoop, eventLoopIntrospection, type EventLoopState } from './model'
+import {
+  describeEventLoop,
+  eventLoopIntrospection,
+  type EventLoopState,
+} from './model'
 
 /**
  * The event-loop visual without its renderer. Pure data and functions, so the
@@ -24,7 +28,11 @@ export const eventLoopDescriptor: StepThroughDescriptor<EventLoopState> = {
   title: 'Event loop: sync, microtasks, tasks',
   engine: eventLoopEngineCore,
   presets: [
-    { id: 'basic-ordering', label: 'Basics', log: withCodeTokens(basicOrdering, codeTokens) },
+    {
+      id: 'basic-ordering',
+      label: 'Basics',
+      log: withCodeTokens(basicOrdering, codeTokens),
+    },
     {
       id: 'microtask-queued-during-drain',
       label: 'Drain',

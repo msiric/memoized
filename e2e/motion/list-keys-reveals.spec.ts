@@ -3,7 +3,7 @@ import { LK, animsOf, hydrateListKeys, openGallery, recordAction, save, summariz
 
 /**
  * H0-C task 1 for the list-keys explorable: every key strategy x list action
- * (and both wrapper changes), with one and with two checked rows, at full and
+ * (and both wrapper changes, in the parent-type-change preset), with one and with two checked rows, at full and
  * reduced motion. Records the apply (pick -> ask), the reveal (ask -> reveal)
  * and "Try another action" (reveal -> pick) transitions.
  */
@@ -49,9 +49,9 @@ for (const reduced of [false, true])
           })
           await page.waitForTimeout(350)
         }
-      // Wrapper scene.
-      await f.getByRole('radiogroup', { name: 'Scene' }).getByRole('radio', { name: 'Wrapper type' }).click()
-      await page.waitForTimeout(350)
+      // The wrapper scene is its own preset (VIZ-H D17).
+      await page.goto('/dev/visualizations?lk=parent-type-change')
+      await hydrateListKeys(page)
       for (const action of ['type', 'class']) {
         await toPick(page)
         const btn = f.locator(`[data-viz-focus="action-${action}"]`)

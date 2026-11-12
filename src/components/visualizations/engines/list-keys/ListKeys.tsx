@@ -24,7 +24,8 @@ import { ink, motionRules, type as typeScale } from '../../primitives/tokens-v3'
 import { CodePane } from '../../shell/CodePane'
 import { CHOICE } from '../../shell/footprint'
 import type { MotionGate } from '../../shell/motion'
-import { H_CLS, heights } from '../../shell/vars'
+import { H_CLS } from '../../shell/vars'
+import { remHeights, toRem } from '../../substrates/units'
 import {
   CODE,
   CODE_COLS,
@@ -39,6 +40,7 @@ import {
   PICK_HINT,
   TITLE,
   WRAPPER_RULE,
+  WRAPPER_TITLE,
   WRAPPER_SETUP,
   feedbackLead,
   keyPhrase,
@@ -54,8 +56,8 @@ import {
   CODE_HEIGHT,
   GAPS,
   KEY_ROW,
-  REVEAL_BUTTON,
   STATUS,
+  REVEAL_BUTTON,
   WIDE_CHOICES,
   listKeysMetrics,
 } from './layout'
@@ -98,10 +100,6 @@ import { OutcomesAsText, RECORDED_RUNTIMES } from './OutcomesAsText'
 const useIsoLayoutEffect =
   typeof window === 'undefined' ? useEffect : useLayoutEffect
 
-const SCENES = [
-  { id: 'list', label: 'List keys' },
-  { id: 'wrapper', label: 'Wrapper type' },
-] as const
 const KEYS = KEY_STRATEGIES.map((k) => ({ id: k, label: KEY_LABEL[k] }))
 
 type Nav = { s: ExploreState; play: boolean; at: number; epoch: number }
@@ -194,6 +192,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
         ? WRAPPER_RULE[s.wrapperAction]
         : ''
   const lead = canPredict ? feedbackLead(s.pick, answer!, labelOf) : ''
+  const revealed = s.phase === 'reveal'
 
   const codeVariant: CodeVariant =
     s.scene === 'list'
@@ -258,9 +257,13 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       !frameRef.current.contains(active)
     )
       return
-    frameRef.current
-      .querySelector<HTMLElement>(`[data-viz-focus="${target}"]`)
-      ?.focus()
+    const el = frameRef.current.querySelector<HTMLElement>(`[data-viz-focus="${target}"]`)
+    if (!el) return
+    // Never scroll the page on a handover (F10): focus in place, and bring
+    // the control into view only if it is entirely off screen.
+    el.focus({ preventScroll: true })
+    const r = el.getBoundingClientRect()
+    if (r.bottom < 0 || r.top > window.innerHeight) el.scrollIntoView({ block: 'nearest' })
   }, [s.phase, s.scene])
 
   // ---- narration (§5.3): polite, never on load -----------------------------
@@ -305,19 +308,23 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
     tracked,
   ])
 
-  // ---- keyboard: 1 to 4 answer, Esc goes back (§5.2) -----------------------
+  // ---- keyboard: 1 to 4 answer (§5.2). Esc never resets (D13): with no
+  // playback to pause, the explorable has no Esc action. ----------------------
   const onKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
     if (!interactive || e.altKey || e.ctrlKey || e.metaKey) return
     if (s.phase !== 'ask') return
     if (/^[1-4]$/.test(e.key) && canPredict) {
-      const c = choices[Number(e.key) - 1]
+      const i = Number(e.key) - 1
+      const c = choices[i]
       if (c) {
         e.preventDefault()
-        fromDock({ type: 'answer', choice: c.id }, 'again')
+        // Focus moves only when the focused control is replaced (§5.2, M19):
+        // from the dock (a choice, Skip) to "Try another action" in its
+        // place; from the key switcher or a checkbox it does not move.
+        const inDock = dockRef.current?.contains(document.activeElement)
+        if (inDock) fromDock({ type: 'answer', choice: c.id }, 'again')
+        else dispatch({ type: 'answer', choice: c.id })
       }
-    } else if (e.key === 'Escape') {
-      e.preventDefault()
-      fromDock({ type: 'back' }, `action-${lastAction.current ?? ''}`)
     }
   }
 
@@ -358,13 +365,11 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       data-viz-interactive={interactive ? 'true' : 'false'}
       onKeyDown={onKeyDown}
     >
-      {/* 1. Header: title, then the scene switcher (right from 768). */}
+      {/* 1. Header: the title. Each preset is one scene (D17): the wrapper
+          case is its own preset, not a tab in this frame. */}
       <header
-        className={clsx(
-          'flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4',
-          H_CLS,
-        )}
-        style={heights({
+        className={clsx('flex items-center', H_CLS)}
+        style={remHeights({
           narrow: metrics.narrow.header,
           wide: metrics.wide.header,
         })}
@@ -373,34 +378,22 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           id={titleId}
           className={clsx('m-0 truncate', typeScale.title.cls, ink.base)}
         >
-          {TITLE}
+          {s.scene === 'list' ? TITLE : WRAPPER_TITLE}
         </p>
-        <div
-          className={clsx('self-start md:self-auto', hidden && 'invisible')}
-          data-viz-part="scene"
-        >
-          <SegmentedControl
-            label="Scene"
-            options={SCENES}
-            value={s.scene === 'list' ? 0 : 1}
-            interactive={interactive}
-            onChange={(i) => dispatch({ type: 'scene', scene: SCENES[i].id })}
-          />
-        </div>
       </header>
 
       {/* 2. Stage: key row, code strip, then Before | match lines | After. */}
       <div
         data-viz-region="stage"
         className={clsx('relative flex flex-col', H_CLS)}
-        style={heights(
+        style={remHeights(
           { narrow: metrics.narrow.stage, wide: metrics.wide.stage },
-          { marginTop: GAPS.header },
+          { marginTop: toRem(GAPS.header) },
         )}
       >
         <div
           className="flex shrink-0 items-center gap-3"
-          style={{ height: KEY_ROW }}
+          style={{ height: toRem(KEY_ROW) }}
           data-viz-region="keyrow"
         >
           {s.scene === 'list' ? (
@@ -463,7 +456,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
           typeScale.status.cls,
           ink.secondary,
         )}
-        style={{ height: STATUS, marginTop: GAPS.status }}
+        style={{ height: toRem(STATUS), marginTop: toRem(GAPS.status) }}
       >
         <span className="min-w-0 truncate" data-viz-part="viz-event">
           {event}
@@ -489,15 +482,15 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
         ref={dockRef}
         data-viz-region="dock"
         className={clsx('relative print:hidden', H_CLS, hidden && 'invisible')}
-        style={heights(
+        style={remHeights(
           { narrow: metrics.narrow.dock, wide: metrics.wide.dock },
-          { marginTop: GAPS.dock },
+          { marginTop: toRem(GAPS.dock) },
         )}
       >
         {s.phase === 'pick' || !action ? (
           <div
             className="flex flex-col"
-            style={{ gap: 8 }}
+            style={{ gap: toRem(8) }}
             data-viz-part="dock-pick"
           >
             <p className={captionCls}>
@@ -545,12 +538,12 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               ))}
             </div>
           </div>
-        ) : s.phase === 'ask' ? (
+        ) : !revealed ? (
           <div
             className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_var(--lk-choices-w)] md:gap-x-4"
             style={{
-              rowGap: CHOICE.textGap,
-              ['--lk-choices-w' as string]: `${WIDE_CHOICES}px`,
+              rowGap: toRem(CHOICE.textGap),
+              ['--lk-choices-w' as string]: toRem(WIDE_CHOICES),
             }}
             data-viz-part="dock-ask"
           >
@@ -568,7 +561,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 'grid grid-cols-2 md:col-start-2 md:row-span-2 md:row-start-1 md:self-start',
                 !canPredict && 'invisible',
               )}
-              style={{ gap: CHOICE.gap }}
+              style={{ gap: toRem(CHOICE.gap) }}
               data-viz-part="choices"
             >
               {choices.map((c, i) => (
@@ -583,9 +576,9 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                   data-choice-index={i}
                   data-viz-focus={`choice-${i}`}
                   tabIndex={canPredict && i === choiceFocus ? 0 : -1}
-                  onClick={() =>
-                    fromDock({ type: 'answer', choice: c.id }, 'again')
-                  }
+                  // The choice is replaced by the reveal, so focus moves to the
+                  // control in its place (§5.2), as the shell hands it on.
+                  onClick={() => fromDock({ type: 'answer', choice: c.id }, 'again')}
                   onKeyDown={(e) => onChoiceKey(e, i)}
                   onFocus={() => setChoiceFocus(i)}
                 />
@@ -598,7 +591,6 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 data-viz-focus="skip"
                 data-viz-part="viz-skip"
                 onClick={() => fromDock({ type: 'skip' }, 'again')}
-                className="-ml-2"
               >
                 {canPredict ? 'Skip, show me' : 'Show me'}
               </Button>
@@ -606,28 +598,17 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 variant="text"
                 tabIndex={interactive ? 0 : -1}
                 data-viz-part="viz-back"
-                aria-keyshortcuts="Escape"
-                onClick={() =>
-                  fromDock(
-                    { type: 'back' },
-                    `action-${lastAction.current ?? action}`,
-                  )
-                }
->
+                onClick={() => fromDock({ type: 'back' }, `action-${lastAction.current ?? action}`)}
+              >
                 Pick another action
               </Button>
             </div>
           </div>
         ) : (
-          <div
-            className="flex flex-col md:flex-row md:items-start"
-            style={{ gap: 8 }}
-            data-viz-part="dock-reveal"
-          >
+          <div className="flex flex-col md:flex-row md:items-start" style={{ gap: toRem(8) }} data-viz-part="dock-reveal">
             <div className="min-w-0 md:flex-1 md:pr-2">
               <p className={clsx(captionCls, ink.base)} data-viz-part="viz-feedback">
-                {lead ? <span className="font-semibold">{lead}</span> : null}{' '}
-                {outcomeSentence}
+                {lead ? <span className="font-semibold">{lead}</span> : null} {outcomeSentence}
               </p>
               <p className={clsx(captionCls, 'mt-2')} data-viz-part="viz-caption">
                 {rule}
@@ -637,14 +618,9 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               tabIndex={interactive ? 0 : -1}
               data-viz-focus="again"
               data-viz-part="viz-again"
-              onClick={() =>
-                fromDock(
-                  { type: 'again' },
-                  `action-${lastAction.current ?? action}`,
-                )
-              }
+              onClick={() => fromDock({ type: 'again' }, `action-${lastAction.current ?? action}`)}
               className="mt-2 self-start md:mt-0 md:w-[var(--lk-again-w)]"
-              style={{ ['--lk-again-w' as string]: `${REVEAL_BUTTON}px` }}
+              style={{ ['--lk-again-w' as string]: toRem(REVEAL_BUTTON) }}
             >
               Try another action
             </Button>
@@ -653,7 +629,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       </div>
 
       {/* 5. Footer: outcomes as text, and provenance. */}
-      <footer className="relative" style={{ marginTop: GAPS.footer }}>
+      <footer className="relative" style={{ marginTop: toRem(GAPS.footer) }}>
         <Disclosure summary="Outcomes as text" summaryProps={{ 'data-viz-focus': 'text-alternative' }}>
           <OutcomesAsText />
         </Disclosure>

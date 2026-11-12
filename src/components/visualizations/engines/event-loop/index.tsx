@@ -1,7 +1,10 @@
 'use client'
 
 import { StepThrough } from '../../shell/StepThrough'
-import type { StepThroughDefinition, VizComponentProps } from '../../shell/types'
+import type {
+  StepThroughDefinition,
+  VizComponentProps,
+} from '../../shell/types'
 import { eventLoopDescriptor, eventLoopEngineCore } from './descriptor'
 import { EventLoopStage } from './EventLoopStage'
 import type { EventLoopState } from './model'
@@ -16,6 +19,11 @@ const definition: StepThroughDefinition<EventLoopState> = {
   engine: { ...eventLoopEngineCore, Stage: EventLoopStage },
 }
 
-export default function EventLoopViz({ preset, interactive }: VizComponentProps) {
-  return <StepThrough def={definition} preset={preset} interactive={interactive} />
+export default function EventLoopViz({
+  preset,
+  interactive,
+}: VizComponentProps) {
+  return (
+    <StepThrough def={definition} preset={preset} interactive={interactive} />
+  )
 }

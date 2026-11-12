@@ -71,6 +71,8 @@ export type EnvSection = {
   highlight: EdgeId[]
   /** A muted note under the diagram, for what a mark alone cannot say. */
   note?: string
+  /** The mark the note explains, drawn as a swatch before it instead of a word (D22). */
+  noteMark?: 'hatch'
 }
 
 export type EnvDiagram = {

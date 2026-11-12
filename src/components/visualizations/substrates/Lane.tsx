@@ -1,13 +1,26 @@
 'use client'
 
-import { AnimatePresence, m, useIsPresent, type MotionProps } from 'framer-motion'
+import {
+  AnimatePresence,
+  m,
+  useIsPresent,
+  type MotionProps,
+} from 'framer-motion'
 import { forwardRef, type ReactNode } from 'react'
 import { cn as clsx } from '../primitives/cn'
 import { Tag } from '../primitives/Tag'
-import { ink, now, radius, stroke, surface, type as typeScale } from '../primitives/tokens-v3'
+import {
+  ink,
+  now,
+  radius,
+  stroke,
+  surface,
+  type as typeScale,
+} from '../primitives/tokens-v3'
 import { presence, type MotionGate, type PresenceCustom } from '../shell/motion'
 import type { PerVariant } from '../shell/types'
-import { H_CLS, heights } from '../shell/vars'
+import { H_CLS } from '../shell/vars'
+import { remHeights } from './units'
 
 /**
  * Lanes substrate (spec §6.1): a labelled region holding chips. Glyphs follow
@@ -15,8 +28,13 @@ import { H_CLS, heights } from '../shell/vars'
  * (`queued`), microtasks are pills (`micro`), host slots are dashed. Changed
  * elements get the `now` emphasis inside the glyph (a lime border doubled by
  * an inset ring, and a tint, D5): never an outline, so it can never be
- * mistaken for keyboard focus. Elements created this step get a `new` tag, so
- * the change never depends on color alone (A7).
+ * mistaken for keyboard focus. Arrival is shown by the enter motion and the
+ * `now` emphasis, so chips carry no `new` tag (D22).
+ *
+ * Layout (D16): queues wrap; a chip never grows past its lane and truncates
+ * its label inside (F5). The engine decides which chips are visible per
+ * layout variant (`show`) and adds a `more` chip for the collapsed tail
+ * (A1), so the lane never overflows.
  *
  * Motion (shell/motion `presence`): a chip that changes place keeps its
  * `data-flip-id`, and the stage's `useFlip` plays the `move` spring from its
@@ -29,14 +47,61 @@ import { H_CLS, heights } from '../shell/vars'
  */
 
 export type ChipKind = 'frame' | 'task' | 'micro' | 'host'
-export type LaneChip = { id: string; label: string }
+export type LaneChip = {
+  id: string
+  label: string
+  /** Visible per layout variant (default: both). */
+  show?: PerVariant<boolean>
+  /** The `+N more` summary of a collapsed queue tail: quiet, sans. */
+  more?: boolean
+}
+
+/** Classes that show an element only in the variants where `show` is true. */
+export function showCls(show?: PerVariant<boolean>): string | undefined {
+  if (!show || (show.narrow && show.wide)) return undefined
+  if (show.narrow) return 'md:hidden'
+  if (show.wide) return 'hidden md:block'
+  return 'hidden'
+}
+
+const moreCls = clsx(
+  'max-w-48 border-dashed px-2 font-sans',
+  radius.chip.cls,
+  stroke.line,
+  typeScale.tag.cls,
+  ink.muted,
+  'h-7',
+)
 
 /** Chips: 4 px corners (S: §2.2), pills for microtasks, at most 12 rem (`max-w-48`). */
 const chipCls: Record<ChipKind, string> = {
-  frame: clsx('w-full px-2', radius.chip.cls, stroke.line, surface.glyph, 'h-7 md:h-8'),
-  task: clsx('max-w-48 px-2', radius.chip.cls, stroke.queued, surface.chipQueued, 'h-7'),
-  micro: clsx('max-w-48 rounded-full px-3', stroke.micro, surface.chipMicro, 'h-7'),
-  host: clsx('max-w-48 border-dashed px-2', radius.chip.cls, stroke.line, surface.glyph, 'h-7'),
+  frame: clsx(
+    'w-full px-2',
+    radius.chip.cls,
+    stroke.line,
+    surface.glyph,
+    'h-7 md:h-8',
+  ),
+  task: clsx(
+    'max-w-48 px-2',
+    radius.chip.cls,
+    stroke.queued,
+    surface.chipQueued,
+    'h-7',
+  ),
+  micro: clsx(
+    'max-w-48 rounded-full px-3',
+    stroke.micro,
+    surface.chipMicro,
+    'h-7',
+  ),
+  host: clsx(
+    'max-w-48 border-dashed px-2',
+    radius.chip.cls,
+    stroke.line,
+    surface.glyph,
+    'h-7',
+  ),
 }
 
 export type LaneProps = {
@@ -62,8 +127,8 @@ export type LaneProps = {
 
 const Chip = forwardRef<
   HTMLDivElement,
-  { chip: LaneChip; kind: ChipKind; focused: boolean; isNew: boolean; top?: boolean }
->(function Chip({ chip, kind, focused, isNew, top }, ref) {
+  { chip: LaneChip; kind: ChipKind; focused: boolean; top?: boolean }
+>(function Chip({ chip, kind, focused, top }, ref) {
   return (
     <div
       ref={ref}
@@ -73,16 +138,13 @@ const Chip = forwardRef<
         'flex min-w-0 items-center gap-2 border',
         typeScale.value.cls,
         ink.base,
-        chipCls[kind],
+        chip.more ? moreCls : chipCls[kind],
         focused && now.glyph,
       )}
     >
-      <span className="min-w-0 truncate">{chip.label}</span>
-      {isNew ? (
-        <Tag tone="now" className="h-4 bg-transparent px-0">
-          new
-        </Tag>
-      ) : null}
+      <span className="min-w-0 truncate" title={chip.label}>
+        {chip.label}
+      </span>
       {top ? (
         <Tag tone="muted" className="ml-auto h-4 bg-transparent px-0">
           top
@@ -93,19 +155,34 @@ const Chip = forwardRef<
 })
 
 /** One chip slot. Exiting copies drop `data-flip-id`, so FLIP measures only the live chip. */
-const LaneItem = forwardRef<HTMLDivElement, { id: string; className: string; children: ReactNode } & MotionProps>(
-  function LaneItem({ id, className, children, ...motionProps }, ref) {
-    const present = useIsPresent()
-    return (
-      <m.div ref={ref} data-glyph={id} className={className} {...motionProps}>
-        <div data-flip-id={present ? id : undefined}>{children}</div>
-      </m.div>
-    )
-  },
-)
+const LaneItem = forwardRef<
+  HTMLDivElement,
+  { id: string; className: string; children: ReactNode } & MotionProps
+>(function LaneItem({ id, className, children, ...motionProps }, ref) {
+  const present = useIsPresent()
+  return (
+    <m.div ref={ref} data-glyph={id} className={className} {...motionProps}>
+      <div data-flip-id={present ? id : undefined}>{children}</div>
+    </m.div>
+  )
+})
 
 export function Lane(props: LaneProps) {
-  const { id, label, kind, chips, labelAt, height, focus, created, present, before, gate, from, to, className } = props
+  const {
+    id,
+    label,
+    kind,
+    chips,
+    labelAt,
+    height,
+    focus,
+    present,
+    before,
+    gate,
+    from,
+    to,
+    className,
+  } = props
   const vertical = kind === 'frame'
   // The live gate and the ids on stage, handed to chips that are leaving.
   const custom: PresenceCustom = { gate, present }
@@ -116,7 +193,11 @@ export function Lane(props: LaneProps) {
       <LaneItem
         key={`${chip.id}:${gate.epoch}`}
         id={chip.id}
-        className={clsx('min-w-0', vertical ? 'w-full' : 'flex-none')}
+        className={clsx(
+          'min-w-0',
+          vertical ? 'w-full' : 'max-w-full flex-none',
+          showCls(chip.show),
+        )}
         {...presence(chip.id, gate, { from, to }, { moved })}
         custom={custom}
       >
@@ -124,7 +205,6 @@ export function Lane(props: LaneProps) {
           chip={chip}
           kind={kind}
           focused={focus.has(chip.id)}
-          isNew={created.has(chip.id)}
           top={vertical && chips.length > 1 && i === chips.length - 1}
         />
       </LaneItem>
@@ -139,13 +219,17 @@ export function Lane(props: LaneProps) {
         radius.row.cls,
         stroke.hairline,
         surface.panel,
-        labelAt.narrow === 'top' ? 'flex-col gap-2' : 'flex-row items-center gap-2',
-        labelAt.wide === 'top' ? 'md:flex-col md:items-stretch md:gap-2' : 'md:flex-row md:items-center md:gap-2',
+        labelAt.narrow === 'top'
+          ? 'flex-col gap-1'
+          : 'flex-row items-center gap-2',
+        labelAt.wide === 'top'
+          ? 'md:flex-col md:items-stretch md:gap-1'
+          : 'md:flex-row md:items-center md:gap-2',
         focus.has(id) && now.panel,
         H_CLS,
         className,
       )}
-      style={heights(height)}
+      style={remHeights(height)}
     >
       <span
         className={clsx(
@@ -161,12 +245,19 @@ export function Lane(props: LaneProps) {
       <div
         className={clsx(
           'relative min-h-0 min-w-0 flex-1',
-          vertical ? 'flex flex-col-reverse justify-start gap-1 self-stretch' : 'flex items-center gap-2 self-stretch',
+          vertical
+            ? 'flex flex-col-reverse justify-start gap-1 self-stretch'
+            : 'flex flex-wrap content-center items-center gap-2 self-stretch',
         )}
       >
         {/* Keyed by the instant epoch: an instant render drops chips that are
             still leaving from an earlier step, so nothing old stays visible (D7). */}
-        <AnimatePresence key={gate.epoch} initial={false} mode="popLayout" custom={custom}>
+        <AnimatePresence
+          key={gate.epoch}
+          initial={false}
+          mode="popLayout"
+          custom={custom}
+        >
           {items}
         </AnimatePresence>
         <span
@@ -174,8 +265,12 @@ export function Lane(props: LaneProps) {
           className={clsx(
             'pointer-events-none absolute left-0 flex h-7 items-center',
             typeScale.tag.cls,
-            vertical && labelAt.narrow === 'top' ? 'bottom-0' : 'top-1/2 -translate-y-1/2',
-            vertical && labelAt.wide === 'inline' && 'md:bottom-auto md:top-1/2 md:-translate-y-1/2',
+            vertical && labelAt.narrow === 'top'
+              ? 'bottom-0'
+              : 'top-1/2 -translate-y-1/2',
+            vertical &&
+              labelAt.wide === 'inline' &&
+              'md:bottom-auto md:top-1/2 md:-translate-y-1/2',
             ink.muted,
             chips.length === 0 ? 'visible' : 'invisible',
           )}

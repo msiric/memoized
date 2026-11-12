@@ -23,14 +23,16 @@ export const outId = (k: number) => `out-${k}`
 export const eventLoopIntrospection: StateIntrospection<EventLoopState> = {
   ids(state) {
     const ids = new Set<string>(REGIONS)
-    for (const lane of [state.stack, state.host, state.micro, state.tasks]) for (const c of lane) ids.add(c.id)
+    for (const lane of [state.stack, state.host, state.micro, state.tasks])
+      for (const c of lane) ids.add(c.id)
     state.console.forEach((_, k) => ids.add(outId(k)))
     return ids
   },
   observedLog: (state) => state.console,
 }
 
-const names = (chips: readonly ElChip[]) => (chips.length ? chips.map((c) => c.label).join(', ') : 'empty')
+const names = (chips: readonly ElChip[]) =>
+  chips.length ? chips.map((c) => c.label).join(', ') : 'empty'
 
 /** The stage's accessible name: a summary of the whole machine (spec §5.3). */
 export function describeEventLoop(state: EventLoopState): string {
@@ -43,4 +45,10 @@ export function describeEventLoop(state: EventLoopState): string {
   ].join(' ')
 }
 
-export const EMPTY: EventLoopState = { stack: [], host: [], micro: [], tasks: [], console: [] }
+export const EMPTY: EventLoopState = {
+  stack: [],
+  host: [],
+  micro: [],
+  tasks: [],
+  console: [],
+}

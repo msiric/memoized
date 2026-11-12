@@ -162,32 +162,19 @@ export function dockModes(variant: Variant) {
   const choices = choicesHeight(s.maxChoices)
   let ask: number
   let reveal: number
+  // The reveal: feedback, then the rule (8 px apart), then "Try another
+  // action" under them below 768 and beside them from 768.
+  const revealText = (width: number) =>
+    maxOf(s.reveals.map((r) => (lines(r.feedback, width, GLYPH.caption) + lines(r.rule, width, GLYPH.caption)) * CAPTION_LINE)) +
+    PARA_GAP
   if (variant === 'narrow') {
     const prompt = maxOf(s.prompts.map((t) => lines(t, w, GLYPH.prompt))) * PROMPT_LINE
     ask = prompt + PARA_GAP + choices + PARA_GAP + TARGET_PX
-    const text = maxOf(
-      s.reveals.map(
-        (r) =>
-          (lines(r.feedback, w, GLYPH.caption) +
-            lines(r.rule, w, GLYPH.caption)) *
-          CAPTION_LINE,
-      ),
-    )
-    reveal = text + PARA_GAP + PARA_GAP + TARGET_PX
+    reveal = revealText(w) + PARA_GAP + TARGET_PX
   } else {
-    const prompt =
-      maxOf(s.prompts.map((t) => lines(t, WIDE_SIDE, GLYPH.prompt))) * PROMPT_LINE
+    const prompt = maxOf(s.prompts.map((t) => lines(t, WIDE_SIDE, GLYPH.prompt))) * PROMPT_LINE
     ask = Math.max(prompt + PARA_GAP + TARGET_PX, choices)
-    const side = w - CHOICE.sideGap - REVEAL_BUTTON
-    const text = maxOf(
-      s.reveals.map(
-        (r) =>
-          (lines(r.feedback, side, GLYPH.caption) +
-            lines(r.rule, side, GLYPH.caption)) *
-          CAPTION_LINE,
-      ),
-    )
-    reveal = Math.max(text + PARA_GAP, TARGET_PX)
+    reveal = Math.max(revealText(w - CHOICE.sideGap - REVEAL_BUTTON), TARGET_PX)
   }
   return { pick, ask, reveal, dock: Math.max(pick, ask, reveal) }
 }
@@ -202,8 +189,8 @@ export type ListKeysMetrics = {
 
 export function listKeysMetrics(): PerVariant<ListKeysMetrics> {
   const m = (variant: Variant): ListKeysMetrics => {
-    // Two scenes in the header switcher.
-    const header = headerHeight(2, variant)
+    // The title only: each preset is one scene (D17).
+    const header = headerHeight(1, variant)
     const stage = STAGE[variant]
     const dock = dockModes(variant).dock
     const footer = FOOTER[variant]

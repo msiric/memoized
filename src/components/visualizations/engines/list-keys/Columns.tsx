@@ -25,6 +25,7 @@ import {
   type as typeScale,
 } from '../../primitives/tokens-v3'
 import { transitionFor, type MotionGate } from '../../shell/motion'
+import { toRem } from '../../substrates/units'
 import { CARD, COLUMNS, COLUMNS_HEIGHT, rowTop } from './layout'
 import type { ExploreAction, ExploreState } from './machine'
 import {
@@ -44,10 +45,13 @@ import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
  * (spec §2.2 "Match line", §8.3).
  *
  * - A card is one instance (a fiber with its DOM node and state). Its spine
- *   names the instance; a mounted instance's spine reads `new` and its card
- *   is dashed. An unmounted instance is dashed and tagged `× unmounted`.
+ *   names the instance. A mounted instance is drawn dashed, spine included,
+ *   with a dashed stub from an open circle: shape, not a `new` word (D22).
+ *   An unmounted instance is dashed in the removed role with one ×.
  * - Match lines: solid = reused, a dashed stub = mounted, a × stub = unmounted.
- *   The state chip (☑ or the count) rides on its line.
+ *   Each line carries `data-from` and `data-to` (row ids) for the harness.
+ *   The state chip (✓ or the count) travels along its own line and rests at
+ *   its After end, so chips of crossing lines never meet (M09, M11).
  * - The row now showing the tracked check carries the `now` emphasis inside
  *   the card (D5). A row that shows another item's state, or lost its own,
  *   carries an in-row badge (× or ✓, D17) with the words for assistive tech
@@ -57,7 +61,7 @@ import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
 const useIsoLayoutEffect =
   typeof window === 'undefined' ? useEffect : useLayoutEffect
 
-const COLS = `minmax(0,${COLUMNS.cardMax}px) minmax(${COLUMNS.linesNarrow}px,1fr) minmax(0,${COLUMNS.cardMax}px)`
+const COLS = `minmax(0,${toRem(COLUMNS.cardMax)}) minmax(${toRem(COLUMNS.linesNarrow)},1fr) minmax(0,${toRem(COLUMNS.cardMax)})`
 const center = (i: number) => rowTop(i) + CARD.height / 2
 
 /** Wrapper geometry: a box (label, then the Counter card), then the +1 button. */
@@ -65,6 +69,8 @@ const BOX = { pad: 4, label: 16, gap: 4, bottom: 8, border: 1 } as const
 const WRAP_LABEL_Y = rowTop(0) + BOX.border + BOX.pad + BOX.label / 2
 const WRAP_COUNTER_Y =
   rowTop(0) + BOX.border + BOX.pad + BOX.label + BOX.gap + CARD.height / 2
+/** The After box's `className="on"` line pushes its Counter down by one meta line. */
+const ATTR_LINE = 16
 
 export type ColumnsProps = {
   s: ExploreState
@@ -83,11 +89,17 @@ export function Columns({
   dispatch,
 }: ColumnsProps) {
   const linesRef = useRef<HTMLDivElement>(null)
-  const [w, setW] = useState<number>(COLUMNS.linesNarrow)
+  // The gutter's width in layout units (px at a 16 px root) and the root
+  // scale, so lines drawn in units stay on their cards at any text size (D19).
+  const [box, setBox] = useState<LinesBox>({ w: COLUMNS.linesNarrow, k: 1 })
   useIsoLayoutEffect(() => {
     const el = linesRef.current
     if (!el) return
-    const measure = () => setW(Math.round(el.getBoundingClientRect().width))
+    const measure = () => {
+      const k = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
+      const w = Math.round((el.getBoundingClientRect().width / k) * 10) / 10
+      setBox((b) => (b.w === w && b.k === k ? b : { w, k }))
+    }
     measure()
     if (typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(measure)
@@ -99,7 +111,7 @@ export function Columns({
     <div
       data-viz-region="columns"
       className="relative grid min-w-0"
-      style={{ height: COLUMNS_HEIGHT, gridTemplateColumns: COLS }}
+      style={{ height: toRem(COLUMNS_HEIGHT), gridTemplateColumns: COLS }}
     >
       {s.scene === 'list' ? (
         <ListColumns s={s} interactive={interactive} dispatch={dispatch} />
@@ -112,13 +124,7 @@ export function Columns({
         className="relative col-start-2 row-start-1 min-w-0"
       >
         {s.phase === 'reveal' ? (
-          <Lines
-            key={`${s.reveals}:${gate.epoch}`}
-            s={s}
-            w={w}
-            gate={gate}
-            play={play}
-          />
+          <Lines key={`${s.reveals}:${gate.epoch}`} s={s} box={box} gate={gate} play={play} />
         ) : null}
       </div>
     </div>
@@ -133,22 +139,14 @@ function ColumnLabel({ children }: { children: ReactNode }) {
   return (
     <p
       className={clsx('m-0 h-4', typeScale.label.cls, ink.secondary)}
-      style={{ marginBottom: COLUMNS.labelGap }}
+      style={{ marginBottom: toRem(COLUMNS.labelGap) }}
     >
       {children}
     </p>
   )
 }
 
-function Spine({
-  label,
-  mounted,
-  dashed,
-}: {
-  label: string
-  mounted?: boolean
-  dashed?: boolean
-}) {
+function Spine({ label, dashed }: { label: string; dashed?: boolean }) {
   return (
     <span
       aria-hidden
@@ -160,11 +158,6 @@ function Spine({
       )}
     >
       {label}
-      {mounted ? (
-        <Badge tone="now" className="h-4 bg-transparent px-0">
-          new
-        </Badge>
-      ) : null}
     </span>
   )
 }
@@ -174,18 +167,13 @@ const CHECK_PATH = 'M3.5 8.5 6.5 11.5 12.5 5'
 /** A drawn (not interactive) checkbox: filled with a ✓ when checked, `?` while unknown. */
 function CheckGlyph({ state }: { state: boolean | '?' }) {
   if (state === '?')
+    // Unknown until the reveal: an empty dashed slot. The row's one `?` is
+    // its instance letter (D22: no duplicate placeholders).
     return (
       <span
         aria-hidden
-        className={clsx(
-          'flex h-4 w-4 shrink-0 items-center justify-center border border-dashed border-zinc-500',
-          radius.chip.cls,
-          typeScale.meta.cls,
-          ink.muted,
-        )}
-      >
-        ?
-      </span>
+        className={clsx('flex h-4 w-4 shrink-0 border border-dashed border-zinc-500', radius.chip.cls)}
+      />
     )
   return (
     <span
@@ -235,18 +223,9 @@ function StatusBadge({ tone, words }: { tone: 'removed' | 'kept'; words: string 
   )
 }
 
-/** A word tag in a wrapper box's header line (in flow, D17). */
-function HeaderTag({ children }: { children: ReactNode }) {
-  return (
-    <Badge tone="now" className="h-4 bg-transparent px-0">
-      {children}
-    </Badge>
-  )
-}
-
 /** Cards are glyphs: zinc-800 fill, 8 px corners, 1 px `line` outline (D1, drift C10). */
 const cardCls = clsx('relative flex min-w-0 overflow-visible border', radius.glyph.cls, surface.glyph)
-const cardStyle = { height: CARD.height }
+const cardStyle = { height: toRem(CARD.height) }
 
 const STATUS_TEXT: Record<NonNullable<AfterRow['status']>, string> = {
   foreign: 'not its check',
@@ -281,7 +260,7 @@ function ListColumns({
         <ColumnLabel>Before</ColumnLabel>
         <ul
           className="m-0 flex list-none flex-col p-0"
-          style={{ gap: CARD.gap }}
+          style={{ gap: toRem(CARD.gap) }}
           aria-label="Before: check rows to give them state"
         >
           {BEFORE.map((id, i) => {
@@ -368,7 +347,7 @@ function ListColumns({
         ) : (
           <ul
             className="m-0 flex list-none flex-col p-0"
-            style={{ gap: CARD.gap }}
+            style={{ gap: toRem(CARD.gap) }}
             aria-label="After"
           >
             {rows.map((r, i) => {
@@ -398,11 +377,7 @@ function ListColumns({
                   style={cardStyle}
                 >
                   <span className="sr-only">{describe}</span>
-                  <Spine
-                    label={revealed ? r.instance : '?'}
-                    mounted={revealed && mounted}
-                    dashed={revealed && mounted}
-                  />
+                  <Spine label={revealed ? r.instance : '?'} dashed={revealed && mounted} />
                   <span
                     aria-hidden
                     className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2"
@@ -440,7 +415,7 @@ function Placeholder({ children }: { children: ReactNode }) {
         typeScale.item.cls,
         ink.muted,
       )}
-      style={{ height: COLUMNS_HEIGHT - COLUMNS.label - COLUMNS.labelGap }}
+      style={{ height: toRem(COLUMNS_HEIGHT - COLUMNS.label - COLUMNS.labelGap) }}
     >
       {children}
     </div>
@@ -449,12 +424,14 @@ function Placeholder({ children }: { children: ReactNode }) {
 
 function WrapperBox({
   tag,
+  attr,
   dashed,
   removed,
   children,
   badge,
 }: {
   tag: string
+  attr?: string
   dashed?: boolean
   removed?: boolean
   children: ReactNode
@@ -467,15 +444,24 @@ function WrapperBox({
         radius.glyph.cls,
         removed ? clsx('border-dashed', stroke.removed) : dashed ? 'border-dashed border-zinc-500' : stroke.line,
       )}
-      style={{ paddingTop: BOX.pad, paddingBottom: BOX.bottom }}
+      style={{ paddingTop: toRem(BOX.pad), paddingBottom: toRem(BOX.bottom) }}
     >
       <p
         className={clsx('m-0 flex h-4 items-center justify-between gap-1', typeScale.meta.cls, ink.secondary)}
-        style={{ marginBottom: BOX.gap }}
+        style={{ marginBottom: toRem(BOX.gap) }}
       >
         <span className="min-w-0 truncate">{tag}</span>
         {badge}
       </p>
+      {attr ? (
+        <p
+          data-viz-part="wrapper-attr"
+          className={clsx('m-0 h-4 truncate', typeScale.meta.cls, ink.now)}
+          style={{ marginTop: toRem(-BOX.gap), marginBottom: toRem(BOX.gap) }}
+        >
+          {attr}
+        </p>
+      ) : null}
       {children}
     </div>
   )
@@ -503,11 +489,11 @@ function CounterCard({
       )}
       style={cardStyle}
     >
-      <Spine label={instance} mounted={mounted} dashed={mounted} />
+      <Spine label={instance} dashed={mounted} />
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2">
         <span className={clsx('truncate', typeScale.item.cls, ink.base)}>Counter</span>
-        <span className={clsx('truncate', typeScale.meta.cls, ink.secondary)}>
-          {count}
+        <span className="flex min-w-0 items-center gap-1">
+          <span className={clsx('truncate', typeScale.meta.cls, ink.secondary)}>{count}</span>
         </span>
       </span>
     </div>
@@ -573,14 +559,9 @@ function WrapperColumns({
               <WrapperBox
                 tag={afterTag}
                 dashed={revealed && !o.wrapperReused}
-                badge={
-                  // The className change has no room beside the tag name at any
-                  // width (it used to sit on the border); it is shown by the code
-                  // pane and the reveal text. The scene leaves the frame in WS3 (D17).
-                  revealed && !o.wrapperReused ? (
-                    <HeaderTag>new</HeaderTag>
-                  ) : null
-                }
+                // The className change gets its own line under the tag name, so
+                // it fits at 320 and never sits on the border (D17).
+                attr={action === 'class' ? 'className="on"' : undefined}
               >
                 <CounterCard
                   instance={revealed ? (o.counterReused ? 'A' : 'B') : '?'}
@@ -605,31 +586,36 @@ function WrapperColumns({
 // Match lines
 // ---------------------------------------------------------------------------
 
+type LinesBox = { w: number; k: number }
+
 type Link =
-  | { kind: 'reused'; y1: number; y2: number; now: boolean; chip?: string }
-  | { kind: 'unmounted'; y: number }
-  | { kind: 'mounted'; y: number }
+  | { kind: 'reused'; y1: number; y2: number; now: boolean; chip?: string; from: string; to: string }
+  | { kind: 'unmounted'; y: number; from: string }
+  | { kind: 'mounted'; y: number; to: string }
 
 function links(s: ExploreState): Link[] {
   if (s.scene === 'wrapper') {
     if (!s.wrapperAction) return []
     const o = WRAPPER_OUTCOMES[s.wrapperAction]
+    const attr = s.wrapperAction === 'class' ? ATTR_LINE : 0
     return o.counterReused
       ? [
-          { kind: 'reused', y1: WRAP_LABEL_Y, y2: WRAP_LABEL_Y, now: false },
+          { kind: 'reused', y1: WRAP_LABEL_Y, y2: WRAP_LABEL_Y, now: false, from: 'before-wrapper', to: 'after-wrapper' },
           {
             kind: 'reused',
             y1: WRAP_COUNTER_Y,
-            y2: WRAP_COUNTER_Y,
+            y2: WRAP_COUNTER_Y + attr,
             now: true,
             chip: s.count ? String(s.count) : undefined,
+            from: 'before-counter',
+            to: 'after-counter',
           },
         ]
       : [
-          { kind: 'unmounted', y: WRAP_LABEL_Y },
-          { kind: 'mounted', y: WRAP_LABEL_Y },
-          { kind: 'unmounted', y: WRAP_COUNTER_Y },
-          { kind: 'mounted', y: WRAP_COUNTER_Y },
+          { kind: 'unmounted', y: WRAP_LABEL_Y, from: 'before-wrapper' },
+          { kind: 'mounted', y: WRAP_LABEL_Y, to: 'after-wrapper' },
+          { kind: 'unmounted', y: WRAP_COUNTER_Y, from: 'before-counter' },
+          { kind: 'mounted', y: WRAP_COUNTER_Y, to: 'after-counter' },
         ]
   }
   if (!s.listAction) return []
@@ -637,7 +623,7 @@ function links(s: ExploreState): Link[] {
   const tracked = trackedRow(s.checks)
   const out: Link[] = []
   outcome.reused.forEach((from, i) => {
-    if (from === null) out.push({ kind: 'mounted', y: center(i) })
+    if (from === null) out.push({ kind: 'mounted', y: center(i), to: `after-${i}` })
     else
       out.push({
         kind: 'reused',
@@ -645,51 +631,84 @@ function links(s: ExploreState): Link[] {
         y2: center(i),
         now: from === tracked,
         chip: s.checks[BEFORE[from] as 'milk' | 'dog'] ? '✓' : undefined,
+        from: `before-${from}`,
+        to: `after-${i}`,
       })
   })
-  for (const r of unmountedRows(outcome))
-    out.push({ kind: 'unmounted', y: center(r) })
+  for (const r of unmountedRows(outcome)) out.push({ kind: 'unmounted', y: center(r), from: `before-${r}` })
   return out
 }
 
-function Lines({
-  s,
-  w,
-  gate,
-  play,
-}: {
-  s: ExploreState
-  w: number
-  gate: MotionGate
-  play: boolean
-}) {
+/** A match line: a cubic with level ends, from (0, y1) to (w, y2). */
+const curve = (w: number, y1: number, y2: number) => ({
+  d: `M0 ${y1} C ${w / 2} ${y1} ${w / 2} ${y2} ${w} ${y2}`,
+  at: (t: number) => {
+    const u = 1 - t
+    return {
+      x: 3 * u * u * t * (w / 2) + 3 * u * t * t * (w / 2) + t * t * t * w,
+      y: u * u * u * y1 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y2,
+    }
+  },
+})
+
+/** The curve parameter where x reaches `x` (x grows with t on these curves). */
+function tAtX(c: ReturnType<typeof curve>, x: number): number {
+  let lo = 0
+  let hi = 1
+  for (let i = 0; i < 24; i++) {
+    const mid = (lo + hi) / 2
+    if (c.at(mid).x < x) lo = mid
+    else hi = mid
+  }
+  return (lo + hi) / 2
+}
+
+/** Half the state chip (20 px) plus 2: it rests on its line just before the After card. */
+const CHIP_REST = 12
+const CHIP_SAMPLES = 12
+
+/**
+ * Where a state chip travels and rests (M09, M10, M11): along its own
+ * curve, never a chord, and it rests at the destination end of the line,
+ * so the chips of two crossing lines never meet. Units are layout px.
+ */
+export function chipPath(w: number, y1: number, y2: number): { x: number; y: number }[] {
+  const c = curve(w, y1, y2)
+  const end = tAtX(c, Math.max(0, w - CHIP_REST))
+  return Array.from({ length: CHIP_SAMPLES + 1 }, (_, i) => c.at((end * i) / CHIP_SAMPLES))
+}
+
+function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: MotionGate; play: boolean }) {
+  const { w, k } = box
   const ls = links(s)
-  const draw = play ? transitionFor('draw', gate) : { duration: 0 }
-  const move = play ? transitionFor('path', gate) : { duration: 0 }
+  // The reveal animates once, at the width it started at. A later resize
+  // (or text size change) re-places everything instantly (M10).
+  const first = useRef(box)
+  const animateNow = play && !gate.reduce && first.current.w === w && first.current.k === k
+  const draw = animateNow ? transitionFor('draw', gate) : { duration: 0 }
+  const move = transitionFor('path', gate)
   const stub = Math.min(14, Math.max(8, w * 0.3))
   const H = COLUMNS_HEIGHT
   // Draw the highlighted line last so it sits on top.
-  const ordered = [...ls].sort(
-    (a, b) =>
-      Number(a.kind === 'reused' && a.now) -
-      Number(b.kind === 'reused' && b.now),
-  )
+  const ordered = [...ls].sort((a, b) => Number(a.kind === 'reused' && a.now) - Number(b.kind === 'reused' && b.now))
   return (
     <>
       <svg
         width={w}
         height={H}
         viewBox={`0 0 ${w} ${H}`}
-        className="absolute inset-0 overflow-visible"
+        className="absolute inset-0 h-full w-full overflow-visible"
         data-viz-part="lines"
       >
-        {ordered.map((l, k) => {
+        {ordered.map((l) => {
           if (l.kind === 'reused') {
-            const d = `M0 ${l.y1} C ${w / 2} ${l.y1} ${w / 2} ${l.y2} ${w} ${l.y2}`
+            const { d } = curve(w, l.y1, l.y2)
             return (
               <g
-                key={k}
+                key={`${l.from}-${l.to}`}
                 data-link="reused"
+                data-from={l.from}
+                data-to={l.to}
                 className={l.now ? svgInk.now : svgInk.line}
               >
                 <m.path
@@ -698,7 +717,7 @@ function Lines({
                   stroke="currentColor"
                   strokeWidth={l.now ? strokeWidth.nowConnector : strokeWidth.connector}
                   strokeLinecap="round"
-                  initial={play && !gate.reduce ? { pathLength: 0 } : false}
+                  initial={animateNow ? { pathLength: 0 } : false}
                   animate={{ pathLength: 1 }}
                   transition={draw}
                 />
@@ -710,11 +729,7 @@ function Lines({
           if (l.kind === 'unmounted') {
             const x = stub
             return (
-              <g
-                key={k}
-                data-link="unmounted"
-                className={svgInk.removed}
-              >
+              <g key={`u-${l.from}`} data-link="unmounted" data-from={l.from} className={svgInk.removed}>
                 <path
                   d={`M0 ${l.y} H ${x - 3}`}
                   stroke="currentColor"
@@ -733,7 +748,7 @@ function Lines({
             )
           }
           return (
-            <g key={k} data-link="mounted" className={svgInk.muted}>
+            <g key={`m-${l.to}`} data-link="mounted" data-to={l.to} className={svgInk.muted}>
               <circle
                 cx={w - stub}
                 cy={l.y}
@@ -753,14 +768,19 @@ function Lines({
           )
         })}
       </svg>
-      {ls.map((l, k) =>
-        l.kind === 'reused' && l.chip ? (
+      {ls.map((l) => {
+        if (l.kind !== 'reused' || !l.chip) return null
+        const pts = chipPath(w, l.y1, l.y2).map((p) => ({ x: p.x * k, y: p.y * k }))
+        const end = pts[pts.length - 1]
+        return (
           <m.span
-            key={`chip-${k}`}
+            key={`chip-${l.from}-${l.to}`}
+            data-from={l.from}
+            data-to={l.to}
             className="absolute left-0 top-0 h-0 w-0"
-            initial={play && !gate.reduce ? { x: 0, y: l.y1 } : false}
-            animate={{ x: w / 2, y: (l.y1 + l.y2) / 2 }}
-            transition={move}
+            initial={animateNow ? { x: pts[0].x, y: pts[0].y } : false}
+            animate={animateNow ? { x: pts.map((p) => p.x), y: pts.map((p) => p.y) } : { x: end.x, y: end.y }}
+            transition={animateNow ? { ...move, times: pts.map((_, i) => i / (pts.length - 1)) } : { duration: 0 }}
           >
             <span
               data-viz-part="state-chip"
@@ -775,8 +795,8 @@ function Lines({
               {l.chip}
             </span>
           </m.span>
-        ) : null,
-      )}
+        )
+      })}
     </>
   )
 }

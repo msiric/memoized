@@ -106,6 +106,14 @@ describe('validateStepLog', () => {
       /must reference the trace/,
     ],
     ['a code line over 40 columns', (l) => ({ ...l, code: { lang: 'js', lines: ['x'.repeat(41)] } }), /41 columns/],
+    // A4: 40 columns used to pass and clip below 640; the line must fit at 320.
+    ['a code line too wide at 320', (l) => ({ ...l, code: { lang: 'js', lines: ['x'.repeat(36)] } }), /wide at 320 > 260px/],
+    ['CJK or emoji in code', (l) => ({ ...l, code: { lang: 'js', lines: ["log('漢字')"] } }), /wide characters/],
+    [
+      'an event too wide beside the counter (A11)',
+      (l) => ({ ...l, steps: l.steps.map((s, i) => (i === 1 ? { ...s, event: 'anEventLabelWithoutSpacesFortyCharsLong!' } : s)) }),
+      /event is \d+px wide at 320/,
+    ],
     ['no checkpoint', (l) => ({ ...l, checkpoints: [] }), /at least one prediction/],
     [
       'a wrong choice without feedback',

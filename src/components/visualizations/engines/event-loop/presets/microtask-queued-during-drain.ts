@@ -21,7 +21,7 @@ const snippet = [
 ].join('\n')
 
 const script = { id: 'script', label: 'script' }
-const timerHost = { id: 'timer', label: 'timer 0 ms → cb' }
+const timerHost = { id: 'timer', label: 'timer → cb' }
 const timerTask = { id: 'timer', label: 'timer cb' }
 const thenCb = { id: 'then', label: 'then cb' }
 const micro2 = { id: 'micro2', label: 'micro 2 cb' }

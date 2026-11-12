@@ -93,48 +93,39 @@ the lint, manifest and text alternative. `engines/list-keys/` is the first: its
 outcomes are recorded from real React 18 and 19 renders (`truth/`) and
 re-verified by `list-keys.truth.test.ts`.
 
-The v1 components below still back the dev gallery and the MDX exports; they
-are scheduled to be ported onto the v2 shell.
+The v1 components (ArrayVisualizer, SequenceStepper, StructureVisualizer, their
+VizFrame/VizControls/useStepper primitives) and the Mermaid pipeline are
+retired (VIZ-H D20): no lesson used them, and static diagrams are React SVG on
+the box-arrow substrate. The promise-lifecycle seed was cut, not ported: the
+R4 register marks it "remove" (a pending/fulfilled/rejected diagram is low
+value) in favour of the promise-chain static diagram.
 
 ## Principle
 
 Three concerns stay separate:
 
-- **Data** (what to show) lives in the content lesson.
+- **Data** (what to show): step-logs and presets, verified against real runs.
 - **Rendering** (these components) is shared and reused.
-- **Look** (theme, spacing, motion) comes from `primitives/tokens.ts`.
+- **Look** (theme, spacing, motion) comes from `primitives/tokens-v3.ts`.
 
-Lesson authors pass data and pick a type. They never write layout or pixels.
+Lesson authors pick a visual and a preset. They never write layout or pixels.
 
-## Structure
+## Engine layouts (VIZ-H WS3)
 
-```
-primitives/          shared chrome, interaction, and theme (build once)
-  tokens.ts          semantic roles -> platform palette/space/motion
-  VizFrame.tsx       outer container: border, label, caption
-  VizControls.tsx    Reset/Back/Step/Play + progress + counter
-  useStepper.ts      step/back/play/keyboard/direction-aware logic
-  useMounted.ts      SSR hydration gate (see "Layout stability")
-ArrayVisualizer.tsx      arrays and strings (sliding window, two-pointer, ...)
-SequenceStepper.tsx      temporal (event loop, call stack, async)
-StructureVisualizer.tsx  hierarchical: binary trees, BSTs, heaps (d3-hierarchy)
-index.ts                 barrel, registered in ../mdx.tsx
-```
-
-`StructureVisualizer` covers hierarchical structures (trees and heaps), laid out
-deterministically by `d3-hierarchy`. Arbitrary-graph *structure* is served by the
-Mermaid pipeline below; interactive graph traversal (non-deterministic force
-layout) is deliberately out of scope until a lesson needs it.
-
-Every component is reviewed side-by-side in the dev-only gallery at
-`/dev/visualizations` (gated out of production). Add a specimen there when a new
-component lands, so drift is easy to catch.
-
-Static structural and flow diagrams are authored as Mermaid in `diagrams/*.mmd`,
-rendered to committed SVG under `public/images/visualizations/` by `yarn
-render-diagrams`, and referenced from MDX as
-`![alt](/images/visualizations/<slug>.svg)`. See `diagrams/README.md` for the
-authoring flow and theme.
+- **Width model.** `substrates/text-metrics.ts` measures text without a DOM
+  (grapheme clusters; CJK 1 em, emoji 1.25 em). Layouts, footprints and the
+  authoring lint all use it, so a string that passes lint fits.
+- **Units.** Geometry is authored in px at a 16 px root and emitted in rem
+  (`substrates/units.ts`), so a reader's larger text grows every box with it.
+- **Overflow policy.** Event-loop queues wrap to a second row, then collapse
+  into `+N more`; the console keeps the newest outputs and collapses the
+  oldest into `N earlier`. The lint keeps real presets from needing either.
+- **Harness hooks.** Env-records boxes carry `data-node`, arrows `data-from`
+  and `data-to`; list-keys match lines and state chips carry `data-from` and
+  `data-to` row ids.
+- **Lint.** `step-log/validate.ts` (`validateStepLog`, `validateDescriptor`),
+  `engines/event-loop/lint.ts` and `engines/env-records/lint.ts` measure every
+  slot that broke rendering at 320 px.
 
 ## The step-log pattern
 
@@ -142,16 +133,6 @@ An algorithm emits an ordered list of frames (a step-log). A renderer plays it.
 Arrays, sequences, trees, and graphs all use this shape, so the interaction model
 is identical everywhere. To support a new algorithm, write a step-log generator,
 not a new component.
-
-## Adding a visualization to a lesson
-
-```
-1. Pick the tool (recorded per lesson in the audit store).
-2. Write a one-line viz spec and get it reviewed.
-3. Author the DATA (step-log input) or the .mmd source.
-4. Reference it: <ArrayVisualizer data={[...]} windowSize={3} /> or the SVG.
-5. Verify: tests, SVG well-formed, re-score the visualization dimension.
-```
 
 ## Layout stability (do not skip)
 
@@ -168,7 +149,7 @@ hold its footprint perfectly still. The rules, learned the hard way:
 - **Reserve the caption too (ghost-caption).** Stack every possible caption string as
   invisible copies in one grid cell so the caption box reserves the tallest line and
   the controls below it never move.
-- **Gate motion behind `useMounted`.** framer-motion injects client-only inline styles
+- **Render the server markup first.** framer-motion injects client-only inline styles
   that differ from the server HTML. Render static markup on the server and first client
   render, then enable motion after mount, or hydration mismatches force a full client
   re-render.
@@ -180,10 +161,10 @@ hold its footprint perfectly still. The rules, learned the hard way:
 
 
 
-- v2 code consumes `primitives/tokens-v3.ts` and the VDS primitives; the
-  token lint enforces it. The v1 files (`tokens.ts`, `VizFrame.tsx`,
-  `VizControls.tsx`, `useStepper.ts`) are legacy and excluded from the lint.
-- Every interactive visual composes `VizFrame` + `VizControls` + `useStepper`.
+- Code consumes `primitives/tokens-v3.ts` and the VDS primitives; the token
+  lint enforces it.
+- Every step-through renders through `shell/StepThrough`; explorables use the
+  same primitives and report their own footprint.
 - Respect `prefers-reduced-motion`.
 - Keep visuals compact and responsive for a lesson page.
 - Add a render test and cover step-log correctness.

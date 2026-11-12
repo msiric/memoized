@@ -502,20 +502,33 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     const width = svg.getAttribute('data-viz-width') ?? ''
     const ids = opts.boxIds?.[`${variant}:${section}:${width}`]
     const spec = opts.edges?.[section]
-    const boxEls = [...svg.querySelectorAll(':scope > g:not([data-edge]) > rect:first-child')] as SVGRectElement[]
-    if (!ids || !spec || ids.length !== boxEls.length) {
-      push({
-        detector: 'edge-untestable',
-        sig: `${variant}:${section}:${width}`,
-        msg: `boxes carry no ids (${boxEls.length} boxes, ${ids?.length ?? 'no'} expected ids): edge endpoints can only be checked against the layout model`,
-        rects: [],
-      })
-      continue
+    // Boxes name themselves (`data-node`) and arrows their ends (`data-from`,
+    // `data-to`) since WS3; the layout model is only the fallback.
+    const named = [...svg.querySelectorAll(':scope > g[data-node]')]
+    let boxR: Map<string, R>
+    if (named.length) {
+      boxR = new Map(
+        named.map((g) => [g.getAttribute('data-node')!, R((g.querySelector('rect') as SVGRectElement).getBoundingClientRect())]),
+      )
+    } else {
+      const boxEls = [...svg.querySelectorAll(':scope > g:not([data-edge]) > rect:first-child')] as SVGRectElement[]
+      if (!ids || !spec || ids.length !== boxEls.length) {
+        push({
+          detector: 'edge-untestable',
+          sig: `${variant}:${section}:${width}`,
+          msg: `boxes carry no ids (${boxEls.length} boxes, ${ids?.length ?? 'no'} expected ids): edge endpoints can only be checked against the layout model`,
+          rects: [],
+        })
+        continue
+      }
+      boxR = new Map(ids.map((id, i) => [id, R(boxEls[i].getBoundingClientRect())]))
     }
-    const boxR = new Map(ids.map((id, i) => [id, R(boxEls[i].getBoundingClientRect())]))
     for (const g of edges) {
       const id = g.getAttribute('data-edge')!
-      const want = spec[id]
+      const kind = id.slice(0, id.indexOf(':')) as 'env' | 'outer' | 'ref'
+      const fromAttr = g.getAttribute('data-from')
+      const toAttr = g.getAttribute('data-to')
+      const want = fromAttr && toAttr ? { from: fromAttr, to: toAttr, kind } : spec?.[id]
       const [line, head] = [...g.querySelectorAll('path')] as SVGPathElement[]
       const m = line.getScreenCTM()
       if (!want || !m) continue
@@ -617,10 +630,19 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
           })
       })
     }
+    // Each state chip rides its own line (data-from / data-to on its holder),
+    // and two chips never overlap (M09).
+    const chipRects: R[] = []
     for (const chip of frame.querySelectorAll('[data-viz-part="state-chip"]')) {
       const r = R(chip.getBoundingClientRect())
+      chipRects.push(r)
       const c = { x: (r.l + r.r) / 2, y: (r.t + r.b) / 2 }
-      const onAny = reusedPaths.some((p) => {
+      const holder = chip.parentElement
+      const from = holder?.getAttribute('data-from')
+      const to = holder?.getAttribute('data-to')
+      const own = from && to ? (lines.querySelector(`[data-link][data-from="${from}"][data-to="${to}"] > path`) as SVGPathElement | null) : null
+      const candidates = own ? [own] : reusedPaths
+      const onLine = candidates.some((p) => {
         const m = p.getScreenCTM()!
         const len = p.getTotalLength()
         for (let s = 0; s <= len; s += 2) {
@@ -629,14 +651,26 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
         }
         return false
       })
-      if (!onAny)
+      if (!onLine)
         push({
           detector: 'edge-detached',
           sig: 'list-keys state-chip',
-          msg: `state chip centre (${n1(c.x)}, ${n1(c.y)}) is not on any match line`,
+          msg: `state chip centre (${n1(c.x)}, ${n1(c.y)}) is not on ${own ? `its line ${from} -> ${to}` : 'any match line'}`,
           rects: [page(r)],
         })
     }
+    for (let i = 0; i < chipRects.length; i++)
+      for (let j = i + 1; j < chipRects.length; j++) {
+        const a = chipRects[i]
+        const b = chipRects[j]
+        if (a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b)
+          push({
+            detector: 'glyph-overlap',
+            sig: 'list-keys state-chips',
+            msg: 'two state chips overlap',
+            rects: [page(a), page(b)],
+          })
+      }
   }
 
   // ---- interactive targets ------------------------------------------------

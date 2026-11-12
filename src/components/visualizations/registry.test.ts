@@ -10,7 +10,7 @@ import {
 } from './registry'
 import { VIZ_SERVER } from './registry.server'
 import { definitionMetrics } from './shell/footprint'
-import { LIMITS } from './step-log/validate'
+import { LIMITS, validateDescriptor } from './step-log/validate'
 
 describe('visualization registry', () => {
   const ids = Object.keys(VIZ_DESCRIPTORS).sort()
@@ -52,6 +52,8 @@ describe('visualization registry', () => {
       }
     }
     expect(d.title.length).toBeLessThanOrEqual(40)
+    // Measured widths at 320 (VIZ-H A2): the title line and the preset switcher.
+    if (d.form === 'step') expect(validateDescriptor(d)).toEqual([])
   })
 
   it('exports a manifest the content repo can validate <Viz id preset> against', () => {
