@@ -30,6 +30,11 @@ export const eventLoopIntrospection: StateIntrospection<EventLoopState> = {
     return ids
   },
   observedLog: (state) => state.console,
+  region(state, id) {
+    for (const lane of ['stack', 'host', 'micro', 'tasks'] as const)
+      if (state[lane].some((c) => c.id === id)) return lane
+    return undefined
+  },
 }
 
 const names = (chips: readonly ElChip[]) =>

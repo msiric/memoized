@@ -594,7 +594,16 @@ export { frameCls } from './frame-cls'
 export const EASE = [0.2, 0, 0, 1] as const
 export const EASE_CSS = 'cubic-bezier(0.2, 0, 0, 1)'
 
-export type MotionTokenName = 'feedback' | 'highlight' | 'enter' | 'exit' | 'move' | 'path' | 'draw' | 'caption'
+export type MotionTokenName =
+  | 'feedback'
+  | 'highlight'
+  | 'enter'
+  | 'exit'
+  | 'move'
+  | 'path'
+  | 'draw'
+  | 'caption'
+  | 'vacate'
 
 export type TweenToken = { type: 'tween'; duration: number; ease?: readonly number[]; distance?: number }
 export type SpringToken = { type: 'spring'; stiffness: number; damping: number; mass: number; settleMs: number }
@@ -628,6 +637,13 @@ export const motion: Record<MotionTokenName, { full: TweenToken | SpringToken; r
    * never share the cell and the change is still visible.
    */
   caption: { full: { type: 'tween', duration: 0.12, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
+  /**
+   * A glyph that leaves the place a moving glyph is arriving at (the stack
+   * frame a task replaces): a 100 ms fade in place, no travel, starting with
+   * the move. Outside the two-glyph budget (H0 S-1, R1M-13): without it the
+   * frame vanishes in one frame under the arriving chip.
+   */
+  vacate: { full: { type: 'tween', duration: 0.1, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
 }
 
 export const motionRules = {

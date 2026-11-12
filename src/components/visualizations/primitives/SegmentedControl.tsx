@@ -124,7 +124,9 @@ export function SegmentedControl({
 
   return (
     <div data-vz-seg={uid} className={cn('flex min-w-0 [container-type:inline-size]', className)}>
-      <style>{fitCss}</style>
+      {/* Raw: as text, the server would entity-escape the quotes and the `>`,
+          and the fallback rule would not apply until the engine loads. */}
+      <style dangerouslySetInnerHTML={{ __html: fitCss }} />
       <div role="radiogroup" aria-label={label} data-viz-own-keys className="relative inline-flex h-11 shrink-0 items-center">
         {/* The track: P: LessonStatus.tsx:93 (`h-8 rounded-full border`), in the one hairline. */}
         <span

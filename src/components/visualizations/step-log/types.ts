@@ -118,4 +118,6 @@ export type StateIntrospection<S> = {
   ids: (state: S) => ReadonlySet<string>
   /** The observable log as the state shows it (for the trace check). */
   observedLog?: (state: S) => readonly string[]
+  /** The region (lane) an element sits in, if the engine has regions (the shell's vacate rule, R1M-13). */
+  region?: (state: S, id: string) => string | undefined
 }

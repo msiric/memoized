@@ -36,7 +36,7 @@ const steps: Step<EventLoopState>[] = [
   {
     state: s0,
     event: 'Before the run',
-    why: 'Nothing has run yet. The script runs to the end as one task before anything it queues can run.',
+    why: 'The script runs to the end as one task before anything it queues can run.',
     narration: 'Nothing has run yet.',
     focus: [],
     claim: 'modelled',
@@ -151,7 +151,7 @@ export const basicOrdering: StepLog<EventLoopState> = {
           d: 'D is synchronous: it logs before anything queued runs.',
         },
       },
-      locked: 'Now watch the console.',
+      locked: 'Watch the console.',
       recap: { right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
     },
     {

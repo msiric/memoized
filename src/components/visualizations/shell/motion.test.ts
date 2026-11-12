@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { motionRules } from '../primitives/tokens-v3'
-import { STATIC_GATE, animates, motionBudget, presence, type MotionGate } from './motion'
+import { STATIC_GATE, animates, motionBudget, presence, vacating, type MotionGate } from './motion'
 import { BURST_WINDOW_MS, INITIAL_PACE, escapePauses, isBurst, pace } from './pace'
 
 const gate = (over: Partial<MotionGate> = {}): MotionGate => ({
@@ -126,5 +126,35 @@ describe('pace: one burst window and one Esc (D13)', () => {
     expect(escapePauses(e, false, () => paused++)).toBe(false)
     expect(escapePauses({ ...e, key: 'Enter' }, true, () => paused++)).toBe(false)
     expect({ paused, prevented }).toEqual({ paused: 1, prevented: 1 })
+  })
+})
+
+describe('vacate (R1M-13)', () => {
+  // Basics 6 -> 7: the timer's task moves from Tasks onto the stack, where
+  // the .then callback's frame is leaving.
+  const where6: Record<string, string> = { then: 'stack', timer: 'tasks' }
+  const where7: Record<string, string> = { timer: 'stack' }
+  const before = new Set(['then', 'timer', 'out-0', 'out-1', 'out-2'])
+  const after = new Set(['timer', 'out-0', 'out-1', 'out-2', 'out-3'])
+
+  it('lets the glyph a mover replaces fade in place, outside the budget', () => {
+    const allow = motionBudget(before, after, ['timer', 'out-3'])
+    expect([...allow]).toEqual(['timer', 'out-3'])
+    const v = vacating(before, after, allow, (id) => where6[id], (id) => where7[id])
+    expect([...v]).toEqual(['then'])
+  })
+
+  it('does nothing when no mover enters the region the glyph leaves', () => {
+    const v = vacating(before, after, new Set(['out-3']), (id) => where6[id], (id) => where7[id])
+    expect(v.size).toBe(0)
+  })
+
+  it('fades a vacating glyph on the vacate token, and snaps it on an instant render', () => {
+    const p = presence('then', gate({ allow: new Set(['timer']), vacate: new Set(['then']) }), { from: {}, to: {} })
+    const leave = p.variants.leave({ gate: gate({ allow: new Set(['timer']), vacate: new Set(['then']) }) })
+    expect(leave).toMatchObject({ opacity: 0, transition: { duration: 0.1 } })
+    expect(leave).not.toHaveProperty('x')
+    const snap = p.variants.leave({ gate: gate({ instant: true, vacate: new Set(['then']) }) })
+    expect(snap).toMatchObject({ opacity: 0, transition: { duration: 0 } })
   })
 })

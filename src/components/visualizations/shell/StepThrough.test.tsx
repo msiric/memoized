@@ -68,7 +68,7 @@ describe('StepThrough (event-loop specimen)', () => {
     key('4') // D
     expect(frame.dataset.vizStep).toBe('0')
     expect(frame.dataset.vizMode).toBe('reveal')
-    expect(screen.getByTestId('viz-feedback')).toHaveTextContent('Locked in: D. Now watch the console.')
+    expect(screen.getByTestId('viz-feedback')).toHaveTextContent('Locked in: D. Watch the console.')
     // No mark gives the answer away: the numbers stay, only the pick is selected.
     expect(document.querySelector('[data-choice="d"]')).toHaveAttribute('aria-checked', 'true')
     for (const id of ['a', 'b', 'c', 'd'])
@@ -85,7 +85,7 @@ describe('StepThrough (event-loop specimen)', () => {
     start(key, 'skip')
     expect(frame.dataset.vizStep).toBe('0')
     expect(frame.dataset.vizMode).toBe('controls')
-    expect(screen.getByTestId('viz-caption')).toHaveTextContent(/^Nothing has run yet\./)
+    expect(screen.getByTestId('viz-caption')).toHaveTextContent(/^The script runs to the end as one task/)
   })
 
   it('steps with the arrow keys and narrates each step once in a polite status', () => {

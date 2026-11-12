@@ -28,10 +28,10 @@ export type VizEntry = readonly [
 export const VIZ_TABLE: Record<string, VizEntry> = {
   'event-loop': [
     () => import('./engines/event-loop'),
-    924,
-    632,
+    872,
+    608,
     undefined,
-    { 'basic-ordering': [924, 632], 'microtask-queued-during-drain': [924, 752] },
+    { 'basic-ordering': [872, 608], 'microtask-queued-during-drain': [924, 740] },
   ],
   'environment-records': [
     () => import('./engines/env-records'),

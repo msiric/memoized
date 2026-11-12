@@ -42,7 +42,7 @@ const steps: Step<EventLoopState>[] = [
   {
     state: s0,
     event: 'Before the run',
-    why: 'Nothing has run yet. One microtask will queue another while the queue is still draining.',
+    why: 'One microtask will queue another while the queue is still draining.',
     narration: 'Nothing has run yet.',
     focus: [],
     claim: 'modelled',
@@ -152,7 +152,8 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
       verdict: 'end',
       prompt: 'Which logs last?',
       choices: [
-        { id: 'sync', label: 'sync', value: 'sync' },
+        // Three, not four: sync plainly logs first, and three choices keep
+        // one row on a 375 px phone, so Next stays on screen (D16).
         { id: 'micro1', label: 'micro 1', value: 'micro 1' },
         { id: 'micro2', label: 'micro 2', value: 'micro 2' },
         { id: 'timeout', label: 'timeout', value: 'timeout' },
@@ -161,12 +162,11 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
       feedback: {
         correct: 'timeout logs last: the timer is a task, and the loop drains every microtask first, even one queued mid-drain.',
         byChoice: {
-          sync: 'sync is synchronous: it logs before anything queued runs.',
           micro1: 'micro 1 is a microtask: it runs before the timer.',
           micro2: 'micro 2 joins the draining microtask queue, so it still runs before the timer.',
         },
       },
-      locked: 'Now watch the console.',
+      locked: 'Watch the console.',
       recap: { right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
     },
     {

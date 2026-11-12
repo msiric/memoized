@@ -126,7 +126,8 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
           {lines.map((text, i) => {
             const n = i + 1
             const isTraced = traced.has(n)
-            const active = (n >= from && n <= to) || isTraced
+            const isCurrent = n >= from && n <= to
+            const active = isCurrent || isTraced
             // A traced line replays from unlit after its own delay while the
             // reveal plays (R7), even if it was already the current line.
             const ground = playTrace && isTraced ? relight('vz-relight-ground', traced.get(n) ?? 0) : undefined
@@ -135,7 +136,8 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
             return (
               <li
                 key={i}
-                aria-current={active ? 'true' : undefined}
+                // Only the current line is "current"; traced lines (R7) are data-traced.
+                aria-current={isCurrent ? 'true' : undefined}
                 data-line={n}
                 data-traced={isTraced || undefined}
                 className={clsx(

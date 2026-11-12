@@ -1,5 +1,6 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../primitives/tokens-v3'
-import type { StepLog } from '../step-log/types'
+import type { Checkpoint, StepLog } from '../step-log/types'
+import { sansWidth } from '../substrates/text-metrics'
 import { allFeedbackStrings, allRecaps } from './feedback'
 import type { PerVariant, StepThroughDescriptor, Variant } from './types'
 
@@ -95,6 +96,38 @@ export function wrapLines(text: string, maxChars: number): number {
 
 const chars = (width: number, glyph: number) => Math.floor(width / glyph)
 
+/** Key cap, gaps and row padding around a choice label (ChoiceRow: 12 + 20 + 8 + label + 12). */
+export const CHOICE_CHROME = 52
+/** The least room the prompt keeps beside a one-row set of choices. */
+export const ROW_TEXT_MIN = 160
+/** The wide variant's threshold in px at the default root (`vz-wide`, 37.875rem). */
+export const WIDE_MIN = 606
+
+/** A checkpoint's choice column: its longest label plus the row chrome, at most 168. */
+export function choiceColumn(cp: Pick<Checkpoint, 'choices'>): number {
+  const label = Math.max(...cp.choices.map((c) => Math.ceil(sansWidth(c.label, typeScale.control.size))))
+  return Math.min(CHOICE.wideWidth, label + CHOICE_CHROME)
+}
+
+/** One row of all choices: its width. */
+export function choiceRowWidth(cp: Pick<Checkpoint, 'choices'>): number {
+  const n = cp.choices.length
+  return n * choiceColumn(cp) + (n - 1) * CHOICE.gap
+}
+
+/** The frame width (px at the default root) from which the choices sit in one row beside the prompt. */
+export function choiceRowBeside(cp: Pick<Checkpoint, 'choices'>): number {
+  return Math.max(WIDE_MIN, choiceRowWidth(cp) + CHOICE.textGap * 3 + SKIP_WIDTH + ROW_TEXT_MIN)
+}
+
+/** Height of a checkpoint's choices at frame width `width` in `variant` (one row where it fits, else two columns). */
+export function choicesBlockHeight(cp: Pick<Checkpoint, 'choices'>, variant: Variant, width: number): number {
+  const n = cp.choices.length
+  if (n <= 2) return choicesHeight(n)
+  const oneRow = variant === 'narrow' ? choiceRowWidth(cp) <= width : choiceRowBeside(cp) <= width
+  return oneRow ? CHOICE.height : choicesHeight(n)
+}
+
 export function choicesHeight(count: number): number {
   const rows = Math.ceil(count / 2)
   return rows * CHOICE.height + Math.max(0, rows - 1) * CHOICE.gap
@@ -106,11 +139,17 @@ export const NARROW_SIDE_TEXT = MIN_TEXT_WIDTH.narrow - SKIP_WIDTH - CHOICE.text
 export const WIDE_SIDE_TEXT =
   MIN_TEXT_WIDTH.wide - 3 * CHOICE.textGap - (2 * CHOICE.wideWidth + CHOICE.gap) - SKIP_WIDTH
 
-export type DockText = { captions: string[]; prompts: string[]; feedback: string[]; maxChoices: number }
+export type DockText = {
+  captions: string[]
+  prompts: string[]
+  feedback: string[]
+  maxChoices: number
+  checkpoints: Pick<Checkpoint, 'choices'>[]
+}
 
 /** Every caption, prompt and feedback one preset can show in the dock. */
 export function dockText<S>(log: StepLog<S>): DockText {
-  const out: DockText = { captions: [], prompts: [], feedback: [], maxChoices: 0 }
+  const out: DockText = { captions: [], prompts: [], feedback: [], maxChoices: 0, checkpoints: [] }
   for (const st of log.steps) out.captions.push(st.why)
   // The end caption leads with a recap of the predictions (D21).
   const end = log.steps[log.steps.length - 1].why
@@ -119,6 +158,7 @@ export function dockText<S>(log: StepLog<S>): DockText {
     out.prompts.push(cp.prompt)
     out.feedback.push(...allFeedbackStrings(cp))
     out.maxChoices = Math.max(out.maxChoices, cp.choices.length)
+    out.checkpoints.push(cp)
   }
   return out
 }
@@ -135,7 +175,7 @@ export function dockSlot(t: DockText, variant: Variant): number {
   const width = MIN_TEXT_WIDTH[variant]
   const caption = maxLines(t.captions, chars(width, GLYPH.caption)) * CAPTION_LINE
   if (t.maxChoices === 0) return caption
-  const choices = choicesHeight(t.maxChoices)
+  const choices = Math.max(...t.checkpoints.map((cp) => choicesBlockHeight(cp, variant, width)))
   const side = variant === 'narrow' ? NARROW_SIDE_TEXT : WIDE_SIDE_TEXT
   const text = Math.max(
     maxLines(t.prompts, chars(side, GLYPH.prompt)) * PROMPT_LINE,

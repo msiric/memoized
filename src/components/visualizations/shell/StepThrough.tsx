@@ -24,7 +24,7 @@ import { SegmentedControl } from '../primitives/SegmentedControl'
 import { TARGET_GAP_PX, ink, motion, motionRules, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
 import { CodePane, codeRows } from './CodePane'
-import { CHOICE, FRAME, SKIP_WIDTH, STEP_BAR, definitionMetrics } from './footprint'
+import { CHOICE, FRAME, STEP_BAR, choiceColumn, choiceRowBeside, choiceRowWidth, definitionMetrics } from './footprint'
 import { RECAP_NONE, allFeedback, allRecaps, feedbackText, recapText } from './feedback'
 import {
   dockMode,
@@ -36,9 +36,8 @@ import {
   type MachineState,
   type PresetShape,
 } from './machine'
-import { motionBudget, transitionFor, type MotionGate } from './motion'
+import { motionBudget, transitionFor, vacating, type MotionGate } from './motion'
 import { BURST_WINDOW_MS, INITIAL_PACE, escapePauses, pace, type Pace } from './pace'
-import { sansWidth } from '../substrates/text-metrics'
 import { Scrubber } from './Scrubber'
 import { StepsAsText, runtimeName } from './StepsAsText'
 import type { StepThroughDefinition } from './types'
@@ -113,6 +112,8 @@ type Nav = {
   allow: ReadonlySet<string>
   /** This render plays the visual's reveal (D21): Next or Play onto the last step. */
   reveal: boolean
+  /** Glyphs that fade in place as a mover arrives where they were (R1M-13). */
+  vacate: ReadonlySet<string>
   /** When the last navigation happened (`performance.now()`). */
   at: number
 }
@@ -161,16 +162,23 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       const reveal =
         !p.instant && state.preset === from.preset && state.index === last && from.index === last - 1
       let allow = NOTHING
+      let vacate = NOTHING
       if (!p.instant && state.preset === from.preset && Math.abs(state.index - from.index) === 1) {
         const steps = def.presets[state.preset].log.steps
-        const ids = def.engine.introspect.ids
-        allow = motionBudget(
-          ids(steps[from.index].state),
-          ids(steps[state.index].state),
-          steps[Math.max(from.index, state.index)].focus,
-        )
+        const { ids, region } = def.engine.introspect
+        const was = steps[from.index].state
+        const now = steps[state.index].state
+        allow = motionBudget(ids(was), ids(now), steps[Math.max(from.index, state.index)].focus)
+        if (region)
+          vacate = vacating(
+            ids(was),
+            ids(now),
+            allow,
+            (id) => region(was, id),
+            (id) => region(now, id),
+          )
       }
-      return { state, pace: p, direction, allow, reveal, at: a.now }
+      return { state, pace: p, direction, allow, vacate, reveal, at: a.now }
     },
     undefined,
     () => ({
@@ -178,6 +186,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       pace: INITIAL_PACE,
       direction: 1 as const,
       allow: NOTHING,
+      vacate: NOTHING,
       reveal: false,
       at: -Infinity,
     }),
@@ -201,6 +210,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     epoch: nav.pace.epoch,
     direction: nav.direction,
     allow: nav.allow,
+    vacate: nav.vacate,
     reveal: nav.reveal && interactive,
   }
   const animate = !gate.instant && !gate.reduce
@@ -782,16 +792,6 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
 const CHOICES_CLS = 'grid shrink-0 grid-cols-2 [grid-area:choices] vz-wide:w-[var(--vz-choices-w)]'
 const choicesStyle = { gap: rem(CHOICE.gap) }
 
-/** Key cap, gaps and row padding around a choice label (ChoiceRow: 12 + 20 + 8 + label + 12). */
-const CHOICE_CHROME = 52
-/** The least room the prompt keeps beside a one-row set of choices. */
-const ROW_TEXT_MIN = 160
-
-function choiceColumn(cp: Checkpoint): number {
-  const label = Math.max(...cp.choices.map((c) => Math.ceil(sansWidth(c.label, typeScale.control.size))))
-  return Math.min(CHOICE.wideWidth, label + CHOICE_CHROME)
-}
-
 /**
  * Container queries (in rem, so larger text switches sooner, D19) that lay a
  * checkpoint's choices in one row where it fits: under the prompt in the
@@ -801,20 +801,17 @@ function choiceColumn(cp: Checkpoint): number {
 function choiceRowCss(scope: string, cp: Checkpoint): string {
   const n = cp.choices.length
   const col = choiceColumn(cp)
-  const row = n * col + (n - 1) * CHOICE.gap
+  const row = choiceRowWidth(cp)
   const sel = `[data-vz-cp="${scope}"] [data-vz-choices]`
   const two = `${sel}{--vz-choices-w:${rem(2 * col + CHOICE.gap)}}`
   if (n <= 2) return two
   const cols = `grid-template-columns:repeat(${n},minmax(0,1fr))`
-  const besideText = row + CHOICE.textGap * 3 + SKIP_WIDTH + ROW_TEXT_MIN
   return (
     two +
     `@container vz (max-width:37.874rem) and (min-width:${rem(row)}){${sel}{${cols}}}` +
-    `@container vz (min-width:${rem(Math.max(WIDE_MIN, besideText))}){${sel}{${cols};--vz-choices-w:${rem(row)}}}`
+    `@container vz (min-width:${rem(choiceRowBeside(cp))}){${sel}{${cols};--vz-choices-w:${rem(row)}}}`
   )
 }
-/** The wide variant's threshold, in px at the default root (`vz-wide`, 37.875rem). */
-const WIDE_MIN = 606
 
 /**
  * The checkpoint block (D9). In the narrow variant (phones, or large text):
@@ -855,7 +852,9 @@ function CheckpointBlock({
       )}
       style={{ columnGap: rem(CHOICE.textGap), rowGap: rem(CHOICE.textGap) }}
     >
-      <style>{choiceRowCss(scope, cp)}</style>
+      {/* Raw, so the server does not entity-escape the selectors' quotes (the
+          rule must hold in the server frame too). Generated CSS only. */}
+      <style dangerouslySetInnerHTML={{ __html: choiceRowCss(scope, cp) }} />
       {/* Stacked, the text's last line sits level with Skip's label (8 px under it, 44 px target). */}
       <div className="grid min-w-0 content-end [grid-area:text] vz-narrow:pb-2 vz-wide:pr-2">
         <p aria-hidden className={cn('invisible col-start-1 row-start-1', promptCls)}>
