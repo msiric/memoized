@@ -404,7 +404,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               >
                 Key
               </span>
-              <div className={clsx(hidden && 'invisible')} data-viz-part="keys">
+              <div className={clsx('min-w-0 flex-1', hidden && 'invisible')} data-viz-part="keys">
                 <SegmentedControl
                   label="Key strategy"
                   options={KEYS}

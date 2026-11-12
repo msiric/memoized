@@ -8,6 +8,7 @@ import { Disclosure } from './Disclosure'
 import { Frame } from './Frame'
 import { Provenance, provenanceText } from './Provenance'
 import { SegmentedControl } from './SegmentedControl'
+import { segmentedWidth } from '../step-log/validate'
 import { Tag } from './Tag'
 import { focusRing, frameCls } from './tokens-v3'
 
@@ -84,6 +85,20 @@ describe('VDS primitives', () => {
     const options = ['a', 'b', 'c', 'd'].map((id) => ({ id, label: id }))
     const html = renderToStaticMarkup(<SegmentedControl label="x" options={options} value={0} onChange={() => {}} />)
     expect(html).toContain('<select')
+  })
+
+  it('SegmentedControl: segments wider than their room fall back to a select, by container query in rem (A2)', () => {
+    const options = [
+      { id: 'a', label: 'Basics' },
+      { id: 'b', label: 'Drain' },
+    ]
+    const html = renderToStaticMarkup(<SegmentedControl label="x" options={options} value={0} onChange={() => {}} />)
+    const fit = segmentedWidth(options.map((o) => o.label)) / 16
+    expect(html).toContain('role="radiogroup"')
+    expect(html).toContain('<select')
+    expect(html).toContain('container-type:inline-size')
+    expect(html).toContain(`@container (min-width:${fit}rem)`)
+    expect(html).toContain(`@container (max-width:${fit - 0.001}rem)`)
   })
 
   it('ChoiceRow: number slot, then ✓ or × in the same slot; never amber', () => {

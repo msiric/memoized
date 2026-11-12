@@ -363,8 +363,11 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         </p>
         {/* One preset has no switcher, and no gap reserved for one (A5). */}
         {def.presets.length > 1 ? (
-          <div className={cn('self-start vz-wide:self-auto', hidden && 'invisible')}>
+          // The switcher takes the row's remaining room and falls back to a
+          // select when its segments do not fit there (A2).
+          <div className={cn('min-w-0 vz-wide:flex-1', hidden && 'invisible')}>
             <SegmentedControl
+              className="vz-wide:justify-end"
               label="Example"
               options={def.presets}
               value={s.preset}
