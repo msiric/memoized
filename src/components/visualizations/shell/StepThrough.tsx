@@ -25,7 +25,7 @@ import { TARGET_GAP_PX, ink, motionRules, type as typeScale } from '../primitive
 import type { Checkpoint } from '../step-log/types'
 import { CodePane } from './CodePane'
 import { CHOICE, FRAME, STEP_BAR, definitionMetrics } from './footprint'
-import { allFeedback, feedbackText } from './feedback'
+import { feedbackText } from './feedback'
 import {
   dockMode,
   initialState,
@@ -641,7 +641,9 @@ function CheckpointBlock({
   className?: string
   ghost?: boolean
 }) {
-  const variants = [cp.prompt, ...allFeedback(cp)]
+  // Ghosts use the live markup exactly (the feedback lead is semibold): a
+  // lighter ghost can wrap one line shorter than the text it reserves for.
+  const feedbacks = [null, ...cp.choices.map((c) => c.id)].map((p) => feedbackText(cp, p))
   return (
     <div
       data-viz-part={ghost ? undefined : 'viz-checkpoint'}
@@ -654,9 +656,12 @@ function CheckpointBlock({
     >
       {/* Below 768 the text's last line sits level with Skip's label (8 px under it, 44 px target). */}
       <div className="grid min-w-0 content-end [grid-area:text] max-md:pb-2 md:pr-2">
-        {variants.map((t, k) => (
-          <p key={k} aria-hidden className={cn('invisible col-start-1 row-start-1', k === 0 ? promptCls : captionCls)}>
-            {t}
+        <p aria-hidden className={cn('invisible col-start-1 row-start-1', promptCls)}>
+          {cp.prompt}
+        </p>
+        {feedbacks.map((f, k) => (
+          <p key={k} aria-hidden className={cn('invisible col-start-1 row-start-1', captionCls)}>
+            <span className={cn('font-semibold', ink.base)}>{f.lead}</span> {f.body}
           </p>
         ))}
         <div className="col-start-1 row-start-1 self-end">{text}</div>
