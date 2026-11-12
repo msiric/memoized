@@ -70,8 +70,9 @@ describe('StepThrough machine', () => {
     expect(run([{ type: 'end' }, { type: 'play' }]).playing).toBe(false)
   })
 
-  it('switching presets resets to Start with fresh checkpoints and keeps speed', () => {
-    const s = run([{ type: 'speed', speed: 2 }, ...nexts(3), { type: 'preset', preset: 1 }])
-    expect(s).toMatchObject({ preset: 1, index: 0, speed: 2, status: ['open'] })
+  it('switching presets resets to Start with fresh checkpoints and keeps answer memory', () => {
+    const s = run([...nexts(5), { type: 'answer', choice: 'b' }, { type: 'preset', preset: 1 }])
+    expect(s).toMatchObject({ preset: 1, index: 0, status: ['open'], memory: { '0:0': 'b' } })
+    expect(s).not.toHaveProperty('speed')
   })
 })

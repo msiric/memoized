@@ -8,14 +8,12 @@ export type CheckpointShape = { beforeStep: number; answer: string }
 export type PresetShape = { steps: number; checkpoints: readonly CheckpointShape[] }
 
 export type CheckpointStatus = 'open' | 'answered' | 'skipped'
-export type Speed = 1 | 2
 export type DockMode = 'controls' | 'ask' | 'reveal'
 
 export type MachineState = {
   preset: number
   index: number
   playing: boolean
-  speed: Speed
   status: CheckpointStatus[]
   /** The choice picked in this pass, per checkpoint (null if none). */
   picked: (string | null)[]
@@ -37,7 +35,6 @@ export type Action =
   | { type: 'pause' }
   | { type: 'toggle' }
   | { type: 'tick' }
-  | { type: 'speed'; speed: Speed }
   | { type: 'preset'; preset: number }
 
 export function initialState(presets: readonly PresetShape[], preset = 0): MachineState {
@@ -46,7 +43,6 @@ export function initialState(presets: readonly PresetShape[], preset = 0): Machi
     preset,
     index: 0,
     playing: false,
-    speed: 1,
     status: Array(n).fill('open'),
     picked: Array(n).fill(null),
     memory: {},
@@ -147,11 +143,9 @@ export function reduce(presets: readonly PresetShape[], s: MachineState, a: Acti
       const stop = next.index >= last || openCheckpointAt(presets, next) !== -1
       return stop ? { ...next, playing: false } : next
     }
-    case 'speed':
-      return { ...s, speed: a.speed }
     case 'preset': {
       if (a.preset === s.preset) return s
-      return { ...initialState(presets, a.preset), speed: s.speed, memory: s.memory }
+      return { ...initialState(presets, a.preset), memory: s.memory }
     }
   }
 }
