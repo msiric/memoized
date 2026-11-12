@@ -617,10 +617,19 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
           })
       })
     }
+    // Each state chip rides its own line (data-from / data-to on its holder),
+    // and two chips never overlap (M09).
+    const chipRects: R[] = []
     for (const chip of frame.querySelectorAll('[data-viz-part="state-chip"]')) {
       const r = R(chip.getBoundingClientRect())
+      chipRects.push(r)
       const c = { x: (r.l + r.r) / 2, y: (r.t + r.b) / 2 }
-      const onAny = reusedPaths.some((p) => {
+      const holder = chip.parentElement
+      const from = holder?.getAttribute('data-from')
+      const to = holder?.getAttribute('data-to')
+      const own = from && to ? (lines.querySelector(`[data-link][data-from="${from}"][data-to="${to}"] > path`) as SVGPathElement | null) : null
+      const candidates = own ? [own] : reusedPaths
+      const onLine = candidates.some((p) => {
         const m = p.getScreenCTM()!
         const len = p.getTotalLength()
         for (let s = 0; s <= len; s += 2) {
@@ -629,14 +638,26 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
         }
         return false
       })
-      if (!onAny)
+      if (!onLine)
         push({
           detector: 'edge-detached',
           sig: 'list-keys state-chip',
-          msg: `state chip centre (${n1(c.x)}, ${n1(c.y)}) is not on any match line`,
+          msg: `state chip centre (${n1(c.x)}, ${n1(c.y)}) is not on ${own ? `its line ${from} -> ${to}` : 'any match line'}`,
           rects: [page(r)],
         })
     }
+    for (let i = 0; i < chipRects.length; i++)
+      for (let j = i + 1; j < chipRects.length; j++) {
+        const a = chipRects[i]
+        const b = chipRects[j]
+        if (a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b)
+          push({
+            detector: 'glyph-overlap',
+            sig: 'list-keys state-chips',
+            msg: 'two state chips overlap',
+            rects: [page(a), page(b)],
+          })
+      }
   }
 
   // ---- interactive targets ------------------------------------------------
