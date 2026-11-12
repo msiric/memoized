@@ -10,6 +10,7 @@ import {
 } from '../../substrates/box-arrow'
 import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
+import { lintEnvDiagram } from './lint'
 import { CONTAINER, EnvRecordsStage } from './EnvRecordsStage'
 import { SIZE, layoutDiagram, layoutSection, type SectionScene } from './layout'
 import type { EnvSection } from './model'
@@ -216,6 +217,17 @@ describe('adversarial data the layout accepts never collides (A3)', () => {
             expect(intersects(s.boxes[i].rect, s.boxes[j].rect, 7), `${s.boxes[i].id} x ${s.boxes[j].id} @ ${s.width}`).toBe(
               false,
             )
+  })
+})
+
+describe('authoring lint (A3, A9, A10)', () => {
+  it.each(envRecordsDescriptor.presets.map((p) => [p.id, p.data] as const))('%s passes', (_id, data) => {
+    expect(lintEnvDiagram(data)).toEqual([])
+  })
+  it('names the over-long heading and the tier that does not fit', () => {
+    const byId = Object.fromEntries(ENV_PRESETS.map((p) => [p.id, lintEnvDiagram(p.data).join('\n')]))
+    expect(byId['er-text-limit']).toMatch(/heading \(narrow\): \d+px > 288px/)
+    expect(byId['er-long-names']).toMatch(/does not fit/)
   })
 })
 

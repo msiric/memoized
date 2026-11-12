@@ -1,8 +1,9 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
-import { validateStepLog } from '../../step-log/validate'
+import { validateDescriptor, validateStepLog } from '../../step-log/validate'
 import { recordNodeTrace, sha256, verifyStepLogTruth } from '../../step-log/truth'
 import { eventLoopDescriptor } from './descriptor'
+import { lintEventLoopLogs } from './lint'
 import { eventLoopIntrospection } from './model'
 
 /**
@@ -22,6 +23,40 @@ describe.each(eventLoopDescriptor.presets.map((p) => [p.id, p.log] as const))('e
 
   it('shows the reader exactly the program that was run', () => {
     expect(log.code?.lines.join('\n')).toBe(log.source.snippet)
+  })
+})
+
+describe('event-loop width lint (A1, A2, A7, F4, F5)', () => {
+  it('every preset fits at 320: chips, outputs, queues, title and switcher', () => {
+    expect(lintEventLoopLogs(eventLoopDescriptor.presets.map((p) => p.log))).toEqual([])
+    expect(validateDescriptor(eventLoopDescriptor)).toEqual([])
+  })
+
+  it('rejects what used to render broken', () => {
+    const log = eventLoopDescriptor.presets[1].log
+    const chip = (id: string, label: string) => ({ id, label })
+    const steps = log.steps.map((s, i) =>
+      i === 2
+        ? {
+            ...s,
+            state: {
+              ...s.state,
+              host: [chip('timer', 'timer 0 ms → callbackHandler')],
+              micro: Array.from({ length: 9 }, (_, k) => chip(`m${k}`, `m${k}`)),
+            },
+          }
+        : s,
+    )
+    const errors = lintEventLoopLogs([{ ...log, steps }]).join('\n')
+    expect(errors).toMatch(/host chip "timer 0 ms → callbackHandler" is \d+px > 122px/)
+    expect(errors).toMatch(/micro holds 9 items/)
+    expect(
+      validateDescriptor({
+        id: 'x',
+        title: 'Title',
+        presets: ['A label of 17 ch.', 'Another 17 chars!', 'A third 17 chars.'].map((label, k) => ({ id: `${k}`, label })),
+      }).join('\n'),
+    ).toMatch(/switcher is \d+px wide > 288px/)
   })
 })
 

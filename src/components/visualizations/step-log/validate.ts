@@ -1,3 +1,4 @@
+import { emWidth, hasWideText, monoWidth, sansWidth } from '../substrates/text-metrics'
 import type { StateIntrospection, StepLog } from './types'
 
 /**
@@ -16,6 +17,60 @@ export const LIMITS = {
   minChoices: 2,
   maxChoices: 4,
 } as const
+
+/**
+ * Width limits (VIZ-H A2, A4, A11): character counts are not enough, so
+ * every text slot that broke rendering is also measured with the shared
+ * width model (`substrates/text-metrics.ts`: CJK 1 em, emoji 1.25 em)
+ * against the slot it gets at 320 px, the narrowest supported width.
+ */
+export const WIDTHS = {
+  /** The stage at 320. */
+  stage: 288,
+  /** Code at 320: the stage minus the pane's 8 + 8 padding and the 12 px marker, mono 12. */
+  code: 260,
+  codeSize: 12,
+  /** The step bar's event, beside the widest counter ("10 / 10", about 46 px) and its 16 px gap: sans 12. */
+  event: 226,
+  eventSize: 12,
+  /** A segmented control's segment: 12 px padding each side, sans 14/500, plus the 2 px track. */
+  segmentPad: 24,
+  segmentSize: 14,
+  /** The frame title: sans 16/600, about 0.46 em in Chromium; 0.48 em here (truncation is the guard). */
+  titleSize: 16,
+  titleAdvance: 0.48,
+} as const
+
+/** Width of a row of segments (the preset switcher) at the shared model. */
+export function segmentedWidth(labels: readonly string[]): number {
+  return labels.reduce((w, l) => w + Math.ceil(sansWidth(l, WIDTHS.segmentSize)) + WIDTHS.segmentPad, 2)
+}
+
+/**
+ * Descriptor-level lint for a step-through: the title fits one line at 320,
+ * and the preset switcher's segments fit the stage at 320 (A2: three legal
+ * 18-character labels did not). Four or more presets render a select.
+ */
+export function validateDescriptor(d: {
+  id: string
+  title: string
+  presets: readonly { id: string; label: string }[]
+}): string[] {
+  const errors: string[] = []
+  const title = Math.ceil(emWidth(d.title, WIDTHS.titleAdvance) * WIDTHS.titleSize)
+  if (title > WIDTHS.stage) errors.push(`${d.id} title: ${title}px wide > ${WIDTHS.stage}px at 320 (shorten it)`)
+  for (const p of d.presets)
+    if ([...p.label].length > LIMITS.presetLabel)
+      errors.push(`${d.id} preset "${p.label}": ${[...p.label].length} chars > ${LIMITS.presetLabel}`)
+  if (d.presets.length >= 2 && d.presets.length <= 3) {
+    const row = segmentedWidth(d.presets.map((p) => p.label))
+    if (row > WIDTHS.stage)
+      errors.push(
+        `${d.id} presets: the switcher is ${row}px wide > ${WIDTHS.stage}px at 320 (shorten the labels: ${d.presets.map((p) => `"${p.label}"`).join(', ')})`,
+      )
+  }
+  return errors
+}
 
 /**
  * A why-caption states a rule or a cause. Lint requires a causal word, a
@@ -40,6 +95,10 @@ export function validateStepLog<S>(log: StepLog<S>, introspect: StateIntrospecti
   log.code?.lines.forEach((l, i) => {
     if ([...l].length > LIMITS.codeColumns)
       err(`code line ${i + 1}`, `${[...l].length} columns > ${LIMITS.codeColumns}`)
+    // A4: the code pane never scrolls or wraps, so a line must fit at 320.
+    const w = Math.ceil(monoWidth(l, WIDTHS.codeSize))
+    if (w > WIDTHS.code) err(`code line ${i + 1}`, `${w}px wide at 320 > ${WIDTHS.code}px (about 35 columns)`)
+    if (hasWideText(l)) err(`code line ${i + 1}`, 'wide characters (CJK, emoji) break the column grid; use ASCII')
   })
   if (log.code?.tokens) {
     if (log.code.tokens.length !== codeLines) err('code tokens', 'one token array per line required')
@@ -52,6 +111,8 @@ export function validateStepLog<S>(log: StepLog<S>, introspect: StateIntrospecti
   steps.forEach((step, i) => {
     const at = i === 0 ? 'Start' : `step ${i}`
     if (step.event.length > LIMITS.event) err(at, `event is ${step.event.length} chars > ${LIMITS.event}`)
+    const ew = Math.ceil(sansWidth(step.event, WIDTHS.eventSize))
+    if (ew > WIDTHS.event) err(at, `event is ${ew}px wide at 320 > ${WIDTHS.event}px (A11)`)
     if (step.why.length > LIMITS.why) err(at, `why is ${step.why.length} chars > ${LIMITS.why}`)
     if (step.narration.length > LIMITS.narration)
       err(at, `narration is ${step.narration.length} chars > ${LIMITS.narration}`)
