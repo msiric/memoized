@@ -254,9 +254,13 @@ export const surfaces: Record<SurfaceName, { dark: Layer[]; light: Layer[] }> = 
   /** P: Button.tsx:24 (filled). */
   accent: { dark: [{ color: 'lime.500' }], light: [{ color: 'lime.700' }] },
   accentHover: { dark: [{ color: 'lime.600' }], light: [{ color: 'lime.800' }] },
-  /** P: Button.tsx:22 (secondary: zinc-800/40 on the frame; hover zinc-800). */
-  secondary: { dark: [...FRAME, { color: 'zinc.800', alpha: 0.4 }], light: [{ color: 'zinc.200' }] },
-  secondaryHover: { dark: [...FRAME, { color: 'zinc.800' }], light: [{ color: 'zinc.300' }] },
+  /**
+   * The secondary role inside the frame is the platform `outline` variant
+   * (P: Button.tsx:26; WS1 ruling 1): no fill, a white/10 inset ring, hover
+   * white/5 with white text.
+   */
+  secondary: { dark: FRAME, light: [{ color: 'zinc.50' }] },
+  secondaryHover: { dark: [...FRAME, { color: 'white', alpha: 0.05 }], light: [{ color: 'zinc.100' }] },
   /** P: LessonStatus.tsx:30 (selected neutral zinc-600), :40 (hover zinc-700). */
   segmentSelected: { dark: [...FRAME, { color: 'zinc.600' }], light: [{ color: 'zinc.200' }] },
   segmentHover: { dark: [...FRAME, { color: 'zinc.700' }], light: [{ color: 'zinc.100' }] },
@@ -346,7 +350,7 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'primary button label', kind: 'text', fg: r('onAccent'), bg: 'accent' },
   { use: 'primary button label, hover and press', kind: 'text', fg: r('onAccent'), bg: 'accentHover' },
   { use: 'secondary button label', kind: 'text', fg: r('inkMuted'), bg: 'secondary' },
-  { use: 'secondary button label, hover', kind: 'text', fg: r('inkSecondary'), bg: 'secondaryHover' },
+  { use: 'secondary button label, hover and press', kind: 'text', fg: { dark: 'white', light: 'zinc.900' }, bg: 'secondaryHover' },
   { use: 'text button label', kind: 'text', fg: r('now'), bg: 'frame' },
   { use: 'selected segment label', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'segmentSelected' },
   { use: 'hovered segment label', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'segmentHover' },
@@ -354,8 +358,9 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'choice label, hover', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'choiceHover' },
   { use: 'picked choice label', kind: 'text', fg: r('ink'), bg: 'choiceSelected' },
   // The ✓ and × marks take the number's slot, so they sit on the key cap (D9).
-  { use: 'choice ✓ mark in the key slot', kind: 'graphic', fg: r('now'), bg: 'keyCap' },
-  { use: 'choice × mark in the key slot', kind: 'graphic', fg: r('removed'), bg: 'keyCap' },
+  // Both are ink (WS1 ruling 3): the glyph shape and the "Right." / "Not
+  // quite." text carry the meaning; lime stays reserved for `now`.
+  { use: 'choice ✓ and × marks in the key slot', kind: 'text', fg: r('ink'), bg: 'keyCap' },
   { use: 'choice key number', kind: 'text', fg: r('inkSecondary'), bg: 'keyCap' },
   { use: 'state chip text', kind: 'text', fg: { dark: 'zinc.900', light: 'white' }, bg: 'chipState' },
   { use: 'done fill text', kind: 'text', fg: { dark: 'zinc.950', light: 'white' }, bg: 'doneFill' },
@@ -551,13 +556,23 @@ export const motion: Record<MotionTokenName, { full: TweenToken | SpringToken; r
     full: { type: 'tween', duration: 0.16, ease: EASE, distance: 8 },
     reduced: { type: 'tween', duration: 0.12, distance: 0 },
   },
+  /**
+   * Critically damped (ratio 1.0) and tuned by its settle time: within 0.4 %
+   * of the target at 280 ms, so the sampled curve (`shell/flip.ts`) ends
+   * inside the 300 ms cap without a visible end snap (M08). omega = 27.6.
+   */
   move: {
-    full: { type: 'spring', stiffness: 520, damping: 46, mass: 1, settleMs: 250 },
+    full: { type: 'spring', stiffness: 760, damping: 55.2, mass: 1, settleMs: 280 },
     reduced: { type: 'tween', duration: 0 },
   },
   path: { full: { type: 'tween', duration: 0.22, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
   draw: { full: { type: 'tween', duration: 0.22, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
-  caption: { full: { type: 'tween', duration: 0.12 }, reduced: { type: 'tween', duration: 0 } },
+  /**
+   * The caption never crossfades (M15, S-4): the old sentence goes at once and
+   * the new one fades in over 120 ms on the shared curve, so two sentences
+   * never share the cell and the change is still visible.
+   */
+  caption: { full: { type: 'tween', duration: 0.12, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
 }
 
 export const motionRules = {
@@ -574,6 +589,19 @@ export const motionRules = {
   /** P: ProblemCard/index.tsx:210 (chevron, 200 ms). */
   disclosureMs: 200,
 } as const
+
+/**
+ * D6: the one functional shadow. Only a glyph moving between regions carries
+ * it, ramped in and out with the move (`k` 0 to 1), and the moving glyph gets
+ * an opaque raised backing (`vz-frame`, the lighter elevated surface) so
+ * nothing it passes over shows through it.
+ */
+export const LIFT = { y: 6, blur: 16, alpha: 0.45, backingCls: 'bg-vz-frame' } as const
+export function liftShadow(k: number): string {
+  if (k <= 0) return 'none'
+  const f = (n: number) => Math.round(n * k * 100) / 100
+  return `0 ${f(LIFT.y)}px ${f(LIFT.blur)}px rgb(0 0 0 / ${f(LIFT.alpha)})`
+}
 
 /** CSS twins for class-driven transitions. */
 export const transitionCls = {

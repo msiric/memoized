@@ -189,15 +189,23 @@ describe('tokens v3: motion (§4, D10, D11)', () => {
     }
   })
 
-  it('uses a critically damped move spring (no overshoot) that settles in about 250 ms', () => {
+  it('uses a critically damped move spring (no overshoot) that settles inside the cap (M08)', () => {
     const m = motion.move.full
     if (m.type !== 'spring') throw new Error('move must be a spring')
-    expect(m).toMatchObject({ stiffness: 520, damping: 46, mass: 1 })
+    const omega = Math.sqrt(m.stiffness / m.mass)
     const ratio = m.damping / (2 * Math.sqrt(m.stiffness * m.mass))
     expect(ratio).toBeGreaterThanOrEqual(1)
-    // Critically damped settle time to within 2 %: about 5.8 / omega.
-    const settleMs = (5.8 / Math.sqrt(m.stiffness / m.mass)) * 1000
-    expect(settleMs).toBeLessThan(motionRules.maxTransitionMs)
+    expect(ratio).toBeLessThan(1.01)
+    // Critically damped residual: (1 + wt) e^(-wt). At settleMs it is under 0.5 %.
+    const residual = (t: number) => (1 + omega * t) * Math.exp(-omega * t)
+    expect(residual(m.settleMs / 1000)).toBeLessThan(0.005)
+    expect(m.settleMs).toBeLessThan(motionRules.maxTransitionMs)
+  })
+
+  it('composes the one lift shadow and ramps it with k (D6)', () => {
+    expect(tokens.liftShadow(0)).toBe('none')
+    expect(tokens.liftShadow(1)).toBe('0 6px 16px rgb(0 0 0 / 0.45)')
+    expect(tokens.liftShadow(0.5)).toBe('0 3px 8px rgb(0 0 0 / 0.23)')
   })
 
   it('fits every transition into 40 % of the play interval', () => {

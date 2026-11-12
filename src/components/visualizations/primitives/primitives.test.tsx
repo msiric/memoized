@@ -34,8 +34,9 @@ describe('VDS primitives', () => {
     expect(primary).toContain(focusRing)
     expect(primary).not.toMatch(/(^|\s)hover:/)
     const secondary = buttonClasses({ variant: 'secondary' })
-    expect(secondary).toContain('bg-zinc-800/40')
-    expect(secondary).toContain('ring-zinc-800')
+    // The platform outline variant (WS1 ruling 1).
+    expect(secondary).toContain('ring-white/10')
+    expect(secondary).not.toMatch(/(^| )bg-/)
     expect(buttonClasses({ variant: 'text' })).toContain('text-lime-400')
     expect(buttonClasses({ size: 'icon' })).toMatch(/\bw-11\b/)
   })

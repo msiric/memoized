@@ -11,7 +11,8 @@ import { focusRing, radius, transitionCls, type as typeScale } from './tokens-v3
  * variants (`src/components/Button.tsx`), sized to a 44 px target:
  *
  * - `primary`: the platform `filled` variant (lime-500, hover lime-600).
- * - `secondary`: the platform `secondary` variant (lesson Previous / Next).
+ * - `secondary`: the platform `outline` variant (WS1 ruling 1: the platform
+ *   `secondary` fill is too faint an edge on the frame surface).
  * - `text`: the platform `text` variant (lime-400, hover lime-500).
  *
  * States: hover only on devices that can hover (`can-hover:`), a press step
@@ -35,17 +36,14 @@ const base = cn(
 /** Rest colors per variant. P: Button.tsx:22-27 (dark values). */
 const rest: Record<ButtonVariant, string> = {
   primary: 'bg-lime-500 text-zinc-900 print:bg-lime-700 print:text-white',
-  secondary: 'bg-zinc-800/40 text-zinc-400 ring-1 ring-inset ring-zinc-800 print:text-zinc-700 print:ring-zinc-300',
+  secondary: 'text-zinc-400 ring-1 ring-inset ring-white/10 print:text-zinc-700 print:ring-zinc-300',
   text: 'text-lime-400 print:text-lime-700',
 }
 
 /** Hover (hover-capable devices only) and press (every device). */
 const live: Record<ButtonVariant, string> = {
   primary: cn('can-hover:bg-lime-600 active:bg-lime-600', transitionCls.press),
-  secondary: cn(
-    'can-hover:bg-zinc-800 can-hover:text-zinc-300 active:bg-zinc-800 active:text-zinc-300',
-    transitionCls.press,
-  ),
+  secondary: cn('can-hover:bg-white/5 can-hover:text-white active:bg-white/5 active:text-white', transitionCls.press),
   text: cn('can-hover:text-lime-500 active:text-lime-500', transitionCls.press),
 }
 

@@ -12,8 +12,9 @@ import { focusRing, ink, radius, transitionCls } from './tokens-v3'
  * `text-sm font-medium`, zinc-600 on hover; 44 px tall (spec A5).
  *
  * The number key sits in a 20 px slot on the left. After the reveal the slot
- * keeps its place and shows the result: ✓ (lime) on the right answer, × (rose)
- * on a wrong pick. Never amber: amber means output (D4). The picked row takes
+ * keeps its place and shows the result: ✓ on the right answer, × on a wrong
+ * pick, both in ink (WS1 ruling 3: the shape and the "Right." / "Not quite."
+ * text carry the meaning; lime stays `now`, amber stays output, D4). The picked row takes
  * the selected neutral fill (P: LessonStatus.tsx:30). A row is a `radio`;
  * the group around it owns the roving tabindex.
  *
@@ -78,7 +79,7 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
           'flex h-5 w-5 shrink-0 items-center justify-center bg-zinc-800 print:bg-zinc-50',
           radius.chip.cls,
           mark
-            ? cn('font-sans text-sm font-semibold leading-5', mark === 'right' ? ink.now : ink.removed)
+            ? cn('font-sans text-sm font-semibold leading-5', ink.base)
             : cn('font-mono text-2xs leading-4 tabular-nums', ink.secondary),
         )}
       >
