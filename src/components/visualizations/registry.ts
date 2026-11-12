@@ -1,6 +1,8 @@
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
+import { listKeysDescriptor } from './engines/list-keys/descriptor'
 import { footprintOf } from './shell/footprint'
 import { textAlternative, type TextAlternative } from './shell/StepsAsText'
+import type { ExplorableDescriptor } from './shell/explorable'
 import type { StepThroughDescriptor } from './shell/types'
 
 /**
@@ -13,10 +15,11 @@ import type { StepThroughDescriptor } from './shell/types'
  * keeps all three in step.
  */
 
-type AnyDescriptor = StepThroughDescriptor<any>
+type AnyDescriptor = StepThroughDescriptor<any> | ExplorableDescriptor<any>
 
 export const VIZ_DESCRIPTORS = {
   'event-loop': eventLoopDescriptor,
+  'list-keys': listKeysDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS
@@ -27,14 +30,23 @@ export type VizManifest = {
   schema: typeof VIZ_MANIFEST_SCHEMA
   visuals: Record<
     string,
-    { form: 'step' | 'static' | 'explorable'; engine: string; presets: string[]; defaultPreset: string; since: string }
+    {
+      form: 'step' | 'static' | 'explorable'
+      engine: string
+      presets: string[]
+      defaultPreset: string
+      since: string
+    }
   >
 }
 
 /** What content CI validates `<Viz id preset>` against (served at /viz-manifest.json). */
 export function buildVizManifest(): VizManifest {
   const visuals: VizManifest['visuals'] = {}
-  for (const [id, d] of Object.entries(VIZ_DESCRIPTORS) as [string, AnyDescriptor][]) {
+  for (const [id, d] of Object.entries(VIZ_DESCRIPTORS) as [
+    string,
+    AnyDescriptor,
+  ][]) {
     visuals[id] = {
       form: d.form,
       engine: d.engine.id,
@@ -51,12 +63,18 @@ export function descriptorFor(id: string): AnyDescriptor | undefined {
 }
 
 /** The reserved [narrow, wide] frame heights for a visual. */
-export function vizFootprint(id: string): readonly [number, number] | undefined {
+export function vizFootprint(
+  id: string,
+): readonly [number, number] | undefined {
   const d = descriptorFor(id)
-  return d ? footprintOf(d) : undefined
+  if (!d) return undefined
+  return d.form === 'explorable' ? d.footprint : footprintOf(d)
 }
 
-export function vizTextAlternative(id: string, preset?: string): TextAlternative | undefined {
+export function vizTextAlternative(
+  id: string,
+  preset?: string,
+): TextAlternative | undefined {
   const d = descriptorFor(id)
   const p = d?.presets.find((x) => x.id === (preset ?? d.defaultPreset))
   return p ? textAlternative(p.log) : undefined

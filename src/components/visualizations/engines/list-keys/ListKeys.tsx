@@ -1,0 +1,764 @@
+'use client'
+
+import clsx from 'clsx'
+import { useReducedMotion } from 'framer-motion'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react'
+import {
+  focusRing,
+  ink,
+  motionRules,
+  surface,
+  transitionCls,
+  type as typeScale,
+} from '../../primitives/tokens-v2'
+import { CodePane } from '../../shell/CodePane'
+import { DockButton } from '../../shell/controls'
+import { CHOICE, FRAME } from '../../shell/footprint'
+import type { MotionGate } from '../../shell/motion'
+import { PresetSwitcher } from '../../shell/PresetSwitcher'
+import { H_CLS, heights } from '../../shell/vars'
+import {
+  CODE,
+  CODE_COLS,
+  CODE_ROWS,
+  CODE_TOKENS,
+  type CodeVariant,
+} from './code'
+import { Columns } from './Columns'
+import {
+  LIST_RULE,
+  NO_CHECK_PROMPT,
+  PICK_HINT,
+  TITLE,
+  WRAPPER_RULE,
+  WRAPPER_SETUP,
+  feedbackLead,
+  keyPhrase,
+  listChoices,
+  listOutcomeSentence,
+  listPrompt,
+  wrapperChoices,
+  wrapperOutcomeSentence,
+  wrapperPrompt,
+} from './content'
+import { PRESET_CONFIGS, DEFAULT_PRESET } from './descriptor'
+import {
+  CODE_HEIGHT,
+  GAPS,
+  KEY_ROW,
+  REVEAL_BUTTON,
+  STATUS,
+  WIDE_CHOICES,
+  listKeysMetrics,
+} from './layout'
+import {
+  answerOf,
+  experimentId,
+  explore,
+  initialExplore,
+  type ExploreAction,
+  type ExploreState,
+} from './machine'
+import {
+  ACTION_LABEL,
+  BEFORE,
+  ITEMS,
+  KEY_LABEL,
+  KEY_STRATEGIES,
+  LIST_ACTIONS,
+  WRAPPER_ACTIONS,
+  WRAPPER_LABEL,
+  afterRows,
+  trackedRow,
+  unmountedRows,
+} from './model'
+import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
+import { OutcomesAsText, RECORDED_LINE } from './OutcomesAsText'
+
+/**
+ * The React list-keys explorable (spec §8.3): the learner sets the starting
+ * state, picks a key strategy and an action, predicts where the state goes,
+ * and then sees which instance React matched to each row. Every outcome is
+ * React's recorded behaviour (`outcomes.ts`), never computed here.
+ *
+ * Frame anatomy follows the step-through shell (§3.3): header with the scene
+ * switcher, a fixed stage (key row, code strip, Before | lines | After), a
+ * status line, one reserved dock shared by the three modes (pick, predict,
+ * reveal), and a footer with the full text alternative and provenance.
+ */
+
+const useIsoLayoutEffect =
+  typeof window === 'undefined' ? useEffect : useLayoutEffect
+
+const SCENES = [
+  { id: 'list', label: 'List keys' },
+  { id: 'wrapper', label: 'Wrapper type' },
+] as const
+const KEYS = KEY_STRATEGIES.map((k) => ({ id: k, label: KEY_LABEL[k] }))
+
+type Nav = { s: ExploreState; play: boolean; at: number; epoch: number }
+
+const metrics = listKeysMetrics()
+
+export type ListKeysProps = { preset?: string; interactive?: boolean }
+
+export function ListKeys({ preset, interactive = true }: ListKeysProps) {
+  const uid = useId().replace(/:/g, '')
+  const titleId = `${uid}-title`
+  const promptId = `${uid}-prompt`
+  const config =
+    PRESET_CONFIGS.find((p) => p.id === preset) ??
+    PRESET_CONFIGS.find((p) => p.id === DEFAULT_PRESET)!
+
+  // The reveal animates only when it follows a deliberate answer or skip, and
+  // not inside a burst of commands (§4 rule 3). Everything else is instant.
+  const [nav, send] = useReducer(
+    (prev: Nav, a: ExploreAction & { now: number }): Nav => {
+      const s = explore(prev.s, a)
+      if (s === prev.s) return prev
+      const enteringReveal = s.phase === 'reveal' && prev.s.phase !== 'reveal'
+      const burst = a.now - prev.at < motionRules.burstWindowMs
+      const play = enteringReveal && !burst
+      return { s, play, at: a.now, epoch: play ? prev.epoch : prev.epoch + 1 }
+    },
+    undefined,
+    () => ({ s: initialExplore(config), play: false, at: -Infinity, epoch: 0 }),
+  )
+  const dispatch = useCallback(
+    (a: ExploreAction) => send({ ...a, now: performance.now() }),
+    [],
+  )
+  const s = nav.s
+
+  const prefersReduced = useReducedMotion() ?? false
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const gate: MotionGate = {
+    reduce: prefersReduced,
+    instant: !nav.play || !interactive || !mounted,
+    epoch: nav.epoch,
+  }
+  const play = nav.play && interactive && mounted
+
+  // ---- derived ---------------------------------------------------------------
+  const action = s.scene === 'list' ? s.listAction : s.wrapperAction
+  const phase = s.phase
+  const tracked = trackedRow(s.checks)
+  const answer = answerOf(s)
+  const choices =
+    s.scene === 'list'
+      ? s.listAction
+        ? listChoices(s.listAction)
+        : []
+      : s.wrapperAction
+        ? wrapperChoices(s.count)
+        : []
+  const labelOf = (id: string) => choices.find((c) => c.id === id)?.label ?? id
+  const prompt =
+    s.scene === 'list'
+      ? tracked === null
+        ? NO_CHECK_PROMPT
+        : listPrompt(BEFORE[tracked])
+      : s.wrapperAction
+        ? wrapperPrompt(s.wrapperAction)
+        : ''
+  const canPredict = answer !== null
+  const lastTime = experimentId(s) ? s.memory[experimentId(s)!] : undefined
+
+  const outcomeSentence =
+    s.scene === 'list'
+      ? s.listAction
+        ? listOutcomeSentence(
+            s.listAction,
+            LIST_OUTCOMES[`${s.key}/${s.listAction}`],
+            s.checks,
+          )
+        : ''
+      : s.wrapperAction
+        ? wrapperOutcomeSentence(s.wrapperAction, s.count)
+        : ''
+  const rule =
+    s.scene === 'list'
+      ? s.listAction
+        ? LIST_RULE[`${s.key}/${s.listAction}`]
+        : ''
+      : s.wrapperAction
+        ? WRAPPER_RULE[s.wrapperAction]
+        : ''
+  const lead = canPredict ? feedbackLead(s.pick, answer!, labelOf) : ''
+
+  const codeVariant: CodeVariant =
+    s.scene === 'list'
+      ? `list/${s.key}`
+      : `wrapper/${s.phase === 'pick' ? 'none' : (s.wrapperAction ?? 'none')}`
+  const code = CODE[codeVariant]
+
+  const counts = useMemo(() => {
+    if (s.phase !== 'reveal') return ''
+    if (s.scene === 'wrapper') {
+      const o = s.wrapperAction ? WRAPPER_OUTCOMES[s.wrapperAction] : null
+      return o ? (o.counterReused ? 'Counter reused' : 'Counter remounted') : ''
+    }
+    if (!s.listAction) return ''
+    const outcome = LIST_OUTCOMES[`${s.key}/${s.listAction}`]
+    const reused = outcome.reused.filter((r) => r !== null).length
+    const mountedN = outcome.reused.length - reused
+    const gone = unmountedRows(outcome).length
+    return [
+      reused && `${reused} reused`,
+      mountedN && `${mountedN} mounted`,
+      gone && `${gone} unmounted`,
+    ]
+      .filter(Boolean)
+      .join(' · ')
+  }, [s])
+
+  const event =
+    s.phase === 'pick' || !action
+      ? s.scene === 'list'
+        ? 'Before: set the state'
+        : 'Before: set the count'
+      : s.scene === 'list'
+        ? ACTION_LABEL[s.listAction!]
+        : WRAPPER_LABEL[s.wrapperAction!]
+
+  const eventKey =
+    s.scene === 'list' && s.phase !== 'pick' && action
+      ? `, ${keyPhrase(s.key)}`
+      : ''
+
+  // ---- focus: moves only when the focused control is replaced (§5.2) -------
+  const frameRef = useRef<HTMLElement>(null)
+  const dockRef = useRef<HTMLDivElement>(null)
+  const pendingFocus = useRef<string | null>(null)
+  const [choiceFocus, setChoiceFocus] = useState(0)
+  const lastAction = useRef<string | null>(null)
+
+  const fromDock = (a: ExploreAction, focusTarget: string) => {
+    pendingFocus.current = focusTarget
+    dispatch(a)
+  }
+
+  useIsoLayoutEffect(() => {
+    const target = pendingFocus.current
+    pendingFocus.current = null
+    if (!target || !frameRef.current) return
+    const active = document.activeElement
+    if (
+      active &&
+      active !== document.body &&
+      !frameRef.current.contains(active)
+    )
+      return
+    frameRef.current
+      .querySelector<HTMLElement>(`[data-viz-focus="${target}"]`)
+      ?.focus()
+  }, [s.phase, s.scene])
+
+  // ---- narration (§5.3): polite, never on load -----------------------------
+  const [live, setLive] = useState('')
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    if (s.phase === 'pick')
+      setLive(s.scene === 'list' ? PICK_HINT.list : PICK_HINT.wrapper)
+    else if (s.phase === 'ask')
+      setLive(
+        `${event}${eventKey}. ${canPredict ? `Predict: ${prompt}` : prompt}`,
+      )
+    else {
+      let rows = ''
+      if (s.scene === 'list' && s.listAction) {
+        rows = ` After: ${afterRows(
+          s.key,
+          s.listAction,
+          LIST_OUTCOMES[`${s.key}/${s.listAction}`],
+          s.checks,
+        )
+          .map(
+            (r) =>
+              `${ITEMS[r.item].text} ${r.checked ? 'checked' : 'unchecked'}, instance ${r.instance}`,
+          )
+          .join('; ')}.`
+      }
+      setLive(`${lead} ${outcomeSentence} ${rule}${rows}`.trim())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    s.phase,
+    s.scene,
+    s.key,
+    s.listAction,
+    s.wrapperAction,
+    s.reveals,
+    tracked,
+  ])
+
+  // ---- keyboard: 1 to 4 answer, Esc goes back (§5.2) -----------------------
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
+    if (!interactive || e.altKey || e.ctrlKey || e.metaKey) return
+    if (s.phase !== 'ask') return
+    if (/^[1-4]$/.test(e.key) && canPredict) {
+      const c = choices[Number(e.key) - 1]
+      if (c) {
+        e.preventDefault()
+        fromDock({ type: 'answer', choice: c.id }, 'again')
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      fromDock({ type: 'back' }, `action-${lastAction.current ?? ''}`)
+    }
+  }
+
+  const onChoiceKey = (e: ReactKeyboardEvent<HTMLButtonElement>, i: number) => {
+    const delta =
+      e.key === 'ArrowDown' || e.key === 'ArrowRight'
+        ? 1
+        : e.key === 'ArrowUp' || e.key === 'ArrowLeft'
+          ? -1
+          : 0
+    if (!delta) return
+    e.preventDefault()
+    const n = (i + delta + choices.length) % choices.length
+    setChoiceFocus(n)
+    frameRef.current
+      ?.querySelector<HTMLElement>(`[data-choice-index="${n}"]`)
+      ?.focus()
+  }
+
+  // ---- render ----------------------------------------------------------------
+  const hidden = !interactive
+  const actions =
+    s.scene === 'list'
+      ? LIST_ACTIONS.map((a) => ({ id: a, label: ACTION_LABEL[a] }))
+      : WRAPPER_ACTIONS.map((a) => ({ id: a, label: WRAPPER_LABEL[a] }))
+
+  return (
+    <section
+      ref={frameRef}
+      aria-labelledby={titleId}
+      aria-roledescription="explorable"
+      data-viz-frame="list-keys"
+      data-viz-preset={config.id}
+      data-viz-scene={s.scene}
+      data-viz-key={s.key}
+      data-viz-action={action ?? ''}
+      data-viz-mode={phase}
+      data-viz-interactive={interactive ? 'true' : 'false'}
+      onKeyDown={onKeyDown}
+      className={clsx(
+        'not-prose relative -mx-4 border-y border-zinc-700/60 p-4 sm:mx-0 sm:rounded-xl sm:border-x print:break-inside-avoid',
+        surface.frame,
+      )}
+      style={{ paddingTop: FRAME.padding, paddingBottom: FRAME.padding }}
+    >
+      {/* 1. Header: title, then the scene switcher (right from 768). */}
+      <header
+        className={clsx(
+          'flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-4',
+          H_CLS,
+        )}
+        style={heights({
+          narrow: metrics.narrow.header,
+          wide: metrics.wide.header,
+        })}
+      >
+        <p
+          id={titleId}
+          className={clsx('m-0 truncate', typeScale.title.cls, ink.base)}
+        >
+          {TITLE}
+        </p>
+        <div
+          className={clsx('self-start md:self-auto', hidden && 'invisible')}
+          data-viz-part="scene"
+        >
+          <PresetSwitcher
+            label="Scene"
+            presets={SCENES}
+            value={s.scene === 'list' ? 0 : 1}
+            interactive={interactive}
+            onChange={(i) => dispatch({ type: 'scene', scene: SCENES[i].id })}
+          />
+        </div>
+      </header>
+
+      {/* 2. Stage: key row, code strip, then Before | match lines | After. */}
+      <div
+        data-viz-region="stage"
+        className={clsx('relative flex flex-col', H_CLS)}
+        style={heights(
+          { narrow: metrics.narrow.stage, wide: metrics.wide.stage },
+          { marginTop: GAPS.header },
+        )}
+      >
+        <div
+          className="flex shrink-0 items-center gap-3"
+          style={{ height: KEY_ROW }}
+          data-viz-region="keyrow"
+        >
+          {s.scene === 'list' ? (
+            <>
+              <span
+                className={clsx(typeScale.regionLabel.cls, ink.secondary)}
+                aria-hidden
+              >
+                Key
+              </span>
+              <div className={clsx(hidden && 'invisible')} data-viz-part="keys">
+                <PresetSwitcher
+                  label="Key strategy"
+                  presets={KEYS}
+                  value={KEY_STRATEGIES.indexOf(s.key)}
+                  interactive={interactive}
+                  onChange={(i) =>
+                    dispatch({ type: 'key', key: KEY_STRATEGIES[i] })
+                  }
+                />
+              </div>
+            </>
+          ) : (
+            <p
+              className={clsx(
+                'm-0 line-clamp-2 font-sans text-[13px] leading-5',
+                ink.secondary,
+              )}
+            >
+              {WRAPPER_SETUP}
+            </p>
+          )}
+        </div>
+        <div className="mt-2 grid min-w-0 grid-cols-1 items-start gap-4 md:mt-4 md:grid-cols-[auto_minmax(0,1fr)]">
+          <CodePane
+            lines={code.lines}
+            tokens={CODE_TOKENS[codeVariant]}
+            line={
+              s.scene === 'wrapper' && s.phase === 'pick'
+                ? undefined
+                : code.line
+            }
+            rows={{ narrow: CODE_ROWS, wide: CODE_ROWS }}
+            height={{ narrow: CODE_HEIGHT, wide: CODE_HEIGHT }}
+            cols={CODE_COLS}
+            animate={false}
+          />
+          <Columns
+            s={s}
+            interactive={interactive}
+            gate={gate}
+            play={play}
+            dispatch={dispatch}
+          />
+        </div>
+      </div>
+
+      {/* 3. Status: what was applied (left), what React did (right). */}
+      <div
+        data-viz-region="status"
+        className={clsx(
+          'flex items-center justify-between gap-4',
+          typeScale.index.cls,
+          ink.secondary,
+        )}
+        style={{ height: STATUS, marginTop: GAPS.status }}
+      >
+        <span className="min-w-0 truncate" data-viz-part="viz-event">
+          {event}
+          {eventKey ? (
+            <span className="hidden sm:inline">{eventKey}</span>
+          ) : null}
+        </span>
+        <span className="shrink-0" data-viz-part="viz-counts">
+          {s.phase === 'ask' ? 'predict first' : counts}
+        </span>
+      </div>
+
+      <div role="status" className="sr-only" data-viz-part="viz-live">
+        {live}
+      </div>
+
+      {/* 4. Dock: one reserved slot for pick, predict and reveal. */}
+      <div
+        ref={dockRef}
+        data-viz-region="dock"
+        className={clsx('relative print:hidden', H_CLS, hidden && 'invisible')}
+        style={heights(
+          { narrow: metrics.narrow.dock, wide: metrics.wide.dock },
+          { marginTop: GAPS.dock },
+        )}
+      >
+        {s.phase === 'pick' || !action ? (
+          <div
+            className="flex flex-col"
+            style={{ gap: 8 }}
+            data-viz-part="dock-pick"
+          >
+            <p className={clsx('m-0', typeScale.caption.cls, ink.base)}>
+              {s.scene === 'list' ? PICK_HINT.list : PICK_HINT.wrapper}
+            </p>
+            <div
+              className={clsx(
+                'grid gap-2',
+                s.scene === 'list'
+                  ? 'grid-cols-2 md:grid-cols-4'
+                  : 'grid-cols-2',
+              )}
+              role="group"
+              aria-label="Actions"
+            >
+              {actions.map((a) => (
+                <DockButton
+                  key={a.id}
+                  tabIndex={interactive ? 0 : -1}
+                  unavailable={!interactive}
+                  data-viz-focus={`action-${a.id}`}
+                  onClick={() => {
+                    lastAction.current = a.id
+                    setChoiceFocus(0)
+                    const nothingToFollow =
+                      s.scene === 'list' && tracked === null
+                    fromDock(
+                      { type: 'apply', action: a.id },
+                      nothingToFollow ? 'skip' : 'choice-0',
+                    )
+                  }}
+                  className="min-w-0 px-2"
+                >
+                  <span
+                    className={clsx(
+                      'truncate',
+                      s.scene === 'wrapper' &&
+                        a.id === 'type' &&
+                        'font-mono text-[13px]',
+                    )}
+                  >
+                    {a.label}
+                  </span>
+                </DockButton>
+              ))}
+            </div>
+          </div>
+        ) : s.phase === 'ask' ? (
+          <div
+            className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_var(--lk-choices-w)] md:gap-x-4"
+            style={{
+              rowGap: CHOICE.textGap,
+              ['--lk-choices-w' as string]: `${WIDE_CHOICES}px`,
+            }}
+            data-viz-part="dock-ask"
+          >
+            <p
+              id={promptId}
+              className={clsx(
+                'm-0 md:col-start-1 md:row-start-1',
+                typeScale.prompt.cls,
+                ink.base,
+              )}
+              data-viz-part="viz-prompt"
+            >
+              {prompt}
+            </p>
+            <div
+              role="radiogroup"
+              aria-labelledby={promptId}
+              className={clsx(
+                'grid grid-cols-2 md:col-start-2 md:row-span-2 md:row-start-1 md:self-start',
+                !canPredict && 'invisible',
+              )}
+              style={{ gap: CHOICE.gap }}
+              data-viz-part="choices"
+            >
+              {choices.map((c, i) => {
+                const badge = lastTime === c.id ? 'last time' : null
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={false}
+                    data-choice={c.id}
+                    data-choice-index={i}
+                    data-viz-focus={`choice-${i}`}
+                    tabIndex={canPredict && i === choiceFocus ? 0 : -1}
+                    onClick={() =>
+                      fromDock({ type: 'answer', choice: c.id }, 'again')
+                    }
+                    onKeyDown={(e) => onChoiceKey(e, i)}
+                    onFocus={() => setChoiceFocus(i)}
+                    className={clsx(
+                      'relative flex h-11 min-w-0 items-center gap-2 rounded-[10px] border border-zinc-600 pl-2 pr-3 text-left hover:border-zinc-400 hover:bg-zinc-800',
+                      focusRing,
+                      transitionCls.feedback,
+                    )}
+                  >
+                    <span
+                      aria-hidden
+                      className={clsx(
+                        'flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-zinc-800 font-mono text-[12px] leading-4',
+                        ink.secondary,
+                      )}
+                    >
+                      {i + 1}
+                    </span>
+                    <span
+                      className={clsx(
+                        'min-w-0 flex-1 truncate text-[14px] leading-5',
+                        ink.base,
+                        s.scene === 'wrapper' && 'font-mono text-[13px]',
+                      )}
+                    >
+                      {c.label}
+                      {badge ? (
+                        <span className="sr-only">{`, ${badge}`}</span>
+                      ) : null}
+                    </span>
+                    {badge ? (
+                      <span
+                        aria-hidden
+                        className={clsx(
+                          'absolute -top-2 right-2 px-1 text-[12px] font-medium leading-4',
+                          surface.frameOpaque,
+                          ink.muted,
+                        )}
+                      >
+                        {badge}
+                      </span>
+                    ) : null}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="flex items-center gap-2 md:col-start-1 md:row-start-2">
+              <DockButton
+                variant="quiet"
+                tabIndex={interactive ? 0 : -1}
+                data-viz-focus="skip"
+                data-viz-part="viz-skip"
+                onClick={() => fromDock({ type: 'skip' }, 'again')}
+                className="-ml-1 px-1"
+              >
+                {canPredict ? 'Skip, show me' : 'Show me'}
+              </DockButton>
+              <DockButton
+                variant="quiet"
+                tabIndex={interactive ? 0 : -1}
+                data-viz-part="viz-back"
+                aria-keyshortcuts="Escape"
+                onClick={() =>
+                  fromDock(
+                    { type: 'back' },
+                    `action-${lastAction.current ?? action}`,
+                  )
+                }
+                className="px-1"
+              >
+                Pick another action
+              </DockButton>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="flex flex-col md:flex-row md:items-start"
+            style={{ gap: 8 }}
+            data-viz-part="dock-reveal"
+          >
+            <div className="min-w-0 md:flex-1 md:pr-2">
+              <p
+                className={clsx('m-0', typeScale.caption.cls, ink.base)}
+                data-viz-part="viz-feedback"
+              >
+                {lead ? <span className="font-semibold">{lead}</span> : null}{' '}
+                {outcomeSentence}
+              </p>
+              <p
+                className={clsx(
+                  'm-0 mt-2',
+                  typeScale.caption.cls,
+                  ink.secondary,
+                )}
+                data-viz-part="viz-caption"
+              >
+                {rule}
+              </p>
+            </div>
+            <DockButton
+              tabIndex={interactive ? 0 : -1}
+              data-viz-focus="again"
+              data-viz-part="viz-again"
+              onClick={() =>
+                fromDock(
+                  { type: 'again' },
+                  `action-${lastAction.current ?? action}`,
+                )
+              }
+              className="mt-2 self-start md:mt-0 md:w-[var(--lk-again-w)]"
+              style={{ ['--lk-again-w' as string]: `${REVEAL_BUTTON}px` }}
+            >
+              Try another action
+            </DockButton>
+          </div>
+        )}
+      </div>
+
+      {/* 5. Footer: outcomes as text, and provenance. */}
+      <footer className="relative" style={{ marginTop: GAPS.footer }}>
+        <details className="group">
+          <summary
+            data-viz-focus="text-alternative"
+            className={clsx(
+              'flex h-11 w-max cursor-pointer list-none items-center gap-2 rounded-[10px] pr-2 text-[14px] font-semibold leading-5 [&::-webkit-details-marker]:hidden',
+              ink.base,
+              focusRing,
+            )}
+          >
+            <svg
+              aria-hidden
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              className="shrink-0 group-open:rotate-90"
+            >
+              <path
+                d="m6 4 4 4-4 4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Outcomes as text
+          </summary>
+          <OutcomesAsText />
+        </details>
+        <p
+          className={clsx(
+            'm-0 md:absolute md:right-0 md:top-0 md:flex md:h-11 md:items-center',
+            typeScale.index.cls,
+            'font-sans font-normal',
+            ink.muted,
+          )}
+        >
+          {RECORDED_LINE}
+        </p>
+      </footer>
+
+      <div className="hidden print:mt-4 print:block">
+        <OutcomesAsText />
+      </div>
+    </section>
+  )
+}
