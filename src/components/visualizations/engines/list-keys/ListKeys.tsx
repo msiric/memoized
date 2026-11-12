@@ -20,9 +20,10 @@ import { Disclosure } from '../../primitives/Disclosure'
 import { Frame } from '../../primitives/Frame'
 import { Provenance } from '../../primitives/Provenance'
 import { SegmentedControl } from '../../primitives/SegmentedControl'
-import { ink, motionRules, type as typeScale } from '../../primitives/tokens-v3'
+import { ink, type as typeScale } from '../../primitives/tokens-v3'
 import { CodePane } from '../../shell/CodePane'
 import type { MotionGate } from '../../shell/motion'
+import { escapePauses, isBurst } from '../../shell/pace'
 import { H_CLS } from '../../shell/vars'
 import { remHeights, toRem } from '../../substrates/units'
 import {
@@ -118,13 +119,14 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
     PRESET_CONFIGS.find((p) => p.id === DEFAULT_PRESET)!
 
   // The reveal animates only when it follows a deliberate answer or skip, and
-  // not inside a burst of commands (§4 rule 3). Everything else is instant.
+  // not inside a burst of commands (§4 rule 3, the shared window in
+  // shell/pace.ts, D13). Everything else is instant.
   const [nav, send] = useReducer(
     (prev: Nav, a: ExploreAction & { now: number }): Nav => {
       const s = explore(prev.s, a)
       if (s === prev.s) return prev
       const enteringReveal = s.phase === 'reveal' && prev.s.phase !== 'reveal'
-      const burst = a.now - prev.at < motionRules.burstWindowMs
+      const burst = isBurst(prev.at, a.now)
       const play = enteringReveal && !burst
       return { s, play, at: a.now, epoch: play ? prev.epoch : prev.epoch + 1 }
     },
@@ -313,6 +315,9 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
   // playback to pause, the explorable has no Esc action. ----------------------
   const onKeyDown = (e: ReactKeyboardEvent<HTMLElement>) => {
     if (!interactive || e.altKey || e.ctrlKey || e.metaKey) return
+    // The shared Esc rule (shell/pace.ts): nothing plays here, so it passes
+    // the key on and never resets, leaves the prediction or moves focus.
+    if (escapePauses(e, false, () => {})) return
     if (s.phase !== 'ask') return
     if (/^[1-4]$/.test(e.key) && canPredict) {
       const i = Number(e.key) - 1
