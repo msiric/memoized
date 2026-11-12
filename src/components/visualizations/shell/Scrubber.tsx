@@ -88,6 +88,26 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
   const gesture = useRef<Gesture | null>(null)
   const [hover, setHover] = useState<number | null>(null)
   const [dragging, setDragging] = useState(false)
+  // A resize moves the thumb (its offset is in container units) without a
+  // change of step: that must land at once, not ease (D7, M03).
+  useEffect(() => {
+    const rail = railRef.current
+    if (!rail || typeof ResizeObserver === 'undefined') return
+    let width = rail.offsetWidth
+    let raf = 0
+    const ro = new ResizeObserver(() => {
+      if (rail.offsetWidth === width) return
+      width = rail.offsetWidth
+      rail.dataset.resizing = ''
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => requestAnimationFrame(() => delete rail.dataset.resizing))
+    })
+    ro.observe(rail)
+    return () => {
+      ro.disconnect()
+      cancelAnimationFrame(raf)
+    }
+  }, [])
   const [keyTip, setKeyTip] = useState(false)
   const keyTimer = useRef<number>()
   useEffect(() => () => window.clearTimeout(keyTimer.current), [])
@@ -216,7 +236,7 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
       <div
         ref={railRef}
         data-viz-part="scrubber-rail"
-        className="absolute inset-y-0"
+        className="absolute inset-y-0 [&[data-resizing]_*]:!transition-none"
         style={{ left: half, right: half, containerType: 'inline-size' }}
       >
         {/* Track: a 2 px `line` rule between the thumb centres, progress in the accent. */}

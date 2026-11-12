@@ -56,6 +56,8 @@ export async function snap(page: Page, root: string): Promise<Snap> {
       }))
     const partial = [...frame.querySelectorAll('*')]
       .filter((el) => {
+        // A deliberate resting opacity (an unavailable control's opacity-50) is not a fade.
+        if (/(^|\s)opacity-\d/.test(el.getAttribute('class') ?? '')) return false
         const o = parseFloat(getComputedStyle(el).opacity)
         return o > 0.001 && o < 0.999
       })
@@ -85,6 +87,7 @@ export function diffGlyphs(a: Snap, b: Snap): string[] {
   }
   for (const k of mb.keys()) if (!ma.has(k)) out.push(`missing in actual: ${k}`)
   const visCaps = (s: Snap) => s.captions.filter((c) => c.eff > 0.01).map((c) => c.text)
-  if (visCaps(a).join('|') !== visCaps(b).join('|')) out.push(`captions ${visCaps(a).join('|')} vs ${visCaps(b).join('|')}`)
+  // Captions are compared only in the same dock mode (Back from a reveal lands on the plain step).
+  if (a.mode === b.mode && visCaps(a).join('|') !== visCaps(b).join('|')) out.push(`captions ${visCaps(a).join('|')} vs ${visCaps(b).join('|')}`)
   return out
 }

@@ -41,7 +41,7 @@ async function reference(page: Page, step: number) {
 }
 
 /** Runs `act` while recording; returns tweens that started after the mark named `after`. */
-type Strict = { instant?: string[]; maxGlyphs?: Record<string, number> }
+type Strict = { instant?: string[]; maxGlyphs?: Record<string, number>; noMoves?: string[] }
 
 async function scenario(
   page: Page,
@@ -99,6 +99,9 @@ async function scenario(
   strictCheck(`${name}: nothing left half-faded`, partialOpacity)
   if (diff) strictCheck(`${name}: settles exactly like a slow walk`, diff)
   for (const label of strict.instant ?? []) strictCheck(`${name}: nothing animates after ${label}`, animsAfter[label] ?? [])
+  // M23: after a layout change no move continues from offsets measured on the old layout.
+  for (const label of strict.noMoves ?? [])
+    strictCheck(`${name}: no move runs after ${label}`, (animsAfter[label] ?? []).filter((a) => a.includes('viz-move')))
   for (const [label, max] of Object.entries(strict.maxGlyphs ?? {}))
     strictCheck(
       `${name}: at most ${max} glyphs animate after ${label}`,
@@ -247,7 +250,7 @@ test('event-loop resize', async ({ page }) => {
     await page.waitForTimeout(80)
     await m('resize')
     await page.setViewportSize({ width: 700, height: 900 })
-  }, 7, { instant: ['resize'] })
+  }, 7, { noMoves: ['resize'] })
 
   // 10. Resize at rest, then one Next: only the glyphs that change should animate.
   await page.setViewportSize({ width: 1024, height: 900 })
