@@ -113,6 +113,8 @@ export type LaidEdge = {
 export type LaidText = {
   kind: 'output' | 'label' | 'note'
   text: string
+  /** The function an output belongs to (its `› value`), for the hover path. */
+  node?: string
   x: number
   /** Baseline. */
   y: number
@@ -771,6 +773,7 @@ function finishScene(
     texts.push({
       kind: 'output',
       text,
+      node: n.id,
       x: centerX(F),
       y: top + 14,
       anchor: 'middle',

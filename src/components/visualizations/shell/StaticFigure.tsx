@@ -17,7 +17,7 @@ import { H_CLS, heights } from './vars'
  * Pure markup with no state, effects or event handlers, so it costs nothing
  * to hydrate: on a hard load the `<Viz>` mount keeps this server HTML and
  * never requests the engine. Anatomy, top to bottom: title, stage (the
- * engine's SVG, `role="img"`, described by the full text alternative),
+ * engine's SVG in a `role="group"`, described by the full text alternative),
  * figcaption with the why-sentence, then "Diagram as text" and provenance.
  * Every region has a fixed height per layout variant (`static-footprint`).
  */
@@ -48,9 +48,12 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
         {p.title}
       </p>
 
+      {/* A group, not an image: its function objects are focusable and
+          named (the closures hover path, D21); the rest is decorative and
+          described by the text alternative. */}
       <div
         data-viz-region="stage"
-        role="img"
+        role="group"
         aria-labelledby={titleId}
         aria-describedby={descId}
         className={clsx('relative', H_CLS)}

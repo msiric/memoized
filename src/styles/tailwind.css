@@ -294,7 +294,7 @@
  */
 @layer components {
   .vz-g { @apply fill-zinc-800 stroke-zinc-500 print:fill-white; }
-  .vz-hl { @apply stroke-zinc-700 print:stroke-zinc-200; }
+  .vz-hl { @apply fill-none stroke-zinc-700 print:stroke-zinc-200; }
   .vz-h { @apply fill-zinc-300 print:fill-zinc-700; }
   .vz-i { @apply fill-zinc-100 print:fill-zinc-900; }
   .vz-m { @apply fill-zinc-400 print:fill-zinc-600; }
@@ -309,4 +309,25 @@
   .vz-d { stroke-dasharray: 4 4; }
   .vz-12 { font-size: 12px; }
   .vz-13 { font-size: 13px; }
+  .vz-c { text-anchor: middle; }
+  /* A record header and a function title (12 px medium), one class each for the markup budget. */
+  .vz-t { @apply fill-zinc-300 font-medium print:fill-zinc-700; font-size: 12px; }
+  .vz-f { @apply font-medium; font-size: 12px; text-anchor: middle; }
+  /* The figure's svg: 13 px mono ink, drawn past its box, centred, never wider than its column. */
+  .vz-s { @apply mx-auto h-auto max-w-full font-mono fill-zinc-100 print:fill-zinc-900; font-size: 13px; overflow: visible; }
+  /*
+   * VIZ-H D21, the closures moment: hovering or focusing a function object
+   * dims everything but its [[Environment]] path (the figure's own rules in
+   * engines/env-records/paths.ts keep the path at full strength). Opacity
+   * only, on the `highlight` token (120 ms, the stage curve), none under
+   * reduced motion; print never hovers.
+   */
+  .vz-s [tabindex] { outline: none; }
+  .vz-s [tabindex]:focus-visible { outline: 2px solid theme('colors.lime.500'); outline-offset: 2px; border-radius: 8px; }
+  .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) { transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1); }
+  .vz-s:has([tabindex]:is(:hover, :focus)) :is([data-edge], [data-node]),
+  .vz-s:has([tabindex]:is(:hover, :focus)) > g[aria-hidden] > :is(text, rect) { opacity: 0.4; }
+  @media (prefers-reduced-motion: reduce) {
+    .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) { transition: none; }
+  }
 }

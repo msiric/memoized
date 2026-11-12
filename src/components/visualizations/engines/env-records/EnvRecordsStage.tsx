@@ -13,7 +13,8 @@ import {
   type LaidText,
   type SectionScene,
 } from './layout'
-import type { EnvDiagram, EnvSection } from './model'
+import { isFunction, type EnvDiagram, type EnvSection } from './model'
+import { pathCss, pathLabel } from './paths'
 
 /**
  * The environment-records stage: one SVG per section per sub-width, chosen by
@@ -63,8 +64,12 @@ const r1 = (n: number) => Math.round(n * 10) / 10
 
 const px = (n: number) => Math.round(n) + 0.5
 
-/** Each box group carries `data-node` (its id), which the stress harness reads. */
-function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
+/**
+ * Each box group carries `data-node` (its id), which the stress harness
+ * reads. A function box is focusable and named (`label`): hovering or
+ * focusing it brings its `[[Environment]]` path forward (`paths.ts`).
+ */
+function Box({ box, hatch, label }: { box: LaidBox; hatch: string; label?: string }) {
   const { x, y, w, h } = box.rect
   const X = px(x)
   const Y = px(y)
@@ -73,7 +78,7 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
   if (box.kind === 'function' || box.kind === 'slot') {
     const slot = box.kind === 'slot'
     return (
-      <g data-node={box.id}>
+      <g data-node={box.id} tabIndex={label ? 0 : undefined} role={label ? 'img' : undefined} aria-label={label}>
         <rect
           x={X}
           y={Y}
@@ -85,17 +90,15 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
         <text
           x={r1(x + w / 2)}
           y={r1(y + h / 2 + 4)}
-          textAnchor="middle"
-          className={clsx(
-            'vz-12',
-            slot ? clsx('italic', C.muted) : 'font-medium',
-          )}
+          // `vz-f`: 12 px medium, centred (tailwind.css, the markup budget).
+          className={slot ? clsx('vz-12 vz-c italic', C.muted) : 'vz-f'}
         >
           {slot ? (
             box.title[0]
           ) : (
             <>
-              <tspan className={C.muted}>ƒ</tspan> {box.title[0]}
+              <tspan className={C.muted}>ƒ</tspan>
+              {` ${box.title[0]}`}
             </>
           )}
         </text>
@@ -122,10 +125,8 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
           key={i}
           x={r1(x + SIZE.cellPad)}
           y={r1(y + SIZE.headerPad + 12 + i * SIZE.headerLine)}
-          className={clsx(
-            'vz-12 font-medium',
-            box.unused ? clsx('italic', C.muted) : C.header,
-          )}
+          // `vz-t`: the header role, 12 px medium (tailwind.css).
+          className={box.unused ? clsx('vz-t italic', C.muted) : 'vz-t'}
         >
           {line}
         </text>
@@ -140,7 +141,7 @@ function Box({ box, hatch }: { box: LaidBox; hatch: string }) {
               return `M${r1(x + 1)} ${px(sep)}H${r1(x + w - 1)}M${px(x + row.nameWidth)} ${row.top + 1}V${bottomY}`
             })
             .join('')}
-          className={clsx('fill-none', C.hairline)}
+          className={C.hairline}
         />
       ) : null}
       {box.rows.map((row) => (
@@ -200,7 +201,7 @@ function Text({ t }: { t: LaidText }) {
   // The note is a legend: upright sans, not italic mono (D22).
   const cls =
     t.kind === 'output'
-      ? C.result
+      ? clsx(C.result, 'vz-c')
       : t.kind === 'label'
         ? clsx('vz-12', C.muted)
         : clsx('vz-12 font-sans', C.muted)
@@ -208,8 +209,8 @@ function Text({ t }: { t: LaidText }) {
     <text
       x={r1(t.x)}
       y={r1(t.y)}
-      textAnchor={t.anchor === 'middle' ? 'middle' : undefined}
-      className={cls}
+      data-o={t.node}
+      className={clsx(cls, t.kind !== 'output' && t.anchor === 'middle' && 'vz-c')}
     >
       {t.text}
     </text>
@@ -235,18 +236,19 @@ function SectionSvg({
     [...es].sort((a, b) => Number(a.now) - Number(b.now))
   const links = order(scene.edges.filter((e) => e.kind !== 'ref'))
   const refs = order(scene.edges.filter((e) => e.kind === 'ref'))
+  const fns = scene.boxes.filter((b) => b.kind === 'function')
   return (
+    // Only the function objects are exposed (focusable, named); the rest of
+    // the picture is described by "Diagram as text". `vz-s`: 13 px mono ink,
+    // overflow visible, centred, never wider than its column (tailwind.css).
     <svg
-      aria-hidden
-      focusable="false"
       width={scene.width}
       height={scene.height}
       viewBox={`0 0 ${scene.width} ${scene.height}`}
-      overflow="visible"
       data-viz-width={scene.width}
       // Sized in rem so the figure follows the reader's text size (D19), and
       // never wider than its column: then it scales down as one picture.
-      className={clsx('vz-13 mx-auto h-auto max-w-full font-mono', C.ink, className)}
+      className={clsx('vz-s', className)}
       style={{ width: `${scene.width / 16}rem` }}
     >
       {hatched ? (
@@ -269,12 +271,23 @@ function SectionSvg({
           </pattern>
         </defs>
       ) : null}
-      {links.map((e) => (
-        <Edge key={e.id} edge={e} section={section} />
-      ))}
-      {scene.boxes.map((b) => (
-        <Box key={b.id} box={b} hatch={hatch} />
-      ))}
+      <g aria-hidden>
+        {links.map((e) => (
+          <Edge key={e.id} edge={e} section={section} />
+        ))}
+        {scene.boxes
+          .filter((b) => b.kind !== 'function')
+          .map((b) => (
+            <Box key={b.id} box={b} hatch={hatch} />
+          ))}
+      </g>
+      {fns.map((b) => {
+        const fn = section.nodes.find((n) => n.id === b.id)
+        return (
+          <Box key={b.id} box={b} hatch={hatch} label={fn && isFunction(fn) ? pathLabel(section, fn) : undefined} />
+        )
+      })}
+      <g aria-hidden>
       {refs.map((e) => (
         <Edge key={e.id} edge={e} section={section} />
       ))}
@@ -293,6 +306,7 @@ function SectionSvg({
       {scene.texts.map((t, i) => (
         <Text key={i} t={t} />
       ))}
+      </g>
     </svg>
   )
 }
@@ -377,6 +391,8 @@ function Variant({ data, variant, uid }: { data: EnvDiagram; variant: 'narrow' |
 export function EnvRecordsStage({ data, uid }: StaticStageProps<EnvDiagram>) {
   return (
     <>
+      {/* The hover and focus paths (D21): server CSS, no script. */}
+      <style dangerouslySetInnerHTML={{ __html: pathCss(data) }} />
       <Variant data={data} variant="narrow" uid={uid} />
       <Variant data={data} variant="wide" uid={uid} />
     </>

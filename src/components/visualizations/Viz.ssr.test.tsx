@@ -75,15 +75,19 @@ describe('<Viz> static figure on the server', () => {
     expect(html).not.toContain('xl:max-w-[960px]')
   })
 
-  it('names the stage image by the title and describes it with the text alternative', () => {
-    const stage = html.match(/<div data-viz-region="stage" role="img" aria-labelledby="([^"]+)" aria-describedby="([^"]+)"/)
+  it('names the stage group by the title and describes it with the text alternative', () => {
+    const stage = html.match(/<div data-viz-region="stage" role="group" aria-labelledby="([^"]+)" aria-describedby="([^"]+)"/)
     expect(stage).not.toBeNull()
     const [, title, desc] = stage!
     expect(html).toContain(`id="${title}"`)
     expect(html).toMatch(new RegExp(`<div id="${desc}"[^>]*>.*sameCounter → ƒ A`))
     expect(html).toContain('Verified output, counters (Node 24.x):')
-    // Every SVG is decorative inside the image role.
-    expect(html.match(/<svg aria-hidden="true" focusable="false"/g)?.length).toBe(8)
+    // Only the function objects are exposed: focusable and named (D21).
+    // Everything else in each of the 8 SVGs sits in two decorative groups.
+    expect(html.match(/<svg [^>]*data-viz-width/g)?.length).toBe(8)
+    expect(html.match(/<g aria-hidden="true">/g)?.length).toBe(16)
+    expect(html.match(/<g data-node="[^"]+" tabindex="0" role="img" aria-label="ƒ [^"]+"/g)?.length).toBe(4 * (2 + 3))
+    expect(html).toContain('aria-label="ƒ A, named counter1 and sameCounter, created in createCounter() call A"')
   })
 
   it('defaults to the first preset and renders the SVG for both layout variants', () => {

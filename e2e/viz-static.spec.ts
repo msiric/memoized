@@ -165,13 +165,77 @@ test('fixed footprint and no overflow at any width', async ({ page }) => {
   }
 })
 
+test('hover or focus on a function brings its [[Environment]] path forward, CSS only (D21)', async ({
+  page,
+}) => {
+  await open(page, 1024)
+  const fig = figure(page, 'factory-calls-vs-aliases')
+  await fig.scrollIntoViewIfNeeded()
+  const svg = fig.locator('[data-viz-section="counters"] svg:visible')
+  const opacities = () =>
+    svg.evaluate((el) => {
+      const out: Record<string, string> = {}
+      for (const n of el.querySelectorAll('[data-node], [data-edge]'))
+        out[n.getAttribute('data-node') ?? n.getAttribute('data-edge')!] = getComputedStyle(n).opacity
+      return out
+    })
+  const boxes = () =>
+    svg.evaluate((el) =>
+      [...el.querySelectorAll('[data-node], [data-edge]')].map((n) => {
+        const r = n.getBoundingClientRect()
+        return [r.x, r.y, r.width, r.height].map(Math.round).join(',')
+      }),
+    )
+  const rest = await boxes()
+  expect(Object.values(await opacities()).every((o) => o === '1')).toBe(true)
+
+  // Hover: fA's record, its env link and both names that alias it stay; the rest dims.
+  await svg.locator('[data-node="fA"]').hover()
+  await page.waitForTimeout(300)
+  const hovered = await opacities()
+  for (const k of ['fA', 'env:fA', 'callA', 'module', 'ref:module.counter1', 'ref:module.sameCounter'])
+    expect(hovered[k], k).toBe('1')
+  for (const k of ['fB', 'env:fB', 'callB', 'ref:module.counter2']) expect(hovered[k], k).toBe('0.4')
+  expect(await boxes(), 'nothing moves').toEqual(rest)
+  // The other section is untouched.
+  const account = fig.locator('[data-viz-section="account"] svg:visible [data-node="call"]')
+  expect(await account.evaluate((n) => getComputedStyle(n).opacity)).toBe('1')
+
+  await page.mouse.move(0, 0)
+  await page.waitForTimeout(300)
+  expect(Object.values(await opacities()).every((o) => o === '1')).toBe(true)
+
+  // Keyboard: functions are in the tab order, named, with the focus ring.
+  await svg.locator('[data-node="fA"]').focus()
+  await page.keyboard.press('Tab')
+  await expect(svg.locator('[data-node="fB"]')).toBeFocused()
+  await expect(svg.locator('[data-node="fB"]')).toHaveAccessibleName(
+    'ƒ B, named counter2, created in createCounter() call B',
+  )
+  await page.waitForTimeout(300)
+  const focused = await opacities()
+  expect([focused.fB, focused.callB, focused['ref:module.counter2'], focused.fA]).toEqual(['1', '1', '1', '0.4'])
+  const ring = await svg
+    .locator('[data-node="fB"]')
+    .evaluate((n) => [getComputedStyle(n).outlineStyle, getComputedStyle(n).outlineWidth])
+  expect(ring).toEqual(['solid', '2px'])
+  expect(await boxes(), 'nothing moves on focus').toEqual(rest)
+})
+
+test('the hover path is instant under reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await open(page, 1024)
+  const n = figure(page, 'var-vs-let-loop').locator('svg:visible [data-node="call"]').first()
+  expect(await n.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s')
+})
+
 test('text alternative: the image is named and fully described, and "Diagram as text" opens', async ({
   page,
 }) => {
   await open(page, 375)
   for (const p of PRESETS) {
     const stage = figure(page, p).locator('[data-viz-region="stage"]')
-    await expect(stage).toHaveAttribute('role', 'img')
+    await expect(stage).toHaveAttribute('role', 'group')
     const name = await figure(page, p).locator('p').first().textContent()
     await expect(stage).toHaveAccessibleName(name!)
     const description = await stage.evaluate(
