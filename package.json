@@ -52,7 +52,6 @@
     "prune:content:dev": "cross-env tsx --env-file .env src/scripts/prune-stale-content.ts",
     "verify:stats": "cross-env tsx src/scripts/verify-content-stats.ts",
     "publish:content": "cross-env tsx src/scripts/publish-content.ts",
-    "render-diagrams": "tsx src/scripts/render-diagrams.ts",
     "viz:tokens": "tsx src/scripts/viz-code-tokens.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
     "test": "vitest",

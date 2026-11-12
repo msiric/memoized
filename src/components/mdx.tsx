@@ -14,7 +14,6 @@ import { CONTENT_COLUMN_CLASSES } from '@/constants/content-layout'
 export { Button } from '@/components/Button'
 export { Code as code, CodeGroup, Pre as pre } from '@/components/Code'
 export { DynamicImage as img } from '@/components/DynamicImage'
-export { ArrayVisualizer, SequenceStepper, StructureVisualizer } from '@/components/visualizations'
 // The v2 lazy mount: a few hundred bytes up front, the engine loads near the viewport.
 export { Viz } from '@/components/visualizations/Viz'
 

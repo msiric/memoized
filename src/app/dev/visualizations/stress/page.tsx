@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation'
-import { DynamicImage } from '@/components/DynamicImage'
 import { Prose } from '@/components/Prose'
 import { EnvRecordsStage } from '@/components/visualizations/engines/env-records/EnvRecordsStage'
 import { StaticFigure } from '@/components/visualizations/shell/StaticFigure'
@@ -17,8 +16,8 @@ import { StressStepThrough } from '@/components/visualizations/__stress__/Stress
  * production exactly like `/dev/visualizations`.
  *
  * `?f=<fixture id>` renders one fixture (what the harness uses); no query
- * lists every fixture with its lint verdict. `?f=mermaid` renders the old
- * Mermaid SVG the way a lesson does (an <img> in Prose).
+ * lists every fixture with its lint verdict. (The Mermaid fixture is gone
+ * with Mermaid itself, VIZ-H D20.)
  */
 
 type Params = { f?: string }
@@ -67,16 +66,7 @@ export default function StressPage({ searchParams = {} }: { searchParams?: Param
   const envIndex = ENV_PRESETS.findIndex((p) => p.id === f)
 
   let body
-  if (f === 'mermaid') {
-    body = (
-      <section data-stress-fixture="mermaid">
-        <h2>Promise lifecycle (Mermaid, as a lesson renders it)</h2>
-        <p>Paragraph before the diagram.</p>
-        <DynamicImage src="/images/visualizations/promise-lifecycle.svg" alt="Promise lifecycle state diagram" />
-        <p data-stress-after="">Text after the visual.</p>
-      </section>
-    )
-  } else if (f && f in EVENT_LOOP_FIXTURES) {
+  if (f && f in EVENT_LOOP_FIXTURES) {
     body = <Step id={f as keyof typeof EVENT_LOOP_FIXTURES} />
   } else if (envIndex >= 0) {
     body = <Static index={envIndex} />
