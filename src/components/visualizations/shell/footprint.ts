@@ -1,11 +1,15 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../primitives/tokens-v3'
-import { allFeedback, allRecaps } from './feedback'
+import type { StepLog } from '../step-log/types'
+import { allFeedbackStrings, allRecaps } from './feedback'
 import type { PerVariant, StepThroughDescriptor, Variant } from './types'
 
 /**
  * Footprint of the StepThrough frame (spec §3.3). The header, stage, step bar
  * and controls have explicit heights derived from the visual's own content,
- * emitted in rem so they follow the reader's text size (D19).
+ * emitted in rem so they follow the reader's text size (D19). Every reserved
+ * band is sized to the preset on screen, not to the worst preset of the
+ * visual (R2): a preset switch may change the frame's height, stepping never
+ * does.
  *
  * The dock is not reserved from these numbers any more (D15): the shell
  * measures it with a ghost stack of every caption, prompt and feedback, so it
@@ -21,16 +25,19 @@ export const FRAME = {
   padding: 16,
   headerGap: 16,
   stageGap: 8,
+  /** The step's name sits right on its caption (R3: joined to its description). */
+  nameGap: 4,
   dockGap: 16,
   barGap: 16,
   footerGap: 16,
 } as const
 
 export const HEADER = { title: typeScale.title.line, presetRowGap: 8 } as const
-export const STEP_BAR = typeScale.status.line
+/** The step bar: the step's name (14/24 600) left, the counter right (R3). */
+export const STEP_BAR = typeScale.stepName.line
 /** A code line (P: Code.tsx:137, 13/24). */
 export const LINE = 24
-/** Caption and reveal feedback lines (D3: 14/28). */
+/** Caption and reveal feedback lines (R3: 14/24). */
 export const CAPTION_LINE = typeScale.caption.line
 /** Checkpoint prompt lines (16/28). */
 export const PROMPT_LINE = typeScale.prompt.line
@@ -101,18 +108,17 @@ export const WIDE_SIDE_TEXT =
 
 export type DockText = { captions: string[]; prompts: string[]; feedback: string[]; maxChoices: number }
 
-export function dockText<S>(def: StepThroughDescriptor<S>): DockText {
+/** Every caption, prompt and feedback one preset can show in the dock. */
+export function dockText<S>(log: StepLog<S>): DockText {
   const out: DockText = { captions: [], prompts: [], feedback: [], maxChoices: 0 }
-  for (const p of def.presets) {
-    for (const st of p.log.steps) out.captions.push(st.why)
-    // The end caption leads with a recap of the predictions (D21).
-    const end = p.log.steps[p.log.steps.length - 1].why
-    for (const r of allRecaps(p.log.checkpoints)) out.captions.push(`${r} ${end}`)
-    for (const cp of p.log.checkpoints) {
-      out.prompts.push(cp.prompt)
-      out.feedback.push(...allFeedback(cp))
-      out.maxChoices = Math.max(out.maxChoices, cp.choices.length)
-    }
+  for (const st of log.steps) out.captions.push(st.why)
+  // The end caption leads with a recap of the predictions (D21).
+  const end = log.steps[log.steps.length - 1].why
+  for (const r of allRecaps(log.checkpoints)) out.captions.push(`${r} ${end}`)
+  for (const cp of log.checkpoints) {
+    out.prompts.push(cp.prompt)
+    out.feedback.push(...allFeedbackStrings(cp))
+    out.maxChoices = Math.max(out.maxChoices, cp.choices.length)
   }
   return out
 }
@@ -149,9 +155,20 @@ export function headerHeight(presetCount: number, variant: Variant): number {
 
 export type FrameMetrics = { header: number; stage: number; dock: number; bar: number; footer: number; total: number }
 
-export function definitionMetrics<S>(def: StepThroughDescriptor<S>): PerVariant<FrameMetrics> {
-  const layout = def.engine.layout(def.presets.map((p) => p.log))
-  const text = dockText(def)
+/** The index of a preset id (the default preset when absent or unknown). */
+export function presetIndex<S>(def: StepThroughDescriptor<S>, preset?: string): number {
+  return Math.max(
+    0,
+    def.presets.findIndex((p) => p.id === (preset ?? def.defaultPreset)),
+  )
+}
+
+/** The frame's footprint with preset `index` on screen (R2: per preset). */
+export function definitionMetrics<S>(def: StepThroughDescriptor<S>, index = presetIndex(def)): PerVariant<FrameMetrics> {
+  const all = def.presets.map((p) => p.log)
+  const log = all[index]
+  const layout = def.engine.layout([log], all)
+  const text = dockText(log)
   const metrics = (variant: Variant): FrameMetrics => {
     const header = headerHeight(def.presets.length, variant)
     const stage = layout.stage[variant]
@@ -166,7 +183,7 @@ export function definitionMetrics<S>(def: StepThroughDescriptor<S>): PerVariant<
       stage +
       FRAME.stageGap +
       STEP_BAR +
-      FRAME.dockGap +
+      FRAME.nameGap +
       dock +
       FRAME.barGap +
       bar +
@@ -177,8 +194,13 @@ export function definitionMetrics<S>(def: StepThroughDescriptor<S>): PerVariant<
   return { narrow: metrics('narrow'), wide: metrics('wide') }
 }
 
-/** The two numbers the lazy mount needs: [narrow, wide] frame heights. */
-export function footprintOf<S>(def: StepThroughDescriptor<S>): readonly [number, number] {
-  const m = definitionMetrics(def)
+/** The two numbers the lazy mount needs: [narrow, wide] frame heights, for one preset (the default). */
+export function footprintOf<S>(def: StepThroughDescriptor<S>, preset?: string): readonly [number, number] {
+  const m = definitionMetrics(def, presetIndex(def, preset))
   return [m.narrow.total, m.wide.total]
+}
+
+/** [narrow, wide] per preset id: the lazy mount reserves the preset it renders. */
+export function presetFootprints<S>(def: StepThroughDescriptor<S>): Record<string, readonly [number, number]> {
+  return Object.fromEntries(def.presets.map((p) => [p.id, footprintOf(def, p.id)]))
 }

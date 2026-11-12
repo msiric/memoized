@@ -158,10 +158,11 @@ describe('VDS primitives', () => {
     expect(html).toContain('text-rose-400')
   })
 
-  it('Caption: 14/28 zinc-300 with pretty wrapping', () => {
+  it('Caption: UI type, 14/24 zinc-300 with pretty wrapping (R3)', () => {
     const html = renderToStaticMarkup(<Caption as="figcaption">why</Caption>)
     const cls = classOf(html, 'figcaption')
-    for (const c of ['text-sm', 'leading-7', 'text-zinc-300', 'text-pretty']) expect(cls).toContain(c)
+    for (const c of ['text-sm', 'leading-6', 'text-zinc-300', 'text-pretty']) expect(cls).toContain(c)
+    expect(cls).not.toContain('leading-7')
   })
 
   it('Provenance: one wording template for every visual', () => {

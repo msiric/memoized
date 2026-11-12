@@ -126,10 +126,12 @@
 
 /* Print styles for blog posts */
 @media print {
-  /* Hide non-essential UI elements */
+  /* Hide non-essential UI elements. A lesson visualization's own header
+     (its title) and footer print (VIZ-H R10): the frame hides its controls
+     itself with print: utilities. */
   .reading-progress,
-  header,
-  footer,
+  header:not([data-viz-frame] *),
+  footer:not([data-viz-frame] *),
   nav,
   .share-buttons,
   .newsletter-cta,
@@ -137,7 +139,7 @@
   .related-posts,
   .giscus,
   .post-navigation,
-  button,
+  button:not([data-viz-frame] *),
   [role="progressbar"] {
     display: none !important;
   }
@@ -201,8 +203,10 @@
     color: #666;
   }
 
-  /* Code blocks */
-  pre, code {
+  /* Code blocks. A visualization's code pane prints its own way (VIZ-H
+     R11: light token colors, one box for the pane, none per line). */
+  pre:not([data-viz-frame] *),
+  code:not([data-viz-frame] *) {
     background: #f5f5f5 !important;
     color: black !important;
     border: 1px solid #ddd !important;
@@ -331,3 +335,12 @@
     .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) { transition: none; }
   }
 }
+
+/*
+ * VIZ-H R7, the event loop's finale: the code pane relights the lines that
+ * printed, in run order. Each traced line replays from unlit after its own
+ * delay (inline `animation`, from the `enter` token), so a line that was
+ * already current lights again in its turn instead of staying lit.
+ */
+@keyframes vz-relight-ground { from { background-color: transparent; } }
+@keyframes vz-relight-mark { from { opacity: 0; } }

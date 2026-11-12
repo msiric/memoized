@@ -20,35 +20,36 @@ const snippet = [
   "console.log('sync')",
 ].join('\n')
 
+// One name per callback from Host to Tasks to the call stack (R7): named by
+// what it logs, so a chip matches its console output.
 const script = { id: 'script', label: 'script' }
-const timerHost = { id: 'timer', label: 'timer → cb' }
-const timerTask = { id: 'timer', label: 'timer cb' }
-const thenCb = { id: 'then', label: 'then cb' }
-const micro2 = { id: 'micro2', label: 'micro 2 cb' }
+const timerCb = { id: 'timer', label: 'cb timeout' }
+const thenCb = { id: 'then', label: 'cb micro 1' }
+const micro2 = { id: 'micro2', label: 'cb micro 2' }
 
 const s0: EventLoopState = EMPTY
-const s1: EventLoopState = { ...s0, stack: [script], host: [timerHost] }
+const s1: EventLoopState = { ...s0, stack: [script], host: [timerCb] }
 const s2: EventLoopState = { ...s1, micro: [thenCb] }
 const s3: EventLoopState = { ...s2, console: ['sync'] }
-const s4: EventLoopState = { ...s3, stack: [], host: [], tasks: [timerTask] }
+const s4: EventLoopState = { ...s3, stack: [], host: [], tasks: [timerCb] }
 const s5: EventLoopState = { ...s4, stack: [thenCb], micro: [], console: ['sync', 'micro 1'] }
 const s6: EventLoopState = { ...s5, micro: [micro2] }
 const s7: EventLoopState = { ...s6, stack: [micro2], micro: [], console: ['sync', 'micro 1', 'micro 2'] }
-const s8: EventLoopState = { ...s7, stack: [timerTask], tasks: [], console: ['sync', 'micro 1', 'micro 2', 'timeout'] }
+const s8: EventLoopState = { ...s7, stack: [timerCb], tasks: [], console: ['sync', 'micro 1', 'micro 2', 'timeout'] }
 const s9: EventLoopState = { ...s8, stack: [] }
 
 const steps: Step<EventLoopState>[] = [
   {
     state: s0,
-    event: 'before the run',
-    why: 'Predict the log first: one microtask will queue another while the queue is still draining.',
+    event: 'Before the run',
+    why: 'Nothing has run yet. One microtask will queue another while the queue is still draining.',
     narration: 'Nothing has run yet.',
     focus: [],
     claim: 'modelled',
   },
   {
     state: s1,
-    event: 'register timer',
+    event: 'Register the timer',
     why: 'setTimeout hands the callback to the host; even 0 ms waits until the current task ends.',
     narration: 'The script starts and registers a 0 ms timer with the host.',
     line: [1, 3],
@@ -57,7 +58,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s2,
-    event: 'queue microtask',
+    event: 'Queue a microtask',
     why: 'Promise.resolve() is already fulfilled, so .then queues its callback now; it runs only after the script.',
     narration: 'The .then callback is added to the microtask queue.',
     line: 4,
@@ -66,7 +67,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s3,
-    event: 'log sync',
+    event: 'Log sync',
     why: 'Synchronous code always finishes before any queued callback runs.',
     narration: 'The script logs sync.',
     line: 10,
@@ -76,7 +77,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s4,
-    event: 'script ends',
+    event: 'Script ends',
     why: 'The stack is empty, but the loop drains every microtask before it takes a task.',
     narration: 'The script finishes. Once the timer is due, the host moves its callback to the task queue.',
     line: 'host',
@@ -85,7 +86,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s5,
-    event: 'run microtask',
+    event: 'Run the microtask',
     why: 'Microtasks run before any task, so the .then callback goes first even though the timer was set earlier.',
     narration: 'The .then callback runs and logs micro 1.',
     line: 5,
@@ -95,7 +96,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s6,
-    event: 'queue microtask',
+    event: 'Queue another microtask',
     why: 'queueMicrotask adds to the queue that is draining right now, not to a later turn of the loop.',
     narration: 'queueMicrotask adds the micro 2 callback to the microtask queue.',
     line: [6, 8],
@@ -104,7 +105,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s7,
-    event: 'run microtask',
+    event: 'Run the new microtask',
     why: 'The drain continues until the queue is empty, including microtasks added during it.',
     narration: 'The micro 2 callback runs and logs micro 2.',
     line: 7,
@@ -114,7 +115,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s8,
-    event: 'run next task',
+    event: 'Run the next task',
     why: "Only now, with the microtask queue empty, does the loop take the timer's task.",
     narration: 'The timer callback runs as the next task and logs timeout.',
     line: 2,
@@ -124,7 +125,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s9,
-    event: 'done',
+    event: 'Done',
     why: 'A microtask that queues another microtask still runs before any waiting task.',
     narration: 'Done. The log reads sync, micro 1, micro 2, timeout.',
     focus: ['console'],
@@ -145,6 +146,30 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
   steps,
   checkpoints: [
     {
+      // R7: the learner predicts before anything runs; the verdict lands
+      // with the finale.
+      beforeStep: 1,
+      verdict: 'end',
+      prompt: 'Which logs last?',
+      choices: [
+        { id: 'sync', label: 'sync', value: 'sync' },
+        { id: 'micro1', label: 'micro 1', value: 'micro 1' },
+        { id: 'micro2', label: 'micro 2', value: 'micro 2' },
+        { id: 'timeout', label: 'timeout', value: 'timeout' },
+      ],
+      answer: 'timeout',
+      feedback: {
+        correct: 'timeout logs last: the timer is a task, and the loop drains every microtask first, even one queued mid-drain.',
+        byChoice: {
+          sync: 'sync is synchronous: it logs before anything queued runs.',
+          micro1: 'micro 1 is a microtask: it runs before the timer.',
+          micro2: 'micro 2 joins the draining microtask queue, so it still runs before the timer.',
+        },
+      },
+      locked: 'Now watch the console.',
+      recap: { right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
+    },
+    {
       beforeStep: 7,
       prompt: 'micro 2 joined the queue mid-drain. What logs next?',
       choices: [
@@ -158,6 +183,7 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
           timeout: 'A task runs only once the microtask queue is empty.',
         },
       },
+      recap: { right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
     },
   ],
   observed: { log: ['sync', 'micro 1', 'micro 2', 'timeout'] },

@@ -55,16 +55,19 @@ export const EMPTY: EventLoopState = {
 }
 
 /**
- * The event loop's reveal (D21): on the last step the console plays its
+ * The event loop's finale (D21, R7): on the last step the console plays its
  * output back, left to right. Output `k` resolves `k * stagger` ms in, over
- * the `enter` token; the stagger shrinks for a long console so the last
- * output and the caption after it still land inside `reveal.maxMs`.
+ * the `enter` token, together with the code line that printed it and the
+ * tag naming that line. The recap replaces the caption once the last output
+ * has resolved (`settleMs`) and fades in over the `caption` token; the whole
+ * reveal ends at `endMs`, inside `reveal.maxMs`. The stagger shrinks for a
+ * long console so it always fits.
  */
-export function consoleReveal(outputs: number): { staggerMs: number; settleMs: number } {
+export function consoleReveal(outputs: number): { staggerMs: number; settleMs: number; endMs: number } {
   const enterMs = motion.enter.full.type === 'tween' ? motion.enter.full.duration * 1000 : 0
   const captionMs = motion.caption.full.type === 'tween' ? motion.caption.full.duration * 1000 : 0
   const steps = Math.max(1, outputs - 1)
   const staggerMs = Math.min(reveal.staggerMs, Math.floor((reveal.maxMs - enterMs - captionMs) / steps))
-  // The caption starts as the last output starts to resolve.
-  return { staggerMs, settleMs: Math.max(0, outputs - 1) * staggerMs }
+  const settleMs = Math.max(0, outputs - 1) * staggerMs + (outputs ? enterMs : 0)
+  return { staggerMs, settleMs, endMs: settleMs + captionMs }
 }

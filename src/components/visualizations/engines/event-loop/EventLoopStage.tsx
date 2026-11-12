@@ -5,9 +5,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { cn as clsx } from '../../primitives/cn'
 import {
   ink,
-  now as nowCls,
   radius,
-  stroke,
   surface,
   type as typeScale,
 } from '../../primitives/tokens-v3'
@@ -20,7 +18,9 @@ import {
   G,
   consoleVisible,
   earlierLabel,
+  lineTag,
   moreLabel,
+  outputLines,
   queueVisible,
   type EventLoopMetrics,
   type LaneKind,
@@ -34,7 +34,7 @@ import {
 } from './model'
 
 /**
- * Event-loop renderer: state -> lanes (VIZ-H D16).
+ * Event-loop renderer: state -> lanes (VIZ-H D16, R7).
  *
  * Below 768 (phones): code, then the four lanes as a 2x2 grid with their
  * labels on top, then the console strip, so code line, stage, caption and
@@ -43,15 +43,17 @@ import {
  *
  * The console is one left-to-right strip in log order: the order is the
  * content. Output is amber from the step it appears on and never changes
- * color (D4); the newest output carries a quiet amber tint, and its arrival
- * is the enter motion, so there is no `new` tag (D22).
+ * color (D4). The newest output, and only it, is marked: a quiet amber
+ * ground (`surface.resultTint`); the panel itself is never lime (R1, N03).
+ * Its arrival is the enter motion, so there is no `new` tag (D22).
  *
- * The reveal (D21): on the last step the console plays the output back, left
- * to right. Each output's quiet amber tint (the one the newest output wears)
- * comes up in turn, `consoleReveal` apart, so the whole order resolves as one
- * read. No new color, no movement: the text never changes, only its ground.
- * Under reduced motion every tint crossfades at once; Back and instant
- * renders land it in one frame.
+ * The finale (D21, R7): on the last step every output resolves in turn, left
+ * to right, `consoleReveal` apart: its ground comes up, the tag naming the
+ * source line that printed it (`L5`) appears under it, and the shell's code
+ * pane relights that line (`codeTrace`), so the reordering of the source
+ * reads in one pass. No new color, no movement. The tag's line is reserved
+ * on every step, so the finale moves nothing. Under reduced motion it lands
+ * in one crossfade; Back, a resize and instant renders land it in one frame.
  */
 
 const both = { narrow: true, wide: true }
@@ -120,11 +122,10 @@ export function EventLoopStage({
   const common = { focus, created, present: ids, before, gate }
   const root = useRef<HTMLDivElement>(null)
   useFlip(root, gate, step)
-  const consoleFocused = focus.has('console')
   // The end of the run: every output is part of the answer (D21).
   const resolved = index === log.steps.length - 1
   const sweep = consoleReveal(state.console.length)
-  const prevNew = new Set(previous?.focus ?? [])
+  const sources = useMemo(() => outputLines(log), [log])
 
   const rows = G.queueRows
   const micro = laneChips(
@@ -146,8 +147,8 @@ export function EventLoopStage({
   // The console keeps the newest outputs; the oldest collapse into `N earlier`.
   const out = state.console
   const kept = {
-    narrow: consoleVisible(out, metrics.consoleWidth.narrow, G.consoleRows),
-    wide: consoleVisible(out, metrics.consoleWidth.wide, G.consoleRows),
+    narrow: consoleVisible(out, metrics.consoleWidth.narrow, G.consoleRows, sources),
+    wide: consoleVisible(out, metrics.consoleWidth.wide, G.consoleRows, sources),
   }
   const firstShown = {
     narrow: out.length - kept.narrow,
@@ -233,16 +234,14 @@ export function EventLoopStage({
       <div
         aria-hidden
         data-viz-region="console"
-        data-focus={consoleFocused || undefined}
         className={clsx(
           // From 768 the console fills the rest of the left column, so both
           // columns end on one line whatever the preset's code length.
-          'relative flex min-w-0 flex-col border p-2 vz-wide:col-start-1 vz-wide:row-start-2 vz-wide:min-h-[var(--vz-h-w)] vz-wide:self-stretch',
+          // Borderless (R2); a transparent border keeps the geometry.
+          'relative flex min-w-0 flex-col border border-transparent p-2 vz-wide:col-start-1 vz-wide:row-start-2 vz-wide:min-h-[var(--vz-h-w)] vz-wide:self-stretch',
           'h-[var(--vz-h-n)] vz-wide:h-auto',
           radius.row.cls,
-          stroke.hairline,
           surface.panel,
-          consoleFocused && nowCls.panel,
         )}
         style={remHeights(metrics.console, { gap: toRem(G.labelGap) })}
       >
@@ -252,7 +251,7 @@ export function EventLoopStage({
           Console
         </span>
         <ol
-          className="m-0 flex min-h-0 min-w-0 list-none flex-wrap content-start items-center p-0"
+          className="m-0 flex min-h-0 min-w-0 list-none flex-wrap content-start items-start p-0"
           style={{ columnGap: toRem(G.outGap), rowGap: toRem(G.outRowGap) }}
         >
           {out.length > kept.narrow || out.length > kept.wide
@@ -262,7 +261,7 @@ export function EventLoopStage({
                     key={`earlier-${v}`}
                     data-viz-part="console-earlier"
                     className={clsx(
-                      'm-0 flex h-5 items-center p-0',
+                      'm-0 flex h-5 items-center self-start p-0',
                       typeScale.tag.cls,
                       ink.muted,
                       showCls({ narrow: v === 'narrow', wide: v === 'wide' }),
@@ -282,61 +281,82 @@ export function EventLoopStage({
             {out.map((text, k) => {
               const isNew = focus.has(outId(k))
               const lit = isNew || resolved
-              // Only the reveal tweens a tint; everything else lands (an
-              // output that stops being newest, Back, a jump).
-              const wasLit = prevNew.has(outId(k))
-              const tint =
-                gate.reveal && lit && !wasLit
-                  ? gate.reduce
-                    ? transitionFor('enter', gate)
-                    : { ...transitionFor('enter', gate), delay: (k * sweep.staggerMs) / 1000 }
-                  : { duration: 0 }
+              // Only the finale tweens: every output's ground and tag come up
+              // in turn, the newest included (its ground restarts from 0, R5).
+              // Everything else lands (an output that stops being newest,
+              // Back, a jump, a resize).
+              const playing = gate.reveal && resolved
+              const beat = playing
+                ? gate.reduce
+                  ? transitionFor('enter', gate)
+                  : { ...transitionFor('enter', gate), delay: (k * sweep.staggerMs) / 1000 }
+                : { duration: 0 }
               const show = {
                 narrow: k >= firstShown.narrow,
                 wide: k >= firstShown.wide,
               }
+              const source = sources[k]
               return (
                 <m.li
                   key={`${k}:${gate.epoch}`}
                   data-out={k}
                   data-focus={isNew || undefined}
+                  // `›` in its own column; the value and, under it, its tag.
                   className={clsx(
-                    'm-0 flex h-5 min-w-0 max-w-full items-center p-0',
+                    'm-0 grid min-w-0 max-w-full items-center p-0 [grid-template-columns:auto_minmax(0,1fr)]',
                     typeScale.value.cls,
                     showCls(show.narrow && show.wide ? both : show),
                   )}
-                  style={{ gap: toRem(G.outMark) }}
+                  style={{ columnGap: toRem(G.outMark) }}
                   // Rises into place; on Back it leaves the way it came (D8).
                   {...presence(outId(k), gate, {
                     from: { y: 1 },
                     to: { y: 1 },
                   })}
                 >
-                  <span aria-hidden className={clsx('shrink-0', ink.muted)}>
+                  <span aria-hidden className={clsx('flex h-5 items-center', ink.muted)}>
                     ›
                   </span>
-                  <span
-                    title={text}
-                    className={clsx(
-                      // The newest output is never the one truncated (F4): the
-                      // lint keeps outputs short, and a guard only truncates older ones.
-                      isNew ? 'break-all' : 'min-w-0 truncate',
-                      // Room for the tint without moving the text.
-                      'relative -mx-1 px-1',
-                      ink.result,
-                    )}
-                  >
-                    <m.span
-                      aria-hidden
-                      // The reveal's part (D21); it tweens only on the reveal.
-                      data-viz-reveal="out"
-                      className={clsx('absolute inset-0 bg-amber-400/10 print:hidden', radius.chip.cls)}
-                      initial={false}
-                      animate={{ opacity: lit ? 1 : 0 }}
-                      transition={tint}
-                    />
-                    <span className="relative">{text}</span>
+                  <span className="flex h-5 min-w-0 items-center">
+                    <span
+                      title={text}
+                      className={clsx(
+                        // The newest output is never the one truncated (F4): the
+                        // lint keeps outputs short, and a guard only truncates older ones.
+                        isNew ? 'break-all' : 'min-w-0 truncate',
+                        // Room for the ground without moving the text.
+                        'relative -mx-1 px-1',
+                        ink.result,
+                      )}
+                    >
+                      <m.span
+                        // Remounted for the finale, so every ground starts at 0.
+                        key={playing ? 'finale' : 'step'}
+                        aria-hidden
+                        data-viz-reveal="out"
+                        className={clsx('absolute inset-0', surface.resultTint, radius.chip.cls)}
+                        initial={playing ? { opacity: 0 } : false}
+                        animate={{ opacity: lit ? 1 : 0 }}
+                        transition={beat}
+                      />
+                      <span className="relative">{text}</span>
+                    </span>
                   </span>
+                  {/* The finale's tag: the source line that printed this output (R7). */}
+                  {source ? (
+                    <m.span
+                      key={playing ? 'finale' : 'step'}
+                      aria-hidden
+                      data-viz-reveal="tag"
+                      data-line={source}
+                      className={clsx('col-start-2 h-4', typeScale.meta.cls, ink.muted)}
+                      initial={playing ? { opacity: 0 } : false}
+                      animate={{ opacity: resolved ? 1 : 0 }}
+                      transition={beat}
+                    >
+                      {lineTag(source)}
+                    </m.span>
+                  ) : null}
                 </m.li>
               )
             })}
@@ -345,7 +365,7 @@ export function EventLoopStage({
             <li
               aria-hidden
               className={clsx(
-                'm-0 flex h-5 items-center p-0',
+                'm-0 flex h-5 items-center self-start p-0',
                 typeScale.tag.cls,
                 ink.muted,
               )}

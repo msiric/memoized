@@ -6,6 +6,7 @@ import {
   vizFootprint,
   vizStaticFootprints,
   vizStaticTextAlternative,
+  vizStepFootprints,
   vizTextAlternative,
 } from './registry'
 import { VIZ_SERVER } from './registry.server'
@@ -21,7 +22,7 @@ describe('visualization registry', () => {
   })
 
   it.each(ids)('%s: the entry table reserves exactly the computed footprint', (id) => {
-    const [, narrow, wide, statics] = VIZ_TABLE[id]
+    const [, narrow, wide, statics, steps] = VIZ_TABLE[id]
     expect([narrow, wide], 'update entry-table.ts').toEqual([...vizFootprint(id)!])
     const d = VIZ_DESCRIPTORS[id as keyof typeof VIZ_DESCRIPTORS]
     if (d.form === 'static') {
@@ -31,6 +32,13 @@ describe('visualization registry', () => {
       )
       expect(Object.keys(statics!)[0]).toBe(d.defaultPreset)
     } else expect(statics).toBeUndefined()
+    if (d.form === 'step') {
+      // Per preset (R2), default first: the placeholder reserves the preset it will render.
+      expect(JSON.parse(JSON.stringify(steps)), 'update entry-table.ts').toEqual(
+        JSON.parse(JSON.stringify(vizStepFootprints(id))),
+      )
+      expect(Object.keys(steps!)[0]).toBe(d.defaultPreset)
+    } else expect(steps).toBeUndefined()
   })
 
   it.each(ids)('%s: the lazy loader resolves to a component', async (id) => {
@@ -82,7 +90,8 @@ describe('visualization registry', () => {
   it('provides a text alternative for every preset', () => {
     const alt = vizTextAlternative('event-loop', 'basic-ordering')!
     expect(alt.output).toBe('A, D, C, B')
-    expect(alt.items.filter((i) => i.kind === 'checkpoint')).toHaveLength(1)
+    // The Start prediction (R7) and the mid-run checkpoint.
+    expect(alt.items.filter((i) => i.kind === 'checkpoint')).toHaveLength(2)
     expect(vizTextAlternative('event-loop', 'nope')).toBeUndefined()
 
     const fig = vizStaticTextAlternative('environment-records', 'var-vs-let-loop')!

@@ -506,8 +506,12 @@ export const type = {
   title: { cls: 'font-sans text-base font-semibold', size: 16, line: 28, source: 'D3; P: typography.ts:191' },
   /** D3: the checkpoint prompt. P: text-base. */
   prompt: { cls: 'font-sans text-base font-semibold text-pretty', size: 16, line: 28, source: 'D3; P: tailwind.config.ts:22' },
-  /** D3: captions 14/28 zinc-300, pretty wrapping. P: typography.ts:45 (prose body 14/28). */
-  caption: { cls: 'font-sans text-sm leading-7 text-pretty', size: 14, line: 28, source: 'D3; P: typography.ts:45' },
+  /**
+   * Copy inside a visual is UI type, not prose (R3): 14/24 zinc-300, pretty
+   * wrapping. P: ProblemCard/index.tsx:224 (`text-sm leading-6`). The prose
+   * 2.0 line height never applies inside a frame.
+   */
+  caption: { cls: 'font-sans text-sm leading-6 text-pretty', size: 14, line: 24, source: 'R3; P: ProblemCard/index.tsx:224' },
   /** A step's name, joined to its caption (R3): sentence case, 14/24 600 zinc-100. */
   stepName: { cls: 'font-sans text-sm font-semibold', size: 14, line: 24, source: 'R3; P: Button.tsx:48 (text-sm)' },
   /** Text-alternative body. P: ProblemCard/index.tsx:224 (`text-sm leading-6`). */

@@ -4,7 +4,7 @@
  * without a DOM.
  */
 
-export type CheckpointShape = { beforeStep: number; answer: string }
+export type CheckpointShape = { beforeStep: number; answer: string; verdict?: 'end' }
 export type PresetShape = { steps: number; checkpoints: readonly CheckpointShape[] }
 
 export type CheckpointStatus = 'open' | 'answered' | 'skipped'
@@ -55,9 +55,19 @@ export function openCheckpointAt(presets: readonly PresetShape[], s: MachineStat
   return cps.findIndex((cp, k) => cp.beforeStep - 1 === index && s.status[k] === 'open')
 }
 
+/**
+ * The step a checkpoint's answer shows on: its reveal step, or, for a
+ * prediction judged at the end (R7), the step it was asked on (it locks in,
+ * and the learner runs the code from there).
+ */
+export function answeredAt(cp: CheckpointShape): number {
+  return cp.verdict === 'end' ? cp.beforeStep - 1 : cp.beforeStep
+}
+
 export function dockMode(presets: readonly PresetShape[], s: MachineState): DockMode {
   if (openCheckpointAt(presets, s) !== -1) return 'ask'
-  if (s.reveal !== null && presets[s.preset].checkpoints[s.reveal]?.beforeStep === s.index) return 'reveal'
+  const cp = s.reveal !== null ? presets[s.preset].checkpoints[s.reveal] : undefined
+  if (cp && answeredAt(cp) === s.index) return 'reveal'
   return 'controls'
 }
 
@@ -118,7 +128,7 @@ export function reduce(presets: readonly PresetShape[], s: MachineState, a: Acti
         status,
         picked,
         memory: { ...s.memory, [`${s.preset}:${open}`]: a.choice },
-        index: cp.beforeStep,
+        index: answeredAt(cp),
         reveal: open,
         playing: false,
       }
@@ -127,7 +137,10 @@ export function reduce(presets: readonly PresetShape[], s: MachineState, a: Acti
       if (open === -1) return s
       const status = s.status.slice()
       status[open] = 'skipped'
-      return { ...s, status, index: presets[s.preset].checkpoints[open].beforeStep, reveal: open, playing: false }
+      const cp = presets[s.preset].checkpoints[open]
+      // A skipped prediction judged at the end has nothing to show: the
+      // learner runs the code from where they are (R7).
+      return { ...s, status, index: answeredAt(cp), reveal: cp.verdict === 'end' ? null : open, playing: false }
     }
     case 'play':
       // D10: Play advances at once, then follows the cadence (`tick`).

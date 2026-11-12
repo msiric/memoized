@@ -15,7 +15,7 @@ export const VARIANTS: readonly Variant[] = ['narrow', 'wide']
 export type PerVariant<T> = Record<Variant, T>
 
 export type EngineLayout = {
-  /** Stage height in px, the maximum over every step of every preset. */
+  /** Stage height in px, the maximum over every step of the logs it was computed for. */
   stage: PerVariant<number>
   /** Visible code rows. */
   codeRows: PerVariant<number>
@@ -48,15 +48,32 @@ export type EngineCore<S> = {
   id: string
   /** The stage's accessible name for a state (`role="img"`). */
   describe: (state: S) => string
-  layout: (logs: readonly StepLog<S>[]) => EngineLayout
+  /**
+   * Stage geometry. Heights are sized to `logs` (the shell passes one
+   * preset's log: per-preset footprints, R2, R7); `all` (every preset of the
+   * visual) fixes what must not change when the reader switches presets,
+   * such as column widths. Without `all`, `logs` is used for both.
+   */
+  layout: (logs: readonly StepLog<S>[], all?: readonly StepLog<S>[]) => EngineLayout
   introspect: StateIntrospection<S>
   /**
    * The engine's reveal (D21), if it has one: ms from the reveal render until
-   * its sequence has resolved, when the shell lands the end caption (the
-   * recap). Without it the caption lands as on any step.
+   * its playback has landed, when the shell swaps the caption for the recap
+   * (R5: the previous caption stays until then). The reveal ends once the
+   * recap has faded in; Replay ignores presses until then (R7). Without it
+   * the caption lands as on any step.
    */
   revealMs?: (state: S) => number
+  /**
+   * The code lines this step relights, in run order, with each line's delay
+   * into the reveal (R7: the event loop's finale relights the lines that
+   * printed, in the order they ran). The shell's code pane draws them as
+   * traced lines; the delays apply only while the reveal plays.
+   */
+  codeTrace?: (log: StepLog<S>, index: number) => CodeTrace | null
 }
+
+export type CodeTrace = { lines: readonly number[]; delaysMs: readonly number[] }
 
 export type Engine<S> = EngineCore<S> & {
   Stage: ComponentType<StageProps<S>>

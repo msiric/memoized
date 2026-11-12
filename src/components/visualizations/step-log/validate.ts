@@ -199,6 +199,14 @@ export function validateStepLog<S>(log: StepLog<S>, introspect: StateIntrospecti
     // The answer must equal what the reveal step observes.
     const answer = cp.choices.find((ch) => ch.id === cp.answer)
     const reveal = steps[cp.beforeStep]
+    if (cp.verdict === 'end') {
+      // A prediction about the whole run: the answer is the run's last output.
+      const lastOut = trace?.[trace.length - 1]
+      if (answer?.value === undefined) err(at, 'a prediction judged at the end needs the answer value')
+      else if (trace && answer.value !== lastOut)
+        err(at, `answer "${answer.value}" is not the run's last output ("${lastOut}")`)
+      return
+    }
     if (answer?.value !== undefined && reveal && trace) {
       const observedAtReveal = (reveal.observes ?? []).map((k) => trace[k])
       if (!observedAtReveal.includes(answer.value)) {
