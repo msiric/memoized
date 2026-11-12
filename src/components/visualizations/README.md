@@ -32,6 +32,10 @@ step-log/            the step-log contract, authoring lint, Node truth harness,
                      pre-computed Shiki tokens (`yarn viz:tokens`)
 shell/               StepThrough: frame, dock, scrubber, checkpoints,
                      narration, footprint, motion gate, FLIP moves
+  motion.ts          the gate (reduce, instant, epoch, direction, allow),
+                     presence() for every stage glyph, motionBudget()
+  pace.ts            the shared burst window (250 ms) and Esc rule (D13)
+  flip.ts            FLIP moves: instant finish, resize re-measure, lift
 substrates/          reusable glyph regions (Lane)
 engines/<name>/      model, layout, stage renderer, logs, descriptor
 ```
@@ -51,6 +55,37 @@ truth test re-runs it), a descriptor and a stage, register it in
 `registry.ts`, `registry.server.tsx` and `entry-table.ts` (the registry test
 prints the footprint to use), then check it on `/dev/visualizations` and with
 `yarn test:e2e`.
+
+### Shell behavior contract (VIZ-H WS2)
+
+- **Instant means instant (D7).** Scrub, Home, End, Restart, a preset switch
+  and a burst (two commands inside 250 ms, `shell/pace.ts`) render with
+  `gate.instant`. Glyph keys and each `AnimatePresence` are keyed by
+  `gate.epoch`, so even a glyph still leaving from an earlier step is gone
+  in the next frame; CSS-driven chrome uses `transitionCls.instant`
+  (`transition: none` cancels a running transition, removing the class does
+  not). FLIP moves finish under the whole stage root.
+- **Back mirrors Next (D8).** Render enters and exits with
+  `presence(id, gate, { from, to })`: forward a glyph enters from `from` and
+  exits toward `to`, Back the reverse. Put the presence `custom` (`{ gate }`,
+  plus `present` for moved chips) on the `AnimatePresence`.
+- **Two stage glyphs per step.** `motionBudget()` allows at most two glyphs
+  (entering, leaving or moving) per step: the step's `focus` first, then
+  arrivals, then departures. Chrome (caption, code line, step bar,
+  scrubber) is exempt. Ask `animates(gate, id)` before animating a glyph.
+- **The lift (D6).** A glyph whose `data-flip-id` changes region renders
+  above every lane on an opaque raised backing with the one lift shadow,
+  ramped with the move. Nothing else casts a shadow.
+- **Geometry in rem (D19).** Author px at the 16 px root and emit through
+  `heights()`, `translateY()` or `rem()` (`shell/vars.ts`).
+- **The dock is measured (D15).** It holds an invisible ghost of every
+  caption and checkpoint of every preset, so its height is the worst case
+  at the current width and text size. `footprint.ts` only estimates it for
+  the client-only placeholder.
+- **The motion harness asserts.** `MOTION_STRICT=1 npx playwright test
+  e2e/motion` fails on any section 4 flag, more than two animated stage
+  glyphs, a Back that does not mirror Next, a tween after an instant
+  command, or a settled frame that differs from a slow walk.
 
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for

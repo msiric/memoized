@@ -11,6 +11,8 @@ describe('FLIP move curve (M08)', () => {
   it('fits the 300 ms cap and lands exactly on the target', () => {
     expect(curve.duration).toBeLessThanOrEqual(motionRules.maxTransitionMs)
     expect(curve.duration).toBeGreaterThan(200)
+    // It settles (0.5 %) before the cap, so the cap never truncates it.
+    expect(curve.duration).toBeLessThan(motionRules.maxTransitionMs - 15)
     expect(curve.progress[0]).toBe(0)
     expect(curve.progress[curve.progress.length - 1]).toBe(1)
     expect(curve.offsets[curve.offsets.length - 1]).toBe(1)

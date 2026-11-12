@@ -513,8 +513,10 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           Next and Play stay in place, unavailable. */}
       <div
         data-viz-region="bar"
-        className={cn('flex flex-col print:hidden', H_CLS, hidden && 'invisible')}
-        style={heights({ narrow: metrics.narrow.bar, wide: metrics.wide.bar }, { marginTop: rem(FRAME.barGap) })}
+        // Sized by its content, which never changes between steps or modes,
+        // so the row can wrap under large text without any shift (D9, D19).
+        className={cn('flex flex-col print:hidden', hidden && 'invisible')}
+        style={{ marginTop: rem(FRAME.barGap) }}
       >
         <Scrubber
           ref={sliderRef}
@@ -531,7 +533,10 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           animate={animate}
           onSeek={(to) => dispatch({ type: 'seek', to }, true)}
         />
-        <div className="flex items-center" style={{ marginTop: rem(TARGET_GAP_PX), gap: rem(TARGET_GAP_PX) }}>
+        {/* One row at every width at the default text size. At 150 % and
+            200 % text on a phone, Next and Play wrap to a second row rather
+            than overflow; the order and the targets never change. */}
+        <div className="flex flex-wrap items-center" style={{ marginTop: rem(TARGET_GAP_PX), gap: rem(TARGET_GAP_PX) }}>
           <Button
             size="icon"
             tabIndex={-1}
@@ -565,7 +570,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             onClick={() => dispatch({ type: 'next' })}
             // Fills the row below 768; from 768 an 8 rem pill that may shrink
             // (at 200 % text the row is wider than the frame otherwise).
-            className="min-w-0 flex-1 md:w-32 md:flex-initial"
+            className="flex-auto md:w-32 md:flex-initial"
             data-viz-part="viz-next"
           >
             <span>Next</span>

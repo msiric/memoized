@@ -32,10 +32,12 @@ type Curve = { duration: number; offsets: number[]; progress: number[] }
 const curves = new Map<string, Curve>()
 
 /**
- * Samples a unit spring until it is within 0.5 % and slow, capped at the
- * 300 ms transition limit, then normalizes the samples so the last one is
- * exactly 1. The curve stays monotonic and ends where the glyph rests: there
- * is no end snap however the cap falls (M08).
+ * Samples a unit spring until it is within 0.5 % of its target (about
+ * 275 ms for the `move` token), capped at the 300 ms transition limit, then
+ * normalizes the samples so the last one is exactly 1. The curve stays
+ * monotonic and ends where the glyph rests: no end snap (M08). The residual
+ * speed at the stop is under 0.1 travel per second, a tenth of a pixel per
+ * frame on the longest stage move.
  */
 export function springCurve({ stiffness, damping, mass }: Spring, stepMs = 1000 / 120): Curve {
   const key = `${stiffness}:${damping}:${mass}`
@@ -45,12 +47,17 @@ export function springCurve({ stiffness, damping, mass }: Spring, stepMs = 1000 
   let v = 0
   const dt = stepMs / 1000
   const samples = [0]
+  // Ten integration sub-steps per keyframe: one coarse Euler step per frame
+  // lags the real spring by about 25 ms at this stiffness.
+  const sub = dt / 10
   for (let t = 0; t < motionRules.maxTransitionMs / 1000 - dt / 2; t += dt) {
-    const a = (-stiffness * x - damping * v) / mass
-    v += a * dt
-    x += v * dt
+    for (let i = 0; i < 10; i++) {
+      const a = (-stiffness * x - damping * v) / mass
+      v += a * sub
+      x += v * sub
+    }
     samples.push(1 - x)
-    if (Math.abs(x) < 0.005 && Math.abs(v) < 0.05) break
+    if (Math.abs(x) < 0.005) break
   }
   const end = samples[samples.length - 1]
   const progress = samples.map((p) => p / end)

@@ -221,12 +221,13 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
       >
         {/* Track: a 2 px `line` rule between the thumb centres, progress in the accent. */}
         <div className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-zinc-500" />
+        {/* Progress is revealed by a clip, so its box never changes size or leaves the rail. */}
         <div
           className={clsx(
-            'absolute inset-x-0 top-1/2 h-0.5 origin-left bg-lime-500 print:bg-lime-700',
+            'absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-lime-500 print:bg-lime-700',
             animate ? transitionCls.highlight : transitionCls.instant,
           )}
-          style={{ transform: `translateY(-50%) scaleX(${fraction(index)})` }}
+          style={{ clipPath: `inset(0 ${(1 - fraction(index)) * 100}% 0 0)` }}
         />
         {showTicks
           ? Array.from({ length: total }, (_, n) =>

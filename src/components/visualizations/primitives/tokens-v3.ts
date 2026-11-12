@@ -611,7 +611,7 @@ export const transitionCls = {
   feedback: 'transition motion-reduce:transition-none',
   press: 'active:brightness-98',
   highlight:
-    'transition-[background-color,opacity,transform] duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
+    'transition-[background-color,opacity,transform,clip-path] duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
   /** P: ProblemCard/index.tsx:210-211 (rotate 180 over 200 ms). */
   disclosure: 'transition-transform duration-200 motion-reduce:transition-none',
   /**
