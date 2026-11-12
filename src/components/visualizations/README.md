@@ -78,10 +78,25 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   ramped with the move. Nothing else casts a shadow.
 - **Geometry in rem (D19).** Author px at the 16 px root and emit through
   `heights()`, `translateY()` or `rem()` (`shell/vars.ts`).
+- **The frame picks the variant (D19).** The frame is a size container
+  (`vz`); write `vz-wide:` (from 37.875rem, the frame's content at a 768 px
+  viewport), `vz-narrow:` and `vz-xl:` (from 53.875rem), never `md:` or
+  `xl:`. Under 150 % or 200 % text the frame gets the narrow layout
+  wherever the wide one would not fit. Viewport variants stay only for the
+  page itself (the frame's bleed and radius, the mount's max width).
+- **Segments that do not fit become a select (A2).** `SegmentedControl` is a
+  size container; a container query at `segmentedWidth()` (in rem) swaps in
+  a native select styled like the platform `Select`. Give its parent the
+  width it may use.
+- **Code soft-wraps (A4).** Long lines wrap with a hanging indent and a
+  continuation hairline; footprints count wrapped rows
+  (`shell/code-geometry.ts`), and the window re-measures rows the browser
+  drew when the pane is narrower than its variant's minimum.
 - **The dock is measured (D15).** It holds an invisible ghost of every
   caption and checkpoint of every preset, so its height is the worst case
   at the current width and text size. `footprint.ts` only estimates it for
-  the client-only placeholder.
+  the client-only placeholder. The list-keys explorable's dock works the same way
+  (`engines/list-keys/DockGhosts.tsx`, ghosts of its tallest strings).
 - **The motion harness asserts.** `MOTION_STRICT=1 npx playwright test
   e2e/motion` fails on any section 4 flag, more than two animated stage
   glyphs, a Back that does not mirror Next, a tween after an instant
