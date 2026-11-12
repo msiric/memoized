@@ -21,7 +21,7 @@ export type VizEntry = readonly [
 ]
 
 export const VIZ_TABLE: Record<string, VizEntry> = {
-  'event-loop': [() => import('./engines/event-loop'), 922, 686],
+  'event-loop': [() => import('./engines/event-loop'), 930, 686],
   'environment-records': [
     () => import('./engines/env-records'),
     870,

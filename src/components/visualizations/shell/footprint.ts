@@ -133,7 +133,9 @@ export function dockSlot(t: DockText, variant: Variant): number {
     maxLines(t.feedback, chars(side, GLYPH.caption)) * CAPTION_LINE,
   )
   const checkpoint =
-    variant === 'narrow' ? Math.max(text, TARGET_PX) + CHOICE.textGap + choices : Math.max(text, choices)
+    variant === 'narrow'
+      ? Math.max(text + CHOICE.textGap, TARGET_PX) + CHOICE.textGap + choices
+      : Math.max(text, choices)
   return Math.max(caption, checkpoint)
 }
 

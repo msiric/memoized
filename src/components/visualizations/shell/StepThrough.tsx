@@ -230,12 +230,12 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
 
   // ---- narration: once input settles, polite, never on load (§5.3, M21) ---
   const [live, setLive] = useState('')
-  const firstRender = useRef(true)
+  // The state last spoken (or loaded): nothing is announced on load, and a
+  // burst that ends where it started says nothing. Safe under strict effects.
+  const spoken = useRef(`${s.preset}:${s.index}:${mode}`)
   useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false
-      return
-    }
+    const key = `${s.preset}:${s.index}:${mode}`
+    if (key === spoken.current) return
     const where = s.index === 0 ? 'Start.' : `Step ${s.index} of ${last}.`
     let text = `${where} ${step.narration} ${step.why}`
     if (mode === 'ask' && cp) text += ` Checkpoint: ${cp.prompt}`
@@ -244,7 +244,10 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       text = `${f.lead} ${f.body} ${where} ${step.narration}`
     }
     // One announcement for a burst: only the step the reader settles on.
-    const id = window.setTimeout(() => setLive(text), BURST_WINDOW_MS)
+    const id = window.setTimeout(() => {
+      spoken.current = key
+      setLive(text)
+    }, BURST_WINDOW_MS)
     return () => window.clearTimeout(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [s.index, s.preset, mode])
@@ -488,7 +491,13 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
                 aria-label="Skip, show me"
                 data-inactive={!atCheckpoint || undefined}
                 unavailable={!atCheckpoint}
-                onClick={() => dispatch({ type: 'skip' })}
+                // Skip hides itself on the reveal, so it hands focus to the
+                // stepper before the render (a hidden focused control would be
+                // blurred to the page before the layout effect could move it).
+                onClick={() => {
+                  sliderRef.current?.focus({ preventScroll: true })
+                  dispatch({ type: 'skip' })
+                }}
                 className={cn(!atCheckpoint && 'invisible')}
                 data-viz-part="viz-skip"
               >
@@ -554,7 +563,9 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             data-inactive={atCheckpoint || undefined}
             unavailable={!interactive || s.index >= last || atCheckpoint}
             onClick={() => dispatch({ type: 'next' })}
-            className="min-w-0 flex-1 md:w-32 md:flex-none"
+            // Fills the row below 768; from 768 an 8 rem pill that may shrink
+            // (at 200 % text the row is wider than the frame otherwise).
+            className="min-w-0 flex-1 md:w-32 md:flex-initial"
             data-viz-part="viz-next"
           >
             <span>Next</span>
@@ -636,7 +647,8 @@ function CheckpointBlock({
       )}
       style={{ columnGap: rem(CHOICE.textGap), rowGap: rem(CHOICE.textGap) }}
     >
-      <div className="grid min-w-0 content-end [grid-area:text] md:pr-2">
+      {/* Below 768 the text's last line sits level with Skip's label (8 px under it, 44 px target). */}
+      <div className="grid min-w-0 content-end [grid-area:text] max-md:pb-2 md:pr-2">
         {variants.map((t, k) => (
           <p key={k} aria-hidden className={cn('invisible col-start-1 row-start-1', k === 0 ? promptCls : captionCls)}>
             {t}
@@ -645,8 +657,7 @@ function CheckpointBlock({
         <div className="col-start-1 row-start-1 self-end">{text}</div>
       </div>
       {choices}
-      {/* Skip's label sits on the text's last line (its 44 px target reaches into the row gap). */}
-      <div className="[grid-area:skip] max-md:-mb-2">{skip}</div>
+      <div className="[grid-area:skip]">{skip}</div>
     </div>
   )
 }
