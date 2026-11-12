@@ -30,8 +30,8 @@ export function Disclosure({ summary, children, summaryProps, className, ...rest
           radius.row.cls,
           typeScale.disclosure.cls,
           ink.muted,
-          'can-hover:text-zinc-200 active:text-zinc-200',
-          transitionCls.press,
+          // R13: hover zinc-200, press white.
+          'can-hover:text-zinc-200 press:text-white',
           focusRing,
           transitionCls.feedback,
         )}

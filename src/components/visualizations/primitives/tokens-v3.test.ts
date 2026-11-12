@@ -107,7 +107,8 @@ describe('tokens v3: contrast (WCAG 1.4.3 / 1.4.11, spec A6)', () => {
     expect(tokens.focusRingHas).toContain(`outline-${cls(roles.focus.dark)}`)
     expect(tokens.now.glyph).toContain(`border-${cls(roles.now.dark)}`)
     expect(tokens.stroke.hairline).toContain(`border-${cls(roles.hairline.dark)}`)
-    expect(tokens.frameCls).toContain(`border-${cls(roles.hairline.dark)}`)
+    // The frame is the platform card (R2): a white/10 edge, not the hairline role.
+    expect(tokens.frameCls).toContain('border-white/10')
   })
 
   it('keeps focus and now geometrically distinct (D5)', () => {

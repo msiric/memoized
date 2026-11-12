@@ -98,6 +98,11 @@ export default {
     plugin(({ addVariant }) => {
       addVariant('can-hover', '@media (hover: hover) { &:hover }')
       addVariant('group-can-hover', '@media (hover: hover) { :merge(.group):hover & }')
+      // The press step (VIZ-H R13). Registered after `can-hover`, so a press
+      // wins over the hover it starts from (a plain `active:` is emitted
+      // before plugin variants and loses to `can-hover:` at equal specificity).
+      addVariant('press', '&:active')
+      addVariant('group-press', ':merge(.group):active &')
       // Lesson visualizations pick their layout variant by the frame's own
       // width in rem (VIZ-H D19), so 150 % or 200 % text gets the layout that
       // fits. The frame is the size container `vz` (primitives/frame-cls.ts).

@@ -23,5 +23,27 @@ export function Caption({
   )
 }
 
-/** The checkpoint prompt: 16/28 semibold, pretty wrapping (D3). */
+/** The checkpoint prompt: 16/28 semibold, pretty wrapping (D3, R3). */
 export const promptCls = cn('m-0', typeScale.prompt.cls, ink.base)
+
+/** The bold lead of a feedback or recap line ("Right.", "Not quite."). */
+export const feedbackLeadCls = cn('font-semibold', ink.base)
+
+/**
+ * Feedback after a prediction (R4, drift X05): one style in every visual. The
+ * caption, led by a semibold zinc-100 verdict. Ghost copies (for reserved
+ * height) must use this same markup, so they wrap exactly like the live one.
+ */
+export function Feedback({
+  lead,
+  body,
+  className,
+  ...rest
+}: HTMLAttributes<HTMLParagraphElement> & { lead: ReactNode; body?: ReactNode }) {
+  return (
+    <p className={cn(captionCls, className)} {...rest}>
+      <span className={feedbackLeadCls}>{lead}</span>
+      {body ? <> {body}</> : null}
+    </p>
+  )
+}

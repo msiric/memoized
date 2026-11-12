@@ -29,7 +29,8 @@ describe('VDS primitives', () => {
     const primary = buttonClasses({ variant: 'primary' })
     expect(primary).toMatch(/\bbg-lime-500\b/)
     expect(primary).toContain('can-hover:bg-lime-600')
-    expect(primary).toContain('active:brightness-98')
+    // R13: press is one step past hover, on its own variant so it wins over hover.
+    expect(primary).toContain('press:bg-lime-700')
     expect(primary).toMatch(/\bh-11\b/)
     expect(primary).toMatch(/\brounded-full\b/)
     expect(primary).toContain(focusRing)
@@ -38,7 +39,11 @@ describe('VDS primitives', () => {
     // The platform outline variant (WS1 ruling 1).
     expect(secondary).toContain('ring-white/10')
     expect(secondary).not.toMatch(/(^| )bg-/)
-    expect(buttonClasses({ variant: 'text' })).toContain('text-lime-400')
+    expect(secondary).toContain('can-hover:bg-white/5')
+    expect(secondary).toContain('press:bg-white/10')
+    // R4: the text button is muted (Skip), never lime.
+    expect(buttonClasses({ variant: 'text' })).toContain('text-zinc-400')
+    expect(buttonClasses({ variant: 'text' })).not.toMatch(/(^| )text-lime/)
     expect(buttonClasses({ size: 'icon' })).toMatch(/\bw-11\b/)
   })
 
@@ -50,6 +55,20 @@ describe('VDS primitives', () => {
     expect(cls).toContain('opacity-50')
     expect(cls).not.toContain('can-hover:')
     expect(cls).not.toContain('active:')
+    expect(cls).not.toContain('press:')
+  })
+
+  it('Button: waiting is aria-disabled and inert but not faded (R4)', () => {
+    const html = renderToStaticMarkup(
+      <Button waiting variant="secondary">
+        Next
+      </Button>,
+    )
+    expect(html).toContain('aria-disabled="true"')
+    const cls = classOf(html, 'button')
+    expect(cls).not.toContain('opacity-50')
+    expect(cls).not.toContain('can-hover:')
+    expect(cls).toContain('ring-white/10')
   })
 
   it('Button: a className override wins (drift D08)', () => {
