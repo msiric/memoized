@@ -84,7 +84,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
     >
       <div
         data-viz-part="code-window"
-        className={clsx('overflow-hidden', windowed && H_CLS)}
+        className={clsx('overflow-y-clip', windowed && H_CLS)}
         style={windowed ? heights(windowRows, { marginTop: rem(CODE_PAD) }) : { marginTop: rem(CODE_PAD) }}
       >
         <ol
