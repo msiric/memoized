@@ -23,7 +23,8 @@ import type { Page } from '@playwright/test'
  *  - edge-detached      an arrow's start/end is not on its source/target box
  *  - edge-through-box   an arrow passes through a box that is neither its source nor target
  *  - edge-untestable    edges without source/target attributes (testability gap)
- *  - target-size        an interactive target under 44 x 44 CSS px
+ *  - target-size        an interactive target under 44 x 44 CSS px (24 for a focus stop
+ *                       that triggers nothing, WCAG 2.5.8)
  *  - contrast           text below 4.5:1 (3:1 for large text) against its composited background
  *  - page-overflow      the document scrolls horizontally
  *
@@ -388,11 +389,17 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
   }
 
   // ---- SVG ------------------------------------------------------------------
+  // A figure's boxes are its top-level groups. Decorative wrappers
+  // (`g[aria-hidden]`, VIZ-H D21: only the function objects are exposed) are
+  // transparent: their child groups count as top level.
+  const TOP_RECT = ':scope > g:not([aria-hidden]) > rect:first-child, :scope > g[aria-hidden] > g > rect:first-child'
+  const isWrapper = (el: Element | null, svg: Element) =>
+    !!el && el.parentElement === svg && el.matches('g[aria-hidden]')
   const svgs = [...frame.querySelectorAll('svg')].filter((s) => visible(s) && s.getBoundingClientRect().width > 24)
   for (const svg of svgs) {
     const vp = R(svg.getBoundingClientRect())
     const tx = [...svg.querySelectorAll('text')].filter((t) => visible(t))
-    const boxes = [...svg.querySelectorAll(':scope > g > rect:first-child')].filter(
+    const boxes = [...svg.querySelectorAll(TOP_RECT)].filter(
       (r) => !r.closest('[data-edge]') && visible(r),
     ) as SVGRectElement[]
     const tR = tx.map((t) => R(t.getBoundingClientRect()))
@@ -410,7 +417,8 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
         })
       // The box a label belongs to: the rect that opens its top-level group.
       let top: Element | null = t
-      while (top && (top.parentElement as Element | null) !== svg) top = top.parentElement
+      while (top && (top.parentElement as Element | null) !== svg && !isWrapper(top.parentElement, svg))
+        top = top.parentElement
       const own = (top?.tagName === 'g' ? top.querySelector(':scope > rect:first-child') : null) as SVGRectElement | null
       if (own && boxes.includes(own)) {
         const b = R(own.getBoundingClientRect())
@@ -475,7 +483,7 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
   const glyphs = [...frame.querySelectorAll(glyphSel)].filter((g) => visible(g))
   for (const svg of svgs)
     glyphs.push(
-      ...([...svg.querySelectorAll(':scope > g > rect:first-child')].filter(
+      ...([...svg.querySelectorAll(TOP_RECT)].filter(
         (r) => !r.closest('[data-edge]') && visible(r),
       ) as Element[]),
     )
@@ -512,14 +520,18 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     const spec = opts.edges?.[section]
     // Boxes name themselves (`data-node`) and arrows their ends (`data-from`,
     // `data-to`) since WS3; the layout model is only the fallback.
-    const named = [...svg.querySelectorAll(':scope > g[data-node]')]
+    const named = [...svg.querySelectorAll(':scope > g[data-node], :scope > g[aria-hidden] > g[data-node]')]
     let boxR: Map<string, R>
     if (named.length) {
       boxR = new Map(
         named.map((g) => [g.getAttribute('data-node')!, R((g.querySelector('rect') as SVGRectElement).getBoundingClientRect())]),
       )
     } else {
-      const boxEls = [...svg.querySelectorAll(':scope > g:not([data-edge]) > rect:first-child')] as SVGRectElement[]
+      const boxEls = [
+        ...svg.querySelectorAll(
+          ':scope > g:not([data-edge]):not([aria-hidden]) > rect:first-child, :scope > g[aria-hidden] > g:not([data-edge]) > rect:first-child',
+        ),
+      ] as SVGRectElement[]
       if (!ids || !spec || ids.length !== boxEls.length) {
         push({
           detector: 'edge-untestable',
@@ -694,7 +706,11 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     // An input inside a <label> is hit through the whole label.
     const hit = t.matches('input') && t.closest('label') ? t.closest('label')! : t
     const r = hit.getBoundingClientRect()
-    if (r.width < 43.5 || r.height < 43.5)
+    // A focus stop that triggers nothing (a closures function object: hover
+    // or focus only brings its path forward, D21) is held to WCAG 2.5.8's
+    // 24 px, not the 44 px of a control (A5).
+    const min = t.matches('svg [tabindex="0"]:not([role="button"])') ? 23.5 : 43.5
+    if (r.width < min || r.height < min)
       push({
         detector: 'target-size',
         sig: sig(t),
