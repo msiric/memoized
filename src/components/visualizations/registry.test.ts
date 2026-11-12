@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { VIZ_TABLE } from './entry-table'
-import { VIZ_DESCRIPTORS, buildVizManifest, vizFootprint, vizTextAlternative } from './registry'
+import {
+  VIZ_DESCRIPTORS,
+  buildVizManifest,
+  vizFootprint,
+  vizStaticFootprints,
+  vizStaticTextAlternative,
+  vizTextAlternative,
+} from './registry'
 import { VIZ_SERVER } from './registry.server'
 import { definitionMetrics } from './shell/footprint'
 import { LIMITS } from './step-log/validate'
@@ -14,8 +21,16 @@ describe('visualization registry', () => {
   })
 
   it.each(ids)('%s: the entry table reserves exactly the computed footprint', (id) => {
-    const [, narrow, wide] = VIZ_TABLE[id]
+    const [, narrow, wide, statics] = VIZ_TABLE[id]
     expect([narrow, wide], 'update entry-table.ts').toEqual([...vizFootprint(id)!])
+    const d = VIZ_DESCRIPTORS[id as keyof typeof VIZ_DESCRIPTORS]
+    if (d.form === 'static') {
+      // Per preset, default first: the placeholder after a client-side navigation.
+      expect(JSON.parse(JSON.stringify(statics)), 'update entry-table.ts').toEqual(
+        JSON.parse(JSON.stringify(vizStaticFootprints(id))),
+      )
+      expect(Object.keys(statics!)[0]).toBe(d.defaultPreset)
+    } else expect(statics).toBeUndefined()
   })
 
   it.each(ids)('%s: the lazy loader resolves to a component', async (id) => {
@@ -30,7 +45,11 @@ describe('visualization registry', () => {
     expect(presetIds).toContain(d.defaultPreset)
     for (const p of d.presets) {
       expect(p.label.length).toBeLessThanOrEqual(LIMITS.presetLabel)
-      expect(p.log.id).toBe(`${d.engine.id}/${p.id}`)
+      if ('log' in p) expect(p.log.id).toBe(`${d.engine.id}/${p.id}`)
+      else {
+        expect(p.title.length).toBeLessThanOrEqual(40)
+        expect(p.caption.length).toBeLessThanOrEqual(LIMITS.why)
+      }
     }
     expect(d.title.length).toBeLessThanOrEqual(40)
   })
@@ -45,6 +64,16 @@ describe('visualization registry', () => {
       defaultPreset: 'basic-ordering',
       since: '2026-11',
     })
+    expect(manifest.visuals['environment-records']).toEqual({
+      form: 'static',
+      engine: 'env-records',
+      presets: VIZ_DESCRIPTORS['environment-records'].presets.map((p) => p.id),
+      defaultPreset: 'var-vs-let-loop',
+      since: '2026-11',
+    })
+    expect(manifest.visuals['environment-records'].presets).toEqual(
+      expect.arrayContaining(['var-vs-let-loop', 'factory-calls-vs-aliases']),
+    )
     expect(JSON.parse(JSON.stringify(manifest))).toEqual(manifest)
   })
 
@@ -53,6 +82,14 @@ describe('visualization registry', () => {
     expect(alt.output).toBe('A, D, C, B')
     expect(alt.items.filter((i) => i.kind === 'checkpoint')).toHaveLength(1)
     expect(vizTextAlternative('event-loop', 'nope')).toBeUndefined()
+
+    const fig = vizStaticTextAlternative('environment-records', 'var-vs-let-loop')!
+    expect(fig.outputs).toEqual([
+      { label: 'var', text: '3, 3, 3' },
+      { label: 'let', text: '0, 1, 2' },
+    ])
+    expect(fig.parts.map((p) => p.heading)).toEqual(['for (var i = 0; i < 3; i++)', 'for (let i = 0; i < 3; i++)'])
+    expect(vizStaticTextAlternative('environment-records', 'nope')).toBeUndefined()
   })
 
   it('documents the footprint arithmetic for the specimen', () => {

@@ -1,0 +1,98 @@
+import type {
+  StaticDescriptor,
+  StaticEngineCore,
+  StaticTextAlternative,
+} from '../../shell/static-types'
+import { layoutDiagram } from './layout'
+import {
+  isFunction,
+  isRecord,
+  isSlot,
+  nodeById,
+  type EnvDiagram,
+  type EnvNode,
+  type EnvSection,
+} from './model'
+import { factoryCallsVsAliases, varVsLetLoop } from './presets/closures'
+
+/**
+ * The environment-records visual without its renderer: pure data and
+ * functions, so the registry, the manifest route and the tests use it
+ * without React.
+ */
+
+const full = (n: EnvNode) => n.title[0].replace(/\n/g, ' ')
+const quoted = (s: EnvSection, id: string) => `“${full(nodeById(s, id))}”`
+
+function describeSection(s: EnvSection): string[] {
+  const out: string[] = []
+  for (const n of s.nodes) {
+    if (isRecord(n)) {
+      const values = n.bindings
+        .map((b) =>
+          b.uninitialized
+            ? `${b.name} (uninitialized)`
+            : 'text' in b.value
+              ? `${b.name} = ${b.value.text}`
+              : `${b.name} → ƒ ${full(nodeById(s, b.value.ref))}`,
+        )
+        .join(', ')
+      let line = `Record ${quoted(s, n.id)}${values ? `: ${values}` : ' (no bindings shown)'}.`
+      if (
+        n.outer &&
+        n.drawOuter !== false &&
+        s.nodes.some((x) => x.id === n.outer)
+      )
+        line += ` Its outer link points to ${quoted(s, n.outer)}.`
+      if (n.unused) line += ' Hatched: no saved function links to it.'
+      out.push(line)
+    } else if (isFunction(n)) {
+      const logs = n.logs === undefined ? '' : `; calling it logs ${n.logs}`
+      const hl = s.highlight.includes(`env:${n.id}`) ? ' (highlighted)' : ''
+      out.push(
+        `Function ƒ ${full(n)}: its [[Environment]] link points to ${quoted(s, n.env)}${hl}${logs}.`,
+      )
+    } else if (isSlot(n)) {
+      out.push(`Under ${quoted(s, n.under)}: ${full(n)}.`)
+    }
+  }
+  const refs = s.highlight
+    .filter((h) => h.startsWith('ref:'))
+    .map((h) => h.slice(4).split('.')[1])
+  if (refs.length)
+    out.push(`Highlighted: ${refs.join(' and ')} point to the same function.`)
+  if (s.note) out.push(s.note)
+  return out
+}
+
+export function describeEnvDiagram(
+  d: EnvDiagram,
+): Omit<StaticTextAlternative, 'outputs'> {
+  return {
+    parts: d.sections.map((s) => ({
+      heading: s.heading,
+      lines: describeSection(s),
+    })),
+    model:
+      'Records and links model how names are looked up (ECMA-262); they are not a memory layout. Every value shown matches a real run.',
+  }
+}
+
+export const envRecordsEngineCore: StaticEngineCore<EnvDiagram> = {
+  id: 'env-records',
+  stageHeight: (d) => ({
+    narrow: layoutDiagram(d, 'narrow').height,
+    wide: layoutDiagram(d, 'wide').height,
+  }),
+  describe: describeEnvDiagram,
+}
+
+export const envRecordsDescriptor: StaticDescriptor<EnvDiagram> = {
+  id: 'environment-records',
+  form: 'static',
+  title: 'Environment records',
+  engine: envRecordsEngineCore,
+  presets: [varVsLetLoop, factoryCallsVsAliases],
+  defaultPreset: 'var-vs-let-loop',
+  since: '2026-11',
+}

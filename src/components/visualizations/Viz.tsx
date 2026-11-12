@@ -18,6 +18,10 @@ import type { VizComponentProps } from './shell/types'
  * - Within 800 px of the viewport, or on first focus or pointer contact, the
  *   engine chunk is imported and swapped in at Start: same footprint, so no
  *   layout shift. Focus and an open "Steps as text" survive the swap.
+ * - Static figures (entry with per-preset heights) are final server markup:
+ *   hydration keeps them and no chunk is ever requested. Only a client-only
+ *   render loads the figure's chunk, at once, over a placeholder of the
+ *   preset's exact footprint.
  */
 
 type Loaded = ComponentType<VizComponentProps>
@@ -41,9 +45,21 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const restore = useRef<{ focus?: string | null; open?: boolean }>()
 
+  const statics = entry?.[3]
   useEffect(() => {
     const el = ref.current
     if (Live || !entry || !el) return
+    if (statics) {
+      if (keep) return
+      let live = true
+      entry[0]().then((mod) => {
+        loaded[id] = mod.default
+        if (live) setLive(() => mod.default)
+      })
+      return () => {
+        live = false
+      }
+    }
     let io: IntersectionObserver | undefined
     const stop = () => {
       io?.disconnect()
@@ -73,7 +89,7 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
       el.addEventListener('pointerenter', go)
     }
     return stop
-  }, [Live, entry, id])
+  }, [Live, entry, id, keep, statics])
 
   useEffect(() => {
     const r = restore.current
@@ -85,8 +101,9 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
   }, [Live])
 
   if (!entry) return null
+  const [narrow, wide] = (statics && (statics[preset ?? ''] ?? Object.values(statics)[0])) || [entry[1], entry[2]]
   return (
-    <div ref={ref} data-viz={id} className="my-8 xl:max-w-[960px]">
+    <div ref={ref} data-viz={id} className={statics ? 'my-8' : 'my-8 xl:max-w-[960px]'}>
       {Live ? (
         <Live preset={preset} />
       ) : SERVER?.[id] ? (
@@ -98,7 +115,7 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
           aria-hidden
           data-viz-placeholder=""
           className="-mx-4 h-[var(--vz-n)] border-y border-zinc-700/60 bg-zinc-800/40 sm:mx-0 sm:rounded-xl sm:border-x md:h-[var(--vz-w)]"
-          style={{ ['--vz-n' as string]: `${entry[1]}px`, ['--vz-w' as string]: `${entry[2]}px` }}
+          style={{ ['--vz-n' as string]: `${narrow}px`, ['--vz-w' as string]: `${wide}px` }}
         />
       )}
     </div>

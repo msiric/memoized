@@ -27,6 +27,16 @@ substrates/          reusable glyph regions (Lane)
 engines/<name>/      model, layout, stage renderer, logs, descriptor
 ```
 
+Static diagrams (`form: 'static'`, spec §6.4) share the same registry and
+mount but ship no client JavaScript: `shell/StaticFigure.tsx` is plain server
+markup (title, `role="img"` stage described by "Diagram as text", why-caption,
+provenance, print styles), the engine computes every coordinate from data
+(`engines/env-records/layout.ts` on the `substrates/box-arrow.ts` geometry),
+one SVG per layout width is switched by CSS container queries, and the mount
+keeps that HTML on hydration. The chunk is requested only after a client-side
+navigation. Each preset lists the programs it draws (verified output) and
+claims derived from its data, which `*.truth.test.ts` re-runs in Node.
+
 Adding a visual: write the logs (record `observed.log` from a real run; the
 truth test re-runs it), a descriptor and a stage, register it in
 `registry.ts`, `registry.server.tsx` and `entry-table.ts` (the registry test
