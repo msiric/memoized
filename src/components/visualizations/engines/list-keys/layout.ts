@@ -12,8 +12,11 @@ import {
   wrapLines,
 } from '../../shell/footprint'
 import type { PerVariant, Variant } from '../../shell/types'
+import { sansWidth } from '../../substrates/text-metrics'
 import {
+  BACK_LABEL,
   LIST_RULE,
+  SKIP_LABEL,
   NONE_LABEL,
   NO_CHECK_PROMPT,
   PICK_HINT,
@@ -84,7 +87,7 @@ const PARA_GAP = 8
 export function dockStrings() {
   const hints = [PICK_HINT.list, PICK_HINT.wrapper]
   const prompts: string[] = [NO_CHECK_PROMPT]
-  const reveals: { feedback: string; rule: string }[] = []
+  const reveals: { feedback: string; lead: string; sentence: string; rule: string }[] = []
   const subsets: Checks[] = [
     { milk: false, dog: false },
     { milk: true, dog: false },
@@ -109,6 +112,8 @@ export function dockStrings() {
           const lead = feedbackLead(pick, AFTER[action][0] ?? 'none', labelOf)
           reveals.push({
             feedback: `${lead} ${sentence}`.trim(),
+            lead,
+            sentence,
             rule: LIST_RULE[`${key}/${action}`],
           })
         }
@@ -122,10 +127,9 @@ export function dockStrings() {
       const labelOf = (id: string) =>
         choices.find((c) => c.id === id)?.label ?? id
       for (const pick of [null, 'kept', 'reset']) {
-        reveals.push({
-          feedback: `${feedbackLead(pick, 'kept', labelOf)} ${wrapperOutcomeSentence(action, count)}`,
-          rule: WRAPPER_RULE[action],
-        })
+        const lead = feedbackLead(pick, 'kept', labelOf)
+        const sentence = wrapperOutcomeSentence(action, count)
+        reveals.push({ feedback: `${lead} ${sentence}`, lead, sentence, rule: WRAPPER_RULE[action] })
       }
     }
   }
@@ -148,9 +152,23 @@ export const choicesHeight = (count: number) => {
 }
 
 /** Width of the text beside the choices (ask) or the button (reveal), from 768. */
-export const WIDE_CHOICES = 2 * CHOICE.wideWidth + CHOICE.gap
+/**
+ * List-keys choices from 768: two 148 px columns (labels are at most about
+ * 9 characters, so the shell's 168 is not needed), which leaves the text
+ * column room for "Skip, show me" and "Pick another action" on one row.
+ */
+export const LK_CHOICE_WIDTH = 148
+export const WIDE_CHOICES = 2 * LK_CHOICE_WIDTH + CHOICE.gap
 export const WIDE_SIDE = MIN_TEXT_WIDTH.wide - CHOICE.sideGap - WIDE_CHOICES
 export const REVEAL_BUTTON = 168
+
+/** Text buttons: 8 px padding each side, sans 14/500 (Button `text`). */
+const textButton = (label: string) => Math.ceil(sansWidth(label, 14)) + 16
+
+/** Rows the ask phase's Skip and "Pick another action" take in `width` (they wrap, 8 px apart). */
+export function askActionRows(width: number): number {
+  return textButton(SKIP_LABEL) + 8 + textButton(BACK_LABEL) <= width ? 1 : 2
+}
 
 export function dockModes(variant: Variant) {
   const s = dockStrings()
@@ -169,11 +187,11 @@ export function dockModes(variant: Variant) {
     PARA_GAP
   if (variant === 'narrow') {
     const prompt = maxOf(s.prompts.map((t) => lines(t, w, GLYPH.prompt))) * PROMPT_LINE
-    ask = prompt + PARA_GAP + choices + PARA_GAP + TARGET_PX
+    ask = prompt + PARA_GAP + choices + PARA_GAP + askActionRows(w) * TARGET_PX
     reveal = revealText(w) + PARA_GAP + TARGET_PX
   } else {
     const prompt = maxOf(s.prompts.map((t) => lines(t, WIDE_SIDE, GLYPH.prompt))) * PROMPT_LINE
-    ask = Math.max(prompt + PARA_GAP + TARGET_PX, choices)
+    ask = Math.max(prompt + PARA_GAP + askActionRows(WIDE_SIDE) * TARGET_PX, choices)
     reveal = Math.max(revealText(w - CHOICE.sideGap - REVEAL_BUTTON), TARGET_PX)
   }
   return { pick, ask, reveal, dock: Math.max(pick, ask, reveal) }
@@ -221,3 +239,26 @@ export const LONGEST_CHOICE = Math.max(
   NONE_LABEL.length,
   ...Object.values(ITEMS).map((i) => i.text.length),
 )
+
+/**
+ * The strings the measured dock keeps as invisible ghosts (D15): both pick
+ * hints, and the longest prompts, feedback lines and rules. The tallest
+ * wrap comes from the longest strings, so a few of each hold the dock's
+ * worst case at any width or text size without a ghost for every reveal.
+ */
+export function dockGhostStrings(keep = 3) {
+  const s = dockStrings()
+  const longest = <T>(xs: readonly T[], len: (x: T) => number) =>
+    [...new Set(xs)].sort((a, b) => len(b) - len(a)).slice(0, keep)
+  const reveals = [
+    ...longest(s.reveals, (r) => r.feedback.length),
+    ...longest(s.reveals, (r) => r.rule.length),
+  ]
+  return {
+    hints: s.hints,
+    prompts: longest(s.prompts, (p) => p.length),
+    reveals: [...new Map(reveals.map((r) => [`${r.feedback}|${r.rule}`, r])).values()],
+    maxChoices: s.maxChoices,
+  }
+}
+

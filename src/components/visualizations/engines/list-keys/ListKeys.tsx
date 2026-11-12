@@ -13,7 +13,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 import { Button } from '../../primitives/Button'
-import { captionCls, promptCls } from '../../primitives/Caption'
+import { captionCls } from '../../primitives/Caption'
 import { ChoiceRow } from '../../primitives/ChoiceRow'
 import { cn as clsx } from '../../primitives/cn'
 import { Disclosure } from '../../primitives/Disclosure'
@@ -22,7 +22,6 @@ import { Provenance } from '../../primitives/Provenance'
 import { SegmentedControl } from '../../primitives/SegmentedControl'
 import { ink, motionRules, type as typeScale } from '../../primitives/tokens-v3'
 import { CodePane } from '../../shell/CodePane'
-import { CHOICE } from '../../shell/footprint'
 import type { MotionGate } from '../../shell/motion'
 import { H_CLS } from '../../shell/vars'
 import { remHeights, toRem } from '../../substrates/units'
@@ -34,10 +33,14 @@ import {
   type CodeVariant,
 } from './code'
 import { Columns } from './Columns'
+import { DOCK, DockGhosts } from './DockGhosts'
 import {
+  BACK_LABEL,
   LIST_RULE,
   NO_CHECK_PROMPT,
   PICK_HINT,
+  SHOW_LABEL,
+  SKIP_LABEL,
   TITLE,
   WRAPPER_RULE,
   WRAPPER_TITLE,
@@ -57,8 +60,6 @@ import {
   GAPS,
   KEY_ROW,
   STATUS,
-  REVEAL_BUTTON,
-  WIDE_CHOICES,
   listKeysMetrics,
 } from './layout'
 import {
@@ -477,155 +478,137 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
         {live}
       </div>
 
-      {/* 4. Dock: one reserved slot for pick, predict and reveal. */}
+      {/* 4. Dock: one slot for pick, predict and reveal, as tall as its
+          tallest state (a ghost stack, measured like the shell's, D15). */}
       <div
         ref={dockRef}
         data-viz-region="dock"
-        className={clsx('relative print:hidden', H_CLS, hidden && 'invisible')}
-        style={remHeights(
-          { narrow: metrics.narrow.dock, wide: metrics.wide.dock },
-          { marginTop: toRem(GAPS.dock) },
-        )}
+        className={clsx('relative grid print:hidden', hidden && 'invisible')}
+        style={{ marginTop: toRem(GAPS.dock) }}
       >
-        {s.phase === 'pick' || !action ? (
-          <div
-            className="flex flex-col"
-            style={{ gap: toRem(8) }}
-            data-viz-part="dock-pick"
-          >
-            <p className={captionCls}>
-              {s.scene === 'list' ? PICK_HINT.list : PICK_HINT.wrapper}
-            </p>
-            <div
-              className={clsx(
-                'grid gap-2',
-                s.scene === 'list'
-                  ? 'grid-cols-2 vz-wide:grid-cols-4'
-                  : 'grid-cols-2',
-              )}
-              role="group"
-              aria-label="Actions"
-            >
-              {actions.map((a) => (
-                <Button
-                  key={a.id}
-                  tabIndex={interactive ? 0 : -1}
-                  unavailable={!interactive}
-                  data-viz-focus={`action-${a.id}`}
-                  onClick={() => {
-                    lastAction.current = a.id
-                    setChoiceFocus(0)
-                    const nothingToFollow =
-                      s.scene === 'list' && tracked === null
-                    fromDock(
-                      { type: 'apply', action: a.id },
-                      nothingToFollow ? 'skip' : 'choice-0',
-                    )
-                  }}
-                  className="min-w-0 px-2"
-                >
-                  <span
-                    className={clsx(
-                      'truncate',
-                      s.scene === 'wrapper' &&
-                        a.id === 'type' &&
-                        'font-mono text-xs',
-                    )}
+        <DockGhosts />
+        <div className="col-start-1 row-start-1 min-w-0">
+          {s.phase === 'pick' || !action ? (
+            <div className={DOCK.pick} style={DOCK.pickStyle} data-viz-part="dock-pick">
+              <p className={captionCls}>
+                {s.scene === 'list' ? PICK_HINT.list : PICK_HINT.wrapper}
+              </p>
+              <div
+                className={DOCK.pickGrid(s.scene)}
+                role="group"
+                aria-label="Actions"
+              >
+                {actions.map((a) => (
+                  <Button
+                    key={a.id}
+                    tabIndex={interactive ? 0 : -1}
+                    unavailable={!interactive}
+                    data-viz-focus={`action-${a.id}`}
+                    onClick={() => {
+                      lastAction.current = a.id
+                      setChoiceFocus(0)
+                      const nothingToFollow =
+                        s.scene === 'list' && tracked === null
+                      fromDock(
+                        { type: 'apply', action: a.id },
+                        nothingToFollow ? 'skip' : 'choice-0',
+                      )
+                    }}
+                    className="min-w-0 px-2"
                   >
-                    {a.label}
-                  </span>
+                    <span
+                      className={clsx(
+                        'truncate',
+                        s.scene === 'wrapper' &&
+                          a.id === 'type' &&
+                          'font-mono text-xs',
+                      )}
+                    >
+                      {a.label}
+                    </span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          ) : !revealed ? (
+            <div className={DOCK.ask} style={DOCK.askStyle} data-viz-part="dock-ask">
+              <p
+                id={promptId}
+                className={DOCK.prompt}
+                data-viz-part="viz-prompt"
+              >
+                {prompt}
+              </p>
+              <div
+                role="radiogroup"
+                aria-labelledby={promptId}
+                className={clsx(DOCK.choices, !canPredict && 'invisible')}
+                style={DOCK.choicesStyle}
+                data-viz-part="choices"
+              >
+                {choices.map((c, i) => (
+                  <ChoiceRow
+                    key={c.id}
+                    index={i}
+                    label={c.label}
+                    wrap="truncate"
+                    mono={s.scene === 'wrapper'}
+                    tag={lastTime === c.id ? 'last time' : undefined}
+                    data-choice={c.id}
+                    data-choice-index={i}
+                    data-viz-focus={`choice-${i}`}
+                    tabIndex={canPredict && i === choiceFocus ? 0 : -1}
+                    // The choice is replaced by the reveal, so focus moves to the
+                    // control in its place (§5.2), as the shell hands it on.
+                    onClick={() => fromDock({ type: 'answer', choice: c.id }, 'again')}
+                    onKeyDown={(e) => onChoiceKey(e, i)}
+                    onFocus={() => setChoiceFocus(i)}
+                  />
+                ))}
+              </div>
+              <div className={DOCK.askActions}>
+                <Button
+                  variant="text"
+                  tabIndex={interactive ? 0 : -1}
+                  data-viz-focus="skip"
+                  data-viz-part="viz-skip"
+                  onClick={() => fromDock({ type: 'skip' }, 'again')}
+                >
+                  {canPredict ? SKIP_LABEL : SHOW_LABEL}
                 </Button>
-              ))}
+                <Button
+                  variant="text"
+                  tabIndex={interactive ? 0 : -1}
+                  data-viz-part="viz-back"
+                  onClick={() => fromDock({ type: 'back' }, `action-${lastAction.current ?? action}`)}
+                >
+                  {BACK_LABEL}
+                </Button>
+              </div>
             </div>
-          </div>
-        ) : !revealed ? (
-          <div
-            className="grid grid-cols-1 vz-wide:grid-cols-[minmax(0,1fr)_var(--lk-choices-w)] vz-wide:gap-x-4"
-            style={{
-              rowGap: toRem(CHOICE.textGap),
-              ['--lk-choices-w' as string]: toRem(WIDE_CHOICES),
-            }}
-            data-viz-part="dock-ask"
-          >
-            <p
-              id={promptId}
-              className={clsx(promptCls, 'vz-wide:col-start-1 vz-wide:row-start-1')}
-              data-viz-part="viz-prompt"
-            >
-              {prompt}
-            </p>
-            <div
-              role="radiogroup"
-              aria-labelledby={promptId}
-              className={clsx(
-                'grid grid-cols-2 vz-wide:col-start-2 vz-wide:row-span-2 vz-wide:row-start-1 vz-wide:self-start',
-                !canPredict && 'invisible',
-              )}
-              style={{ gap: toRem(CHOICE.gap) }}
-              data-viz-part="choices"
-            >
-              {choices.map((c, i) => (
-                <ChoiceRow
-                  key={c.id}
-                  index={i}
-                  label={c.label}
-                  wrap="truncate"
-                  mono={s.scene === 'wrapper'}
-                  tag={lastTime === c.id ? 'last time' : undefined}
-                  data-choice={c.id}
-                  data-choice-index={i}
-                  data-viz-focus={`choice-${i}`}
-                  tabIndex={canPredict && i === choiceFocus ? 0 : -1}
-                  // The choice is replaced by the reveal, so focus moves to the
-                  // control in its place (§5.2), as the shell hands it on.
-                  onClick={() => fromDock({ type: 'answer', choice: c.id }, 'again')}
-                  onKeyDown={(e) => onChoiceKey(e, i)}
-                  onFocus={() => setChoiceFocus(i)}
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-2 vz-wide:col-start-1 vz-wide:row-start-2">
+          ) : (
+            <div className={DOCK.reveal} style={DOCK.revealStyle} data-viz-part="dock-reveal">
+              <div className={DOCK.revealText}>
+                <p className={DOCK.feedback} data-viz-part="viz-feedback">
+                  {lead ? <span className="font-semibold">{lead}</span> : null} {outcomeSentence}
+                </p>
+                <p className={DOCK.rule} data-viz-part="viz-caption">
+                  {rule}
+                </p>
+              </div>
               <Button
-                variant="text"
                 tabIndex={interactive ? 0 : -1}
-                data-viz-focus="skip"
-                data-viz-part="viz-skip"
-                onClick={() => fromDock({ type: 'skip' }, 'again')}
+                data-viz-focus="again"
+                data-viz-part="viz-again"
+                onClick={() => fromDock({ type: 'again' }, `action-${lastAction.current ?? action}`)}
+                className={DOCK.again}
+                style={DOCK.againStyle}
               >
-                {canPredict ? 'Skip, show me' : 'Show me'}
-              </Button>
-              <Button
-                variant="text"
-                tabIndex={interactive ? 0 : -1}
-                data-viz-part="viz-back"
-                onClick={() => fromDock({ type: 'back' }, `action-${lastAction.current ?? action}`)}
-              >
-                Pick another action
+                Try another action
               </Button>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col vz-wide:flex-row vz-wide:items-start" style={{ gap: toRem(8) }} data-viz-part="dock-reveal">
-            <div className="min-w-0 vz-wide:flex-1 vz-wide:pr-2">
-              <p className={clsx(captionCls, ink.base)} data-viz-part="viz-feedback">
-                {lead ? <span className="font-semibold">{lead}</span> : null} {outcomeSentence}
-              </p>
-              <p className={clsx(captionCls, 'mt-2')} data-viz-part="viz-caption">
-                {rule}
-              </p>
-            </div>
-            <Button
-              tabIndex={interactive ? 0 : -1}
-              data-viz-focus="again"
-              data-viz-part="viz-again"
-              onClick={() => fromDock({ type: 'again' }, `action-${lastAction.current ?? action}`)}
-              className="mt-2 self-start vz-wide:mt-0 vz-wide:w-[var(--lk-again-w)]"
-              style={{ ['--lk-again-w' as string]: toRem(REVEAL_BUTTON) }}
-            >
-              Try another action
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* 5. Footer: outcomes as text, and provenance. */}

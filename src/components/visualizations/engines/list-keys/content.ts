@@ -157,3 +157,8 @@ export function feedbackLead(
 
 /** `key={i}`-style label for the status bar and narration. */
 export const keyPhrase = (k: KeyStrategy) => `key={${KEY_EXPR[k]}}`
+
+/** The ask phase's two text buttons (the layout measures them, A2/D16). */
+export const SKIP_LABEL = 'Skip, show me'
+export const SHOW_LABEL = 'Show me'
+export const BACK_LABEL = 'Pick another action'

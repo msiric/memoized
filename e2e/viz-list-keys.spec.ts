@@ -377,7 +377,9 @@ test('layout stability: nothing moves across every scene, key, action and phase'
     await open(page, width)
     const f = frame(page)
     const base = await layoutSnapshot(page)
-    expect(base.frame[3], 'frame height equals the reserved footprint').toBe(
+    // The dock is measured (a ghost stack, D15), so the frame is at most the
+    // entry-table estimate the client-only placeholder reserves.
+    expect(base.frame[3], 'frame height within the reserved footprint').toBeLessThanOrEqual(
       width < 768 ? NARROW : WIDE,
     )
     const same = async (label: string) =>
