@@ -312,7 +312,7 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({
   }
 })
 
-test('reduced motion: lines and state chip land instantly, information unchanged (A4)', async ({
+test('reduced motion: lines and the check land instantly, no ride, information unchanged (A4)', async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -320,54 +320,46 @@ test('reduced motion: lines and state chip land instantly, information unchanged
   const f = frame(page)
   await f.getByTestId('viz-skip').click()
   await page.waitForTimeout(20)
-  const sample = await f.evaluate((el) => {
-    const chip = el.querySelector(
-      '[data-viz-part="state-chip"]',
-    )!.parentElement!
-    const path = el.querySelector('[data-link="reused"] path')!
-    return {
-      transform: getComputedStyle(chip).transform,
-      dash: getComputedStyle(path).strokeDasharray,
-    }
-  })
+  const sample = await f.evaluate((el) => ({
+    riders: el.querySelectorAll('[data-viz-reveal="rider"]').length,
+    checked: [...el.querySelectorAll('[data-row^="after-"] [data-check] path')].length,
+    dash: getComputedStyle(el.querySelector('[data-link="reused"] path')!).strokeDasharray,
+  }))
   await page.waitForTimeout(400)
-  const settled = await f.evaluate((el) => {
-    const chip = el.querySelector(
-      '[data-viz-part="state-chip"]',
-    )!.parentElement!
-    const path = el.querySelector('[data-link="reused"] path')!
-    return {
-      transform: getComputedStyle(chip).transform,
-      dash: getComputedStyle(path).strokeDasharray,
-    }
-  })
+  const settled = await f.evaluate((el) => ({
+    riders: el.querySelectorAll('[data-viz-reveal="rider"]').length,
+    checked: [...el.querySelectorAll('[data-row^="after-"] [data-check] path')].length,
+    dash: getComputedStyle(el.querySelector('[data-link="reused"] path')!).strokeDasharray,
+  }))
+  expect(sample.riders, 'no checkbox rides under reduced motion').toBe(0)
   expect(sample, 'already at the end state on the first frame').toEqual(settled)
   await expect(f.locator('[data-focus]')).toHaveCount(1)
   await expect(f.locator('[data-status="foreign"]')).toHaveCount(1)
 })
 
-test('full motion: the reveal draws and the chip moves, then settles', async ({
+test('full motion: the checkbox rides its line into its After row, then ticks there (D21)', async ({
   page,
 }) => {
   await open(page, 1024)
   const f = frame(page)
   await page.waitForTimeout(300)
   await f.getByTestId('viz-skip').click()
-  await page.waitForTimeout(30)
-  const early = await f.evaluate(
-    (el) =>
-      getComputedStyle(
-        el.querySelector('[data-viz-part="state-chip"]')!.parentElement!,
-      ).transform,
-  )
-  await page.waitForTimeout(400)
-  const late = await f.evaluate(
-    (el) =>
-      getComputedStyle(
-        el.querySelector('[data-viz-part="state-chip"]')!.parentElement!,
-      ).transform,
-  )
+  await page.waitForTimeout(60)
+  const rider = f.locator('[data-viz-reveal="rider"]')
+  await expect(rider).toHaveCount(1)
+  // Index keys after an insert at top: Buy milk's check rides to row 0 (Wake up).
+  await expect(rider).toHaveAttribute('data-from', 'before-0')
+  await expect(rider).toHaveAttribute('data-to', 'after-0')
+  const early = await rider.evaluate((el) => getComputedStyle(el).transform)
+  await page.waitForTimeout(150)
+  const late = await rider.evaluate((el) => getComputedStyle(el).transform)
   expect(early).not.toEqual(late)
+  // While it rides, the destination waits with an empty box and no marks.
+  await expect(f.locator('[data-row="after-0"] [data-check] path')).toHaveCount(0)
+  await page.waitForTimeout(700)
+  await expect(rider).toHaveCount(0)
+  await expect(f.locator('[data-row="after-0"] [data-check] path')).toHaveCount(1)
+  await expect(f.locator('[data-focus]')).toHaveCount(1)
 })
 
 test('layout stability: nothing moves across every scene, key, action and phase', async ({

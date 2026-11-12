@@ -25,6 +25,7 @@ import {
   type as typeScale,
 } from '../../primitives/tokens-v3'
 import { transitionFor, type MotionGate } from '../../shell/motion'
+import { CheckRiders, type Ride } from './CheckRider'
 import { toRem } from '../../substrates/units'
 import { CARD, COLUMNS, COLUMNS_HEIGHT, rowTop } from './layout'
 import type { ExploreAction, ExploreState } from './machine'
@@ -52,6 +53,9 @@ import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
  *   Each line carries `data-from` and `data-to` (row ids) for the harness.
  *   The state chip (✓ or the count) travels along its own line and rests at
  *   its After end, so chips of crossing lines never meet (M09, M11).
+ * - The reveal (D21, `CheckRider.tsx`): each carried checkbox rides its own
+ *   line from the Before row into the After row its instance now renders and
+ *   ticks there; that row's emphasis and badge arrive as it lands.
  * - The row now showing the tracked check carries the `now` emphasis inside
  *   the card (D5). A row that shows another item's state, or lost its own,
  *   carries an in-row badge (× or ✓, D17) with the words for assistive tech
@@ -89,6 +93,16 @@ export function Columns({
   dispatch,
 }: ColumnsProps) {
   const linesRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  // The reveal's rides (D21): only on a played list reveal at full motion.
+  const revealKey = `${s.reveals}:${gate.epoch}`
+  const rides = play && !gate.reduce && s.phase === 'reveal' && s.scene === 'list' ? ridesOf(s) : []
+  const [landed, setLanded] = useState<{ key: string; to: readonly string[] }>({ key: '', to: [] })
+  const pending = rides
+    .map((r) => r.to)
+    .filter((to) => !(landed.key === revealKey && landed.to.includes(to)))
+  const onLand = (to: string) =>
+    setLanded((l) => (l.key === revealKey ? (l.to.includes(to) ? l : { key: l.key, to: [...l.to, to] }) : { key: revealKey, to: [to] }))
   // The gutter's width in layout units (px at a 16 px root) and the root
   // scale, so lines drawn in units stay on their cards at any text size (D19).
   const [box, setBox] = useState<LinesBox>({ w: COLUMNS.linesNarrow, k: 1 })
@@ -109,12 +123,20 @@ export function Columns({
 
   return (
     <div
+      ref={rootRef}
       data-viz-region="columns"
       className="relative grid min-w-0"
       style={{ height: toRem(COLUMNS_HEIGHT), gridTemplateColumns: COLS }}
     >
       {s.scene === 'list' ? (
-        <ListColumns s={s} interactive={interactive} dispatch={dispatch} />
+        <ListColumns
+          s={s}
+          interactive={interactive}
+          dispatch={dispatch}
+          pending={pending}
+          landing={rides.length > 0}
+          gate={gate}
+        />
       ) : (
         <WrapperColumns s={s} interactive={interactive} dispatch={dispatch} />
       )}
@@ -124,9 +146,18 @@ export function Columns({
         className="relative col-start-2 row-start-1 min-w-0"
       >
         {s.phase === 'reveal' ? (
-          <Lines key={`${s.reveals}:${gate.epoch}`} s={s} box={box} gate={gate} play={play} />
+          <Lines key={revealKey} s={s} box={box} gate={gate} play={play} />
         ) : null}
       </div>
+      {pending.length ? (
+        <CheckRiders
+          key={revealKey}
+          rides={rides.filter((r) => pending.includes(r.to))}
+          rootRef={rootRef}
+          linesRef={linesRef}
+          onLand={onLand}
+        />
+      ) : null}
     </div>
   )
 }
@@ -165,7 +196,7 @@ function Spine({ label, dashed }: { label: string; dashed?: boolean }) {
 const CHECK_PATH = 'M3.5 8.5 6.5 11.5 12.5 5'
 
 /** A drawn (not interactive) checkbox: filled with a ✓ when checked, `?` while unknown. */
-function CheckGlyph({ state }: { state: boolean | '?' }) {
+function CheckGlyph({ state, tick }: { state: boolean | '?'; tick?: MotionGate }) {
   if (state === '?')
     // Unknown until the reveal: an empty dashed slot. The row's one `?` is
     // its instance letter (D22: no duplicate placeholders).
@@ -178,6 +209,7 @@ function CheckGlyph({ state }: { state: boolean | '?' }) {
   return (
     <span
       aria-hidden
+      data-check
       className={clsx(
         'flex h-4 w-4 shrink-0 items-center justify-center border',
         radius.chip.cls,
@@ -193,13 +225,18 @@ function CheckGlyph({ state }: { state: boolean | '?' }) {
           viewBox="0 0 16 16"
           className="text-zinc-900 print:text-white"
         >
-          <path
+          {/* On the reveal's landing the tick draws in (D21). */}
+          <m.path
             d={CHECK_PATH}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
+            data-viz-reveal={tick ? 'tick' : undefined}
+            initial={tick ? { pathLength: 0 } : false}
+            animate={{ pathLength: 1 }}
+            transition={tick ? transitionFor('highlight', tick) : { duration: 0 }}
           />
         </svg>
       ) : null}
@@ -237,10 +274,18 @@ function ListColumns({
   s,
   interactive,
   dispatch,
+  pending,
+  landing,
+  gate,
 }: {
   s: ExploreState
   interactive: boolean
   dispatch: (a: ExploreAction) => void
+  /** After rows still waiting for their carried checkbox (D21). */
+  pending: readonly string[]
+  /** This reveal plays its rides: landed rows tick and fade their marks in. */
+  landing: boolean
+  gate: MotionGate
 }) {
   const action = s.listAction
   const outcome = action ? LIST_OUTCOMES[`${s.key}/${action}`] : null
@@ -352,7 +397,10 @@ function ListColumns({
           >
             {rows.map((r, i) => {
               const mounted = r.from === null
-              const isDest = i === destination
+              // A row waiting for its checkbox shows an empty box and no
+              // marks yet; they arrive with the checkbox (D21).
+              const waiting = pending.includes(`after-${i}`)
+              const isDest = i === destination && !waiting
               const describe = revealed
                 ? `${ITEMS[r.item].text}, ${r.checked ? 'checked' : 'not checked'}, ${
                     mounted
@@ -373,6 +421,7 @@ function ListColumns({
                     'm-0 p-0',
                     revealed && mounted ? 'border-dashed border-zinc-500' : stroke.line,
                     isDest && now.glyph,
+                    landing && transitionCls.feedback,
                   )}
                   style={cardStyle}
                 >
@@ -383,15 +432,25 @@ function ListColumns({
                     className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2"
                   >
                     <span className="flex min-w-0 items-center gap-1.5 xs:gap-2">
-                      <CheckGlyph state={revealed ? r.checked : '?'} />
+                      <CheckGlyph
+                        state={revealed ? (waiting ? false : r.checked) : '?'}
+                        tick={landing && r.checked && !waiting ? gate : undefined}
+                      />
                       <span className={clsx('min-w-0 truncate', typeScale.item.cls, ink.base)}>
                         {ITEMS[r.item].text}
                       </span>
                     </span>
                     <span className="flex min-w-0 items-center gap-1">
                       <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${r.key}`}</span>
-                      {revealed && r.status ? (
-                        <StatusBadge tone={r.status === 'kept' ? 'kept' : 'removed'} words={STATUS_TEXT[r.status]} />
+                      {revealed && r.status && !waiting ? (
+                        <m.span
+                          className="ml-auto flex"
+                          initial={landing ? { opacity: 0 } : false}
+                          animate={{ opacity: 1 }}
+                          transition={transitionFor('highlight', gate)}
+                        >
+                          <StatusBadge tone={r.status === 'kept' ? 'kept' : 'removed'} words={STATUS_TEXT[r.status]} />
+                        </m.span>
                       ) : null}
                     </span>
                   </span>
@@ -589,7 +648,7 @@ function WrapperColumns({
 type LinesBox = { w: number; k: number }
 
 type Link =
-  | { kind: 'reused'; y1: number; y2: number; now: boolean; chip?: string; from: string; to: string }
+  | { kind: 'reused'; y1: number; y2: number; now: boolean; chip?: string; checked?: boolean; from: string; to: string }
   | { kind: 'unmounted'; y: number; from: string }
   | { kind: 'mounted'; y: number; to: string }
 
@@ -630,7 +689,9 @@ function links(s: ExploreState): Link[] {
         y1: center(from),
         y2: center(i),
         now: from === tracked,
-        chip: s.checks[BEFORE[from] as 'milk' | 'dog'] ? '✓' : undefined,
+        // The checkbox itself rides this line on the reveal (D21) and rests
+        // in the After row, so the line carries no chip.
+        checked: s.checks[BEFORE[from] as 'milk' | 'dog'],
         from: `before-${from}`,
         to: `after-${i}`,
       })
@@ -799,4 +860,12 @@ function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: M
       })}
     </>
   )
+}
+
+/** The rides of a list reveal (D21): each checked, reused row, the tracked one first. */
+function ridesOf(s: ExploreState): Ride[] {
+  return links(s)
+    .flatMap((l) => (l.kind === 'reused' && l.checked ? [l] : []))
+    .sort((a, b) => Number(b.now) - Number(a.now))
+    .map((l) => ({ from: l.from, to: l.to, y1: l.y1, y2: l.y2 }))
 }
