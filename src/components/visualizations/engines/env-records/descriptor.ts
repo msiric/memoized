@@ -3,7 +3,7 @@ import type {
   StaticEngineCore,
   StaticTextAlternative,
 } from '../../shell/static-types'
-import { layoutDiagram } from './layout'
+import { layoutDiagramSafe } from './layout'
 import {
   isFunction,
   isRecord,
@@ -61,7 +61,7 @@ function describeSection(s: EnvSection): string[] {
     .map((h) => h.slice(4).split('.')[1])
   if (refs.length)
     out.push(`Highlighted: ${refs.join(' and ')} point to the same function.`)
-  if (s.note) out.push(s.note)
+  if (s.note) out.push(s.noteMark === 'hatch' ? `Hatched: ${s.note}` : s.note)
   return out
 }
 
@@ -81,8 +81,8 @@ export function describeEnvDiagram(
 export const envRecordsEngineCore: StaticEngineCore<EnvDiagram> = {
   id: 'env-records',
   stageHeight: (d) => ({
-    narrow: layoutDiagram(d, 'narrow').height,
-    wide: layoutDiagram(d, 'wide').height,
+    narrow: layoutDiagramSafe(d, 'narrow').height,
+    wide: layoutDiagramSafe(d, 'wide').height,
   }),
   describe: describeEnvDiagram,
 }

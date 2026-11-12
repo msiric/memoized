@@ -4,17 +4,17 @@
  *
  * Everything here is deterministic arithmetic on data, so the same layout
  * runs on the server, in tests and in the browser, and a diagram never needs
- * client JavaScript to measure itself. Text is set in the platform monospace
- * stack, whose advance is a fixed fraction of the font size, so widths are
- * known without a DOM.
+ * client JavaScript to measure itself. Text widths come from the shared
+ * width model (`text-metrics.ts`): monospace advance for Latin, 1 em for CJK,
+ * 1.25 em for emoji, so wide scripts fit their cells (VIZ-H A6).
  */
 
-/** Monospace advance as a fraction of the font size, padded slightly above
- * the widest common stack member (Menlo and DejaVu Sans Mono, 0.602). */
-export const MONO_ADVANCE = 0.61
+import { MONO_ADVANCE, monoWidth, wrapByWidth } from './text-metrics'
+
+export { MONO_ADVANCE }
 
 export function textWidth(text: string, size: number): number {
-  return [...text].length * size * MONO_ADVANCE
+  return monoWidth(text, size)
 }
 
 export type Point = { x: number; y: number }
@@ -155,23 +155,7 @@ export function arrowHead(points: Point[]): string {
   return `M${r1(tip.x)} ${r1(tip.y)}L${r1(bx - dy * w)} ${r1(by + dx * w)}L${r1(bx + dy * w)} ${r1(by - dx * w)}Z`
 }
 
-/** Greedy word wrap by character count (monospace). */
-export function wrapMono(
-  text: string,
-  maxWidth: number,
-  size: number,
-): string[] {
-  const max = Math.max(1, Math.floor(maxWidth / (size * MONO_ADVANCE)))
-  const lines: string[] = []
-  let line = ''
-  for (const word of text.split(/\s+/).filter(Boolean)) {
-    const next = line ? `${line} ${word}` : word
-    if ([...next].length <= max) line = next
-    else {
-      if (line) lines.push(line)
-      line = word
-    }
-  }
-  if (line) lines.push(line)
-  return lines
+/** Greedy word wrap by measured width (monospace model). */
+export function wrapMono(text: string, maxWidth: number, size: number): string[] {
+  return wrapByWidth(text, maxWidth, (t) => textWidth(t, size))
 }

@@ -126,7 +126,8 @@ const letSection: EnvSection = {
     },
   ],
   highlight: ['env:f0', 'env:f1', 'env:f2'],
-  note: 'Hatched: i = 3 · the loop test fails, so no function is saved.',
+  note: 'i = 3 · the loop test fails, so no function is saved.',
+  noteMark: 'hatch',
 }
 
 export const varVsLetLoop: StaticPreset<EnvDiagram> = {

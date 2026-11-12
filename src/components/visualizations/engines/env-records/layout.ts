@@ -7,17 +7,20 @@ import {
   routePath,
   segmentBox,
   segments,
+  simplify,
   textWidth,
-  wrapMono,
   type Point,
   type Rect,
 } from '../../substrates/box-arrow'
+import { sansWidth, wrapByWidth } from '../../substrates/text-metrics'
 import {
   isFunction,
   isRecord,
   isSlot,
   type EdgeId,
   type EnvDiagram,
+  type EnvFunction,
+  type EnvRecord,
   type EnvNode,
   type EnvSection,
   type Label,
@@ -62,6 +65,16 @@ export const SIZE = {
   label: 12,
   labelGap: 6,
   dot: 3,
+  /** The legend's hatch swatch (D22) and its gap to the words. */
+  swatch: 12,
+  swatchGap: 6,
+  /** Beside arrangement: first reference lane and lane step outside the record, gap to the column. */
+  besideLane: 8,
+  besideStep: 10,
+  besideGap: 10,
+  /** Beside arrangement: a record to its function (room for the `env` label), and between groups. */
+  besideEnv: 32,
+  besideGroup: 16,
 } as const
 
 /** Narrowest section width per variant; wider containers reuse the same vertical structure. */
@@ -116,6 +129,8 @@ export type SectionScene = {
   texts: LaidText[]
   /** Top of each tier, for alignment and tests. */
   tierTops: number[]
+  /** The mark the note explains (a swatch is drawn before its first line). */
+  noteMark?: 'hatch'
 }
 
 const pick = (label: Label, level: number) =>
@@ -328,25 +343,162 @@ function chooseLevels(
 
 type Placed = { node: EnvNode; rect: Rect; title: string[] }
 
+/**
+ * x positions for a row of boxes that want to sit centred on `center`: as
+ * close to it as the gaps allow, never overlapping and never outside
+ * [0, contentW]. Null when the boxes cannot fit even at the minimum gap
+ * (VIZ-H A3: a row used to be clamped into overlap).
+ */
 function resolveRow(
   items: { id: string; w: number; center: number }[],
   contentW: number,
-): Map<string, number> {
+): Map<string, number> | null {
   const sorted = [...items].sort((a, b) => a.center - b.center)
-  const xs: number[] = []
-  sorted.forEach((it, i) => {
-    const want = it.center - it.w / 2
-    xs.push(
-      i === 0
-        ? Math.max(0, want)
-        : Math.max(want, xs[i - 1] + sorted[i - 1].w + SIZE.colGap),
-    )
+  for (const gap of [SIZE.colGap, SIZE.minColGap]) {
+    const total = sorted.reduce((s, it) => s + it.w, 0) + (sorted.length - 1) * gap
+    if (total > contentW + 0.5) continue
+    const xs: number[] = []
+    sorted.forEach((it, i) => {
+      const want = Math.max(0, it.center - it.w / 2)
+      xs.push(i === 0 ? want : Math.max(want, xs[i - 1] + sorted[i - 1].w + gap))
+    })
+    // Pull back from the right edge, keeping the gaps.
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      const limit = i === sorted.length - 1 ? contentW - sorted[i].w : xs[i + 1] - gap - sorted[i].w
+      xs[i] = Math.min(xs[i], limit)
+    }
+    return new Map(sorted.map((it, i) => [it.id, Math.round(Math.max(0, xs[i]))]))
+  }
+  return null
+}
+
+/**
+ * The beside arrangement (VIZ-H D18): a record whose bindings name
+ * functions sits on the left, and each named function sits in one column to
+ * its right, under the record it closed over (`call A` above `ƒ A`, so the
+ * [[Environment]] arrow still points up). References leave the value cells
+ * and turn into the function from the left, so two names for one function
+ * converge within a few rows instead of detouring under the whole figure.
+ *
+ * Applies when the section is exactly that shape: one root record holding
+ * the references, and for each referenced function its own record, a child
+ * of the root drawn without its outer link. Anything else uses the tiers.
+ */
+type BesidePlan = {
+  root: EnvRecord
+  groups: { fn: EnvFunction; record: EnvRecord }[]
+}
+
+export function besidePlan(section: EnvSection): BesidePlan | null {
+  const ids = new Set(section.nodes.map((n) => n.id))
+  const roots = section.nodes.filter(isRecord).filter((r) => !r.outer || !ids.has(r.outer))
+  if (roots.length !== 1) return null
+  const root = roots[0]
+  const order: string[] = []
+  for (const b of root.bindings) if ('ref' in b.value && !order.includes(b.value.ref)) order.push(b.value.ref)
+  if (!order.length) return null
+  const used = new Set([root.id])
+  const groups: BesidePlan['groups'] = []
+  for (const id of order) {
+    const fn = section.nodes.find((n) => n.id === id)
+    if (!fn || !isFunction(fn)) return null
+    const record = section.nodes.find((n) => n.id === fn.env)
+    if (!record || !isRecord(record) || record === root) return null
+    if (record.outer !== root.id || record.drawOuter !== false || used.has(record.id)) return null
+    if (record.bindings.some((b) => 'ref' in b.value)) return null
+    used.add(record.id)
+    used.add(fn.id)
+    groups.push({ fn, record })
+  }
+  if (section.nodes.some((n) => !used.has(n.id))) return null
+  return { root, groups }
+}
+
+function layoutBeside(
+  section: EnvSection,
+  plan: BesidePlan,
+  width: number,
+  minWidth: number,
+  highlight: ReadonlySet<EdgeId>,
+): SectionScene | null {
+  const { root, groups } = plan
+  const k = groups.length
+  const rootSize = boxSize(root, 0)
+  const lanesEnd = rootSize.w + SIZE.besideLane + (k - 1) * SIZE.besideStep
+  const colX = lanesEnd + SIZE.besideGap
+  // The longest record titles (shared by the group) that fit at the narrowest width.
+  const recLevels = Math.max(...groups.map((g) => g.record.title.length))
+  const fnLevels = Math.max(...groups.map((g) => g.fn.title.length))
+  let chosen: { rl: number; fl: number; colW: number } | null = null
+  for (let rl = 0; rl < recLevels && !chosen; rl++)
+    for (let fl = 0; fl < fnLevels && !chosen; fl++) {
+      const colW = Math.max(
+        ...groups.map((g) => boxSize(g.record, rl).w),
+        ...groups.map((g) => boxSize(g.fn, fl).w),
+      )
+      if (colX + colW <= minWidth) chosen = { rl, fl, colW }
+    }
+  if (!chosen) return null
+  const { rl, fl, colW } = chosen
+  const fnW = Math.max(...groups.map((g) => boxSize(g.fn, fl).w))
+
+  const placed = new Map<string, Placed>()
+  let y = 0
+  const fnCenter = new Map<string, number>()
+  for (const g of groups) {
+    const rs = boxSize(g.record, rl)
+    placed.set(g.record.id, { node: g.record, rect: { x: colX, y, w: colW, h: rs.h }, title: rs.title })
+    y += rs.h + SIZE.besideEnv
+    const fs = boxSize(g.fn, fl)
+    placed.set(g.fn.id, {
+      node: g.fn,
+      rect: { x: colX + Math.round((colW - fnW) / 2), y, w: fnW, h: fs.h },
+      title: fs.title,
+    })
+    fnCenter.set(g.fn.id, y + fs.h / 2)
+    y += fs.h + (g.fn.logs !== undefined ? SIZE.outputGap + SIZE.outputLine : 0) + SIZE.besideGroup
+  }
+  const columnBottom = y - SIZE.besideGroup
+
+  // Drop the root so the rows naming the first function meet it level.
+  const header = 2 * SIZE.headerPad + rootSize.title.length * SIZE.headerLine
+  const rowCenter = (i: number) => header + i * SIZE.row + SIZE.row / 2
+  const first = groups[0].fn.id
+  const firstRows = root.bindings.flatMap((b, i) => ('ref' in b.value && b.value.ref === first ? [rowCenter(i)] : []))
+  const mean = firstRows.reduce((a, b) => a + b, 0) / firstRows.length
+  const rootY = Math.max(0, Math.round(fnCenter.get(first)! - mean))
+  placed.set(root.id, {
+    node: root,
+    rect: { x: 0, y: rootY, w: rootSize.w, h: rootSize.h },
+    title: rootSize.title,
   })
-  const last = sorted.length - 1
-  const overflow = last >= 0 ? xs[last] + sorted[last].w - contentW : 0
-  if (overflow > 0)
-    for (let i = 0; i <= last; i++) xs[i] = Math.max(0, xs[i] - overflow)
-  return new Map(sorted.map((it, i) => [it.id, xs[i]]))
+
+  const boxes = laidBoxes(section, placed)
+  const rectOf = (id: string) => placed.get(id)!.rect
+  const edges: LaidEdge[] = []
+  for (const g of groups) {
+    const F = rectOf(g.fn.id)
+    const R = rectOf(g.record.id)
+    const x = centerX(F)
+    const id: EdgeId = `env:${g.fn.id}`
+    edges.push(edgeOf(id, 'env', [{ x, y: F.y }, { x, y: bottom(R) }], highlight.has(id), false))
+  }
+  // Lanes: the lowest target takes the innermost lane, so no two references cross.
+  const R = rectOf(root.id)
+  const rows = boxes.find((b) => b.id === root.id)!.rows
+  root.bindings.forEach((b, i) => {
+    if (!('ref' in b.value)) return
+    const gi = groups.findIndex((g) => g.fn.id === (b.value as { ref: string }).ref)
+    const laneX = right(R) + SIZE.besideLane + (k - 1 - gi) * SIZE.besideStep
+    const F = rectOf(groups[gi].fn.id)
+    const fy = F.y + F.h / 2
+    const dot = { x: right(R) - 14, y: rows[i].top + SIZE.row / 2 }
+    const points = simplify([dot, { x: laneX, y: dot.y }, { x: laneX, y: fy }, { x: F.x, y: fy }])
+    const id: EdgeId = `ref:${root.id}.${b.name}`
+    edges.push({ ...edgeOf(id, 'ref', points, highlight.has(id), false), dot })
+  })
+  const contentBottom = Math.max(bottom(R), columnBottom)
+  return finishScene(section, width, minWidth, boxes, edges, contentBottom, [0])
 }
 
 export function layoutSection(
@@ -356,6 +508,9 @@ export function layoutSection(
   highlight: ReadonlySet<EdgeId>,
   extraBeforeLast = 0,
 ): SectionScene {
+  const plan = besidePlan(section)
+  const beside = plan && layoutBeside(section, plan, width, minWidth, highlight)
+  if (beside) return beside
   const tiers = tiersOf(section)
   const levels = chooseLevels(section, tiers, minWidth)
   const contentW = width - lanesWidth(section)
@@ -407,7 +562,7 @@ export function layoutSection(
   const put = (n: EnvNode, x: number, w: number) =>
     placed.set(n.id, {
       node: n,
-      rect: { x, y: tierTops[tierOf.get(n.id)!], w, h: sizes.get(n.id)!.h },
+      rect: { x: Math.round(x), y: tierTops[tierOf.get(n.id)!], w: Math.round(w), h: sizes.get(n.id)!.h },
       title: sizes.get(n.id)!.title,
     })
   const a = anchorIndex(tiers)
@@ -438,6 +593,7 @@ export function layoutSection(
       return { id: n.id, w: own, center }
     })
     const xs = resolveRow(items, contentW)
+    if (!xs) throw new Error(`${section.id}: tier ${t} does not fit in ${contentW}px`)
     for (const it of items)
       put(tiers[t].find((n) => n.id === it.id)!, xs.get(it.id)!, it.w)
   }
@@ -452,41 +608,12 @@ export function layoutSection(
       }
     })
     const xs = resolveRow(items, contentW)
+    if (!xs) throw new Error(`${section.id}: tier ${t} does not fit in ${contentW}px`)
     for (const it of items)
       put(tiers[t].find((n) => n.id === it.id)!, xs.get(it.id)!, it.w)
   }
 
-  const boxes: LaidBox[] = section.nodes.map((n) => {
-    const p = placed.get(n.id)!
-    const rows: LaidRow[] = isRecord(n)
-      ? n.bindings.map((b, i) => ({
-          name: b.name,
-          value: b.uninitialized
-            ? '‹uninitialized›'
-            : 'text' in b.value
-              ? b.value.text
-              : null,
-          uninitialized: b.uninitialized,
-          top:
-            p.rect.y +
-            2 * SIZE.headerPad +
-            p.title.length * SIZE.headerLine +
-            i * SIZE.row,
-          nameWidth: Math.ceil(
-            Math.max(...n.bindings.map((x) => textWidth(x.name, SIZE.value))) +
-              2 * SIZE.cellPad,
-          ),
-        }))
-      : []
-    return {
-      id: n.id,
-      kind: n.kind,
-      rect: p.rect,
-      title: p.title,
-      rows,
-      unused: isRecord(n) ? n.unused : undefined,
-    }
-  })
+  const boxes = laidBoxes(section, placed)
   const rectOf = (id: string) => placed.get(id)!.rect
 
   // Edges: environment and outer links enter the bottom of their target.
@@ -532,9 +659,11 @@ export function layoutSection(
     list.forEach((e, i) => {
       const sx = centerX(e.from)
       const sy = e.from.y
-      const px = allInside
-        ? sx
-        : centerX(T) + (i - (list.length - 1) / 2) * spacing
+      const spread = centerX(T) + (i - (list.length - 1) / 2) * spacing
+      // A jog shorter than two corner radii reads as a kink (F-ER-08): enter
+      // straight above the source instead, which stays 12 px clear of the
+      // neighbouring entries.
+      const px = allInside || (Math.abs(spread - sx) < 8 && inside(sx)) ? sx : spread
       const ty = bottom(T)
       const mid = Math.round(ty + (sy - ty) / 2)
       const points =
@@ -585,9 +714,54 @@ export function layoutSection(
     })
   }
 
-  // Outputs under the functions that logged.
-  const texts: LaidText[] = []
   let contentBottom = lowest
+  if (targets.length)
+    contentBottom = Math.max(
+      contentBottom,
+      lowest + SIZE.busTop + (targets.length - 1) * SIZE.busStep + 2,
+    )
+  return finishScene(section, width, minWidth, boxes, edges, contentBottom, tierTops)
+}
+
+function laidBoxes(section: EnvSection, placed: Map<string, Placed>): LaidBox[] {
+  return section.nodes.map((n) => {
+    const p = placed.get(n.id)!
+    const nameWidth = isRecord(n)
+      ? Math.ceil(Math.max(0, ...n.bindings.map((x) => textWidth(x.name, SIZE.value))) + 2 * SIZE.cellPad)
+      : 0
+    const rows: LaidRow[] = isRecord(n)
+      ? n.bindings.map((b, i) => ({
+          name: b.name,
+          value: b.uninitialized ? '‹uninitialized›' : 'text' in b.value ? b.value.text : null,
+          uninitialized: b.uninitialized,
+          top: p.rect.y + 2 * SIZE.headerPad + p.title.length * SIZE.headerLine + i * SIZE.row,
+          nameWidth,
+        }))
+      : []
+    return {
+      id: n.id,
+      kind: n.kind,
+      rect: p.rect,
+      title: p.title,
+      rows,
+      unused: isRecord(n) ? n.unused : undefined,
+    }
+  })
+}
+
+/** Outputs under the functions that logged, one label per link kind, the note. */
+function finishScene(
+  section: EnvSection,
+  width: number,
+  minWidth: number,
+  boxes: LaidBox[],
+  edges: LaidEdge[],
+  contentBottomIn: number,
+  tierTops: number[],
+): SectionScene {
+  const rectOf = (id: string) => boxes.find((b) => b.id === id)!.rect
+  const texts: LaidText[] = []
+  let contentBottom = contentBottomIn
   for (const n of section.nodes.filter(isFunction)) {
     if (n.logs === undefined) continue
     const F = rectOf(n.id)
@@ -604,32 +778,25 @@ export function layoutSection(
     })
     contentBottom = Math.max(contentBottom, top + SIZE.outputLine)
   }
-  if (targets.length)
-    contentBottom = Math.max(
-      contentBottom,
-      lowest + SIZE.busTop + (targets.length - 1) * SIZE.busStep + 2,
-    )
 
   // One label per link kind, wherever it collides with nothing.
   placeLabels(edges, boxes, texts, width)
 
   let height = contentBottom
   if (section.note) {
-    const noteLines = wrapMono(section.note, minWidth, SIZE.label)
+    // A legend, not code: upright sans 12/16 (D22), after a hatch swatch
+    // when the note explains the hatch.
+    const indent = section.noteMark === 'hatch' ? SIZE.swatch + SIZE.swatchGap : 0
+    const noteLines = wrapByWidth(section.note, minWidth - indent, (t) => sansWidth(t, SIZE.label))
     let top = height + SIZE.noteGap
     for (const line of noteLines) {
       texts.push({
         kind: 'note',
         text: line,
-        x: 0,
+        x: indent,
         y: top + 12,
         anchor: 'start',
-        rect: {
-          x: 0,
-          y: top,
-          w: textWidth(line, SIZE.label),
-          h: SIZE.noteLine,
-        },
+        rect: { x: indent, y: top, w: sansWidth(line, SIZE.label), h: SIZE.noteLine },
       })
       top += SIZE.noteLine
     }
@@ -644,7 +811,27 @@ export function layoutSection(
     edges,
     texts,
     tierTops,
+    noteMark: section.note ? section.noteMark : undefined,
   }
+}
+
+/** The nodes an edge joins, for `data-from` and `data-to` (the stress harness reads them). */
+export function edgeEnds(section: EnvSection, id: EdgeId): { from: string; to: string; binding?: string } {
+  const [kind, rest] = [id.slice(0, id.indexOf(':')), id.slice(id.indexOf(':') + 1)]
+  if (kind === 'env') {
+    const fn = section.nodes.find((n) => n.id === rest)
+    return { from: rest, to: fn && isFunction(fn) ? fn.env : '' }
+  }
+  if (kind === 'outer') {
+    const rec = section.nodes.find((n) => n.id === rest)
+    return { from: rest, to: rec && isRecord(rec) ? (rec.outer ?? '') : '' }
+  }
+  const dot = rest.indexOf('.')
+  const recId = rest.slice(0, dot)
+  const name = rest.slice(dot + 1)
+  const rec = section.nodes.find((n) => n.id === recId)
+  const b = rec && isRecord(rec) ? rec.bindings.find((x) => x.name === name) : undefined
+  return { from: recId, to: b && 'ref' in b.value ? b.value.ref : '', binding: name }
 }
 
 function edgeOf(
@@ -768,6 +955,24 @@ export type DiagramScene = {
   /** Height of the whole stage for this variant. */
   height: number
 }
+
+/**
+ * The layout for rendering: never throws. A diagram the layout rejects (the
+ * authoring lint reports it first) renders as a short note that points to
+ * "Diagram as text", so lesson data can never crash a page (VIZ-H A9).
+ */
+export function layoutDiagramSafe(
+  diagram: EnvDiagram,
+  variant: Variant,
+): DiagramScene | { variant: Variant; failed: string; height: number } {
+  try {
+    return layoutDiagram(diagram, variant)
+  } catch (e) {
+    return { variant, failed: (e as Error).message, height: FAILED_HEIGHT }
+  }
+}
+/** Two caption lines for the fallback note. */
+export const FAILED_HEIGHT = 48
 
 export function layoutDiagram(
   diagram: EnvDiagram,
