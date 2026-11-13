@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { cn as clsx } from '../../primitives/cn'
 import {
   ink,
+  motion as motionTokens,
   radius,
   surface,
   type as typeScale,
@@ -86,6 +87,13 @@ function laneChips(
         show: { narrow: v === 'narrow', wide: v === 'wide' },
       })
   return out
+}
+
+/** How long a leaving glyph takes (s), so a placeholder appears only after it has gone. */
+function exitSeconds(gate: { instant: boolean; reduce: boolean }): number {
+  if (gate.instant) return 0
+  const t = gate.reduce ? motionTokens.exit.reduced : motionTokens.exit.full
+  return t.type === 'tween' ? t.duration : 0
 }
 
 export function EventLoopStage({
@@ -321,8 +329,13 @@ export function EventLoopStage({
                   data-out={k}
                   data-focus={isNew || undefined}
                   // `›` in its own column; the value and, under it, its tag.
+                  // A leaving line is popped out of flow at its rounded
+                  // offsetWidth (popLayout marks it `data-motion-pop-id`): a
+                  // value that needs 43.1 px would wrap into two rows in 43 px
+                  // and rise over the "Console" label while it fades (G1). It
+                  // keeps its one row instead.
                   className={clsx(
-                    'm-0 grid min-w-0 max-w-full items-center p-0 [grid-template-columns:auto_minmax(0,1fr)]',
+                    'm-0 grid min-w-0 max-w-full items-center p-0 [grid-template-columns:auto_minmax(0,1fr)] [&[data-motion-pop-id]]:whitespace-nowrap',
                     typeScale.value.cls,
                     showCls(show.narrow && show.wide ? both : show),
                     k < firstTight && 'vz-tight:hidden',
@@ -382,16 +395,22 @@ export function EventLoopStage({
             })}
           </AnimatePresence>
           {out.length === 0 ? (
-            <li
+            // Like a lane's "empty" (R1M-01): it appears once the last output
+            // has left (its exit), so it never prints over a fading line (G1);
+            // instant renders land it at once (D7).
+            <m.li
               aria-hidden
               className={clsx(
                 'm-0 flex h-5 items-center self-start p-0',
                 typeScale.tag.cls,
                 ink.muted,
               )}
+              initial={gate.instant ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ ...transitionFor('highlight', gate), delay: exitSeconds(gate) }}
             >
               no output yet
-            </li>
+            </m.li>
           ) : null}
         </ol>
       </div>
