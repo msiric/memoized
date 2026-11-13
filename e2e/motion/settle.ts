@@ -56,8 +56,14 @@ export async function snap(page: Page, root: string): Promise<Snap> {
       }))
     const partial = [...frame.querySelectorAll('*')]
       .filter((el) => {
-        // A deliberate resting opacity (an unavailable control's opacity-50) is not a fade.
-        if (/(^|\s)opacity-\d/.test(el.getAttribute('class') ?? '')) return false
+        // A deliberate resting opacity is not a fade, but only on an
+        // unavailable control (its opacity-50, G8): anything else half-faded
+        // in a settled frame is a fade that did not finish.
+        if (
+          el.matches('[aria-disabled="true"], [data-unavailable]') &&
+          /(^|\s)opacity-\d/.test(el.getAttribute('class') ?? '')
+        )
+          return false
         const o = parseFloat(getComputedStyle(el).opacity)
         return o > 0.001 && o < 0.999
       })

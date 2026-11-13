@@ -10,7 +10,7 @@ import { diffGlyphs, snap } from './settle'
  * running or half-faded, and which elements still tweened after the
  * interrupting command (spec §4 rule 3: they must snap).
  *
- * MOTION_STRICT=1 asserts, for the event-loop scenarios: the settled frame
+ * Asserts (unless MOTION_STRICT=0), for the event-loop scenarios: the settled frame
  * equals the slow walk, nothing is left running or half-faded, nothing tweens
  * after an instant command (the burst's later presses, a scrub, a preset
  * switch, Back inside the burst window, a resize mid-move: D7, D13, M23), and

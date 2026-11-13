@@ -20,6 +20,8 @@ export type Sample = {
   pl?: string | null
   cx?: string | null
   cy?: string | null
+  /** The raised opaque layer the element paints in (0: none), see recorder.ts. */
+  ly?: number
 }
 export type Frame = { t: number; rows: [number, Sample][]; gone: number[] }
 export type Anim = {
@@ -35,7 +37,17 @@ export type Anim = {
   from: Record<string, unknown>
   to: Record<string, unknown>
 }
-export type Capture = { frames: Frame[]; labels: Record<string, string>; anims: Anim[] }
+export type Capture = {
+  frames: Frame[]
+  labels: Record<string, string>
+  anims: Anim[]
+  /** Element id -> parent id (0 for the root). */
+  parents?: Record<string, number>
+  /** Element id -> nearest clipping ancestor id (0 when none inside the frame). */
+  clips?: Record<string, number>
+  /** Ids of text leaves (no child elements, non-empty text). */
+  texts?: number[]
+}
 
 export type Track = {
   id: number
@@ -86,31 +98,19 @@ export function tracks(cap: Capture, from = 0): Map<number, Track> {
     }
     return tr
   }
-  let baselineTaken = false
   for (const f of cap.frames) {
     for (const [id, s] of f.rows) state.set(id, { ...(state.get(id) ?? {}), ...s } as Sample)
     for (const id of f.gone) {
       state.delete(id)
-      if (baselineTaken) {
+      if (f.t >= from) {
         const tr = out.get(id)
         if (tr && tr.removedAt === undefined) tr.removedAt = f.t - from
       }
     }
-    if (f.t < from) {
-      // keep updating until the command
-      continue
-    }
-    if (!baselineTaken) {
-      baselineTaken = true
-      // The baseline is the state just before this first post-command frame was
-      // applied; approximate with the state carried from earlier frames, which
-      // the loop above already merged. Re-derive by replaying without this frame.
-    }
+    // Frames before the command only build up the state.
+    if (f.t < from) continue
     for (const [id, s] of state) {
       const tr = ensure(id)
-      if (tr.mountedAt === undefined && !Object.keys(tr.series).length) {
-        // first time we see this id after the command
-      }
       for (const p of [...OWN, ...BOX, 'eff'] as const) {
         const v = (s as Record<string, unknown>)[p]
         if (v === undefined) continue
@@ -229,32 +229,86 @@ export const TOKENS = {
 
 export type Flag = { kind: string; detail: string }
 
+/** An element of a visual's designed reveal (`data-viz-reveal`, D21). */
+export const REVEAL = /\bviz-reveal=(\S+)/
+const STAGE_REGION = /\bin=(stack|host|micro|tasks|console)\b/
+const GLYPH_KEY = /\b(?:glyph|flip-id|chip)=(\S+)|\bout=(\d+)/
+
+/** The stage glyph an element belongs to (`then`, `out-2`), or null for chrome. */
+export function glyphKey(label: string): string | null {
+  // The reveal (D21) is the one explicit exception to the budget; it is
+  // asserted on its own (reveal.spec.ts).
+  if (REVEAL.test(label)) return null
+  if (!STAGE_REGION.test(label)) return null
+  const m = label.match(GLYPH_KEY)
+  if (!m) return null
+  return m[1] ?? `out-${m[2]}`
+}
+
+/**
+ * The vacate exit (R1M-13, H0 S-1): a glyph leaving the place a moving glyph
+ * arrives at fades in place (opacity only) in at most `vacate` (100 ms) plus
+ * two frames of sampling. It is outside the two-glyph budget. Full motion
+ * only: under reduced motion every exit is an opacity fade, so none is exempt.
+ */
+const VACATE_MS = 130
+export function vacates(e: ElementMotion): boolean {
+  const own = e.props.filter((p) => p.intermediates > 0 && !['x', 'y', 'eff'].includes(p.prop))
+  return e.removed && own.length > 0 && own.every((p) => p.prop === 'op' && p.duration <= VACATE_MS)
+}
+
+/** Distinct stage glyphs that tweened opacity or translate (spec §4 rule 1 counts these). */
+export function animatedGlyphs(ms: ElementMotion[], reduced = false): string[] {
+  const keys = new Set<string>()
+  for (const e of ms) {
+    const props = e.props.filter((p) => p.intermediates > 0 && ['op', 'tx', 'ty'].includes(p.prop))
+    if (!props.length) continue
+    if (!reduced && vacates(e)) continue
+    const k = glyphKey(e.label)
+    if (k) keys.add(k)
+  }
+  return [...keys].sort()
+}
+
 /**
  * Flags per spec §4 over a set of element motions:
- * - tweened size (w/h with intermediate values),
- * - durations above 300 ms,
- * - overshoot on translate,
- * - big single-frame jumps inside a tween (discontinuity),
- * - opacity dips on elements that end visible,
- * - more than two independently animated glyphs.
+ * - `size-tween`: a tweened size (w/h with intermediate values);
+ * - `too-long`: a tween above 300 ms; a reveal part or anything inside one
+ *   (D21) is held only to 800 ms here, reveal.spec.ts asserts the rest;
+ * - `overshoot`: translate past its end;
+ * - `scale`: any scale tween;
+ * - `jump` (G2): a discontinuity inside a tween: one frame covers more than
+ *   half of the whole travel of tx, ty or a stroke dash, in a tween with at
+ *   least three intermediate values (a short tween sampled at 60 fps
+ *   legitimately covers a third of its travel per frame);
+ * - `opacity-dip`: an element that ends visible dips on the way;
+ * - `glyph-count` (G2): more than `maxGlyphs` distinct stage glyphs tween
+ *   (spec §4 rule 1; reveal parts and vacate exits are exempt);
+ * - under reduced motion: any movement, or an opacity fade over 150 ms.
  */
-export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean } = {}): Flag[] {
+export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyphs?: number } = {}): Flag[] {
   const flags: Flag[] = []
-  const animatedRoots = new Set<string>()
   for (const e of ms) {
+    // An element of the designed reveal, or inside one (the rider's svg and
+    // tick): the reveal is the one sequence outside these rules (D21), held
+    // to 800 ms here and asserted beat by beat in reveal.spec.ts.
+    if (/\bwithin-reveal=/.test(e.label) || REVEAL.test(e.label)) {
+      for (const p of e.props)
+        if (p.intermediates > 0 && ['op', 'tx', 'ty', 'd', 'dash', 'sc'].includes(p.prop) && p.duration > TOKENS.reveal)
+          flags.push({ kind: 'too-long', detail: `${e.label}: ${p.prop} ${p.duration}ms` })
+      continue
+    }
     for (const p of e.props) {
       const tweened = p.intermediates > 0
       if ((p.prop === 'w' || p.prop === 'h') && tweened)
         flags.push({ kind: 'size-tween', detail: `${e.label}: ${p.prop} ${p.start}->${p.end} over ${p.duration}ms` })
       if (['op', 'tx', 'ty', 'd', 'dash', 'sc'].includes(p.prop) && tweened) {
-        animatedRoots.add(`${e.id}`)
-        // The reveal (D21) is the one sequence allowed past 300 ms; reveal.spec.ts
-        // holds it to 800 ms end to end.
-        const revealPart = /\bviz-reveal=/.test(e.label)
-        if (p.duration > (revealPart ? TOKENS.reveal : TOKENS.max))
+        if (p.duration > TOKENS.max)
           flags.push({ kind: 'too-long', detail: `${e.label}: ${p.prop} ${p.duration}ms` })
         if ((p.prop === 'tx' || p.prop === 'ty') && (p.overshootPx ?? 0) > 0.5)
           flags.push({ kind: 'overshoot', detail: `${e.label}: ${p.prop} overshoot ${p.overshootPx}px` })
+        if (['tx', 'ty', 'd', 'dash'].includes(p.prop) && p.intermediates >= 3 && (p.maxStepShare ?? 0) > 0.5)
+          flags.push({ kind: 'jump', detail: `${e.label}: ${p.prop} ${p.start}->${p.end}, one frame covers ${Math.round((p.maxStepShare ?? 0) * 100)}% of it` })
         if (p.prop === 'sc') flags.push({ kind: 'scale', detail: `${e.label}: scale ${p.start}->${p.end}` })
         if (opts.reduced && p.prop !== 'op')
           flags.push({ kind: 'reduced-motion-move', detail: `${e.label}: ${p.prop} ${p.start}->${p.end} ${p.duration}ms` })
@@ -266,5 +320,90 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean } = {}):
         flags.push({ kind: 'opacity-dip', detail: `${e.label}: eff ${p.start}->${p.end}` })
     }
   }
+  const glyphs = animatedGlyphs(ms, opts.reduced)
+  const max = opts.maxGlyphs ?? 2
+  if (glyphs.length > max) flags.push({ kind: 'glyph-count', detail: `${glyphs.length} stage glyphs tween: ${glyphs.join(', ')}` })
   return flags
+}
+
+// ---------------------------------------------------------------------------
+// G1: overlap and legibility during motion.
+// ---------------------------------------------------------------------------
+
+export type Overlap = { t: number; moving: string; over: string; area: number }
+
+type Box = { l: number; t: number; r: number; b: number }
+const boxOf = (s: Sample): Box => ({ l: s.x, t: s.y, r: s.x + s.w, b: s.y + s.h })
+const clipTo = (a: Box, c: Box): Box | null => {
+  const r = { l: Math.max(a.l, c.l), t: Math.max(a.t, c.t), r: Math.min(a.r, c.r), b: Math.min(a.b, c.b) }
+  return r.r > r.l && r.b > r.t ? r : null
+}
+
+/**
+ * Text that a moving or fading element prints over (G1, R1M-01, R1M-03,
+ * R1M-08). For each frame from `from` (ms since record start): every text
+ * leaf whose position, transform or opacity changed in that frame, with an
+ * effective opacity above 0.1, against every other visible text leaf. Two
+ * boxes that intersect by more than `minArea` px² are an overlap, unless one
+ * is the other's ancestor, or the two paint in different raised opaque
+ * layers (a lifted glyph on its backing, D6, or the scrubber tooltip, D12:
+ * those hide what they cover instead of printing over it). Boxes are cut to their nearest clipping ancestor
+ * first, so a code row scrolled out of its window or a truncated label's
+ * hidden tail never counts. One entry per pair, at its first frame.
+ */
+export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {
+  const parents = cap.parents ?? {}
+  const clips = cap.clips ?? {}
+  const texts = new Set(cap.texts ?? [])
+  const state = new Map<number, Sample>()
+  const ancestors = (id: number) => {
+    const out = new Set<number>()
+    for (let p = parents[id]; p; p = parents[p]) out.add(p)
+    return out
+  }
+  const visibleBox = (id: number): Box | null => {
+    const s = state.get(id)
+    if (!s || s.eff <= 0.1 || s.w * s.h <= 0) return null
+    let b: Box | null = boxOf(s)
+    for (let c = clips[id]; c && b; c = clips[c]) {
+      const cs = state.get(c)
+      if (!cs) break
+      b = clipTo(b, boxOf(cs))
+    }
+    return b
+  }
+  const MOVE = ['x', 'y', 'tx', 'ty', 'op', 'eff'] as const
+  const seen = new Set<string>()
+  const out: Overlap[] = []
+  for (const f of cap.frames) {
+    const changed: number[] = []
+    for (const [id, s] of f.rows) {
+      const prev = state.get(id)
+      if (prev && MOVE.some((k) => prev[k] !== s[k])) changed.push(id)
+      state.set(id, { ...(prev ?? {}), ...s } as Sample)
+    }
+    for (const id of f.gone) state.delete(id)
+    if (f.t < from) continue
+    const visible = [...texts].map((id) => [id, visibleBox(id)] as const).filter((x): x is readonly [number, Box] => !!x[1])
+    for (const a of changed) {
+      if (!texts.has(a)) continue
+      const ab = visibleBox(a)
+      if (!ab) continue
+      const up = ancestors(a)
+      for (const [b, bb] of visible) {
+        if (b === a || up.has(b) || ancestors(b).has(a)) continue
+        // A raised opaque layer hides what it covers: only the same layer overprints.
+        if ((state.get(a)?.ly ?? 0) !== (state.get(b)?.ly ?? 0)) continue
+        const i = clipTo(ab, bb)
+        if (!i) continue
+        const area = (i.r - i.l) * (i.b - i.t)
+        if (area <= minArea) continue
+        const key = [a, b].sort().join('|')
+        if (seen.has(key)) continue
+        seen.add(key)
+        out.push({ t: Math.round(f.t - from), moving: cap.labels[a] ?? String(a), over: cap.labels[b] ?? String(b), area: Math.round(area) })
+      }
+    }
+  }
+  return out
 }

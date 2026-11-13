@@ -1,11 +1,30 @@
 import { test, type Page } from '@playwright/test'
-import { LK, LK_ACTION_ID, animsOf, hydrateListKeys, lkChoose, openGallery, recordAction, save, summarize } from './helpers'
+import {
+  LK,
+  LK_ACTION_ID,
+  animsOf,
+  hydrateListKeys,
+  lkChoose,
+  openGallery,
+  overlapProblems,
+  recordAction,
+  save,
+  strictCheck,
+  summarize,
+} from './helpers'
 
 /**
  * H0-C task 1 for the list-keys explorable: every key strategy x list action
  * (and both wrapper changes, in the parent-type-change preset), with one and with two checked rows, at full and
  * reduced motion. Records the action change (-> ask) and the reveal
  * (ask -> reveal). The action is an always-visible control (H3 R8).
+ *
+ * Asserts (unless MOTION_STRICT=0): no §4 flag on the action change, nor on
+ * the reveal under reduced motion; G1 everywhere: nothing that moves or fades
+ * prints over other text. The full-motion reveal is the one designed
+ * sequence (D21): the Before box empties and refills with the verdict, the
+ * lines draw with the ride, so its beats are asserted by reveal.spec.ts
+ * rather than by the 300 ms step rules.
  */
 
 const KEYS = ['Index', 'Id', 'Math.random()']
@@ -28,6 +47,7 @@ for (const reduced of [false, true])
         await page.waitForTimeout(350)
       }
       const report: unknown[] = []
+      const problems: string[] = []
       for (const key of KEYS)
         for (const action of ACTIONS) {
           await lkChoose(page, { key })
@@ -41,6 +61,14 @@ for (const reduced of [false, true])
           await page.waitForTimeout(350)
           const reveal = await recordAction(page, LK, () => f.locator('[data-choice-index="0"]').click(), 700)
           const lines = await f.locator('[data-viz-part="lines"] path').count()
+          const where = `${key}/${action}${both ? ' both' : ''}${reduced ? ' reduced' : ''}`
+          const applyS = summarize(apply.motions, reduced)
+          const revealS = summarize(reveal.motions, reduced)
+          problems.push(
+            ...[...applyS.flags, ...(reduced ? revealS.flags : [])].map((x) => `${where}: ${x.kind} ${x.detail}`),
+            ...overlapProblems(apply.cap, apply.at).map((o) => `${where} apply ${o}`),
+            ...overlapProblems(reveal.cap, reveal.at).map((o) => `${where} reveal ${o}`),
+          )
           report.push({
             key,
             action,
@@ -63,6 +91,14 @@ for (const reduced of [false, true])
         )
         await page.waitForTimeout(350)
         const reveal = await recordAction(page, LK, () => f.locator('[data-choice-index="0"]').click(), 700)
+        const where = `wrapper ${action}${reduced ? ' reduced' : ''}`
+        problems.push(
+          ...[...summarize(apply.motions, reduced).flags, ...(reduced ? summarize(reveal.motions, reduced).flags : [])].map(
+            (x) => `${where}: ${x.kind} ${x.detail}`,
+          ),
+          ...overlapProblems(apply.cap, apply.at).map((o) => `${where} apply ${o}`),
+          ...overlapProblems(reveal.cap, reveal.at).map((o) => `${where} reveal ${o}`),
+        )
         report.push({
           key: 'wrapper',
           action,
@@ -72,4 +108,5 @@ for (const reduced of [false, true])
         await page.waitForTimeout(350)
       }
       save(`list-keys${both ? '-both' : ''}${reduced ? '-reduced' : ''}.json`, report)
+      strictCheck(`list keys${both ? ' two checks' : ''}${reduced ? ' reduced' : ''}: §4 flags and G1`, problems)
     })

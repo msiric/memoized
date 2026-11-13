@@ -2,7 +2,20 @@ import { expect, type Page } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 import { RECORDER } from './recorder'
-import { flagsFor, motionsAfter, type Capture, type ElementMotion } from './analyze'
+import { motion as MOTION_TOKENS, motionRules, type TweenToken } from '../../src/components/visualizations/primitives/tokens-v3'
+import {
+  REVEAL,
+  animatedGlyphs,
+  flagsFor,
+  glyphKey,
+  motionsAfter,
+  overlapsDuring,
+  vacates,
+  type Capture,
+  type ElementMotion,
+} from './analyze'
+
+export { REVEAL, animatedGlyphs, glyphKey }
 
 export const GALLERY = '/dev/visualizations'
 export const EL = '[data-viz="event-loop"] section'
@@ -114,7 +127,7 @@ export function summarize(ms: ElementMotion[], reduced = false) {
         monotonic: p.monotonic,
       })),
     })),
-    flags: flagsFor(ms, { reduced }),
+    flags: flagsFor(ms, { reduced, maxGlyphs: motionRules.maxAnimatedPerStep }),
   }
 }
 
@@ -142,54 +155,95 @@ export function animsOf(cap: Capture) {
 }
 
 // ---------------------------------------------------------------------------
-// Strict mode (VIZ-H WS2). MOTION_STRICT=1 turns the recorded facts into
-// assertions for the rules the shell implements; without it the specs only
-// record. Failures are soft, so one run lists every violation.
+// Strict mode (VIZ-H WS2, G). The specs assert by default; MOTION_STRICT=0
+// turns the assertions off so a run only records its JSON reports. Failures
+// are soft, so one run lists every violation.
 // ---------------------------------------------------------------------------
 
-export const STRICT = process.env.MOTION_STRICT === '1'
+export const STRICT = process.env.MOTION_STRICT !== '0'
 
-/** Fails (softly) with the list of problems, in strict mode only. */
+/** Fails (softly) with the list of problems, unless MOTION_STRICT=0. */
 export function strictCheck(name: string, problems: string[]) {
   if (STRICT) expect.soft(problems, name).toEqual([])
 }
 
-/** An element of a visual's designed reveal (`data-viz-reveal`, D21). */
-export const REVEAL = /\bviz-reveal=(\S+)/
-const STAGE_REGION = /\bin=(stack|host|micro|tasks|console)\b/
-const GLYPH_KEY = /\b(?:glyph|flip-id|chip)=(\S+)|\bout=(\d+)/
+/** Widths the gated specs run at (G5): MOTION_WIDTHS=375,1024 overrides. */
+export const WIDTHS = (process.env.MOTION_WIDTHS ?? process.env.MOTION_WIDTH ?? '375,1024,1440')
+  .split(',')
+  .map(Number)
+  .filter((n) => n > 0)
 
-/** The stage glyph an element belongs to (`then`, `out-2`), or null for chrome. */
-export function glyphKey(label: string): string | null {
-  // The reveal (D21) is the one explicit exception to the budget; it is
-  // asserted on its own (reveal.spec.ts).
-  if (REVEAL.test(label)) return null
-  if (!STAGE_REGION.test(label)) return null
-  const m = label.match(GLYPH_KEY)
-  if (!m) return null
-  return m[1] ?? `out-${m[2]}`
+/** G1: text a moving or fading element prints over, as readable problems. */
+export function overlapProblems(cap: Capture, at: number): string[] {
+  return overlapsDuring(cap, at).map(
+    (o) => `+${o.t}ms: ${o.moving.slice(0, 70)} over ${o.over.slice(0, 70)} (${o.area} px²)`,
+  )
+}
+
+/** One glyph's motion for a step: its translate displacement and duration. */
+export type GlyphVector = { dx: number; dy: number; ms: number; kind: 'enter' | 'exit' | 'move' }
+
+/** Per stage glyph, the displacement (end minus start) of its translate and the tween's duration (G4). */
+export function glyphVectors(ms: ElementMotion[]): Record<string, GlyphVector> {
+  const out: Record<string, GlyphVector> = {}
+  for (const e of ms) {
+    const k = glyphKey(e.label)
+    // A vacate (R1M-13) is outside the budget and the mirror: the glyph fades
+    // where a moving glyph arrives, and comes back at once on Back.
+    if (!k || vacates(e)) continue
+    const tx = e.props.find((p) => p.prop === 'tx' && p.intermediates > 0)
+    const ty = e.props.find((p) => p.prop === 'ty' && p.intermediates > 0)
+    const op = e.props.find((p) => p.prop === 'op' && p.intermediates > 0)
+    if (!tx && !ty && !op) continue
+    const num = (v: number | string | undefined) => (typeof v === 'number' ? v : 0)
+    const kind = op && op.start === 0 && op.end === 1 ? 'enter' : op && op.start === 1 && op.end === 0 ? 'exit' : 'move'
+    const v: GlyphVector = {
+      dx: tx ? num(tx.end) - num(tx.start) : 0,
+      dy: ty ? num(ty.end) - num(ty.start) : 0,
+      ms: Math.max(tx?.duration ?? 0, ty?.duration ?? 0) || (op?.duration ?? 0),
+      kind,
+    }
+    // The element that travels is the glyph; keep the larger displacement.
+    const prev = out[k]
+    if (!prev || Math.hypot(v.dx, v.dy) > Math.hypot(prev.dx, prev.dy)) out[k] = v
+  }
+  return out
+}
+
+const TOKEN_MS = {
+  enter: (MOTION_TOKENS.enter.full as TweenToken).duration * 1000,
+  exit: (MOTION_TOKENS.exit.full as TweenToken).duration * 1000,
 }
 
 /**
- * The vacate exit (R1M-13, H0 S-1): a glyph leaving the place a moving glyph
- * arrives at fades in place (opacity only) in at most `vacate` (100 ms) plus
- * two frames of sampling. It is outside the two-glyph budget. Full motion
- * only: under reduced motion every exit is an opacity fade, so none is exempt.
+ * G4, D8: Back mirrors Next. Per glyph the displacement is negated (within
+ * 1 px): an enter from `from` (f -> 0) mirrors as an exit toward `from`
+ * (0 -> f), a FLIP move from A to B (A-B -> 0) as (B-A -> 0). Durations match
+ * within 20 ms, except that an enter mirrors as an exit and the two tokens
+ * differ by design (enter 200 ms, exit 160 ms, the recorded data in
+ * e2e/motion/out shows 212 vs 168 at 1024): the difference must then be
+ * the tokens' difference. The tolerance is 20 ms plus one 60 Hz frame,
+ * because each duration is measured to the frame it was sampled in (a
+ * 160 ms exit reads 166 to 182 ms run to run).
  */
-const VACATE_MS = 130
-function vacates(e: ElementMotion): boolean {
-  return e.removed && e.props.every((p) => p.prop === 'op' && p.duration <= VACATE_MS)
-}
-
-/** Distinct stage glyphs that tweened opacity or translate (spec §4 rule 1 counts these). */
-export function animatedGlyphs(ms: ElementMotion[], reduced = false): string[] {
-  const keys = new Set<string>()
-  for (const e of animated(ms)) {
-    const k = glyphKey(e.label)
-    if (!reduced && vacates(e)) continue
-    if (k && e.props.some((p) => ['op', 'tx', 'ty'].includes(p.prop))) keys.add(k)
+const MIRROR_MS = 20 + 17
+export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<string, GlyphVector>): string[] {
+  const out: string[] = []
+  for (const k of new Set([...Object.keys(fwd), ...Object.keys(back)])) {
+    const f = fwd[k]
+    const b = back[k]
+    if (!f || !b) {
+      out.push(`${k}: animates only ${f ? 'forward' : 'back'}`)
+      continue
+    }
+    if (Math.abs(b.dx + f.dx) > 1 || Math.abs(b.dy + f.dy) > 1)
+      out.push(`${k}: next moves (${f.dx}, ${f.dy}), back (${b.dx}, ${b.dy}); expected (${-f.dx}, ${-f.dy})`)
+    const expected =
+      f.kind !== b.kind && f.kind !== 'move' && b.kind !== 'move' ? TOKEN_MS[b.kind] - TOKEN_MS[f.kind] : 0
+    if (Math.abs(b.ms - f.ms - expected) > MIRROR_MS)
+      out.push(`${k}: next ${f.kind} ${f.ms} ms, back ${b.kind} ${b.ms} ms (expected a ${expected} ms difference)`)
   }
-  return [...keys].sort()
+  return out
 }
 
 /**

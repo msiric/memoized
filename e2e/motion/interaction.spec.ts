@@ -1,13 +1,22 @@
 import { test, type Locator, type Page } from '@playwright/test'
-import { EL, LK, activeInfo, answerStart, hydrateListKeys, openGallery, save } from './helpers'
+import { EL, LK, activeInfo, answerStart, hydrateListKeys, openGallery, save, strictCheck } from './helpers'
 
 /**
- * H0-C task 3: interaction and behaviour consistency. Facts only (no
- * assertions), written to interaction.json, so the findings table can quote
- * exact values: tab order, keyboard map, focus after every action, focus-ring
- * and hover/press styles of equivalent controls, segmented switchers,
- * checkpoint flow and live-region announcements.
+ * H0-C task 3, G6: interaction and behaviour consistency. Every fact is
+ * written to interaction.json (tab order, keyboard map, focus after every
+ * action, focus-ring and hover/press styles of equivalent controls,
+ * segmented switchers, checkpoint flow, live-region announcements), and the
+ * rules are asserted (unless MOTION_STRICT=0):
+ * - hover changes every control and press differs from hover (R13; the
+ *   sample includes `filter`, so a brightness press counts);
+ * - keyboard focus draws the lime-500 ring, 2 px, on every control (D5);
+ * - at a checkpoint the tab order reaches the choices (D9);
+ * - after a tap nothing stays in its hover state, and every target in the
+ *   frame is at least 44 px (A5).
  */
+
+/** The focus ring (D5): 2 px solid lime-500. */
+const LIME_500 = 'rgb(132, 204, 22)'
 
 const out: Record<string, unknown> = {}
 test.afterAll(() => save('interaction.json', out))
@@ -65,19 +74,32 @@ async function ring(page: Page) {
   })
 }
 
+/**
+ * The control's look: its own computed colors, filter, transform and
+ * opacity, and those of every element inside it (a segment draws its fill on
+ * an inner span, a Before card its hover on an overlay), keyed by position.
+ * With `inner`, only that element.
+ */
 async function styleOf(l: Locator, inner?: string) {
   return l.evaluate((el, sel) => {
-    const t = (sel ? el.querySelector(sel) : el) as HTMLElement
-    const cs = getComputedStyle(t)
-    return {
-      bg: cs.backgroundColor,
-      color: cs.color,
-      border: cs.borderTopColor,
-      deco: cs.textDecorationColor,
-      transform: cs.transform,
-      opacity: cs.opacity,
-      transition: `${cs.transitionProperty} ${cs.transitionDuration} ${cs.transitionTimingFunction}`.slice(0, 120),
-    }
+    const nodes = sel ? [el.querySelector(sel) as HTMLElement] : [el, ...el.querySelectorAll('*')]
+    const out: Record<string, string> = {}
+    nodes.forEach((t, i) => {
+      const cs = getComputedStyle(t)
+      const k = i === 0 ? '' : `${i}:`
+      Object.assign(out, {
+        [`${k}bg`]: cs.backgroundColor,
+        [`${k}color`]: cs.color,
+        [`${k}border`]: cs.borderTopColor,
+        [`${k}deco`]: cs.textDecorationColor,
+        [`${k}filter`]: cs.filter,
+        [`${k}transform`]: cs.transform,
+        [`${k}opacity`]: cs.opacity,
+      })
+      if (i === 0)
+        out.transition = `${cs.transitionProperty} ${cs.transitionDuration} ${cs.transitionTimingFunction}`.slice(0, 120)
+    })
+    return out
   }, inner)
 }
 
@@ -130,7 +152,13 @@ test('tab order and focus ring', async ({ page }) => {
     await page.waitForTimeout(350)
   }
   out.checkpointMode = await page.locator(EL).getAttribute('data-viz-mode')
-  out.tabOrderEventLoopAtCheckpoint = await order('#before-el', 6)
+  const atCheckpoint = (await order('#before-el', 6)) as { el: string }[]
+  out.tabOrderEventLoopAtCheckpoint = atCheckpoint
+  strictCheck('a checkpoint is open', out.checkpointMode === 'ask' ? [] : [`mode ${out.checkpointMode}`])
+  strictCheck(
+    'tab order at a checkpoint reaches the choices (D9)',
+    atCheckpoint.some((x) => /^event-loop:button\[radio\]/.test(x.el)) ? [] : [atCheckpoint.map((x) => x.el).join(' > ')],
+  )
 })
 
 test('event-loop keyboard map and focus', async ({ page }) => {
@@ -397,30 +425,63 @@ test('hover, press and focus styles of equivalent controls', async ({ page }) =>
   r['el:choice row'] = await feedback(page, el.locator('[data-choice]').first())
   r['el:Skip (quiet)'] = await feedback(page, el.locator('[data-viz-part="viz-skip"]'))
   out.feedback = r
+  type Fb = { rest: Record<string, string>; hoverDelta: Record<string, string>; pressDelta: Record<string, string> }
+  strictCheck(
+    'hover changes every control (R13)',
+    Object.entries(r as Record<string, Fb>)
+      .filter(([, f]) => !Object.keys(f.hoverDelta).length)
+      .map(([k]) => `${k}: hover changes nothing`),
+  )
+  strictCheck(
+    'press differs from hover on every control (R13, G6)',
+    Object.entries(r as Record<string, Fb>)
+      .filter(([, f]) => !Object.keys(f.pressDelta).length)
+      .map(([k]) => `${k}: press looks like hover`),
+  )
 
   // Keyboard focus rings on equivalent controls.
   const rings: Record<string, unknown> = {}
   const focusRing = async (name: string, l: Locator) => {
+    // A key press first, so the programmatic focus that follows counts as
+    // keyboard focus (:focus-visible) on exactly this control. (Shift+Tab,
+    // Tab lands on a roving group's tab stop instead, not the one asked for.)
+    await page.mouse.move(0, 0)
+    await page.keyboard.press('Shift')
     await l.focus()
-    // Focus by keyboard so :focus-visible applies.
-    await page.keyboard.press('Shift+Tab')
-    await page.keyboard.press('Tab')
-    rings[name] = { el: await activeInfo(page), ring: await ring(page) }
+    const el = await activeInfo(page)
+    const own = await l.evaluate((n) => n === document.activeElement)
+    rings[name] = { el, ring: own ? await ring(page) : { on: `focus went to ${el}` } }
   }
   await focusRing('el:slider', el.getByRole('slider'))
   await focusRing('el:preset', el.getByRole('radio', { checked: true }))
   await focusRing('el:choice', el.locator('[data-choice]').first())
   await focusRing('el:summary', el.locator('summary'))
+  await focusRing('el:skip', el.locator('[data-viz-part="viz-skip"]'))
+  await focusRing('el:Back', el.getByRole('button', { name: 'Back' }))
+  await focusRing('el:Next', el.getByRole('button', { name: 'Next' }))
+  await focusRing('el:Restart', el.getByRole('button', { name: 'Restart' }))
+  await focusRing('el:Play', el.locator('button[aria-keyshortcuts="Space K"]'))
   await focusRing('lk:key', lk.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { checked: true }))
   await focusRing('lk:checkbox', lk.locator('input[type="checkbox"]').first())
   await focusRing('lk:action', lk.locator('[data-viz-focus=\"action-append\"]'))
   await focusRing('lk:summary', lk.locator('summary'))
   out.rings = rings
+  type Ring = { el: string; ring: { on: string; style?: string; width?: string; color?: string } | null }
+  strictCheck(
+    'keyboard focus draws the lime ring on every control (D5)',
+    Object.entries(rings as Record<string, Ring>).flatMap(([k, v]) =>
+      !v.ring || v.ring.on === 'none'
+        ? [`${k} (${v.el}): no ring`]
+        : v.ring.color !== LIME_500 || v.ring.width !== '2px' || v.ring.style !== 'solid'
+          ? [`${k} (${v.el}): ${v.ring.style} ${v.ring.width} ${v.ring.color}`]
+          : [],
+    ),
+  )
 })
 
-test('touch at 375', async ({ browser }) => {
+test('touch at 375', async ({ browser, baseURL }) => {
   test.setTimeout(180_000)
-  const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, baseURL: 'http://localhost:3100' })
+  const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, baseURL })
   const page = await ctx.newPage()
   await page.goto('/dev/visualizations')
   const f = page.locator(EL)
@@ -483,5 +544,15 @@ test('touch at 375', async ({ browser }) => {
       }),
   )
   out.touch = t
+  const tap = t.nextAfterTap as { restBg: string; afterTapBg: string; step: string | null }
+  strictCheck(
+    'touch: nothing stays in its hover state after a tap; targets are at least 44 px (A5)',
+    [
+      ...(tap.afterTapBg !== tap.restBg ? [`Next after a tap: ${tap.afterTapBg}, at rest ${tap.restBg}`] : []),
+      ...(t.targets as { el: string; w: number; h: number }[])
+        .filter((x) => x.w < 44 || x.h < 44)
+        .map((x) => `${x.el}: ${x.w}x${x.h}`),
+    ],
+  )
   await ctx.close()
 })

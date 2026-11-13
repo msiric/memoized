@@ -1,4 +1,5 @@
 import { test } from '@playwright/test'
+import { tracks } from './analyze'
 import { EL, LK, animated, animsOf, hydrateListKeys, openGallery, recordAction, save, strictCheck } from './helpers'
 
 /**
@@ -6,11 +7,31 @@ import { EL, LK, animated, animsOf, hydrateListKeys, openGallery, recordAction, 
  * bursts must render instantly. Records each instant path from a settled
  * step and lists anything that still tweened, with its Web Animation timing.
  *
- * MOTION_STRICT=1 asserts D7: after each instant command nothing on the
- * frame tweens opacity or translate (glyphs entering, leaving or moving,
- * caption, code line, scrubber thumb), and no transform or opacity Web
- * Animation with a duration runs. Mount and hydration never animate.
+ * Asserts D7 (unless MOTION_STRICT=0): after each instant command nothing
+ * on the frame tweens opacity or translate (glyphs entering, leaving or
+ * moving, caption, code line, scrubber thumb), and no transform or opacity
+ * Web Animation with a duration runs. Mount and hydration never animate.
+ *
+ * A drag is a run of instant seeks, so values legitimately step through many
+ * states. Its exemption is scoped (G8): only the pointer-driven thumb and its
+ * tooltip may translate, and every opacity stays at a rest value (0, 1, or
+ * the unavailable 0.5): a fractional opacity is a fade, a translate anywhere
+ * else is a tween.
  */
+
+/** G8: in a drag, any opacity off its rest values, or a translate outside the thumb. */
+function dragTweens(cap: Parameters<typeof tracks>[0], at: number): string[] {
+  const out: string[] = []
+  for (const t of tracks(cap, at).values()) {
+    const thumb = /scrubber-(thumb|tip)/.test(t.label)
+    const ops = (t.series.op ?? []).map((s) => Number(s.v)).filter((v) => ![0, 0.5, 1].includes(v))
+    if (ops.length) out.push(`${t.label.slice(0, 60)}: opacity passes ${[...new Set(ops)].slice(0, 4).join(', ')}`)
+    if (!thumb)
+      for (const p of ['tx', 'ty'] as const)
+        if (new Set((t.series[p] ?? []).map((s) => s.v)).size > 1) out.push(`${t.label.slice(0, 60)}: ${p} moves`)
+  }
+  return out
+}
 
 test('instant paths render without tweens', async ({ page }) => {
   test.setTimeout(200_000)
@@ -37,8 +58,9 @@ test('instant paths render without tweens', async ({ page }) => {
     )
     const anims = animsOf(r.cap).filter((a) => a.duration !== 0)
     out[name] = { step: await f.getAttribute('data-viz-step'), tweened, anims }
-    // A drag is a run of instant seeks: its frames step, they do not tween.
-    if (!name.startsWith('drag')) strictCheck(`${name}: nothing tweens (D7)`, tweened)
+    // A drag is a run of instant seeks: its frames step, they do not tween (G8: scoped).
+    if (name.startsWith('drag')) strictCheck(`${name}: only the thumb follows the pointer (D7, G8)`, dragTweens(r.cap, r.at))
+    else strictCheck(`${name}: nothing tweens (D7)`, tweened)
     strictCheck(
       `${name}: no transform or opacity animation runs (D7)`,
       anims

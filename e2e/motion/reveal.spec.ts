@@ -5,11 +5,13 @@ import {
   EL,
   LK,
   REVEAL,
+  WIDTHS,
   animated,
   hydrateListKeys,
   lkChoose,
   mark,
   openGallery,
+  overlapProblems,
   recordAction,
   save,
   startRec,
@@ -19,9 +21,12 @@ import {
 
 /**
  * VIZ-H D21: each visual's one designed reveal, the single explicit exception
- * to the two-glyph budget and the 300 ms cap. MOTION_STRICT=1 asserts:
+ * to the two-glyph budget and the 300 ms cap. Asserts (unless
+ * MOTION_STRICT=0), at 375, 1024 and 1440 (MOTION_WIDTHS overrides):
  *
  * - it plays the right elements, in the right order, and ends within 800 ms;
+ * - G1: nothing it moves or fades prints over other text (a rider over row
+ *   text, an output over a label);
  * - under reduced motion it is a crossfade (no movement, at most ~150 ms,
  *   everything at once) or nothing;
  * - it never plays on load or after an instant command;
@@ -67,13 +72,15 @@ const outIndexes = (page: Page) =>
     [...el.querySelectorAll('li[data-out]')].map((li) => Number(li.getAttribute('data-out'))),
   )
 
+for (const width of WIDTHS)
 for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
-  test(`event-loop ${preset}: the console plays back, then the recap (D21)`, async ({ page }) => {
-    await openGallery(page, { query: `?preset=${preset}` })
+  test(`event-loop ${preset} @${width}: the console plays back, then the recap (D21)`, async ({ page }) => {
+    await openGallery(page, { width, query: `?preset=${preset}` })
     await toEventLoopEnd(page, '2')
     const r = await recordAction(page, EL, () => page.keyboard.press('ArrowRight'), 1000)
     const parts = revealParts(r.motions)
-    report[`el-${preset}`] = parts
+    report[`el-${preset}-${width}`] = parts
+    strictCheck(`${preset}@${width}: no text crosses text in the reveal (G1)`, overlapProblems(r.cap, r.at))
     const outs = parts.filter((p) => p.kind === 'out')
     const lines = parts.filter((p) => p.kind === 'line')
     const recap = parts.filter((p) => p.kind === 'recap')
@@ -111,7 +118,7 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
       problems.push(`the recap lands at ${recap[0].start} ms, before the playback ends`)
     const end = Math.max(...parts.map((p) => p.end))
     if (end > REVEAL_TOKEN.maxMs) problems.push(`the reveal ends at ${end} ms`)
-    strictCheck(`${preset}: reveal sequence`, problems)
+    strictCheck(`${preset}@${width}: reveal sequence`, problems)
     await expect(page.locator(EL).getByRole('button', { name: 'Replay' })).toBeVisible()
     // Choice 2 at each question: B (right) and C (right); micro 2 (wrong) and micro 2 (right).
     await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
@@ -206,13 +213,14 @@ async function landing(page: Page, cap: Awaited<ReturnType<typeof stopRec>>) {
   return { dest, riders: [...last.entries()].map(([id, s]) => ({ label: cap.labels[id], ...s })) }
 }
 
+for (const width of WIDTHS)
 for (const [key, action, both, expectRides] of [
   ['Id', 'Insert at top', false, [['before-0', 'after-1']]],
   ['Index', 'Insert at top', false, [['before-0', 'after-0']]],
   ['Id', 'Reverse', true, [['before-0', 'after-1'], ['before-1', 'after-0']]],
 ] as const)
-  test(`list-keys ${key} ${action}${both ? ' (two checks)' : ''}: the checkbox rides its line (D21)`, async ({ page }) => {
-    await openGallery(page)
+  test(`list-keys ${key} ${action}${both ? ' (two checks)' : ''} @${width}: the checkbox rides its line (D21)`, async ({ page }) => {
+    await openGallery(page, { width })
     await hydrateListKeys(page)
     await toAsk(page, key, action, both)
     const f = page.locator(LK)
@@ -236,8 +244,8 @@ for (const [key, action, both, expectRides] of [
     const rides = await seen
     const parts = revealParts(r.motions)
     const { dest, riders } = await landing(page, r.cap)
-    report[`lk-${key}-${action}-${both}`] = { rides, parts, riders }
-    const problems: string[] = []
+    report[`lk-${key}-${action}-${both}-${width}`] = { rides, parts, riders }
+    const problems: string[] = [...overlapProblems(r.cap, r.at)]
     const want = expectRides.map(([a, b]) => `${a}>${b}`)
     if (JSON.stringify(rides) !== JSON.stringify(want)) problems.push(`rides ${rides.join(', ')}; expected ${want.join(', ')}`)
     const moving = parts.filter((p) => p.kind === 'rider')

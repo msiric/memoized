@@ -12,7 +12,10 @@
  * with its timing, so durations and curves can be compared with spec §4.
  *
  * Elements get a stable numeric id per DOM node (a remount gets a new id), and
- * a readable label from their data attributes and text.
+ * a readable label from their data attributes and text. For the overlap
+ * check (analyze.ts `overlapsDuring`, G1) it also keeps, per element, its
+ * parent id, its nearest clipping ancestor (overflow other than visible) and
+ * whether it is a text leaf.
  */
 export const RECORDER = String.raw`
 (() => {
@@ -30,6 +33,9 @@ export const RECORDER = String.raw`
     for (const a of ATTRS) { const v = el.getAttribute && el.getAttribute(a); if (v !== null && v !== undefined) parts.push(a.replace('data-','') + '=' + String(v).slice(0, 30)) }
     const region = el.closest && el.closest('[data-viz-region]')
     if (region && region !== el) parts.push('in=' + region.getAttribute('data-viz-region'))
+    // Inside a reveal part (its drawn tick, its svg): the reveal's own rules apply (D21).
+    const part = el.parentElement && el.parentElement.closest('[data-viz-reveal]')
+    if (part) parts.push('within-reveal=' + part.getAttribute('data-viz-reveal'))
     const t = (el.childElementCount === 0 ? (el.textContent || '') : '').trim().slice(0, 24)
     if (t) parts.push('"' + t + '"')
     return parts.join(' ')
@@ -43,6 +49,17 @@ export const RECORDER = String.raw`
     return [0, 0, 1]
   }
   const r2 = (n) => Math.round(n * 100) / 100
+  // A raised opaque layer (a lifted glyph on its backing, D6; the scrubber
+  // tooltip, D12): a z-index and a background with no transparency. What it
+  // covers is hidden, not overprinted, so the overlap check (G1) pairs only
+  // elements in the same layer.
+  const opaque = (c) => {
+    if (!c || c === 'transparent') return false
+    const m = c.match(/^rgba\([^)]*,\s*([\d.]+)\)$/)
+    if (m) return Number(m[1]) >= 0.999
+    if (/^color\(/.test(c)) return !/\/\s*0?\.\d/.test(c)
+    return /^rgb\(/.test(c)
+  }
   let state = null
   function sample() {
     if (!state) return
@@ -51,7 +68,7 @@ export const RECORDER = String.raw`
     const t = performance.now() - state.t0
     const seen = new Set()
     const rows = []
-    const walk = (el, effOp, effVis) => {
+    const walk = (el, effOp, effVis, parent, clip, layer) => {
       const cs = getComputedStyle(el)
       if (cs.display === 'none') return
       const op = parseFloat(cs.opacity)
@@ -59,11 +76,18 @@ export const RECORDER = String.raw`
       const vis = effVis && cs.visibility !== 'hidden'
       const id = idOf(el)
       seen.add(id)
+      if (!state.parents.has(id)) {
+        state.parents.set(id, parent)
+        state.clips.set(id, clip)
+        if (el.childElementCount === 0 && (el.textContent || '').trim()) state.texts.add(id)
+      }
+      const clips = cs.overflowX !== 'visible' || cs.overflowY !== 'visible'
+      const ly = cs.zIndex !== 'auto' && opaque(cs.backgroundColor) ? id : layer
       const b = el.getBoundingClientRect()
       const [tx, ty, sc] = translateOf(cs.transform)
       const rec = {
         x: r2(b.left - rr.left), y: r2(b.top - rr.top), w: r2(b.width), h: r2(b.height),
-        op: r2(op), eff: r2(vis ? eff : 0), tx: r2(tx), ty: r2(ty), sc: r2(sc),
+        op: r2(op), eff: r2(vis ? eff : 0), tx: r2(tx), ty: r2(ty), sc: r2(sc), ly,
       }
       if (el instanceof SVGPathElement) {
         rec.d = el.getAttribute('d')
@@ -78,9 +102,9 @@ export const RECORDER = String.raw`
         if (!state.labels.has(id)) state.labels.set(id, labelOf(el))
         rows.push([id, rec])
       }
-      for (const c of el.children) walk(c, eff, vis)
+      for (const c of el.children) walk(c, eff, vis, id, clips ? id : clip, ly)
     }
-    walk(root, 1, true)
+    walk(root, 1, true, 0, 0, 0)
     const gone = []
     for (const id of state.present) if (!seen.has(id)) gone.push(id)
     for (const id of gone) state.last.delete(id)
@@ -110,7 +134,7 @@ export const RECORDER = String.raw`
     start(selector) {
       const root = document.querySelector(selector)
       if (!root) throw new Error('no root ' + selector)
-      state = { root, t0: performance.now(), frames: [], last: new Map(), labels: new Map(), present: new Set(), anims: new Map(), raf: 0 }
+      state = { root, t0: performance.now(), frames: [], last: new Map(), labels: new Map(), present: new Set(), anims: new Map(), raf: 0, parents: new Map(), clips: new Map(), texts: new Set() }
       sample()
       return true
     },
@@ -118,7 +142,14 @@ export const RECORDER = String.raw`
     stop() {
       if (!state) return null
       cancelAnimationFrame(state.raf)
-      const out = { frames: state.frames, labels: Object.fromEntries(state.labels), anims: [...state.anims.values()] }
+      const out = {
+        frames: state.frames,
+        labels: Object.fromEntries(state.labels),
+        anims: [...state.anims.values()],
+        parents: Object.fromEntries(state.parents),
+        clips: Object.fromEntries(state.clips),
+        texts: [...state.texts],
+      }
       state = null
       return out
     },
