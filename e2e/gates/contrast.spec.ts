@@ -8,14 +8,14 @@ import {
   type PaletteRef,
 } from '../../src/components/visualizations/primitives/tokens-v3'
 import { auditContrast, type Pair } from './contrast-audit'
-import { GALLERY, LESSONS, SPECIMEN, STATES, lessonUrl, open } from './drive'
+import { GALLERY, LESSONS, MOTION_STATES, SPECIMEN, STATES, freezeForContrast, lessonUrl, open, stateUrl } from './drive'
 
 /**
  * Contrast gate (VIZ-H G, R1 L05): the token table (`tokens-v3.test.ts`)
  * proves every declared pair; this crawl proves the pairs that actually
  * render, from computed styles, in every state the gallery reaches, on the
  * specimen (every primitive in every forced state), and in lesson context.
- * Dark at 375 and 1440, and the light print rendering. See
+ * Dark at 375, 768 and 1440, and the light print rendering. See
  * `contrast-audit.ts` for what counts as a pair and the one exemption
  * (aria-disabled and disabled controls).
  */
@@ -31,7 +31,8 @@ const PALETTE = [
 const CODE_COLORS = [...Object.keys(CODE_PRINT), ...Object.values(CODE_PRINT), CODE_PRINT_INK].map((h) => h.toLowerCase())
 const SCOPE = '[data-viz] section, [data-viz] figure, [data-viz-frame="system"]'
 
-const WIDTHS = [375, 1440] as const
+/** 375, 768 (the narrow-to-wide switch, R2 G-02) and 1440. */
+const WIDTHS = [375, 768, 1440] as const
 
 function failures(pairs: Pair[]) {
   return pairs
@@ -43,7 +44,8 @@ function failures(pairs: Pair[]) {
     )
 }
 
-async function audit(page: Page, where: string, focus = true) {
+/** `palette`: also check every text color against the tokens (a rest-state rule; mid-tween colors are blends). */
+async function audit(page: Page, where: string, focus = true, palette = true) {
   const pairs = await auditContrast(page, { scope: SCOPE, palette: PALETTE, codeColors: CODE_COLORS, focus })
   const exempt = pairs.filter((p) => p.exempt && p.ratio < p.need)
   if (exempt.length)
@@ -52,7 +54,7 @@ async function audit(page: Page, where: string, focus = true) {
       description: `${where}: ${exempt.length} pairs on unavailable controls`,
     })
   expect(pairs.length, `${where}: the crawl found pairs`).toBeGreaterThan(10)
-  return failures(pairs).map((f) => `${where}: ${f}`)
+  return failures(palette ? pairs : pairs.filter((p) => p.kind !== 'palette')).map((f) => `${where}: ${f}`)
 }
 
 for (const width of WIDTHS) {
@@ -62,11 +64,10 @@ for (const width of WIDTHS) {
   })
 
   test(`gallery states @${width}: every rendered pair passes`, async ({ page }) => {
-    test.setTimeout(180_000)
+    test.setTimeout(300_000)
     const problems: string[] = []
     for (const [name, drive] of Object.entries(STATES)) {
-      const url = name.startsWith('closures') ? `${GALLERY}?static=1` : GALLERY
-      await open(page, url, width)
+      await open(page, stateUrl(name), width)
       await drive(page)
       problems.push(...(await audit(page, `${name} @${width}`)))
     }
@@ -79,6 +80,32 @@ for (const width of WIDTHS) {
       expect(await audit(page, `lesson ${slug} @${width}`)).toEqual([])
     })
 }
+
+/**
+ * Full motion (R2 G-01, MOTION GB8): every designed motion with a payoff,
+ * from the input that starts it, frozen at +140 and +440 ms (the beats and
+ * the verdict, mid-flight) and crawled: a label whose color tweens with its
+ * fill, a ground mid-relight under syntax colors, a verdict over a fading
+ * tint. Fades and moves are finished first (`freezeForContrast`), so a pair
+ * is judged at the colors a reader sees then, not at a partial opacity.
+ * The PR tier runs 375; the full tier 375, 768 and 1440 (MOTION_WIDTHS).
+ */
+const MOTION_CONTRAST_WIDTHS = process.env.STRESS_TIER === 'full' ? [375, 768, 1440] : [375]
+for (const width of MOTION_CONTRAST_WIDTHS)
+  test(`full motion @${width}: every rendered pair passes while a reveal plays`, async ({ page }) => {
+    test.setTimeout(600_000)
+    const problems: string[] = []
+    for (const [name, st] of Object.entries(MOTION_STATES))
+      for (const ms of [140, 440]) {
+        await open(page, st.url, width, 900, 'no-preference')
+        await st.setup(page)
+        await st.act(page)
+        await page.waitForTimeout(ms)
+        await freezeForContrast(page)
+        problems.push(...(await audit(page, `${name} +${ms}ms @${width}`, true, false)))
+      }
+    expect(problems).toEqual([])
+  })
 
 test('print: the light rendering passes', async ({ page }) => {
   test.setTimeout(120_000)

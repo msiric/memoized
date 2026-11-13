@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { GALLERY, LESSONS, SPECIMEN, STATES, lessonUrl, open, settle } from './drive'
+import { GALLERY, LESSONS, MOTION_STATES, SPECIMEN, STATES, freezeAt, lessonUrl, open, settle, stateFrame, stateUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -43,17 +43,32 @@ for (const width of WIDTHS) {
   })
 
   test(`gallery states @${width}`, async ({ page }) => {
-    test.setTimeout(180_000)
+    test.setTimeout(300_000)
     for (const [name, drive] of Object.entries(STATES)) {
-      const closures = name.startsWith('closures')
-      await open(page, closures ? `${GALLERY}?static=1` : GALLERY, width)
+      await open(page, stateUrl(name), width)
       await drive(page)
-      const selector = closures
-        ? '[data-viz="environment-records"] figure'
-        : name.startsWith('lk')
-          ? '[data-viz="list-keys"] section'
-          : '[data-viz="event-loop"] section'
-      await frameShot(page, selector, `${name}-${width}.png`)
+      await frameShot(page, stateFrame(name), `${name}-${width}.png`)
+    }
+  })
+
+  // R2 G-01: one baseline per reveal at its midpoint, in full motion. The
+  // motion is frozen at a fixed time into its own timeline (`freezeAt`), so
+  // the frame is the same on every run.
+  test(`full motion midpoints @${width}`, async ({ page }) => {
+    test.setTimeout(180_000)
+    for (const [name, ms] of [
+      ['el-lockin', 75],
+      ['el-finale', 300],
+      ['lk-ride', 200],
+    ] as const) {
+      const st = MOTION_STATES[name]
+      await open(page, st.url, width, 900, 'no-preference')
+      await st.setup(page)
+      const el = page.locator(st.frame).first()
+      await el.scrollIntoViewIfNeeded()
+      await st.act(page)
+      await freezeAt(page, ms)
+      await expect(el).toHaveScreenshot(`motion-${name}-${ms}-${width}.png`, { ...SHOT, animations: 'allow' })
     }
   })
 
