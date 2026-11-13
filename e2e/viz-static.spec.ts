@@ -20,7 +20,7 @@ const FOOTPRINT: Record<
   { narrow: number; wide: number; col: number }
 > = {
   'var-vs-let-loop': { narrow: 890, wide: 572, col: 548 },
-  'factory-calls-vs-aliases': { narrow: 814, wide: 550, col: 526 },
+  'factory-calls-vs-aliases': { narrow: 830, wide: 550, col: 526 },
 }
 /** The footprint tier a viewport width shows (the frame's container width decides). */
 const tierOf = (width: number) => (width < 768 ? 'narrow' : width < 1280 ? 'wide' : 'col')
