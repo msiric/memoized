@@ -62,6 +62,8 @@ export const SIZE = {
   busStep: 12,
   noteGap: 12,
   noteLine: 16,
+  /** A note wraps at this width at most, so it reads as a caption to its mark. */
+  noteMax: 220,
   label: 12,
   labelGap: 6,
   dot: 3,
@@ -790,18 +792,26 @@ function finishScene(
   let height = contentBottom
   if (section.note) {
     // A legend, not code: upright sans 12/16 (D22), after a hatch swatch
-    // when the note explains the hatch.
+    // when the note explains the hatch. It wraps at a width fixed per
+    // variant (so every width keeps one height), and sits under the mark it
+    // explains: right-aligned to the hatched record's column (R2 critique
+    // F-CL-06), so "no function is saved" is read beside "no ƒ".
     const indent = section.noteMark === 'hatch' ? SIZE.swatch + SIZE.swatchGap : 0
-    const noteLines = wrapByWidth(section.note, minWidth - indent, (t) => sansWidth(t, SIZE.label))
+    const noteLines = wrapByWidth(section.note, Math.min(SIZE.noteMax, minWidth) - indent, (t) =>
+      sansWidth(t, SIZE.label),
+    )
+    const blockW = Math.ceil(indent + Math.max(...noteLines.map((l) => sansWidth(l, SIZE.label))))
+    const mark = section.noteMark === 'hatch' ? boxes.find((b) => b.unused) : undefined
+    const x0 = mark ? Math.max(0, Math.min(width - blockW, right(mark.rect) - blockW)) : 0
     let top = height + SIZE.noteGap
     for (const line of noteLines) {
       texts.push({
         kind: 'note',
         text: line,
-        x: indent,
+        x: x0 + indent,
         y: top + 12,
         anchor: 'start',
-        rect: { x: indent, y: top, w: sansWidth(line, SIZE.label), h: SIZE.noteLine },
+        rect: { x: x0 + indent, y: top, w: sansWidth(line, SIZE.label), h: SIZE.noteLine },
       })
       top += SIZE.noteLine
     }

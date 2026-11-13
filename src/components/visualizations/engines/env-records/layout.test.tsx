@@ -190,6 +190,30 @@ describe('the layout follows the links', () => {
   })
 })
 
+describe('the hatch note sits under its mark (critique F-CL-06)', () => {
+  const letSection = envRecordsDescriptor.presets[0].data.sections[1]
+  // [width, the narrowest width of its variant]: the wrap is decided there.
+  it.each([
+    [288, 288],
+    [343, 288],
+    [295, 295],
+    [359, 295],
+  ])('right-aligned to the hatched record, one wrap per variant @ %i', (w, min) => {
+    const s = layoutSection(letSection, w, min)
+    const notes = s.texts.filter((t) => t.kind === 'note')
+    const ghost = s.boxes.find((b) => b.unused)!.rect
+    const swatch = SIZE.swatch + SIZE.swatchGap
+    const right = Math.max(...notes.map((t) => t.rect.x + t.rect.w))
+    expect(right).toBeLessThanOrEqual(ghost.x + ghost.w + 0.5)
+    expect(right).toBeGreaterThan(ghost.x + ghost.w - 12)
+    for (const t of notes) {
+      expect(t.rect.x).toBe(notes[0].rect.x)
+      expect(t.rect.w).toBeLessThanOrEqual(SIZE.noteMax - swatch)
+    }
+    expect(notes[0].rect.x - swatch).toBeGreaterThanOrEqual(0)
+  })
+})
+
 describe('factory: functions beside the module (D18)', () => {
   const [counters] = envRecordsDescriptor.presets[1].data.sections
   it.each([288, 295, 343, 359])('aliases converge on one function without a detour @ %i', (w) => {

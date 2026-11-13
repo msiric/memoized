@@ -408,7 +408,7 @@ function SectionSvg({
       {scene.noteMark === 'hatch' && note ? (
         <rect
           data-viz-part="legend-swatch"
-          x={0.5}
+          x={r1(note.rect.x - SIZE.swatch - SIZE.swatchGap) + 0.5}
           y={r1(note.rect.y + 2) + 0.5}
           width={SIZE.swatch - 1}
           height={SIZE.swatch - 1}
