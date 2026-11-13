@@ -20,19 +20,25 @@ export type VizEntry = readonly [
    */
   statics?: Record<string, readonly [number, number, number]>,
   /**
-   * Step-throughs only: [narrow, wide] heights per preset, default first
-   * (R2: every reserved band is sized to the preset on screen).
+   * Step-throughs only: heights per preset, default first (R2: every
+   * reserved band is sized to the preset on screen): [narrow, wide, small,
+   * tight, tighter], the frame laid out at the narrowest content width of
+   * each band (H3 R2 Q16: a 375 phone, 768, a 320 phone, and very large
+   * text), so the reserve holds at any text size.
    */
-  steps?: Record<string, readonly [number, number]>,
+  steps?: Record<string, readonly [number, number, number, number, number]>,
 ]
 
 export const VIZ_TABLE: Record<string, VizEntry> = {
   'event-loop': [
     () => import('./engines/event-loop'),
-    840,
-    584,
+    824,
+    576,
     undefined,
-    { 'basic-ordering': [840, 584], 'microtask-queued-during-drain': [892, 732] },
+    {
+      'basic-ordering': [824, 576, 852, 1016, 1060],
+      'microtask-queued-during-drain': [820, 716, 880, 972, 1040],
+    },
   ],
   'environment-records': [
     () => import('./engines/env-records'),

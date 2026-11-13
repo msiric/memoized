@@ -11,7 +11,7 @@ import {
   type as typeScale,
 } from '../../primitives/tokens-v3'
 import { useFlip } from '../../shell/flip'
-import { presence, transitionFor } from '../../shell/motion'
+import { beatDelay, presence, transitionFor } from '../../shell/motion'
 import type { PerVariant, StageProps } from '../../shell/types'
 import { Lane, showCls, type LaneChip } from '../../substrates/Lane'
 import { remHeights, toRem } from '../../substrates/units'
@@ -89,6 +89,25 @@ function laneChips(
   return out
 }
 
+/**
+ * Q14: the newest output's ground, lit on the step before the finale, fades
+ * out on the `exit` token, holds unlit, then comes back on the `enter` token
+ * at its turn (`delay`, s), as one keyframed tween.
+ */
+function fadeThenRelight(delay: number) {
+  const out = motionTokens.exit.full
+  const enter = motionTokens.enter.full
+  const outS = out.type === 'tween' ? out.duration : 0
+  const inS = enter.type === 'tween' ? enter.duration : 0
+  const start = Math.max(delay, outS)
+  const total = start + inS
+  return {
+    initial: false as const,
+    animate: { opacity: [1, 0, 0, 1] },
+    transition: { duration: total, times: [0, outS / total, start / total, 1], ease: 'easeOut' as const },
+  }
+}
+
 /** How long a leaving glyph takes (s), so a placeholder appears only after it has gone. */
 function exitSeconds(gate: { instant: boolean; reduce: boolean }): number {
   if (gate.instant) return 0
@@ -118,6 +137,7 @@ export function EventLoopStage({
   const created = new Set(
     [...focus].filter((f) => !prevIds.has(f) && !f.startsWith('out-')),
   )
+  const prevFocus = new Set(previous?.focus ?? [])
 
   // What was on stage in the last render, so a moved chip slides instead of
   // fading in (scrubs and jumps included).
@@ -172,7 +192,7 @@ export function EventLoopStage({
       ref={root}
       className={clsx(
         'relative flex h-full flex-col',
-        'vz-wide:grid vz-wide:[grid-template-columns:var(--vz-cols-md)] vz-wide:[grid-template-rows:auto_minmax(0,1fr)] vz-xl:[grid-template-columns:var(--vz-cols-xl)]',
+        'vz-wide:grid vz-wide:[grid-template-columns:var(--vz-cols-md)] vz-wide:[grid-template-rows:auto_minmax(0,1fr)] vz-col:[grid-template-columns:var(--vz-cols-xl)]',
       )}
       style={{
         gap: toRem(G.gap),
@@ -200,10 +220,7 @@ export function EventLoopStage({
           label="Call stack"
           kind="frame"
           chips={state.stack}
-          labelAt={{
-            narrow: 'top',
-            wide: metrics.stackLabelTopWide ? 'top' : 'inline',
-          }}
+          labelAt={{ narrow: 'top', wide: 'inline' }}
           height={metrics.stackLane}
           from={{ y: -1 }}
           to={{ y: -1 }}
@@ -317,11 +334,23 @@ export function EventLoopStage({
                 ? gate.reduce
                   ? transitionFor('enter', gate)
                   : { ...transitionFor('enter', gate), delay: (k * sweep.staggerMs) / 1000 }
-                : { duration: 0 }
+                : // An output that stops being the newest lets go of its ground
+                  // when the new one lands (the third beat, Q1).
+                  { duration: 0, delay: beatDelay(gate, 'land') }
               const show = {
                 narrow: k >= firstShown.narrow,
                 wide: k >= firstShown.wide,
               }
+              // Q14: the output lit on the step before fades out (`exit`)
+              // and relights in its turn, never cut to unlit in one frame.
+              const fadeFirst = playing && !gate.reduce && prevFocus.has(outId(k))
+              const groundMotion = fadeFirst
+                ? fadeThenRelight((k * sweep.staggerMs) / 1000)
+                : {
+                    initial: playing ? { opacity: 0 } : (false as const),
+                    animate: { opacity: lit ? 1 : 0 },
+                    transition: beat,
+                  }
               const source = sources[k]
               return (
                 <m.li
@@ -335,17 +364,23 @@ export function EventLoopStage({
                   // and rise over the "Console" label while it fades (G1). It
                   // keeps its one row instead.
                   className={clsx(
-                    'm-0 grid min-w-0 max-w-full items-center p-0 [grid-template-columns:auto_minmax(0,1fr)] [&[data-motion-pop-id]]:whitespace-nowrap',
+                    'm-0 grid min-w-0 max-w-full items-center p-0 [grid-template-columns:auto_minmax(0,1fr)] [&[data-motion-pop-id]]:!w-max [&[data-motion-pop-id]]:whitespace-nowrap',
                     typeScale.value.cls,
                     showCls(show.narrow && show.wide ? both : show),
                     k < firstTight && 'vz-tight:hidden',
                   )}
                   style={{ columnGap: toRem(G.outMark) }}
-                  // Rises into place; on Back it leaves the way it came (D8).
-                  {...presence(outId(k), gate, {
-                    from: { y: 1 },
-                    to: { y: 1 },
-                  })}
+                  // Rises into place on the third beat (Q1); on Back it leaves
+                  // the way it came, first (D8).
+                  {...presence(
+                    outId(k),
+                    gate,
+                    {
+                      from: { y: 1 },
+                      to: { y: 1 },
+                    },
+                    { beat: 'land' },
+                  )}
                 >
                   <span aria-hidden className={clsx('flex h-5 items-center', ink.muted)}>
                     ›
@@ -368,9 +403,7 @@ export function EventLoopStage({
                         aria-hidden
                         data-viz-reveal="out"
                         className={clsx('absolute inset-0', surface.resultTint, radius.chip.cls)}
-                        initial={playing ? { opacity: 0 } : false}
-                        animate={{ opacity: lit ? 1 : 0 }}
-                        transition={beat}
+                        {...groundMotion}
                       />
                       <span className="relative">{text}</span>
                     </span>

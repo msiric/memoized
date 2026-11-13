@@ -26,11 +26,14 @@ describe('VDS primitives', () => {
   })
 
   it('Button: platform variants, 44 px pill, focus ring, press and hover-capable hover', () => {
+    // H3 R2 Q12: the platform `primary` (P: Button.tsx:20), the lesson's own main action.
     const primary = buttonClasses({ variant: 'primary' })
-    expect(primary).toMatch(/\bbg-lime-500\b/)
-    expect(primary).toContain('can-hover:bg-lime-600')
+    expect(primary).toMatch(/\bbg-lime-400\/10\b/)
+    expect(primary).toContain('text-lime-400')
+    expect(primary).toContain('ring-lime-400/20')
+    expect(primary).toContain('can-hover:bg-lime-500/10')
     // R13: press is one step past hover, on its own variant so it wins over hover.
-    expect(primary).toContain('press:brightness-90')
+    expect(primary).toContain('press:bg-lime-400/20')
     expect(primary).toMatch(/\bh-11\b/)
     expect(primary).toMatch(/\brounded-full\b/)
     expect(primary).toContain(focusRing)
@@ -58,15 +61,15 @@ describe('VDS primitives', () => {
     expect(cls).not.toContain('press:')
   })
 
-  it('Button: waiting is aria-disabled and inert but not faded (R4)', () => {
+  it('Button: a control that cannot act always looks unavailable, even when its press redirects (Q2)', () => {
     const html = renderToStaticMarkup(
-      <Button waiting variant="secondary">
+      <Button unavailable redirects variant="secondary">
         Next
       </Button>,
     )
     expect(html).toContain('aria-disabled="true"')
     const cls = classOf(html, 'button')
-    expect(cls).not.toContain('opacity-50')
+    expect(cls).toContain('opacity-50')
     expect(cls).not.toContain('can-hover:')
     expect(cls).toContain('ring-white/10')
   })
@@ -157,7 +160,21 @@ describe('VDS primitives', () => {
     expect(wrong).toContain('×')
     for (const html of [ask, right, wrong]) expect(html).not.toMatch(/amber/)
     expect(ask).toMatch(/rounded-lg/)
-    expect(ask).toMatch(/\bh-11\b/)
+    expect(ask).toMatch(/\bmin-h-11\b/)
+    // Q5: a label wraps, never clamps or truncates.
+    for (const html of [ask, right, wrong]) expect(html).not.toMatch(/line-clamp|truncate/)
+    // Q3: the correct choice lands on the now tint with a lime ✓; a wrong pick drops to muted ink.
+    expect(classOf(right, 'button')).toContain('bg-lime-400/10')
+    expect(right).toMatch(/text-lime-400[^"]*"[^>]*>(<span[^>]*>)?✓/)
+    expect(classOf(wrong, 'button')).toContain('text-zinc-400')
+    expect(classOf(wrong, 'button')).not.toMatch(/bg-zinc-600|bg-lime/)
+    // A pick before the verdict (a locked-in prediction) is the selected segment look.
+    const locked = renderToStaticMarkup(<ChoiceRow index={1} label="B" state="resolved" picked />)
+    expect(classOf(locked, 'button')).toContain('bg-zinc-600')
+    const other = renderToStaticMarkup(<ChoiceRow index={2} label="C" state="resolved" />)
+    expect(classOf(other, 'button')).toContain('text-zinc-400')
+    // Q4: the key is a quiet numeral, not a boxed cap.
+    expect(ask).not.toMatch(/data-choice-slot="key"[^>]*bg-zinc-800/)
   })
 
   it('Disclosure: a native details with a 44 px summary and a rotating chevron', () => {

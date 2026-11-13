@@ -12,7 +12,12 @@ import { focusRing, focusRingGroup, strokeWidth, transitionCls, type as typeScal
  * `text-sm font-medium` in every state (no weight jump); the selected
  * segment is the neutral zinc-600 fill with zinc-200 text; idle segments are
  * zinc-400 and take the zinc-700 fill on hover. Each segment keeps a 44 px
- * hit area around the 32 px track.
+ * hit area around the 32 px track. The track and dividers are the one
+ * hairline, white/10 (H3 R2 Q10, as LessonStatus draws it).
+ *
+ * Without container queries (Q17: Safari before 16, Firefox before 110) only
+ * the select shows (`src/styles/tailwind.css`), so one control is ever on
+ * screen.
  *
  * Semantics: a `radiogroup` with one tab stop (roving tabindex). Arrow keys
  * move and select, Home and End jump.
@@ -142,16 +147,16 @@ export function SegmentedControl({
           and the fallback rule would not apply until the engine loads. */}
       <style dangerouslySetInnerHTML={{ __html: fitCss }} />
       <div role="radiogroup" aria-label={label} data-viz-own-keys className="relative inline-flex h-11 shrink-0 items-center">
-        {/* The track: P: LessonStatus.tsx:93 (`h-8 rounded-full border`), in the one hairline. */}
+        {/* The track: P: LessonStatus.tsx:93 (`h-8 rounded-full border`), in the one hairline (white/10, Q10). */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-1.5 h-8 rounded-full border border-zinc-700 print:border-zinc-300"
+          className="pointer-events-none absolute inset-x-0 top-1.5 h-8 rounded-full border border-white/10 print:border-zinc-300"
         />
         {options.map((p, i) => {
           const checked = i === value
           return (
             <Fragment key={p.id}>
-              {i > 0 ? <span aria-hidden className="relative h-8 w-px shrink-0 bg-zinc-700 print:bg-zinc-300" /> : null}
+              {i > 0 ? <span aria-hidden className="relative h-8 w-px shrink-0 bg-white/10 print:bg-zinc-300" /> : null}
               <button
                 ref={(el) => {
                   refs.current[i] = el

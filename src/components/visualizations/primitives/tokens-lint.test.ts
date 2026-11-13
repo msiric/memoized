@@ -55,7 +55,7 @@ type Allow = { file: RegExp; match: RegExp; why: string }
 const ALLOW: Allow[] = [
   {
     file: /^Viz\.tsx$/,
-    match: /^(vz-wide:|vz-col:)?h-\[calc\(var\(--vz-[nwc]\)-2rem-2px\)\]$/,
+    match: /^(vz-wide:|vz-col:|\[@container_vz_\(min-width:[\d.]+rem\)_and_\(max-width:[\d.]+rem\)\]:)?h-\[calc\(var\(--vz-[nwcstu]\)-2rem-2px\)\]$/,
     why: 'The lazy mount stays dependency-free (bundle budget): its reserve is the footprint less the frame padding (1rem) and borders (1px) that frame-cls draws.',
   },
   {

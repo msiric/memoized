@@ -102,10 +102,17 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
   }, [Live])
 
   if (!entry) return null
-  const sized = statics ?? entry[4]
-  const [narrow, wide, col = wide] = (sized && (sized[preset ?? ''] ?? Object.values(sized)[0])) || [entry[1], entry[2]]
+  const sized: Record<string, readonly number[]> | undefined = statics ?? entry[4]
+  const row = (sized && (sized[preset ?? ''] ?? Object.values(sized)[0])) || [entry[1], entry[2]]
+  // Static figures: [narrow, wide, col]. Step-throughs: [narrow, wide, small,
+  // tight, tighter] (Q16: each narrow band reserves its narrowest layout).
+  const [narrow, wide] = row
+  const col = statics ? row[2] : wide
+  const small = statics ? narrow : (row[2] ?? narrow)
+  const tight = statics ? narrow : (row[3] ?? small)
+  const tighter = statics ? narrow : (row[4] ?? tight)
   return (
-    <div ref={ref} data-viz={id} className={statics ? 'my-8' : 'my-8 xl:max-w-vz-breakout'}>
+    <div ref={ref} data-viz={id} className="my-8">
       {Live ? (
         <Live preset={preset} />
       ) : SERVER?.[id] ? (
@@ -122,12 +129,17 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
             ['--vz-n' as string]: `${narrow / 16}rem`,
             ['--vz-w' as string]: `${wide / 16}rem`,
             ['--vz-c' as string]: `${col / 16}rem`,
+            ['--vz-s' as string]: `${small / 16}rem`,
+            ['--vz-t' as string]: `${tight / 16}rem`,
+            ['--vz-u' as string]: `${tighter / 16}rem`,
           }}
         >
           {/* The frame is the variant's size container, so the reserve sits inside
               it: the footprint less the frame's 1rem padding and 1 px borders.
-              `vz-col` is the full lesson column (static figures, INTEG 4). */}
-          <div className="h-[calc(var(--vz-n)-2rem-2px)] vz-wide:h-[calc(var(--vz-w)-2rem-2px)] vz-col:h-[calc(var(--vz-c)-2rem-2px)]" />
+              The narrow bands are the content width in rem (`footprint.ts`
+              BANDS: 19.3125, 15.875, 12.875); `vz-col` is the full lesson
+              column (static figures, INTEG 4). */}
+          <div className="h-[calc(var(--vz-u)-2rem-2px)] [@container_vz_(min-width:12.875rem)_and_(max-width:15.874rem)]:h-[calc(var(--vz-t)-2rem-2px)] [@container_vz_(min-width:15.875rem)_and_(max-width:19.312rem)]:h-[calc(var(--vz-s)-2rem-2px)] [@container_vz_(min-width:19.3125rem)_and_(max-width:37.874rem)]:h-[calc(var(--vz-n)-2rem-2px)] vz-wide:h-[calc(var(--vz-w)-2rem-2px)] vz-col:h-[calc(var(--vz-c)-2rem-2px)]" />
         </div>
       )}
     </div>

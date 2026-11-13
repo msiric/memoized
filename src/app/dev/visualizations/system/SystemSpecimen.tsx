@@ -2,8 +2,9 @@
 
 import type { ReactNode } from 'react'
 import { BackIcon, Button, NextIcon, PlayIcon, RestartIcon, type ButtonVariant } from '@/components/visualizations/primitives/Button'
-import { Caption, Feedback, lastTimeCls, promptCls } from '@/components/visualizations/primitives/Caption'
-import { lastTimeText } from '@/components/visualizations/shell/footprint'
+import { Caption, Feedback, promptCls } from '@/components/visualizations/primitives/Caption'
+import { NUDGE_TEXT, lastTimeText } from '@/components/visualizations/shell/footprint'
+import { CheckpointBlock, PromptBlock, SkipButton } from '@/components/visualizations/primitives/Checkpoint'
 import { ChoiceRow } from '@/components/visualizations/primitives/ChoiceRow'
 import { cn } from '@/components/visualizations/primitives/cn'
 import { Disclosure } from '@/components/visualizations/primitives/Disclosure'
@@ -19,6 +20,7 @@ import { Scrubber } from '@/components/visualizations/shell/Scrubber'
 import { Lane, type ChipKind, type LaneChip } from '@/components/visualizations/substrates/Lane'
 import {
   DASH,
+  changed,
   tooltipCls,
   ink,
   now,
@@ -90,7 +92,7 @@ function SpecimenLane({
   kind: ChipKind
   chips: LaneChip[]
   focus?: string[]
-  /** The call stack: label on top, chips stacked upward. */
+  /** The call stack: a taller lane, chips stacked upward (Q8: the same label column). */
   stack?: boolean
 }) {
   const present = ids(chips)
@@ -100,7 +102,7 @@ function SpecimenLane({
       label={label}
       kind={kind}
       chips={chips}
-      labelAt={stack ? { narrow: 'top', wide: 'top' } : { narrow: 'top', wide: 'inline' }}
+      labelAt={{ narrow: 'top', wide: 'inline' }}
       height={stack ? { narrow: 108, wide: 108 } : { narrow: 72, wide: 44 }}
       focus={new Set(focus)}
       created={new Set()}
@@ -162,7 +164,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
     },
     { variant: 'secondary', icon: true, node: <RestartIcon /> },
     { variant: 'secondary', icon: true, node: <PlayIcon /> },
-    { variant: 'text', node: <span>Skip, show me</span> },
+    { variant: 'text', node: <span>Skip</span> },
   ]
 
   return (
@@ -271,19 +273,37 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
 
       <Section
         id="emphasis"
-        title="Focus versus now"
-        note="Keyboard focus is the only offset ring: 2 px lime-500, 2 px away from the shape. Now (changed this step) is drawn inside the glyph: a lime-400 border doubled by an inset ring, and a tint. They never look alike."
+        title="Focus, changed and lands here"
+        note="Three emphases that never look alike (Q9). Focus: the only offset ring, 2 px lime-500, 2 px away from the shape. Changed this step (`changed`): the glyph keeps its own role hue, doubles its own edge with an inset ring and takes its own tint; never lime (event-loop chips). Lands here (`now`): lime marks only the current code line, a traced path, the primary action and where a payoff lands, such as the correct choice or the list-keys row that receives the check."
       >
         <div className="flex flex-wrap items-start gap-8">
-          <Cell label="glyph, rest">
-            <span className={cn('flex h-7 items-center border px-2', radius.chip.cls, typeScale.value.cls, ink.base, stroke.queued, surface.chipQueued)}>
-              timer cb
+          <Cell label="chip, rest">
+            <span className={cn('flex h-7 items-center border px-1.5', radius.chip.cls, typeScale.value.cls, ink.base, stroke.queued, surface.glyph)}>
+              cb B
             </span>
           </Cell>
-          <Cell label="glyph, now">
-            <span className={cn('flex h-7 items-center border px-2', radius.chip.cls, typeScale.value.cls, ink.base, stroke.queued, now.glyph)}>
-              timer cb
+          <Cell label="changed: task">
+            <span className={cn('flex h-7 items-center border px-1.5', radius.chip.cls, typeScale.value.cls, ink.base, surface.glyph, stroke.queued, changed.queued)}>
+              cb B
             </span>
+          </Cell>
+          <Cell label="changed: microtask">
+            <span className={cn('flex h-7 items-center border px-1.5', radius.chip.cls, typeScale.value.cls, ink.base, surface.glyph, stroke.micro, changed.micro)}>
+              cb C
+            </span>
+          </Cell>
+          <Cell label="changed: stack frame">
+            <span className={cn('flex h-7 items-center border px-1.5', radius.chip.cls, typeScale.value.cls, ink.base, surface.glyph, stroke.line, changed.neutral)}>
+              script
+            </span>
+          </Cell>
+          <Cell label="lands here: card">
+            <span className={cn('flex h-7 items-center border px-2', radius.glyph.cls, typeScale.item.cls, ink.base, now.glyph)}>
+              Buy milk
+            </span>
+          </Cell>
+          <Cell label="lands here: correct choice">
+            <ChoiceRow className="w-40" index={1} label="C, from .then" state="resolved" mark="right" />
           </Cell>
           <Cell label="control, focus">
             <Force state="focus">
@@ -298,10 +318,10 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
               Microtasks
             </span>
           </Cell>
-          <Cell label="glyph, now and focus">
+          <Cell label="lands here and focus">
             <Force state="focus">
-              <span tabIndex={-1} className={cn('flex h-7 items-center border px-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-500', radius.chip.cls, typeScale.value.cls, ink.base, stroke.queued, now.glyph)}>
-                timer cb
+              <span tabIndex={-1} className={cn('flex h-7 items-center border px-2 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime-500', radius.glyph.cls, typeScale.item.cls, ink.base, now.glyph)}>
+                Buy milk
               </span>
             </Force>
           </Cell>
@@ -311,7 +331,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
       <Section
         id="button"
         title="Button"
-        note="The platform Button variants at a 44 px target: filled (Next), secondary (Back, Restart, Play, actions), text (Skip). Hover applies only on devices that hover; press is one more step (R13)."
+        note="The platform Button variants at a 44 px target: primary (Next and Replay, the platform's own main action, Q12), secondary (Back, Restart, Play, actions), text (Skip). Hover applies only on devices that hover; press is one more step (R13). A control that cannot act looks unavailable, always (Q2): Next while a question is open is the outline variant at the same reduced treatment as Back at Start."
       >
         <div className="grid gap-6">
           {buttons.map((b, k) => (
@@ -365,7 +385,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
         </div>
       </Section>
 
-      <Section id="choice" title="Choice row" note="Checkpoint choices: the number slot becomes a check or a cross after the answer; the row keeps its full label. The earlier answer is a muted line under the prompt (G ruling 2). Never amber.">
+      <Section id="choice" title="Choice row" note="Checkpoint choices (Q3 to Q5): the outline control with a quiet numeral that teaches the 1 to 4 keys. A locked-in pick is the selected segment; on the reveal the correct choice gets ✓ on the lime tint with full ink, every other choice drops to muted ink, and a wrong pick shows ×. Labels wrap, never truncate. Never amber.">
         <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
           <Cell label="rest">
             <ChoiceRow className="w-44" index={0} label="B, from the timer" />
@@ -386,16 +406,29 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
             </Force>
           </Cell>
           <Cell label="prompt, last time">
-            <div className="w-44">
-              <p className={promptCls}>What logs after D?</p>
-              <p className={lastTimeCls}>{lastTimeText('C, from .then')}</p>
+            <div className="w-72">
+              <PromptBlock live={false} prompt="What logs after D?" note={lastTimeText('C')} noteReserve={NUDGE_TEXT} />
             </div>
           </Cell>
-          <Cell label="two lines">
+          <Cell label="prompt, nudge after Next (Q2)">
+            <div className="w-72">
+              <PromptBlock live={false} prompt="Which logs last?" note={NUDGE_TEXT} noteReserve={NUDGE_TEXT} />
+            </div>
+          </Cell>
+          <Cell label="wraps (Q5)">
             <ChoiceRow className="w-44" index={2} label="micro 2 (microtask) then timeout" />
+          </Cell>
+          <Cell label="locked in (picked, no verdict yet)">
+            <ChoiceRow className="w-44" index={1} label="B" state="resolved" picked />
+          </Cell>
+          <Cell label="locked in: not picked">
+            <ChoiceRow className="w-44" index={2} label="C" state="resolved" />
           </Cell>
           <Cell label="picked, wrong">
             <ChoiceRow className="w-44" index={0} label="B, from the timer" state="resolved" picked mark="wrong" />
+          </Cell>
+          <Cell label="not picked, not the answer">
+            <ChoiceRow className="w-44" index={0} label="B, from the timer" state="resolved" />
           </Cell>
           <Cell label="answer, not picked">
             <ChoiceRow className="w-44" index={1} label="C, from .then" state="resolved" mark="right" />
@@ -407,7 +440,20 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
             <ChoiceRow className="w-44" index={3} label="It’s lost" state="unavailable" />
           </Cell>
           <Cell label="code label">
-            <ChoiceRow className="w-44" index={0} label="count 7" mono wrap="truncate" />
+            <ChoiceRow className="w-44" index={0} label="count 7" mono />
+          </Cell>
+        </div>
+        <div className="mt-6 grid max-w-3xl gap-6 [container:vz/inline-size]">
+          <Cell label="checkpoint block: the choice row with Skip trailing (Q4)">
+            <CheckpointBlock
+              ghost
+              labels={['A', 'B', 'C', 'D']}
+              text={<PromptBlock live={false} prompt="Which logs last?" note={null} noteReserve={NUDGE_TEXT} />}
+              choices={['A', 'B', 'C', 'D'].map((l, i) => (
+                <ChoiceRow key={l} index={i} label={l} tabIndex={-1} />
+              ))}
+              skip={<SkipButton tabIndex={-1} />}
+            />
           </Cell>
         </div>
       </Section>
@@ -496,7 +542,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
       <Section
         id="scrubber"
         title="Scrubber"
-        note="Track in the line role, progress and thumb in the accent, a tick per step, a diamond on each checkpoint (hollow open, filled answered, crossed skipped); the thumb carries the diamond it sits on. Hover a rail to see the step tooltip."
+        note="Track in the line role, progress and thumb in the accent, a tick per step, a diamond on each checkpoint (hollow open, filled answered, crossed skipped); the diamond sits on the step where its question is asked, and the thumb carries the diamond it sits on. Hover a rail to see the step tooltip, beside the thumb on the track (it never covers text)."
       >
         <div className="grid gap-6 sm:grid-cols-2">
           <Cell label="start, open checkpoint">
@@ -531,7 +577,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
       <Section
         id="code"
         title="Code pane"
-        note="github-dark tokens on zinc-900, the current line lit with the now bar and ▸, line numbers from 768. Long lines soft-wrap with a hanging indent and a continuation hairline (A4). The host note is reserved only when a step runs outside the code."
+        note="github-dark tokens on zinc-900, the current line lit with the now bar and ▸, line numbers at every width (Q7). Long lines soft-wrap with a hanging indent and a white/10 continuation hairline (A4). A step the host runs says so beside its name in the step bar, not under the code (Q15)."
       >
         <div className="grid gap-6 md:grid-cols-2">
           <Cell label="current line 2">
@@ -572,7 +618,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
       <Section
         id="lanes"
         title="Lanes and chips"
-        note="Borderless panels on the frame (R2). Chips share one neutral fill with the lane hue on the edge only (R1); a changed chip doubles its edge in its own hue; host chips are dashed; a collapsed tail reads +N more."
+        note="Borderless panels on the frame (R2). One lane anatomy per variant (Q8): labels in the same place, tokens from the same x and first row. Chips share one neutral fill with the lane hue on the edge only (R1); a changed chip doubles its edge and takes its own tint, in its own hue, never lime (Q9); host chips are dashed; a collapsed tail reads +N more."
       >
         <div className="grid gap-2">
           <SpecimenLane stack label="Call stack" kind="frame" chips={[{ id: 's1', label: 'script' }, { id: 's2', label: 'cb B' }]} focus={['s2']} />

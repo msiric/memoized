@@ -3,22 +3,34 @@
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { cn } from './cn'
 import { UNAVAILABLE } from './Button'
-import { focusRing, ink, radius, transitionCls } from './tokens-v3'
+import { focusRing, radius, transitionCls } from './tokens-v3'
 
 /**
- * A checkpoint choice (D9, D4). The platform self-assessment row
- * (P: designTokens.ts:344-349): `rounded-lg`, zinc-700 fill, zinc-300
- * `text-sm font-medium`, zinc-600 on hover; 44 px tall (spec A5).
+ * A checkpoint choice (D9, H3 R2 Q3 to Q5), shared by every interactive
+ * visual. A `radio`; the group around it owns the roving tabindex.
  *
- * The number key sits in a 20 px slot on the left. After the reveal the slot
- * keeps its place and shows the result: ✓ on the right answer, × on a wrong
- * pick, both in ink (WS1 ruling 3: the shape and the "Right." / "Not quite."
- * text carry the meaning; lime stays `now`, amber stays output, D4). The picked row takes
- * the selected neutral fill (P: LessonStatus.tsx:30). A row is a `radio`;
- * the group around it owns the roving tabindex.
+ * Anatomy: the outline control on the frame (a white/10 ring, no fill,
+ * P: Button.tsx:26), radius 8 (the platform self-assessment row), at least
+ * 44 px tall. The number key is a quiet muted numeral in a 12 px slot, not a
+ * boxed cap: it teaches the 1 to 4 shortcuts without a second label (Q4).
+ * The label wraps to as many lines as it needs and the row grows with it; it
+ * never truncates (Q5). Footprints count the wrapped rows
+ * (`shell/footprint.ts` `choiceLines`).
  *
- * States: `ask` (answerable: hover, press, focus), `resolved` (after the
- * reveal: legible, not faded, no hover) and `unavailable` (opacity-50).
+ * States:
+ * - `ask`: answerable. Hover white/5 (hover devices), press white/10.
+ * - `resolved` before the verdict (a prediction locked in, or a reveal
+ *   still landing): the pick takes the selected segment fill (zinc-600,
+ *   P: LessonStatus.tsx:30), so the commitment reads at once; the other
+ *   choices drop to muted ink.
+ * - `resolved` with marks (the verdict): the correct choice gets ✓ (lime,
+ *   `now`) on the `now` tint with full ink, where the payoff lands; a wrong
+ *   pick shows × and drops to muted ink like every other choice. The wrong
+ *   pick is never the brightest row (Q3).
+ * - `unavailable`: opacity 50.
+ *
+ * `fade`: the mark arrives on the 160 ms `land` fade (Q4) instead of at once.
+ * Pass it only on the render where the verdict lands under full motion.
  */
 
 export type ChoiceMark = 'right' | 'wrong' | null
@@ -28,20 +40,40 @@ export type ChoiceRowProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disa
   index: number
   label: ReactNode
   state?: ChoiceState
-  /** Picked in this pass (only shown once resolved). */
+  /** The learner's pick (shown once resolved). */
   picked?: boolean
+  /** The verdict mark: ✓ on the answer, × on a wrong pick; null until the verdict lands. */
   mark?: ChoiceMark
   /** Label face: sans for wording, mono when the choice is code. */
   mono?: boolean
-  /** How the label handles overflow: two lines (default) or one with an ellipsis. */
-  wrap?: 'clamp' | 'truncate'
+  /** The mark fades in on the `land` token (Q4). */
+  fade?: boolean
 }
 
+/** Row classes per look (exported for the specimen and the ghosts). */
+export const choiceLook = {
+  ask: cn(
+    'text-zinc-300 ring-white/10 print:text-zinc-700 print:ring-zinc-300',
+    'can-hover:bg-white/5 can-hover:text-zinc-100 press:bg-white/10 press:text-white',
+  ),
+  selected: 'bg-zinc-600 text-zinc-100 ring-transparent print:bg-zinc-200 print:text-zinc-900',
+  muted: 'text-zinc-400 ring-white/10 print:text-zinc-600 print:ring-zinc-300',
+  correct: 'bg-lime-400/10 text-zinc-100 ring-lime-400/20 print:text-zinc-900 print:ring-lime-700',
+} as const
+
 export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function ChoiceRow(
-  { index, label, state = 'ask', picked = false, mark = null, mono = false, wrap = 'clamp', className, onClick, ...rest },
+  { index, label, state = 'ask', picked = false, mark = null, mono = false, fade = false, className, onClick, ...rest },
   ref,
 ) {
   const resolved = state === 'resolved'
+  // Before the verdict a pick is the selected segment; with it, ✓ wins.
+  const look = !resolved
+    ? choiceLook.ask
+    : mark === 'right'
+      ? choiceLook.correct
+      : picked && !mark
+        ? choiceLook.selected
+        : choiceLook.muted
   return (
     <button
       ref={ref}
@@ -54,15 +86,11 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         onClick?.(e)
       }}
       className={cn(
-        'relative flex h-11 min-w-0 items-center gap-2 pl-3 pr-3 text-left',
+        'relative flex min-h-11 min-w-0 items-center gap-2 px-2.5 py-2 text-left ring-1 ring-inset',
         radius.row.cls,
         focusRing,
         transitionCls.feedback,
-        resolved && picked
-          ? 'bg-zinc-600 text-zinc-100 print:bg-zinc-200 print:text-zinc-900'
-          : 'bg-zinc-700 text-zinc-300 print:bg-zinc-100 print:text-zinc-700',
-        // R13: hover zinc-600 (the platform row), press one step on.
-        state === 'ask' && 'can-hover:bg-zinc-600 can-hover:text-zinc-200 press:bg-zinc-500 press:text-white',
+        look,
         resolved && 'cursor-default',
         state === 'unavailable' && UNAVAILABLE,
         className,
@@ -73,31 +101,34 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         aria-hidden
         data-choice-slot={mark ?? 'key'}
         className={cn(
-          'flex h-5 w-5 shrink-0 items-center justify-center bg-zinc-800 print:bg-zinc-50',
-          radius.chip.cls,
-          // The mark keeps the number's size, so the slot reads as the same
-          // element before and after the answer (drift N06).
+          'flex h-5 w-3 shrink-0 items-center justify-center',
           mark
-            ? cn('font-sans text-2xs font-semibold leading-4', ink.base)
-            : cn('font-mono text-2xs leading-4 tabular-nums', ink.secondary),
+            ? cn(
+                'font-sans text-2xs font-semibold leading-4',
+                mark === 'right' ? 'text-lime-400 print:text-lime-700' : 'text-zinc-100 print:text-zinc-900',
+              )
+            : cn(
+                'font-mono text-2xs leading-4 tabular-nums',
+                look === choiceLook.selected ? 'text-zinc-300 print:text-zinc-700' : 'text-zinc-400 print:text-zinc-600',
+              ),
         )}
       >
-        {mark === 'right' ? '✓' : mark === 'wrong' ? '×' : index + 1}
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col">
-        {/* Relative, so its sr-only suffix is clipped with a truncated label
-            instead of sitting past the line's end and widening the page. */}
-        <span
-          className={cn(
-            'relative min-w-0 text-sm font-medium leading-5',
-            wrap === 'clamp' ? 'line-clamp-2' : 'truncate',
-            mono && 'font-mono text-xs font-normal',
-          )}
-        >
-          {label}
-          {mark ? <span className="sr-only">{mark === 'right' ? ', right answer' : ', wrong'}</span> : null}
+        {/* A new element for the mark, so its fade is an arrival, not a dip of the numeral. */}
+        <span key={mark ?? 'key'} className={cn(mark && fade && 'vz-land-in')}>
+          {mark === 'right' ? '✓' : mark === 'wrong' ? '×' : index + 1}
         </span>
+      </span>
+      {/* Wraps freely (Q5): the row grows, nothing is clamped. */}
+      <span
+        className={cn(
+          'min-w-0 flex-1 text-pretty text-sm font-medium leading-5 [overflow-wrap:anywhere]',
+          mono && 'font-mono text-xs font-normal leading-5',
+        )}
+      >
+        {label}
+        {mark ? <span className="sr-only">{mark === 'right' ? ', right answer' : ', wrong'}</span> : null}
       </span>
     </button>
   )
 })
+

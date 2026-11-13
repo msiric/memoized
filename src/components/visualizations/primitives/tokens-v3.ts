@@ -40,6 +40,7 @@ export type RoleName =
   | 'hairline'
   | 'hatch'
   | 'now'
+  | 'changed'
   | 'accent'
   | 'accentHover'
   | 'onAccent'
@@ -97,11 +98,12 @@ export const roles: Record<RoleName, Role> = {
     source: 'P: styles/tailwind.css:6 (comment tone); D1 (widths)',
   },
   hairline: {
-    meaning: 'The one hairline: frame, panel and divider borders (decorative)',
-    dark: 'zinc.700',
+    meaning:
+      'The one hairline, white at 10 % (Q10): frame, segmented track and dividers, outline controls, code wrap marks (decorative)',
+    dark: 'white',
     light: 'zinc.200',
     channel: 'n/a',
-    source: 'P: designTokens.ts:263; typography.ts:41; ProblemCard/index.tsx:253. D4 (one hairline)',
+    source: 'P: Button.tsx:26 (`ring-white/10`); LessonStatus.tsx:93. D4 (one hairline), H3 R2 Q10',
   },
   hatch: {
     meaning: 'Hatch stroke: unused, collectible, unreachable',
@@ -111,12 +113,21 @@ export const roles: Record<RoleName, Role> = {
     source: 'D4: hatch zinc-500 (print zinc-500 too: zinc-300 is 1.5:1 on white)',
   },
   now: {
-    meaning: 'Changed this step: current code line, active glyph, new connector',
+    meaning:
+      'Lands here (H3 R2 Q9): the current code line, a traced path, the primary action, and where a payoff lands (the correct choice, the row that receives the check)',
     dark: 'lime.400',
     light: 'lime.700',
     channel:
-      'Drawn inside the glyph: a 2 px lime border plus a tinted fill (D5); 2.5 px connectors; a ▸ gutter mark on code lines',
-    source: 'P: typography.ts:27; Code.tsx:173 (accent text). D5',
+      'A lime tint with a lime edge or ring (D5); 2.5 px connectors; a ▸ gutter mark on code lines; a ✓ on the correct choice',
+    source: 'P: typography.ts:27; Code.tsx:173 (accent text); Button.tsx:20 (primary). D5, H3 R2 Q9',
+  },
+  changed: {
+    meaning:
+      'Changed this step (H3 R2 Q9): a glyph that moved, arrived or ran on this step, in its own role hue, never lime',
+    dark: 'zinc.300',
+    light: 'zinc.700',
+    channel: 'Its own edge doubled by an inset ring (2 px, no layout shift) plus its own tint',
+    source: 'D4: one hue per role; H3 R1 R1 (one hue per chip); H3 R2 Q9',
   },
   accent: {
     meaning: 'Filled primary control (Next), scrubber progress',
@@ -208,13 +219,17 @@ export type SurfaceName =
   | 'choice'
   | 'choiceHover'
   | 'choiceSelected'
-  | 'keyCap'
+  | 'choiceCorrect'
   | 'tag'
   | 'chipState'
   | 'doneFill'
   | 'resultTint'
   | 'tooltip'
   | 'choicePress'
+  | 'primary'
+  | 'primaryHover'
+  | 'primaryPress'
+  | 'changedNeutral'
 
 const PAGE: Layer = { color: 'zinc.900' }
 const FRAME: Layer[] = [PAGE, { color: 'zinc.800', alpha: 0.4 }]
@@ -268,13 +283,17 @@ export const surfaces: Record<SurfaceName, { dark: Layer[]; light: Layer[] }> = 
   /** P: LessonStatus.tsx:30 (selected neutral zinc-600), :40 (hover zinc-700). */
   segmentSelected: { dark: [...FRAME, { color: 'zinc.600' }], light: [{ color: 'zinc.200' }] },
   segmentHover: { dark: [...FRAME, { color: 'zinc.700' }], light: [{ color: 'zinc.100' }] },
-  /** P: designTokens.ts:347-349 (self-assessment choice: zinc-700, hover zinc-600). */
-  choice: { dark: [...FRAME, { color: 'zinc.700' }], light: [{ color: 'zinc.100' }] },
-  choiceHover: { dark: [...FRAME, { color: 'zinc.600' }], light: [{ color: 'zinc.200' }] },
-  /** A picked choice after the reveal: the selected neutral (LessonStatus.tsx:30). */
+  /**
+   * A choice at rest (H3 R2 Q3): the outline control on the frame (a white/10
+   * ring, no fill, P: Button.tsx:26), so a locked-in pick, the filled
+   * segment look, reads at once against its neighbours.
+   */
+  choice: { dark: FRAME, light: [{ color: 'zinc.50' }] },
+  choiceHover: { dark: [...FRAME, { color: 'white', alpha: 0.05 }], light: [{ color: 'zinc.100' }] },
+  /** A picked choice: the selected segment (LessonStatus.tsx:30, zinc-600). */
   choiceSelected: { dark: [...FRAME, { color: 'zinc.600' }], light: [{ color: 'zinc.200' }] },
-  /** Number key cap on a choice row: zinc-800 on the zinc-700 row. */
-  keyCap: { dark: [...FRAME, { color: 'zinc.700' }, { color: 'zinc.800' }], light: [{ color: 'zinc.50' }] },
+  /** The correct choice on the reveal: the `now` tint where the payoff lands (Q3, Q9). */
+  choiceCorrect: { dark: [...FRAME, { color: 'lime.400', alpha: 0.1 }], light: [{ color: 'zinc.50' }] },
   /** Tag fill: zinc-800 on the glyph or frame (P: styles/tailwind.css:261 badge family). */
   tag: { dark: [...FRAME, { color: 'zinc.800' }], light: [{ color: 'zinc.100' }] },
   /** The state chip that rides a match line: an inverted (zinc-100) glyph. */
@@ -292,8 +311,19 @@ export const surfaces: Record<SurfaceName, { dark: Layer[]; light: Layer[] }> = 
   },
   /** The scrubber tooltip (D12, drift D13): zinc-900 under the thumb. */
   tooltip: { dark: [{ color: 'zinc.900' }], light: [{ color: 'white' }] },
-  /** A pressed choice row (R13): one step past its zinc-600 hover. */
-  choicePress: { dark: [...FRAME, { color: 'zinc.500' }], light: [{ color: 'zinc.300' }] },
+  /** A pressed choice row (R13): one step past its white/5 hover, on the frame. */
+  choicePress: { dark: [...FRAME, { color: 'white', alpha: 0.1 }], light: [{ color: 'zinc.200' }] },
+  /**
+   * The platform `primary` button (P: Button.tsx:20, the lesson's own main
+   * action, PageNavigation's Next; H3 R2 Q12): a lime-400/10 tint with a
+   * lime-400/20 ring and a lime-400 label; hover lime-500/10 with a lime-300
+   * label and ring; press one step on (lime-400/20).
+   */
+  primary: { dark: [...FRAME, { color: 'lime.400', alpha: 0.1 }], light: [{ color: 'zinc.50' }] },
+  primaryHover: { dark: [...FRAME, { color: 'lime.500', alpha: 0.1 }], light: [{ color: 'zinc.100' }] },
+  primaryPress: { dark: [...FRAME, { color: 'lime.400', alpha: 0.2 }], light: [{ color: 'zinc.200' }] },
+  /** A neutral chip (stack frame, host) that changed this step: its own white/5 tint on the panel (Q9). */
+  changedNeutral: { dark: [...PANEL, { color: 'white', alpha: 0.05 }], light: [{ color: 'zinc.100' }] },
 }
 
 /**
@@ -365,10 +395,11 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'muted tag text', kind: 'text', fg: r('inkMuted'), bg: 'tag' },
   { use: 'code-pane gutter and host note', kind: 'text', fg: { dark: 'zinc.400', light: 'zinc.400' }, bg: 'code' },
   { use: 'code-pane text', kind: 'text', fg: { dark: 'zinc.100', light: 'zinc.100' }, bg: 'code' },
-  // Controls
-  { use: 'primary button label', kind: 'text', fg: r('onAccent'), bg: 'accent' },
-  // Press is the hover fill at brightness 0.9 (label and fill together): 4.84:1, checked by the crawl.
-  { use: 'primary button label, hover and press', kind: 'text', fg: r('onAccent'), bg: 'accentHover' },
+  // Controls. The primary is the platform `primary` (Q12): lime on its own tint.
+  { use: 'primary button label', kind: 'text', fg: r('now'), bg: 'primary' },
+  { use: 'primary button label, hover', kind: 'text', fg: { dark: 'lime.300', light: 'lime.800' }, bg: 'primaryHover' },
+  { use: 'primary button label, press', kind: 'text', fg: { dark: 'lime.300', light: 'lime.800' }, bg: 'primaryPress' },
+  { use: 'primary button ring, hover (lime-300)', kind: 'graphic', fg: { dark: 'lime.300', light: 'lime.800' }, bg: 'primaryHover' },
   { use: 'secondary button label', kind: 'text', fg: r('inkMuted'), bg: 'secondary' },
   { use: 'secondary button label, hover and press', kind: 'text', fg: { dark: 'white', light: 'zinc.900' }, bg: 'secondaryHover' },
   { use: 'text button label (Skip)', kind: 'text', fg: r('inkMuted'), bg: 'frame' },
@@ -376,16 +407,22 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'selected segment label', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'segmentSelected' },
   { use: 'hovered segment label', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'segmentHover' },
   { use: 'choice label', kind: 'text', fg: r('inkSecondary'), bg: 'choice' },
-  { use: 'choice label, hover', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'choiceHover' },
+  { use: 'choice label, hover', kind: 'text', fg: { dark: 'zinc.100', light: 'zinc.900' }, bg: 'choiceHover' },
   { use: 'choice label, press', kind: 'text', fg: { dark: 'white', light: 'zinc.900' }, bg: 'choicePress' },
+  // Q4: the key numeral is a quiet muted figure, not a boxed cap.
+  { use: 'choice key numeral', kind: 'text', fg: r('inkMuted'), bg: 'choice' },
+  { use: 'choice key numeral, hover', kind: 'text', fg: r('inkMuted'), bg: 'choiceHover' },
+  { use: 'choice key numeral, press', kind: 'text', fg: r('inkSecondary'), bg: 'choicePress' },
+  { use: 'choice key numeral on a picked row', kind: 'text', fg: r('inkSecondary'), bg: 'choiceSelected' },
+  // Q3: on the reveal the other choices drop to muted ink (still 4.5:1).
+  { use: 'choice label, resolved and not the answer', kind: 'text', fg: r('inkMuted'), bg: 'choice' },
+  { use: 'choice label, the correct answer on the reveal', kind: 'text', fg: r('ink'), bg: 'choiceCorrect' },
+  { use: 'choice ✓ on the correct answer', kind: 'text', fg: r('now'), bg: 'choiceCorrect' },
+  { use: 'choice × on a wrong pick', kind: 'text', fg: r('ink'), bg: 'choice' },
+  { use: 'correct choice edge (lime-400/20 ring is decorative; the ✓ and tint carry it)', kind: 'graphic', fg: r('now'), bg: 'choiceCorrect' },
   // The earlier answer, a muted line under the prompt (G ruling 2).
   { use: '"Last time" line under the prompt', kind: 'text', fg: r('inkMuted'), bg: 'frame' },
   { use: 'picked choice label', kind: 'text', fg: r('ink'), bg: 'choiceSelected' },
-  // The ✓ and × marks take the number's slot, so they sit on the key cap (D9).
-  // Both are ink (WS1 ruling 3): the glyph shape and the "Right." / "Not
-  // quite." text carry the meaning; lime stays reserved for `now`.
-  { use: 'choice ✓ and × marks in the key slot', kind: 'text', fg: r('ink'), bg: 'keyCap' },
-  { use: 'choice key number', kind: 'text', fg: r('inkSecondary'), bg: 'keyCap' },
   { use: 'state chip text', kind: 'text', fg: { dark: 'zinc.900', light: 'white' }, bg: 'chipState' },
   // Marks that carry state without text (G: the palette rule ties every edge
   // color to a row here, so each one is contrast-tested).
@@ -398,11 +435,15 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'empty checkbox edge on frame', kind: 'graphic', fg: r('line'), bg: 'frame' },
   { use: 'diamond on the scrubber thumb', kind: 'graphic', fg: { dark: 'zinc.900', light: 'zinc.900' }, bg: 'accent' },
   {
-    use: 'changed frame or host chip: its doubled edge on a panel (R1)',
+    use: 'changed frame or host chip: its doubled edge on its white/5 tint (Q9)',
     kind: 'graphic',
-    fg: { dark: 'zinc.300', light: 'zinc.700' },
-    bg: 'panel',
+    fg: r('changed'),
+    bg: 'changedNeutral',
   },
+  { use: 'changed neutral chip text', kind: 'text', fg: r('ink'), bg: 'changedNeutral' },
+  { use: 'changed microtask chip: its doubled violet edge on its tint (Q9)', kind: 'graphic', fg: r('micro'), bg: 'chipMicro' },
+  { use: 'changed task chip: its doubled sky edge on its tint (Q9)', kind: 'graphic', fg: r('queued'), bg: 'chipQueued' },
+  { use: 'the "Pick an answer, or Skip." nudge under the prompt (Q2)', kind: 'text', fg: r('inkMuted'), bg: 'frame' },
   { use: 'scrubber tooltip on the page', kind: 'text', fg: r('ink'), bg: 'tooltip' },
   { use: 'done fill text', kind: 'text', fg: { dark: 'zinc.950', light: 'white' }, bg: 'doneFill' },
 ]
@@ -423,7 +464,7 @@ export const ink = {
 
 export const stroke = {
   line: 'border-zinc-500 print:border-zinc-500',
-  hairline: 'border-zinc-700 print:border-zinc-200',
+  hairline: 'border-white/10 print:border-zinc-200',
   now: 'border-lime-400 print:border-lime-700',
   micro: 'border-violet-400 print:border-violet-600',
   queued: 'border-sky-400 print:border-sky-700',
@@ -498,13 +539,28 @@ export const focusRingHas =
   'has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-lime-500'
 
 export const now = {
-  /** A glyph (chip, card, record) that changed this step. */
+  /** A card or row where a payoff lands (list keys: the row that receives the check; Q9). Never a chip that merely changed. */
   glyph:
     'border-lime-400 bg-lime-400/10 ring-1 ring-inset ring-lime-400 print:border-lime-700 print:ring-lime-700',
   /** A whole region (lane, console) that changed this step. */
   panel: 'border-lime-400 bg-lime-400/5 ring-1 ring-inset ring-lime-400 print:border-lime-700 print:ring-lime-700',
   /** An inverted chip (zinc-100 fill) riding a now connector: a flush 2 px ring, no offset. */
   chip: 'ring-2 ring-lime-400 print:ring-lime-700',
+} as const
+
+/**
+ * "Changed this step" (H3 R2 Q9), distinct from `now` ("lands here"): a
+ * glyph that moved, arrived or ran on this step keeps its own role hue,
+ * doubles its own edge with an inset ring (no layout shift) and takes its own
+ * tint. Never lime. Event-loop chips use it; the specimen shows both.
+ */
+export const changed = {
+  /** Stack frames and host timers: the neutral edge brightened to zinc-300, a white/5 tint. */
+  neutral: 'border-zinc-300 bg-white/5 ring-1 ring-inset ring-zinc-300 print:border-zinc-700 print:ring-zinc-700',
+  /** Microtasks: the violet edge doubled, the violet tint. */
+  micro: 'bg-violet-400/10 ring-1 ring-inset ring-violet-400 print:ring-violet-600',
+  /** Tasks: the sky edge doubled, the sky tint. */
+  queued: 'bg-sky-400/10 ring-1 ring-inset ring-sky-400 print:ring-sky-700',
 } as const
 
 // ---------------------------------------------------------------------------
@@ -563,8 +619,13 @@ export const type = {
   },
   /** Small identifiers inside glyphs (`key=0`, line numbers): mono 12, compact 16. */
   meta: { cls: 'font-mono text-2xs leading-4', size: 12, line: 16, source: 'P: tailwind.config.ts:19' },
-  /** Code pane. P: Code.tsx:137 (mono 13/24); 12 below 375 so 40 columns fit (drift T09). */
-  code: { cls: 'font-mono text-2xs leading-6 xs:text-xs', size: 12, line: 24, source: 'P: Code.tsx:137' },
+  /**
+   * Code pane. P: Code.tsx:137 (mono 13/24) from 768; 12 in the narrow
+   * variant (drift T09), so a 34-column line keeps one row on a 375 px phone
+   * now that the frame sits in the column (H3 R2 Q6) and line numbers show
+   * at every width (Q7).
+   */
+  code: { cls: 'font-mono text-2xs leading-6 vz-wide:text-xs', size: 12, line: 24, source: 'P: Code.tsx:137' },
 } as const satisfies Record<string, TypeToken>
 
 // ---------------------------------------------------------------------------
@@ -576,7 +637,7 @@ export const space = { 1: 4, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32, 12: 48 } as const
 
 /** D1. Px values for geometry, class names for markup. */
 export const radius = {
-  /** P: Code.tsx:297; mdx.tsx:154 (rounded-2xl). 0 when the frame bleeds below 640. */
+  /** P: Code.tsx:297; mdx.tsx:154 (rounded-2xl), at every width (Q6). */
   frame: { px: 16, cls: 'rounded-2xl' },
   /** P: Button.tsx:20-26; LessonStatus.tsx:93. */
   control: { px: 9999, cls: 'rounded-full' },
@@ -635,6 +696,7 @@ export type MotionTokenName =
   | 'draw'
   | 'caption'
   | 'vacate'
+  | 'land'
 
 export type TweenToken = { type: 'tween'; duration: number; ease?: readonly number[]; distance?: number }
 export type SpringToken = { type: 'spring'; stiffness: number; damping: number; mass: number; settleMs: number }
@@ -652,12 +714,13 @@ export const motion: Record<MotionTokenName, { full: TweenToken | SpringToken; r
     reduced: { type: 'tween', duration: 0.12, distance: 0 },
   },
   /**
-   * Critically damped (ratio 1.0) and tuned by its settle time: within 0.4 %
-   * of the target at 280 ms, so the sampled curve (`shell/flip.ts`) ends
-   * inside the 300 ms cap without a visible end snap (M08). omega = 27.6.
+   * Critically damped (ratio 1.0) and tuned by its settle time: within 0.6 %
+   * of the target at 260 ms, so the sampled curve (`shell/flip.ts`) ends
+   * inside the 300 ms cap without a visible end snap (M08), and a step's
+   * three beats fit 560 ms (H3 R2 Q1). omega = 27.6.
    */
   move: {
-    full: { type: 'spring', stiffness: 760, damping: 55.2, mass: 1, settleMs: 280 },
+    full: { type: 'spring', stiffness: 760, damping: 55.2, mass: 1, settleMs: 260 },
     reduced: { type: 'tween', duration: 0 },
   },
   path: { full: { type: 'tween', duration: 0.22, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
@@ -675,6 +738,35 @@ export const motion: Record<MotionTokenName, { full: TweenToken | SpringToken; r
    * frame vanishes in one frame under the arriving chip.
    */
   vacate: { full: { type: 'tween', duration: 0.1, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
+  /**
+   * The third beat of a step (H3 R2 Q1): the console line, the caption, a
+   * checkpoint's verdict and its ✓ and × arrive once the moving glyph has
+   * landed, over 160 ms. The same fade is the list-keys verdict (Q4: one
+   * rule for both visuals).
+   */
+  land: {
+    full: { type: 'tween', duration: 0.16, ease: EASE, distance: 8 },
+    reduced: { type: 'tween', duration: 0.12, distance: 0 },
+  },
+}
+
+/**
+ * One step in three beats (H3 R2 Q1), at most 560 ms: (1) the code line
+ * highlights (`highlight`, 120 ms); (2) the moving glyph travels (`move`,
+ * 280 ms, keeping its own color, with the lift); (3) the console line and
+ * the caption land (`land`, 160 ms). Back plays the beats in reverse. Bursts,
+ * scrubs and instant paths are instant; reduced motion is a crossfade with
+ * no beats. Values in ms: when each beat starts.
+ */
+export type StepBeats = { line: number; glyph: number; land: number; end: number }
+const ms = (t: TweenToken | SpringToken) => (t.type === 'tween' ? t.duration * 1000 : t.settleMs)
+const LINE_MS = ms(motion.highlight.full)
+const GLYPH_MS = ms(motion.move.full)
+const LAND_MS = ms(motion.land.full)
+export const STEP_BEATS: { forward: StepBeats; back: StepBeats; none: StepBeats } = {
+  forward: { line: 0, glyph: LINE_MS, land: LINE_MS + GLYPH_MS, end: LINE_MS + GLYPH_MS + LAND_MS },
+  back: { land: 0, glyph: LAND_MS, line: LAND_MS + GLYPH_MS, end: LAND_MS + GLYPH_MS + LINE_MS },
+  none: { line: 0, glyph: 0, land: 0, end: 0 },
 }
 
 export const motionRules = {
@@ -685,8 +777,11 @@ export const motionRules = {
   maxStaggerMs: 40,
   /** D13: two or more commands inside this window render instantly. */
   burstWindowMs: 250,
-  /** D10: one cadence (the speed toggle is gone). S: §4 rule 5 (1x). */
+  /** D10: one cadence (the speed toggle is gone). S: §4 rule 5 (1x). The base dwell. */
   playIntervalMs: 1600,
+  /** H3 R2 Q13: autoplay dwells 25 ms longer per character of narration, at most 4 s. */
+  playPerCharMs: 25,
+  playMaxMs: 4000,
   maxTransitionShareOfInterval: 0.4,
   /** P: ProblemCard/index.tsx:210 (chevron, 200 ms). */
   disclosureMs: 200,
@@ -747,6 +842,10 @@ export function liftShadow(k: number): string {
  */
 export const vzTheme = {
   highlight: `${(motion.highlight.full as TweenToken).duration * 1000}ms`,
+  /** The third beat (Q1, Q4): a verdict mark, a feedback line. */
+  land: `${(motion.land.full as TweenToken).duration * 1000}ms`,
+  /** The opening fade of the newest finale output before it relights (Q14). */
+  exit: `${(motion.exit.full as TweenToken).duration * 1000}ms`,
   ease: EASE_CSS,
   dash: DASH,
   readTint: String(opacityRole.readTint),

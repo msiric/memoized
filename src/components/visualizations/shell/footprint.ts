@@ -1,5 +1,6 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
+import { CHOICE as CHOICE_GEOMETRY, choiceGeometry, choicesHeight } from '../primitives/choice-geometry'
 import { sansWidth } from '../substrates/text-metrics'
 import { allFeedbackStrings, allRecaps } from './feedback'
 import type { PerVariant, StepThroughDescriptor, Variant } from './types'
@@ -30,6 +31,8 @@ export const FRAME = {
   nameGap: 4,
   dockGap: 16,
   barGap: 16,
+  /** On a phone the controls sit 12 under the dock (Q15). */
+  barGapNarrow: 12,
   footerGap: 16,
 } as const
 
@@ -43,10 +46,29 @@ export const CAPTION_LINE = typeScale.caption.line
 /** Checkpoint prompt lines (16/28). */
 export const PROMPT_LINE = typeScale.prompt.line
 
-/** Narrowest text width per variant: the stage at 320 px and at 768 px. */
-export const MIN_TEXT_WIDTH: PerVariant<number> = { narrow: 288, wide: 606 }
+/**
+ * Narrowest content width per variant (px at the default root): a 320 px
+ * phone, where the frame still bleeds (288 px of content, `frame-cls.ts`),
+ * and 768. From a 375 px phone the frame sits in the column (H3 R2 Q6): 309.
+ */
+export const NARROW_MIN = 288
+export const MIN_TEXT_WIDTH: PerVariant<number> = { narrow: NARROW_MIN, wide: 606 }
 /** The frame's content in the full lesson column (`vz-col`, 47.875rem): 1280 and up. */
 export const COL_TEXT_WIDTH = 766
+
+/**
+ * Width bands of the narrow variant for the lazy mount's reserve (H3 R2
+ * Q16): the content width in rem picks a band, and each band reserves the
+ * frame as laid out at its narrowest width, so the reserve is never short
+ * under any text size. `phone`: a 375 px phone (309 px of content) and up;
+ * `small`: a 320 px phone (the frame bleeds there, 288 px); `tight` and
+ * `tighter`: very large text (Chrome's
+ * "Very large" on a phone is about 12.9rem, 200 % in a lesson column about
+ * 14.9rem).
+ */
+export const BANDS = { phone: 309, small: 288, tight: 206, tighter: 152 } as const
+export type Band = keyof typeof BANDS
+export const BAND_ORDER: readonly Band[] = ['phone', 'small', 'tight', 'tighter']
 
 /**
  * Average glyph width in px, padded about 15 % above the system UI font
@@ -55,18 +77,32 @@ export const COL_TEXT_WIDTH = 766
  */
 export const GLYPH = { caption: 7.2, prompt: 8.4, note: 6.2 } as const
 
-/** Choices sit in two columns; from 768 they sit beside the prompt. */
-export const CHOICE = { height: TARGET_PX, gap: TARGET_GAP_PX, wideWidth: 168, textGap: 8, sideGap: 16 } as const
-/** The checkpoint's "Skip" text button (44 px target, about 46 px wide at 14/500). */
-export const SKIP_WIDTH = 52
+/**
+ * Checkpoint geometry lives in `primitives/choice-geometry.ts` (one model for
+ * both visuals, Q4). `sideGap` stays for the list-keys dock until it adopts
+ * the shared block.
+ */
+export const CHOICE = { ...CHOICE_GEOMETRY, sideGap: 16 } as const
+/** The checkpoint's "Skip" text button (44 px target, about 52 px wide at 14/500). */
+export const SKIP_WIDTH = CHOICE_GEOMETRY.skip
 
 /**
- * The controls bar: scrubber row, then the button row, in flow at every
- * width (the sticky dock is removed, D14).
+ * The controls bar: scrubber row, then the button row (Restart, Back, Next,
+ * Play), in flow at every width. The row wraps (Next and Play to a second
+ * row) only where it cannot fit: Back is an icon below 18rem (`vz-tight`).
  */
 export const BAR: PerVariant<number> = {
   narrow: TARGET_PX + TARGET_GAP_PX + TARGET_PX,
   wide: TARGET_PX + TARGET_GAP_PX + TARGET_PX,
+}
+/** The button row's width: Restart, Back (icon below 18rem), Next (its least width), Play, three gaps. */
+const NEXT_MIN = 88
+export function buttonRowWidth(width: number): number {
+  const back = width < 286 ? TARGET_PX : 84
+  return TARGET_PX + back + NEXT_MIN + TARGET_PX + 3 * TARGET_GAP_PX
+}
+export function barHeight(width: number): number {
+  return buttonRowWidth(width) <= width ? BAR.narrow : BAR.narrow + TARGET_GAP_PX + TARGET_PX
 }
 
 export const FOOTER: PerVariant<number> = {
@@ -96,90 +132,51 @@ export function wrapLines(text: string, maxChars: number): number {
   return lines
 }
 
-const chars = (width: number, glyph: number) => Math.floor(width / glyph)
+const chars = (width: number, glyph: number) => Math.max(1, Math.floor(width / glyph))
 
-/**
- * Key cap, gaps and row padding around a choice label (ChoiceRow: 12 + 20 +
- * 8 + label + 12), plus 4 px of slack: the width model is an average, and a
- * one-letter label ("A") is wider than it predicts.
- */
-export const CHOICE_CHROME = 56
-/** The least room the prompt keeps beside a one-row set of choices. */
-export const ROW_TEXT_MIN = 160
 /** The wide variant's threshold in px at the default root (`vz-wide`, 37.875rem). */
 export const WIDE_MIN = 606
 
 /**
- * The earlier answer after Restart (G ruling 2): one muted 12/20 line under
- * the prompt, "Last time: <label>", never a tag on the choice row. Its slot
- * is reserved under every prompt (invisible until there is a last answer),
- * so the prompt never moves.
+ * The note line under a prompt (G ruling 2, H3 R2 Q2): the earlier answer
+ * after Restart ("Last time: <label>"), or, after a press on Next while the
+ * question is open, the nudge. One muted 12/20 line, always reserved, so the
+ * prompt never moves.
  */
 export const LAST_TIME_LINE = typeScale.provenance.line
 export const lastTimeText = (label: string) => `Last time: ${label}`
-/** The longest "Last time" line a checkpoint can show (its widest choice label). */
+/** Q2: what a press on Next says while a question is open. */
+export const NUDGE_TEXT = 'Pick an answer, or Skip.'
+/** The longest note a checkpoint can show (its widest "Last time" line, or the nudge). */
 export function longestLastTime(cp: Pick<Checkpoint, 'choices'>): string {
-  const widest = [...cp.choices].sort((a, b) => sansWidth(b.label, 12) - sansWidth(a.label, 12))[0]
-  return lastTimeText(widest?.label ?? '')
+  const notes = [NUDGE_TEXT, ...cp.choices.map((c) => lastTimeText(c.value ?? c.label))]
+  return notes.sort((a, b) => sansWidth(b, 12) - sansWidth(a, 12))[0]
 }
-
-/** A checkpoint's choice column: its longest label plus the row chrome, at most 168. */
-export function choiceColumn(cp: Pick<Checkpoint, 'choices'>): number {
-  const label = Math.max(...cp.choices.map((c) => Math.ceil(sansWidth(c.label, typeScale.control.size))))
-  return Math.min(CHOICE.wideWidth, label + CHOICE_CHROME)
-}
-
-/** One row of all choices: its width. */
-export function choiceRowWidth(cp: Pick<Checkpoint, 'choices'>): number {
-  const n = cp.choices.length
-  return n * choiceColumn(cp) + (n - 1) * CHOICE.gap
-}
-
-/** The frame width (px at the default root) from which the choices sit in one row beside the prompt. */
-export function choiceRowBeside(cp: Pick<Checkpoint, 'choices'>): number {
-  return Math.max(WIDE_MIN, choiceRowWidth(cp) + CHOICE.textGap * 3 + SKIP_WIDTH + ROW_TEXT_MIN)
-}
-
-/** Height of a checkpoint's choices at frame width `width` in `variant` (one row where it fits, else two columns). */
-export function choicesBlockHeight(cp: Pick<Checkpoint, 'choices'>, variant: Variant, width: number): number {
-  const n = cp.choices.length
-  if (n <= 2) return choicesHeight(n)
-  const oneRow = variant === 'narrow' ? choiceRowWidth(cp) <= width : choiceRowBeside(cp) <= width
-  return oneRow ? CHOICE.height : choicesHeight(n)
-}
-
-export function choicesHeight(count: number): number {
-  const rows = Math.ceil(count / 2)
-  return rows * CHOICE.height + Math.max(0, rows - 1) * CHOICE.gap
-}
-
-/** Width of the checkpoint prompt below 768: beside "Skip". */
-export const NARROW_SIDE_TEXT = MIN_TEXT_WIDTH.narrow - SKIP_WIDTH - CHOICE.textGap
-/** Width of the checkpoint text from 768: beside the choices and "Skip" (8 px gaps plus 8 px padding). */
-export const WIDE_SIDE_TEXT =
-  MIN_TEXT_WIDTH.wide - 3 * CHOICE.textGap - (2 * CHOICE.wideWidth + CHOICE.gap) - SKIP_WIDTH
 
 export type DockText = {
   captions: string[]
   prompts: string[]
-  /** The longest "Last time" line per checkpoint (G ruling 2). */
+  /** The longest note line per checkpoint (G ruling 2, Q2). */
   lastTimes: string[]
   feedback: string[]
+  /** Every feedback per checkpoint (its text cell's ghosts). */
+  feedbackBy: string[][]
   maxChoices: number
   checkpoints: Pick<Checkpoint, 'choices'>[]
 }
 
 /** Every caption, prompt and feedback one preset can show in the dock. */
 export function dockText<S>(log: StepLog<S>): DockText {
-  const out: DockText = { captions: [], prompts: [], lastTimes: [], feedback: [], maxChoices: 0, checkpoints: [] }
+  const out: DockText = { captions: [], prompts: [], lastTimes: [], feedback: [], feedbackBy: [], maxChoices: 0, checkpoints: [] }
   for (const st of log.steps) out.captions.push(st.why)
   // The end caption leads with a recap of the predictions (D21).
   const end = log.steps[log.steps.length - 1].why
-  for (const r of allRecaps(log.checkpoints)) out.captions.push(`${r} ${end}`)
+  for (const r of allRecaps(log.checkpoints)) out.captions.push(`${r.lead} ${r.body} ${end}`.trim())
   for (const cp of log.checkpoints) {
     out.prompts.push(cp.prompt)
     out.lastTimes.push(longestLastTime(cp))
     out.feedback.push(...allFeedbackStrings(cp))
+    out.feedbackBy.push(allFeedbackStrings(cp))
     out.maxChoices = Math.max(out.maxChoices, cp.choices.length)
     out.checkpoints.push(cp)
   }
@@ -189,34 +186,49 @@ export function dockText<S>(log: StepLog<S>): DockText {
 const maxLines = (texts: string[], maxChars: number) => Math.max(0, ...texts.map((t) => wrapLines(t, maxChars)))
 
 /**
- * The dock estimate at the narrowest width of a variant: the taller of the
- * caption and the checkpoint block. The checkpoint's text cell holds its
- * prompt and every feedback; below 768 the choices sit under it (it shares
- * its row with "Skip"), from 768 beside it.
+ * The dock at content width `width` (px at the default root): the taller of
+ * the caption and each checkpoint block (Q4: the text cell over the choice
+ * row with Skip at its end when narrow; text beside the row from 768).
  */
-export function dockSlot(t: DockText, variant: Variant): number {
-  const width = MIN_TEXT_WIDTH[variant]
+export function dockAt(t: DockText, width: number, variant: Variant): number {
   const caption = maxLines(t.captions, chars(width, GLYPH.caption)) * CAPTION_LINE
-  if (t.maxChoices === 0) return caption
-  const choices = Math.max(...t.checkpoints.map((cp) => choicesBlockHeight(cp, variant, width)))
-  const side = variant === 'narrow' ? NARROW_SIDE_TEXT : WIDE_SIDE_TEXT
-  // Stacked, the feedback takes the full row (Skip is gone by then) and
-  // Skip takes only the prompt's line (its target overhangs, F1 ruling 2).
-  const feedbackWidth = variant === 'narrow' ? width : side
-  // The prompt with its "Last time" slot under it (G ruling 2).
-  const text = Math.max(
-    maxLines(t.prompts, chars(side, GLYPH.prompt)) * PROMPT_LINE +
-      maxLines(t.lastTimes, chars(side, GLYPH.note)) * LAST_TIME_LINE,
-    maxLines(t.feedback, chars(feedbackWidth, GLYPH.caption)) * CAPTION_LINE,
-  )
-  const checkpoint =
-    variant === 'narrow' ? Math.max(text, PROMPT_LINE) + CHOICE.textGap + choices : Math.max(text, choices)
-  return Math.max(caption, checkpoint)
+  let worst = caption
+  t.checkpoints.forEach((cp, k) => {
+    const labels = cp.choices.map((c) => c.label)
+    const g = choiceGeometry(labels)
+    const wide = variant === 'wide'
+    const oneRow = width >= Math.max(g.rowWide, WIDE_MIN)
+    const side = wide
+      ? width - CHOICE.textGap - 8 - (oneRow ? g.n * g.col + g.n * CHOICE.gap + CHOICE.skip : 2 * g.col + CHOICE.gap)
+      : width
+    // The note shares the prompt's line when both fit (Q15), else wraps under it.
+    const promptLines = wrapLines(t.prompts[k], chars(side, GLYPH.prompt))
+    const inline =
+      promptLines === 1 && [...t.prompts[k]].length * GLYPH.prompt + 16 + sansWidth(t.lastTimes[k], 12) <= side
+    const text = Math.max(
+      promptLines * PROMPT_LINE + (inline ? 0 : wrapLines(t.lastTimes[k], chars(side, GLYPH.note)) * LAST_TIME_LINE),
+      maxLines(t.feedbackBy[k] ?? [], chars(side, GLYPH.caption)) * CAPTION_LINE,
+    )
+    const choices = choicesHeight(labels, width, wide)
+    worst = Math.max(worst, wide ? Math.max(text, choices) : text + CHOICE.textGap + choices)
+  })
+  return worst
 }
 
-export function headerHeight(presetCount: number, variant: Variant): number {
-  if (presetCount < 2) return HEADER.title
-  return variant === 'narrow' ? HEADER.title + HEADER.presetRowGap + TARGET_PX : Math.max(HEADER.title, TARGET_PX)
+/** The dock estimate at the narrowest width of a variant. */
+export function dockSlot(t: DockText, variant: Variant): number {
+  return dockAt(t, variant === 'wide' ? MIN_TEXT_WIDTH.wide : NARROW_MIN, variant)
+}
+
+export function headerHeight(presetCount: number, variant: Variant, titleLines = 1): number {
+  const title = titleLines * HEADER.title
+  if (presetCount < 2) return title
+  return variant === 'narrow' ? title + HEADER.presetRowGap + TARGET_PX : Math.max(title, TARGET_PX)
+}
+
+/** Lines the frame title takes at content width `width` (16/600). */
+export function titleLines(title: string, width: number): number {
+  return wrapLines(title, chars(width, GLYPH.prompt))
 }
 
 export type FrameMetrics = { header: number; stage: number; dock: number; bar: number; footer: number; total: number }
@@ -229,44 +241,69 @@ export function presetIndex<S>(def: StepThroughDescriptor<S>, preset?: string): 
   )
 }
 
-/** The frame's footprint with preset `index` on screen (R2: per preset). */
-export function definitionMetrics<S>(def: StepThroughDescriptor<S>, index = presetIndex(def)): PerVariant<FrameMetrics> {
+/**
+ * The frame's footprint with preset `index` on screen (R2: per preset), laid
+ * out at content width `width` (px at the default root) in `variant`. The
+ * stage is fixed per variant; the title, the dock, the button row and the
+ * footer wrap with the width (Q16: the text-scaled part).
+ */
+export function metricsAt<S>(
+  def: StepThroughDescriptor<S>,
+  index: number,
+  width: number,
+  variant: Variant,
+): FrameMetrics {
   const all = def.presets.map((p) => p.log)
   const log = all[index]
   const layout = def.engine.layout([log], all)
   const text = dockText(log)
-  const metrics = (variant: Variant): FrameMetrics => {
-    const header = headerHeight(def.presets.length, variant)
-    const stage = layout.stage[variant]
-    const dock = dockSlot(text, variant)
-    const bar = BAR[variant]
-    const footer = FOOTER[variant]
-    const total =
-      2 * FRAME.border +
-      2 * FRAME.padding +
-      header +
-      FRAME.headerGap +
-      stage +
-      FRAME.stageGap +
-      STEP_BAR +
-      FRAME.nameGap +
-      dock +
-      FRAME.barGap +
-      bar +
-      FRAME.footerGap +
-      footer
-    return { header, stage, dock, bar, footer, total }
+  const header = headerHeight(def.presets.length, variant, titleLines(def.title, variant === 'wide' ? width / 2 : width))
+  const stage = layout.stage[variant]
+  const dock = dockAt(text, width, variant)
+  const bar = variant === 'wide' ? BAR.wide : barHeight(width)
+  const provenance = wrapLines(PROVENANCE_MODEL, chars(width, GLYPH.note))
+  const footer = variant === 'wide' ? FOOTER.wide : TARGET_PX + provenance * typeScale.provenance.line
+  const total =
+    2 * FRAME.border +
+    2 * FRAME.padding +
+    header +
+    FRAME.headerGap +
+    stage +
+    FRAME.stageGap +
+    STEP_BAR +
+    FRAME.nameGap +
+    dock +
+    (variant === 'wide' ? FRAME.barGap : FRAME.barGapNarrow) +
+    bar +
+    FRAME.footerGap +
+    footer
+  return { header, stage, dock, bar, footer, total }
+}
+
+/** The provenance line's longest form (the width model for its wrap). */
+const PROVENANCE_MODEL = 'Recorded from a real run in Node 24.x'
+
+/** The frame's footprint per variant: narrow at a 375 px phone (`BANDS.phone`), wide at 768. */
+export function definitionMetrics<S>(def: StepThroughDescriptor<S>, index = presetIndex(def)): PerVariant<FrameMetrics> {
+  return {
+    narrow: metricsAt(def, index, BANDS.phone, 'narrow'),
+    wide: metricsAt(def, index, MIN_TEXT_WIDTH.wide, 'wide'),
   }
-  return { narrow: metrics('narrow'), wide: metrics('wide') }
 }
 
-/** The two numbers the lazy mount needs: [narrow, wide] frame heights, for one preset (the default). */
-export function footprintOf<S>(def: StepThroughDescriptor<S>, preset?: string): readonly [number, number] {
-  const m = definitionMetrics(def, presetIndex(def, preset))
-  return [m.narrow.total, m.wide.total]
+/**
+ * The lazy mount's reserve for one preset: [narrow, wide, small, tight,
+ * tighter] frame heights in px at the default root (Q16). `narrow` is the
+ * `phone` band; the placeholder picks a band by its own width in rem.
+ */
+export type StepFootprint = readonly [number, number, number, number, number]
+export function footprintOf<S>(def: StepThroughDescriptor<S>, preset?: string): StepFootprint {
+  const i = presetIndex(def, preset)
+  const at = (w: number) => metricsAt(def, i, w, 'narrow').total
+  return [at(BANDS.phone), metricsAt(def, i, MIN_TEXT_WIDTH.wide, 'wide').total, at(BANDS.small), at(BANDS.tight), at(BANDS.tighter)]
 }
 
-/** [narrow, wide] per preset id: the lazy mount reserves the preset it renders. */
-export function presetFootprints<S>(def: StepThroughDescriptor<S>): Record<string, readonly [number, number]> {
+/** Every band per preset id: the lazy mount reserves the preset it renders. */
+export function presetFootprints<S>(def: StepThroughDescriptor<S>): Record<string, StepFootprint> {
   return Object.fromEntries(def.presets.map((p) => [p.id, footprintOf(def, p.id)]))
 }

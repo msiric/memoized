@@ -81,14 +81,17 @@ export function descriptorFor(id: string): AnyDescriptor | undefined {
 export function vizFootprint(id: string, preset?: string): readonly [number, number] | undefined {
   const d = descriptorFor(id)
   if (!d) return undefined
-  if (d.form === 'step') return footprintOf(d, preset)
+  if (d.form === 'step') {
+    const [narrow, wide] = footprintOf(d, preset)
+    return [narrow, wide] as const
+  }
   if (d.form === 'explorable') return d.footprint
   const [narrow, wide] = staticFootprints(d)[preset ?? d.defaultPreset]
   return [narrow, wide] as const
 }
 
-/** Per-preset footprints of a step-through (R2), default first (the entry table's fifth slot). */
-export function vizStepFootprints(id: string): Record<string, readonly [number, number]> | undefined {
+/** Per-preset footprints of a step-through (R2), default first (the entry table's fifth slot): [narrow, wide, small, tight, tighter] (Q16). */
+export function vizStepFootprints(id: string): Record<string, readonly number[]> | undefined {
   const d = descriptorFor(id)
   if (d?.form !== 'step') return undefined
   const all = presetFootprints(d)

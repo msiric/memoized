@@ -31,8 +31,13 @@ import type { CheckpointStatus } from './machine'
  * touch seeks only on a tap, or once the finger has moved `SLOP_PX`
  * horizontally more than vertically; a vertical gesture never changes the
  * step. While dragging, hovering (mouse) or stepping from the keyboard (it
- * lingers `tooltipLingerMs` after the last key, so it never sits over the
- * dock), a tooltip above the thumb names the step, clamped inside the slider.
+ * lingers `tooltipLingerMs` after the last key), a tooltip beside the thumb,
+ * on the track's own line, names the step: it covers ticks, never text (the
+ * dock's last line sits right above the bar, R2M-11). It flips to the
+ * thumb's left near the end and stays inside the slider.
+ *
+ * Without container queries (Q17) the thumb is placed by `left` on the rail
+ * (`--vz-at`) instead of the `cqw` transform (`src/styles/tailwind.css`).
  *
  * When the thumb sits on a checkpoint's step it carries the diamond itself,
  * so the thumb never hides whether that checkpoint was answered or skipped.
@@ -195,7 +200,10 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
     const r = rail.getBoundingClientRect()
     const centre = (r.left - host.left) / k + fraction(tip) * rail.offsetWidth
     const w = t.offsetWidth
-    t.style.left = `${Math.max(0, Math.min(hostEl.offsetWidth - w, centre - w / 2))}px`
+    // Beside the thumb (half a thumb plus a 4 px gap), on its right, or on its left where the right runs out.
+    const off = (THUMB_REM / 2) * parseFloat(getComputedStyle(document.documentElement).fontSize) + 4
+    const right = centre + off
+    t.style.left = `${right + w <= hostEl.offsetWidth ? right : Math.max(0, centre - off - w)}px`
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tip, total])
 
@@ -205,6 +213,8 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
     height: `${THUMB_REM}rem`,
     marginLeft: `-${half}`,
     transform: `translate(calc(${fraction(index)} * 100cqw), -50%)`,
+    ['--vz-at' as string]: `${fraction(index) * 100}%`,
+    ['--vz-up' as string]: '-50%',
   }
 
   return (
@@ -301,10 +311,9 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
           ref={tipRef}
           aria-hidden
           data-viz-part="scrubber-tip"
-          // It names the step above the thumb, over the bar's top edge on purpose.
-          data-viz-overhang="top"
+          // It names the step beside the thumb, on the track (R2M-11).
           data-viz-layer="overlay"
-          className={clsx('pointer-events-none absolute bottom-full left-0 z-10 mb-1 whitespace-nowrap', tooltipCls)}
+          className={clsx('pointer-events-none absolute left-0 top-1/2 z-10 -translate-y-1/2 whitespace-nowrap', tooltipCls)}
         >
           {stepLabel(tip, events[tip])}
         </div>

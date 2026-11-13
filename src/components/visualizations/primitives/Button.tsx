@@ -10,7 +10,12 @@ import { focusRing, radius, transitionCls, type as typeScale } from './tokens-v3
  * The visualization button (D2, D11, R4, R13). Colors are the platform
  * `Button` variants (`src/components/Button.tsx`), sized to a 44 px target:
  *
- * - `primary`: the platform `filled` variant (lime-500, hover lime-600).
+ * - `primary`: the platform `primary` variant (P: Button.tsx:20), the one
+ *   lessons use for their own main action (PageNavigation's Next): a
+ *   lime-400/10 tint, a lime-400/20 ring and a lime-400 label; hover
+ *   lime-500/10 with lime-300; press one step on (lime-400/20). H3 R2 Q12:
+ *   the `filled` slab repeated on every step was louder than any platform
+ *   call to action.
  * - `secondary`: the platform `outline` variant (WS1 ruling 1: the platform
  *   `secondary` fill is too faint an edge on the frame surface). The only
  *   secondary style (R4).
@@ -23,9 +28,10 @@ import { focusRing, radius, transitionCls, type as typeScale } from './tokens-v3
  * its fill to lime-600, then dims it to 0.9 on press), the keyboard focus ring, and
  * `unavailable`. Never `disabled`, so focus never drops (spec §5.1):
  * `aria-disabled` plus a click guard, drawn at the platform's `opacity-50`.
- * `waiting` is a control that will act in a moment (Next at a checkpoint,
- * R4): it renders as the outline variant, `aria-disabled`, without the
- * faded look.
+ * H3 R2 Q2: a control that cannot act always looks unavailable (no dead
+ * control looks live). `inert` draws a control as unavailable but still
+ * hands its click to the caller, for a press that redirects (Next while a
+ * question is open moves focus to the answers).
  */
 
 export type ButtonVariant = 'primary' | 'secondary' | 'text'
@@ -41,68 +47,64 @@ const base = cn(
 
 /** Rest colors per variant. P: Button.tsx:22-27 (dark values). */
 const rest: Record<ButtonVariant, string> = {
-  primary: 'bg-lime-500 text-zinc-900 print:bg-lime-700 print:text-white',
+  primary:
+    'bg-lime-400/10 text-lime-400 ring-1 ring-inset ring-lime-400/20 print:bg-transparent print:text-lime-700 print:ring-lime-700',
   secondary: 'text-zinc-400 ring-1 ring-inset ring-white/10 print:text-zinc-700 print:ring-zinc-300',
   text: 'text-zinc-400 print:text-zinc-600',
 }
 
 /** Hover (hover-capable devices only) and press (every device), one step each (R13). */
 const live: Record<ButtonVariant, string> = {
-  // Press keeps the hover fill and dims it (0.9): lime-700 was 3.55:1 under
-  // the zinc-900 label (found by the contrast crawl); dimmed lime-600 is 4.84:1.
-  primary: 'can-hover:bg-lime-600 press:bg-lime-600 press:brightness-90',
+  // P: Button.tsx:20 (hover lime-500/10, lime-300 label and ring); press one step on.
+  primary:
+    'can-hover:bg-lime-500/10 can-hover:text-lime-300 can-hover:ring-lime-300 press:bg-lime-400/20 press:text-lime-300 press:ring-lime-300',
   secondary: cn(transitionCls.hover, transitionCls.press, 'can-hover:text-white press:text-white'),
   text: cn(transitionCls.hover, transitionCls.press, 'can-hover:text-zinc-200 press:text-zinc-200'),
 }
 
 const sizes: Record<ButtonVariant, Record<ButtonSize, string>> = {
-  primary: { default: 'px-5', icon: 'w-11 px-0' },
+  primary: { default: 'px-4', icon: 'w-11 px-0' },
   secondary: { default: 'px-4', icon: 'w-11 px-0' },
   text: { default: 'px-3', icon: 'w-11 px-0' },
 }
 
 export const UNAVAILABLE = 'cursor-not-allowed opacity-50'
-/** A control that is about to act (R4): legible at rest, no hover or press, not faded. */
-export const WAITING = 'cursor-default'
 
 export function buttonClasses({
   variant = 'secondary',
   size = 'default',
   unavailable = false,
-  waiting = false,
-}: { variant?: ButtonVariant; size?: ButtonSize; unavailable?: boolean; waiting?: boolean } = {}): string {
-  return cn(
-    base,
-    rest[variant],
-    sizes[variant][size],
-    unavailable ? UNAVAILABLE : waiting ? WAITING : live[variant],
-  )
+}: { variant?: ButtonVariant; size?: ButtonSize; unavailable?: boolean } = {}): string {
+  return cn(base, rest[variant], sizes[variant][size], unavailable ? UNAVAILABLE : live[variant])
 }
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'> & {
   variant?: ButtonVariant
   size?: ButtonSize
   unavailable?: boolean
-  /** `aria-disabled` and inert, drawn at rest without the faded look (R4). */
-  waiting?: boolean
+  /**
+   * Drawn and announced as unavailable, but the click still reaches
+   * `onClick` (a press that redirects, Q2). Without it an unavailable
+   * control ignores clicks.
+   */
+  redirects?: boolean
   children: ReactNode
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'secondary', size = 'default', unavailable = false, waiting = false, className, onClick, ...rest },
+  { variant = 'secondary', size = 'default', unavailable = false, redirects = false, className, onClick, ...rest },
   ref,
 ) {
-  const inert = unavailable || waiting
   return (
     <button
       ref={ref}
       type="button"
-      aria-disabled={inert || undefined}
+      aria-disabled={unavailable || undefined}
       onClick={(e) => {
-        if (inert) return
+        if (unavailable && !redirects) return
         onClick?.(e)
       }}
-      className={cn(buttonClasses({ variant, size, unavailable, waiting }), className)}
+      className={cn(buttonClasses({ variant, size, unavailable }), className)}
       {...rest}
     />
   )
