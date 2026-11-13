@@ -454,7 +454,7 @@ function VariantStage({ data, scene, uid }: { data: EnvDiagram; scene: DiagramSc
         // Paper cannot be hovered: print keeps the space, not the words.
         <p
           data-viz-part="hint"
-          className={clsx('m-0 font-sans text-2xs leading-5 print:invisible', ink.muted)}
+          className={clsx('m-0 print:invisible', typeScale.provenance.cls, ink.muted)}
           style={{ marginBottom: HINT.gap }}
         >
           <span className="[@media(hover:none)]:hidden">{HINT.hover}</span>
