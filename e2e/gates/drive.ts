@@ -80,7 +80,20 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
     const f = page.locator(EL).first()
     await f.getByRole('slider').focus()
     await page.keyboard.press('End')
+    await page.waitForTimeout(1200)
     await settle(page)
+  },
+  // G ruling 2: after Restart the Start question names the earlier answer under the prompt.
+  'el-last-time': async (page) => {
+    await answerStart(page, 2)
+    const f = page.locator(EL).first()
+    await f.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await page.keyboard.press('Home')
+    // The step tooltip lingers after a key press; let it go so the shot is stable.
+    await page.waitForTimeout(1200)
+    await settle(page)
+    await expect(f.locator('[data-viz-part="viz-last-time"]')).toBeVisible()
   },
   'lk-ask': async () => {},
   'lk-reveal': async (page) => {
