@@ -104,7 +104,15 @@ export const RECORDER = String.raw`
       // it moves, enters or leaves is seen.
       if (state.texts.has(id) && !(el instanceof SVGElement) && cs.display !== 'inline') {
         rec.s = (el.textContent || '').trim().slice(0, 60)
-        rec.ov = (cs.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (cs.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1) ? 1 : 0
+        // Cut: the words are wider than the box that clips them, measured in
+        // sub-pixels (a box frozen at its rounded-down width ellipsizes for
+        // a third of a pixel, R2M-01, which integer scrollWidth cannot see),
+        // or a line clamp hides lines. Compared with the leaf's own rest.
+        const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth)
+        const tr = document.createRange()
+        tr.selectNodeContents(el)
+        const words = [...tr.getClientRects()].reduce((m, q) => Math.max(m, q.width), 0)
+        rec.ov = (cs.overflowX !== 'visible' && words > b.width - pad + 0.05) || (cs.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1) ? 1 : 0
         const rg = document.createRange()
         rg.selectNodeContents(el)
         rec.ln = new Set([...rg.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top - b.top))).size

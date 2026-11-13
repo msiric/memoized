@@ -418,7 +418,13 @@ export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {
         if (la !== lb && la === 0) continue
         // The moving element's raised layer hides the text under it.
         const covers = la !== lb
-        const i = clipTo(ab, bb)
+        // A glyph without text is held against the text's ink band, not its
+        // line box: the half-leading above and below a label (a fifth of a
+        // 24 px line for 14 px type) is empty, and a glyph passing through it
+        // touches no letter.
+        const glyphOnly = !texts.has(a)
+        const inset = glyphOnly ? (bb.b - bb.t) * 0.2 : 0
+        const i = clipTo(ab, { ...bb, t: bb.t + inset, b: bb.b - inset })
         if (!i) continue
         const area = (i.r - i.l) * (i.b - i.t)
         if (area <= minArea) continue

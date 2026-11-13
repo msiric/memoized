@@ -272,10 +272,11 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
         if ((e as HTMLElement).scrollWidth > (e as HTMLElement).clientWidth + 1) truncatedBy = e
         break
       }
-      // A line clamp (R2 G3): `-webkit-line-clamp` on a `-webkit-box` cuts
-      // whole lines, which shows as content taller than the box, not wider.
+      // A line clamp (R2 G3) cuts whole lines, which shows as content taller
+      // than the box, not wider. (Chromium computes a clamped box's display
+      // as `flow-root`, so the clamp itself is the signal.)
       const clamp = s.getPropertyValue('-webkit-line-clamp')
-      if (clamp && clamp !== 'none' && /-webkit-box/.test(s.display)) {
+      if (clamp && clamp !== 'none') {
         if ((e as HTMLElement).scrollHeight > (e as HTMLElement).clientHeight + 1) truncatedBy = e
         break
       }
