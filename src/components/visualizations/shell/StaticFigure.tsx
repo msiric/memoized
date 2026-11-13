@@ -50,7 +50,8 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
           figure never re-renders, so that is growth, not a shift. */}
       <p
         id={titleId}
-        className={clsx('m-0 break-words', typeScale.title.cls, ink.base, MIN_H_CLS)}
+        // Print (Q6): the title stays with the drawing it names.
+        className={clsx('m-0 break-words print:break-after-avoid', typeScale.title.cls, ink.base, MIN_H_CLS)}
         style={heights({ narrow: m.narrow.title, wide: m.wide.title, col: m.col.title })}
       >
         {p.title}
@@ -64,7 +65,10 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
         role="group"
         aria-labelledby={titleId}
         aria-describedby={descId}
-        className={clsx('relative', H_CLS)}
+        // Print (Q6): the frame may break between regions, never inside the
+        // drawing: its height is fixed, so a split would print the rest of it
+        // over the caption.
+        className={clsx('relative print:break-inside-avoid', H_CLS)}
         style={heights({ narrow: m.narrow.stage, wide: m.wide.stage, col: m.col.stage }, { marginTop: FRAME.headerGap })}
       >
         <Stage data={p.data} uid={uid} />
