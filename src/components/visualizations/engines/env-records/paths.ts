@@ -67,13 +67,14 @@ export type PathParts = {
 }
 
 /**
- * The traced path (R11). Lit: the function, its `[[Environment]]` link, the
- * record it points to, the row its body reads (and, when that row lies
+ * The traced path (R11). Lit: the function, its `[[Environment]]` link and
+ * that link's `env` label (R2M-14), the record it points to, the row its body reads (and, when that row lies
  * further out, the outer links and records the lookup walks to reach it),
  * its output, and every name that refers to it with its arrow and row.
  * Everything else, the rest of the outer chain included, keeps its rest colours.
  */
 export function pathParts(section: EnvSection, fn: EnvFunction): PathParts {
+  // `[data-o]` marks what the function owns outside its box: its output and its link's label.
   const lit = [node(fn.id), edge(`env:${fn.id}`), `[data-o=${q(fn.id)}]`, node(fn.env)]
   const read = readRow(section, fn)
   if (read) {
@@ -83,7 +84,8 @@ export function pathParts(section: EnvSection, fn: EnvFunction): PathParts {
       seen.add(at)
       const rec = section.nodes.find((n) => n.id === at)
       if (!rec || !isRecord(rec) || !rec.outer) break
-      lit.push(edge(`outer:${rec.id}`), node(rec.outer))
+      // The link, its label (`data-o`, its owner) and the record it reaches.
+      lit.push(edge(`outer:${rec.id}`), `[data-o=${q(rec.id)}]`, node(rec.outer))
       at = rec.outer
     }
     lit.push(row(read.record, read.name))

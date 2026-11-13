@@ -69,6 +69,8 @@ const C = {
   rowTint: 'vz-rt',
   /** An unused (hatched) record: its text is knocked out of the hatch. */
   unused: 'vz-u',
+  /** A link's label: muted at rest, lit with its link (R2M-14, `data-o` names the path's owner). */
+  edgeLabel: 'vz-el',
   result: 'vz-r',
   hatch: 'vz-x',
 } as const
@@ -273,7 +275,7 @@ function Text({ t }: { t: LaidText }) {
     t.kind === 'output'
       ? clsx(C.result, 'vz-c')
       : t.kind === 'label'
-        ? clsx('vz-12', C.muted)
+        ? C.edgeLabel
         : clsx('vz-12 font-sans', C.muted)
   return (
     <text

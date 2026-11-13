@@ -267,18 +267,36 @@ test('rest is grey; the traced path is lime: function, link, record, the row it 
         alias: c('[data-edge="ref:module.sameCounter"] .vz-e'),
         row: c('[data-node=callA] [data-b=count]', 'fill'),
         held: c('[data-node=module] .vz-g'),
+        // The label naming fA's link (R2M-14): muted text at rest, lit with its link.
+        label: c('[data-edge="env:fA"] .vz-el[data-o=fA]', 'fill'),
       }
     })
   const grey = 'rgb(113, 113, 122)'
   const rest = await colors()
   expect([rest.fn, rest.env, rest.record, rest.alias, rest.held]).toEqual([grey, grey, grey, grey, grey])
   expect(rest.row).toBe('rgba(0, 0, 0, 0)')
+  expect(rest.label, 'zinc-400, text contrast at rest').toBe('rgb(161, 161, 170)')
   await svg.locator('[data-node="fA"]').hover()
   await page.waitForTimeout(300)
   const lit = await colors()
   const lime = 'rgb(163, 230, 53)'
-  expect([lit.fn, lit.env, lit.record, lit.alias, lit.row]).toEqual([lime, lime, lime, lime, lime])
+  expect([lit.fn, lit.env, lit.record, lit.alias, lit.row, lit.label]).toEqual([lime, lime, lime, lime, lime, lime])
   expect(lit.held, 'the module holds the names; it is not what fA remembers').toBe(grey)
+})
+
+test('every link label uses one word at every width: env and outer (critique F-CL-05)', async ({ page }) => {
+  const words = new Set<string>()
+  for (const width of WIDTHS) {
+    await open(page, width)
+    const seen = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-viz="environment-records"] svg.vz-s .vz-el')]
+        .filter((t) => t.getBoundingClientRect().width > 0)
+        .map((t) => t.textContent!),
+    )
+    expect(seen.length, `labels at ${width}`).toBeGreaterThan(0)
+    seen.forEach((w) => words.add(w))
+  }
+  expect([...words].sort()).toEqual(['env', 'outer'])
 })
 
 test('every function has a touch target of at least 44 px', async ({ page }) => {

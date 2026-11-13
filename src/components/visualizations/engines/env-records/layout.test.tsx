@@ -12,7 +12,7 @@ import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
 import { lintEnvDiagram } from './lint'
 import { CONTAINER, EnvRecordsStage, hitBands } from './EnvRecordsStage'
-import { HINT, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
+import { HINT, LABELS, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
 import { sansWidth } from '../../substrates/text-metrics'
 import type { EnvSection } from './model'
 
@@ -102,13 +102,18 @@ describe.each(cases)('environment-records %s', (_name, data, variant) => {
         const labels = s.texts
           .filter((t) => t.kind === 'label')
           .map((t) => t.text)
-        if (kinds.has('env'))
-          expect(
-            labels.some((l) => l === 'env' || l === '[[Environment]]'),
-            s.id,
-          ).toBe(true)
-        if (kinds.has('outer')) expect(labels, s.id).toContain('outer')
+        // One word per kind at every width (critique F-CL-05), never a fallback.
+        if (kinds.has('env')) expect(labels, s.id).toContain(LABELS.env)
+        if (kinds.has('outer')) expect(labels, s.id).toContain(LABELS.outer)
+        expect(labels.every((l) => l === LABELS.env || l === LABELS.outer), s.id).toBe(true)
       }
+  })
+
+  it('names the owner of each labelled link, so the label lights with its path (R2M-14)', () => {
+    for (const { scenes } of scene.sections)
+      for (const s of scenes)
+        for (const t of s.texts.filter((x) => x.kind === 'label'))
+          expect(t.node, t.edge).toBe(t.edge!.slice(t.edge!.indexOf(':') + 1))
   })
 
   it('rests every link in the line role: lime is only the traced path (R1)', () => {
