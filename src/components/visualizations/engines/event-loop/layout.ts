@@ -1,5 +1,5 @@
 import type { StepLog } from '../../step-log/types'
-import { CODE_GUTTER, NARROW_CODE_COLS, codePaneHeight, codeRows as visualRows } from '../../shell/code-geometry'
+import { CODE_GUTTER, NARROW_CODE_COLS, codePaneHeight, codeRows as visualRows, hasHostNote } from '../../shell/code-geometry'
 import type { EngineLayout, PerVariant, Variant } from '../../shell/types'
 import { monoWidth } from '../../substrates/text-metrics'
 import type { ElChip, EventLoopState } from './model'
@@ -333,7 +333,7 @@ export function eventLoopMetrics(
     narrow: Math.min(G.codeRowsNarrow, narrowRows),
     wide: wideRows <= G.codeRowsMax ? wideRows : G.codeRowsWindow,
   }
-  const code = per((v) => codePaneHeight(codeRows[v]))
+  const code = per((v) => codePaneHeight(codeRows[v], hasHostNote(logs)))
   const stackContent = (v: Variant) =>
     maxStack * G.frame[v] + (maxStack - 1) * G.frameGap
   const queueContent = (v: Variant) =>

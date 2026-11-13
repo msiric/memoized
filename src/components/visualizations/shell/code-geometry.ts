@@ -37,8 +37,18 @@ export const CODE_GUTTER = 8 + 12 + 24 + 8
 /** A 16 px status line under the code (plus the bottom padding), so the host note never covers code. */
 export const CODE_STATUS = 16
 
-export function codePaneHeight(rows: number): number {
-  return rows * LINE + 2 * CODE_PAD + CODE_STATUS
+/**
+ * The pane's height for `rows` code rows. The host-note line is reserved only
+ * when a step of the log runs outside the code (`line: 'host'`): a pane that
+ * never shows the note keeps no empty band (H3 INTEG 6).
+ */
+export function codePaneHeight(rows: number, hostNote = false): number {
+  return rows * LINE + 2 * CODE_PAD + (hostNote ? CODE_STATUS : 0)
+}
+
+/** Whether any step of these logs is a host step (the pane shows its note). */
+export function hasHostNote(logs: readonly { steps: readonly { line?: unknown }[] }[]): boolean {
+  return logs.some((l) => l.steps.some((s) => s.line === 'host'))
 }
 
 /** Rows to translate so `anchor` (1-based) sits in the middle of a `rows`-tall window. */

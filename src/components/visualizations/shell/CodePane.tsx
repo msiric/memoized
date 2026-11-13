@@ -57,9 +57,23 @@ export type CodePaneProps = {
   trace?: CodeTrace | null
   /** The trace plays now (the reveal): each line lights after its delay. */
   playTrace?: boolean
+  /** Reserve the "host: not a line of your code" line (a log with host steps, INTEG 6). */
+  hostNote?: boolean
 }
 
-export function CodePane({ lines, tokens, line, anchor, rows, height, cols, animate, trace, playTrace = false }: CodePaneProps) {
+export function CodePane({
+  lines,
+  tokens,
+  line,
+  anchor,
+  rows,
+  height,
+  cols,
+  animate,
+  trace,
+  playTrace = false,
+  hostNote = false,
+}: CodePaneProps) {
   const [from, to] = typeof line === 'number' ? [line, line] : Array.isArray(line) ? line : [0, -1]
   const traced = new Map((trace?.lines ?? []).map((l, k) => [l, trace?.delaysMs[k] ?? 0]))
   const offset: PerVariant<number> = {
@@ -96,7 +110,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
         H_CLS,
       )}
       style={heights(
-        height ?? { narrow: codePaneHeight(rows.narrow), wide: codePaneHeight(rows.wide) },
+        height ?? { narrow: codePaneHeight(rows.narrow, hostNote), wide: codePaneHeight(rows.wide, hostNote) },
         cols
           ? {
               ['--vz-cols' as string]: String(cols),
@@ -214,15 +228,17 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
           })}
         </ol>
       </div>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 flex items-start justify-end bg-zinc-900 px-2 print:hidden"
-        style={{ height: rem(CODE_STATUS + CODE_PAD) }}
-      >
-        <span className={clsx('font-sans text-2xs leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}>
-          host: not a line of your code
-        </span>
-      </div>
+      {hostNote ? (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 flex items-start justify-end bg-zinc-900 px-2 print:hidden"
+          style={{ height: rem(CODE_STATUS + CODE_PAD) }}
+        >
+          <span className={clsx('font-sans text-2xs leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}>
+            host: not a line of your code
+          </span>
+        </div>
+      ) : null}
     </div>
   )
 }

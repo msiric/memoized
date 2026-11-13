@@ -23,7 +23,7 @@ import { Provenance } from '../primitives/Provenance'
 import { SegmentedControl } from '../primitives/SegmentedControl'
 import { TARGET_GAP_PX, ink, motion, motionRules, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
-import { CodePane, codeRows } from './CodePane'
+import { CodePane, codeRows, hasHostNote } from './CodePane'
 import { CHOICE, FRAME, STEP_BAR, choiceColumn, choiceRowBeside, choiceRowWidth, definitionMetrics } from './footprint'
 import { RECAP_NONE, allFeedback, allRecaps, feedbackText, recapText } from './feedback'
 import {
@@ -423,6 +423,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
 
   // ---- render -------------------------------------------------------------
   const stageLabel = def.engine.describe(step.state)
+  const hostNote = useMemo(() => hasHostNote([log]), [log])
   const codePane = log.code ? (
     <CodePane
       lines={log.code.lines}
@@ -438,6 +439,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       animate={animate}
       trace={def.engine.codeTrace?.(log, s.index)}
       playTrace={gate.reveal && !gate.reduce}
+      hostNote={hostNote}
     />
   ) : null
   const Stage = def.engine.Stage
