@@ -105,11 +105,13 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   frame's height, stepping never does. The entry table carries per-preset
   heights for the lazy mount; `footprint.ts` only estimates them. The
   list-keys dock works the same way (`engines/list-keys/DockGhosts.tsx`, a
-  ghost of every verdict). Nothing reserves a band no state needs (F1 and F2
+  ghost of every verdict, and of every choice set, so a wrapped label never
+  moves the page). Nothing reserves a band no state needs (F1 and F2
   rulings 2): stacked, Skip's target rises into the step bar so the prompt
   row is one line, the feedback takes the full row, and checkpoint copy
   fits one line on a 375 px phone; the list-keys verdict is two short
-  sentences, with its tally in the action row.
+  sentences, with its tally as the note line under it (where "Last time"
+  sits under the question).
 - **Checkpoints (D9, R4).** The choice rows stay in place and their number
   slot becomes ✓ or ×; the feedback is the shared `Feedback` line. Next
   waits as the outline variant (`waiting`), Skip is a muted text button.
@@ -150,14 +152,23 @@ reduced motion, and it never moves the page. Elements that play it carry
 - **List keys.** Each carried checkbox lifts out of its Before box (which
   empties), rides its own match line as the line draws behind it, and
   settles into the After box its instance now renders (`CheckRider.tsx`,
-  Web Animations, one curve for rider and lines, a single 120 ms settle).
-  The checkbox sits on the card edge that faces the lines, so the path never
-  crosses row text or an instance letter; a second check leaves only once it
-  can no longer meet the first. Instance letters show as their lines arrive;
-  the verdict, the ✓ and × in the choice slots, badges and tally fade in
-  (160 ms) after the last landing (`reveal.ts` holds the timeline). The key
-  and the action are always-visible controls, and under very large text the
-  columns stack, Before above After, with the lines in a rail (`stack-css.ts`).
+  Web Animations, one curve for rider and lines; the 120 ms settle is the
+  end of the travel, so the landing is the end of the motion). The checkbox
+  sits on the card edge that faces the lines, so the path never crosses row
+  text or an instance letter; a second check leaves only once it can no
+  longer meet the first. Instance letters replace their `?` as their lines
+  arrive (never a blank cell). After the last landing the outcome arrives in
+  one ordered sequence, a 40 ms beat apart, each a 160 ms fade (`BEAT` in
+  `reveal.ts`): the lime landing on the row that received the check, the
+  in-row badges (Before and After) with the removed role, the verdict with
+  the ✓ and × and the answer emphasis (narrated as it appears), and last the
+  Before checks as a quiet record of the starting state, so a check never
+  reads as copied. Lime is only the landing, the traced line and the correct
+  choice (Q9). The key and the action are always-visible controls, the same
+  shape in one block: where the four actions need the select, the key is a
+  select too. Under very large text, or without container queries, the
+  columns stack, Before above After, with the lines in a rail
+  (`stack-css.ts`).
 - **Closures.** No script. At rest every link is `line` grey (lime means
   current, chosen or traced). Hovering a function, focusing it from the
   keyboard (`:focus-visible`) or tapping it on a device that cannot hover
