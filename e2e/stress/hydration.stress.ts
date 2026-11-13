@@ -25,6 +25,8 @@ const PAGES = [
   '/dev/visualizations?lk=parent-type-change',
   '/dev/visualizations/lesson/event-loop',
   '/dev/visualizations/lesson/closures',
+  // The committed stand-in lesson body for list keys (R2 G-02).
+  '/dev/visualizations/lesson/list-keys',
 ]
 const CONFIGS: Config[] =
   TIER === 'full'
@@ -54,6 +56,18 @@ async function zoomText(page: Page, c: Config) {
   const k = parseFloat(c.rootFont) / 100
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Page.setFontSizes', { fontSizes: { standard: Math.round(16 * k), fixed: Math.round(13 * k) } })
+}
+
+/**
+ * R2 G10: the browser's font-size setting can fall back to 16 px during a
+ * session, and a text-zoom gate would then measure at the default size
+ * without noticing. The root size is asserted where each measure is taken.
+ */
+async function zoomHeld(page: Page, c: Config, rec: Recorder, url: string, where: string) {
+  if (!c.rootFont) return
+  const want = (16 * parseFloat(c.rootFont)) / 100
+  const root = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
+  if (Math.abs(root - want) > 0.5) rec.note(url, where, 'text-zoom-lost', `the root font size is ${root} px, expected ${want} px: the measure ran without text zoom`)
 }
 
 type Box = { id: string; x: number; y: number; w: number; h: number; afterY: number | null }
@@ -104,6 +118,7 @@ for (const c of CONFIGS)
           await off.close()
           continue
         }
+        await zoomHeld(p0, c, rec, url, 'server')
         const server = await boxes(p0)
         for (const [i, b] of server.entries())
           await p0
@@ -158,6 +173,7 @@ for (const c of CONFIGS)
         }
         await page.evaluate(() => window.scrollTo(0, 0))
         await settle(page, 100)
+        await zoomHeld(page, c, rec, url, 'hydrated')
         const live = await boxes(page)
         for (const s of server) {
           const l = live.find((b) => b.id === s.id)

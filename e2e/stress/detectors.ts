@@ -11,7 +11,7 @@ import type { Page } from '@playwright/test'
  *                    or a partially visible line vertically; fully hidden lines in a
  *                    windowed pane are intentional and ignored)
  *  - text-spill      text drawn outside its own block box (overflow: visible)
- *  - truncation      text-overflow: ellipsis actually truncating (counted separately)
+ *  - truncation      text-overflow: ellipsis or a -webkit-line-clamp actually cutting text (counted separately)
  *  - text-overlap    two visible runs of HTML text overlap (after clipping), e.g. a
  *                    footer line drawn over the printed text alternative
  *  - region-overflow a visible element or text outside its [data-viz-region] box,
@@ -272,6 +272,13 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
         if ((e as HTMLElement).scrollWidth > (e as HTMLElement).clientWidth + 1) truncatedBy = e
         break
       }
+      // A line clamp (R2 G3): `-webkit-line-clamp` on a `-webkit-box` cuts
+      // whole lines, which shows as content taller than the box, not wider.
+      const clamp = s.getPropertyValue('-webkit-line-clamp')
+      if (clamp && clamp !== 'none' && /-webkit-box/.test(s.display)) {
+        if ((e as HTMLElement).scrollHeight > (e as HTMLElement).clientHeight + 1) truncatedBy = e
+        break
+      }
       if (styleOf(e).display !== 'inline') break
     }
     if (truncatedBy && !reported.has(`trunc:${sig(truncatedBy)}`)) {
@@ -280,7 +287,10 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
       push({
         detector: 'truncation',
         sig: sig(truncatedBy),
-        msg: `"${text}" truncated: scrollWidth ${h.scrollWidth} > clientWidth ${h.clientWidth}`,
+        msg:
+          h.scrollHeight > h.clientHeight + 1 && h.scrollWidth <= h.clientWidth + 1
+            ? `"${text}" clamped: scrollHeight ${h.scrollHeight} > clientHeight ${h.clientHeight}`
+            : `"${text}" truncated: scrollWidth ${h.scrollWidth} > clientWidth ${h.clientWidth}`,
         rects: [page(R(h.getBoundingClientRect()))],
         data: { scrollWidth: h.scrollWidth, clientWidth: h.clientWidth, text: node.data.slice(0, 120) },
       })

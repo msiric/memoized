@@ -64,7 +64,14 @@ export default function VisualizationGalleryPage({
                   Pick a key strategy and an action, predict, then see which instance React matched to each row.
                   Every outcome is recorded from real React 18 and 19 renders.
                 </p>
-                <Viz id="list-keys" preset={searchParams.lk} />
+                {/* `?mount=client` mounts it client-only too: the lazy placeholder under test (Q16). */}
+                {searchParams.mount === 'client' ? (
+                  <ClientOnly>
+                    <Viz id="list-keys" preset={searchParams.lk} />
+                  </ClientOnly>
+                ) : (
+                  <Viz id="list-keys" preset={searchParams.lk} />
+                )}
                 <p>Text after the explorable, to show it never moves while exploring.</p>
               </>
             )}

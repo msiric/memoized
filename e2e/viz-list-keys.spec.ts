@@ -598,3 +598,38 @@ test('screenshots at 320, 375, 768, 1024 and 1440', async ({
     await shot(f, `lk-${width}-wrapper-type`)
   }
 })
+
+test('lazy mount under text zoom: the placeholder reserves at least the live frame (Q16)', async ({ page }) => {
+  // The reader's root font size, held by a style tag (R2 G10), asserted
+  // before each measure; both scenes (the wrapper is its own preset). The
+  // supported sizes (R9): 200 % on a 375 phone is recorded only (F2 ruling 3).
+  for (const [width, zoom, query] of [
+    [375, 150, ''],
+    [320, 150, ''],
+    [1280, 200, ''],
+    [768, 125, ''],
+    [375, 150, '&lk=parent-type-change'],
+  ] as const) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.addInitScript((z) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('zoom')?.remove()
+        const s = document.createElement('style')
+        s.id = 'zoom'
+        s.textContent = `html{font-size:${z}% !important}`
+        document.head.append(s)
+      })
+    }, zoom)
+    await page.goto(`${GALLERY}?spacer=1&mount=client${query}`)
+    const root = () => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
+    expect(await root()).toBe((16 * zoom) / 100)
+    const placeholder = mount(page).locator('[data-viz-placeholder]')
+    await expect(placeholder).toHaveCount(1)
+    const reserved = (await placeholder.boundingBox())!.height
+    await mount(page).scrollIntoViewIfNeeded()
+    await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
+    expect(await root()).toBe((16 * zoom) / 100)
+    const live = (await frame(page).boundingBox())!.height
+    expect(reserved, `${width} at ${zoom} %${query}: reserve ${reserved} vs live ${live}`).toBeGreaterThanOrEqual(live - 0.5)
+  }
+})

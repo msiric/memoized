@@ -8,6 +8,8 @@ const routes = [
   '/dev/visualizations/stress',
   '/dev/visualizations/lesson/event-loop',
   '/dev/visualizations/lesson/closures',
+  '/dev/visualizations/lesson/list-keys',
+  '/dev/visualizations?lk=parent-type-change',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {
