@@ -13,13 +13,17 @@ const GALLERY = '/dev/visualizations?static=1'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
 const PRESETS = ['var-vs-let-loop', 'factory-calls-vs-aliases'] as const
 // entry-table.ts (checked against the computed footprint by registry.test.ts).
+// `col`: the full lesson column (vz-col, from 1280), whose caption reserve is
+// only the lines it needs there (INTEG 4).
 const FOOTPRINT: Record<
   (typeof PRESETS)[number],
-  { narrow: number; wide: number }
+  { narrow: number; wide: number; col: number }
 > = {
-  'var-vs-let-loop': { narrow: 890, wide: 572 },
-  'factory-calls-vs-aliases': { narrow: 814, wide: 550 },
+  'var-vs-let-loop': { narrow: 890, wide: 572, col: 572 },
+  'factory-calls-vs-aliases': { narrow: 814, wide: 550, col: 526 },
 }
+/** The footprint tier a viewport width shows (the frame's container width decides). */
+const tierOf = (width: number) => (width < 768 ? 'narrow' : width < 1280 ? 'wide' : 'col')
 /** The section layout each width shows (stage 288/343 stacked; 606/638/734 in two columns). */
 const SECTION_WIDTH: Record<(typeof WIDTHS)[number], number> = {
   320: 288,
@@ -96,6 +100,7 @@ test('client-only render: the placeholder reserves each preset footprint, then t
   for (const [width, variant] of [
     [375, 'narrow'],
     [1024, 'wide'],
+    [1440, 'col'],
   ] as const) {
     await open(page, width, '&mount=client')
     for (const p of PRESETS)
@@ -108,7 +113,7 @@ test('client-only render: the placeholder reserves each preset footprint, then t
 test('fixed footprint and no overflow at any width', async ({ page }) => {
   for (const width of WIDTHS) {
     await open(page, width)
-    const variant = width < 768 ? 'narrow' : 'wide'
+    const variant = tierOf(width)
     for (const p of PRESETS) {
       expect(
         (await figure(page, p).boundingBox())!.height,

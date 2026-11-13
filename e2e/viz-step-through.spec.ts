@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
 
 /**
  * The event-loop specimen on /dev/visualizations, through the real `<Viz>`
@@ -12,7 +13,8 @@ const WIDTHS = [320, 375, 768, 1024, 1440] as const
 // entry-table.ts: the client-only placeholder's estimate, an upper bound. The
 // live dock is measured (a ghost stack, D15), so the frame is at most this tall.
 // Basics, the default preset (entry-table.ts; per preset, R2).
-const FOOTPRINT = { narrow: 840, wide: 584 }
+const [, FOOT_N, FOOT_W] = VIZ_TABLE['event-loop']
+const FOOTPRINT = { narrow: FOOT_N, wide: FOOT_W }
 
 const mount = (page: Page) => page.locator('[data-viz="event-loop"]')
 const frame = (page: Page) => mount(page).locator('section')
