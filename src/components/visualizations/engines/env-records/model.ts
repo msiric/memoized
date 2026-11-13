@@ -47,6 +47,12 @@ export type EnvFunction = {
   env: string
   /** What calling it printed in the verified run, shown as `› value`. */
   logs?: string
+  /**
+   * The binding its body reads, resolved along its environment chain
+   * (`lookup`): hovering the function lights that row (VIZ-H R11), and the
+   * truth test checks the row holds what the function logged.
+   */
+  reads?: string
 }
 
 /** An empty place under a record, saying why nothing is there (`no ƒ`). */
@@ -67,8 +73,6 @@ export type EnvSection = {
   /** The part of the heading that differs between sections (`var`, `let`), set in full ink. */
   emphasis?: string
   nodes: EnvNode[]
-  /** The single highlight of the section (§1 P4): the edges that teach it. */
-  highlight: EdgeId[]
   /** A muted note under the diagram, for what a mark alone cannot say. */
   note?: string
   /** The mark the note explains, drawn as a swatch before it instead of a word (D22). */
@@ -101,14 +105,25 @@ export function lookup(
   fnId: string,
   name: string,
 ): EnvValue | undefined {
+  return resolve(section, fnId, name)?.binding.value
+}
+
+/** Where a lookup of `name` from a function lands: the record and its binding. */
+export function resolve(
+  section: EnvSection,
+  fnId: string,
+  name: string,
+): { record: EnvRecord; binding: EnvBinding } | undefined {
   const fn = nodeById(section, fnId)
   if (!isFunction(fn)) throw new Error(`${fnId} is not a function`)
   let at: string | null = fn.env
-  while (at) {
+  const seen = new Set<string>()
+  while (at && !seen.has(at)) {
+    seen.add(at)
     const rec = nodeById(section, at)
     if (!isRecord(rec)) throw new Error(`${at} is not a record`)
-    const b = rec.bindings.find((x) => x.name === name)
-    if (b) return b.value
+    const binding = rec.bindings.find((x) => x.name === name)
+    if (binding) return { record: rec, binding }
     at =
       rec.outer && section.nodes.some((n) => n.id === rec.outer)
         ? rec.outer

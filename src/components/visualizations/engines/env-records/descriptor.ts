@@ -4,11 +4,13 @@ import type {
   StaticTextAlternative,
 } from '../../shell/static-types'
 import { layoutDiagramSafe } from './layout'
+import { aliasesOf } from './paths'
 import {
   isFunction,
   isRecord,
   isSlot,
   nodeById,
+  resolve,
   type EnvDiagram,
   type EnvNode,
   type EnvSection,
@@ -48,19 +50,24 @@ function describeSection(s: EnvSection): string[] {
       out.push(line)
     } else if (isFunction(n)) {
       const logs = n.logs === undefined ? '' : `; calling it logs ${n.logs}`
-      const hl = s.highlight.includes(`env:${n.id}`) ? ' (highlighted)' : ''
+      const hit = n.reads ? resolve(s, n.id, n.reads) : undefined
+      const reads =
+        hit && 'text' in hit.binding.value
+          ? `; it reads ${hit.binding.name} = ${hit.binding.value.text}${hit.record.id === n.env ? '' : ` in ${quoted(s, hit.record.id)}`}`
+          : ''
       out.push(
-        `Function ƒ ${full(n)}: its [[Environment]] link points to ${quoted(s, n.env)}${hl}${logs}.`,
+        `Function ƒ ${full(n)}: its [[Environment]] link points to ${quoted(s, n.env)}${reads}${logs}.`,
       )
     } else if (isSlot(n)) {
       out.push(`Under ${quoted(s, n.under)}: ${full(n)}.`)
     }
   }
-  const refs = s.highlight
-    .filter((h) => h.startsWith('ref:'))
-    .map((h) => h.slice(4).split('.')[1])
-  if (refs.length)
-    out.push(`Highlighted: ${refs.join(' and ')} point to the same function.`)
+  // Aliasing: two names for one function are one closure, not two.
+  for (const fn of s.nodes.filter(isFunction)) {
+    const names = aliasesOf(s, fn.id).map((a) => a.name)
+    if (names.length > 1)
+      out.push(`${names.slice(0, -1).join(', ')} and ${names[names.length - 1]} name the same function, ƒ ${full(fn)}.`)
+  }
   if (s.note) out.push(s.noteMark === 'hatch' ? `Hatched: ${s.note}` : s.note)
   return out
 }

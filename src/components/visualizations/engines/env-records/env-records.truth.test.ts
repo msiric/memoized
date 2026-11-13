@@ -77,7 +77,7 @@ describe.each(envRecordsDescriptor.presets.map((p) => [p.id, p] as const))(
           section.id,
         ).toEqual(program.observed)
         for (const f of fns) {
-          const v = lookup(section, f.id, 'i')
+          const v = lookup(section, f.id, f.reads ?? '')
           expect(
             v && 'text' in v ? v.text : undefined,
             `${section.id}/${f.id}`,
@@ -87,6 +87,21 @@ describe.each(envRecordsDescriptor.presets.map((p) => [p.id, p] as const))(
     })
   },
 )
+
+describe('the traced row is the binding the function really reads (R11)', () => {
+  it.each(envRecordsDescriptor.presets.map((p) => [p.id, p] as const))('%s', (_id, preset) => {
+    for (const section of preset.data.sections)
+      for (const f of section.nodes.filter(isFunction)) {
+        // Every function names what it reads, and the lookup finds it on its chain.
+        expect(f.reads, `${section.id}/${f.id}`).toBeDefined()
+        const v = lookup(section, f.id, f.reads!)
+        expect(v && 'text' in v, `${section.id}/${f.id} reads ${f.reads}`).toBe(true)
+        // The body really mentions it (the lesson's own code).
+        const program = preset.programs.find((p) => p.id === section.id)!
+        expect(program.snippet).toMatch(new RegExp(`\\b${f.reads}\\b`))
+      }
+  })
+})
 
 describe('the closures figures say what the lesson verifies', () => {
   it('var logs 3, 3, 3 and let logs 0, 1, 2', () => {

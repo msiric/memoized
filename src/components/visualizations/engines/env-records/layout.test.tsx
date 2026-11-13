@@ -11,8 +11,9 @@ import {
 import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
 import { lintEnvDiagram } from './lint'
-import { CONTAINER, EnvRecordsStage } from './EnvRecordsStage'
-import { SIZE, layoutDiagram, layoutSection, type SectionScene } from './layout'
+import { CONTAINER, EnvRecordsStage, hitBands } from './EnvRecordsStage'
+import { HINT, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
+import { sansWidth } from '../../substrates/text-metrics'
 import type { EnvSection } from './model'
 
 /**
@@ -110,14 +111,12 @@ describe.each(cases)('environment-records %s', (_name, data, variant) => {
       }
   })
 
-  it('draws the section highlight, and only it, in the `now` role', () => {
-    for (const { section, scenes } of scene.sections)
-      expect(
-        scenes[0].edges
-          .filter((e) => e.now)
-          .map((e) => e.id)
-          .sort(),
-      ).toEqual([...section.highlight].sort())
+  it('rests every link in the line role: lime is only the traced path (R1)', () => {
+    const html = renderToStaticMarkup(<EnvRecordsStage data={data} uid="x" />)
+    const markup = html.replace(/<style>[\s\S]*?<\/style>/, '')
+    // Links, heads and dots draw in currentColor (line grey at rest); no `now` class is left.
+    expect(markup).not.toMatch(/\bvz-n\b|\bvz-nf\b|lime/)
+    expect(markup).not.toMatch(/\bitalic\b/)
   })
 
   it('switches every width with a literal container-query class', () => {
@@ -129,7 +128,7 @@ describe.each(cases)('environment-records %s', (_name, data, variant) => {
 describe('the layout follows the links', () => {
   const [varSection, letSection] = envRecordsDescriptor.presets[0].data.sections
   const at = (s: EnvSection, w: number) =>
-    layoutSection(s, w, w, new Set(s.highlight))
+    layoutSection(s, w, w)
 
   it('var: three [[Environment]] arrows converge on one record', () => {
     const s = at(varSection, 343)
@@ -165,7 +164,7 @@ describe('the layout follows the links', () => {
 describe('factory: functions beside the module (D18)', () => {
   const [counters] = envRecordsDescriptor.presets[1].data.sections
   it.each([288, 295, 343, 359])('aliases converge on one function without a detour @ %i', (w) => {
-    const s = layoutSection(counters, w, Math.min(w, 288), new Set(counters.highlight))
+    const s = layoutSection(counters, w, Math.min(w, 288))
     const box = (id: string) => s.boxes.find((b) => b.id === id)!.rect
     const mod = box('module')
     for (const f of ['fA', 'fB']) expect(box(f).x).toBeGreaterThan(mod.x + mod.w)
@@ -240,12 +239,49 @@ describe('text width model (A6)', () => {
   })
 })
 
-describe('static markup budget (spec §6.5: 30 KB raw per figure)', () => {
+describe('static markup budget (spec §6.5, raised to 36 KB by H3 R11 for the traced path)', () => {
   it.each(envRecordsDescriptor.presets.map((p) => [p.id, p.data] as const))(
     '%s',
     (_id, data) => {
       const html = renderToStaticMarkup(<EnvRecordsStage data={data} uid="x" />)
-      expect(html.length).toBeLessThan(30_000)
+      expect(html.length).toBeLessThan(36_000)
     },
   )
+})
+
+describe('the interaction hint (R11)', () => {
+  it('fits one line at the narrowest stage, in both wordings', () => {
+    for (const text of [HINT.hover, HINT.tap]) {
+      expect(sansWidth(text, HINT.size)).toBeLessThanOrEqual(STAGE.narrow.min)
+      expect(text).not.toMatch(/\u2014/)
+    }
+  })
+  it('is reserved in the footprint only when the figure has a function to trace', () => {
+    for (const p of envRecordsDescriptor.presets) {
+      const html = renderToStaticMarkup(<EnvRecordsStage data={p.data} uid="x" />)
+      expect(html.match(/data-viz-part="hint"/g)).toHaveLength(2)
+    }
+  })
+})
+
+describe('touch targets (R11)', () => {
+  it.each(cases)('%s: every function has a 44 px hit area, and no two overlap', (_n, data, variant) => {
+    for (const { scenes } of layoutDiagram(data, variant).sections)
+      for (const s of scenes) {
+        const bands = hitBands(s.boxes)
+        const hits = s.boxes
+          .filter((x) => x.kind === 'function')
+          .map((b) => {
+            const d = bands.get(b.id)!
+            // The drawn box is rect - 1 px; the band adds its sides.
+            const r = { x: b.rect.x - d.l, y: b.rect.y - d.t, w: b.rect.w - 1 + d.l + d.r, h: b.rect.h - 1 + d.t + d.b }
+            expect(r.h, `${b.id} @ ${s.width}`).toBeGreaterThanOrEqual(44)
+            expect(r.w, `${b.id} @ ${s.width}`).toBeGreaterThanOrEqual(44)
+            return { id: b.id, r }
+          })
+        for (let i = 0; i < hits.length; i++)
+          for (let j = i + 1; j < hits.length; j++)
+            expect(intersects(hits[i].r, hits[j].r), `${hits[i].id} x ${hits[j].id} @ ${s.width}`).toBe(false)
+      }
+  })
 })

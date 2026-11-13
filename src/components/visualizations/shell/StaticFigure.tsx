@@ -86,6 +86,12 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
   )
 }
 
+/**
+ * One text-alternative layout across visuals (DESIGN X12), the list-keys
+ * `OutcomesAsText` pattern: a list of groups, each headed by its code in
+ * mono 600 with a bulleted list under it; then the verified output lines as
+ * in `StepsAsText`, and the modelled-not-observed note as the muted footnote.
+ */
 export function DiagramAsText({
   id,
   alt,
@@ -97,29 +103,27 @@ export function DiagramAsText({
 }) {
   return (
     <div id={id} className={disclosureBodyCls}>
-      {alt.parts.map((part, i) => (
-        <div key={i} className={i > 0 ? 'mt-3' : undefined}>
-          <p className={clsx('m-0 font-semibold', ink.base)}>{part.heading}</p>
-          <ul className="m-0 list-disc space-y-1 pl-5">
-            {part.lines.map((line, k) => (
-              <li key={k} className="m-0 p-0">
-                {line}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <ul className="m-0 list-none space-y-3 p-0">
+        {alt.parts.map((part, i) => (
+          <li key={i} className="m-0 p-0">
+            <p className={clsx('m-0 font-mono text-xs font-semibold', ink.base)}>{part.heading}</p>
+            <ul className="m-0 list-disc pl-5">
+              {part.lines.map((line, k) => (
+                <li key={k} className="m-0">
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
       {alt.outputs.map((o, i) => (
         <p key={i} className={clsx('m-0', i === 0 && 'mt-3')}>
           <span className={clsx('font-semibold', ink.base)}>{`Verified output, ${o.label} (${runtime}):`}</span>{' '}
           <span className="font-mono text-xs">{o.text}</span>
         </p>
       ))}
-      {alt.model ? (
-        <p className={clsx('m-0 mt-3', ink.muted)}>
-          {alt.model}
-        </p>
-      ) : null}
+      {alt.model ? <p className={clsx('m-0 mt-3 text-xs', ink.muted)}>{alt.model}</p> : null}
     </div>
   )
 }

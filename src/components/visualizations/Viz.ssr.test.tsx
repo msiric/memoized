@@ -87,7 +87,7 @@ describe('<Viz> static figure on the server', () => {
     expect(html.match(/<svg [^>]*data-viz-width/g)?.length).toBe(8)
     expect(html.match(/<g aria-hidden="true">/g)?.length).toBe(16)
     expect(html.match(/<g data-node="[^"]+" tabindex="0" role="img" aria-label="ƒ [^"]+"/g)?.length).toBe(4 * (2 + 3))
-    expect(html).toContain('aria-label="ƒ A, named counter1 and sameCounter, created in createCounter() call A"')
+    expect(html).toContain('aria-label="ƒ A, named counter1 and sameCounter, created in createCounter() call A; it reads count = 2"')
   })
 
   it('defaults to the first preset and renders the SVG for both layout variants', () => {

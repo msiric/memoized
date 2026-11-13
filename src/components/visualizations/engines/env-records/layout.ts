@@ -104,7 +104,6 @@ export type LaidEdge = {
   points: Point[]
   d: string
   head: string
-  now: boolean
   dashed: boolean
   /** Reference arrows start at a dot in the binding's value cell. */
   dot?: Point
@@ -115,6 +114,8 @@ export type LaidText = {
   text: string
   /** The function an output belongs to (its `› value`), for the hover path. */
   node?: string
+  /** The link a label names: it is drawn with that link and rides its hover path. */
+  edge?: EdgeId
   x: number
   /** Baseline. */
   y: number
@@ -421,7 +422,6 @@ function layoutBeside(
   plan: BesidePlan,
   width: number,
   minWidth: number,
-  highlight: ReadonlySet<EdgeId>,
 ): SectionScene | null {
   const { root, groups } = plan
   const k = groups.length
@@ -483,7 +483,7 @@ function layoutBeside(
     const R = rectOf(g.record.id)
     const x = centerX(F)
     const id: EdgeId = `env:${g.fn.id}`
-    edges.push(edgeOf(id, 'env', [{ x, y: F.y }, { x, y: bottom(R) }], highlight.has(id), false))
+    edges.push(edgeOf(id, 'env', [{ x, y: F.y }, { x, y: bottom(R) }], false))
   }
   // Lanes: the lowest target takes the innermost lane, so no two references cross.
   const R = rectOf(root.id)
@@ -497,7 +497,7 @@ function layoutBeside(
     const dot = { x: right(R) - 14, y: rows[i].top + SIZE.row / 2 }
     const points = simplify([dot, { x: laneX, y: dot.y }, { x: laneX, y: fy }, { x: F.x, y: fy }])
     const id: EdgeId = `ref:${root.id}.${b.name}`
-    edges.push({ ...edgeOf(id, 'ref', points, highlight.has(id), false), dot })
+    edges.push({ ...edgeOf(id, 'ref', points, false), dot })
   })
   const contentBottom = Math.max(bottom(R), columnBottom)
   return finishScene(section, width, minWidth, boxes, edges, contentBottom, [0])
@@ -507,11 +507,10 @@ export function layoutSection(
   section: EnvSection,
   width: number,
   minWidth: number,
-  highlight: ReadonlySet<EdgeId>,
   extraBeforeLast = 0,
 ): SectionScene {
   const plan = besidePlan(section)
-  const beside = plan && layoutBeside(section, plan, width, minWidth, highlight)
+  const beside = plan && layoutBeside(section, plan, width, minWidth)
   if (beside) return beside
   const tiers = tiersOf(section)
   const levels = chooseLevels(section, tiers, minWidth)
@@ -680,7 +679,7 @@ export function layoutSection(
               { x: px, y: mid },
               { x: px, y: ty },
             ]
-      edges.push(edgeOf(e.id, e.kind, points, highlight.has(e.id), e.dashed))
+      edges.push(edgeOf(e.id, e.kind, points, e.dashed))
     })
   }
 
@@ -710,7 +709,7 @@ export function layoutSection(
       ]
       const id: EdgeId = `ref:${r.id}.${b.name}`
       edges.push({
-        ...edgeOf(id, 'ref', points, highlight.has(id), false),
+        ...edgeOf(id, 'ref', points, false),
         dot,
       })
     })
@@ -841,7 +840,6 @@ function edgeOf(
   id: EdgeId,
   kind: LaidEdge['kind'],
   points: Point[],
-  now: boolean,
   dashed: boolean,
 ): LaidEdge {
   return {
@@ -850,7 +848,6 @@ function edgeOf(
     points,
     d: routePath(points, 8, 2),
     head: arrowHead(points),
-    now,
     dashed,
   }
 }
@@ -898,6 +895,7 @@ function placeLabels(
             texts.push({
               kind: 'label',
               text,
+              edge: e.id,
               x,
               y: top + 12,
               anchor: 'start',
@@ -934,6 +932,19 @@ export const STAGE = {
 export const SECTION_GAP = { narrow: 32, wide: 16 } as const
 /** Section heading: one line of code above each diagram. */
 export const HEADING = { line: 20, gap: 8 } as const
+/**
+ * The one-line interaction hint above a figure that has functions (H3 R11):
+ * sans 12/20 (`text-2xs`), the wording per input (hover or tap). The layout
+ * test keeps both on one line at the narrowest stage.
+ */
+export const HINT = {
+  line: 20,
+  gap: 12,
+  size: 12,
+  hover: 'Hover a function to trace what it remembers.',
+  tap: 'Tap a function to trace what it remembers.',
+} as const
+export const hasHint = (diagram: EnvDiagram) => diagram.sections.some((s) => s.nodes.some(isFunction))
 
 /** Sections stack below 768 and sit side by side from 768 (at most two per row). */
 export function sectionWidths(
@@ -984,8 +995,7 @@ export function layoutDiagram(
   const { min, widths } = sectionWidths(diagram, variant)
   const columns =
     variant === 'narrow' ? 1 : Math.min(2, diagram.sections.length)
-  const hl = (s: EnvSection) => new Set(s.highlight)
-  const natural = diagram.sections.map((s) => layoutSection(s, min, min, hl(s)))
+  const natural = diagram.sections.map((s) => layoutSection(s, min, min))
   const extra = diagram.sections.map((_, i) => {
     // Only sections that share a row line up their function rows.
     if (diagram.align !== 'bottom' || columns < 2) return 0
@@ -995,13 +1005,13 @@ export function layoutDiagram(
   const sections = diagram.sections.map((section, i) => ({
     section,
     scenes: widths.map((w) =>
-      layoutSection(section, w, min, hl(section), extra[i]),
+      layoutSection(section, w, min, extra[i]),
     ),
   }))
   const sectionH = sections.map(
     (s) => HEADING.line + HEADING.gap + s.scenes[0].height,
   )
-  let height = 0
+  let height = hasHint(diagram) ? HINT.line + HINT.gap : 0
   for (let i = 0; i < sectionH.length; i += columns) {
     const row = Math.max(...sectionH.slice(i, i + columns))
     height += row + (i > 0 ? SECTION_GAP[variant] : 0)

@@ -17,8 +17,8 @@ const FOOTPRINT: Record<
   (typeof PRESETS)[number],
   { narrow: number; wide: number }
 > = {
-  'var-vs-let-loop': { narrow: 858, wide: 540 },
-  'factory-calls-vs-aliases': { narrow: 782, wide: 518 },
+  'var-vs-let-loop': { narrow: 890, wide: 572 },
+  'factory-calls-vs-aliases': { narrow: 814, wide: 550 },
 }
 /** The section layout each width shows (stage 288/343 stacked; 606/638/734 in two columns). */
 const SECTION_WIDTH: Record<(typeof WIDTHS)[number], number> = {
@@ -127,7 +127,12 @@ test('fixed footprint and no overflow at any width', async ({ page }) => {
         ) as SVGSVGElement[]
         for (const s of svgs) {
           const r = s.getBoundingClientRect()
+          // The drawing, not the transparent touch bands around function objects
+          // (they may reach 7 px past the edge; the svg's overflow is visible).
+          const hits = [...s.querySelectorAll<SVGElement>('.vz-hit')]
+          hits.forEach((h) => (h.style.display = 'none'))
           const box = s.getBBox()
+          hits.forEach((h) => (h.style.display = ''))
           if (r.left < stage.left - 0.5 || r.right > stage.right + 0.5)
             out.push(`svg ${r.width} wide leaves the stage`)
           if (r.bottom > stage.bottom + 0.5) out.push('svg below the stage')
@@ -210,16 +215,72 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
   await page.keyboard.press('Tab')
   await expect(svg.locator('[data-node="fB"]')).toBeFocused()
   await expect(svg.locator('[data-node="fB"]')).toHaveAccessibleName(
-    'ƒ B, named counter2, created in createCounter() call B',
+    'ƒ B, named counter2, created in createCounter() call B; it reads count = 1',
   )
   await page.waitForTimeout(300)
   const focused = await opacities()
   expect([focused.fB, focused.callB, focused['ref:module.counter2'], focused.fA]).toEqual(['1', '1', '1', '0.4'])
   const ring = await svg
-    .locator('[data-node="fB"]')
+    .locator('[data-node="fB"] .vz-fb')
     .evaluate((n) => [getComputedStyle(n).outlineStyle, getComputedStyle(n).outlineWidth])
   expect(ring).toEqual(['solid', '2px'])
   expect(await boxes(), 'nothing moves on focus').toEqual(rest)
+
+  // One path at a time: hovering fA while fB keeps keyboard focus shows fA's path only.
+  await svg.locator('[data-node="fA"]').hover()
+  await page.waitForTimeout(300)
+  const mixed = await opacities()
+  expect([mixed.fA, mixed.callA, mixed.fB, mixed.callB, mixed['ref:module.counter2']]).toEqual(['1', '1', '0.4', '0.4', '0.4'])
+  await page.evaluate(() => (document.activeElement as HTMLElement).blur())
+
+  // A mouse click never sticks: after the pointer leaves, the figure is at rest.
+  await svg.locator('[data-node="fB"]').click()
+  await page.mouse.move(0, 0)
+  await page.waitForTimeout(300)
+  expect(Object.values(await opacities()).every((o) => o === '1')).toBe(true)
+})
+
+test('rest is grey; the traced path is lime: function, link, record, the row it reads, its aliases (R1, R11)', async ({
+  page,
+}) => {
+  await open(page, 1024)
+  const fig = figure(page, 'factory-calls-vs-aliases')
+  await fig.scrollIntoViewIfNeeded()
+  const svg = fig.locator('[data-viz-section="counters"] svg:visible')
+  const colors = () =>
+    svg.evaluate((el) => {
+      const c = (sel: string, prop: 'stroke' | 'fill' = 'stroke') => getComputedStyle(el.querySelector(sel)!)[prop]
+      return {
+        fn: c('[data-node=fA] .vz-fb'),
+        env: c('[data-edge="env:fA"] .vz-e'),
+        record: c('[data-node=callA] .vz-g'),
+        alias: c('[data-edge="ref:module.sameCounter"] .vz-e'),
+        row: c('[data-node=callA] [data-b=count]', 'fill'),
+        held: c('[data-node=module] .vz-g'),
+      }
+    })
+  const grey = 'rgb(113, 113, 122)'
+  const rest = await colors()
+  expect([rest.fn, rest.env, rest.record, rest.alias, rest.held]).toEqual([grey, grey, grey, grey, grey])
+  expect(rest.row).toBe('rgba(0, 0, 0, 0)')
+  await svg.locator('[data-node="fA"]').hover()
+  await page.waitForTimeout(300)
+  const lit = await colors()
+  const lime = 'rgb(163, 230, 53)'
+  expect([lit.fn, lit.env, lit.record, lit.alias, lit.row]).toEqual([lime, lime, lime, lime, lime])
+  expect(lit.held, 'the module holds the names; it is not what fA remembers').toBe(grey)
+})
+
+test('every function has a touch target of at least 44 px', async ({ page }) => {
+  await open(page, 375)
+  const sizes = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-viz="environment-records"] svg.vz-s [tabindex] .vz-hit')]
+      .map((r) => r.getBoundingClientRect())
+      .filter((r) => r.width > 0)
+      .map((r) => Math.min(r.width, r.height)),
+  )
+  expect(sizes.length).toBeGreaterThan(0)
+  for (const s of sizes) expect(s).toBeGreaterThanOrEqual(44)
 })
 
 test('the hover path is instant under reduced motion', async ({ page }) => {

@@ -140,10 +140,17 @@ reduced motion, and it never moves the page. Elements that play it carry
 - **List keys.** Each carried checkbox rides its own match line into the
   After row its instance now renders (`CheckRider.tsx`, Web Animations,
   lifted), and the row ticks as it lands.
-- **Closures.** No script: function objects are focusable and named, and
-  hover or focus dims everything but the function's `[[Environment]]` path
-  and, in the factory preset, its aliases (`engines/env-records/paths.ts`
-  writes the per-figure rules, `.vz-s` in `tailwind.css` the generic dim).
+- **Closures.** No script. At rest every link is `line` grey (lime means
+  current, chosen or traced). Hovering a function, focusing it from the
+  keyboard (`:focus-visible`) or tapping it on a device that cannot hover
+  traces it in lime: the function, its `[[Environment]]` link, its record,
+  the row its body reads (`reads` in the data, checked by the truth test)
+  and, in the factory preset, every name that refers to it. Everything else
+  dims. One path at a time: a hovered function wins over a keyboard focus,
+  and a mouse click never sticks. A one-line hint names the gesture, and
+  each function has a 45 px touch band (`HIT`). `engines/env-records/paths.ts`
+  writes the per-figure rules; `.vz-s` in `tailwind.css` holds the rest
+  colours, the dim and the lit colours (`--vz-k`).
 
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for
