@@ -42,18 +42,18 @@ const CONFIGS: Config[] =
       ]
 const HYDRATION = /did not match|hydrat|Text content does not match|server rendered HTML/i
 
-/** Text-only zoom served in the HTML itself, so it applies before the first paint, with or without JavaScript. */
-async function zoomText(page: Page, c: Config, url: string) {
+/**
+ * Text-only zoom from the first paint, with or without JavaScript: the
+ * browser's own default font size (Chrome's "Very large" is 24 px), set over
+ * CDP before the page loads. No HTML rewrite: a fulfilled document is a
+ * public-address-space page to Chrome, whose scripts and styles from a
+ * private dev host are then blocked (Private Network Access).
+ */
+async function zoomText(page: Page, c: Config) {
   if (!c.rootFont) return
-  await page.route(`${BASE}${url}`, async (route) => {
-    const r = await route.fetch()
-    const body = (await r.text()).replace('</head>', `<style>html{font-size:${c.rootFont}!important}</style></head>`)
-    // The body is decoded and longer now: drop the original length and encoding.
-    const headers = { ...r.headers() }
-    delete headers['content-length']
-    delete headers['content-encoding']
-    await route.fulfill({ status: r.status(), headers, body })
-  })
+  const k = parseFloat(c.rootFont) / 100
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Page.setFontSizes', { fontSizes: { standard: Math.round(16 * k), fixed: Math.round(13 * k) } })
 }
 
 type Box = { id: string; x: number; y: number; w: number; h: number; afterY: number | null }
@@ -97,7 +97,7 @@ for (const c of CONFIGS)
         const p0 = await off.newPage()
         // Without JavaScript a style tag cannot be added after load, so text
         // zoom goes into the served HTML.
-        await zoomText(p0, c, url)
+        await zoomText(p0, c)
         const res = await p0.goto(`${BASE}${url}`, { waitUntil: 'load' })
         if (!res || res.status() >= 400) {
           rec.note(url, 'load', 'page-missing', `HTTP ${res?.status()}`)
@@ -140,7 +140,7 @@ for (const c of CONFIGS)
           }).observe({ type: 'layout-shift', buffered: true })
         })
         // Text zoom from the first paint (a style added after load would itself shift the page).
-        await zoomText(page, c, url)
+        await zoomText(page, c)
         await page.goto(`${BASE}${url}`, { waitUntil: 'load' })
         await page.evaluate(() => document.fonts.ready)
         const n = await page.locator('[data-viz]').count()
