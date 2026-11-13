@@ -49,15 +49,15 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
   'list-keys': [
     () => import('./engines/list-keys'),
     878,
-    594,
+    566,
     undefined,
     {
-      'index-insert-top': [878, 594, 890, 1118, 1222],
-      'id-insert-top': [878, 594, 890, 1118, 1222],
-      'index-delete-first': [878, 594, 890, 1118, 1222],
-      'index-append': [878, 594, 890, 1118, 1222],
-      'random-key': [878, 594, 890, 1118, 1222],
-      'parent-type-change': [786, 562, 826, 1030, 1118],
+      'index-insert-top': [878, 566, 890, 1094, 1222],
+      'id-insert-top': [878, 566, 890, 1094, 1218],
+      'index-delete-first': [730, 522, 782, 974, 1078],
+      'index-append': [878, 566, 890, 1094, 1222],
+      'random-key': [878, 566, 890, 1118, 1218],
+      'parent-type-change': [786, 566, 826, 1030, 1094],
     },
   ],
 }

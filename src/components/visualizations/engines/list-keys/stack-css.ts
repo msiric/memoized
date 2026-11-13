@@ -1,7 +1,7 @@
 import { segmentedWidth } from '../../step-log/validate'
 import { rem } from '../../shell/vars'
 import { ACTION_LABEL, LIST_ACTIONS } from './model'
-import { BEFORE_BLOCK, CARD, COLUMNS, COLUMNS_HEIGHT, STACKED_HEIGHT, STACK_BELOW, STAGE_STACKED } from './layout'
+import { BEFORE_BLOCK, CARD, COLUMNS, COLUMNS_HEIGHT, STACKED_HEIGHT, STACK_BELOW } from './layout'
 
 /**
  * The columns' two layouts, chosen by the frame's width in rem (a container
@@ -15,12 +15,15 @@ import { BEFORE_BLOCK, CARD, COLUMNS, COLUMNS_HEIGHT, STACKED_HEIGHT, STACK_BELO
  *   "Very large" text on a phone, 200 % text): Before above After, both
  *   cards with the checkbox on the right, the lines in a rail beside them.
  *
- * Plain CSS from the layout constants, scoped to the list-keys frame.
+ * Plain CSS from the layout constants, scoped to the list-keys frame. The
+ * heights that follow the combination's card rows (two, or three when the
+ * action adds a row) are variables the stage sets (`--lk-cols-h`,
+ * `--lk-stack-h`, `--lk-stage-s`), falling back to the three-row height.
  */
 const F = '[data-viz-frame="list-keys"]'
 const edge = `${CARD.border}px`
 const stacked =
-  `${F} [data-lk-cols]{grid-template-columns:minmax(0,1fr) ${rem(COLUMNS.rail)};grid-template-rows:${rem(BEFORE_BLOCK)} ${rem(COLUMNS_HEIGHT)};row-gap:${rem(COLUMNS.stackGap)};height:${rem(STACKED_HEIGHT)}}` +
+  `${F} [data-lk-cols]{grid-template-columns:minmax(0,1fr) ${rem(COLUMNS.rail)};grid-template-rows:${rem(BEFORE_BLOCK)} var(--lk-cols-h,${rem(COLUMNS_HEIGHT)});row-gap:${rem(COLUMNS.stackGap)};height:var(--lk-stack-h,${rem(STACKED_HEIGHT)})}` +
   `${F} [data-lk-area=after]{grid-area:2/1}` +
   `${F} [data-lk-area=lines]{grid-area:1/2/3/3}` +
   // The wrapper's Before block (box and Add 1) is taller than two list rows:
@@ -29,7 +32,7 @@ const stacked =
   `${F} [data-lk-scene=wrapper] [data-lk-area=lines]{display:none}` +
   `${F} [data-lk-flip]{flex-direction:row-reverse}` +
   `${F} [data-lk-spine=after]{border-left-width:0;border-right-width:${edge}}` +
-  `${F} [data-lk-stage]{height:${rem(STAGE_STACKED)}}`
+  `${F} [data-lk-stage]{height:var(--lk-stage-s)}`
 const cols = `minmax(0,${rem(COLUMNS.cardMax)}) minmax(${rem(COLUMNS.linesNarrow)},1fr) minmax(0,${rem(COLUMNS.cardMax)})`
 
 /** The width (rem) from which the four list actions fit as segments (SegmentedControl's own threshold). */
@@ -37,7 +40,7 @@ export const ACTION_FIT = segmentedWidth(LIST_ACTIONS.map((a) => ACTION_LABEL[a]
 const SEG = (part: string) => `${F} [data-viz-part=${part}] [data-vz-seg]`
 
 export const stackCss =
-  `${F} [data-lk-cols]{display:grid;grid-template-columns:${cols};height:${rem(COLUMNS_HEIGHT)}}` +
+  `${F} [data-lk-cols]{display:grid;grid-template-columns:${cols};height:var(--lk-cols-h,${rem(COLUMNS_HEIGHT)})}` +
   `${F} [data-lk-area=before]{grid-area:1/1}` +
   `${F} [data-lk-area=lines]{grid-area:1/2}` +
   `${F} [data-lk-area=after]{grid-area:1/3}` +

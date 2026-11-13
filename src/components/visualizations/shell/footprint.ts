@@ -1,6 +1,6 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
-import { CHOICE as CHOICE_GEOMETRY, choiceGeometry, choicesHeight } from '../primitives/choice-geometry'
+import { CHOICE as CHOICE_GEOMETRY, besideAt, choiceGeometry, choicesHeight } from '../primitives/choice-geometry'
 import { sansWidth } from '../substrates/text-metrics'
 import { allFeedbackStrings, allRecaps } from './feedback'
 import type { PerVariant, StepThroughDescriptor, Variant } from './types'
@@ -198,10 +198,9 @@ export function dockAt(t: DockText, width: number, variant: Variant): number {
     const labels = cp.choices.map((c) => c.label)
     const g = choiceGeometry(labels)
     const wide = variant === 'wide'
-    const oneRow = width >= Math.max(g.rowWide, WIDE_MIN)
-    const side = wide
-      ? width - CHOICE.textGap - 8 - (oneRow ? g.n * g.col + g.n * CHOICE.gap + CHOICE.skip : 2 * g.col + CHOICE.gap)
-      : width
+    // Beside the choices where the row fits next to the text, else stacked over them (Q4).
+    const beside = besideAt(g, width, wide)
+    const side = beside ? width - CHOICE.textGap - 8 - (g.n * g.col + g.n * CHOICE.gap + CHOICE.skip) : width
     // The note shares the prompt's line when both fit (Q15), else wraps under it.
     const promptLines = wrapLines(t.prompts[k], chars(side, GLYPH.prompt))
     const inline =
@@ -211,7 +210,7 @@ export function dockAt(t: DockText, width: number, variant: Variant): number {
       maxLines(t.feedbackBy[k] ?? [], chars(side, GLYPH.caption)) * CAPTION_LINE,
     )
     const choices = choicesHeight(labels, width, wide)
-    worst = Math.max(worst, wide ? Math.max(text, choices) : text + CHOICE.textGap + choices)
+    worst = Math.max(worst, beside ? Math.max(text, choices) : text + CHOICE.textGap + choices)
   })
   return worst
 }

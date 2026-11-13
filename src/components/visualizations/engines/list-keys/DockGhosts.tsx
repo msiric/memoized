@@ -6,7 +6,7 @@ import { CheckpointBlock, PromptBlock, SkipButton } from '../../primitives/Check
 import { ChoiceRow } from '../../primitives/ChoiceRow'
 import { cn as clsx } from '../../primitives/cn'
 import { AGAIN_LABEL, SHOW_LABEL } from './content'
-import { TRAILING_WIDTH, dockGhostStrings, type Scene } from './layout'
+import { DOCK_TEXT_MIN, TRAILING_WIDTH, dockGhostStrings, dockStrings, type Combo } from './layout'
 
 /**
  * The list-keys dock is the shared checkpoint (H3 R2 Q4,
@@ -19,9 +19,11 @@ import { TRAILING_WIDTH, dockGhostStrings, type Scene } from './layout'
  * (`TRAILING_WIDTH`, the block's `trail`).
  *
  * Every cell is as tall as its tallest state (ghost stacks, D15), measured
- * per preset (H3 R2): one invisible block per choice set of the scene, each
- * with every question and verdict as text ghosts, so nothing moves when the
- * action, the key or the phase changes.
+ * per combination (final polish): one invisible block with the choice set of
+ * the action on screen and every question and verdict that key and action
+ * can show, so nothing moves while the learner checks rows, answers, skips
+ * or sees the reveal. Choosing another key or action re-measures (a
+ * user-initiated switch, like a preset switch).
  */
 
 /** The note under the text: "Last time: ..." on the question, the tally on the reveal. */
@@ -52,9 +54,9 @@ export function VerdictText({ lead, rule, live = false }: { lead: string; rule: 
 
 const cell = 'col-start-1 row-start-1'
 
-/** Invisible copies of the scene's longest questions and every verdict, each with its note line. */
-export function TextGhosts({ scene }: { scene: Scene }) {
-  const g = dockGhostStrings(scene)
+/** Invisible copies of the combination's questions and verdicts, each with its note line. */
+export function TextGhosts({ combo }: { combo: Combo }) {
+  const g = dockGhostStrings(combo)
   return (
     <>
       {g.prompts.map((p) => (
@@ -73,36 +75,35 @@ export function TextGhosts({ scene }: { scene: Scene }) {
 }
 
 /**
- * One invisible checkpoint block per choice set the scene can show, stacked
- * in the dock's cell, so the dock is as tall as the tallest set at the
- * current width and text size (Q5: wrapped labels included), whichever
- * action is chosen.
+ * One invisible checkpoint block with the combination's choice set and
+ * every text it can show, in the dock's cell, so the dock is as tall as
+ * that combination's tallest state at the current width and text size (Q5:
+ * wrapped labels included).
  */
-export function DockGhosts({ scene, sets }: { scene: Scene; sets: readonly (readonly { id: string; label: string }[])[] }) {
-  const mono = scene === 'wrapper'
+export function DockGhosts({ combo }: { combo: Combo }) {
+  const mono = combo.scene === 'wrapper'
+  const set = dockStrings(combo).choiceSet
   return (
     <div aria-hidden className={clsx('invisible grid', cell)}>
-      {sets.map((set) => (
-        <CheckpointBlock
-          key={set.map((c) => c.id).join('|')}
-          ghost
-          className={cell}
-          labels={set.map((c) => c.label)}
-          mono={mono}
-          trail={TRAILING_WIDTH}
-          text={null}
-          textGhosts={<TextGhosts scene={scene} />}
-          choices={set.map((c, i) => (
-            <ChoiceRow key={c.id} index={i} label={c.label} mono={mono} tabIndex={-1} role="none" />
-          ))}
-          skip={
-            <span className="grid">
-              <TrailingGhosts />
-              <SkipButton tabIndex={-1} unavailable className={cell} />
-            </span>
-          }
-        />
-      ))}
+      <CheckpointBlock
+        ghost
+        className={cell}
+        labels={set.map((c) => c.label)}
+        mono={mono}
+        trail={TRAILING_WIDTH}
+        textMin={DOCK_TEXT_MIN}
+        text={null}
+        textGhosts={<TextGhosts combo={combo} />}
+        choices={set.map((c, i) => (
+          <ChoiceRow key={c.id} index={i} label={c.label} mono={mono} tabIndex={-1} role="none" />
+        ))}
+        skip={
+          <span className="grid">
+            <TrailingGhosts />
+            <SkipButton tabIndex={-1} unavailable className={cell} />
+          </span>
+        }
+      />
     </div>
   )
 }

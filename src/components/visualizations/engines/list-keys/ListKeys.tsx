@@ -6,6 +6,7 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -59,14 +60,20 @@ import { DockGhosts, TextGhosts, TrailingGhosts, VerdictText, noteCls } from './
 import {
   CODE_HEIGHT,
   CONTROLS,
+  DOCK_TEXT_MIN,
   GAPS,
   TRAILING_WIDTH,
+  columnsHeight,
+  comboId,
+  comboRows,
   dockGhostStrings,
-  dockStrings,
   STAGE_GAP,
   listKeysMetrics,
   listTally,
+  stackedHeight,
+  stageOf,
   wrapperTally,
+  type Combo,
 } from './layout'
 import {
   actionOf,
@@ -115,9 +122,6 @@ const KEYS = KEY_STRATEGIES.map((k) => ({ id: k, label: KEY_LABEL[k] }))
 
 type Nav = { s: ExploreState; play: boolean; at: number; epoch: number }
 
-const METRICS = { list: listKeysMetrics('list'), wrapper: listKeysMetrics('wrapper') }
-const CHOICE_SETS = { list: dockStrings('list').choiceSets, wrapper: dockStrings('wrapper').choiceSets }
-const GHOST_TEXT = { list: dockGhostStrings('list'), wrapper: dockGhostStrings('wrapper') }
 
 export type ListKeysProps = { preset?: string; interactive?: boolean }
 
@@ -198,9 +202,17 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
   const codeVariant: CodeVariant =
     s.scene === 'list' ? `list/${s.key}` : `wrapper/${s.wrapperAction}`
   const code = CODE[codeVariant]
-  const metrics = METRICS[s.scene]
-  const choiceSets = CHOICE_SETS[s.scene]
-  const ghostText = GHOST_TEXT[s.scene]
+  // Every reserve is sized to the combination on screen (final polish): the
+  // key and the action pick the card rows, the choices and the verdicts.
+  const comboKey =
+    s.scene === 'list' ? comboId({ scene: 'list', key: s.key, action: s.listAction }) : comboId({ scene: 'wrapper', action: s.wrapperAction })
+  const { combo, metrics, stage, ghostText } = useMemo(() => {
+    const c: Combo =
+      s.scene === 'list' ? { scene: 'list', key: s.key, action: s.listAction } : { scene: 'wrapper', action: s.wrapperAction }
+    return { combo: c, metrics: listKeysMetrics(c), stage: stageOf(c), ghostText: dockGhostStrings(c) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comboKey])
+  const rows = comboRows(combo)
 
   const actionOptions =
     s.scene === 'list'
@@ -341,8 +353,14 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
         data-lk-stage
         className={clsx('relative flex flex-col print:h-auto', H_CLS)}
         style={remHeights(
-          { narrow: metrics.narrow.stage, wide: metrics.wide.stage },
-          { marginTop: toRem(GAPS.header) },
+          { narrow: stage.narrow, wide: stage.wide },
+          {
+            marginTop: toRem(GAPS.header),
+            // The columns and the stacked stage (`stack-css.ts`) read the combination's rows.
+            ['--lk-cols-h' as string]: toRem(columnsHeight(rows)),
+            ['--lk-stack-h' as string]: toRem(stackedHeight(rows)),
+            ['--lk-stage-s' as string]: toRem(stage.stacked),
+          },
         )}
       >
         <div
@@ -407,7 +425,8 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             tokens={CODE_TOKENS[codeVariant]}
             line={code.line}
             rows={{ narrow: CODE_ROWS, wide: CODE_ROWS }}
-            height={{ narrow: CODE_HEIGHT, wide: CODE_HEIGHT }}
+            // Beside the columns the pane runs their full height: no empty quadrant under the code.
+            height={{ narrow: CODE_HEIGHT, wide: stage.code }}
             cols={CODE_COLS}
             animate={false}
           />
@@ -429,12 +448,13 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
         className={clsx('relative grid print:hidden', hidden && 'invisible')}
         style={{ marginTop: toRem(GAPS.dock), ['--vz-land-delay' as string]: `${BEAT.verdict * BEAT_MS}ms` }}
       >
-        <DockGhosts scene={s.scene} sets={choiceSets} />
+        <DockGhosts combo={combo} />
         <CheckpointBlock
           className="col-start-1 row-start-1 self-start"
           labels={choices.map((c) => c.label)}
           mono={s.scene === 'wrapper'}
           trail={TRAILING_WIDTH}
+          textMin={DOCK_TEXT_MIN}
           text={
             <div className="grid min-w-0" data-viz-part={revealed ? 'dock-reveal' : 'dock-ask'}>
               {verdictShown ? (
@@ -483,7 +503,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               ) : null}
             </div>
           }
-          textGhosts={<TextGhosts scene={s.scene} />}
+          textGhosts={<TextGhosts combo={combo} />}
           choicesProps={{
             role: 'radiogroup',
             'aria-labelledby': promptId,

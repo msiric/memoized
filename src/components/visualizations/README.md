@@ -145,10 +145,16 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   preset's worst case at the current width and text size. Every reserved
   band (stage, dock) is sized per preset: a preset switch may change the
   frame's height, stepping never does. The entry table carries per-preset
-  heights for the lazy mount; `footprint.ts` only estimates them. The
-  list-keys dock works the same way (`engines/list-keys/DockGhosts.tsx`, a
-  ghost of every verdict, and of every choice set, so a wrapped label never
-  moves the page). Nothing reserves a band no state needs (F1 and F2
+  heights for the lazy mount; `footprint.ts` only estimates them. List keys
+  reserves per combination (final polish): the key and the action on screen
+  pick the stage's card rows (two, or three when the action adds a row; the
+  code pane runs the columns' height beside them, so the stage has no empty
+  quadrant) and the dock's ghosts (`engines/list-keys/DockGhosts.tsx`: that
+  action's choice set and every question and verdict that key and action
+  can show). Nothing moves while the learner checks rows, answers, skips or
+  sees the reveal; choosing another key or action may resize the frame, as
+  a preset switch does, and each preset's lazy reserve is its starting
+  combination. Nothing reserves a band no state needs (F1 and F2
   rulings 2): stacked, Skip's target rises into the step bar so the prompt
   row is one line, the feedback takes the full row, and checkpoint copy
   fits one line on a 375 px phone; the list-keys verdict is two short
@@ -156,9 +162,13 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   sits under the question).
 - **Checkpoints (D9, R4, H3 R2 Q2 to Q5).** One layout for every visual
   (`primitives/Checkpoint.tsx`: `CheckpointBlock`, `PromptBlock`,
-  `SkipButton`, geometry in `primitives/choice-geometry.ts`): the text cell,
-  then the choice row with Skip as its trailing text button (two columns
-  with Skip in the next free cell where one row does not fit). Labels wrap,
+  `SkipButton`, geometry in `primitives/choice-geometry.ts`): one band under
+  the stage, the text cell on the left (centred on the row) and the choice
+  row on its right with Skip as its trailing text button, wherever the row
+  fits beside text that keeps its `textMin` (list keys keeps 256 px for its
+  two-sentence verdict); otherwise the text sits right over the choices, in
+  one row across the band or two columns with Skip in the next free cell.
+  Never two columns beside the text. Labels wrap,
   never truncate. Choices are outline rows with a quiet numeral (the 1 to 4
   keys); a locked-in pick takes the selected segment look; on the reveal the
   correct choice gets ✓ on the `now` tint, the rest drop to muted ink and a

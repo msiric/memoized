@@ -35,9 +35,11 @@ import {
   CARD,
   CHECK_Y,
   COLUMNS,
-  COLUMNS_HEIGHT,
   STACKED_HEIGHT,
+  columnsHeight,
   rowTop,
+  rowsOf,
+  stackedHeight,
 } from './layout'
 import type { ExploreAction, ExploreState } from './machine'
 import {
@@ -752,7 +754,9 @@ function Lines({ s, box, view, gate }: { s: ExploreState; box: LinesBox; view: R
   const animateChip = view.played && !gate.reduce && first.current.w === w && first.current.k === k
   const move = transitionFor('path', gate)
   const stub = Math.min(14, Math.max(8, w * 0.3))
-  const H = stacked ? STACKED_HEIGHT : COLUMNS_HEIGHT
+  // The drawing is as tall as the combination's card rows (the stage's reserve).
+  const rows = s.scene === 'list' ? rowsOf(s.listAction) : COLUMNS.rows
+  const H = stacked ? stackedHeight(rows) : columnsHeight(rows)
   // Draw the highlighted line last so it sits on top.
   const ordered = [...ls].sort((a, b) => Number(a.kind === 'reused' && a.now) - Number(b.kind === 'reused' && b.now))
   const hide = hidden ? { pathLength: 1, strokeDasharray: '1 1', strokeDashoffset: 1.001 } : {}

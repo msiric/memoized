@@ -4,20 +4,22 @@ import { useId, type ReactNode } from 'react'
 import { Button } from './Button'
 import { cn } from './cn'
 import { lastTimeCls, promptCls } from './Caption'
-import { choiceGeometry, type ChoiceGeometry } from './choice-geometry'
+import { CHOICE, WIDE_FROM, choiceGeometry, type ChoiceGeometry } from './choice-geometry'
 
 /**
  * The one checkpoint layout (H3 R2 Q4, Q5), shared by every interactive
  * visual: the text cell (the prompt with its note line, or the feedback),
  * then the choice row with "Skip" as its trailing text button.
  *
- * - Narrow (phones, large text): the text takes the full row; under it the
- *   choices sit in one row with Skip at its end when every label fits its
- *   column in at most two lines; otherwise two columns, with Skip in the
- *   next free cell (after the last choice).
- * - Wide (the frame from 37.875rem): the text on the left, the choices and
- *   Skip on the right in one row when it fits beside the text; otherwise
- *   two columns there, Skip in the next free cell.
+ * - Beside (the frame from 37.875rem, where the row fits next to text that
+ *   keeps `textMin`): the text on the left, the choices and Skip on the
+ *   right in one row, as one band under the stage.
+ * - Otherwise stacked (phones, large text, or a row too long to sit beside
+ *   the text): the text takes the full row and the choices sit right under
+ *   it, in one row across the width with Skip at its end when every label
+ *   fits its column in at most two lines; otherwise two columns, with Skip
+ *   in the next free cell (after the last choice). Never two columns beside
+ *   the text (final polish: the question read far from its choices).
  *
  * Choice labels wrap; rows grow (Q5). The thresholds are container queries
  * in rem (server-final CSS, larger text switches sooner, D19), computed from
@@ -50,6 +52,8 @@ export type CheckpointBlockProps = {
   ghost?: boolean
   /** The trailing cell's width when a wider action takes Skip's place (`choiceGeometry`). */
   trail?: number
+  /** The least room the text keeps beside the choices; below it the block stacks (`choiceGeometry`). */
+  textMin?: number
 }
 
 export function CheckpointBlock({
@@ -63,24 +67,21 @@ export function CheckpointBlock({
   className,
   ghost = false,
   trail,
+  textMin,
 }: CheckpointBlockProps) {
   const scope = useId().replace(/:/g, '')
-  const g = choiceGeometry(labels, mono, trail)
+  const g = choiceGeometry(labels, mono, trail, textMin)
   return (
     <div
       data-vz-cp={scope}
       data-viz-part={ghost ? undefined : 'viz-checkpoint'}
-      className={cn(
-        'grid min-w-0 [grid-template-areas:"text""choices"] [grid-template-columns:minmax(0,1fr)]',
-        'vz-wide:items-center vz-wide:[grid-template-areas:"text_choices"] vz-wide:[grid-template-columns:minmax(0,1fr)_auto]',
-        className,
-      )}
+      className={cn('grid min-w-0 [grid-template-areas:"text""choices"] [grid-template-columns:minmax(0,1fr)]', className)}
       style={{ columnGap: rem(g.textGap), rowGap: rem(g.textGap) }}
     >
       {/* Raw, so the server does not entity-escape the selectors' quotes (the
           rule must hold in the server frame too). Generated CSS only. */}
       <style dangerouslySetInnerHTML={{ __html: checkpointCss(scope, g) }} />
-      <div className="grid min-w-0 content-end [grid-area:text] vz-wide:pr-2">
+      <div data-vz-text className="grid min-w-0 content-end [grid-area:text]">
         {textGhosts}
         <div className="col-start-1 row-start-1 self-end">{text}</div>
       </div>
@@ -160,23 +161,30 @@ export function SkipButton({
 const rem = (px: number) => (px === 0 ? '0' : `${Math.round((px / 16) * 10_000) / 10_000}rem`)
 
 /**
- * The block's container queries (in rem). Narrow: one row of choices plus
- * Skip from `g.rowNarrow`, two columns below it. Wide: one row beside the
- * text from `g.rowWide`, two columns of `g.col` beside it below that.
+ * The block's container queries (in rem). Stacked by default: two columns
+ * of choices, one row across the width from `g.rowNarrow`. Beside from
+ * `g.rowWide` (never under 37.875rem): the text left, one row of `g.col`
+ * columns and the trailing action right.
  */
 export function checkpointCss(scope: string, g: ChoiceGeometry): string {
-  const sel = `[data-vz-cp="${scope}"] [data-vz-choices]`
+  const block = `[data-vz-cp="${scope}"]`
+  const sel = `${block} [data-vz-choices]`
   const two = `${sel}{grid-template-columns:repeat(2,minmax(0,1fr))}`
-  const oneNarrow = `${sel}{grid-template-columns:repeat(${g.n},minmax(0,1fr)) auto}`
-  const twoWide = `${sel}{grid-template-columns:repeat(2,${rem(g.col)})}`
-  const oneWide = `${sel}{grid-template-columns:repeat(${g.n},${rem(g.col)}) auto}`
+  // One row under the text: equal columns, never wider than the widest
+  // column beside the text (a wide band keeps compact choices, Skip right after them).
+  const oneStacked = `${sel}{grid-template-columns:repeat(${g.n},minmax(0,${rem(CHOICE.wideWidth)})) auto}`
+  const beside =
+    `${block}{grid-template-areas:"text choices";grid-template-columns:minmax(0,1fr) auto;align-items:center}` +
+    // The text centres on the choice row: a short question sits level with
+    // its choices, never at the foot of a band reserved for a longer verdict.
+    `${block}>[data-vz-text]{padding-right:0.5rem}${block}>[data-vz-text]>:last-child{align-self:center}` +
+    `${sel}{grid-template-columns:repeat(${g.n},${rem(g.col)}) auto}`
   // Two columns narrower than the trailing action (very large text): it takes its own row.
-  const trailRow = `@container vz (max-width:${rem(2 * g.trail + g.gap - 0.5)}){[data-vz-cp="${scope}"] [data-vz-skip]{grid-column:1/-1}}`
+  const trailRow = `@container vz (max-width:${rem(2 * g.trail + g.gap - 0.5)}){${block} [data-vz-skip]{grid-column:1/-1}}`
   return (
     two +
     trailRow +
-    `@container vz (max-width:37.874rem) and (min-width:${rem(g.rowNarrow)}){${oneNarrow}}` +
-    `@container vz (min-width:37.875rem){${twoWide}}` +
-    `@container vz (min-width:${rem(Math.max(g.rowWide, 606))}){${oneWide}}`
+    `@container vz (min-width:${rem(g.rowNarrow)}){${oneStacked}}` +
+    `@container vz (min-width:${rem(Math.max(g.rowWide, WIDE_FROM))}){${beside}}`
   )
 }

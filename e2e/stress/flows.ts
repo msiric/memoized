@@ -164,11 +164,11 @@ export async function walkListKeys(page: Page, rec: Recorder, scope: string, vis
   if (wrapper) {
     for (const action of ['type', 'class']) {
       await click(`[data-viz-focus="action-${action}"]`, `wrapper ${action}`)
-      await rec.check(page, scope, visual, `wrapper ${action} ${await mode()}`)
+      await rec.check(page, scope, visual, `wrapper ${action} ${await mode()}`, {}, `${visual} wrapper/${action}`)
       // The first by pointer, the second from the keyboard (N1: both paths).
       if (action === 'type') await click('[data-viz-part="viz-skip"]', `wrapper ${action} skip`)
       else await keyActivate(page, rec, `${frame} [data-viz-part="viz-skip"]`, visual, `wrapper ${action} skip (keyboard)`)
-      await rec.check(page, scope, visual, `wrapper ${action} ${await mode()}`)
+      await rec.check(page, scope, visual, `wrapper ${action} ${await mode()}`, {}, `${visual} wrapper/${action}`)
     }
     return
   }
@@ -189,13 +189,16 @@ export async function walkListKeys(page: Page, rec: Recorder, scope: string, vis
     rec.scrollJump(visual, `key ${key}`, r.before, r.after)
     for (const [a, action] of LIST_ACTIONS.entries()) {
       await click(`[data-viz-focus="action-${action}"]`, `${key}/${action}`)
-      await rec.check(page, scope, visual, `${key}/${action} ${await mode()}`)
+      // Reserves are per key and action (final polish): the frame must hold
+      // still within each combination; choosing another may resize it.
+      const combo = `${visual} ${key}/${action}`
+      await rec.check(page, scope, visual, `${key}/${action} ${await mode()}`, {}, combo)
       // Answered as well as skipped (N4): the first choice, the second, or Skip, in turn.
       const policy = (k + a) % 3
       if (policy === 2) await click('[data-viz-part="viz-skip"]', `${key}/${action} skip`)
       else await click(`[data-choice-index="${policy}"]`, `${key}/${action} pick ${policy}`)
       const reused = LIST_OUTCOMES[`${key}/${action}`].reused as (number | null)[]
-      await rec.check(page, scope, visual, `${key}/${action} ${['pick 0', 'pick 1', 'skip'][policy]} ${await mode()}`, { reused })
+      await rec.check(page, scope, visual, `${key}/${action} ${['pick 0', 'pick 1', 'skip'][policy]} ${await mode()}`, { reused }, combo)
     }
   }
 }

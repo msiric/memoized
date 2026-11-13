@@ -17,7 +17,7 @@ import {
   wrapperOutcomeSentence,
   wrapperPrompt,
 } from './content'
-import { listKeysBands, listKeysFootprint } from './layout'
+import { listKeysBands, listKeysFootprint, type Combo } from './layout'
 import {
   ACTION_LABEL,
   BEFORE,
@@ -304,6 +304,10 @@ export function wrapperLog(
   }
 }
 
+/** The combination a preset opens on (what its lazy placeholder reserves). */
+export const presetCombo = (p: PresetConfig): Combo =>
+  p.scene === 'list' ? { scene: 'list', key: p.key, action: p.action } : { scene: 'wrapper', action: p.action }
+
 export const presetLog = (p: PresetConfig) =>
   p.scene === 'list' ? listLog(p) : wrapperLog(p)
 
@@ -321,6 +325,7 @@ export const listKeysDescriptor: ExplorableDescriptor<ListKeysLogState> = {
   ),
   defaultPreset: DEFAULT_PRESET,
   since: '2026-11',
-  footprint: listKeysFootprint(),
-  bands: Object.fromEntries(PRESET_CONFIGS.map((p) => [p.id, listKeysBands(p.scene)])),
+  // Each preset reserves its starting combination (final polish: per key and action).
+  footprint: listKeysFootprint(presetCombo(PRESET_CONFIGS.find((p) => p.id === DEFAULT_PRESET)!)),
+  bands: Object.fromEntries(PRESET_CONFIGS.map((p) => [p.id, listKeysBands(presetCombo(p))])),
 }

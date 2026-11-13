@@ -402,49 +402,71 @@ test('full motion: the checkbox rides its line into its After row, then ticks th
   await expect(f.locator('[data-focus]')).toHaveCount(1)
 })
 
-test('layout stability: nothing moves across every scene, key, action and phase', async ({
+test('layout stability: nothing moves within a key and action, in every phase (reserves per combination)', async ({
   page,
 }) => {
   // Every reveal now plays to its landing (H3 R5) before the next.
-  test.setTimeout(240_000)
+  test.setTimeout(300_000)
   for (const width of [375, 1024]) {
     await open(page, width)
     const f = frame(page)
-    const base = await layoutSnapshot(page)
     // The dock is measured (a ghost stack, D15), so the frame is at most the
     // entry-table estimate the client-only placeholder reserves.
-    expect(base.frame[3], 'frame height within the reserved footprint').toBeLessThanOrEqual(
+    const first = await layoutSnapshot(page)
+    expect(first.frame[3], 'frame height within the reserved footprint').toBeLessThanOrEqual(
       width < 768 ? NARROW : WIDE,
     )
-    const same = async (label: string) =>
-      expect(await layoutSnapshot(page), `${label} at ${width}`).toEqual(base)
+    // Final polish: every reserve is sized to the key and action on screen.
+    // Choosing another key or action may change the frame's height (a
+    // user-initiated switch, like a preset); nothing else may move it.
     for (const key of KEY_STRATEGIES) {
       await setKey(page, key)
-      await same(`key ${key}`)
       for (const action of LIST_ACTIONS) {
+        if ((await f.getAttribute('data-viz-action')) !== action) await setAction(page, action)
+        else if ((await mode(page)) === 'reveal') {
+          await setAction(page, action === 'reverse' ? 'append' : 'reverse')
+          await setAction(page, action)
+        }
+        await expect(f).toHaveAttribute('data-viz-mode', 'ask')
+        const base = await layoutSnapshot(page)
+        const same = async (label: string) =>
+          expect(await layoutSnapshot(page), `${key}/${action} ${label} at ${width}`).toEqual(base)
+        // No checks: the prompt changes to the no-state message, then back.
+        await f.locator('[data-viz-focus="check-milk"]').click()
+        await same('nothing checked')
+        await f.locator('[data-viz-focus="check-dog"]').click()
+        await same('Walk dog checked')
+        await f.locator('[data-viz-focus="check-milk"]').click()
+        await same('both checked')
+        await f.locator('[data-viz-focus="check-dog"]').click()
+        await same('Buy milk checked')
+        // Answered wrong, then skipped (the longest verdict leads).
+        await f.locator('[data-choice-index="0"]').click()
+        await expect(f).toHaveAttribute('data-viz-landed', 'true')
+        await same('answered')
+        await setAction(page, action === 'reverse' ? 'append' : 'reverse')
+        await setAction(page, action)
+        await same('asked again')
         await reveal(page, action)
-        await same(`${key}/${action} reveal`)
-        await f.getByTestId('viz-again').click()
-        await same(`${key}/${action} try another`)
+        await same('skipped')
       }
     }
-    // No checks: the prompt changes to the no-state message.
-    await f.locator('[data-viz-focus="check-milk"]').click()
-    await same('nothing checked')
     // A 10-click burst.
-    for (let i = 0; i < 10; i++)
-      await f.locator('[data-viz-focus="check-dog"]').click()
-    await same('burst')
+    for (let i = 0; i < 10; i++) await f.locator('[data-viz-focus="check-dog"]').click()
+    await expect(f).toHaveAttribute('data-viz-mode', 'ask')
     // The wrapper case is its own preset (D17); its dock is measured for
-    // its own text (H3 R2), so it holds still within itself.
+    // its own text (H3 R2), so it holds still within each change.
     await openWrapper(page, width)
     const w = await layoutSnapshot(page)
     expect(w.frame[3], 'wrapper frame within the reserved footprint').toBeLessThanOrEqual(width < 768 ? NARROW : WIDE)
-    for (const a of ['class', 'type'] as const) {
+    for (const a of ['type', 'class'] as const) {
       await reveal(page, a)
       const r = await layoutSnapshot(page)
-      for (const k of ['frame', 'stage', 'dock', 'after'] as const)
-        expect(r[k], `wrapper ${a} ${k}`).toEqual(w[k])
+      if (a === 'type') for (const k of ['frame', 'stage', 'dock', 'after'] as const) expect(r[k], `wrapper ${a} ${k}`).toEqual(w[k])
+      await setAction(page, a === 'type' ? 'class' : 'type')
+      await setAction(page, a)
+      const again = await layoutSnapshot(page)
+      for (const k of ['frame', 'stage', 'dock', 'after'] as const) expect(again[k], `wrapper ${a} asked again ${k}`).toEqual(r[k])
     }
   }
 })
