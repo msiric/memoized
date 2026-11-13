@@ -47,7 +47,12 @@ export function checkLandsOn(key: KeyStrategy, action: ListAction): string {
 export const RECORDED_RUNTIMES = RECORDED_WITH.react.map((v, i) => (i === 0 ? `React ${v}` : v))
 export const RECORDED_LINE = provenanceText(RECORDED_RUNTIMES)
 
-export function OutcomesAsText() {
+/**
+ * `print`: paper has no footer, so the recorded-runs line names the
+ * runtimes; on screen the provenance line beside the summary already does,
+ * so only what is new is said (drift N15).
+ */
+export function OutcomesAsText({ print = false }: { print?: boolean }) {
   return (
     <div className={disclosureBodyCls}>
       <p className="m-0">
@@ -89,7 +94,7 @@ export function OutcomesAsText() {
         </li>
       </ul>
       <p className={cn('m-0 mt-3 text-xs', ink.muted)}>
-        {`${RECORDED_LINE} (react-dom with jsdom), for every starting set of checks, with the state held both in the DOM and in useState.`}
+        {`${print ? `${RECORDED_LINE} (react-dom with jsdom)` : 'Recorded with react-dom and jsdom'}, for every starting set of checks, with the state held both in the DOM and in useState.`}
       </p>
     </div>
   )

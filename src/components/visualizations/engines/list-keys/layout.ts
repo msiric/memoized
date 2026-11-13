@@ -8,6 +8,7 @@ import {
   LAST_TIME_LINE,
   MIN_TEXT_WIDTH,
   PROMPT_LINE,
+  WIDE_MIN,
   headerHeight,
   lastTimeText,
   wrapLines,
@@ -15,6 +16,7 @@ import {
 import type { PerVariant, Variant } from '../../shell/types'
 import { monoWidth, sansWidth } from '../../substrates/text-metrics'
 import {
+  AGAIN_LABEL,
   LIST_RULE,
   NONE_LABEL,
   NO_CHECK_PROMPT,
@@ -26,6 +28,8 @@ import {
   wrapperPrompt,
 } from './content'
 import { CODE_ROWS } from './code'
+import { MAX_COUNT } from './machine'
+import { LIST_OUTCOMES } from './outcomes'
 import {
   ITEMS,
   KEY_STRATEGIES,
@@ -125,7 +129,8 @@ export const STAGE: PerVariant<number> = {
 /** The narrow stage with the columns stacked (very large text only). */
 export const STAGE_STACKED = STAGE.narrow - COLUMNS_HEIGHT + STACKED_HEIGHT
 
-export const GAPS = { header: 16, dock: 16, footer: 16 } as const
+/** The frame's own gaps (drift S05: the shell's `FRAME`). */
+export const GAPS = { header: FRAME.headerGap, dock: FRAME.dockGap, footer: FRAME.footerGap } as const
 
 /** Dock copy is UI type (H3 R3): the caption's 14/24. */
 const BODY_LINE = typeScale.caption.line
@@ -179,7 +184,16 @@ export function dockStrings(scene: Scene) {
   const labels =
     scene === 'list' ? LIST_ACTIONS.flatMap((a) => listChoices(a).map((c) => c.label)) : wrapperChoices(99).map((c) => c.label)
   const lastTime = lastTimeText([...labels].sort((a, b) => sansWidth(b, 12) - sansWidth(a, 12))[0])
-  return { prompts: [...new Set(prompts)], reveals: unique, maxChoices, lastTime }
+  // Every choice set the scene can show (the choice row reserves the tallest, Q5).
+  const choiceSets =
+    scene === 'list' ? LIST_ACTIONS.map((a) => listChoices(a)) : [wrapperChoices(MAX_COUNT)]
+  // The verdict's note line: the longest tally.
+  const tallies =
+    scene === 'list'
+      ? KEY_STRATEGIES.flatMap((k) => LIST_ACTIONS.map((a) => listTally(LIST_OUTCOMES[`${k}/${a}`])))
+      : [wrapperTally(true), wrapperTally(false)]
+  const tally = [...tallies].sort((a, b) => sansWidth(b, 12) - sansWidth(a, 12))[0]
+  return { prompts: [...new Set(prompts)], reveals: unique, maxChoices, lastTime, choiceSets, tally }
 }
 
 /** "2 reused · 1 mounted": what React did, counted. */
@@ -197,18 +211,34 @@ const chars = (width: number, glyph: number) => Math.floor(width / glyph)
 const lines = (t: string, width: number, glyph: number) => wrapLines(t, chars(width, glyph))
 const maxOf = (xs: number[]) => Math.max(0, ...xs)
 
-export const choicesHeight = (count: number) => {
-  const rows = Math.ceil(count / 2)
-  return rows * CHOICE.height + (rows - 1) * CHOICE.gap
-}
-
 /**
- * List-keys choices from 768: two 148 px columns (labels are at most about
- * 9 characters, so the shell's 168 is not needed), beside the text.
+ * A choice's chrome around its label (`LkChoice`): 12 + the 16 px numeral
+ * slot + 8 + label + 12, plus 4 px of slack for the width model.
  */
-export const LK_CHOICE_WIDTH = 148
-export const WIDE_CHOICES = 2 * LK_CHOICE_WIDTH + CHOICE.gap
-export const WIDE_SIDE = MIN_TEXT_WIDTH.wide - CHOICE.sideGap - WIDE_CHOICES
+export const LK_CHOICE_CHROME = 52
+/** A wrapped choice: 10 px above and below each 20 px label line. */
+const CHOICE_PAD = 20
+const CHOICE_LINE = 20
+const choiceLabels = [
+  ...LIST_ACTIONS.flatMap((a) => listChoices(a).map((c) => ({ label: c.label, mono: false }))),
+  ...wrapperChoices(MAX_COUNT).map((c) => ({ label: c.label, mono: true })),
+]
+/** One-row choice column: the longest label of either scene plus the chrome, at most the shell's 168. */
+export const LK_CHOICE_WIDTH = Math.min(
+  CHOICE.wideWidth,
+  Math.ceil(
+    Math.max(...choiceLabels.map((c) => (c.mono ? monoWidth(c.label, 13) : sansWidth(c.label, typeScale.control.size)))),
+  ) + LK_CHOICE_CHROME,
+)
+/** "Try another", the widest trailing action (outline pill, 16 px sides), plus slack. */
+export const TRAILING_WIDTH = Math.ceil(sansWidth(AGAIN_LABEL, typeScale.control.size)) + 2 * 16 + 4
+/**
+ * From the wide variant (the frame from 37.875rem) the choices and the
+ * trailing action share one row: columns up to `LK_CHOICE_WIDTH`, narrower
+ * where the row needs it (a label then wraps, Q5, and the row grows).
+ */
+export const CHOICE_ROW_FIT = WIDE_MIN
+const MAX_CHOICES = Math.max(...LIST_ACTIONS.map((a) => listChoices(a).length))
 
 /**
  * The verdict (H3 F2 ruling 2): at most two short sentences, the lead and
@@ -220,26 +250,51 @@ function revealTextHeight(r: { lead: string; rule: string }, width: number) {
   return lines(`${r.lead} ${r.rule}`.trim(), width, GLYPH.caption) * BODY_LINE
 }
 
-/** The dock's one action row: Skip, Show me or Try another (44 px targets), and the tally once revealed. */
+/** The trailing action (Skip, Show me, then Try another): a 44 px target. */
 const ACTION_ROW = TARGET_PX
+
+/**
+ * The choice row at width `w` (Q4, Q5): one row of equal columns with the
+ * trailing action from `CHOICE_ROW_FIT`, else two columns (an odd last
+ * choice spans both) with the action under them. Labels wrap; a column's
+ * label room is checked so a wrapped label is counted.
+ */
+export function choiceRowHeight(scene: Scene, w: number): number {
+  const s = dockStrings(scene)
+  const one = w >= CHOICE_ROW_FIT
+  const col = one
+    ? Math.min(LK_CHOICE_WIDTH, (w - TRAILING_WIDTH - MAX_CHOICES * CHOICE.gap) / MAX_CHOICES)
+    : (w - CHOICE.gap) / 2
+  const room = col - LK_CHOICE_CHROME
+  const rowOf = (labels: string[]) =>
+    Math.max(TARGET_PX, ...labels.map((l) => CHOICE_PAD + lines(l, room, GLYPH.caption) * CHOICE_LINE))
+  let worst = 0
+  for (const set of s.choiceSets) {
+    const labels = set.map((c) => c.label)
+    if (one) worst = Math.max(worst, rowOf(labels))
+    else {
+      let h = 0
+      for (let i = 0; i < labels.length; i += 2) {
+        const pair = labels.length - i === 1 ? [labels[i]] : labels.slice(i, i + 2)
+        h += (i ? CHOICE.gap : 0) + rowOf(pair)
+      }
+      worst = Math.max(worst, h + CHOICE.gap + ACTION_ROW)
+    }
+  }
+  return worst
+}
 
 export function dockModes(variant: Variant, scene: Scene) {
   const s = dockStrings(scene)
   const w = MIN_TEXT_WIDTH[variant]
-  const choices = choicesHeight(s.maxChoices)
-  const side = variant === 'narrow' ? w : WIDE_SIDE
   const text = Math.max(
-    maxOf(s.prompts.map((t) => lines(t, side, GLYPH.prompt))) * PROMPT_LINE +
-      lines(s.lastTime, side, GLYPH.note) * LAST_TIME_LINE,
-    maxOf(s.reveals.map((r) => revealTextHeight(r, side))),
+    maxOf(s.prompts.map((t) => lines(t, w, GLYPH.prompt))) * PROMPT_LINE +
+      lines(s.lastTime, w, GLYPH.note) * LAST_TIME_LINE,
+    maxOf(s.reveals.map((r) => revealTextHeight(r, w))) + LAST_TIME_LINE,
   )
-  // Narrow: text, choices, the action row. Wide: the text with the action
-  // row under it, beside the choices.
-  const dock =
-    variant === 'narrow'
-      ? text + BLOCK_GAP + choices + BLOCK_GAP + ACTION_ROW
-      : Math.max(text + BLOCK_GAP + ACTION_ROW, choices)
-  return { text, choices, dock }
+  const choices = choiceRowHeight(scene, w)
+  // The text (question or verdict, with its note line), then the choice row.
+  return { text, choices, dock: text + BLOCK_GAP + choices }
 }
 
 export type ListKeysMetrics = {
@@ -295,5 +350,5 @@ export const LONGEST_CHOICE = Math.max(
 export function dockGhostStrings(scene: Scene, keep = 3) {
   const s = dockStrings(scene)
   const prompts = [...s.prompts].sort((a, b) => b.length - a.length).slice(0, keep)
-  return { prompts, reveals: s.reveals, maxChoices: s.maxChoices, lastTime: s.lastTime }
+  return { prompts, reveals: s.reveals, maxChoices: s.maxChoices, lastTime: s.lastTime, tally: s.tally }
 }
