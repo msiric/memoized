@@ -30,7 +30,7 @@ describe('VDS primitives', () => {
     expect(primary).toMatch(/\bbg-lime-500\b/)
     expect(primary).toContain('can-hover:bg-lime-600')
     // R13: press is one step past hover, on its own variant so it wins over hover.
-    expect(primary).toContain('press:bg-lime-700')
+    expect(primary).toContain('press:brightness-90')
     expect(primary).toMatch(/\bh-11\b/)
     expect(primary).toMatch(/\brounded-full\b/)
     expect(primary).toContain(focusRing)

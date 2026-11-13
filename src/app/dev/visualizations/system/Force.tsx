@@ -25,7 +25,7 @@ const VARIANTS: Record<ForcedState, string[]> = {
  * it finds literally in the source, so they are listed here.
  */
 export const FORCED_SAFELIST = [
-  'bg-lime-600 bg-lime-700 brightness-98 bg-zinc-800 bg-zinc-700 bg-zinc-600 bg-zinc-500 bg-white/5 bg-white/10',
+  'bg-lime-600 bg-lime-700 brightness-98 brightness-90 bg-zinc-800 bg-zinc-700 bg-zinc-600 bg-zinc-500 bg-white/5 bg-white/10',
   'text-zinc-300 text-zinc-200 text-zinc-100 text-white text-lime-500',
   'outline outline-2 outline-offset-2 outline-offset-4 outline-lime-500',
 ].join(' ')

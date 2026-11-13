@@ -20,7 +20,7 @@ import { focusRing, radius, transitionCls, type as typeScale } from './tokens-v3
  *
  * States: hover only on devices that can hover (`can-hover:`), a press one
  * step past hover on every device (R13: white/5 then white/10; Next steps
- * its fill, lime-600 then lime-700), the keyboard focus ring, and
+ * its fill to lime-600, then dims it to 0.9 on press), the keyboard focus ring, and
  * `unavailable`. Never `disabled`, so focus never drops (spec §5.1):
  * `aria-disabled` plus a click guard, drawn at the platform's `opacity-50`.
  * `waiting` is a control that will act in a moment (Next at a checkpoint,
@@ -48,7 +48,9 @@ const rest: Record<ButtonVariant, string> = {
 
 /** Hover (hover-capable devices only) and press (every device), one step each (R13). */
 const live: Record<ButtonVariant, string> = {
-  primary: 'can-hover:bg-lime-600 press:bg-lime-700',
+  // Press keeps the hover fill and dims it (0.9): lime-700 was 3.55:1 under
+  // the zinc-900 label (found by the contrast crawl); dimmed lime-600 is 4.84:1.
+  primary: 'can-hover:bg-lime-600 press:bg-lime-600 press:brightness-90',
   secondary: cn(transitionCls.hover, transitionCls.press, 'can-hover:text-white press:text-white'),
   text: cn(transitionCls.hover, transitionCls.press, 'can-hover:text-zinc-200 press:text-zinc-200'),
 }
