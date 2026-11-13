@@ -497,7 +497,13 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
   // A figure's boxes are its top-level groups. Decorative wrappers
   // (`g[aria-hidden]`, VIZ-H D21: only the function objects are exposed) are
   // transparent: their child groups count as top level.
-  const TOP_RECT = ':scope > g:not([aria-hidden]) > rect:first-child, :scope > g[aria-hidden] > g > rect:first-child'
+  // A box is the glyph a group draws first. A function's transparent touch
+  // band (`.vz-hit`, R11) comes before it and is not a glyph: it reaches
+  // past the box by design (a 45 px target), so measuring labels, overlap
+  // and edge ends against it would pass a label that overruns the drawn box
+  // and flag text that only meets the invisible band.
+  const BOX = ':is(rect:first-child:not(.vz-hit), rect.vz-hit:first-child + rect)'
+  const TOP_RECT = `:scope > g:not([aria-hidden]) > ${BOX}, :scope > g[aria-hidden] > g > ${BOX}`
   const isWrapper = (el: Element | null, svg: Element) =>
     !!el && el.parentElement === svg && el.matches('g[aria-hidden]')
   const svgs = [...frame.querySelectorAll('svg')].filter((s) => visible(s) && s.getBoundingClientRect().width > 24)
@@ -524,7 +530,7 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
       let top: Element | null = t
       while (top && (top.parentElement as Element | null) !== svg && !isWrapper(top.parentElement, svg))
         top = top.parentElement
-      const own = (top?.tagName === 'g' ? top.querySelector(':scope > rect:first-child') : null) as SVGRectElement | null
+      const own = (top?.tagName === 'g' ? top.querySelector(`:scope > ${BOX}`) : null) as SVGRectElement | null
       if (own && boxes.includes(own)) {
         const b = R(own.getBoundingClientRect())
         const o = Math.max(r.r - b.r, b.l - r.l)
@@ -629,12 +635,12 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     let boxR: Map<string, R>
     if (named.length) {
       boxR = new Map(
-        named.map((g) => [g.getAttribute('data-node')!, R((g.querySelector('rect') as SVGRectElement).getBoundingClientRect())]),
+        named.map((g) => [g.getAttribute('data-node')!, R((g.querySelector(`:scope > ${BOX}`) as SVGRectElement).getBoundingClientRect())]),
       )
     } else {
       const boxEls = [
         ...svg.querySelectorAll(
-          ':scope > g:not([data-edge]):not([aria-hidden]) > rect:first-child, :scope > g[aria-hidden] > g:not([data-edge]) > rect:first-child',
+          `:scope > g:not([data-edge]):not([aria-hidden]) > ${BOX}, :scope > g[aria-hidden] > g:not([data-edge]) > ${BOX}`,
         ),
       ] as SVGRectElement[]
       if (!ids || !spec || ids.length !== boxEls.length) {
