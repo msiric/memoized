@@ -150,6 +150,10 @@ export function EventLoopStage({
     narrow: consoleVisible(out, metrics.consoleWidth.narrow, G.consoleRows, sources),
     wide: consoleVisible(out, metrics.consoleWidth.wide, G.consoleRows, sources),
   }
+  // Below the design width (very large text) the strip keeps the narrow
+  // variant's rows by collapsing more of the oldest outputs (R9).
+  const tight = consoleVisible(out, metrics.consoleTight, metrics.consoleRows.narrow, sources)
+  const firstTight = out.length - tight
   const firstShown = {
     narrow: out.length - kept.narrow,
     wide: out.length - kept.wide,
@@ -265,6 +269,8 @@ export function EventLoopStage({
                       typeScale.tag.cls,
                       ink.muted,
                       showCls({ narrow: v === 'narrow', wide: v === 'wide' }),
+                      // The tight frame shows its own count.
+                      v === 'narrow' && firstTight > firstShown.narrow && 'vz-tight:hidden',
                     )}
                   >
                     {earlierLabel(firstShown[v])}
@@ -272,6 +278,19 @@ export function EventLoopStage({
                 ) : null,
               )
             : null}
+          {firstTight > firstShown.narrow ? (
+            <li
+              key="earlier-tight"
+              data-viz-part="console-earlier"
+              className={clsx(
+                'm-0 hidden h-5 items-center self-start p-0 vz-tight:flex',
+                typeScale.tag.cls,
+                ink.muted,
+              )}
+            >
+              {earlierLabel(firstTight)}
+            </li>
+          ) : null}
           <AnimatePresence
             key={gate.epoch}
             initial={false}
@@ -306,6 +325,7 @@ export function EventLoopStage({
                     'm-0 grid min-w-0 max-w-full items-center p-0 [grid-template-columns:auto_minmax(0,1fr)]',
                     typeScale.value.cls,
                     showCls(show.narrow && show.wide ? both : show),
+                    k < firstTight && 'vz-tight:hidden',
                   )}
                   style={{ columnGap: toRem(G.outMark) }}
                   // Rises into place; on Back it leaves the way it came (D8).

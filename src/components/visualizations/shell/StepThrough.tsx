@@ -469,16 +469,18 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     >
       {/* 1. Header: title, then the preset switcher (right from 768). */}
       <header
+        // A floor, not a fixed height: the title may wrap under very large
+        // text (R9). It never changes between steps, so nothing shifts.
         className={cn(
-          'flex flex-col gap-2 vz-wide:flex-row vz-wide:items-center vz-wide:justify-between vz-wide:gap-4 print:!h-auto',
-          H_CLS,
+          'flex flex-col gap-2 vz-wide:flex-row vz-wide:items-center vz-wide:justify-between vz-wide:gap-4',
+          'min-h-[var(--vz-h-n)] vz-wide:min-h-[var(--vz-h-w)]',
         )}
         style={heights({
           narrow: metrics.narrow.header,
           wide: metrics.wide.header,
         })}
       >
-        <p id={titleId} className={cn('m-0 truncate', typeScale.title.cls, ink.base)}>
+        <p id={titleId} className={cn('m-0 min-w-0 text-pretty', typeScale.title.cls, ink.base)}>
           {def.title}
         </p>
         {/* One preset has no switcher, and no gap reserved for one (A5). */}

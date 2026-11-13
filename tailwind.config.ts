@@ -111,6 +111,9 @@ export default {
       addVariant('vz-wide', '@container vz (min-width: 37.875rem)')
       addVariant('vz-narrow', '@container vz (max-width: 37.874rem)')
       addVariant('vz-xl', '@container vz (min-width: 53.875rem)')
+      // Below the 320 design width: Chrome's "Very large" text on a phone,
+      // or 200 % text in a lesson column (VIZ-H R9).
+      addVariant('vz-tight', '@container vz (max-width: 17.874rem)')
     }),
   ],
 } satisfies Config

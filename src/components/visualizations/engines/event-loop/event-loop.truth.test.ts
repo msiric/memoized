@@ -60,7 +60,7 @@ describe('event-loop width lint (A1, A2, A7, F4, F5)', () => {
     )
     const errors = lintEventLoopLogs([{ ...log, steps }]).join('\n')
     expect(errors).toMatch(
-      /host chip "timer 0 ms → callbackHandler" is \d+px > 122px/,
+      /host chip "timer 0 ms → callbackHandler" is \d+px > 128px/,
     )
     expect(errors).toMatch(/micro holds 9 items/)
     expect(

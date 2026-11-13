@@ -36,6 +36,8 @@ export const G = {
   gap: 8,
   pad: 8,
   border: 1,
+  /** A lane's inline inset: no border, `px-1.5` (R9: room for a whole chip label). */
+  laneInset: 6,
   label: 16,
   labelGap: 4,
   chip: 28,
@@ -72,6 +74,13 @@ export const G = {
 
 /** Narrowest stage width per variant (the stage at 320 and at 768). */
 export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
+/**
+ * The frame below the 320 design width (`vz-tight`, under 17.875rem): very
+ * large text on a phone (375 at 150 % is 14.3rem) or 200 % text in a lesson
+ * column. The console keeps its reserved rows there by collapsing more of
+ * its oldest outputs into `N earlier` (R9), measured at 14rem.
+ */
+export const STAGE_TIGHT = 224
 
 export type LaneKind = 'frame' | 'host' | 'micro' | 'task'
 
@@ -188,6 +197,8 @@ export type EventLoopMetrics = {
   queueWidth: PerVariant<number>
   hostWidth: PerVariant<number>
   consoleWidth: PerVariant<number>
+  /** Console content width in the tight frame (`vz-tight`, R9). */
+  consoleTight: number
   /** Label on top of the stack lane from 768 (it holds frames or spare height). */
   stackLabelTopWide: boolean
   maxStack: number
@@ -217,12 +228,12 @@ export function wideCodeCols(codeCols: number): number {
 /** Content widths at the narrowest width of each variant. */
 function widths(codeCols: number) {
   const half = (STAGE_MIN.narrow - G.gap) / 2
-  const laneContentNarrow = half - 2 * G.border - 2 * G.pad
+  const laneContentNarrow = half - 2 * G.laneInset
   // From 768 the code column is at least `codeMin.md`, or as wide as the code.
   const codeCol = codeColumn(codeCols).md
   const right = STAGE_MIN.wide - codeCol - 16
   const laneContentWide =
-    right - 2 * G.border - 2 * G.pad - G.inlineLabel - G.gap
+    right - 2 * G.laneInset - G.inlineLabel - G.gap
   return {
     queueWidth: { narrow: laneContentNarrow, wide: laneContentWide },
     hostWidth: { narrow: laneContentNarrow, wide: laneContentWide },
@@ -366,6 +377,7 @@ export function eventLoopMetrics(
     queueWidth: w.queueWidth,
     hostWidth: w.hostWidth,
     consoleWidth: w.consoleWidth,
+    consoleTight: STAGE_TIGHT - 2 * G.border - 2 * G.pad,
     stackLabelTopWide,
     maxStack,
     codeColumn: codeColumn(maxCols),

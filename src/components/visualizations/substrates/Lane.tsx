@@ -211,8 +211,10 @@ export function Lane(props: LaneProps) {
     <div
       data-viz-region={id}
       className={clsx(
-        // No visible border (R2): a transparent one keeps the geometry.
-        'relative flex min-w-0 border border-transparent p-2',
+        // No visible border (R2): a transparent top and bottom keep the
+        // heights; inline, 6 px and no border, so a chip keeps its whole
+        // label at very large text on a phone (R9).
+        'relative flex min-w-0 border-y border-transparent px-1.5 py-2',
         radius.row.cls,
         surface.panel,
         labelAt.narrow === 'top'
