@@ -387,6 +387,23 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'choice ✓ and × marks in the key slot', kind: 'text', fg: r('ink'), bg: 'keyCap' },
   { use: 'choice key number', kind: 'text', fg: r('inkSecondary'), bg: 'keyCap' },
   { use: 'state chip text', kind: 'text', fg: { dark: 'zinc.900', light: 'white' }, bg: 'chipState' },
+  // Marks that carry state without text (G: the palette rule ties every edge
+  // color to a row here, so each one is contrast-tested).
+  {
+    use: 'checked checkbox and answered scrubber diamond (fill and edge) on frame',
+    kind: 'graphic',
+    fg: { dark: 'zinc.100', light: 'zinc.900' },
+    bg: 'frame',
+  },
+  { use: 'empty checkbox edge on frame', kind: 'graphic', fg: r('line'), bg: 'frame' },
+  { use: 'diamond on the scrubber thumb', kind: 'graphic', fg: { dark: 'zinc.900', light: 'zinc.900' }, bg: 'accent' },
+  {
+    use: 'changed frame or host chip: its doubled edge on a panel (R1)',
+    kind: 'graphic',
+    fg: { dark: 'zinc.300', light: 'zinc.700' },
+    bg: 'panel',
+  },
+  { use: 'scrubber tooltip on the page', kind: 'text', fg: r('ink'), bg: 'tooltip' },
   { use: 'done fill text', kind: 'text', fg: { dark: 'zinc.950', light: 'white' }, bg: 'doneFill' },
 ]
 
@@ -571,10 +588,24 @@ export const radius = {
   chip: { px: 4, cls: 'rounded' },
 } as const
 
-/** D1: outlines 1 px; connectors 1.5 px; a `now` connector 2.5 px. */
-export const strokeWidth = { outline: 1, connector: 1.5, nowConnector: 2.5 } as const
+/**
+ * D1: outlines 1 px; connectors 1.5 px; a `now` connector 2.5 px. `mark` is
+ * the drawn tick and chevron inside a control (2 px, the platform icon
+ * weight); `knockout` the dark halo that lifts an unused record's text off
+ * its hatch (R16).
+ */
+export const strokeWidth = { outline: 1, connector: 1.5, nowConnector: 2.5, mark: 2, knockout: 4 } as const
 /** S: §2.2. The one dash pattern. */
 export const DASH = '4 4'
+/** The end dot of a connector (list-keys match lines), radius in px. */
+export const DOT_R = 3
+
+/**
+ * Opacity roles (R1 L09): `dim` is everything off the traced path while a
+ * closures function is hovered or focused (H3 R11); `readTint` the lime
+ * ground of the binding row a traced function reads.
+ */
+export const opacityRole = { dim: 0.4, readTint: 0.16 } as const
 
 /** Minimum touch target (S: A5) and the gap between adjacent targets. */
 export const TARGET_PX = 44
@@ -708,6 +739,21 @@ export function liftShadow(k: number): string {
   const f = (n: number) => Math.round(n * k * 100) / 100
   return `0 ${f(LIFT.y)}px ${f(LIFT.blur)}px rgb(0 0 0 / ${f(LIFT.alpha)})`
 }
+
+/**
+ * The tokens the stylesheet needs (`src/styles/tailwind.css`, the `.vz-*`
+ * rules), exposed as the Tailwind theme key `vz` (tailwind.config.ts), so the
+ * CSS writes `theme('vz.highlight')` and never a literal (token lint, R1 L01).
+ */
+export const vzTheme = {
+  highlight: `${(motion.highlight.full as TweenToken).duration * 1000}ms`,
+  ease: EASE_CSS,
+  dash: DASH,
+  dim: String(opacityRole.dim),
+  readTint: String(opacityRole.readTint),
+  connector: `${strokeWidth.connector}px`,
+  knockout: `${strokeWidth.knockout}px`,
+} as const
 
 /** CSS twins for class-driven transitions. */
 export const transitionCls = {

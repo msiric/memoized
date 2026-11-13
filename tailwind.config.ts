@@ -3,6 +3,7 @@ import typographyPlugin from '@tailwindcss/typography'
 import { type Config } from 'tailwindcss'
 import colors from 'tailwindcss/colors'
 import plugin from 'tailwindcss/plugin'
+import { vzTheme } from './src/components/visualizations/primitives/tokens-v3'
 import typographyStyles from './typography'
 
 export default {
@@ -35,6 +36,9 @@ export default {
     },
     typography: typographyStyles,
     extend: {
+      // Lesson visualizations: the tokens the `.vz-*` stylesheet reads with
+      // `theme('vz.*')` (tokens-v3.ts `vzTheme`; the token lint forbids literals there).
+      vz: vzTheme,
       colors: {
         // Lesson visualizations (VIZ-H decision 4): the frame surface
         // (zinc-800/40 over the zinc-900 page) as one opaque color, derived
@@ -73,6 +77,8 @@ export default {
         '3xl': '50rem',
         '5xl': '66rem',
         '8xl': '88rem',
+        // Lesson visualizations: the step-through's breakout width from 1280 (Viz.tsx).
+        'vz-breakout': '960px',
       },
       opacity: {
         1: '0.01',

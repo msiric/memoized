@@ -24,6 +24,7 @@ import {
   svgInk,
   transitionCls,
   type as typeScale,
+  DOT_R,
 } from '../../primitives/tokens-v3'
 import { transitionFor, type MotionGate } from '../../shell/motion'
 import { toRem } from '../../substrates/units'
@@ -760,8 +761,8 @@ function Lines({ s, box, view, gate }: { s: ExploreState; box: LinesBox; view: R
                   data-lk-draw
                   {...hide}
                 />
-                <circle cx={0} cy={l.y1} r={3} fill="currentColor" />
-                <circle cx={x2} cy={l.y2} r={3} fill="currentColor" data-lk-end style={hidden ? { opacity: 0 } : undefined} />
+                <circle cx={0} cy={l.y1} r={DOT_R} fill="currentColor" />
+                <circle cx={x2} cy={l.y2} r={DOT_R} fill="currentColor" data-lk-end style={hidden ? { opacity: 0 } : undefined} />
               </g>
             )
           }
@@ -791,7 +792,7 @@ function Lines({ s, box, view, gate }: { s: ExploreState; box: LinesBox; view: R
           const cx = stacked ? stub : w - stub
           return (
             <g key={`m-${l.to}`} data-link="mounted" data-to={l.to} data-lk-stub className={svgInk.muted} style={hidden ? { opacity: 0 } : undefined}>
-              <circle cx={cx} cy={l.y} r={3} fill="none" stroke="currentColor" strokeWidth={strokeWidth.connector} />
+              <circle cx={cx} cy={l.y} r={DOT_R} fill="none" stroke="currentColor" strokeWidth={strokeWidth.connector} />
               <path
                 d={stacked ? `M${stub - 3} ${l.y} H 0` : `M${w - stub + 3} ${l.y} H ${w}`}
                 stroke="currentColor"

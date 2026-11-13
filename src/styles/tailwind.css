@@ -292,6 +292,13 @@
 }
 
 /*
+ * Lesson visualizations. The token lint (components/visualizations/
+ * primitives/tokens-lint.test.ts) scans from this comment to the end of the
+ * file: no literal color, size, duration or opacity; values come from
+ * `theme('vz.*')` (tokens-v3 `vzTheme`), `theme('colors.*')` on the role
+ * palette, or `@apply` of token classes.
+ */
+/*
  * Static visualization roles (VIZ-01 spec §2.1) as short classes: an inline
  * SVG repeats them on every glyph, so full utility lists would blow the
  * markup budget. Dark is the product; `print:` carries the light roles.
@@ -301,10 +308,10 @@
   .vz-g { @apply fill-zinc-800 print:fill-white; stroke: currentColor; }
   .vz-hl { @apply fill-none stroke-zinc-700 print:stroke-zinc-200; }
   .vz-m { @apply fill-zinc-400 print:fill-zinc-600; }
-  .vz-l { @apply stroke-zinc-500 print:stroke-zinc-600; }
+  .vz-l { @apply stroke-zinc-500 print:stroke-zinc-500; }
   .vz-r { @apply fill-amber-400 print:fill-amber-700; }
-  .vz-x { @apply stroke-zinc-500 print:stroke-zinc-400; }
-  .vz-d { stroke-dasharray: 4 4; }
+  .vz-x { @apply stroke-zinc-500 print:stroke-zinc-500; }
+  .vz-d { stroke-dasharray: theme('vz.dash'); }
   .vz-c { text-anchor: middle; }
   /*
    * Type in em of the svg's own size, which the stage sets in user units
@@ -331,16 +338,16 @@
     --vz-kt: theme('colors.lime.400 / 10%');
   }
   .vz-s :is([data-edge], [data-node]) { @apply text-zinc-500 print:text-zinc-600; }
-  .vz-e { fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: var(--vz-sw, 1.5px); }
+  .vz-e { fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: var(--vz-sw, theme('vz.connector')); }
   .vz-ah { fill: currentColor; }
   /* A function object: the glyph, tinted when traced (D5: a lime border plus the lime-400/10 fill). */
   .vz-fb { fill: var(--vz-t, theme('colors.zinc.800')); stroke: currentColor; @apply print:fill-white; }
   /* Its touch target: a transparent band up to 7 px around the box, 45 px tall (R11, `hitBands` in the stage). */
   .vz-hit { fill: transparent; }
   /* A row a function can read: clear until traced, then the lime tint. */
-  .vz-rt { color: transparent; fill: currentColor; fill-opacity: 0.16; }
+  .vz-rt { color: transparent; fill: currentColor; fill-opacity: theme('vz.readTint'); }
   /* An unused record's text is knocked out of its hatch (R16), on screen and paper. */
-  .vz-u text { @apply stroke-zinc-800 print:stroke-white; paint-order: stroke; stroke-width: 4px; stroke-linejoin: round; }
+  .vz-u text { @apply stroke-zinc-800 print:stroke-white; paint-order: stroke; stroke-width: theme('vz.knockout'); stroke-linejoin: round; }
   /*
    * VIZ-H D21 and H3 R11, the closures moment: hovering a function, focusing
    * it from the keyboard (`:focus-visible`, so a mouse click never sticks)
@@ -355,18 +362,18 @@
    * The focus ring (D5: 2 px lime-500, 2 px off the glyph), on the glyph
    * itself: the group also holds the touch band, which would widen it.
    */
-  .vz-s [tabindex]:focus-visible > .vz-fb { outline: 2px solid theme('colors.lime.500'); outline-offset: 2px; border-radius: 8px; }
+  .vz-s [tabindex]:focus-visible > .vz-fb { @apply rounded-lg outline outline-2 outline-offset-2 outline-lime-500; }
   /* Press (R13): the traced tint deepens while held. */
   .vz-s [tabindex]:active > .vz-fb { fill: theme('colors.lime.400 / 20%'); }
   .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) {
-    transition: opacity 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1);
+    transition: opacity theme('vz.highlight') theme('vz.ease'), color theme('vz.highlight') theme('vz.ease');
   }
-  .vz-e, .vz-fb { transition: stroke-width 120ms cubic-bezier(0.2, 0, 0, 1), fill 120ms cubic-bezier(0.2, 0, 0, 1); }
+  .vz-e, .vz-fb { transition: stroke-width theme('vz.highlight') theme('vz.ease'), fill theme('vz.highlight') theme('vz.ease'); }
   .vz-s:is(:has([tabindex]:hover), :has([tabindex]:focus-visible)) :is([data-edge], [data-node]),
-  .vz-s:is(:has([tabindex]:hover), :has([tabindex]:focus-visible)) > g[aria-hidden] > :is(text, rect) { opacity: 0.4; }
+  .vz-s:is(:has([tabindex]:hover), :has([tabindex]:focus-visible)) > g[aria-hidden] > :is(text, rect) { opacity: theme('vz.dim'); }
   @media (hover: none) {
     .vz-s:has([tabindex]:focus) :is([data-edge], [data-node]),
-    .vz-s:has([tabindex]:focus) > g[aria-hidden] > :is(text, rect) { opacity: 0.4; }
+    .vz-s:has([tabindex]:focus) > g[aria-hidden] > :is(text, rect) { opacity: theme('vz.dim'); }
   }
   @media (prefers-reduced-motion: reduce) {
     .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect), .vz-e, .vz-fb { transition: none; }

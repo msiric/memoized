@@ -3,7 +3,7 @@
 import { Fragment, useId, useRef, type KeyboardEvent } from 'react'
 import { segmentedWidth } from '../step-log/validate'
 import { cn } from './cn'
-import { focusRing, focusRingGroup, transitionCls, type as typeScale } from './tokens-v3'
+import { focusRing, focusRingGroup, strokeWidth, transitionCls, type as typeScale } from './tokens-v3'
 
 /**
  * Segmented control (D2): a copy of the lesson footer's "Lesson completed?"
@@ -96,7 +96,7 @@ export function SegmentedControl({
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth={strokeWidth.mark}
         className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white print:text-zinc-900"
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />

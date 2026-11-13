@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { Fragment } from 'react'
-import { ink, radius, type as typeScale } from '../../primitives/tokens-v3'
+import { ink, radius, strokeWidth, type as typeScale } from '../../primitives/tokens-v3'
 import type { StaticStageProps } from '../../shell/static-types'
 import {
   HEADING,
@@ -348,7 +348,7 @@ function SectionSvg({
               y1="0"
               x2="0"
               y2="6"
-              strokeWidth="1.5"
+              strokeWidth={strokeWidth.connector}
               className={C.hatch}
             />
           </pattern>

@@ -105,7 +105,7 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
   const sized = statics ?? entry[4]
   const [narrow, wide, col = wide] = (sized && (sized[preset ?? ''] ?? Object.values(sized)[0])) || [entry[1], entry[2]]
   return (
-    <div ref={ref} data-viz={id} className={statics ? 'my-8' : 'my-8 xl:max-w-[960px]'}>
+    <div ref={ref} data-viz={id} className={statics ? 'my-8' : 'my-8 xl:max-w-vz-breakout'}>
       {Live ? (
         <Live preset={preset} />
       ) : SERVER?.[id] ? (

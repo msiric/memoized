@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { radius, transitionCls } from '../../primitives/tokens-v3'
+import { radius, strokeWidth, transitionCls } from '../../primitives/tokens-v3'
 
 /**
  * The list-keys checkbox, real (a Before row) or drawn (an After row and the
@@ -20,7 +20,7 @@ const emptyBoxCls = 'border-zinc-500 bg-transparent print:border-zinc-900'
 export function Tick({ className }: { className?: string }) {
   return (
     <svg aria-hidden width="16" height="16" viewBox="0 0 16 16" className={clsx('text-zinc-900', className)}>
-      <path d={CHECK_PATH} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={CHECK_PATH} fill="none" stroke="currentColor" strokeWidth={strokeWidth.mark} strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

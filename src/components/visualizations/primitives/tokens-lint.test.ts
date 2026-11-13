@@ -3,49 +3,118 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
+import {
+  contrastPairs,
+  roles,
+  surfaces,
+  type PaletteRef,
+} from './tokens-v3'
+
 /**
- * Token lint (VIZ-H WS1): outside the token definitions, the visualization
- * system may not hard-code a color, a size or a duration. Everything comes
- * from `tokens-v3.ts` (or a named class on the platform scale).
+ * Token lint (VIZ-H WS1, G): outside the token definitions, the visualization
+ * system may not hard-code a color, a size or a duration, and it may paint
+ * only the colors the token tables declare (and the contrast suite tests).
  *
- * Scanned: shell/, engines/, substrates/, primitives/ (TS and TSX sources,
- * comments stripped). Not scanned: the token module itself, tests, the
- * `__stress__` fixtures, JSON data (pre-computed Shiki colors) and the legacy
- * v1 files listed in the README.
+ * Scanned: every TS and TSX source under components/visualizations (comments
+ * stripped), and the visualization rules of `src/styles/tailwind.css` (from
+ * its "Lesson visualizations" comment to the end). Not scanned: the token
+ * module itself, tests, the `__stress__` fixtures and JSON data
+ * (pre-computed Shiki colors).
  *
- * Rules:
+ * Rules (TS and TSX):
  * - no raw hex, rgb(a) or hsl(a) color;
  * - no arbitrary Tailwind value carrying a length, a number or a color
  *   (`text-[13px]`, `p-[7px]`, `rounded-[10px]`, `max-w-[12rem]`,
  *   `duration-[120ms]`); `[var(--x)]`, selectors and keywords are fine;
  * - no literal duration: `120ms` strings, `duration-150` classes, non-zero
- *   framer `duration:` literals, or `setTimeout` with a number.
+ *   framer `duration:` literals, or `setTimeout` with a number;
+ * - no literal SVG stroke width or radius (`strokeWidth="2"`, `r={3}`):
+ *   `strokeWidth`, `DOT_R` and `radius` are the tokens (R1 L04);
+ * - the palette rule (R1 L03): a color class must use a color the tables
+ *   paint in that capacity. Text (`text-`, `decoration-`) must be the
+ *   foreground of a `text` contrast pair; edges (`border-`, `ring-`,
+ *   `stroke-`, `outline-`, `divide-`) the foreground of a `graphic` pair or
+ *   the hairline; fills (`bg-`, `fill-`) a surface layer, a role or a pair
+ *   foreground. So every color that renders is one the contrast suite
+ *   checks; anything else needs a row in `ALLOW_COLOR` naming its role.
  *
- * The allowlist names the only exceptions: geometry that Tailwind needs as a
- * literal class and that a test ties to the layout tokens.
+ * Rules (the stylesheet): no raw color, no literal number with or without a
+ * unit in a declaration (values come from `theme('vz.*')`, `theme('colors.*')`
+ * or `var()`; `calc(12em / 13)`, the type ratio inside an SVG, is allowed),
+ * and every `@apply` class and `theme('colors.*')` passes the rules above.
+ *
+ * The allowlists name the only exceptions.
  */
 
 const ROOT = join(__dirname, '..')
-const DIRS = ['shell', 'engines', 'substrates', 'primitives']
-const EXCLUDE = [
-  /primitives\/tokens-v3\.ts$/,
-  /\.test\.tsx?$/,
-  /__stress__\//,
-  // Legacy v1 (README "v1 components"), scheduled for removal (D20).
-  /primitives\/tokens\.ts$/,
-  /primitives\/VizFrame\.tsx$/,
-  /primitives\/VizControls\.tsx$/,
-  /primitives\/useStepper\.ts$/,
-]
+const CSS = join(__dirname, '..', '..', '..', 'styles', 'tailwind.css')
+const CSS_MARK = '/*\n * Lesson visualizations. The token lint'
+const EXCLUDE = [/primitives\/tokens-v3\.ts$/, /\.test\.tsx?$/, /__stress__\//]
 
 type Allow = { file: RegExp; match: RegExp; why: string }
 const ALLOW: Allow[] = [
+  {
+    file: /^Viz\.tsx$/,
+    match: /^(vz-wide:|vz-col:)?h-\[calc\(var\(--vz-[nwc]\)-2rem-2px\)\]$/,
+    why: 'The lazy mount stays dependency-free (bundle budget): its reserve is the footprint less the frame padding (1rem) and borders (1px) that frame-cls draws.',
+  },
   {
     file: /engines\/env-records\/EnvRecordsStage\.tsx$/,
     match: /^\[@container\(min-width:\d+px\)\]:(block|hidden)$/,
     why: 'Container-query widths are the layout sub-widths; layout.test.tsx fails if one is missing.',
   },
 ]
+
+/**
+ * Color classes outside the palette rule, each with the role it plays. A new
+ * visual that needs a color the tables do not paint adds a contrast pair (and
+ * passes the rule) or a row here.
+ */
+export const ALLOW_COLOR: Record<string, string> = {
+  'border-white/10': 'the frame edge (P: Button.tsx:26 `ring-white/10`): decorative, like the hairline',
+  'ring-white/10': 'the outline-button edge (P: Button.tsx:26): decorative; the label identifies the control',
+  'print:border-zinc-300': 'paper: the frame, code pane and select edge (decorative; light hairline family)',
+  'print:border-white': 'paper: the scrubber thumb\'s knockout ring, in the paper color (border-vz-frame on screen)',
+  'print:ring-zinc-300': 'paper: the outline-button edge (decorative; the label identifies the control)',
+  'border-zinc-600':
+    'the select fallback edge, the platform outline Select (P: Select.tsx:27): 2.15:1, decorative; its value text and chevron identify it (WCAG 1.4.11 needs no boundary then)',
+  'text-zinc-500': 'stylesheet: `currentColor` for SVG strokes (svgInk.line), a graphic tested as `line`',
+  'stroke-zinc-800': 'stylesheet: the knockout halo behind an unused record\'s text, in the glyph fill (surface glyph)',
+  'print:stroke-white': 'stylesheet: the same halo on paper, in the paper color',
+}
+
+const PALETTE =
+  'slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose'
+const COLOR_CLASS = new RegExp(
+  `(?<![\\w-])(?:[\\w-]+:|\\[[^\\]\\s]*\\]:)*(bg|text|border(?:-[xytblrse])?|ring|ring-offset|fill|stroke|outline|divide|decoration|placeholder|caret|accent|shadow|from|via|to)-((?:${PALETTE})-\\d{2,3}|white|black)(?:\\/[\\d.]+)?(?![\\w-])`,
+  'g',
+)
+
+const refOf = (c: string): string => (c === 'white' || c === 'black' ? c : c.replace(/-(\d+)$/, '.$1'))
+const both = (x: { dark: PaletteRef | 'white'; light: PaletteRef | 'white' }) => [x.dark, x.light]
+const TEXT = new Set<string>(contrastPairs.filter((p) => p.kind === 'text').flatMap((p) => both(p.fg)))
+const GRAPHIC = new Set<string>([
+  ...contrastPairs.filter((p) => p.kind === 'graphic').flatMap((p) => both(p.fg)),
+  ...both(roles.hairline),
+])
+const SURFACE = new Set<string>(
+  Object.values(surfaces).flatMap((s) => [...s.dark, ...s.light].map((l) => l.color as string)),
+)
+const ROLE = new Set<string>(Object.values(roles).flatMap((r) => [r.dark, r.light]))
+
+/** Why a color class (`whole`, variants and alpha included) breaks the palette rule, or null. */
+export function paletteViolation(utility: string, color: string, whole = `${utility}-${color}`): string | null {
+  const ref = refOf(color)
+  if (ALLOW_COLOR[whole]) return null
+  if (/^(text|decoration|placeholder|caret)$/.test(utility))
+    return TEXT.has(ref) ? null : `${ref} is not the foreground of any text contrast pair`
+  if (/^(border|ring|stroke|outline|divide|accent|shadow)/.test(utility))
+    return GRAPHIC.has(ref) ? null : `${ref} is not a graphic pair foreground or the hairline`
+  // bg, fill, gradient stops: a surface, a role, or a pair foreground (SVG text is a fill).
+  return SURFACE.has(ref) || ROLE.has(ref) || TEXT.has(ref) || GRAPHIC.has(ref)
+    ? null
+    : `${ref} is not a surface, role or contrast-pair color`
+}
 
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
@@ -54,7 +123,6 @@ function files(dir: string): string[] {
     return /\.(ts|tsx)$/.test(name) ? [p] : []
   })
 }
-
 /** Strips comments but keeps strings (a `//` inside a string such as a URL survives). */
 export function stripComments(src: string): string {
   let out = ''
@@ -126,6 +194,42 @@ export function lint(file: string, src: string): Finding[] {
     for (const m of l.matchAll(/\bduration:\s*(\d*\.?\d+)/g))
       if (Number(m[1]) !== 0) push(k, 'literal duration', m[0])
     for (const m of l.matchAll(/setTimeout\([^,]+,\s*\d+/g)) push(k, 'literal duration', m[0])
+    for (const m of l.matchAll(/\b(strokeWidth|rx|ry|r)=(?:"\d*\.?\d+"|\{\d*\.?\d+\})/g))
+      if (!/=(?:"0"|\{0\})$/.test(m[0])) push(k, 'literal svg size', m[0])
+    for (const m of l.matchAll(COLOR_CLASS)) {
+      const why = paletteViolation(m[1], m[2], m[0].trim())
+      if (why) push(k, `off-palette color (${why})`, m[0].trim())
+    }
+  })
+  return out
+}
+
+/** The stylesheet's visualization rules (from the marker comment to the end). */
+export function lintCss(file: string, css: string): Finding[] {
+  const out: Finding[] = []
+  const at = css.indexOf(CSS_MARK)
+  if (at < 0) return [{ file, line: 0, rule: 'missing marker', text: CSS_MARK }]
+  const before = css.slice(0, at).split('\n').length - 1
+  const block = css.slice(at).replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, ' '))
+  block.split('\n').forEach((l, k) => {
+    const push = (rule: string, text: string) => out.push({ file, line: before + k + 1, rule, text })
+    for (const m of l.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) push('raw hex color', m[0])
+    for (const m of l.matchAll(/\b(rgba?|hsla?)\(/g)) push('raw rgb/hsl color', m[0])
+    for (const m of l.matchAll(/theme\(\s*'colors\.([a-z]+)\.(\d+)/g)) {
+      const ref = `${m[1]}.${m[2]}`
+      if (![TEXT, GRAPHIC, SURFACE, ROLE].some((set) => set.has(ref))) push('off-palette color', m[0])
+    }
+    for (const a of l.matchAll(/@apply\s+([^;]+);/g))
+      for (const f of lint(file, `const c = '${a[1]}'`)) push(f.rule, f.text)
+    // Declarations: no literal number once tokens, variables and the SVG type ratio are taken out.
+    for (const d of l.matchAll(/(?<![@\w-])([a-z-]+)\s*:\s*([^;{}]+);/g)) {
+      const value = d[2]
+        .replace(/theme\([^)]*\)/g, '')
+        .replace(/var\(--[\w-]+/g, '')
+        .replace(/calc\(\d+em \/ \d+\)/g, '')
+      for (const n of value.matchAll(/(?<![\w-])(\d*\.?\d+)([a-z%]*)/g))
+        if (Number(n[1]) !== 0) push('literal value', `${d[1]}: ${d[2].trim()}`)
+    }
   })
   return out
 }
@@ -159,10 +263,39 @@ describe('token lint (VIZ-H WS1)', () => {
     expect(lint('x.tsx', ok)).toEqual([])
   })
 
+  it('flags SVG literals, off-palette colors and stylesheet literals', () => {
+    const tsx = [
+      `<path strokeWidth="2" /> <circle r={3} />`,
+      `const a = 'ring-zinc-600 text-emerald-400 bg-zinc-750'`,
+      `const b = 'print:text-zinc-500'`,
+    ].join('\n')
+    const t = lint('x.tsx', tsx).map((f) => f.text)
+    for (const x of ['strokeWidth="2"', 'r={3}', 'ring-zinc-600', 'text-emerald-400', 'bg-zinc-750', 'print:text-zinc-500'])
+      expect(t.some((r) => r.includes(x)), x).toBe(true)
+    const css = `${CSS_MARK} */\n.vz-a { font-size: 12px; opacity: 0.4; color: #fff; }\n.vz-b { @apply text-[13px] ring-zinc-600; transition: opacity 120ms ease; }\n.vz-c { fill: theme('colors.emerald.400'); }`
+    const c = lintCss('x.css', css).map((f) => `${f.rule}: ${f.text}`)
+    for (const x of ['font-size: 12px', 'opacity: 0.4', '#fff', 'text-[13px]', 'transition: opacity 120ms', 'emerald', 'ring-zinc-600'])
+      expect(c.some((r) => r.includes(x)), x).toBe(true)
+  })
+
+  it('accepts token references in the stylesheet', () => {
+    const css = `${CSS_MARK} */\n.vz-a { opacity: theme('vz.dim'); stroke-width: var(--vz-sw, theme('vz.connector')); font-size: calc(12em / 13); }\n.vz-b { @apply fill-zinc-800 print:fill-white; --vz-k: theme('colors.lime.400'); }\n@keyframes x { from { opacity: 0; } }`
+    expect(lintCss('x.css', css)).toEqual([])
+  })
+
   it('finds no hard-coded color, size or duration in the visualization system', () => {
-    const found = DIRS.flatMap((d) => files(join(ROOT, d)))
+    const found = files(ROOT)
       .filter((f) => !EXCLUDE.some((x) => x.test(f)))
       .flatMap((f) => lint(relative(ROOT, f), readFileSync(f, 'utf8')))
     expect(found.map((f) => `${f.file}:${f.line} ${f.rule}: ${f.text}`)).toEqual([])
+  })
+
+  it('finds no literal and no off-palette color in the visualization stylesheet (R1 L01)', () => {
+    const found = lintCss('styles/tailwind.css', readFileSync(CSS, 'utf8'))
+    expect(found.map((f) => `${f.file}:${f.line} ${f.rule}: ${f.text}`)).toEqual([])
+  })
+
+  it('keeps every color exception tied to a role', () => {
+    for (const [cls, why] of Object.entries(ALLOW_COLOR)) expect(why.length, cls).toBeGreaterThan(20)
   })
 })

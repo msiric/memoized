@@ -10,7 +10,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { cn as clsx } from '../primitives/cn'
-import { focusRingGroup, motionRules, tooltipCls, transitionCls } from '../primitives/tokens-v3'
+import { focusRingGroup, motionRules, strokeWidth, tooltipCls, transitionCls } from '../primitives/tokens-v3'
 import { stepLabel } from './StepsAsText'
 import type { CheckpointStatus } from './machine'
 
@@ -72,8 +72,8 @@ function Diamond({ status, onThumb = false }: { status: CheckpointStatus; onThum
         : 'fill-vz-frame print:fill-white'
   return (
     <svg aria-hidden viewBox="0 0 12 12" className="block h-3 w-3" data-diamond={status}>
-      <path d="M6 1 L11 6 L6 11 L1 6 Z" strokeWidth="1.5" className={clsx(ink, fill)} />
-      {status === 'skipped' ? <path d="M4 4 L8 8 M8 4 L4 8" strokeWidth="1.5" className={ink} /> : null}
+      <path d="M6 1 L11 6 L6 11 L1 6 Z" strokeWidth={strokeWidth.connector} className={clsx(ink, fill)} />
+      {status === 'skipped' ? <path d="M4 4 L8 8 M8 4 L4 8" strokeWidth={strokeWidth.connector} className={ink} /> : null}
     </svg>
   )
 }
