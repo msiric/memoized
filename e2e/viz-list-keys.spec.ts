@@ -192,9 +192,11 @@ test('predict, then reveal: the answer is checked against React (§5.4)', async 
   ).not.toHaveAttribute('data-checked')
   await f.locator('[data-choice="milk"]').click()
   await expect(f.getByTestId('viz-feedback')).toContainText('Not quite.')
+  // Two short sentences (F2 ruling 2): the lead and the rule; the tally sits in the action row.
   await expect(f.getByTestId('viz-feedback')).toContainText(
-    'Instance A now renders Wake up',
+    'Index keys match by position',
   )
+  await expect(f.getByTestId('viz-counts')).toHaveText('2 reused · 1 mounted')
   // The rows stay, and their slots become the result (H3 R4).
   await expect(f.locator('[data-choice="milk"] [data-choice-slot]')).toHaveAttribute('data-choice-slot', 'wrong')
   await expect(f.locator('[data-choice="wake"] [data-choice-slot]')).toHaveAttribute('data-choice-slot', 'right')

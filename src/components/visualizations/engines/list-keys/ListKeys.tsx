@@ -89,7 +89,6 @@ import {
 import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
 import { OutcomesAsText, RECORDED_RUNTIMES } from './OutcomesAsText'
 import { useRevealView, verdictFade } from './reveal'
-import { Segments } from './Segments'
 import { stackCss } from './stack-css'
 
 /**
@@ -117,13 +116,6 @@ const CHOICE_ROWS = {
   list: Math.ceil(dockStrings('list').maxChoices / 2),
   wrapper: Math.ceil(dockStrings('wrapper').maxChoices / 2),
 }
-
-/**
- * The muted text button (H3 R4: Skip is a muted text button). Merge note
- * (H3 F2): use F1's muted `Button` variant when it lands and drop this.
- */
-const MUTED_TEXT =
-  'text-zinc-400 can-hover:text-zinc-200 active:text-zinc-100 print:text-zinc-700'
 
 export type ListKeysProps = { preset?: string; interactive?: boolean }
 
@@ -320,7 +312,8 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       data-viz-interactive={interactive ? 'true' : 'false'}
       onKeyDown={onKeyDown}
     >
-      <style>{stackCss}</style>
+      {/* Raw, so the server does not entity-escape the selectors' quotes (generated CSS only). */}
+      <style dangerouslySetInnerHTML={{ __html: stackCss }} />
       {/* 1. Header: the title (a div, so the blog's print sheet keeps it, H3 R10). */}
       {/* At least one title line; under very large text the title wraps
           rather than truncates (it never changes within a preset, so the
@@ -371,13 +364,16 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             {s.scene === 'list' ? CONTROL_LABEL.action : CONTROL_LABEL.change}
           </span>
           <div className={clsx('flex h-11 min-w-0 items-center', hidden && 'invisible')} data-viz-part="actions">
-              <Segments
-                className="flex-1"
-                label={s.scene === 'list' ? 'Action' : 'Change'}
-                options={actionOptions}
-                value={actionIndex}
-                interactive={interactive}
-                optionProps={(o) => ({ 'data-viz-focus': `action-${o.id}` })}
+            <SegmentedControl
+              className="flex-1"
+              label={s.scene === 'list' ? 'Action' : 'Change'}
+              options={actionOptions}
+              value={actionIndex}
+              interactive={interactive}
+              // Every action stays a visible segment wherever the four fit (H3 R8).
+              maxSegments={LIST_ACTIONS.length}
+              optionProps={(o) => ({ 'data-viz-focus': `action-${o.id}` })}
+              selectProps={{ 'data-viz-part': 'segments-select' }}
               onChange={(i) => dispatch({ type: 'apply', action: actionOptions[i].id as never })}
             />
           </div>
@@ -430,7 +426,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 <p id={promptId} className="sr-only">
                   {prompt}
                 </p>
-                <VerdictText live lead={lead} sentence={outcomeSentence} rule={rule} tally={tally} />
+                <VerdictText live lead={lead} rule={rule} />
               </m.div>
             ) : (
               // The question stays until the payoff lands (H3 R5).
@@ -456,23 +452,8 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 <ChoiceRow
                   key={c.id}
                   index={i}
-                  // N01: the "last time" tag in zinc-300 (7.3:1 on the row, 5.4:1
-                  // on hover). Merge note (H3 F2): pass `tag` once the
-                  // primitive draws it in `ink.secondary`.
-                  label={
-                    tagged ? (
-                      <span className="flex flex-col">
-                        <span className="truncate">{c.label}</span>
-                        <span aria-hidden className={clsx(typeScale.tag.cls, ink.secondary)}>
-                          last time
-                        </span>
-                        <span className="sr-only">, last time</span>
-                      </span>
-                    ) : (
-                      c.label
-                    )
-                  }
-                  wrap={tagged ? 'truncate' : 'clamp'}
+                  label={c.label}
+                  tag={tagged ? 'last time' : undefined}
                   mono={s.scene === 'wrapper'}
                   state={revealed ? 'resolved' : 'ask'}
                   picked={picked}
@@ -511,12 +492,25 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 aria-label={canPredict ? SKIP_NAME : undefined}
                 data-viz-focus="skip"
                 data-viz-part="viz-skip"
-                className={MUTED_TEXT}
                 onClick={(e) => fromDock({ type: 'skip' }, 'again', e)}
               >
                 {canPredict ? SKIP_LABEL : SHOW_LABEL}
               </Button>
             )}
+            {/* What React did, counted (F2 ruling 2): in the action row the
+                dock already reserves, with the verdict. */}
+            {verdictShown ? (
+              <m.p
+                key={view.key}
+                className={DOCK.tally}
+                initial={view.fade ? { opacity: 0 } : false}
+                animate={{ opacity: 1 }}
+                transition={view.fade ? verdictFade : { duration: 0 }}
+                data-viz-part="viz-counts"
+              >
+                {tally}
+              </m.p>
+            ) : null}
           </div>
         </div>
       </div>

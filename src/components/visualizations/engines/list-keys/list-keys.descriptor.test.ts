@@ -56,12 +56,13 @@ describe('list-keys presets', () => {
 })
 
 describe('list-keys authored text', () => {
-  it('states a rule within 140 characters for every combination', () => {
+  it('states a short rule for every combination (the verdict is two short sentences, H3 F2 ruling 2)', () => {
     for (const t of [
       ...Object.values(LIST_RULE),
       ...Object.values(WRAPPER_RULE),
     ]) {
-      expect(t.length).toBeLessThanOrEqual(LIMITS.why)
+      expect(t.length).toBeLessThanOrEqual(Math.min(LIMITS.why, 84))
+      expect(t.match(/[.!?](\s|$)/g)?.length, t).toBe(1)
     }
   })
 

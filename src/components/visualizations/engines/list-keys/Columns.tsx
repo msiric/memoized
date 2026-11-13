@@ -333,7 +333,7 @@ function ListColumns({
                       aria-hidden
                       className={clsx(
                         'pointer-events-none absolute inset-0 rounded-[inherit] print:hidden',
-                        'group-can-hover:bg-white/5 group-active:bg-white/10',
+                        'group-can-hover:bg-white/5 group-press:bg-white/10',
                         transitionCls.feedback,
                       )}
                     />

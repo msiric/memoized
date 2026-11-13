@@ -19,10 +19,8 @@ import {
   WRAPPER_RULE,
   feedbackLead,
   listChoices,
-  listOutcomeSentence,
   listPrompt,
   wrapperChoices,
-  wrapperOutcomeSentence,
   wrapperPrompt,
 } from './content'
 import { CODE_ROWS } from './code'
@@ -34,7 +32,6 @@ import {
   keyText,
   type Checks,
 } from './model'
-import { LIST_OUTCOMES } from './outcomes'
 
 /**
  * Fixed footprint of the list-keys explorable (spec §3.3, §3.4). Every region
@@ -128,10 +125,8 @@ export const STAGE_STACKED = STAGE.narrow - COLUMNS_HEIGHT + STACKED_HEIGHT
 
 export const GAPS = { header: 16, dock: 16, footer: 16 } as const
 
-/** Dock copy is UI type (H3 R3): 14/24. */
-const BODY_LINE = typeScale.body.line
-/** Feedback, rule and tally are 4 px apart. */
-export const PARA_GAP = 4
+/** Dock copy is UI type (H3 R3): the caption's 14/24. */
+const BODY_LINE = typeScale.caption.line
 const BLOCK_GAP = 8
 
 export type Scene = 'list' | 'wrapper'
@@ -139,7 +134,7 @@ export type Scene = 'list' | 'wrapper'
 /** Every string the dock can show for a scene, per mode. */
 export function dockStrings(scene: Scene) {
   const prompts: string[] = []
-  const reveals: { lead: string; sentence: string; rule: string; tally: string }[] = []
+  const reveals: { lead: string; rule: string }[] = []
   if (scene === 'list') {
     prompts.push(NO_CHECK_PROMPT)
     const subsets: Checks[] = [
@@ -150,22 +145,15 @@ export function dockStrings(scene: Scene) {
     ]
     for (const key of KEY_STRATEGIES) {
       for (const action of LIST_ACTIONS) {
-        const outcome = LIST_OUTCOMES[`${key}/${action}`]
         const choices = listChoices(action)
         const labelOf = (id: string) => choices.find((c) => c.id === id)?.label ?? id
         for (const checks of subsets) {
           const tracked = checks.milk ? 'milk' : checks.dog ? 'dog' : null
           if (tracked) prompts.push(listPrompt(tracked))
-          const sentence = listOutcomeSentence(action, outcome, checks)
           const picks = tracked ? [null, ...choices.map((c) => c.id)] : [undefined]
           for (const pick of picks)
             for (const answer of choices.map((c) => c.id))
-              reveals.push({
-                lead: feedbackLead(pick, answer, labelOf),
-                sentence,
-                rule: LIST_RULE[`${key}/${action}`],
-                tally: listTally(outcome),
-              })
+              reveals.push({ lead: feedbackLead(pick, answer, labelOf), rule: LIST_RULE[`${key}/${action}`] })
         }
       }
     }
@@ -176,12 +164,7 @@ export function dockStrings(scene: Scene) {
         const choices = wrapperChoices(count)
         const labelOf = (id: string) => choices.find((c) => c.id === id)?.label ?? id
         for (const pick of [null, 'kept', 'reset'])
-          reveals.push({
-            lead: feedbackLead(pick, 'kept', labelOf),
-            sentence: wrapperOutcomeSentence(action, count),
-            rule: WRAPPER_RULE[action],
-            tally: wrapperTally(action === 'class'),
-          })
+          reveals.push({ lead: feedbackLead(pick, 'kept', labelOf), rule: WRAPPER_RULE[action] })
       }
     }
   }
@@ -189,7 +172,8 @@ export function dockStrings(scene: Scene) {
     scene === 'list'
       ? Math.max(...LIST_ACTIONS.map((a) => listChoices(a).length))
       : wrapperChoices(0).length
-  return { prompts: [...new Set(prompts)], reveals, maxChoices }
+  const unique = [...new Map(reveals.map((r) => [`${r.lead}|${r.rule}`, r])).values()]
+  return { prompts: [...new Set(prompts)], reveals: unique, maxChoices }
 }
 
 /** "2 reused · 1 mounted": what React did, counted. */
@@ -220,16 +204,17 @@ export const LK_CHOICE_WIDTH = 148
 export const WIDE_CHOICES = 2 * LK_CHOICE_WIDTH + CHOICE.gap
 export const WIDE_SIDE = MIN_TEXT_WIDTH.wide - CHOICE.sideGap - WIDE_CHOICES
 
-/** The reveal text: feedback, the rule, then the tally (4 px apart). */
-function revealTextHeight(r: { lead: string; sentence: string; rule: string }, width: number) {
-  return (
-    (lines(`${r.lead} ${r.sentence}`.trim(), width, GLYPH.caption) + lines(r.rule, width, GLYPH.caption)) * BODY_LINE +
-    2 * PARA_GAP +
-    typeScale.status.line
-  )
+/**
+ * The verdict (H3 F2 ruling 2): at most two short sentences, the lead and
+ * the rule, in the shared feedback style. What happened to each row is drawn
+ * (the ride, the instance letters, the badges) and narrated; the tally sits
+ * in the action row.
+ */
+function revealTextHeight(r: { lead: string; rule: string }, width: number) {
+  return lines(`${r.lead} ${r.rule}`.trim(), width, GLYPH.caption) * BODY_LINE
 }
 
-/** The dock's one action row: Skip, Show me or Try another (44 px targets). */
+/** The dock's one action row: Skip, Show me or Try another (44 px targets), and the tally once revealed. */
 const ACTION_ROW = TARGET_PX
 
 export function dockModes(variant: Variant, scene: Scene) {
@@ -295,23 +280,13 @@ export const LONGEST_CHOICE = Math.max(
 
 /**
  * The strings the measured dock keeps as invisible ghosts (D15) for one
- * scene: the longest prompts and reveal texts. The tallest wrap comes from
- * the longest strings, so a few of each hold the dock's worst case at any
- * width or text size without a ghost for every reveal.
+ * scene: the longest prompts, and every distinct verdict. A verdict is two
+ * short sentences, so there are few of them, and the line a word breaks on
+ * is not predicted by length: every one is kept, so the dock holds the true
+ * worst case at any width and text size.
  */
 export function dockGhostStrings(scene: Scene, keep = 3) {
   const s = dockStrings(scene)
-  const longest = <T>(xs: readonly T[], len: (x: T) => number) =>
-    [...new Set(xs)].sort((a, b) => len(b) - len(a)).slice(0, keep)
-  const fb = (r: (typeof s.reveals)[number]) => `${r.lead} ${r.sentence}`.length
-  const reveals = [
-    ...longest(s.reveals, fb),
-    ...longest(s.reveals, (r) => r.rule.length),
-    ...longest(s.reveals, (r) => fb(r) + r.rule.length),
-  ]
-  return {
-    prompts: longest(s.prompts, (p) => p.length),
-    reveals: [...new Map(reveals.map((r) => [`${r.lead}|${r.sentence}|${r.rule}`, r])).values()],
-    maxChoices: s.maxChoices,
-  }
+  const prompts = [...s.prompts].sort((a, b) => b.length - a.length).slice(0, keep)
+  return { prompts, reveals: s.reveals, maxChoices: s.maxChoices }
 }
