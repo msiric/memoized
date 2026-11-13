@@ -1,5 +1,5 @@
 import { test, type Locator, type Page } from '@playwright/test'
-import { EL, LK, activeInfo, hydrateListKeys, openGallery, save } from './helpers'
+import { EL, LK, activeInfo, answerStart, hydrateListKeys, openGallery, save } from './helpers'
 
 /**
  * H0-C task 3: interaction and behaviour consistency. Facts only (no
@@ -156,6 +156,8 @@ test('event-loop keyboard map and focus', async ({ page }) => {
     keys[`slider:${k}`] = { before, after: await st(), live: await takeLive(page) }
   }
   // Shortcuts after clicking a button (focus on a tabindex=-1 button).
+  await slider.focus()
+  await answerStart(page)
   await f.getByRole('button', { name: 'Next' }).click()
   await page.waitForTimeout(400)
   keys['afterClickNext'] = await st()
@@ -188,6 +190,7 @@ test('event-loop keyboard map and focus', async ({ page }) => {
   await slider.focus()
   await page.keyboard.press('Home')
   await page.waitForTimeout(300)
+  await answerStart(page)
   for (let i = 0; i < 5; i++) {
     await page.keyboard.press('ArrowRight')
     await page.waitForTimeout(350)
@@ -211,6 +214,7 @@ test('event-loop keyboard map and focus', async ({ page }) => {
   flow.nextAgainAfterAnswered = { ...(await st()), live: await takeLive(page) }
   await page.keyboard.press('Home')
   await page.waitForTimeout(300)
+  await answerStart(page)
   for (let i = 0; i < 5; i++) {
     await page.keyboard.press('ArrowRight')
     await page.waitForTimeout(350)
@@ -231,6 +235,7 @@ test('event-loop keyboard map and focus', async ({ page }) => {
   // Back from ask with the Back button.
   await page.keyboard.press('Home')
   await page.waitForTimeout(300)
+  await answerStart(page)
   for (let i = 0; i < 5; i++) {
     await page.keyboard.press('ArrowRight')
     await page.waitForTimeout(350)
@@ -366,6 +371,7 @@ test('hover, press and focus styles of equivalent controls', async ({ page }) =>
   const r: Record<string, unknown> = {}
   r['el:Back(secondary)'] = await (async () => {
     await el.getByRole('slider').focus()
+    await answerStart(page)
     await page.keyboard.press('ArrowRight')
     await page.waitForTimeout(300)
     return feedback(page, el.getByRole('button', { name: 'Back' }))
@@ -462,6 +468,7 @@ test('touch at 375', async ({ browser }) => {
   const st2 = (await f.locator('[data-viz-region="stage"]').boundingBox())!
   t.scrollGestureOnStage = await gesture(st2.x + st2.width / 2, Math.max(50, Math.min(st2.y + 100, 500)))
   // Tap Next: hover style stuck after tap?
+  await answerStart(page)
   const next = f.getByRole('button', { name: 'Next' })
   await next.scrollIntoViewIfNeeded()
   const restBg = await next.evaluate((e) => getComputedStyle(e).backgroundColor)

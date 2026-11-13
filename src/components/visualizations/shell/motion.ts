@@ -36,6 +36,12 @@ export type MotionGate = {
    * exception to `allow`. Never set on load, on Back or on an instant render.
    */
   reveal?: boolean
+  /**
+   * Glyphs leaving the place a moving glyph arrives at on this render: they
+   * fade in place on the `vacate` token instead of vanishing, outside the
+   * budget (R1M-13). Computed by `vacating`.
+   */
+  vacate?: ReadonlySet<string>
 }
 
 export const STATIC_GATE: MotionGate = {
@@ -108,6 +114,36 @@ export function motionBudget(
   return new Set(ranked.slice(0, max))
 }
 
+/**
+ * The vacate rule (R1M-13, H0 S-1): a glyph that leaves a region a moving
+ * glyph (one of `allow`) is entering on this step fades briefly in place
+ * instead of vanishing under the arrival. At most one per region.
+ */
+export function vacating(
+  before: ReadonlySet<string>,
+  after: ReadonlySet<string>,
+  allow: ReadonlySet<string>,
+  regionBefore: (id: string) => string | undefined,
+  regionAfter: (id: string) => string | undefined,
+): ReadonlySet<string> {
+  const entered = new Set<string>()
+  for (const id of allow) {
+    const from = regionBefore(id)
+    const to = regionAfter(id)
+    if (from && to && from !== to) entered.add(to)
+  }
+  const out = new Set<string>()
+  for (const id of before) {
+    if (after.has(id) || allow.has(id)) continue
+    const r = regionBefore(id)
+    if (r && entered.has(r)) {
+      out.add(id)
+      entered.delete(r)
+    }
+  }
+  return out
+}
+
 export type Vector = { x?: number; y?: number }
 
 /** A signed offset along one axis, without negative zero. */
@@ -155,6 +191,8 @@ export function presence(
     variants: {
       leave: (c: PresenceCustom | undefined) => {
         const g = c?.gate ?? gate
+        if (!g.instant && !c?.present?.has(id) && g.vacate?.has(id))
+          return { opacity: 0, transition: transitionFor('vacate', g) }
         if (c?.present?.has(id) || !animates(g, id)) return { opacity: 0, transition: { duration: 0 } }
         const dOut = travel('exit', g)
         const toward = g.direction === -1 ? vectors.from : vectors.to

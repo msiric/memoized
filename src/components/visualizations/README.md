@@ -73,6 +73,9 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   (entering, leaving or moving) per step: the step's `focus` first, then
   arrivals, then departures. Chrome (caption, code line, step bar,
   scrubber) is exempt. Ask `animates(gate, id)` before animating a glyph.
+  One exception (R1M-13): a glyph leaving the place a moving glyph arrives
+  at fades in place on the 100 ms `vacate` token (`gate.vacate`, from the
+  introspection's `region`), so it never vanishes under the arrival.
 - **The lift (D6).** A glyph whose `data-flip-id` changes region renders
   above every lane on an opaque raised backing with the one lift shadow,
   ramped with the move. Nothing else casts a shadow.
@@ -92,9 +95,24 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   continuation hairline; footprints count wrapped rows
   (`shell/code-geometry.ts`), and the window re-measures rows the browser
   drew when the pane is narrower than its variant's minimum.
-- **The dock is measured (D15).** It holds an invisible ghost of every
-  caption and checkpoint of every preset, so its height is the worst case
-  at the current width and text size. `footprint.ts` only estimates it for
+- **The dock is measured (D15, R2).** It holds an invisible ghost of every
+  caption and checkpoint of the preset on screen, so its height is that
+  preset's worst case at the current width and text size. Every reserved
+  band (stage, dock) is sized per preset: a preset switch may change the
+  frame's height, stepping never does. The entry table carries per-preset
+  heights for the lazy mount.
+- **Checkpoints (D9, R4).** The choice rows stay in place and their number
+  slot becomes ✓ or ×; the feedback is the shared `Feedback` line. Next
+  waits as the outline variant (`waiting`), Skip is a muted text button.
+  A checkpoint with `verdict: 'end'` is a prediction about the whole run
+  (the event loop's "Which logs last?" at Start): it locks in with no
+  verdict and the verdict lands in the end recap. More than two short
+  choices take one row wherever it fits (server-final container rules).
+- **Copy is UI type (R3).** Captions 14/24, the step's name (sentence case,
+  14/600) joined to its caption with the counter ("3 of 8") beside it.
+- **Hover and press (R13).** Hover is a white/5 step on hover devices, press
+  one step on (`press:` variant, registered after `can-hover:` so it wins);
+  surfaces with their own fill step the fill. `footprint.ts` only estimates it for
   the client-only placeholder. The list-keys explorable's dock works the same way
   (`engines/list-keys/DockGhosts.tsx`, ghosts of its tallest strings).
 - **The motion harness asserts.** `MOTION_STRICT=1 npx playwright test
@@ -111,11 +129,14 @@ once by Back and by every instant command, a crossfade or nothing under
 reduced motion, and it never moves the page. Elements that play it carry
 `data-viz-reveal`; the strict motion harness asserts them separately.
 
-- **Event loop.** Next onto the last step (`gate.reveal`) plays the console
-  back left to right (`consoleReveal`), then the caption lands leading with a
-  recap of this pass's predictions (`recapText`, or a neutral invitation).
-  The primary becomes Replay in the same slot (restart, answers kept as
-  "last time"); a press inside the reveal is ignored.
+- **Event loop (R7).** Next onto the last step (`gate.reveal`) plays the
+  console back left to right (`consoleReveal`): each output's ground comes
+  up with a tag naming its source line, and the code pane relights that
+  line (`codeTrace`), in run order. The previous name and caption hold
+  until the playback lands; then the recap replaces them (`recapText`, or a
+  neutral invitation) and the primary becomes Replay in the same slot.
+  Presses are ignored until the recap has landed (about 560 ms); a resize
+  lands the reveal at once.
 - **List keys.** Each carried checkbox rides its own match line into the
   After row its instance now renders (`CheckRider.tsx`, Web Animations,
   lifted), and the row ticks as it lands.

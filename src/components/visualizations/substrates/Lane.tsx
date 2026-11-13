@@ -11,7 +11,7 @@ import { cn as clsx } from '../primitives/cn'
 import { Tag } from '../primitives/Tag'
 import {
   ink,
-  now,
+  motion,
   radius,
   stroke,
   surface,
@@ -23,13 +23,21 @@ import { H_CLS } from '../shell/vars'
 import { remHeights } from './units'
 
 /**
- * Lanes substrate (spec §6.1): a labelled region holding chips. Glyphs follow
- * §2.2: stack frames are full-width neutral bars, task chips have 4 px corners
- * (`queued`), microtasks are pills (`micro`), host slots are dashed. Changed
- * elements get the `now` emphasis inside the glyph (a lime border doubled by
- * an inset ring, and a tint, D5): never an outline, so it can never be
- * mistaken for keyboard focus. Arrival is shown by the enter motion and the
- * `now` emphasis, so chips carry no `new` tag (D22).
+ * Lanes substrate (spec §6.1): a labelled region holding chips.
+ *
+ * Surfaces (R2): a lane is an inner region of the frame, so it has no border
+ * (a transparent one keeps the geometry), a faint white/2.5 lift, and space
+ * between it and its neighbours. Only glyphs that carry state are stroked.
+ *
+ * Chips (R1, R7): one shape for every callback, wherever it waits or runs: a
+ * 28 px chip with 4 px corners, content width, the neutral glyph fill, and
+ * the lane's hue on its edge only (call stack and host: the neutral `line`,
+ * the host dashed because the callback is only registered; microtasks violet;
+ * tasks sky). A chip never changes hue between steps, and lime never marks a
+ * chip: lime means current, chosen or traced (the code line). The glyph that
+ * changed this step doubles its own edge (an inset ring in the same hue, no
+ * layout shift). Arrival is shown by the enter motion, so chips carry no
+ * `new` tag (D22). Stack frames stack bottom-up, left-aligned.
  *
  * Layout (D16): queues wrap; a chip never grows past its lane and truncates
  * its label inside (F5). The engine decides which chips are visible per
@@ -44,6 +52,8 @@ import { remHeights } from './units'
  * from the live gate, so scrubs, Home, End and preset switches snap leaving
  * chips too (D7). Only glyphs inside the step's budget animate. A chip that
  * moved elsewhere leaves its old lane instantly, so it is never drawn twice.
+ * The lane's "empty" word waits for a leaving chip's exit (R1M-01), so it is
+ * never printed over a chip that is still fading out.
  */
 
 export type ChipKind = 'frame' | 'task' | 'micro' | 'host'
@@ -73,35 +83,25 @@ const moreCls = clsx(
   'h-7',
 )
 
-/** Chips: 4 px corners (S: §2.2), pills for microtasks, at most 12 rem (`max-w-48`). */
-const chipCls: Record<ChipKind, string> = {
-  frame: clsx(
-    'w-full px-2',
-    radius.chip.cls,
-    stroke.line,
-    surface.glyph,
-    'h-7 vz-wide:h-8',
-  ),
-  task: clsx(
-    'max-w-48 px-2',
-    radius.chip.cls,
-    stroke.queued,
-    surface.chipQueued,
-    'h-7',
-  ),
-  micro: clsx(
-    'max-w-48 rounded-full px-3',
-    stroke.micro,
-    surface.chipMicro,
-    'h-7',
-  ),
-  host: clsx(
-    'max-w-48 border-dashed px-2',
-    radius.chip.cls,
-    stroke.line,
-    surface.glyph,
-    'h-7',
-  ),
+/** One chip (R7): 4 px corners, 28 px, content width up to 12 rem, the neutral glyph fill. */
+// 6 px inline padding: at Chrome's "Very large" text on a 375 phone, "cb micro 2"
+// keeps its whole label in a 2x2 lane (R9).
+const chipBase = clsx('h-7 max-w-48 px-1.5', radius.chip.cls, surface.glyph)
+
+/** The lane's hue, on the chip's edge only (R1). */
+const chipEdge: Record<ChipKind, string> = {
+  frame: stroke.line,
+  task: stroke.queued,
+  micro: stroke.micro,
+  host: clsx('border-dashed', stroke.line),
+}
+
+/** "Changed this step": the chip doubles its own edge, in its own hue (R1). */
+const chipChanged: Record<ChipKind, string> = {
+  frame: 'border-zinc-300 ring-1 ring-inset ring-zinc-300 print:border-zinc-700 print:ring-zinc-700',
+  task: 'ring-1 ring-inset ring-sky-400 print:ring-sky-700',
+  micro: 'ring-1 ring-inset ring-violet-400 print:ring-violet-600',
+  host: 'border-zinc-300 ring-1 ring-inset ring-zinc-300 print:border-zinc-700 print:ring-zinc-700',
 }
 
 export type LaneProps = {
@@ -138,8 +138,8 @@ const Chip = forwardRef<
         'flex min-w-0 items-center gap-2 border',
         typeScale.value.cls,
         ink.base,
-        chip.more ? moreCls : chipCls[kind],
-        focused && now.glyph,
+        chip.more ? moreCls : clsx(chipBase, chipEdge[kind]),
+        focused && !chip.more && chipChanged[kind],
       )}
     >
       <span className="min-w-0 truncate" title={chip.label}>
@@ -193,11 +193,7 @@ export function Lane(props: LaneProps) {
       <LaneItem
         key={`${chip.id}:${gate.epoch}`}
         id={chip.id}
-        className={clsx(
-          'min-w-0',
-          vertical ? 'w-full' : 'max-w-full flex-none',
-          showCls(chip.show),
-        )}
+        className={clsx('min-w-0 max-w-full flex-none', showCls(chip.show))}
         {...presence(chip.id, gate, { from, to }, { moved })}
         custom={custom}
       >
@@ -215,9 +211,11 @@ export function Lane(props: LaneProps) {
     <div
       data-viz-region={id}
       className={clsx(
-        'relative flex min-w-0 border p-2',
+        // No visible border (R2): a transparent top and bottom keep the
+        // heights; inline, 6 px and no border, so a chip keeps its whole
+        // label at very large text on a phone (R9).
+        'relative flex min-w-0 border-y border-transparent px-1.5 py-2',
         radius.row.cls,
-        stroke.hairline,
         surface.panel,
         labelAt.narrow === 'top'
           ? 'flex-col gap-1'
@@ -225,7 +223,6 @@ export function Lane(props: LaneProps) {
         labelAt.wide === 'top'
           ? 'vz-wide:flex-col vz-wide:items-stretch vz-wide:gap-1'
           : 'vz-wide:flex-row vz-wide:items-center vz-wide:gap-2',
-        focus.has(id) && now.panel,
         H_CLS,
         className,
       )}
@@ -246,7 +243,7 @@ export function Lane(props: LaneProps) {
         className={clsx(
           'relative min-h-0 min-w-0 flex-1',
           vertical
-            ? 'flex flex-col-reverse justify-start gap-1 self-stretch'
+            ? 'flex flex-col-reverse items-start justify-start gap-1 self-stretch'
             : 'flex flex-wrap content-center items-center gap-2 self-stretch',
         )}
       >
@@ -272,12 +269,25 @@ export function Lane(props: LaneProps) {
               labelAt.wide === 'inline' &&
               'vz-wide:bottom-auto vz-wide:top-1/2 vz-wide:-translate-y-1/2',
             ink.muted,
-            chips.length === 0 ? 'visible' : 'invisible',
+            chips.length === 0 ? 'opacity-100' : 'opacity-0',
           )}
+          // It appears once a leaving chip has gone (its exit), and goes at
+          // once when a chip arrives; instant renders land it (D7).
+          style={emptyTransition(gate, chips.length === 0)}
         >
           empty
         </span>
       </div>
     </div>
   )
+}
+
+/** The "empty" word's fade: after the exit when it appears, at once when it hides. */
+function emptyTransition(gate: MotionGate, appearing: boolean) {
+  if (gate.instant || !appearing) return { transition: 'none' }
+  const exit = gate.reduce ? motion.exit.reduced : motion.exit.full
+  const fade = motion.highlight.full
+  const exitMs = exit.type === 'tween' ? exit.duration * 1000 : 0
+  const fadeMs = fade.type === 'tween' ? fade.duration * 1000 : 0
+  return { transition: `opacity ${gate.reduce ? 0 : fadeMs}ms linear ${exitMs}ms` }
 }

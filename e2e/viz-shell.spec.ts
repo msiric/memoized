@@ -135,11 +135,13 @@ test.describe('scrubber on touch (D12, M18)', () => {
 
     // No hover color stuck on a control after a tap (D11): Next returns to rest.
     const next = frame(page).getByTestId('viz-next')
+    // Read rest once any press from the drag above has settled (R13: press is a 150 ms step).
+    await page.waitForTimeout(300)
     const rest = await next.evaluate((el) => getComputedStyle(el).backgroundColor)
     const box = (await next.boundingBox())!
     await touch(cdp, [{ x: box.x + box.width / 2, y: box.y + box.height / 2 }])
     await expect(frame(page)).toHaveAttribute('data-viz-step', '2')
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(400)
     expect(await next.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(rest)
   })
 })
@@ -182,9 +184,10 @@ test('checkpoint diamonds sit on the step they gate; the thumb carries one; the 
   page,
 }) => {
   await open(page, 320)
-  const diamond = frame(page).locator('[data-checkpoint-step]')
-  await expect(diamond).toHaveCount(1)
-  expect(await diamond.getAttribute('data-checkpoint-step')).toBe('6')
+  // Two: the Start prediction (judged at the end, R7) on Start, and the mid-run one on step 6.
+  await expect(frame(page).locator('[data-checkpoint-step]')).toHaveCount(2)
+  await expect(frame(page).locator('[data-checkpoint-step="0"]')).toHaveCount(1)
+  const diamond = frame(page).locator('[data-checkpoint-step="6"]')
   const d = (await diamond.boundingBox())!
   const six = await stepPoint(page, 6)
   expect(Math.abs(d.x + d.width / 2 - six.x)).toBeLessThan(1)
@@ -194,7 +197,7 @@ test('checkpoint diamonds sit on the step they gate; the thumb carries one; the 
   const end = await stepPoint(page, 8)
   await page.mouse.move(end.x, end.y)
   const tip = frame(page).locator('[data-viz-part="scrubber-tip"]')
-  await expect(tip).toHaveText('Step 8: done')
+  await expect(tip).toHaveText('Step 8: Done')
   const t = (await tip.boundingBox())!
   const s = (await slider(page).boundingBox())!
   expect(t.x).toBeGreaterThanOrEqual(s.x - 0.5)
@@ -327,6 +330,8 @@ test('the control row keeps its shape at a checkpoint and after it (D9); Play ad
   await expect(frame(page).locator('[data-choice="c"] [data-choice-slot="right"]')).toHaveText('✓')
 
   await page.keyboard.press('Home')
+  // Start asks again (R7): lock a prediction in, then Play.
+  await page.keyboard.press('2')
   await frame(page).getByRole('button', { name: 'Play' }).click()
   await expect(frame(page)).toHaveAttribute('data-viz-step', '1', { timeout: 300 })
   await page.keyboard.press('Escape')
@@ -353,8 +358,11 @@ test('narration: one announcement once input settles, for the step it settles on
   await open(page, 1024)
   await slider(page).focus()
   const live = frame(page).getByTestId('viz-live')
+  // Lock the Start prediction in (R7), and let its own announcement land first.
+  await page.keyboard.press('2')
+  await expect(live).toHaveText(/^Locked in: B\./)
   for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight', { delay: 0 })
-  expect(await live.textContent()).toBe('')
+  await expect(live).toHaveText(/^Locked in: B\./)
   await expect(live).toHaveText(/^Step 4 of 8\./)
 })
 
@@ -373,10 +381,12 @@ test('the dock is exactly as tall as its tallest state at each width: no shift, 
           live: Math.round(Math.max(h('[data-viz-part="viz-caption"]'), h('[data-viz-part="viz-checkpoint"]'))),
         }
       })
-    const base = await measure()
-    let tallest = 0
     for (const preset of ['Basics', 'Drain']) {
       await frame(page).getByRole('radio', { name: preset }).click()
+      await page.waitForTimeout(200)
+      // Per preset (R2): the reserve is this preset's tallest state.
+      const base = await measure()
+      let tallest = 0
       await slider(page).focus()
       await page.keyboard.press('Home')
       for (const answer of ['1', '2']) {
@@ -396,8 +406,8 @@ test('the dock is exactly as tall as its tallest state at each width: no shift, 
       await walkTo(page, preset === 'Basics' ? 5 : 6)
       await frame(page).getByRole('button', { name: 'Skip, show me' }).click()
       tallest = Math.max(tallest, (await measure()).live)
+      expect(tallest, `the reserve for ${preset} at ${width} is its tallest state`).toBe(base.dock)
     }
-    expect(tallest, `the reserve at ${width} is the tallest state`).toBe(base.dock)
   }
 })
 
@@ -416,7 +426,8 @@ test('text zoom 150 % and 200 %: shell geometry scales with the root font size (
     })
     // The button row may wrap to a second row under large text; the targets keep their size.
     expect(g.slider).toBeCloseTo(44 * zoom, 0)
-    expect(g.stepbar).toBeCloseTo(20 * zoom, 0)
+    // The step's name, 14/24 (R3).
+    expect(g.stepbar).toBeCloseTo(24 * zoom, 0)
     expect(g.thumb).toBeCloseTo(28 * zoom, 0)
     // The shell's own regions stay inside the frame (the stage's content at
     // 200 % is the engines' part of D19, WS3).

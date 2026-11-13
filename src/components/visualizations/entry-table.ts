@@ -18,15 +18,26 @@ export type VizEntry = readonly [
    * chunk loads only after a client-side navigation.
    */
   statics?: Record<string, readonly [number, number]>,
+  /**
+   * Step-throughs only: [narrow, wide] heights per preset, default first
+   * (R2: every reserved band is sized to the preset on screen).
+   */
+  steps?: Record<string, readonly [number, number]>,
 ]
 
 export const VIZ_TABLE: Record<string, VizEntry> = {
-  'event-loop': [() => import('./engines/event-loop'), 900, 732],
+  'event-loop': [
+    () => import('./engines/event-loop'),
+    872,
+    608,
+    undefined,
+    { 'basic-ordering': [872, 608], 'microtask-queued-during-drain': [924, 740] },
+  ],
   'environment-records': [
     () => import('./engines/env-records'),
-    870,
-    548,
-    { 'var-vs-let-loop': [870, 548], 'factory-calls-vs-aliases': [794, 526] },
+    858,
+    540,
+    { 'var-vs-let-loop': [858, 540], 'factory-calls-vs-aliases': [782, 518] },
   ],
   'list-keys': [() => import('./engines/list-keys'), 842, 558],
 }

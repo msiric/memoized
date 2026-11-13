@@ -5,9 +5,11 @@ import { monoWidth } from '../../substrates/text-metrics'
 import type { ElChip, EventLoopState } from './model'
 
 /**
- * Event-loop stage geometry (VIZ-H D16). Every height is the maximum over
- * every step of every preset at the narrowest width of its variant, so the
- * stage never moves while stepping or switching presets.
+ * Event-loop stage geometry (VIZ-H D16, R7). Every height is the maximum over
+ * every step of the preset on screen at the narrowest width of its variant,
+ * so the stage never moves while stepping, and each preset gets the room its
+ * own trace needs (lanes sized to the trace, R7). Widths that a preset
+ * switch must not move (the code column) come from every preset.
  *
  * narrow (< 768): the phone composition, built to pass the 375x667 fit test:
  *   code (5-line window)
@@ -34,18 +36,26 @@ export const G = {
   gap: 8,
   pad: 8,
   border: 1,
+  /** A lane's inline inset: no border, `px-1.5` (R9: room for a whole chip label). */
+  laneInset: 6,
   label: 16,
   labelGap: 4,
   chip: 28,
   chipGap: 8,
-  /** Stack frames: 28 tall when the stage is narrow, 32 from 768. */
-  frame: { narrow: 28, wide: 32 } as PerVariant<number>,
+  /** Stack frames are chips like every other callback (R7): one shape, 28 tall. */
+  frame: { narrow: 28, wide: 28 } as PerVariant<number>,
   frameGap: 4,
   /** Inline lane label column (wide queues): `w-24`. */
   inlineLabel: 96,
-  /** Console strip: one output line, the gap between outputs and between rows. */
-  outLine: 20,
-  outGap: 8,
+  /**
+   * Console strip: one output (a 20 px value line over the 16 px line its
+   * source-line tag takes at the finale, R7), the gap between outputs and
+   * between rows.
+   */
+  outLine: 36,
+  outValue: 20,
+  // 6, so four tagged outputs keep one row at 320 (Drain: 266 of 270 px).
+  outGap: 6,
   outRowGap: 4,
   /** The `›` before each output and its gap. */
   outMark: 4,
@@ -64,27 +74,40 @@ export const G = {
 
 /** Narrowest stage width per variant (the stage at 320 and at 768). */
 export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
+/**
+ * The frame below the 320 design width (`vz-tight`, under 17.875rem): very
+ * large text on a phone (375 at 150 % is 14.3rem) or 200 % text in a lesson
+ * column. The console keeps its reserved rows there by collapsing more of
+ * its oldest outputs into `N earlier` (R9), measured at 14rem.
+ */
+export const STAGE_TIGHT = 224
 
 export type LaneKind = 'frame' | 'host' | 'micro' | 'task'
 
-/** Horizontal padding inside a chip, per kind (pills are rounder). */
-const CHIP_PAD: Record<LaneKind, number> = {
-  frame: 8,
-  host: 8,
-  micro: 12,
-  task: 8,
-}
+/** Horizontal padding inside a chip: one chip shape for every kind (R7), `px-1.5`. */
+const CHIP_PAD = 6
 
-export function chipWidth(label: string, kind: LaneKind): number {
-  return Math.ceil(monoWidth(label, G.text) + 2 * CHIP_PAD[kind] + 2 * G.border)
+export function chipWidth(label: string, _kind?: LaneKind): number {
+  return Math.ceil(monoWidth(label, G.text) + 2 * CHIP_PAD + 2 * G.border)
 }
 
 export const moreLabel = (n: number) => `+${n} more`
 export const earlierLabel = (n: number) => `${n} earlier`
 
-/** Width of one console output token (`› value`). */
-export function outWidth(text: string): number {
-  return Math.ceil(monoWidth('›', G.text) + G.outMark + monoWidth(text, G.text))
+/** The finale's tag under an output: its source line (R7). */
+export const lineTag = (line: number) => `L${line}`
+/** Mono 12 for the tag (`type.meta`). */
+const TAG_TEXT = 12
+
+/**
+ * Width of one console output token: `› value`, and under the value the
+ * source-line tag it shows at the finale (reserved on every step, so the
+ * finale never pushes a token sideways).
+ */
+export function outWidth(text: string, line?: number): number {
+  const value = monoWidth(text, G.text)
+  const tag = line ? monoWidth(lineTag(line), TAG_TEXT) : 0
+  return Math.ceil(monoWidth('›', G.text) + G.outMark + Math.max(value, tag))
 }
 
 /** Rows a left-to-right flow of `widths` takes in `width`, with `gap` between items. */
@@ -138,8 +161,9 @@ export function consoleVisible(
   out: readonly string[],
   width: number,
   rows: number,
+  lines: readonly (number | undefined)[] = [],
 ): number {
-  const ws = out.map(outWidth)
+  const ws = out.map((t, k) => outWidth(t, lines[k]))
   if (flowRows(ws, width, G.outGap) <= rows) return out.length
   for (let k = out.length - 1; k >= 1; k--) {
     const tail = [
@@ -173,6 +197,8 @@ export type EventLoopMetrics = {
   queueWidth: PerVariant<number>
   hostWidth: PerVariant<number>
   consoleWidth: PerVariant<number>
+  /** Console content width in the tight frame (`vz-tight`, R9). */
+  consoleTight: number
   /** Label on top of the stack lane from 768 (it holds frames or spare height). */
   stackLabelTopWide: boolean
   maxStack: number
@@ -202,12 +228,12 @@ export function wideCodeCols(codeCols: number): number {
 /** Content widths at the narrowest width of each variant. */
 function widths(codeCols: number) {
   const half = (STAGE_MIN.narrow - G.gap) / 2
-  const laneContentNarrow = half - 2 * G.border - 2 * G.pad
+  const laneContentNarrow = half - 2 * G.laneInset
   // From 768 the code column is at least `codeMin.md`, or as wide as the code.
   const codeCol = codeColumn(codeCols).md
   const right = STAGE_MIN.wide - codeCol - 16
   const laneContentWide =
-    right - 2 * G.border - 2 * G.pad - G.inlineLabel - G.gap
+    right - 2 * G.laneInset - G.inlineLabel - G.gap
   return {
     queueWidth: { narrow: laneContentNarrow, wide: laneContentWide },
     hostWidth: { narrow: laneContentNarrow, wide: laneContentWide },
@@ -218,17 +244,32 @@ function widths(codeCols: number) {
   }
 }
 
+/**
+ * The source line that printed each output, by output index (the finale's
+ * tags, R7): the first line of the step that observes it.
+ */
+export function outputLines(log: StepLog<EventLoopState>): (number | undefined)[] {
+  const out: (number | undefined)[] = []
+  for (const step of log.steps)
+    for (const k of step.observes ?? []) {
+      const l = step.line
+      out[k] = typeof l === 'number' ? l : Array.isArray(l) ? (l[0] as number) : undefined
+    }
+  return out
+}
+
 export function eventLoopMetrics(
   logs: readonly StepLog<EventLoopState>[],
+  all: readonly StepLog<EventLoopState>[] = logs,
 ): EventLoopMetrics & { layout: EngineLayout } {
   let maxStack = 1
   let maxCols = 1
-  for (const log of logs) {
+  for (const log of all)
     for (const l of log.code?.lines ?? [])
       maxCols = Math.max(maxCols, [...l].length)
+  for (const log of logs)
     for (const step of log.steps)
       maxStack = Math.max(maxStack, step.state.stack.length)
-  }
   const w = widths(maxCols)
   const per = <T>(f: (v: Variant) => T): PerVariant<T> => ({
     narrow: f('narrow'),
@@ -240,7 +281,8 @@ export function eventLoopMetrics(
     let queue = 1
     let host = 1
     let out = 1
-    for (const log of logs)
+    for (const log of logs) {
+      const lines = outputLines(log)
       for (const { state } of log.steps) {
         for (const [chips, kind] of [
           [state.micro, 'micro'],
@@ -263,12 +305,17 @@ export function eventLoopMetrics(
           state.console,
           w.consoleWidth[v],
           G.consoleRows,
+          lines,
         )
-        const os = state.console.slice(state.console.length - ok).map(outWidth)
+        const first = state.console.length - ok
+        const os = state.console
+          .slice(first)
+          .map((t, i) => outWidth(t, lines[first + i]))
         if (ok < state.console.length)
           os.unshift(outWidth(earlierLabel(state.console.length - ok)))
         out = Math.max(out, flowRows(os, w.consoleWidth[v], G.outGap))
       }
+    }
     return { queue, host, out }
   }
   const rows = per(rowsFor)
@@ -277,6 +324,7 @@ export function eventLoopMetrics(
   const wideCols = wideCodeCols(maxCols)
   let narrowRows = 1
   let wideRows = 1
+  // Code rows are the preset's own (the window and the pane hug its code).
   for (const log of logs) {
     narrowRows = Math.max(narrowRows, visualRows(log.code?.lines ?? [], NARROW_CODE_COLS))
     wideRows = Math.max(wideRows, visualRows(log.code?.lines ?? [], wideCols))
@@ -329,6 +377,7 @@ export function eventLoopMetrics(
     queueWidth: w.queueWidth,
     hostWidth: w.hostWidth,
     consoleWidth: w.consoleWidth,
+    consoleTight: STAGE_TIGHT - 2 * G.border - 2 * G.pad,
     stackLabelTopWide,
     maxStack,
     codeColumn: codeColumn(maxCols),

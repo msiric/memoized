@@ -60,7 +60,7 @@ describe('event-loop width lint (A1, A2, A7, F4, F5)', () => {
     )
     const errors = lintEventLoopLogs([{ ...log, steps }]).join('\n')
     expect(errors).toMatch(
-      /host chip "timer 0 ms → callbackHandler" is \d+px > 122px/,
+      /host chip "timer 0 ms → callbackHandler" is \d+px > 128px/,
     )
     expect(errors).toMatch(/micro holds 9 items/)
     expect(
@@ -110,13 +110,23 @@ describe('the truth harness catches a lying log', () => {
   })
 
   it('fails when a checkpoint answer is not what the reveal observes', () => {
-    const cp = { ...log.checkpoints[0], answer: 'b' }
+    const cp = { ...log.checkpoints[1], answer: 'b' }
     expect(
       validateStepLog(
-        { ...log, checkpoints: [cp] },
+        { ...log, checkpoints: [log.checkpoints[0], cp] },
         eventLoopIntrospection,
       ).join('\n'),
     ).toMatch(/answer "B" is not what the reveal step observes/)
+  })
+
+  it('fails when a prediction judged at the end is not the last output (R7)', () => {
+    const cp = { ...log.checkpoints[0], answer: 'd' }
+    expect(
+      validateStepLog(
+        { ...log, checkpoints: [cp, log.checkpoints[1]] },
+        eventLoopIntrospection,
+      ).join('\n'),
+    ).toMatch(/answer "D" is not the run's last output \("B"\)/)
   })
 
   it('records with a clean environment and real timers', () => {

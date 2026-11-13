@@ -102,7 +102,8 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
   }, [Live])
 
   if (!entry) return null
-  const [narrow, wide] = (statics && (statics[preset ?? ''] ?? Object.values(statics)[0])) || [entry[1], entry[2]]
+  const sized = statics ?? entry[4]
+  const [narrow, wide] = (sized && (sized[preset ?? ''] ?? Object.values(sized)[0])) || [entry[1], entry[2]]
   return (
     <div ref={ref} data-viz={id} className={statics ? 'my-8' : 'my-8 xl:max-w-[960px]'}>
       {Live ? (

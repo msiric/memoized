@@ -52,6 +52,22 @@ export type Choice = {
 export type Checkpoint = {
   /** The reveal step. The question is asked while the learner is on `beforeStep - 1`. */
   beforeStep: number
+  /**
+   * When the verdict lands (R7). Default: on the reveal step, as "Right." or
+   * "Not quite." with the rows marked. `'end'`: a prediction about the whole
+   * run (asked at Start, "Which logs last?"); answering locks it in and the
+   * run continues, and the verdict lands with the finale's recap, never
+   * earlier (R5). The answer is then the last value the run observes.
+   */
+  verdict?: 'end'
+  /**
+   * The recap line for this checkpoint at the end, with `{pick}` and
+   * `{answer}` filled in. Default: "You predicted {pick}. Right." and
+   * "You predicted {pick}; it was {answer}."
+   */
+  recap?: { right: string; wrong: string }
+  /** After a prediction judged at the end locks in: what to do next (default "Now step through to check it."). */
+  locked?: string
   /** At most 80 characters (two lines at 288 px). */
   prompt: string
   choices: readonly Choice[]
@@ -102,4 +118,6 @@ export type StateIntrospection<S> = {
   ids: (state: S) => ReadonlySet<string>
   /** The observable log as the state shows it (for the trace check). */
   observedLog?: (state: S) => readonly string[]
+  /** The region (lane) an element sits in, if the engine has regions (the shell's vacate rule, R1M-13). */
+  region?: (state: S, id: string) => string | undefined
 }

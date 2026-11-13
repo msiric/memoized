@@ -50,7 +50,9 @@ for (const width of [375, 1440])
       await page.waitForTimeout(300)
       await page.keyboard.press('ArrowRight')
       await page.waitForTimeout(120)
-      await f.locator('[data-viz-part="viz-next"]').click()
+      // Forced: the control is aria-disabled while the reveal plays (H3 R1M-11,
+      // R1M-12), and the probe measures that an early press is ignored.
+      await f.locator('[data-viz-part="viz-next"]').click({ force: true })
       await page.waitForTimeout(50)
       const afterEarly = await f.getAttribute('data-viz-step')
       await page.waitForTimeout(400)

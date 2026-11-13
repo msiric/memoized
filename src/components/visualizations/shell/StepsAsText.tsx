@@ -14,6 +14,15 @@ export type TextAlternative = {
   output?: string
 }
 
+/**
+ * One name per step everywhere it is shown (drift D13): the scrubber's
+ * tooltip and the text alternative. The step bar shows the same name beside
+ * its counter.
+ */
+export function stepLabel(index: number, event: string): string {
+  return index === 0 ? 'Start' : `Step ${index}: ${event}`
+}
+
 export function textAlternative<S>(log: StepLog<S>): TextAlternative {
   const items: TextAlternative['items'] = []
   log.steps.forEach((step, i) => {
@@ -28,7 +37,7 @@ export function textAlternative<S>(log: StepLog<S>): TextAlternative {
     }
     items.push({
       kind: 'step',
-      label: i === 0 ? 'Start' : `Step ${i}, ${step.event}`,
+      label: stepLabel(i, step.event),
       text: `${step.narration} ${step.why}`,
     })
   })

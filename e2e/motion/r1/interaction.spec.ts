@@ -23,10 +23,13 @@ test('event-loop focus and live after every action @1440', async ({ page }) => {
   const log: unknown[] = []
   const slider = f.getByRole('slider')
   await slider.focus()
+  // H3 R7: Start asks "Which logs last?"; lock B in so the stepper moves on.
+  await act(page, EL, 'answer Start 2', () => page.keyboard.press('2'), log)
   await act(page, EL, 'ArrowRight', () => page.keyboard.press('ArrowRight'), log)
   await act(page, EL, 'ArrowLeft', () => page.keyboard.press('ArrowLeft'), log)
   await act(page, EL, 'End', () => page.keyboard.press('End'), log)
   await act(page, EL, 'Home', () => page.keyboard.press('Home'), log)
+  await act(page, EL, 'answer Start 2 again', () => page.keyboard.press('2'), log)
   // Mouse: Next button click, then keyboard continues?
   await act(page, EL, 'click Next', () => f.locator('[data-viz-part="viz-next"]').click(), log)
   await act(page, EL, 'click Back', () => f.getByRole('button', { name: 'Back' }).click(), log)

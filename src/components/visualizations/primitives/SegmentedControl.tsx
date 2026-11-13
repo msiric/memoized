@@ -59,14 +59,15 @@ export function SegmentedControl({
         disabled={!interactive}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        // P: Select.tsx:23-27,53 (outlined, rounded-lg, room for the chevron),
-        // 44 px tall for the target size, with the shared focus ring.
+        // The platform `outline` Select (P: Select.tsx:23-30,53: transparent,
+        // white text, weight 400, border zinc-600, rounded-lg, room for the
+        // chevron; no hover), 44 px tall for the target size, with the shared
+        // focus ring (drift D10). It trades the pill for the platform's
+        // rounded-lg select on purpose: it is the platform control.
         className={cn(
-          'h-11 min-w-0 max-w-full appearance-none truncate rounded-lg border border-zinc-600 bg-zinc-900 pl-3 pr-9 text-zinc-100 print:border-zinc-300 print:bg-transparent print:text-zinc-900',
-          typeScale.control.cls,
+          'h-11 min-w-0 max-w-full appearance-none truncate rounded-lg border border-zinc-600 bg-transparent pl-3 pr-9 font-sans text-sm font-normal text-white print:border-zinc-300 print:text-zinc-900',
           focusRing,
           transitionCls.feedback,
-          interactive && 'can-hover:border-zinc-500',
         )}
       >
         {options.map((p, i) => (
@@ -82,7 +83,7 @@ export function SegmentedControl({
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
-        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400"
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white print:text-zinc-900"
       >
         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
       </svg>
@@ -123,7 +124,9 @@ export function SegmentedControl({
 
   return (
     <div data-vz-seg={uid} className={cn('flex min-w-0 [container-type:inline-size]', className)}>
-      <style>{fitCss}</style>
+      {/* Raw: as text, the server would entity-escape the quotes and the `>`,
+          and the fallback rule would not apply until the engine loads. */}
+      <style dangerouslySetInnerHTML={{ __html: fitCss }} />
       <div role="radiogroup" aria-label={label} data-viz-own-keys className="relative inline-flex h-11 shrink-0 items-center">
         {/* The track: P: LessonStatus.tsx:93 (`h-8 rounded-full border`), in the one hairline. */}
         <span
@@ -162,7 +165,8 @@ export function SegmentedControl({
                       : cn(
                           'text-zinc-400 print:text-zinc-600',
                           interactive &&
-                            'group-can-hover:bg-zinc-700 group-can-hover:text-zinc-200 group-active:bg-zinc-700 group-active:text-zinc-200 group-active:brightness-98',
+                            // R13: hover zinc-700, press one step on (the selected fill).
+                            'group-can-hover:bg-zinc-700 group-can-hover:text-zinc-200 group-press:bg-zinc-600 group-press:text-zinc-100',
                         ),
                   )}
                 >

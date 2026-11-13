@@ -10,7 +10,8 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import { cn as clsx } from '../primitives/cn'
-import { focusRingGroup, motionRules, radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
+import { focusRingGroup, motionRules, tooltipCls, transitionCls } from '../primitives/tokens-v3'
+import { stepLabel } from './StepsAsText'
 import type { CheckpointStatus } from './machine'
 
 /**
@@ -296,13 +297,9 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
           ref={tipRef}
           aria-hidden
           data-viz-part="scrubber-tip"
-          className={clsx(
-            'pointer-events-none absolute bottom-full left-0 z-10 mb-1 whitespace-nowrap border border-zinc-700 bg-zinc-900 px-2 text-zinc-100',
-            radius.row.cls,
-            typeScale.status.cls,
-          )}
+          className={clsx('pointer-events-none absolute bottom-full left-0 z-10 mb-1 whitespace-nowrap', tooltipCls)}
         >
-          {tip === 0 ? 'Start' : `Step ${tip}: ${events[tip]}`}
+          {stepLabel(tip, events[tip])}
         </div>
       ) : null}
     </div>

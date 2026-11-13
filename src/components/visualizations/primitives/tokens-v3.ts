@@ -212,17 +212,21 @@ export type SurfaceName =
   | 'tag'
   | 'chipState'
   | 'doneFill'
+  | 'resultTint'
+  | 'tooltip'
+  | 'choicePress'
 
 const PAGE: Layer = { color: 'zinc.900' }
 const FRAME: Layer[] = [PAGE, { color: 'zinc.800', alpha: 0.4 }]
-const PANEL: Layer[] = [...FRAME, { color: 'zinc.900', alpha: 0.6 }]
+/** Inner regions (R2): no border, a faint lift on the frame, separated by space. */
+const PANEL: Layer[] = [...FRAME, { color: 'white', alpha: 0.025 }]
 
 export const surfaces: Record<SurfaceName, { dark: Layer[]; light: Layer[] }> = {
   /** P: app/layout.tsx:108 (`dark:bg-zinc-900`). */
   page: { dark: [PAGE], light: [{ color: 'white' }] },
   /** P: Button.tsx:22 (`dark:bg-zinc-800/40`, the raised surface). */
   frame: { dark: FRAME, light: [{ color: 'zinc.50' }] },
-  /** Region panels inside the stage (lanes, console). S: §2.1. */
+  /** Region panels inside the stage (lanes, console): borderless, a white/2.5 lift (R2). */
   panel: { dark: PANEL, light: [{ color: 'white' }] },
   /** Glyph fill (chips, cards, records): zinc-800 everywhere (drift C10). */
   glyph: { dark: [...PANEL, { color: 'zinc.800' }], light: [{ color: 'white' }] },
@@ -277,6 +281,19 @@ export const surfaces: Record<SurfaceName, { dark: Layer[]; light: Layer[] }> = 
   chipState: { dark: [{ color: 'zinc.100' }], light: [{ color: 'zinc.900' }] },
   /** Solid `done` fill. S: §2.1. */
   doneFill: { dark: [{ color: 'zinc.400' }], light: [{ color: 'zinc.600' }] },
+  /**
+   * The newest console output, and every output at the event-loop finale: a
+   * quiet amber ground behind amber text (D4: amber is output; N03: the one
+   * "this is the new output" mark, never the panel).
+   */
+  resultTint: {
+    dark: [...PANEL, { color: 'amber.400', alpha: 0.1 }],
+    light: [{ color: 'white' }, { color: 'amber.700', alpha: 0.08 }],
+  },
+  /** The scrubber tooltip (D12, drift D13): zinc-900 under the thumb. */
+  tooltip: { dark: [{ color: 'zinc.900' }], light: [{ color: 'white' }] },
+  /** A pressed choice row (R13): one step past its zinc-600 hover. */
+  choicePress: { dark: [...FRAME, { color: 'zinc.500' }], light: [{ color: 'zinc.300' }] },
 }
 
 /**
@@ -315,7 +332,6 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'now: border of a card on the frame', kind: 'graphic', fg: r('now'), bg: 'nowGlyphFrame' },
   { use: 'now tag text on a now glyph', kind: 'text', fg: r('now'), bg: 'nowGlyph' },
   { use: 'values on a now panel', kind: 'text', fg: r('ink'), bg: 'nowPanel' },
-  { use: 'output on a now panel', kind: 'text', fg: r('result'), bg: 'nowPanel' },
   { use: 'region label on a now panel', kind: 'text', fg: r('inkSecondary'), bg: 'nowPanel' },
   // Outlines and emphasis
   { use: 'glyph outlines on frame (scrubber track, ticks)', kind: 'graphic', fg: r('line'), bg: 'frame' },
@@ -337,6 +353,9 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'scrubber progress (accent) on frame', kind: 'graphic', fg: r('accent'), bg: 'frame' },
   // Roles
   { use: 'result: console lines on panels', kind: 'text', fg: r('result'), bg: 'panel' },
+  { use: 'result: the newest output on its tint', kind: 'text', fg: r('result'), bg: 'resultTint' },
+  { use: 'finale: source-line tag beside an output', kind: 'text', fg: r('inkMuted'), bg: 'panel' },
+  { use: 'scrubber tooltip text', kind: 'text', fg: r('ink'), bg: 'tooltip' },
   { use: 'micro: chip outline', kind: 'graphic', fg: r('micro'), bg: 'panel' },
   { use: 'queued: chip outline', kind: 'graphic', fg: r('queued'), bg: 'panel' },
   { use: 'removed: struck outline on panels', kind: 'graphic', fg: r('removed'), bg: 'panel' },
@@ -351,11 +370,16 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'primary button label, hover and press', kind: 'text', fg: r('onAccent'), bg: 'accentHover' },
   { use: 'secondary button label', kind: 'text', fg: r('inkMuted'), bg: 'secondary' },
   { use: 'secondary button label, hover and press', kind: 'text', fg: { dark: 'white', light: 'zinc.900' }, bg: 'secondaryHover' },
-  { use: 'text button label', kind: 'text', fg: r('now'), bg: 'frame' },
+  { use: 'text button label (Skip)', kind: 'text', fg: r('inkMuted'), bg: 'frame' },
+  { use: 'text button label, hover and press', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.900' }, bg: 'secondaryHover' },
   { use: 'selected segment label', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'segmentSelected' },
   { use: 'hovered segment label', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'segmentHover' },
   { use: 'choice label', kind: 'text', fg: r('inkSecondary'), bg: 'choice' },
   { use: 'choice label, hover', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'choiceHover' },
+  { use: 'choice label, press', kind: 'text', fg: { dark: 'white', light: 'zinc.900' }, bg: 'choicePress' },
+  // The "last time" tag sits on the row itself (no tag fill), at rest and on hover (N01).
+  { use: 'choice "last time" tag', kind: 'text', fg: r('inkSecondary'), bg: 'choice' },
+  { use: 'choice "last time" tag, hover', kind: 'text', fg: r('inkSecondary'), bg: 'choiceHover' },
   { use: 'picked choice label', kind: 'text', fg: r('ink'), bg: 'choiceSelected' },
   // The ✓ and × marks take the number's slot, so they sit on the key cap (D9).
   // Both are ink (WS1 ruling 3): the glyph shape and the "Right." / "Not
@@ -406,13 +430,38 @@ export const surface = {
    * `tailwind.config.ts` as a color-mix of zinc-800 at 40 % over zinc-900.
    */
   frameOpaque: 'bg-vz-frame print:bg-zinc-50',
-  panel: 'bg-zinc-900/60 print:bg-white',
+  panel: 'bg-white/2.5 print:bg-white',
   glyph: 'bg-zinc-800 print:bg-white',
   code: 'bg-zinc-900',
   chipQueued: 'bg-sky-400/10 print:bg-sky-700/10',
   chipMicro: 'bg-violet-400/10 print:bg-violet-600/10',
   tag: 'bg-zinc-800 print:bg-zinc-100',
+  /** The newest output's ground (N03); print keeps the text and drops the ground. */
+  resultTint: 'bg-amber-400/10 print:hidden',
 } as const
+
+/**
+ * Code on paper (R10, R11): the pane's syntax colors are github-dark (the
+ * lesson code blocks' theme, P: src/mdx/rehype.mjs); on white they fall to
+ * 1.3 to 2.5:1. Print swaps each for its github-light twin, darkened where
+ * the light theme itself is under 4.5:1 on white (orange). Unknown colors
+ * print as ink.
+ */
+export const CODE_PRINT: Record<string, string> = {
+  '#E1E4E8': '#24292E',
+  '#F97583': '#D73A49',
+  '#B392F0': '#6F42C1',
+  '#9ECBFF': '#032F62',
+  '#79B8FF': '#005CC5',
+  '#85E89D': '#22863A',
+  '#FFAB70': '#A04A00',
+  '#A1A1AA': '#6A737D',
+}
+export const CODE_PRINT_INK = '#24292E'
+
+/** The scrubber tooltip (drift D13): a 4 px chip like the tags and key caps, hairline edge. */
+export const tooltipCls =
+  'rounded border border-white/10 bg-zinc-900 px-2 py-0.5 font-sans text-2xs font-medium tabular-nums text-zinc-100'
 
 /**
  * The two emphases (D5), which can never be confused:
@@ -457,8 +506,14 @@ export const type = {
   title: { cls: 'font-sans text-base font-semibold', size: 16, line: 28, source: 'D3; P: typography.ts:191' },
   /** D3: the checkpoint prompt. P: text-base. */
   prompt: { cls: 'font-sans text-base font-semibold text-pretty', size: 16, line: 28, source: 'D3; P: tailwind.config.ts:22' },
-  /** D3: captions 14/28 zinc-300, pretty wrapping. P: typography.ts:45 (prose body 14/28). */
-  caption: { cls: 'font-sans text-sm leading-7 text-pretty', size: 14, line: 28, source: 'D3; P: typography.ts:45' },
+  /**
+   * Copy inside a visual is UI type, not prose (R3): 14/24 zinc-300, pretty
+   * wrapping. P: ProblemCard/index.tsx:224 (`text-sm leading-6`). The prose
+   * 2.0 line height never applies inside a frame.
+   */
+  caption: { cls: 'font-sans text-sm leading-6 text-pretty', size: 14, line: 24, source: 'R3; P: ProblemCard/index.tsx:224' },
+  /** A step's name, joined to its caption (R3): sentence case, 14/24 600 zinc-100. */
+  stepName: { cls: 'font-sans text-sm font-semibold', size: 14, line: 24, source: 'R3; P: Button.tsx:48 (text-sm)' },
   /** Text-alternative body. P: ProblemCard/index.tsx:224 (`text-sm leading-6`). */
   body: { cls: 'font-sans text-sm leading-6', size: 14, line: 24, source: 'P: ProblemCard/index.tsx:224' },
   /** Buttons and segments. P: Button.tsx:48 (`text-sm font-medium`). */
@@ -539,7 +594,16 @@ export { frameCls } from './frame-cls'
 export const EASE = [0.2, 0, 0, 1] as const
 export const EASE_CSS = 'cubic-bezier(0.2, 0, 0, 1)'
 
-export type MotionTokenName = 'feedback' | 'highlight' | 'enter' | 'exit' | 'move' | 'path' | 'draw' | 'caption'
+export type MotionTokenName =
+  | 'feedback'
+  | 'highlight'
+  | 'enter'
+  | 'exit'
+  | 'move'
+  | 'path'
+  | 'draw'
+  | 'caption'
+  | 'vacate'
 
 export type TweenToken = { type: 'tween'; duration: number; ease?: readonly number[]; distance?: number }
 export type SpringToken = { type: 'spring'; stiffness: number; damping: number; mass: number; settleMs: number }
@@ -573,6 +637,13 @@ export const motion: Record<MotionTokenName, { full: TweenToken | SpringToken; r
    * never share the cell and the change is still visible.
    */
   caption: { full: { type: 'tween', duration: 0.12, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
+  /**
+   * A glyph that leaves the place a moving glyph is arriving at (the stack
+   * frame a task replaces): a 100 ms fade in place, no travel, starting with
+   * the move. Outside the two-glyph budget (H0 S-1, R1M-13): without it the
+   * frame vanishes in one frame under the arriving chip.
+   */
+  vacate: { full: { type: 'tween', duration: 0.1, ease: EASE }, reduced: { type: 'tween', duration: 0 } },
 }
 
 export const motionRules = {
@@ -645,7 +716,14 @@ export const transitionCls = {
   // instant render never fades a control in or out (D7).
   feedback:
     'transition-[color,background-color,border-color,text-decoration-color,fill,stroke,box-shadow,filter] motion-reduce:transition-none',
-  press: 'active:brightness-98',
+  /**
+   * R13: hover is a white/5 step (hover devices only), press one more step,
+   * white/10, on every device, so a press is visible on a mouse too (the 0.98
+   * brightness of D11 was below what anyone sees, R1M-15). Surfaces that have
+   * their own fill (Next, choice rows, segments) step their fill instead.
+   */
+  hover: 'can-hover:bg-white/5',
+  press: 'press:bg-white/10',
   highlight:
     'transition-[background-color,opacity,transform,clip-path] duration-[120ms] ease-[cubic-bezier(0.2,0,0,1)] motion-reduce:transition-none',
   /** P: ProblemCard/index.tsx:210-211 (rotate 180 over 200 ms). */

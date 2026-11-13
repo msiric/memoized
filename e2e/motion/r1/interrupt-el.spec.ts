@@ -55,7 +55,9 @@ test('event-loop reveal interruptions @1440', async ({ page }) => {
     ['resize-to-375', () => page.setViewportSize({ width: 375, height: 900 })],
     ['esc', () => page.keyboard.press('Escape')],
     ['tab-hidden', () => hide(page, true)],
-    ['replay-click-at-100', () => f.locator('[data-viz-part="viz-next"]').click()],
+    // Forced: the control is aria-disabled during the reveal (H3 R1M-11, 12), and
+    // an unforced click would wait for it and press after the reveal instead.
+    ['replay-click-at-100', () => f.locator('[data-viz-part="viz-next"]').click({ force: true })],
     ['home-key', () => page.keyboard.press('Home')],
     ['space', () => page.keyboard.press(' ')],
     ['preset-switch', () => f.getByRole('radio', { name: 'Drain' }).click()],
@@ -89,7 +91,7 @@ test('event-loop reveal interruptions @1440', async ({ page }) => {
       async () => {
         await f.locator('[data-viz-part="viz-next"]').click()
         await page.waitForTimeout(gap)
-        await f.locator('[data-viz-part="viz-next"]').click()
+        await f.locator('[data-viz-part="viz-next"]').click({ force: true })
       },
       800,
     )

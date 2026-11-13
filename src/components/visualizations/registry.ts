@@ -1,7 +1,7 @@
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
-import { footprintOf } from './shell/footprint'
+import { footprintOf, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
 import type { StaticDescriptor, StaticTextAlternative } from './shell/static-types'
 import { textAlternative, type TextAlternative } from './shell/StepsAsText'
@@ -81,9 +81,17 @@ export function descriptorFor(id: string): AnyDescriptor | undefined {
 export function vizFootprint(id: string, preset?: string): readonly [number, number] | undefined {
   const d = descriptorFor(id)
   if (!d) return undefined
-  if (d.form === 'step') return footprintOf(d)
+  if (d.form === 'step') return footprintOf(d, preset)
   if (d.form === 'explorable') return d.footprint
   return staticFootprints(d)[preset ?? d.defaultPreset]
+}
+
+/** Per-preset footprints of a step-through (R2), default first (the entry table's fifth slot). */
+export function vizStepFootprints(id: string): Record<string, readonly [number, number]> | undefined {
+  const d = descriptorFor(id)
+  if (d?.form !== 'step') return undefined
+  const all = presetFootprints(d)
+  return { [d.defaultPreset]: all[d.defaultPreset], ...all }
 }
 
 /** Per-preset footprints of a static visual, default first (the entry table's fourth slot). */

@@ -16,33 +16,34 @@ const snippet = [
   "console.log('D')",
 ].join('\n')
 
+// One name per callback from Host to Tasks to the call stack (R7): named by
+// what it logs, so a chip matches its console output.
 const script = { id: 'script', label: 'script' }
-const timerHost = { id: 'timer', label: 'timer → cb' }
-const timerTask = { id: 'timer', label: 'timer cb' }
-const thenCb = { id: 'then', label: 'then cb' }
+const timerCb = { id: 'timer', label: 'cb B' }
+const thenCb = { id: 'then', label: 'cb C' }
 
 const s0: EventLoopState = EMPTY
 const s1: EventLoopState = { ...s0, stack: [script], console: ['A'] }
-const s2: EventLoopState = { ...s1, host: [timerHost] }
+const s2: EventLoopState = { ...s1, host: [timerCb] }
 const s3: EventLoopState = { ...s2, micro: [thenCb] }
 const s4: EventLoopState = { ...s3, console: ['A', 'D'] }
-const s5: EventLoopState = { ...s4, stack: [], host: [], tasks: [timerTask] }
+const s5: EventLoopState = { ...s4, stack: [], host: [], tasks: [timerCb] }
 const s6: EventLoopState = { ...s5, stack: [thenCb], micro: [], console: ['A', 'D', 'C'] }
-const s7: EventLoopState = { ...s6, stack: [timerTask], tasks: [], console: ['A', 'D', 'C', 'B'] }
+const s7: EventLoopState = { ...s6, stack: [timerCb], tasks: [], console: ['A', 'D', 'C', 'B'] }
 const s8: EventLoopState = { ...s7, stack: [] }
 
 const steps: Step<EventLoopState>[] = [
   {
     state: s0,
-    event: 'before the run',
-    why: 'Predict the order first: the script runs to the end as one task before anything it queues can run.',
+    event: 'Before the run',
+    why: 'The script runs to the end as one task before anything it queues can run.',
     narration: 'Nothing has run yet.',
     focus: [],
     claim: 'modelled',
   },
   {
     state: s1,
-    event: 'run script',
+    event: 'Run the script',
     why: 'The whole file runs as one task, so nothing queued can start until it finishes.',
     narration: 'The script starts on the call stack and logs A.',
     line: 1,
@@ -52,7 +53,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s2,
-    event: 'register timer',
+    event: 'Register the timer',
     why: 'setTimeout hands the callback to the host; even with no delay it waits for the current task to finish.',
     narration: 'setTimeout registers a timer with the host.',
     line: 2,
@@ -61,7 +62,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s3,
-    event: 'queue microtask',
+    event: 'Queue a microtask',
     why: "The promise is already fulfilled, so .then queues its callback now, but it can't run until the stack is empty.",
     narration: 'The .then callback is added to the microtask queue.',
     line: [3, 4],
@@ -70,7 +71,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s4,
-    event: 'log D',
+    event: 'Log D',
     why: 'Still the first task: synchronous code always finishes before any queued callback runs.',
     narration: 'The script logs D.',
     line: 5,
@@ -80,7 +81,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s5,
-    event: 'script ends',
+    event: 'Script ends',
     why: 'The stack is empty, but the loop drains every microtask before it takes a task.',
     narration: 'The script finishes. Once the timer is due, the host moves its callback to the task queue.',
     line: 'host',
@@ -89,7 +90,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s6,
-    event: 'run microtask',
+    event: 'Run the microtask',
     why: 'The loop empties the microtask queue completely before it takes another task.',
     narration: 'The .then callback runs and logs C.',
     line: 4,
@@ -99,7 +100,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s7,
-    event: 'run next task',
+    event: 'Run the next task',
     why: "Only with no microtasks left does the loop take the timer's task, even with no delay.",
     narration: 'The timer callback runs as the next task and logs B.',
     line: 2,
@@ -109,7 +110,7 @@ const steps: Step<EventLoopState>[] = [
   },
   {
     state: s8,
-    event: 'done',
+    event: 'Done',
     why: 'The order is always sync code first, then every microtask, then one task.',
     narration: 'Done. The log reads A, D, C, B.',
     focus: ['console'],
@@ -130,6 +131,30 @@ export const basicOrdering: StepLog<EventLoopState> = {
   steps,
   checkpoints: [
     {
+      // R7: the learner predicts before anything runs; the verdict lands
+      // with the finale.
+      beforeStep: 1,
+      verdict: 'end',
+      prompt: 'Which logs last?',
+      choices: [
+        { id: 'a', label: 'A', value: 'A' },
+        { id: 'b', label: 'B', value: 'B' },
+        { id: 'c', label: 'C', value: 'C' },
+        { id: 'd', label: 'D', value: 'D' },
+      ],
+      answer: 'b',
+      feedback: {
+        correct: "B logs last: the timer's callback is a task, so it waits for the script and every microtask.",
+        byChoice: {
+          a: 'A logs first: it is synchronous, on line 1.',
+          c: "C is a microtask: it runs before the timer's task.",
+          d: 'D is synchronous: it logs before anything queued runs.',
+        },
+      },
+      locked: 'Watch the console.',
+      recap: { right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
+    },
+    {
       beforeStep: 6,
       prompt: 'D has logged. What logs next?',
       choices: [
@@ -141,6 +166,7 @@ export const basicOrdering: StepLog<EventLoopState> = {
         correct: 'Microtasks run before the next task, so C goes first.',
         byChoice: { b: "The timer's task waits for an empty microtask queue." },
       },
+      recap: { right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
     },
   ],
   observed: { log: ['A', 'D', 'C', 'B'] },

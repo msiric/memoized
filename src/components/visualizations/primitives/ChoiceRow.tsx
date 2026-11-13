@@ -64,8 +64,8 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         resolved && picked
           ? 'bg-zinc-600 text-zinc-100 print:bg-zinc-200 print:text-zinc-900'
           : 'bg-zinc-700 text-zinc-300 print:bg-zinc-100 print:text-zinc-700',
-        state === 'ask' &&
-          cn('can-hover:bg-zinc-600 can-hover:text-zinc-200 active:bg-zinc-600 active:text-zinc-200', transitionCls.press),
+        // R13: hover zinc-600 (the platform row), press one step on.
+        state === 'ask' && 'can-hover:bg-zinc-600 can-hover:text-zinc-200 press:bg-zinc-500 press:text-white',
         resolved && 'cursor-default',
         state === 'unavailable' && UNAVAILABLE,
         className,
@@ -78,8 +78,10 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         className={cn(
           'flex h-5 w-5 shrink-0 items-center justify-center bg-zinc-800 print:bg-zinc-50',
           radius.chip.cls,
+          // The mark keeps the number's size, so the slot reads as the same
+          // element before and after the answer (drift N06).
           mark
-            ? cn('font-sans text-sm font-semibold leading-5', ink.base)
+            ? cn('font-sans text-2xs font-semibold leading-4', ink.base)
             : cn('font-mono text-2xs leading-4 tabular-nums', ink.secondary),
         )}
       >
@@ -99,7 +101,9 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         </span>
         {/* The tag takes the label's second line, in flow, so it never squeezes the label sideways. */}
         {tag ? (
-          <Tag aria-hidden tone="muted" className="h-4 bg-transparent px-0">
+          // zinc-300 on the row's own fill: the muted tone fails 4.5:1 on
+          // zinc-700 and zinc-600 (drift N01).
+          <Tag aria-hidden tone="neutral" className="h-4 bg-transparent px-0">
             {tag}
           </Tag>
         ) : null}

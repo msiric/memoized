@@ -1,7 +1,7 @@
 import codeTokens from '../../code-tokens.json'
 import type { EngineCore, StepThroughDescriptor } from '../../shell/types'
 import { withCodeTokens } from '../../step-log/with-tokens'
-import { eventLoopMetrics } from './layout'
+import { eventLoopMetrics, outputLines } from './layout'
 import { basicOrdering } from './presets/basic-ordering'
 import { microtaskQueuedDuringDrain } from './presets/microtask-queued-during-drain'
 import {
@@ -19,9 +19,17 @@ import {
 export const eventLoopEngineCore: EngineCore<EventLoopState> = {
   id: 'event-loop',
   describe: describeEventLoop,
-  layout: (logs) => eventLoopMetrics(logs).layout,
+  layout: (logs, all) => eventLoopMetrics(logs, all).layout,
   introspect: eventLoopIntrospection,
   revealMs: (state) => consoleReveal(state.console.length).settleMs,
+  // The finale relights each line that printed, in the order its output ran.
+  codeTrace: (log, index) => {
+    if (index !== log.steps.length - 1) return null
+    const lines = outputLines(log)
+    const { staggerMs } = consoleReveal(log.steps[index].state.console.length)
+    const out = lines.flatMap((l, k) => (l ? [{ l, d: k * staggerMs }] : []))
+    return { lines: out.map((o) => o.l), delaysMs: out.map((o) => o.d) }
+  },
 }
 
 export const eventLoopDescriptor: StepThroughDescriptor<EventLoopState> = {

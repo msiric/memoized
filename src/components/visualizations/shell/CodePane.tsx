@@ -1,19 +1,25 @@
 import { useEffect, useLayoutEffect, useRef, type CSSProperties, type RefObject } from 'react'
 import { cn as clsx } from '../primitives/cn'
 import type { CodeToken, StepLine } from '../step-log/types'
-import { radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
+import { CODE_PRINT, CODE_PRINT_INK, EASE_CSS, ink, motion, radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
 import { CODE_GUTTER, CODE_PAD, CODE_STATUS, HANG, codePaneHeight, lineIndent, windowOffset } from './code-geometry'
 import { LINE } from './footprint'
-import type { PerVariant } from './types'
+import type { CodeTrace, PerVariant } from './types'
 import { H_CLS, TRANSLATE_Y_CLS, heights, rem, translateY } from './vars'
 
 /**
  * Code pane with line sync (spec §5.5). Reuses the lesson code-block surface
- * (zinc-900, mono 13/24, P: Code.tsx:297) with the one hairline as its edge (D4). The
- * current line gets a 2 px `now` bar, a 10 % `now`
- * background and a ▸ in the gutter, in the same frame as the stage. Windowed
- * panes keep the current line centred by translating the list; the pane never
+ * (zinc-900, mono 13/24, P: Code.tsx:297); as an inner region of the frame it
+ * has no edge (R2). The current line gets a 2 px `now` bar, a 10 % `now`
+ * background and a ▸ in the gutter, in the same frame as the stage. A traced
+ * set of lines (R7, the event loop's finale) is drawn the same way, each
+ * line lighting after its own delay while the reveal plays. Windowed panes
+ * keep the current line centred by translating the list; the pane never
  * scrolls, and neither does the page.
+ *
+ * Print (R10, R11): syntax colors take their light twins (`CODE_PRINT`), the
+ * ▸ marks the current line (backgrounds do not print), and the pane prints
+ * unwindowed, every line, with no box per line.
  *
  * The window clips at whole rows (F6): the list sits in a viewport exactly
  * `rows` lines tall, with the pane's padding outside it, so no part of the
@@ -47,10 +53,15 @@ export type CodePaneProps = {
   /** Widest line over every preset: fixes the pane width from 768 px. */
   cols?: number
   animate: boolean
+  /** Lines lit as traced (R7), in run order, with their delays. */
+  trace?: CodeTrace | null
+  /** The trace plays now (the reveal): each line lights after its delay. */
+  playTrace?: boolean
 }
 
-export function CodePane({ lines, tokens, line, anchor, rows, height, cols, animate }: CodePaneProps) {
+export function CodePane({ lines, tokens, line, anchor, rows, height, cols, animate, trace, playTrace = false }: CodePaneProps) {
   const [from, to] = typeof line === 'number' ? [line, line] : Array.isArray(line) ? line : [0, -1]
+  const traced = new Map((trace?.lines ?? []).map((l, k) => [l, trace?.delaysMs[k] ?? 0]))
   const offset: PerVariant<number> = {
     narrow: -windowOffset(anchor, lines.length, rows.narrow) * LINE,
     wide: -windowOffset(anchor, lines.length, rows.wide) * LINE,
@@ -61,13 +72,20 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
   const view = useRef<HTMLDivElement>(null)
   const list = useRef<HTMLOListElement>(null)
   useWindow(view, list, anchor, lines)
-  const current =
-    from > 0 ? (from === to ? `line ${from}` : `lines ${from} to ${to}`) : line === 'host' ? 'host' : 'none'
+  const current = traced.size
+    ? `the lines that printed, in run order: ${[...traced.keys()].join(', ')}`
+    : from > 0
+      ? from === to
+        ? `line ${from}`
+        : `lines ${from} to ${to}`
+      : line === 'host'
+        ? 'host'
+        : 'none'
   return (
     <div
       data-viz-region="code"
       className={clsx(
-        'relative overflow-hidden bg-zinc-900 ring-1 ring-zinc-700 print:border print:border-zinc-300',
+        'relative overflow-hidden bg-zinc-900 print:!h-auto print:border print:border-zinc-300 print:bg-white',
         radius.row.cls,
         typeScale.code.cls,
         // From 768 the pane is exactly as wide as the widest line of any preset
@@ -92,51 +110,80 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
       <div
         data-viz-part="code-window"
         ref={view}
-        className={clsx('overflow-y-clip', H_CLS)}
+        className={clsx('overflow-y-clip print:!h-auto', H_CLS)}
         style={heights(windowRows, { marginTop: rem(CODE_PAD) })}
       >
         <ol
           ref={list}
           aria-label={`Code, current: ${current}`}
-          className={clsx('m-0 list-none p-0', TRANSLATE_Y_CLS, animate ? transitionCls.highlight : transitionCls.instant)}
+          className={clsx(
+            'm-0 list-none p-0 print:![transform:none]',
+            TRANSLATE_Y_CLS,
+            animate ? transitionCls.highlight : transitionCls.instant,
+          )}
           style={translateY(offset)}
         >
           {lines.map((text, i) => {
             const n = i + 1
-            const active = n >= from && n <= to
+            const isTraced = traced.has(n)
+            const isCurrent = n >= from && n <= to
+            const active = isCurrent || isTraced
+            // A traced line replays from unlit after its own delay while the
+            // reveal plays (R7), even if it was already the current line.
+            const ground = playTrace && isTraced ? relight('vz-relight-ground', traced.get(n) ?? 0) : undefined
+            const mark = playTrace && isTraced ? relight('vz-relight-mark', traced.get(n) ?? 0) : undefined
+            const tween = animate && !playTrace ? transitionCls.highlight : transitionCls.instant
             return (
               <li
                 key={i}
-                aria-current={active ? 'true' : undefined}
+                // Only the current line is "current"; traced lines (R7) are data-traced.
+                aria-current={isCurrent ? 'true' : undefined}
                 data-line={n}
+                data-traced={isTraced || undefined}
                 className={clsx(
                   'relative flex min-h-6 items-start pl-2 pr-2',
-                  animate ? transitionCls.highlight : transitionCls.instant,
+                  tween,
                   active ? 'bg-lime-400/10' : 'bg-transparent',
                 )}
+                style={ground}
               >
                 <span
                   aria-hidden
                   className={clsx(
                     'absolute inset-y-0 left-0 w-0.5',
+                    tween,
                     active ? 'bg-lime-400 print:bg-lime-700' : 'bg-transparent',
                   )}
+                  style={ground}
                 />
                 {/* Continuation rows of a wrapped line: a hairline under the marker
                     column, so a wrapped row never reads as a line of its own (A4). */}
                 <span aria-hidden className="absolute bottom-1.5 left-3.5 top-6 w-px bg-zinc-700" />
-                <span aria-hidden className="w-3 shrink-0 select-none font-mono text-2xs leading-6 text-lime-400">
-                  {active && n === from ? '▸' : ''}
+                <span
+                  // A new mark for the finale, so it replays from unlit as its own part.
+                  key={mark ? 'relight' : 'mark'}
+                  aria-hidden
+                  className={clsx(
+                    'w-3 shrink-0 select-none font-mono text-2xs leading-6',
+                    ink.now,
+                    tween,
+                    active && (n === from || isTraced) ? 'opacity-100' : 'opacity-0',
+                  )}
+                  style={mark}
+                  // The finale's part (R7): asserted with the reveal (reveal.spec.ts).
+                  data-viz-reveal={mark ? 'line' : undefined}
+                >
+                  ▸
                 </span>
                 <span
                   aria-hidden
-                  className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 vz-wide:inline"
+                  className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 vz-wide:inline print:text-zinc-600"
                 >
                   {n}
                 </span>
                 <code
                   className={clsx(
-                    'min-w-0 flex-1 whitespace-pre-wrap bg-transparent p-0 text-zinc-100 [overflow-wrap:anywhere]',
+                    'min-w-0 flex-1 whitespace-pre-wrap bg-transparent p-0 text-zinc-100 [overflow-wrap:anywhere] print:text-zinc-900',
                     // The hanging indent: continuation rows start past the line's own indent.
                     'pl-[var(--vz-hang)] [text-indent:calc(-1*var(--vz-hang))]',
                     typeScale.code.cls,
@@ -145,7 +192,18 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                 >
                   {tokens?.[i]
                     ? tokens[i].map((t, k) => (
-                        <span key={k} style={t.color ? { color: t.color } : undefined}>
+                        <span
+                          key={k}
+                          className={t.color ? '[color:var(--vz-c)] print:[color:var(--vz-pc)]' : undefined}
+                          style={
+                            t.color
+                              ? ({
+                                  ['--vz-c' as string]: t.color,
+                                  ['--vz-pc' as string]: CODE_PRINT[t.color] ?? CODE_PRINT_INK,
+                                } as CSSProperties)
+                              : undefined
+                          }
+                        >
                           {t.text}
                         </span>
                       ))
@@ -158,7 +216,7 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
       </div>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 flex items-start justify-end bg-zinc-900 px-2"
+        className="pointer-events-none absolute inset-x-0 bottom-0 flex items-start justify-end bg-zinc-900 px-2 print:hidden"
         style={{ height: rem(CODE_STATUS + CODE_PAD) }}
       >
         <span className={clsx('font-sans text-2xs leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}>
@@ -232,4 +290,11 @@ function useWindow(
     ro.observe(v)
     return () => ro.disconnect()
   }, [anchor, lines])
+}
+
+/** One traced line's replay (R7): the `enter` token, held unlit until its delay. */
+function relight(name: string, delayMs: number): CSSProperties {
+  const t = motion.enter.full
+  const ms = t.type === 'tween' ? t.duration * 1000 : 0
+  return { animation: `${name} ${ms}ms ${EASE_CSS} ${delayMs}ms backwards` }
 }

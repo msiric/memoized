@@ -74,11 +74,23 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
     const parts = revealParts(r.motions)
     report[`el-${preset}`] = parts
     const outs = parts.filter((p) => p.kind === 'out')
+    const lines = parts.filter((p) => p.kind === 'line')
     const recap = parts.filter((p) => p.kind === 'recap')
     const n = (await outIndexes(page)).length
     const problems: string[] = []
-    // The newest output was already lit, so every earlier one resolves.
-    if (outs.length !== n - 1) problems.push(`expected ${n - 1} outputs to resolve, got ${outs.length}`)
+    // Every output resolves in turn, the newest included (R5: it restarts from 0).
+    if (outs.length !== n) problems.push(`expected ${n} outputs to resolve, got ${outs.length}`)
+    // R7: the code line that printed each output relights with it.
+    if (lines.length !== n) problems.push(`expected ${n} code lines to relight, got ${lines.length}`)
+    for (const l of lines) {
+      const op = l.props.find((p) => p.prop === 'op')
+      if (!op || op.end !== 1) problems.push(`${l.label} does not end lit`)
+    }
+    const lineStarts = [...lines.map((l) => l.start)].sort((a, b) => a - b)
+    const outStarts = [...outs.map((o) => o.start)].sort((a, b) => a - b)
+    lineStarts.forEach((t, i) => {
+      if (outStarts[i] !== undefined && Math.abs(t - outStarts[i]) > 34) problems.push(`line ${i} starts at ${t} ms, its output at ${outStarts[i]} ms`)
+    })
     for (const o of outs) {
       if (o.props.some((p) => p.prop !== 'op' && p.prop !== 'eff')) problems.push(`${o.label} moves`)
       const op = o.props.find((p) => p.prop === 'op')
@@ -93,12 +105,19 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
       if (!(starts[i] > starts[i - 1])) problems.push(`output ${i} starts at ${starts[i]} ms, not after ${starts[i - 1]} ms`)
     for (let i = 1; i < xs.length; i++) if (!(xs[i] > xs[i - 1])) problems.push('outputs are not left to right')
     if (recap.length !== 1) problems.push(`expected the recap caption to fade in once, got ${recap.length}`)
-    else if (outs.length && recap[0].start < Math.max(...starts)) problems.push('the recap lands before the last output starts')
+    // R5: the recap lands once the playback has resolved, not before.
+    else if (outs.length && recap[0].start < Math.max(...outs.map((o) => o.end)) - 34)
+      problems.push(`the recap lands at ${recap[0].start} ms, before the playback ends`)
     const end = Math.max(...parts.map((p) => p.end))
     if (end > REVEAL_TOKEN.maxMs) problems.push(`the reveal ends at ${end} ms`)
     strictCheck(`${preset}: reveal sequence`, problems)
     await expect(page.locator(EL).getByRole('button', { name: 'Replay' })).toBeVisible()
-    await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText('You predicted ' + (preset === 'basic-ordering' ? 'C before B. Right.' : 'micro 2 before timeout. Right.'))
+    // Choice 2 at each question: B (right) and C (right); micro 2 (wrong) and micro 2 (right).
+    await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
+      preset === 'basic-ordering'
+        ? 'B logs last, as you said. C ran next, as you predicted.'
+        : 'You said micro 2 logs last; it was timeout. micro 2 ran next, as you predicted.',
+    )
   })
 
 test('event-loop reveal under reduced motion: one crossfade, no movement', async ({ page }) => {
@@ -115,7 +134,9 @@ test('event-loop reveal under reduced motion: one crossfade, no movement', async
   const starts = parts.map((p) => p.start)
   if (starts.length && Math.max(...starts) - Math.min(...starts) > 34) problems.push(`not at once: ${starts.join(', ')} ms`)
   strictCheck('reduced reveal', problems)
-  await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText('You predicted B; it was C.')
+  await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
+    'You said A logs last; it was B. You predicted B next; it was C.',
+  )
 })
 
 test('event-loop reveal never plays on load or after an instant command, and snaps when interrupted', async ({
