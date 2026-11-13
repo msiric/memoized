@@ -7,7 +7,9 @@ import { defineConfig, devices } from '@playwright/test'
  *
  * Projects:
  * - functional: e2e/viz-*.spec.ts, behavior, layout, axe, no-JS, console.
- * - gates: e2e/gates/contrast.spec.ts, the computed-style contrast crawl.
+ * - gates: e2e/gates/contrast.spec.ts, the computed-style contrast crawl (at
+ *   rest and in full motion), and e2e/gates/consistency.spec.ts (equivalent
+ *   elements across visuals, frames against the lesson's code blocks).
  * - visual: e2e/gates/visual.spec.ts, screenshot baselines; runs only in the
  *   Playwright Linux image (VIZ_VISUAL=1), see `yarn test:viz:visual`.
  * - motion: e2e/motion/*.spec.ts, the strict motion gate (MOTION_STRICT=0
@@ -55,7 +57,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'functional', testMatch: /viz-[\w-]+\.spec\.ts$/, use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 900 } } },
-    { name: 'gates', testMatch: /gates\/contrast\.spec\.ts$/, use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 900 } } },
+    { name: 'gates', testMatch: /gates\/(contrast|consistency)\.spec\.ts$/, use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 900 } } },
     { name: 'visual', testMatch: /gates\/visual\.spec\.ts$/, use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 900 } } },
     { name: 'motion', testMatch: /motion\/[\w-]+\.spec\.ts$/, use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 900 } } },
   ],
