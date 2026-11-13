@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react'
-import { EASE, motion, reveal, type TweenToken } from '../../primitives/tokens-v3'
+import { useCallback, useState, type CSSProperties } from 'react'
+import { EASE, EASE_CSS, motion, motionRules, reveal, type TweenToken } from '../../primitives/tokens-v3'
 
 const tween = (t: unknown) => (t as TweenToken).duration * 1000
 /** Stage `highlight` (120 ms) and `path` (220 ms), in ms. */
@@ -23,7 +23,12 @@ export const RIDE = {
   travelMs: 360,
   baseMs: 160,
   msPerPx: 0.8,
-  /** H3 R6: a single 120 ms settle on landing (the stage `highlight` duration). */
+  /**
+   * H3 R6: a single 120 ms settle (the stage `highlight` duration). It is the
+   * last 120 ms of the travel (R2M-04): the rider sets down while it
+   * decelerates onto its box, so the landing is the end of the motion and
+   * the verdict sequence starts there, with no still frames in between.
+   */
   settleMs: HIGHLIGHT_MS,
   /**
    * H3 R6: the rider and the lines share one easing, the reveal's own ride
@@ -41,10 +46,10 @@ export const RIDE = {
   /** Riders keep this many of their own widths apart, so the second waits for the first to clear a crossing (H3 R6). */
   clearance: 1.5,
   /**
-   * The plan's ceiling: the reveal budget less five frames, the measured
-   * latency from the last landing to the verdict's first frame (a React
-   * commit, then the fade's first frame), so the moment as seen stays
-   * inside `reveal.maxMs`.
+   * The plan's ceiling, verdict sequence included: the reveal budget less
+   * five frames, the measured latency from the last landing to the first
+   * beat's first frame (a React commit, then the fade's first frame), so the
+   * moment as seen stays inside `reveal.maxMs`.
    */
   maxMs: reveal.maxMs - 80,
 } as const
@@ -52,6 +57,42 @@ export const RIDE = {
 /** H3 R5: verdict, explanation, marks and tally fade in over 160 ms once the payoff lands. */
 export const VERDICT_FADE_MS = 160
 export const verdictFade = { duration: VERDICT_FADE_MS / 1000, ease: EASE }
+
+/**
+ * Q18 (R2M-04, R2M-05, R2M-15): after the last landing the outcome arrives
+ * in one ordered sequence, one stagger token (40 ms) per beat, each a 160 ms
+ * fade, instead of everything in one frame:
+ * - `landing`: the row that received the tracked check takes the lime
+ *   landing emphasis (Q9), as the rider sets down;
+ * - `badges`: the in-row verdicts, Before and After alike, and an unmounted
+ *   instance takes the removed role (a card changes color once);
+ * - `verdict`: the dock's verdict, the ✓ and × with the answer emphasis, and
+ *   the tally (narrated as it appears);
+ * - `history`: the Before boxes show their checks again, as a quiet record of
+ *   the starting state (R2M-15), last, so it never reads as a copy.
+ */
+export const BEAT_MS = motionRules.maxStaggerMs
+export const BEAT = { landing: 0, badges: 1, verdict: 2, history: 3 } as const
+export type Beat = (typeof BEAT)[keyof typeof BEAT]
+/** From the last landing to the last frame of the sequence. */
+export const SEQUENCE_MS = BEAT.history * BEAT_MS + VERDICT_FADE_MS
+
+/** A framer transition for a beat: the verdict fade, delayed; instant when not played. */
+export const beatFade = (on: boolean, beat: Beat) =>
+  on ? { ...verdictFade, delay: (beat * BEAT_MS) / 1000 } : { duration: 0 }
+
+/**
+ * The CSS twin for class-driven changes on a beat (borders, fills, colors).
+ * Off, the change is instant (`none` lands it in the same frame, D7).
+ */
+export const beatTransition = (on: boolean, beat: Beat): CSSProperties =>
+  on
+    ? {
+        transitionDuration: `${VERDICT_FADE_MS}ms`,
+        transitionDelay: `${beat * BEAT_MS}ms`,
+        transitionTimingFunction: EASE_CSS,
+      }
+    : { transitionProperty: 'none' }
 
 /** The wrapper scene has no rider: its lines and state chip draw on the stage `path` token. */
 export const WRAPPER_DRAW_MS = PATH_MS
@@ -64,10 +105,12 @@ export type RevealView = {
   played: boolean
   /** The director runs: played and not yet landed. */
   directing: boolean
-  /** Every check has landed: the verdict, marks, badges and tally show. */
+  /** Every check has landed: the verdict sequence (`BEAT`) plays. */
   landed: boolean
   /** Fade the verdict in (played, and not landed at once by a resize). */
   fade: boolean
+  /** The verdict sequence is playing or has played: beats fade in on their delays. */
+  sequence: boolean
   /** A row's line has reached it: its instance shows. */
   arrived: (row: string) => boolean
   /** A row's carried check has settled into it. */
@@ -104,6 +147,7 @@ export function useRevealView(key: string, played: boolean): RevealView {
     directing: played && !landed,
     landed,
     fade: played && !cur.instant,
+    sequence: played && !cur.instant && landed,
     arrived: (row) => landed || cur.arrived.includes(row),
     landedRow: (row) => landed || cur.landedRows.includes(row),
     onArrive,
