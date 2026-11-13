@@ -101,7 +101,7 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         aria-hidden
         data-choice-slot={mark ?? 'key'}
         className={cn(
-          'flex h-5 w-3 shrink-0 items-center justify-center',
+          'relative flex h-5 w-3 shrink-0 items-center justify-center',
           mark
             ? cn(
                 'font-sans text-2xs font-semibold leading-4',
@@ -113,7 +113,20 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
               ),
         )}
       >
-        {/* A new element for the mark, so its fade is an arrival, not a dip of the numeral. */}
+        {/* A new element for the mark, so its fade is an arrival, not a dip of
+            the numeral. On a delayed landing (`--vz-land-delay`) the numeral
+            holds the slot until the mark's beat (`vz-land-out`). */}
+        {mark && fade ? (
+          <span
+            aria-hidden
+            className={cn(
+              'vz-land-out absolute font-mono text-2xs font-normal leading-4 tabular-nums',
+              'text-zinc-400 print:hidden',
+            )}
+          >
+            {index + 1}
+          </span>
+        ) : null}
         <span key={mark ?? 'key'} className={cn(mark && fade && 'vz-land-in')}>
           {mark === 'right' ? '✓' : mark === 'wrong' ? '×' : index + 1}
         </span>

@@ -9,9 +9,8 @@ const PATH_MS = tween(motion.path.full)
 /**
  * The list-keys reveal's timeline (D21, H3 R5 and R6), in one place.
  *
- * Local values, each traced to a decision; none is a new role. Merge note
- * (H3 F2): when tokens-v3 carries the shared reveal timing (F1, R5), point
- * `VERDICT_FADE_MS` at it.
+ * Local values, each traced to a decision; none is a new role. The verdict
+ * fade is the shared `land` token (H3 R2 Q4: one rule for both visuals).
  */
 export const RIDE = {
   /**
@@ -54,8 +53,8 @@ export const RIDE = {
   maxMs: reveal.maxMs - 80,
 } as const
 
-/** H3 R5: verdict, explanation, marks and tally fade in over 160 ms once the payoff lands. */
-export const VERDICT_FADE_MS = 160
+/** H3 R5, R2 Q4: verdict, explanation, marks and tally fade in on the shared `land` fade (160 ms) once the payoff lands. */
+export const VERDICT_FADE_MS = tween(motion.land.full)
 export const verdictFade = { duration: VERDICT_FADE_MS / 1000, ease: EASE }
 
 /**

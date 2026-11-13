@@ -38,6 +38,8 @@ export type ChoiceGeometry = {
   rowWide: number
   gap: number
   textGap: number
+  /** The trailing action's cell (Skip, or a wider action in its place). */
+  trail: number
 }
 
 const labelWidth = (label: string, mono: boolean) =>
@@ -45,16 +47,22 @@ const labelWidth = (label: string, mono: boolean) =>
 const longestWord = (label: string, mono: boolean) =>
   Math.max(0, ...label.split(/\s+/).map((w) => labelWidth(w, mono)))
 
-export function choiceGeometry(labels: readonly string[], mono = false): ChoiceGeometry {
+/**
+ * `trail`: the width of the trailing action's cell, Skip's 44 by default. A
+ * visual whose trailing cell also takes a wider action (list keys: "Try
+ * another" in Skip's place on the reveal) passes that width, so neither the
+ * one-row thresholds nor a two-column cell are ever narrower than it.
+ */
+export function choiceGeometry(labels: readonly string[], mono = false, trail: number = CHOICE.skip): ChoiceGeometry {
   const n = labels.length
   const widest = Math.max(0, ...labels.map((l) => labelWidth(l, mono)))
   const word = Math.max(0, ...labels.map((l) => longestWord(l, mono)))
   // One row: equal columns, each label in at most two lines, no word broken.
   const cell = CHOICE.chrome + Math.max(word, Math.ceil(widest / CHOICE.rowLines))
-  const rowNarrow = n * cell + n * CHOICE.gap + CHOICE.skip
-  const col = Math.min(CHOICE.wideWidth, CHOICE.chrome + widest)
-  const rowWide = n * col + n * CHOICE.gap + CHOICE.skip + CHOICE.textGap + 8 + CHOICE.textMin
-  return { n, col, rowNarrow, rowWide, gap: CHOICE.gap, textGap: CHOICE.textGap }
+  const rowNarrow = n * cell + n * CHOICE.gap + trail
+  const col = Math.min(CHOICE.wideWidth, Math.max(CHOICE.chrome + widest, trail))
+  const rowWide = n * col + n * CHOICE.gap + trail + CHOICE.textGap + 8 + CHOICE.textMin
+  return { n, col, rowNarrow, rowWide, gap: CHOICE.gap, textGap: CHOICE.textGap, trail }
 }
 
 /** Lines a label takes in a column `width` px wide. */
@@ -69,12 +77,18 @@ const rowHeight = (lines: number) => Math.max(CHOICE.height, lines * CHOICE.line
  * The height of the choices and Skip at content width `width` (px at the
  * default root): one row, or two columns with Skip in the next free cell.
  */
-export function choicesHeight(labels: readonly string[], width: number, wide: boolean, mono = false): number {
-  const g = choiceGeometry(labels, mono)
+export function choicesHeight(
+  labels: readonly string[],
+  width: number,
+  wide: boolean,
+  mono = false,
+  trail: number = CHOICE.skip,
+): number {
+  const g = choiceGeometry(labels, mono, trail)
   if (!g.n) return 0
   const one = wide ? width >= Math.max(g.rowWide, 606) : width >= g.rowNarrow
   if (one) {
-    const colW = wide ? g.col : (width - CHOICE.skip - g.n * CHOICE.gap) / g.n
+    const colW = wide ? g.col : (width - g.trail - g.n * CHOICE.gap) / g.n
     return rowHeight(Math.max(...labels.map((l) => choiceLines(l, colW, mono))))
   }
   const colW = wide ? g.col : (width - CHOICE.gap) / 2

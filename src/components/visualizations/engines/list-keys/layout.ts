@@ -1,6 +1,8 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../../primitives/tokens-v3'
 import { codePaneHeight } from '../../shell/code-geometry'
+import { choiceGeometry, choicesHeight } from '../../primitives/choice-geometry'
 import {
+  BANDS,
   CHOICE,
   FOOTER,
   FRAME,
@@ -11,6 +13,7 @@ import {
   WIDE_MIN,
   headerHeight,
   lastTimeText,
+  titleLines,
   wrapLines,
 } from '../../shell/footprint'
 import type { PerVariant, Variant } from '../../shell/types'
@@ -18,9 +21,10 @@ import { monoWidth, sansWidth } from '../../substrates/text-metrics'
 import {
   AGAIN_LABEL,
   LIST_RULE,
-  NONE_LABEL,
   NO_CHECK_PROMPT,
+  TITLE,
   WRAPPER_RULE,
+  WRAPPER_TITLE,
   feedbackLead,
   listChoices,
   listPrompt,
@@ -28,6 +32,7 @@ import {
   wrapperPrompt,
 } from './content'
 import { CODE_ROWS } from './code'
+import { RECORDED_LINE } from './OutcomesAsText'
 import { MAX_COUNT } from './machine'
 import { LIST_OUTCOMES } from './outcomes'
 import {
@@ -134,7 +139,6 @@ export const GAPS = { header: FRAME.headerGap, dock: FRAME.dockGap, footer: FRAM
 
 /** Dock copy is UI type (H3 R3): the caption's 14/24. */
 const BODY_LINE = typeScale.caption.line
-const BLOCK_GAP = 8
 
 export type Scene = 'list' | 'wrapper'
 
@@ -207,109 +211,54 @@ export function listTally(outcome: { reused: readonly (0 | 1 | null)[] }): strin
 }
 export const wrapperTally = (reused: boolean) => (reused ? 'Counter reused' : 'Counter remounted')
 
-const chars = (width: number, glyph: number) => Math.floor(width / glyph)
+const chars = (width: number, glyph: number) => Math.max(1, Math.floor(width / glyph))
 const lines = (t: string, width: number, glyph: number) => wrapLines(t, chars(width, glyph))
 const maxOf = (xs: number[]) => Math.max(0, ...xs)
 
 /**
- * A choice's chrome around its label (`LkChoice`): 12 + the 16 px numeral
- * slot + 8 + label + 12, plus 4 px of slack for the width model.
+ * "Try another", the widest trailing action (the secondary pill, 16 px
+ * sides), plus slack: the shared checkpoint's trailing cell (`trail`), so
+ * Skip, "Show me" and "Try another" share one place (H3 R2 Q4).
  */
-export const LK_CHOICE_CHROME = 52
-/** A wrapped choice: 10 px above and below each 20 px label line. */
-const CHOICE_PAD = 20
-const CHOICE_LINE = 20
-const choiceLabels = [
-  ...LIST_ACTIONS.flatMap((a) => listChoices(a).map((c) => ({ label: c.label, mono: false }))),
-  ...wrapperChoices(MAX_COUNT).map((c) => ({ label: c.label, mono: true })),
-]
-/** One-row choice column: the longest label of either scene plus the chrome, at most the shell's 168. */
-export const LK_CHOICE_WIDTH = Math.min(
-  CHOICE.wideWidth,
-  Math.ceil(
-    Math.max(...choiceLabels.map((c) => (c.mono ? monoWidth(c.label, 13) : sansWidth(c.label, typeScale.control.size)))),
-  ) + LK_CHOICE_CHROME,
-)
-/**
- * Below this frame width (px at the default root) a half-width column cannot
- * hold the longest word of any label, so the choices take one column
- * instead of breaking a word (Q5).
- */
-export const CHOICE_ONE_COLUMN_BELOW = Math.ceil(
-  2 *
-    (Math.max(
-      ...choiceLabels.flatMap((c) =>
-        c.label.split(' ').map((w) => (c.mono ? monoWidth(w, 13) : sansWidth(w, typeScale.control.size))),
-      ),
-    ) +
-      LK_CHOICE_CHROME) +
-    CHOICE.gap,
-)
-/** "Try another", the widest trailing action (outline pill, 16 px sides), plus slack. */
 export const TRAILING_WIDTH = Math.ceil(sansWidth(AGAIN_LABEL, typeScale.control.size)) + 2 * 16 + 4
-/**
- * From the wide variant (the frame from 37.875rem) the choices and the
- * trailing action share one row: columns up to `LK_CHOICE_WIDTH`, narrower
- * where the row needs it (a label then wraps, Q5, and the row grows).
- */
-export const CHOICE_ROW_FIT = WIDE_MIN
-const MAX_CHOICES = Math.max(...LIST_ACTIONS.map((a) => listChoices(a).length))
 
 /**
- * The verdict (H3 F2 ruling 2): at most two short sentences, the lead and
- * the rule, in the shared feedback style. What happened to each row is drawn
- * (the ride, the instance letters, the badges) and narrated; the tally sits
- * in the action row.
+ * The dock at content width `width` (px at the default root): the shared
+ * checkpoint layout (`primitives/Checkpoint.tsx`, Q4), the tallest over
+ * every choice set the scene can show. Narrow: the text cell (the question
+ * with its note, or the verdict with its tally) over the choice row; from
+ * 768 the text beside the choices. The same model as the event loop's dock
+ * (`shell/footprint.ts` `dockAt`).
  */
-function revealTextHeight(r: { lead: string; rule: string }, width: number) {
-  return lines(`${r.lead} ${r.rule}`.trim(), width, GLYPH.caption) * BODY_LINE
-}
-
-/** The trailing action (Skip, Show me, then Try another): a 44 px target. */
-const ACTION_ROW = TARGET_PX
-
-/**
- * The choice row at width `w` (Q4, Q5): one row of equal columns with the
- * trailing action from `CHOICE_ROW_FIT`, else two columns (an odd last
- * choice spans both) with the action under them. Labels wrap; a column's
- * label room is checked so a wrapped label is counted.
- */
-export function choiceRowHeight(scene: Scene, w: number): number {
+export function dockAt(scene: Scene, width: number, variant: Variant): number {
   const s = dockStrings(scene)
-  const one = w >= CHOICE_ROW_FIT
-  const col = one
-    ? Math.min(LK_CHOICE_WIDTH, (w - TRAILING_WIDTH - MAX_CHOICES * CHOICE.gap) / MAX_CHOICES)
-    : w < CHOICE_ONE_COLUMN_BELOW
-      ? w
-      : (w - CHOICE.gap) / 2
-  const room = col - LK_CHOICE_CHROME
-  const rowOf = (labels: string[]) =>
-    Math.max(TARGET_PX, ...labels.map((l) => CHOICE_PAD + lines(l, room, GLYPH.caption) * CHOICE_LINE))
+  const mono = scene === 'wrapper'
+  const wide = variant === 'wide'
   let worst = 0
   for (const set of s.choiceSets) {
     const labels = set.map((c) => c.label)
-    if (one) worst = Math.max(worst, rowOf(labels))
-    else {
-      const per = w < CHOICE_ONE_COLUMN_BELOW ? 1 : 2
-      let h = 0
-      for (let i = 0; i < labels.length; i += per) h += (i ? CHOICE.gap : 0) + rowOf(labels.slice(i, i + per))
-      worst = Math.max(worst, h + CHOICE.gap + ACTION_ROW)
-    }
+    const g = choiceGeometry(labels, mono, TRAILING_WIDTH)
+    const oneRow = width >= Math.max(g.rowWide, WIDE_MIN)
+    const side = wide
+      ? width - CHOICE.textGap - 8 - (oneRow ? g.n * g.col + g.n * CHOICE.gap + g.trail : 2 * g.col + CHOICE.gap)
+      : width
+    // The note shares the prompt's line when both fit (Q15), else wraps under it.
+    const prompt = maxOf(
+      s.prompts.map((t) => {
+        const n = lines(t, side, GLYPH.prompt)
+        const inline = n === 1 && [...t].length * GLYPH.prompt + 16 + sansWidth(s.lastTime, 12) <= side
+        return n * PROMPT_LINE + (inline ? 0 : lines(s.lastTime, side, GLYPH.note) * LAST_TIME_LINE)
+      }),
+    )
+    // The verdict (two short sentences, F2 ruling 2) with its tally under it.
+    const verdict =
+      maxOf(s.reveals.map((r) => lines(`${r.lead} ${r.rule}`.trim(), side, GLYPH.caption) * BODY_LINE)) +
+      lines(s.tally, side, GLYPH.note) * LAST_TIME_LINE
+    const text = Math.max(prompt, verdict)
+    const choices = choicesHeight(labels, width, wide, mono, TRAILING_WIDTH)
+    worst = Math.max(worst, wide ? Math.max(text, choices) : text + CHOICE.textGap + choices)
   }
   return worst
-}
-
-export function dockModes(variant: Variant, scene: Scene) {
-  const s = dockStrings(scene)
-  const w = MIN_TEXT_WIDTH[variant]
-  const text = Math.max(
-    maxOf(s.prompts.map((t) => lines(t, w, GLYPH.prompt))) * PROMPT_LINE +
-      lines(s.lastTime, w, GLYPH.note) * LAST_TIME_LINE,
-    maxOf(s.reveals.map((r) => revealTextHeight(r, w))) + LAST_TIME_LINE,
-  )
-  const choices = choiceRowHeight(scene, w)
-  // The text (question or verdict, with its note line), then the choice row.
-  return { text, choices, dock: text + BLOCK_GAP + choices }
 }
 
 export type ListKeysMetrics = {
@@ -320,40 +269,46 @@ export type ListKeysMetrics = {
   total: number
 }
 
-export function listKeysMetrics(scene: Scene = 'list'): PerVariant<ListKeysMetrics> {
-  const m = (variant: Variant): ListKeysMetrics => {
-    // The title only: each preset is one scene (D17).
-    const header = headerHeight(1, variant)
-    const stage = STAGE[variant]
-    const dock = dockModes(variant, scene).dock
-    const footer = FOOTER[variant]
-    const total =
-      2 * FRAME.border +
-      2 * FRAME.padding +
-      header +
-      GAPS.header +
-      stage +
-      GAPS.dock +
-      dock +
-      GAPS.footer +
-      footer
-    return { header, stage, dock, footer, total }
-  }
-  return { narrow: m('narrow'), wide: m('wide') }
+/**
+ * The frame laid out at content width `width` (px at the default root) in
+ * `variant`. The stage is fixed per variant (stacked below `STACK_BELOW`,
+ * very large text); the title, the dock and the footer wrap with the width
+ * (Q16: the text-scaled part).
+ */
+export function listKeysMetricsAt(scene: Scene, width: number, variant: Variant): ListKeysMetrics {
+  const title = scene === 'list' ? TITLE : WRAPPER_TITLE
+  // The title only: each preset is one scene (D17).
+  const header = headerHeight(1, variant, titleLines(title, width))
+  const stage = variant === 'narrow' && width < STACK_BELOW ? STAGE_STACKED : STAGE[variant]
+  const dock = dockAt(scene, width, variant)
+  const footer =
+    variant === 'wide' ? FOOTER.wide : TARGET_PX + lines(RECORDED_LINE, width, GLYPH.note) * typeScale.provenance.line
+  const total =
+    2 * FRAME.border + 2 * FRAME.padding + header + GAPS.header + stage + GAPS.dock + dock + GAPS.footer + footer
+  return { header, stage, dock, footer, total }
 }
 
-/** The lazy mount's placeholder: the taller scene (the list), per variant. */
+/** Per variant: narrow at a 375 px phone (`BANDS.phone`), wide at 768. */
+export function listKeysMetrics(scene: Scene = 'list'): PerVariant<ListKeysMetrics> {
+  return { narrow: listKeysMetricsAt(scene, BANDS.phone, 'narrow'), wide: listKeysMetricsAt(scene, MIN_TEXT_WIDTH.wide, 'wide') }
+}
+
+/**
+ * The lazy mount's reserve for one scene, in the step-throughs' band format
+ * (H3 R2 Q16): [narrow, wide, small, tight, tighter] frame heights in px at
+ * the default root, each narrow band laid out at its narrowest width.
+ */
+export function listKeysBands(scene: Scene): readonly [number, number, number, number, number] {
+  const at = (w: number) => listKeysMetricsAt(scene, w, 'narrow').total
+  return [at(BANDS.phone), listKeysMetricsAt(scene, MIN_TEXT_WIDTH.wide, 'wide').total, at(BANDS.small), at(BANDS.tight), at(BANDS.tighter)]
+}
+
+/** The lazy mount's placeholder without a preset: the taller scene (the list), per variant. */
 export function listKeysFootprint(): readonly [number, number] {
   const a = listKeysMetrics('list')
   const b = listKeysMetrics('wrapper')
   return [Math.max(a.narrow.total, b.narrow.total), Math.max(a.wide.total, b.wide.total)]
 }
-
-/** The longest choice label, for the choice grid's minimum width. */
-export const LONGEST_CHOICE = Math.max(
-  NONE_LABEL.length,
-  ...Object.values(ITEMS).map((i) => i.text.length),
-)
 
 /**
  * The strings the measured dock keeps as invisible ghosts (D15) for one

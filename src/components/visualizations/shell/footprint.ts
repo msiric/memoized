@@ -77,12 +77,8 @@ export const BAND_ORDER: readonly Band[] = ['phone', 'small', 'tight', 'tighter'
  */
 export const GLYPH = { caption: 7.2, prompt: 8.4, note: 6.2 } as const
 
-/**
- * Checkpoint geometry lives in `primitives/choice-geometry.ts` (one model for
- * both visuals, Q4). `sideGap` stays for the list-keys dock until it adopts
- * the shared block.
- */
-export const CHOICE = { ...CHOICE_GEOMETRY, sideGap: 16 } as const
+/** Checkpoint geometry lives in `primitives/choice-geometry.ts` (one model for every visual, Q4). */
+export const CHOICE = CHOICE_GEOMETRY
 /** The checkpoint's "Skip" text button (44 px target, about 52 px wide at 14/500). */
 export const SKIP_WIDTH = CHOICE_GEOMETRY.skip
 

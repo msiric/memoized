@@ -423,9 +423,18 @@
  * visual. Under reduced motion they appear at once.
  */
 @keyframes vz-land-in { from { opacity: 0; } }
-.vz-land-in { animation: vz-land-in theme('vz.land') theme('vz.ease') backwards; }
+.vz-land-in { animation: vz-land-in theme('vz.land') theme('vz.ease') var(--vz-land-delay, 0s) backwards; }
+/*
+ * A visual whose verdict lands on a later beat (list keys: `BEAT.verdict`
+ * after the last landing) sets `--vz-land-delay`; what the mark replaces
+ * (the choice's numeral) stays until that beat, then goes at once, so the
+ * slot is never blank and two glyphs never crossfade (M15).
+ */
+@keyframes vz-land-out { to { opacity: 0; } }
+.vz-land-out { animation: vz-land-out 0s var(--vz-land-delay, 0s) forwards; }
 @media (prefers-reduced-motion: reduce) {
   .vz-land-in { animation: none; }
+  .vz-land-out { display: none; }
 }
 /*
  * Q17: browsers without size container queries (Safari before 16, Firefox

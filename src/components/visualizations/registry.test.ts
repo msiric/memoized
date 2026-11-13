@@ -32,7 +32,7 @@ describe('visualization registry', () => {
       )
       expect(Object.keys(statics!)[0]).toBe(d.defaultPreset)
     } else expect(statics).toBeUndefined()
-    if (d.form === 'step') {
+    if (d.form === 'step' || d.form === 'explorable') {
       // Per preset (R2), default first: the placeholder reserves the preset it will render.
       expect(JSON.parse(JSON.stringify(steps)), 'update entry-table.ts').toEqual(
         JSON.parse(JSON.stringify(vizStepFootprints(id))),

@@ -20,7 +20,7 @@ export type VizEntry = readonly [
    */
   statics?: Record<string, readonly [number, number, number]>,
   /**
-   * Step-throughs only: heights per preset, default first (R2: every
+   * Step-throughs and explorables: heights per preset, default first (R2: every
    * reserved band is sized to the preset on screen): [narrow, wide, small,
    * tight, tighter], the frame laid out at the narrowest content width of
    * each band (H3 R2 Q16: a 375 phone, 768, a 320 phone, and very large
@@ -46,5 +46,18 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     572,
     { 'var-vs-let-loop': [890, 572, 548], 'factory-calls-vs-aliases': [830, 550, 526] },
   ],
-  'list-keys': [() => import('./engines/list-keys'), 870, 582],
+  'list-keys': [
+    () => import('./engines/list-keys'),
+    878,
+    594,
+    undefined,
+    {
+      'index-insert-top': [878, 594, 890, 1118, 1222],
+      'id-insert-top': [878, 594, 890, 1118, 1222],
+      'index-delete-first': [878, 594, 890, 1118, 1222],
+      'index-append': [878, 594, 890, 1118, 1222],
+      'random-key': [878, 594, 890, 1118, 1222],
+      'parent-type-change': [786, 562, 826, 1030, 1118],
+    },
+  ],
 }

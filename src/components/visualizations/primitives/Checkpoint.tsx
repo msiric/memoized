@@ -48,6 +48,8 @@ export type CheckpointBlockProps = {
   className?: string
   /** A ghost block: no part names, no live hooks. */
   ghost?: boolean
+  /** The trailing cell's width when a wider action takes Skip's place (`choiceGeometry`). */
+  trail?: number
 }
 
 export function CheckpointBlock({
@@ -60,9 +62,10 @@ export function CheckpointBlock({
   choicesProps,
   className,
   ghost = false,
+  trail,
 }: CheckpointBlockProps) {
   const scope = useId().replace(/:/g, '')
-  const g = choiceGeometry(labels, mono)
+  const g = choiceGeometry(labels, mono, trail)
   return (
     <div
       data-vz-cp={scope}

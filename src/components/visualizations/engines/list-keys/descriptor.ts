@@ -17,7 +17,7 @@ import {
   wrapperOutcomeSentence,
   wrapperPrompt,
 } from './content'
-import { listKeysFootprint } from './layout'
+import { listKeysBands, listKeysFootprint } from './layout'
 import {
   ACTION_LABEL,
   BEFORE,
@@ -322,4 +322,5 @@ export const listKeysDescriptor: ExplorableDescriptor<ListKeysLogState> = {
   defaultPreset: DEFAULT_PRESET,
   since: '2026-11',
   footprint: listKeysFootprint(),
+  bands: Object.fromEntries(PRESET_CONFIGS.map((p) => [p.id, listKeysBands(p.scene)])),
 }

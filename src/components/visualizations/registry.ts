@@ -90,11 +90,15 @@ export function vizFootprint(id: string, preset?: string): readonly [number, num
   return [narrow, wide] as const
 }
 
-/** Per-preset footprints of a step-through (R2), default first (the entry table's fifth slot): [narrow, wide, small, tight, tighter] (Q16). */
+/**
+ * Per-preset footprints of a step-through (R2) or an explorable, default
+ * first (the entry table's fifth slot): [narrow, wide, small, tight,
+ * tighter] (Q16).
+ */
 export function vizStepFootprints(id: string): Record<string, readonly number[]> | undefined {
   const d = descriptorFor(id)
-  if (d?.form !== 'step') return undefined
-  const all = presetFootprints(d)
+  if (d?.form !== 'step' && d?.form !== 'explorable') return undefined
+  const all: Record<string, readonly number[]> = d.form === 'step' ? presetFootprints(d) : d.bands
   return { [d.defaultPreset]: all[d.defaultPreset], ...all }
 }
 

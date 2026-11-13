@@ -155,9 +155,7 @@ export function feedbackLead(
 /** `key={i}`-style label for the status bar and narration. */
 export const keyPhrase = (k: KeyStrategy) => `key={${KEY_EXPR[k]}}`
 
-/** The dock's one secondary action per phase (H3 R4): a muted Skip, then "Try another". */
-export const SKIP_LABEL = 'Skip'
-/** Skip's accessible name, as the event loop's. */
+/** The dock's one secondary action per phase (H3 R4): the shared Skip, then "Try another". Skip's accessible name, as the event loop's. */
 export const SKIP_NAME = 'Skip, show me'
 /** With nothing checked there is no prediction to skip. */
 export const SHOW_LABEL = 'Show me'

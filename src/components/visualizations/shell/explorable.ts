@@ -22,4 +22,10 @@ export type ExplorableDescriptor<S> = {
   since: string
   /** Reserved [narrow, wide] frame heights in px, the maximum over every state. */
   footprint: readonly [narrow: number, wide: number]
+  /**
+   * The lazy mount's reserve per preset, in the step-throughs' band format
+   * (H3 R2 Q16): [narrow, wide, small, tight, tighter], so the placeholder
+   * holds at any text size.
+   */
+  bands: Record<string, readonly [number, number, number, number, number]>
 }
