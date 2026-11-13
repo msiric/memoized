@@ -116,6 +116,30 @@ describe.each(cases)('environment-records %s', (_name, data, variant) => {
           expect(t.node, t.edge).toBe(t.edge!.slice(t.edge!.indexOf(':') + 1))
   })
 
+  it('keeps the hatch out of every run of text in an unused record (R16)', () => {
+    const html = renderToStaticMarkup(<EnvRecordsStage data={data} uid="x" />)
+    const unused = scene.sections.flatMap(({ scenes }) => scenes.flatMap((s) => s.boxes.filter((b) => b.unused)))
+    for (const b of unused) {
+      const g = html.match(new RegExp(`<g data-node="${b.id}" class="vz-m">([\\s\\S]*?)</g>`))![1]
+      const plates = [...g.matchAll(/M([\d.]+) ([\d.]+)h([\d.]+)v([\d.]+)/g)].map((m) => m.slice(1).map(Number))
+      const texts = [...g.matchAll(/<text x="([\d.]+)" y="([\d.]+)"[^>]*>([^<]+)<\/text>/g)]
+      expect(texts.length).toBeGreaterThan(0)
+      expect(plates).toHaveLength(texts.length)
+      // The plate is drawn after the hatch and before the text.
+      expect(g.indexOf('class="vz-p"')).toBeGreaterThan(g.indexOf('url(#'))
+      expect(g.indexOf('class="vz-p"')).toBeLessThan(g.indexOf('<text'))
+      texts.forEach((m, i) => {
+        const [x, y, text] = [Number(m[1]), Number(m[2]), m[3]]
+        const size = m[0].includes('vz-t') || m[0].includes('vz-12') ? SIZE.header : SIZE.value
+        const [px, py, pw, ph] = plates[i]
+        expect(px).toBeLessThanOrEqual(x - 1)
+        expect(px + pw).toBeGreaterThanOrEqual(x + textWidth(text, size) + 1)
+        expect(py).toBeLessThanOrEqual(y - 0.75 * size)
+        expect(py + ph).toBeGreaterThanOrEqual(y + 0.2 * size)
+      })
+    }
+  })
+
   it('rests every link in the line role: lime is only the traced path (R1)', () => {
     const html = renderToStaticMarkup(<EnvRecordsStage data={data} uid="x" />)
     const markup = html.replace(/<style>[\s\S]*?<\/style>/, '')

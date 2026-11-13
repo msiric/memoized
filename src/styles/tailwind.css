@@ -346,8 +346,8 @@
   .vz-hit { fill: transparent; }
   /* A row a function can read: clear until traced, then the lime tint. */
   .vz-rt { color: transparent; fill: currentColor; fill-opacity: theme('vz.readTint'); }
-  /* An unused record's text is knocked out of its hatch (R16), on screen and paper. */
-  .vz-u text { @apply stroke-zinc-800 print:stroke-white; paint-order: stroke; stroke-width: theme('vz.knockout'); stroke-linejoin: round; }
+  /* The clear plates under an unused record's text, in the glyph fill: the hatch never runs through a letter (R16). */
+  .vz-p { @apply fill-zinc-800 print:fill-white; }
   /*
    * A link's label (`env`, `outer`): muted text at rest; it takes the lit
    * colour with its link (R2M-14), through `color` like the link itself.
