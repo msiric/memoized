@@ -11,15 +11,20 @@ const PATH_MS = tween(motion.path.full)
  *
  * Local values, each traced to a decision; none is a new role. Merge note
  * (H3 F2): when tokens-v3 carries the shared reveal timing (F1, R5), point
- * `VERDICT_FADE_MS` at it, and set `reveal.ride.ease` to `EASE` there.
+ * `VERDICT_FADE_MS` at it.
  */
 export const RIDE = {
   /** The travel, before the settle. Shortened when two checks ride, so the whole moment stays inside `reveal.maxMs`. */
   travelMs: 360,
   /** H3 R6: a single 120 ms settle on landing (the stage `highlight` duration). */
   settleMs: HIGHLIGHT_MS,
-  /** H3 R6: the rider and the lines share one easing, the stage curve. */
-  ease: EASE,
+  /**
+   * H3 R6: the rider and the lines share one easing, the reveal's own ride
+   * curve (the platform's ease-in-out, `reveal.ride.ease`). The stage curve
+   * (`EASE`) spends half its time on the last few pixels, which left the
+   * rider visibly parked for 200 ms before its settle.
+   */
+  ease: reveal.ride.ease,
   /** The rider lifts this much (scale) with the lift shadow (D6) while it travels. */
   liftScale: 0.12,
   /** Shortest travel when the budget forces it shorter. */

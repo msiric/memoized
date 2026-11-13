@@ -279,18 +279,22 @@ export function RevealDirector({
       if (plan.end) track(plan.end.animate([{ opacity: 0 }, { opacity: 1 }], { ...SNAP, delay: arrive }))
     })
 
-    // Lines nothing rides: drawn on the first rider's timing.
+    // Lines nothing rides draw as if a check rode them from a box at the
+    // same inset, so a line of the same length arrives at the same moment.
+    const inset = ridden[0]?.lead ?? 17 * k
     for (const plan of plans) {
       if (ridden.includes(plan)) continue
+      const total = 2 * inset + plan.line
       const dash: Keyframe[] = []
       for (let j = 0; j <= SAMPLES; j++) {
-        const x = j / SAMPLES
-        const drawn = EASE_FN.at(x)
-        dash.push({ offset: x, strokeDashoffset: String(drawn >= 1 ? 0 : 1.001 - drawn) })
+        const u = j / SAMPLES
+        const drawn = Math.min(1, Math.max(0, (u * total - inset) / (plan.line || 1)))
+        dash.push({ offset: EASE_FN.when(u), strokeDashoffset: String(drawn >= 1 ? 0 : 1.001 - drawn) })
       }
       if (plan.draw) track(plan.draw.animate(dash, { duration: travel, fill: 'both' }))
-      if (plan.end) track(plan.end.animate([{ opacity: 0 }, { opacity: 1 }], { ...SNAP, delay: travel }))
-      arrivals.push({ at: travel, row: plan.ride.to })
+      const arrive = EASE_FN.when((inset + plan.line) / total) * travel
+      if (plan.end) track(plan.end.animate([{ opacity: 0 }, { opacity: 1 }], { ...SNAP, delay: arrive }))
+      arrivals.push({ at: arrive, row: plan.ride.to })
     }
 
     // Stubs (mounted, unmounted) fade in with the lines.

@@ -80,12 +80,15 @@ export function TextGhosts({ scene }: { scene: Scene }) {
   )
 }
 
-/** The live text in the ghosts' cell. */
+/**
+ * The live text in the ghosts' cell: on its own row (narrow) it sits on the
+ * choices under it; beside them (wide) it starts level with the first row.
+ */
 export function TextCell({ scene, children }: { scene: Scene; children: ReactNode }) {
   return (
     <div className={DOCK.text}>
       <TextGhosts scene={scene} />
-      <div className={clsx(cell, 'min-w-0 self-end')}>{children}</div>
+      <div className={clsx(cell, 'min-w-0 self-end vz-wide:self-start')}>{children}</div>
     </div>
   )
 }

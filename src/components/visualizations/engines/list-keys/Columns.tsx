@@ -112,13 +112,19 @@ export function Columns({ s, interactive, gate, view, dispatch }: ColumnsProps) 
     const measure = () => {
       const k = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
       const w = Math.round((el.offsetWidth / k) * 10) / 10
-      const stacked = getComputedStyle(el).getPropertyValue('--lk-stacked').trim() === '1'
+      // Stacked when the After block sits under the Before block (the
+      // container query in `stack-css.ts` decides; this reads its result).
+      const root = rootRef.current
+      const before = root?.querySelector<HTMLElement>('[data-lk-area="before"]')
+      const after = root?.querySelector<HTMLElement>('[data-lk-area="after"]')
+      const stacked = Boolean(before && after && after.offsetTop > before.offsetTop + 1)
       setBox((b) => (b.w === w && b.k === k && b.stacked === stacked ? b : { w, k, stacked }))
     }
     measure()
     if (typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(measure)
     ro.observe(el)
+    if (rootRef.current) ro.observe(rootRef.current)
     return () => ro.disconnect()
   }, [])
 

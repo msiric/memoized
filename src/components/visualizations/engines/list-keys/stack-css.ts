@@ -1,5 +1,5 @@
 import { rem } from '../../shell/vars'
-import { CARD, COLUMNS, COLUMNS_HEIGHT, STACKED_HEIGHT, STACK_BELOW, STAGE_STACKED } from './layout'
+import { BEFORE_BLOCK, CARD, COLUMNS, COLUMNS_HEIGHT, STACKED_HEIGHT, STACK_BELOW, STAGE_STACKED } from './layout'
 
 /**
  * The columns' two layouts, chosen by the frame's width in rem (a container
@@ -26,15 +26,13 @@ export const stackCss =
   `${F} [data-lk-area=after]{grid-area:1/3}` +
   `${F} [data-lk-flip]{flex-direction:row}` +
   `${F} [data-lk-spine=after]{border-left-width:${edge};border-right-width:0}` +
-  `${F} [data-lk-lines]{--lk-stacked:0}` +
   `@container vz (max-width:${rem(STACK_BELOW - 0.02)}){` +
-  `${F} [data-lk-cols]{grid-template-columns:minmax(0,1fr) ${rem(COLUMNS.rail)};grid-template-rows:auto auto;row-gap:${rem(COLUMNS.stackGap)};height:${rem(STACKED_HEIGHT)}}` +
+  `${F} [data-lk-cols]{grid-template-columns:minmax(0,1fr) ${rem(COLUMNS.rail)};grid-template-rows:${rem(BEFORE_BLOCK)} ${rem(COLUMNS_HEIGHT)};row-gap:${rem(COLUMNS.stackGap)};height:${rem(STACKED_HEIGHT)}}` +
   `${F} [data-lk-area=after]{grid-area:2/1}` +
   `${F} [data-lk-area=lines]{grid-area:1/2/3/3}` +
   `${F} [data-lk-scene=wrapper]{grid-template-columns:minmax(0,1fr)}` +
   `${F} [data-lk-scene=wrapper] [data-lk-area=lines]{display:none}` +
   `${F} [data-lk-flip]{flex-direction:row-reverse}` +
   `${F} [data-lk-spine=after]{border-left-width:0;border-right-width:${edge}}` +
-  `${F} [data-lk-lines]{--lk-stacked:1}` +
   `${F} [data-lk-stage]{height:${rem(STAGE_STACKED)}}` +
   `}`
