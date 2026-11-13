@@ -52,6 +52,32 @@ keeps that HTML on hydration. The chunk is requested only after a client-side
 navigation. Each preset lists the programs it draws (verified output) and
 claims derived from its data, which `*.truth.test.ts` re-runs in Node.
 
+The closures figure's one interaction, tracing what a function remembers, is
+CSS the server writes per figure (`engines/env-records/paths.ts`), with no
+script and no dimming (G ruling 1):
+
+- **Who lights it.** Hover and keyboard focus (`:focus-visible`) where the
+  reader can hover; a tap (`:focus`) where they cannot. A second tap on the
+  lit function puts it down: while focused it lets taps through to the
+  figure, which cannot take focus, so the tap blurs it (R2M-16). Hover rules
+  stay out of touch browsers, which keep `:hover` on what was tapped. On
+  real iOS this relies on the figure counting as clickable (`cursor:
+  pointer` under `hover: none`); the e2e test covers emulated Chromium and
+  WebKit only.
+- **What lights.** The function, its link and that link's label (`data-o`
+  names the label's owner, R2M-14), the record, the row it reads, its
+  aliases. Links are labelled with one word at every width, `env` and
+  `outer` (the text alternative spells out `[[Environment]]`).
+- **Where.** Screen only: paper never shows a trace. In print the drawing
+  is one region (`break-inside: avoid` on the stage, the title kept with
+  it), so a frame may break before its caption or text alternative but
+  never through the drawing, whose height is fixed.
+- **Unused records** are hatched, with a clear plate under every run of
+  text (`platesPath` in `substrates/box-arrow.ts`), so the hatch never runs
+  through a letter (R16).
+- **No `:has()`** (Firefox before 121): the figure stays static and
+  complete; only the trace is missing.
+
 Adding a visual: write the logs (record `observed.log` from a real run; the
 truth test re-runs it), a descriptor and a stage, register it in
 `registry.ts`, `registry.server.tsx` and `entry-table.ts` (the registry test
