@@ -30,8 +30,9 @@ export const feedbackLeadCls = cn('font-semibold', ink.base)
 
 /**
  * Feedback after a prediction (R4, drift X05): one style in every visual. The
- * caption, led by a semibold zinc-100 verdict. Ghost copies (for reserved
- * height) must use this same markup, so they wrap exactly like the live one.
+ * caption, led by a semibold zinc-100 verdict when there is one. Ghost copies
+ * (for reserved height) must use this same markup, so they wrap exactly like
+ * the live one.
  */
 export function Feedback({
   lead,
@@ -41,8 +42,9 @@ export function Feedback({
 }: HTMLAttributes<HTMLParagraphElement> & { lead: ReactNode; body?: ReactNode }) {
   return (
     <p className={cn(captionCls, className)} {...rest}>
-      <span className={feedbackLeadCls}>{lead}</span>
-      {body ? <> {body}</> : null}
+      {lead ? <span className={feedbackLeadCls}>{lead}</span> : null}
+      {lead && body ? ' ' : null}
+      {body}
     </p>
   )
 }

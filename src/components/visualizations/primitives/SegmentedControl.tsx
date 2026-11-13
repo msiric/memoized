@@ -17,8 +17,8 @@ import { focusRing, focusRingGroup, transitionCls, type as typeScale } from './t
  * Semantics: a `radiogroup` with one tab stop (roving tabindex). Arrow keys
  * move and select, Home and End jump.
  *
- * Fallback (A2): four or more options, or segments wider than the room the
- * control is given, render a native select styled like the platform `Select`
+ * Fallback (A2): more than `maxSegments` options (default 3), or segments
+ * wider than the room the control is given, render a native select styled like the platform `Select`
  * (`src/components/Select.tsx`: outlined, rounded-lg, the chevron). The room
  * is decided by CSS alone: the control is a size container, and a container
  * query at the segments' modelled width (`segmentedWidth`, in rem, so larger
@@ -37,6 +37,16 @@ export type SegmentedControlProps = {
   label: string
   interactive?: boolean
   className?: string
+  /**
+   * The most options drawn as segments (default 3); more always render the
+   * select. Raise it where every option must stay visible when it fits (the
+   * list-keys action, H3 R8): the container query still decides.
+   */
+  maxSegments?: number
+  /** Per-option attributes on each segment (harness hooks, focus handover). */
+  optionProps?: (o: SegmentedOption, i: number) => Record<string, string>
+  /** Attributes on the fallback select. */
+  selectProps?: Record<string, string>
 }
 
 export function SegmentedControl({
@@ -46,6 +56,9 @@ export function SegmentedControl({
   label,
   interactive = true,
   className,
+  maxSegments = 3,
+  optionProps,
+  selectProps,
 }: SegmentedControlProps) {
   const refs = useRef<(HTMLButtonElement | null)[]>([])
   const uid = useId()
@@ -56,6 +69,7 @@ export function SegmentedControl({
       <select
         aria-label={label}
         data-viz-own-keys
+        {...selectProps}
         disabled={!interactive}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
@@ -90,7 +104,7 @@ export function SegmentedControl({
     </span>
   )
 
-  if (options.length > 3) return <div className={cn('flex min-w-0', className)}>{fallback}</div>
+  if (options.length > maxSegments) return <div className={cn('flex min-w-0', className)}>{fallback}</div>
 
   // From this container width (rem) the segments fit; below it, the select.
   const fit = segmentedWidth(options.map((o) => o.label)) / 16
@@ -150,6 +164,7 @@ export function SegmentedControl({
                 onClick={() => interactive && onChange(i)}
                 onKeyDown={(e) => onKey(e, i)}
                 data-segment={p.id}
+                {...optionProps?.(p, i)}
                 className="group relative flex h-11 min-w-11 items-center outline-none"
               >
                 <span

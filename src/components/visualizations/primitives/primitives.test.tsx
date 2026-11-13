@@ -104,6 +104,26 @@ describe('VDS primitives', () => {
     const options = ['a', 'b', 'c', 'd'].map((id) => ({ id, label: id }))
     const html = renderToStaticMarkup(<SegmentedControl label="x" options={options} value={0} onChange={() => {}} />)
     expect(html).toContain('<select')
+    expect(html).not.toContain('role="radiogroup"')
+  })
+
+  it('SegmentedControl: maxSegments keeps four options as segments where they fit, with per-option and select attributes', () => {
+    const options = ['a', 'b', 'c', 'd'].map((id) => ({ id, label: id }))
+    const html = renderToStaticMarkup(
+      <SegmentedControl
+        label="x"
+        options={options}
+        value={0}
+        onChange={() => {}}
+        maxSegments={4}
+        optionProps={(o) => ({ 'data-viz-focus': `action-${o.id}` })}
+        selectProps={{ 'data-viz-part': 'segments-select' }}
+      />,
+    )
+    expect(html.match(/role="radio"/g)).toHaveLength(4)
+    expect(html).toContain('data-viz-focus="action-d"')
+    expect(html).toContain('data-viz-part="segments-select"')
+    expect(html).toContain('@container (min-width:')
   })
 
   it('SegmentedControl: segments wider than their room fall back to a select, by container query in rem (A2)', () => {
