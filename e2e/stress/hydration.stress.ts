@@ -48,7 +48,11 @@ async function zoomText(page: Page, c: Config, url: string) {
   await page.route(`${BASE}${url}`, async (route) => {
     const r = await route.fetch()
     const body = (await r.text()).replace('</head>', `<style>html{font-size:${c.rootFont}!important}</style></head>`)
-    await route.fulfill({ response: r, body })
+    // The body is decoded and longer now: drop the original length and encoding.
+    const headers = { ...r.headers() }
+    delete headers['content-length']
+    delete headers['content-encoding']
+    await route.fulfill({ status: r.status(), headers, body })
   })
 }
 

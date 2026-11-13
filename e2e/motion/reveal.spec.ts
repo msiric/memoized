@@ -48,6 +48,12 @@ function revealParts(ms: ElementMotion[]): Part[] {
     })
 }
 
+/**
+ * One 60 Hz frame: `end` is the timestamp of the last sampled frame that
+ * changed, up to one frame after the change itself (the full matrix saw
+ * 805 ms for a plan that ends inside 800 in the Linux image).
+ */
+const FRAME_MS = 17
 const report: Record<string, unknown> = {}
 test.afterAll(() => save('reveal.json', report))
 
@@ -117,7 +123,7 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
     else if (outs.length && recap[0].start < Math.max(...outs.map((o) => o.end)) - 34)
       problems.push(`the recap lands at ${recap[0].start} ms, before the playback ends`)
     const end = Math.max(...parts.map((p) => p.end))
-    if (end > REVEAL_TOKEN.maxMs) problems.push(`the reveal ends at ${end} ms`)
+    if (end > REVEAL_TOKEN.maxMs + FRAME_MS) problems.push(`the reveal ends at ${end} ms`)
     strictCheck(`${preset}@${width}: reveal sequence`, problems)
     await expect(page.locator(EL).getByRole('button', { name: 'Replay' })).toBeVisible()
     // Choice 2 at each question: B (right) and C (right); micro 2 (wrong) and micro 2 (right).
@@ -273,7 +279,7 @@ for (const [key, action, both, expectRides] of [
     for (const v of verdict)
       if (v.start < lastLanding - 34) problems.push(`the verdict starts at ${v.start} ms, before the landing at ${lastLanding} ms`)
     const end = Math.max(...parts.map((p) => p.end))
-    if (end > REVEAL_TOKEN.maxMs) problems.push(`the reveal ends at ${end} ms`)
+    if (end > REVEAL_TOKEN.maxMs + FRAME_MS) problems.push(`the reveal ends at ${end} ms`)
     await expect(f.locator('[data-viz-reveal="rider"]')).toHaveCount(0)
     for (const [, to] of expectRides) await expect(f.locator(`[data-row="${to}"]`)).toHaveAttribute('data-checked', 'true')
     strictCheck(`list-keys ${key} ${action}: ride`, problems)
