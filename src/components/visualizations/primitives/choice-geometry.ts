@@ -92,8 +92,11 @@ export function choicesHeight(
     return rowHeight(Math.max(...labels.map((l) => choiceLines(l, colW, mono))))
   }
   const colW = wide ? g.col : (width - CHOICE.gap) / 2
-  const cells = [...labels.map((l) => choiceLines(l, colW, mono)), 1]
+  // The trailing action takes the next free cell, or its own row where a column cannot hold it.
+  const own = colW < g.trail
+  const cells = labels.map((l) => choiceLines(l, colW, mono))
+  if (!own) cells.push(1)
   let h = 0
   for (let r = 0; r < cells.length; r += 2) h += rowHeight(Math.max(cells[r], cells[r + 1] ?? 1)) + (r ? CHOICE.gap : 0)
-  return h
+  return own ? h + CHOICE.gap + CHOICE.height : h
 }

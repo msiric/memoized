@@ -170,8 +170,11 @@ export function checkpointCss(scope: string, g: ChoiceGeometry): string {
   const oneNarrow = `${sel}{grid-template-columns:repeat(${g.n},minmax(0,1fr)) auto}`
   const twoWide = `${sel}{grid-template-columns:repeat(2,${rem(g.col)})}`
   const oneWide = `${sel}{grid-template-columns:repeat(${g.n},${rem(g.col)}) auto}`
+  // Two columns narrower than the trailing action (very large text): it takes its own row.
+  const trailRow = `@container vz (max-width:${rem(2 * g.trail + g.gap - 0.5)}){[data-vz-cp="${scope}"] [data-vz-skip]{grid-column:1/-1}}`
   return (
     two +
+    trailRow +
     `@container vz (max-width:37.874rem) and (min-width:${rem(g.rowNarrow)}){${oneNarrow}}` +
     `@container vz (min-width:37.875rem){${twoWide}}` +
     `@container vz (min-width:${rem(Math.max(g.rowWide, 606))}){${oneWide}}`
