@@ -12,7 +12,7 @@ const fn = (s: EnvSection, id: string) => {
 }
 
 describe('closures traced paths (D21, H3 R11)', () => {
-  it('lights the function, its [[Environment]] link, its record and the row it reads; the outer chain dims', () => {
+  it('lights the function, its [[Environment]] link, its record and the row it reads; the outer chain stays at rest', () => {
     const let_ = section('var-vs-let-loop', 'let')
     expect(pathParts(let_, fn(let_, 'f1'))).toEqual({
       lit: ['[data-node=f1]', '[data-edge="env:f1"]', '[data-o=f1]', '[data-node=it1]', '[data-node=it1] [data-b=i]'],
@@ -65,8 +65,10 @@ describe('closures traced paths (D21, H3 R11)', () => {
       const css = pathCss(p.data)
       const fns = p.data.sections.flatMap((s) => s.nodes.filter(isFunction))
       const [main, touch] = css.split('@media (hover:none)')
-      expect(main.match(/opacity:1;color/g)).toHaveLength(fns.length)
-      expect(touch.match(/opacity:1;color/g)).toHaveLength(fns.length)
+      expect(main.match(/\{color:var\(--vz-k\)/g)).toHaveLength(fns.length)
+      expect(touch.match(/\{color:var\(--vz-k\)/g)).toHaveLength(fns.length)
+      // G ruling 1: emphasis only; nothing is dimmed or faded.
+      expect(css).not.toMatch(/opacity/)
       expect(main).not.toMatch(/:focus[^-]/)
       // Every function's keyboard path yields to any hovered function.
       for (const f of fns)

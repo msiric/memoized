@@ -163,12 +163,12 @@ reduced motion, and it never moves the page. Elements that play it carry
   keyboard (`:focus-visible`) or tapping it on a device that cannot hover
   traces it in lime: the function, its `[[Environment]]` link, its record,
   the row its body reads (`reads` in the data, checked by the truth test)
-  and, in the factory preset, every name that refers to it. Everything else
-  dims. One path at a time: a hovered function wins over a keyboard focus,
+  and, in the factory preset, every name that refers to it. Nothing else
+  changes (emphasis only, G ruling 1). One path at a time: a hovered function wins over a keyboard focus,
   and a mouse click never sticks. A one-line hint names the gesture, and
   each function has a 45 px touch band (`HIT`). `engines/env-records/paths.ts`
   writes the per-figure rules; `.vz-s` in `tailwind.css` holds the rest
-  colours, the dim and the lit colours (`--vz-k`).
+  colours and the lit colours (`--vz-k`); nothing dims (G ruling 1).
 
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for

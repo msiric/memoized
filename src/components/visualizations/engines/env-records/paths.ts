@@ -7,11 +7,11 @@ import { isFunction, isRecord, resolve, type EnvDiagram, type EnvFunction, type 
  * `[[Environment]]` link, the record that link points to, the binding row
  * its body reads (`i 3`, `count 2`) and, in the factory preset, every name
  * that refers to it with its arrow. The rest of its lookup chain (outer
- * links and the records they reach) stays at full strength in its rest
- * colours; everything else dims to 40 %.
+ * links and the records they reach) and everything else keep their rest
+ * colours: emphasis only, nothing dims (G ruling 1, WCAG 1.4.3 and 1.4.11).
  *
  * No JavaScript: the server writes one small stylesheet per figure (these
- * rules); the rest colours, the dim and the lit colours live in
+ * rules); the rest colours and the lit colours live in
  * `src/styles/tailwind.css` (`.vz-s`). Only one path is lit at a time:
  * - a hovered function always wins;
  * - keyboard focus (`:focus-visible`, never a mouse click's `:focus`) lights
@@ -71,7 +71,7 @@ export type PathParts = {
  * record it points to, the row its body reads (and, when that row lies
  * further out, the outer links and records the lookup walks to reach it),
  * its output, and every name that refers to it with its arrow and row.
- * Everything else dims, the rest of the outer chain included.
+ * Everything else, the rest of the outer chain included, keeps its rest colours.
  */
 export function pathParts(section: EnvSection, fn: EnvFunction): PathParts {
   const lit = [node(fn.id), edge(`env:${fn.id}`), `[data-o=${q(fn.id)}]`, node(fn.env)]
@@ -105,8 +105,8 @@ export function pathSelectors(section: EnvSection, fn: EnvFunction): string[] {
 /** Ids are CSS identifiers, so the selectors need no quotes (the markup budget). */
 const safe = (id: string) => /^[A-Za-z_][\w-]*$/.test(id)
 
-/** Lit: full strength, the `now` colour, the glyph tint and the 2.5 px connector (tailwind.css `.vz-s`). */
-const LIT = '{opacity:1;color:var(--vz-k);--vz-t:var(--vz-kt);--vz-sw:2.5px}'
+/** Lit: the `now` colour, the glyph tint and the 2.5 px connector (tailwind.css `.vz-s`). */
+const LIT = '{color:var(--vz-k);--vz-t:var(--vz-kt);--vz-sw:2.5px}'
 
 /**
  * Per function, scoped to its section: the lit rule, plus a hold rule when
@@ -120,11 +120,11 @@ export function pathCss(data: EnvDiagram): string {
   for (const section of data.sections)
     for (const fn of section.nodes.filter(isFunction)) {
       if (!safe(section.id) || !safe(fn.id)) throw new Error(`env-records: unsafe id ${section.id}/${fn.id}`)
-      const { lit, hold } = pathParts(section, fn)
+      // The held outer chain needs no rule: nothing dims, so it stays at rest.
+      const { lit } = pathParts(section, fn)
       const s = `[data-viz-section=${section.id}] .vz-s`
       const f = `[data-node=${fn.id}]`
-      const rules = (at: string) =>
-        `${at} :is(${lit.join(',')})${LIT}` + (hold.length ? `${at} :is(${hold.join(',')}){opacity:1}` : '')
+      const rules = (at: string) => `${at} :is(${lit.join(',')})${LIT}`
       main.push(rules(`${s}:is(:has(${f}:hover),:not(:has([tabindex]:hover)):has(${f}:focus-visible))`))
       touch.push(rules(`${s}:has(${f}:focus)`))
     }

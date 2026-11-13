@@ -182,11 +182,16 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
   const fig = figure(page, 'factory-calls-vs-aliases')
   await fig.scrollIntoViewIfNeeded()
   const svg = fig.locator('[data-viz-section="counters"] svg:visible')
+  // G ruling 1: a trace emphasizes in lime and never dims. 'lit' is the lime
+  // `now` colour, 'rest' anything else, always at full opacity.
   const opacities = () =>
     svg.evaluate((el) => {
       const out: Record<string, string> = {}
-      for (const n of el.querySelectorAll('[data-node], [data-edge]'))
-        out[n.getAttribute('data-node') ?? n.getAttribute('data-edge')!] = getComputedStyle(n).opacity
+      for (const n of el.querySelectorAll('[data-node], [data-edge]')) {
+        const cs = getComputedStyle(n)
+        if (cs.opacity !== '1') throw new Error(`dimmed: ${n.outerHTML.slice(0, 60)}`)
+        out[n.getAttribute('data-node') ?? n.getAttribute('data-edge')!] = cs.color === 'rgb(163, 230, 53)' ? 'lit' : 'rest'
+      }
       return out
     })
   const boxes = () =>
@@ -197,15 +202,15 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
       }),
     )
   const rest = await boxes()
-  expect(Object.values(await opacities()).every((o) => o === '1')).toBe(true)
+  expect(Object.values(await opacities()).every((o) => o === 'rest')).toBe(true)
 
-  // Hover: fA's record, its env link and both names that alias it stay; the rest dims.
+  // Hover: fA, its env link and both names that alias it light; the rest stays at rest.
   await svg.locator('[data-node="fA"]').hover()
   await page.waitForTimeout(300)
   const hovered = await opacities()
-  for (const k of ['fA', 'env:fA', 'callA', 'module', 'ref:module.counter1', 'ref:module.sameCounter'])
-    expect(hovered[k], k).toBe('1')
-  for (const k of ['fB', 'env:fB', 'callB', 'ref:module.counter2']) expect(hovered[k], k).toBe('0.4')
+  for (const k of ['fA', 'env:fA', 'callA', 'ref:module.counter1', 'ref:module.sameCounter'])
+    expect(hovered[k], k).toBe('lit')
+  for (const k of ['module', 'fB', 'env:fB', 'callB', 'ref:module.counter2']) expect(hovered[k], k).toBe('rest')
   expect(await boxes(), 'nothing moves').toEqual(rest)
   // The other section is untouched.
   const account = fig.locator('[data-viz-section="account"] svg:visible [data-node="call"]')
@@ -213,7 +218,7 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
 
   await page.mouse.move(0, 0)
   await page.waitForTimeout(300)
-  expect(Object.values(await opacities()).every((o) => o === '1')).toBe(true)
+  expect(Object.values(await opacities()).every((o) => o === 'rest')).toBe(true)
 
   // Keyboard: functions are in the tab order, named, with the focus ring.
   await svg.locator('[data-node="fA"]').focus()
@@ -224,7 +229,7 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
   )
   await page.waitForTimeout(300)
   const focused = await opacities()
-  expect([focused.fB, focused.callB, focused['ref:module.counter2'], focused.fA]).toEqual(['1', '1', '1', '0.4'])
+  expect([focused.fB, focused.callB, focused['ref:module.counter2'], focused.fA]).toEqual(['lit', 'lit', 'lit', 'rest'])
   const ring = await svg
     .locator('[data-node="fB"] .vz-fb')
     .evaluate((n) => [getComputedStyle(n).outlineStyle, getComputedStyle(n).outlineWidth])
@@ -235,14 +240,14 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
   await svg.locator('[data-node="fA"]').hover()
   await page.waitForTimeout(300)
   const mixed = await opacities()
-  expect([mixed.fA, mixed.callA, mixed.fB, mixed.callB, mixed['ref:module.counter2']]).toEqual(['1', '1', '0.4', '0.4', '0.4'])
+  expect([mixed.fA, mixed.callA, mixed.fB, mixed.callB, mixed['ref:module.counter2']]).toEqual(['lit', 'lit', 'rest', 'rest', 'rest'])
   await page.evaluate(() => (document.activeElement as HTMLElement).blur())
 
   // A mouse click never sticks: after the pointer leaves, the figure is at rest.
   await svg.locator('[data-node="fB"]').click()
   await page.mouse.move(0, 0)
   await page.waitForTimeout(300)
-  expect(Object.values(await opacities()).every((o) => o === '1')).toBe(true)
+  expect(Object.values(await opacities()).every((o) => o === 'rest')).toBe(true)
 })
 
 test('rest is grey; the traced path is lime: function, link, record, the row it reads, its aliases (R1, R11)', async ({

@@ -103,16 +103,10 @@ export const gated = (c: Config) => STRICT && !c.recordOnly
  * ruling before they can be fixed. Each matches only its own rows; the rows
  * stay in the JSON (marked `pending`) and the test annotates them. Remove an
  * entry when the lead rules; the gate then fails until the visual is fixed.
- * - R11-dim: the closures trace dims the rest to 0.4, below 4.5:1 for text
- *   (also annotated by e2e/gates/contrast.spec.ts).
  * - R4-last-time: a choice carrying the "last time" tag keeps one label line
  *   in its 44 px row, so a label that needs two lines truncates.
  */
 export const PENDING: { id: string; match: (r: Row) => boolean }[] = [
-  {
-    id: 'R11-dim',
-    match: (r) => r.detector === 'contrast' && r.visual.startsWith('environment-records') && r.state.startsWith('hover'),
-  },
   {
     id: 'R4-last-time',
     match: (r) => r.detector === 'truncation' && /\[data-viz-part=viz-checkpoint\] \[data-choice=/.test(r.sig),

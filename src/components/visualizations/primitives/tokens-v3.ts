@@ -602,11 +602,11 @@ export const DASH = '4 4'
 export const DOT_R = 3
 
 /**
- * Opacity roles (R1 L09): `dim` is everything off the traced path while a
- * closures function is hovered or focused (H3 R11); `readTint` the lime
- * ground of the binding row a traced function reads.
+ * Opacity roles (R1 L09): `readTint` is the lime ground of the binding row a
+ * traced closures function reads. There is no dim role: a trace emphasizes,
+ * it never fades the rest (G ruling 1).
  */
-export const opacityRole = { dim: 0.4, readTint: 0.16 } as const
+export const opacityRole = { readTint: 0.16 } as const
 
 /** Minimum touch target (S: A5) and the gap between adjacent targets. */
 export const TARGET_PX = 44
@@ -750,7 +750,6 @@ export const vzTheme = {
   highlight: `${(motion.highlight.full as TweenToken).duration * 1000}ms`,
   ease: EASE_CSS,
   dash: DASH,
-  dim: String(opacityRole.dim),
   readTint: String(opacityRole.readTint),
   connector: `${strokeWidth.connector}px`,
   knockout: `${strokeWidth.knockout}px`,

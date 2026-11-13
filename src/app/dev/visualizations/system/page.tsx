@@ -76,11 +76,11 @@ export default function VisualizationSystemPage() {
         </div>
         {/* The substrates that live inside an engine (the console, the
             list-keys connectors and state chips, the closures roles and their
-            hover dim) are shown by the engines themselves: the visual gate
+            trace) are shown by the engines themselves: the visual gate
             (e2e/gates/visual.spec.ts) drives these to each state. */}
         <Prose className="mt-12" data-specimen="engines">
           <h2>Engines in their states</h2>
-          <p>The closures roles (glyph, header, hatch, edges, the traced path and its dim):</p>
+          <p>The closures roles (glyph, header, hatch, edges, the traced path):</p>
           <Viz id="environment-records" preset="factory-calls-vs-aliases" />
           <Viz id="environment-records" preset="var-vs-let-loop" />
           <p>The event loop (lanes, chips, the console and its finale):</p>

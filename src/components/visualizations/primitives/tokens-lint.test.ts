@@ -279,7 +279,7 @@ describe('token lint (VIZ-H WS1)', () => {
   })
 
   it('accepts token references in the stylesheet', () => {
-    const css = `${CSS_MARK} */\n.vz-a { opacity: theme('vz.dim'); stroke-width: var(--vz-sw, theme('vz.connector')); font-size: calc(12em / 13); }\n.vz-b { @apply fill-zinc-800 print:fill-white; --vz-k: theme('colors.lime.400'); }\n@keyframes x { from { opacity: 0; } }`
+    const css = `${CSS_MARK} */\n.vz-a { fill-opacity: theme('vz.readTint'); stroke-width: var(--vz-sw, theme('vz.connector')); font-size: calc(12em / 13); }\n.vz-b { @apply fill-zinc-800 print:fill-white; --vz-k: theme('colors.lime.400'); }\n@keyframes x { from { opacity: 0; } }`
     expect(lintCss('x.css', css)).toEqual([])
   })
 

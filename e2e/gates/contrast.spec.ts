@@ -33,29 +33,9 @@ const SCOPE = '[data-viz] section, [data-viz] figure, [data-viz-frame="system"]'
 
 const WIDTHS = [375, 1440] as const
 
-/**
- * OPEN DECISION, not an exemption class: the closures trace (H3 R11) dims
- * everything off the traced path to opacity 0.4 (`opacityRole.dim`), which
- * puts muted text at 2.2 to 3.5:1 and grey edges at 1.6:1 while a function is
- * hovered or focused. WCAG 1.4.3 and 1.4.11 have no exception for that; text
- * stays readable only from 0.85 and edges from 0.9. Until the lead rules
- * (keep the dim and accept it, or dim only to 0.85 to 0.9, or emphasize
- * without dimming), the crawl reports these pairs as annotations in the
- * one state that dims and still fails on anything else there. Remove this
- * when decided.
- */
-const PENDING_R11_DIM = { state: 'closures-hover', alpha: 0.45 }
-
-function failures(pairs: Pair[], state?: string) {
-  const pending = (p: Pair) => state === PENDING_R11_DIM.state && p.alpha <= PENDING_R11_DIM.alpha
-  const dimmed = pairs.filter((p) => !p.exempt && p.ratio < p.need - 0.005 && pending(p))
-  if (dimmed.length)
-    test.info().annotations.push({
-      type: 'pending decision (R11 dim)',
-      description: `${state}: ${dimmed.length} dimmed pairs below WCAG, lowest ${Math.min(...dimmed.map((p) => p.ratio)).toFixed(2)}:1`,
-    })
+function failures(pairs: Pair[]) {
   return pairs
-    .filter((p) => !p.exempt && !pending(p) && (p.kind === 'palette' || p.ratio < p.need - 0.005))
+    .filter((p) => !p.exempt && (p.kind === 'palette' || p.ratio < p.need - 0.005))
     .map((p) =>
       p.kind === 'palette'
         ? `off-token color ${p.fg}: "${p.text}" (${p.what})`
@@ -63,7 +43,7 @@ function failures(pairs: Pair[], state?: string) {
     )
 }
 
-async function audit(page: Page, where: string, focus = true, state?: string) {
+async function audit(page: Page, where: string, focus = true) {
   const pairs = await auditContrast(page, { scope: SCOPE, palette: PALETTE, codeColors: CODE_COLORS, focus })
   const exempt = pairs.filter((p) => p.exempt && p.ratio < p.need)
   if (exempt.length)
@@ -72,7 +52,7 @@ async function audit(page: Page, where: string, focus = true, state?: string) {
       description: `${where}: ${exempt.length} pairs on unavailable controls`,
     })
   expect(pairs.length, `${where}: the crawl found pairs`).toBeGreaterThan(10)
-  return failures(pairs, state).map((f) => `${where}: ${f}`)
+  return failures(pairs).map((f) => `${where}: ${f}`)
 }
 
 for (const width of WIDTHS) {
@@ -88,7 +68,7 @@ for (const width of WIDTHS) {
       const url = name.startsWith('closures') ? `${GALLERY}?static=1` : GALLERY
       await open(page, url, width)
       await drive(page)
-      problems.push(...(await audit(page, `${name} @${width}`, true, name)))
+      problems.push(...(await audit(page, `${name} @${width}`)))
     }
     expect(problems).toEqual([])
   })
