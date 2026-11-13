@@ -92,7 +92,10 @@ const moreCls = clsx(
 /** One chip (R7): 4 px corners, 28 px, content width up to 12 rem, the neutral glyph fill. */
 // 6 px inline padding: at Chrome's "Very large" text on a 375 phone, "cb micro 2"
 // keeps its whole label in a 2x2 lane (R9).
-const chipBase = clsx('h-7 max-w-48 px-1.5', radius.chip.cls, surface.glyph)
+// Under very large text on a phone the lane is narrower than the 320 design
+// width (the frame sits in the column, H3 R2 Q6): 12 px mono and 2 px
+// padding keep a whole ten-character label (R9).
+const chipBase = clsx('h-7 max-w-48 px-1.5 vz-tight:px-0.5 vz-tight:text-2xs', radius.chip.cls, surface.glyph)
 
 /** The lane's hue, on the chip's edge only (R1). */
 const chipEdge: Record<ChipKind, string> = {
@@ -228,7 +231,7 @@ export function Lane(props: LaneProps) {
         // heights; inline, 6 px and no border, so a chip keeps its whole
         // label at very large text on a phone (R9).
         // 6 px above and below on a phone, 8 from 768 (Q15: the phone fit).
-        'relative flex min-w-0 border-y border-transparent px-1.5 py-1.5 vz-wide:py-2',
+        'relative flex min-w-0 border-y border-transparent px-1.5 py-1.5 vz-wide:py-2 vz-tight:px-1',
         radius.row.cls,
         surface.panel,
         labelAt.narrow === 'top'

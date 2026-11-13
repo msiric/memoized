@@ -200,9 +200,10 @@ describe('tokens v3: motion (§4, D10, D11)', () => {
     const ratio = m.damping / (2 * Math.sqrt(m.stiffness * m.mass))
     expect(ratio).toBeGreaterThanOrEqual(1)
     expect(ratio).toBeLessThan(1.01)
-    // Critically damped residual: (1 + wt) e^(-wt). At settleMs it is under 0.5 %.
+    // Critically damped residual: (1 + wt) e^(-wt).
     const residual = (t: number) => (1 + omega * t) * Math.exp(-omega * t)
-    expect(residual(m.settleMs / 1000)).toBeLessThan(0.007)
+    // Landed to the eye (within 1 %) when the third beat starts (H3 R2 Q1).
+    expect(residual(m.settleMs / 1000)).toBeLessThan(0.011)
     expect(m.settleMs).toBeLessThan(motionRules.maxTransitionMs)
   })
 

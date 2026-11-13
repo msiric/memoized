@@ -238,8 +238,10 @@ export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<st
     }
     if (Math.abs(b.dx + f.dx) > 1 || Math.abs(b.dy + f.dy) > 1)
       out.push(`${k}: next moves (${f.dx}, ${f.dy}), back (${b.dx}, ${b.dy}); expected (${-f.dx}, ${-f.dy})`)
+    // A console line arrives and leaves on the one `land` token (H3 R2 Q1): no difference.
+    const land = /^out-/.test(k)
     const expected =
-      f.kind !== b.kind && f.kind !== 'move' && b.kind !== 'move' ? TOKEN_MS[b.kind] - TOKEN_MS[f.kind] : 0
+      !land && f.kind !== b.kind && f.kind !== 'move' && b.kind !== 'move' ? TOKEN_MS[b.kind] - TOKEN_MS[f.kind] : 0
     if (Math.abs(b.ms - f.ms - expected) > MIRROR_MS)
       out.push(`${k}: next ${f.kind} ${f.ms} ms, back ${b.kind} ${b.ms} ms (expected a ${expected} ms difference)`)
   }
@@ -258,4 +260,85 @@ export async function answerStart(page: Page, frame: string = EL, pick = '2') {
   if (inside) await page.keyboard.press(pick)
   else await f.locator('[data-viz-region="dock"] [role="radio"]').nth(Number(pick) - 1).click()
   await page.waitForTimeout(300)
+}
+
+/**
+ * H3 R2 Q1: a paced event-loop step moves in three beats, the code line,
+ * then the moving glyph, then the console line and the caption, in 560 ms or
+ * less; Back plays them in reverse. Each beat starts when the first of its
+ * parts changes on screen (after the command), so the order is read from
+ * the frames themselves.
+ */
+const BEAT_PART = {
+  line: /in=code/,
+  glyph: /data-glyph|flip-id|chip=/,
+  land: /out=|viz-caption/,
+} as const
+export type BeatStarts = Partial<Record<keyof typeof BEAT_PART, number>> & { end: number }
+
+export function beatStarts(ms: ElementMotion[]): BeatStarts {
+  const out: BeatStarts = { end: 0 }
+  for (const e of ms) {
+    const props = e.props.filter((p) => p.prop !== 'x' && p.prop !== 'y' && p.prop !== 'eff' && p.prop !== 'w' && p.prop !== 'h')
+    if (!props.length) continue
+    for (const [beat, re] of Object.entries(BEAT_PART) as [keyof typeof BEAT_PART, RegExp][]) {
+      if (!re.test(e.label) || (beat === 'glyph' && BEAT_PART.land.test(e.label))) continue
+      const start = Math.min(...props.map((p) => p.delay))
+      out[beat] = Math.min(out[beat] ?? Infinity, start)
+    }
+    out.end = Math.max(out.end, ...props.map((p) => p.delay + p.duration))
+  }
+  return out
+}
+
+/** One frame of slack (a beat may start in the same frame as the one before it). */
+const BEAT_SLACK_MS = 20
+/**
+ * The three beats end within 560 ms (nominally 540: 120 + 260 + 160), plus
+ * two frames: the held caption is swapped on a timer, then committed.
+ */
+export const BEATS_MAX_MS = 560 + 34
+
+export function beatProblems(b: BeatStarts, dir: 'forward' | 'back'): string[] {
+  const order = dir === 'forward' ? (['line', 'glyph', 'land'] as const) : (['land', 'glyph', 'line'] as const)
+  const seen = order.filter((k) => b[k] !== undefined)
+  const out: string[] = []
+  for (let i = 1; i < seen.length; i++) {
+    const a = b[seen[i - 1]]!
+    const c = b[seen[i]]!
+    if (c + BEAT_SLACK_MS < a) out.push(`${seen[i]} starts at ${Math.round(c)} ms, before ${seen[i - 1]} (${Math.round(a)} ms)`)
+  }
+  // A forward step's console line and caption wait for the glyph to land.
+  if (dir === 'forward' && b.glyph !== undefined && b.land !== undefined && b.land - b.glyph < 200)
+    out.push(`land starts ${Math.round(b.land - b.glyph)} ms after the glyph beat (the glyph has not landed)`)
+  if (b.end > BEATS_MAX_MS) out.push(`the step ends at ${Math.round(b.end)} ms (> ${BEATS_MAX_MS})`)
+  return out
+}
+
+/**
+ * Q4: a checkpoint's verdict (the feedback line and the ✓ or × marks) lands
+ * only after the step's motion has landed: its first visible frame is no
+ * earlier than the last frame any stage glyph moved, less one frame.
+ */
+export function verdictAfterPayoff(cap: Capture, at: number): string[] {
+  // The step's motion is its moving glyphs (chips); the console line lands with the verdict.
+  const glyph = /data-glyph|flip-id|chip=/
+  let lastGlyph = -Infinity
+  let firstVerdict = Infinity
+  const shown = new Map<number, number>()
+  for (const f of cap.frames) {
+    if (f.t < at) continue
+    for (const [id, s] of f.rows) {
+      const label = cap.labels[id] ?? ''
+      if (glyph.test(label)) lastGlyph = Math.max(lastGlyph, f.t - at)
+      if (/viz-feedback/.test(label) && (s as { eff?: number }).eff !== undefined && (s as { eff: number }).eff > 0 && !shown.has(id)) {
+        shown.set(id, f.t - at)
+        firstVerdict = Math.min(firstVerdict, f.t - at)
+      }
+    }
+  }
+  if (firstVerdict === Infinity) return ['no feedback appeared']
+  return firstVerdict + BEAT_SLACK_MS < lastGlyph
+    ? [`the verdict shows at ${Math.round(firstVerdict)} ms, before the step lands (${Math.round(lastGlyph)} ms)`]
+    : []
 }

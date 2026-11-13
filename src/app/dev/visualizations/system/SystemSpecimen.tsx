@@ -450,7 +450,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
               labels={['A', 'B', 'C', 'D']}
               text={<PromptBlock live={false} prompt="Which logs last?" note={null} noteReserve={NUDGE_TEXT} />}
               choices={['A', 'B', 'C', 'D'].map((l, i) => (
-                <ChoiceRow key={l} index={i} label={l} tabIndex={-1} />
+                <ChoiceRow key={l} index={i} label={l} tabIndex={-1} role="none" />
               ))}
               skip={<SkipButton tabIndex={-1} />}
             />

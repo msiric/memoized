@@ -36,6 +36,7 @@ import {
   type MachineState,
   type PresetShape,
 } from './machine'
+import { moveSpringToken, springCurve } from './flip'
 import { motionBudget, transitionFor, vacating, type MotionGate } from './motion'
 import { BURST_WINDOW_MS, INITIAL_PACE, escapePauses, pace, type Pace } from './pace'
 import { Scrubber } from './Scrubber'
@@ -94,6 +95,8 @@ import { H_CLS, heights, rem } from './vars'
 
 /** The third beat's fade (Q1): the caption, the console line and a verdict, 160 ms. */
 const LAND_MS = motion.land.full.type === 'tween' ? motion.land.full.duration * 1000 : 0
+/** One 60 Hz frame (ms). */
+const FRAME_MS = Math.round(1000 / 60)
 
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
@@ -284,7 +287,14 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   // What holds before the third beat (Q1): the previous step's name and
   // caption, or a checkpoint's prompt over its unmarked choices (Q4), until
   // the moving glyph has landed; on the reveal, until the playback has.
-  const holdMs = gate.reveal ? revealMs : nav.direction === 1 ? beats.land : 0
+  // A verdict waits for the whole move (Q4: never before the glyph is still).
+  const holdMs = gate.reveal
+    ? revealMs
+    : nav.direction !== 1 || !beats.land
+      ? 0
+      : mode === 'reveal'
+        ? beats.glyph + springCurve(moveSpringToken()).duration
+        : beats.land
 
   // Per navigation: until `holdMs` the previous text holds; until it has
   // faded in, a press on the primary lands the reveal (R1M-11, Q2). Derived
@@ -294,7 +304,13 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const revealBusy = Boolean(gate.reveal) && heldUntil.busy !== nav
   useEffect(() => {
     if (!holdMs && !gate.reveal) return
-    const t1 = window.setTimeout(() => setHeldUntil((h) => ({ ...h, hold: nav })), holdMs)
+    // A caption's hold ends one frame early: the swap is committed by the
+    // time the glyph lands, so the third beat starts on time (Q1).
+    const t1 = window.setTimeout(
+      () => setHeldUntil((h) => ({ ...h, hold: nav })),
+      // A verdict waits the full hold: it never shows before the glyph lands (Q4).
+      gate.reveal || mode === 'reveal' ? holdMs : Math.max(0, holdMs - FRAME_MS),
+    )
     const t2 = gate.reveal
       ? window.setTimeout(() => setHeldUntil((h) => ({ ...h, busy: nav })), holdMs + LAND_MS)
       : undefined
@@ -714,18 +730,20 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         style={{ height: rem(STEP_BAR), marginTop: rem(FRAME.stageGap) }}
       >
         <span className="flex min-w-0 items-baseline gap-2">
-          <span className={cn('min-w-0 shrink-0 truncate', typeScale.stepName.cls, ink.base)} data-viz-part="viz-event">
+          <span className={cn('min-w-0 truncate', typeScale.stepName.cls, ink.base)} data-viz-part="viz-event">
             {shown.event}
           </span>
           {/* A step the host runs has no line of the reader's code: said here,
-              beside its name, not in a band reserved under the code (Q15). */}
+              beside its name, not in a band reserved under the code (Q15).
+              Under very large text it gives way (the code pane lights no line). */}
           {shown.line === 'host' ? (
-            <span className={cn('min-w-0 truncate', typeScale.status.cls, ink.muted)} data-viz-part="viz-host-note">
-              not a line of your code
+            <span className={cn('shrink-0 whitespace-nowrap vz-tight:hidden', typeScale.status.cls, ink.muted)} data-viz-part="viz-host-note">
+              not your code
             </span>
           ) : null}
         </span>
-        <span className={cn('shrink-0 print:hidden', typeScale.status.cls, ink.muted)} data-viz-part="viz-counter">
+        {/* Under very large text the scrubber alone gives the position (R9). */}
+        <span className={cn('shrink-0 vz-tight:hidden print:hidden', typeScale.status.cls, ink.muted)} data-viz-part="viz-counter">
           {counter}
         </span>
       </div>
@@ -932,7 +950,7 @@ function DockGhosts<S>({ log }: { log: StepLog<S> }) {
           text={null}
           textGhosts={<CheckpointTextGhosts cp={c} />}
           choices={c.choices.map((ch, i) => (
-            <ChoiceRow key={ch.id} index={i} label={ch.label} tabIndex={-1} />
+            <ChoiceRow key={ch.id} index={i} label={ch.label} tabIndex={-1} role="none" />
           ))}
           skip={<SkipButton tabIndex={-1} unavailable />}
         />

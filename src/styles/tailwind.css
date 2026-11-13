@@ -406,7 +406,7 @@
  * visual. Under reduced motion they appear at once.
  */
 @keyframes vz-land-in { from { opacity: 0; } }
-.vz-land-in { animation: vz-land-in theme('vz.land') theme('vz.ease') both; }
+.vz-land-in { animation: vz-land-in theme('vz.land') theme('vz.ease') backwards; }
 @media (prefers-reduced-motion: reduce) {
   .vz-land-in { animation: none; }
 }

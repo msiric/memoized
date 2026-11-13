@@ -121,11 +121,11 @@ export function PromptBlock({
   live?: boolean
 }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+    <div className="flex flex-wrap items-baseline gap-x-3">
       <p id={id} className={promptCls} data-viz-part={live ? 'viz-prompt' : undefined}>
         {prompt}
       </p>
-      <div className="grid text-right">
+      <div className="grid">
         <p aria-hidden className={cn(lastTimeCls, 'invisible col-start-1 row-start-1')}>
           {noteReserve}
         </p>

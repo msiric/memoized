@@ -714,13 +714,15 @@ export const motion: Record<MotionTokenName, { full: TweenToken | SpringToken; r
     reduced: { type: 'tween', duration: 0.12, distance: 0 },
   },
   /**
-   * Critically damped (ratio 1.0) and tuned by its settle time: within 0.6 %
-   * of the target at 260 ms, so the sampled curve (`shell/flip.ts`) ends
-   * inside the 300 ms cap without a visible end snap (M08), and a step's
-   * three beats fit 560 ms (H3 R2 Q1). omega = 27.6.
+   * Critically damped (ratio 1.0). The sampled curve (`shell/flip.ts`)
+   * runs about 263 ms (within 0.6 % of the target), inside the 300 ms cap
+   * without a visible end snap (M08). `settleMs` is when the glyph has
+   * landed to the eye (within 1 %, about 2 px of the longest stage move):
+   * the third beat of a step starts there, so the three beats end by
+   * 520 ms nominal, under the 560 ms bound (H3 R2 Q1). omega = 27.6.
    */
   move: {
-    full: { type: 'spring', stiffness: 760, damping: 55.2, mass: 1, settleMs: 260 },
+    full: { type: 'spring', stiffness: 760, damping: 55.2, mass: 1, settleMs: 240 },
     reduced: { type: 'tween', duration: 0 },
   },
   path: { full: { type: 'tween', duration: 0.22, ease: EASE }, reduced: { type: 'tween', duration: 0 } },

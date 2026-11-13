@@ -143,10 +143,15 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   await open(page, 1024)
   const f = frame(page)
 
-  // Tab stops: preset, stepper, steps-as-text. Buttons are not stops.
+  // Tab follows what the eye reads (Q11): preset, the question (first
+  // choice, Skip), the stepper, Restart, Back, Next, Play, steps as text.
   await page.locator('h1').first().click()
   await page.keyboard.press('Tab')
   await expect(f.getByRole('radio', { name: 'Basics' })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(f.locator('[data-viz-region="dock"] [role="radio"]').first()).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(f.getByTestId('viz-skip')).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(slider(page)).toBeFocused()
   // The floating key hint is cut (VIZ-H D22): the shortcuts live in aria-keyshortcuts.
@@ -157,16 +162,14 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
     thumb: getComputedStyle(el.querySelector('.rounded-full')!).outlineWidth,
   }))
   expect(ring).toEqual({ track: 'rgba(0, 0, 0, 0)', thumb: '2px' })
-  // At Start the question follows the stepper (R1M-16): the first choice, Skip, then the text alternative.
-  await page.keyboard.press('Tab')
-  await expect(f.locator('[data-viz-region="dock"] [role="radio"]').first()).toBeFocused()
-  await page.keyboard.press('Tab')
-  await expect(f.getByTestId('viz-skip')).toBeFocused()
+  // The controls are Tab stops (Q11), unavailable ones included (announced as such).
+  for (const name of ['Restart', 'Back', 'Next', 'Play']) {
+    await page.keyboard.press('Tab')
+    await expect(f.getByRole('button', { name, exact: true })).toBeFocused()
+  }
   await page.keyboard.press('Tab')
   await expect(f.locator('summary')).toBeFocused()
-  await page.keyboard.press('Shift+Tab')
-  await page.keyboard.press('Shift+Tab')
-  await page.keyboard.press('Shift+Tab')
+  for (let i = 0; i < 5; i++) await page.keyboard.press('Shift+Tab')
   await expect(slider(page)).toBeFocused()
 
   // A digit locks the Start prediction in; the stepper keeps focus.
@@ -220,11 +223,11 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   await page.keyboard.press('Home')
   expect(await state(page)).toEqual({ step: '0', mode: 'ask' })
   // G ruling 2: the earlier answer is a line under the prompt, never a tag on a row.
-  await expect(f.locator('[data-viz-part="viz-last-time"]')).toHaveText('Last time: B')
+  await expect(f.locator('[data-viz-part="viz-note"]')).toHaveText('Last time: B')
   await expect(f.locator('[data-choice="b"]')).not.toContainText('last time')
   await page.keyboard.press('2')
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight')
-  await expect(f.locator('[data-viz-part="viz-last-time"]')).toHaveText('Last time: C, from .then')
+  await expect(f.locator('[data-viz-part="viz-note"]')).toHaveText('Last time: C')
   await page.keyboard.press('Home')
   await page.keyboard.press('End')
   expect((await state(page)).step).toBe('8')
@@ -562,45 +565,54 @@ test('nothing overflows its reserved box at any width or step', async ({
 // The fit comes from layout, not a sticky bar (D14, D16): on phones the
 // lanes form a 2x2 grid and the console is one strip. Spec §3.4: with the
 // code pane at the top of the viewport, every step of both presets.
-test('375×667 fit: code line, focused element, caption and Next stay visible', async ({
+test('375×667 fit in a real lesson: code line, changed glyph, caption and Next stay visible under the site header (Q15)', async ({
   page,
 }) => {
-  await open(page, 375, '', 667)
-  const code = frame(page).locator('[data-viz-region="code"]')
+  // The lesson-context page: the visual in the lesson column, under the fixed
+  // site header, as a reader on a small phone meets it (H3 R2 Q15, R2 G1).
+  await page.setViewportSize({ width: 375, height: 667 })
+  await page.goto('/dev/visualizations/lesson/event-loop')
+  await mount(page).scrollIntoViewIfNeeded()
+  await mount(page).hover({ position: { x: 3, y: 3 } })
+  await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
   for (const preset of ['Basics', 'Drain']) {
     await frame(page).getByRole('radio', { name: preset }).click()
     await slider(page).focus()
-    for (let i = 0; i <= 9; i++) {
-      await code.evaluate((el) =>
-        window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY),
-      )
+    for (let i = 0; i <= 10; i++) {
+      // The reader scrolls the code pane to just under the header.
       const v = await page.evaluate(() => {
         const root = document.querySelector('[data-viz="event-loop"] section')!
-        const bar = root
-          .querySelector('[data-viz-region="bar"]')!
-          .getBoundingClientRect()
+        const header = [...document.querySelectorAll('div.fixed')]
+          .map((e) => e.getBoundingClientRect())
+          .find((r) => r.top <= 0 && r.height > 30 && r.height < 120)
+        const top = header ? header.bottom : 0
+        const code = root.querySelector('[data-viz-region="code"]')!
+        window.scrollBy(0, code.getBoundingClientRect().top - top - 8)
         const visible = (el: Element | null) => {
           if (!el) return true
           const r = el.getBoundingClientRect()
-          return r.top >= 0 && r.bottom <= bar.top + 1
+          return r.top >= top - 0.5 && r.bottom <= window.innerHeight + 0.5
         }
-        const next = root
-          .querySelector('[data-viz-part="viz-next"]')!
-          .getBoundingClientRect()
         return {
+          header: top > 0,
           line: visible(root.querySelector('[aria-current="true"]')),
-          focus: [...root.querySelectorAll('[data-focus]')].every(visible),
+          changed: [...root.querySelectorAll('[data-focus]')].every(visible),
           caption: visible(root.querySelector('[data-viz-part="viz-caption"]')),
-          next: next.top >= 0 && next.bottom <= window.innerHeight,
+          next: visible(root.querySelector('[data-viz-part="viz-next"]')),
+          step: root.getAttribute('data-viz-step'),
+          mode: root.getAttribute('data-viz-mode'),
+          end: root.querySelector('[data-viz-part="viz-next"]')!.hasAttribute('data-viz-end'),
         }
       })
-      expect(v, `${preset} step ${i}`).toEqual({
+      const { step, mode, end, ...seen } = v
+      expect(seen, `${preset} step ${step} (${mode})`).toEqual({
+        header: true,
         line: true,
-        focus: true,
+        changed: true,
         caption: true,
         next: true,
       })
-      const { mode } = await state(page)
+      if (end) break
       await page.keyboard.press(mode === 'ask' ? '2' : 'ArrowRight')
       await page.waitForTimeout(30)
     }
@@ -645,6 +657,37 @@ test('lazy mount: server HTML first, engine near the viewport, same footprint', 
       mount(page).locator('[data-viz-interactive="true"]'),
     ).toBeVisible()
     expect((await frame(page).boundingBox())!.height).toBeLessThanOrEqual(h)
+  }
+})
+
+test('lazy mount under text zoom: the placeholder reserves at least the live frame (Q16)', async ({ page }) => {
+  // The reader's root font size, held by a style tag (R2 G10: the browser
+  // setting can revert during a session); asserted before each measure.
+  for (const [width, zoom] of [
+    [375, 150],
+    [320, 150],
+    [1280, 200],
+    [768, 125],
+  ] as const) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.addInitScript((z) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        const s = document.createElement('style')
+        s.textContent = `html{font-size:${z}% !important}`
+        document.head.append(s)
+      })
+    }, zoom)
+    await page.goto(`${GALLERY}?spacer=1&mount=client`)
+    const root = () => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))
+    expect(await root()).toBe((16 * zoom) / 100)
+    const placeholder = mount(page).locator('[data-viz-placeholder]')
+    await expect(placeholder).toHaveCount(1)
+    const reserved = (await placeholder.boundingBox())!.height
+    await mount(page).scrollIntoViewIfNeeded()
+    await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
+    expect(await root()).toBe((16 * zoom) / 100)
+    const live = (await frame(page).boundingBox())!.height
+    expect(reserved, `${width} at ${zoom} %: reserve ${reserved} vs live ${live}`).toBeGreaterThanOrEqual(live - 0.5)
   }
 })
 
@@ -696,8 +739,9 @@ test('zero axe violations at Start, at a checkpoint and at a reveal', async ({
         `${label} at ${width}`,
       ).toEqual([])
     }
-    // Scans run after transitions settle (axe reads painted opacity).
-    const settle = () => page.waitForTimeout(400)
+    // Scans run after transitions settle (axe reads painted opacity): a step's
+    // three beats end within 560 ms (Q1), the verdict with the third (Q4).
+    const settle = () => page.waitForTimeout(700)
     await scan('Start')
     await stepTo(page, 5)
     await settle()

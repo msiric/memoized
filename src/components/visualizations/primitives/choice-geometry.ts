@@ -15,6 +15,8 @@ export const CHOICE = {
   gap: TARGET_GAP_PX,
   textGap: 8,
   chrome: 40,
+  /** Slack on a label's modelled width: the model is an average, and capitals ("A") run wider. */
+  slack: 4,
   line: 20,
   pad: 8,
   /** The widest column from 768. */
@@ -39,7 +41,7 @@ export type ChoiceGeometry = {
 }
 
 const labelWidth = (label: string, mono: boolean) =>
-  Math.ceil(mono ? monoWidth(label, 13) : sansWidth(label, 14))
+  Math.ceil(mono ? monoWidth(label, 13) : sansWidth(label, 14)) + CHOICE.slack
 const longestWord = (label: string, mono: boolean) =>
   Math.max(0, ...label.split(/\s+/).map((w) => labelWidth(w, mono)))
 

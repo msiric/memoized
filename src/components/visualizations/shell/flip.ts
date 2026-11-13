@@ -77,6 +77,11 @@ export function springCurve({ stiffness, damping, mass }: Spring, stepMs = 1000 
   return curve
 }
 
+/** The `move` token's spring (for callers that time against the sampled curve). */
+export function moveSpringToken(): Spring {
+  return moveSpring()
+}
+
 function moveSpring(): Spring {
   const m = motionTokens.move.full
   if (m.type !== 'spring') throw new Error('The move token must be a spring')

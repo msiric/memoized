@@ -108,7 +108,9 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
     for (const o of outs) {
       if (o.props.some((p) => p.prop !== 'op' && p.prop !== 'eff')) problems.push(`${o.label} moves`)
       const op = o.props.find((p) => p.prop === 'op')
-      if (!op || op.start !== 0 || op.end !== 1) problems.push(`${o.label} does not resolve 0 -> 1`)
+      // Every output resolves to lit; the newest, lit on the step before, fades
+      // out first instead of cutting to unlit (H3 R2 Q14), so it starts at 1.
+      if (!op || (op.start !== 0 && op.start !== 1) || op.end !== 1) problems.push(`${o.label} does not resolve to lit`)
     }
     // Left to right: the order of the start times is the order on screen.
     const xs = await page.locator(EL).evaluate((el) =>
@@ -129,8 +131,8 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
     // Choice 2 at each question: B (right) and C (right); micro 2 (wrong) and micro 2 (right).
     await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
       preset === 'basic-ordering'
-        ? 'B logs last, as you said. C ran next, as you predicted.'
-        : 'You said micro 2 logs last; it was timeout. micro 2 ran next, as you predicted.',
+        ? 'Right: B logs last. C ran next, as you predicted.'
+        : 'Not quite: timeout logs last. You said micro 2. micro 2 ran next, as you predicted.',
     )
   })
 
