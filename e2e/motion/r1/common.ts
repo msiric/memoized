@@ -4,8 +4,9 @@ import path from 'node:path'
 
 export const AUDIT =
   '/Users/mariosiric/Documents/memoized-content-audit/audit/content-quality/program-runs/VIZ/2026-11-12-hardening/R1'
-// R1_MOTION_OUT redirects a re-run, so the R1 evidence is never overwritten.
-export const SHOTS = process.env.R1_MOTION_OUT ?? path.join(AUDIT, 'shots-motion')
+// A re-run writes under the worktree (or R1_MOTION_OUT), never over the R1
+// evidence in the audit folder (AUDIT is kept only as the record of where it lives).
+export const SHOTS = process.env.R1_MOTION_OUT ?? path.join(process.cwd(), 'e2e', 'motion', 'out', 'r1')
 export const DATA = path.join(SHOTS, 'data')
 export const EL = '[data-viz="event-loop"] section'
 export const LK = '[data-viz="list-keys"] section'
