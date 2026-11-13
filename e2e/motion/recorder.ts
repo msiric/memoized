@@ -15,7 +15,8 @@
  * a readable label from their data attributes and text. For the overlap
  * check (analyze.ts `overlapsDuring`, G1) it also keeps, per element, its
  * parent id, its nearest clipping ancestor (overflow other than visible) and
- * whether it is a text leaf.
+ * whether it is a text leaf. For a text leaf it also keeps its words, whether
+ * it is cut (ellipsis, line clamp) and its line count (R2 GB2).
  */
 export const RECORDER = String.raw`
 (() => {
@@ -27,7 +28,7 @@ export const RECORDER = String.raw`
     if (!v) { v = nextId++; ids.set(el, v) }
     return v
   }
-  const ATTRS = ['data-viz-reveal','data-glyph','data-flip-id','data-chip','data-out','data-viz-part','data-viz-region','data-link','data-row','data-choice','data-line','data-checkpoint','role','aria-label']
+  const ATTRS = ['data-viz-reveal','data-glyph','data-flip-id','data-chip','data-out','data-viz-part','data-viz-region','data-link','data-row','data-choice','data-choice-slot','data-lk-beat','data-line','data-checkpoint','role','aria-label']
   const labelOf = (el) => {
     const parts = [el.tagName.toLowerCase()]
     for (const a of ATTRS) { const v = el.getAttribute && el.getAttribute(a); if (v !== null && v !== undefined) parts.push(a.replace('data-','') + '=' + String(v).slice(0, 30)) }
@@ -36,6 +37,8 @@ export const RECORDER = String.raw`
     // Inside a reveal part (its drawn tick, its svg): the reveal's own rules apply (D21).
     const part = el.parentElement && el.parentElement.closest('[data-viz-reveal]')
     if (part) parts.push('within-reveal=' + part.getAttribute('data-viz-reveal'))
+    // A list-keys Before box showing its check as history (Q18, R2 GB4).
+    if (el.closest && el.closest('[data-lk-history]')) parts.push('lk-history')
     const t = (el.childElementCount === 0 ? (el.textContent || '') : '').trim().slice(0, 24)
     if (t) parts.push('"' + t + '"')
     return parts.join(' ')
@@ -95,11 +98,25 @@ export const RECORDER = String.raw`
         rec.pl = el.getAttribute('pathLength')
       }
       if (el.tagName === 'circle') { rec.cx = el.getAttribute('cx'); rec.cy = el.getAttribute('cy') }
+      // Text integrity (R2 GB2): a text leaf's words, whether it is cut
+      // (ellipsis or line clamp: its content overflows a clipping box) and
+      // how many lines it takes, so a label that truncates or rewraps while
+      // it moves, enters or leaves is seen.
+      if (state.texts.has(id) && !(el instanceof SVGElement) && cs.display !== 'inline') {
+        rec.s = (el.textContent || '').trim().slice(0, 60)
+        rec.ov = (cs.overflowX !== 'visible' && el.scrollWidth > el.clientWidth + 1) || (cs.overflowY !== 'visible' && el.scrollHeight > el.clientHeight + 1) ? 1 : 0
+        const rg = document.createRange()
+        rg.selectNodeContents(el)
+        rec.ln = new Set([...rg.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top - b.top))).size
+      }
       const prev = state.last.get(id)
       const key = JSON.stringify(rec)
       if (prev !== key) {
         state.last.set(id, key)
-        if (!state.labels.has(id)) state.labels.set(id, labelOf(el))
+        // A part that becomes a reveal part (or history) later keeps that in its label.
+        const was = state.labels.get(id)
+        if (!was) state.labels.set(id, labelOf(el))
+        else if (!/viz-reveal=|lk-history/.test(was)) { const now = labelOf(el); if (/viz-reveal=|lk-history/.test(now)) state.labels.set(id, now) }
         rows.push([id, rec])
       }
       for (const c of el.children) walk(c, eff, vis, id, clips ? id : clip, ly)

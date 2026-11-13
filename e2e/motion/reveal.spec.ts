@@ -280,16 +280,58 @@ for (const [key, action, both, expectRides] of [
       if (Math.hypot(c.x - d.x, c.y - d.y) > 1.5)
         problems.push(`rider ${i} rests at (${c.x.toFixed(1)}, ${c.y.toFixed(1)}), its checkbox is at (${d.x.toFixed(1)}, ${d.y.toFixed(1)})`)
     }
-    // H3 R6: the tick rides at full strength and never redraws on landing
-    // (no fade and redraw, R1M-05); the landing is the rider's own settle.
-    const ticks = parts.filter((p) => p.kind === 'tick')
-    if (ticks.length) problems.push(`${ticks.length} ticks redrew on landing`)
-    // H3 R5: the verdict fades in only after the last rider has landed.
+    // H3 R5, R2 Q18 and GB4: after the last landing the outcome arrives in
+    // order, every part timed (not only the verdict): the in-row badges
+    // (Before and After), the verdict, the ✓ and × in the choices, then the
+    // Before checks as history (a tick marker that must be emitted: a run
+    // with no history tick fails, so the check is never vacuous).
     const verdict = parts.filter((p) => p.kind === 'verdict')
     const lastLanding = Math.max(...moving.map((m) => m.end))
     if (verdict.length !== 1) problems.push(`${verdict.length} verdict fades, expected 1`)
-    for (const v of verdict)
-      if (v.start < lastLanding - 34) problems.push(`the verdict starts at ${v.start} ms, before the landing at ${lastLanding} ms`)
+    const firstShown = (re: RegExp) => {
+      const out: { label: string; t: number }[] = []
+      const done = new Set<number>()
+      for (const fr of r.cap.frames)
+        for (const [id, smp] of fr.rows) {
+          const label = r.cap.labels[id] ?? ''
+          if (done.has(id) || !re.test(label) || !((smp as { eff?: number }).eff! > 0)) continue
+          done.add(id)
+          out.push({ label, t: fr.t - r.at })
+        }
+      return out
+    }
+    const badges = firstShown(/lk-beat=1/)
+    const marks = firstShown(/in=dock.*"[✓×]"|"[✓×]".*in=dock/)
+    // A history tick arrives when an element labelled history shows again after its check left (eff 0, then up).
+    const history: { label: string; start: number }[] = []
+    {
+      const eff = new Map<number, number>()
+      const gone = new Set<number>()
+      for (const fr of r.cap.frames)
+        for (const [id, smp] of fr.rows) {
+          const e = (smp as { eff?: number }).eff
+          if (e === undefined) continue
+          if (e <= 0.01) gone.add(id)
+          else if (gone.has(id) && (eff.get(id) ?? 0) <= 0.01 && /lk-history/.test(r.cap.labels[id] ?? '')) {
+            history.push({ label: r.cap.labels[id], start: fr.t - r.at })
+            gone.delete(id)
+          }
+          eff.set(id, e)
+        }
+    }
+    if (!badges.length) problems.push('no in-row badge arrived')
+    if (!marks.length) problems.push('no ✓ or × arrived in the choices')
+    if (!history.length) problems.push('no history tick arrived on a Before box')
+    const after = (what: string, t: number) => {
+      if (t < lastLanding - 34) problems.push(`${what} at ${Math.round(t)} ms, before the landing at ${Math.round(lastLanding)} ms`)
+    }
+    for (const v of verdict) after('the verdict starts', v.start)
+    for (const b of badges) after(`a badge (${b.label.slice(0, 30)}) shows`, b.t)
+    for (const m of marks) after(`a mark (${m.label.slice(0, 30)}) shows`, m.t)
+    for (const h of history) {
+      after('a history tick starts', h.start)
+      for (const v of verdict) if (h.start + 17 < v.start) problems.push(`a history tick starts at ${Math.round(h.start)} ms, before the verdict (${Math.round(v.start)} ms)`)
+    }
     const end = Math.max(...parts.map((p) => p.end))
     if (end > REVEAL_TOKEN.maxMs + FRAME_MS) problems.push(`the reveal ends at ${end} ms`)
     await expect(f.locator('[data-viz-reveal="rider"]')).toHaveCount(0)

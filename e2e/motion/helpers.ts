@@ -9,6 +9,7 @@ import {
   flagsFor,
   glyphKey,
   motionsAfter,
+  integrityDuring,
   overlapsDuring,
   vacates,
   type Capture,
@@ -173,11 +174,17 @@ export const WIDTHS = (process.env.MOTION_WIDTHS ?? process.env.MOTION_WIDTH ?? 
   .map(Number)
   .filter((n) => n > 0)
 
-/** G1: text a moving or fading element prints over, as readable problems. */
+/**
+ * G1 and R2 GB1, GB2: text a moving or fading element prints over or covers,
+ * and text that is cut or rewraps while it moves, as readable problems.
+ */
 export function overlapProblems(cap: Capture, at: number): string[] {
-  return overlapsDuring(cap, at).map(
-    (o) => `+${o.t}ms: ${o.moving.slice(0, 70)} over ${o.over.slice(0, 70)} (${o.area} px²)`,
-  )
+  return [
+    ...overlapsDuring(cap, at).map(
+      (o) => `+${o.t}ms: ${o.moving.slice(0, 70)} ${o.covers ? 'covers' : 'over'} ${o.over.slice(0, 70)} (${o.area} px²)`,
+    ),
+    ...integrityDuring(cap, at).map((x) => `+${x.t}ms: ${x.label.slice(0, 70)} ${x.what}`),
+  ]
 }
 
 /** One glyph's motion for a step: its translate displacement and duration. */
@@ -318,7 +325,8 @@ export function beatProblems(b: BeatStarts, dir: 'forward' | 'back'): string[] {
 /**
  * Q4: a checkpoint's verdict (the feedback line and the ✓ or × marks) lands
  * only after the step's motion has landed: its first visible frame is no
- * earlier than the last frame any stage glyph moved, less one frame.
+ * earlier than the last frame any stage glyph moved, less one frame. Every
+ * part is timed: the line and each mark (R2 GB4).
  */
 export function verdictAfterPayoff(cap: Capture, at: number): string[] {
   // The step's motion is its moving glyphs (chips); the console line lands with the verdict.
@@ -331,7 +339,9 @@ export function verdictAfterPayoff(cap: Capture, at: number): string[] {
     for (const [id, s] of f.rows) {
       const label = cap.labels[id] ?? ''
       if (glyph.test(label)) lastGlyph = Math.max(lastGlyph, f.t - at)
-      if (/viz-feedback/.test(label) && (s as { eff?: number }).eff !== undefined && (s as { eff: number }).eff > 0 && !shown.has(id)) {
+      // The feedback line and the ✓ and × that replace the numerals (R2 GB4: the marks too).
+      const verdictPart = /viz-feedback/.test(label) || (/in=dock/.test(label) && /"[✓×]"/.test(label))
+      if (verdictPart && (s as { eff?: number }).eff !== undefined && (s as { eff: number }).eff > 0 && !shown.has(id)) {
         shown.set(id, f.t - at)
         firstVerdict = Math.min(firstVerdict, f.t - at)
       }

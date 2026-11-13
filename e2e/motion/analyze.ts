@@ -22,6 +22,10 @@ export type Sample = {
   cy?: string | null
   /** The raised opaque layer the element paints in (0: none), see recorder.ts. */
   ly?: number
+  /** Text leaves (R2 GB2): the words, cut (1) or whole (0), and the line count. */
+  s?: string
+  ov?: number
+  ln?: number
 }
 export type Frame = { t: number; rows: [number, Sample][]; gone: number[] }
 export type Anim = {
@@ -330,7 +334,7 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyp
 // G1: overlap and legibility during motion.
 // ---------------------------------------------------------------------------
 
-export type Overlap = { t: number; moving: string; over: string; area: number }
+export type Overlap = { t: number; moving: string; over: string; area: number; covers?: boolean }
 
 type Box = { l: number; t: number; r: number; b: number }
 const boxOf = (s: Sample): Box => ({ l: s.x, t: s.y, r: s.x + s.w, b: s.y + s.h })
@@ -340,17 +344,33 @@ const clipTo = (a: Box, c: Box): Box | null => {
 }
 
 /**
- * Text that a moving or fading element prints over (G1, R1M-01, R1M-03,
- * R1M-08). For each frame from `from` (ms since record start): every text
- * leaf whose position, transform or opacity changed in that frame, with an
- * effective opacity above 0.1, against every other visible text leaf. Two
- * boxes that intersect by more than `minArea` px² are an overlap, unless one
- * is the other's ancestor, or the two paint in different raised opaque
- * layers (a lifted glyph on its backing, D6, or the scrubber tooltip, D12:
- * those hide what they cover instead of printing over it). Boxes are cut to their nearest clipping ancestor
- * first, so a code row scrolled out of its window or a truncated label's
- * hidden tail never counts. One entry per pair, at its first frame.
+ * Text that a moving or fading element prints over or covers (G1, R1M-01,
+ * R1M-03, R1M-08; R2 GB1). For each frame from `from` (ms since record
+ * start): every element whose position, transform or opacity changed in that
+ * frame, with an effective opacity above 0.1, that is a text leaf or a glyph
+ * without text (the list-keys rider, a chip, a stage glyph, the scrubber
+ * tooltip), against every other visible text leaf. Two boxes that intersect
+ * by more than `minArea` px² are an overlap, unless one is the other's
+ * ancestor. When the moving element paints in a raised opaque layer (a
+ * lifted glyph on its backing, D6, or the scrubber tooltip, D12) and the
+ * text does not, it hides that text: a `covers` entry, allowed only for a
+ * lifted stage glyph passing over a lane's own text (`COVER_OK`). Text that
+ * a moving element passes under (the text is in the raised layer) is not
+ * overprinted. Boxes are cut to their nearest clipping ancestor first, so a
+ * code row scrolled out of its window or a truncated label's hidden tail
+ * never counts. One entry per pair, at its first frame.
  */
+/** A glyph without text that moves or fades (R2 GB1): its box is tested against text too. */
+const MOVING_GLYPH = /viz-reveal=rider|\bchip=|\bglyph=|flip-id=|scrubber-tooltip/
+/**
+ * The only covering allowed (R2 GB1): a lifted stage glyph on its opaque
+ * backing (D6), or its label, passing over a lane's own text on its way to
+ * another lane. Anything else that covers text (the scrubber tooltip over
+ * the dock, the list-keys rider over a row) is a finding.
+ */
+const LANE = /\bin=(stack|host|micro|tasks|console)\b/
+const COVER_OK: [RegExp, RegExp][] = [[LANE, LANE]]
+
 export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {
   const parents = cap.parents ?? {}
   const clips = cap.clips ?? {}
@@ -386,24 +406,85 @@ export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {
     if (f.t < from) continue
     const visible = [...texts].map((id) => [id, visibleBox(id)] as const).filter((x): x is readonly [number, Box] => !!x[1])
     for (const a of changed) {
-      if (!texts.has(a)) continue
+      if (!texts.has(a) && !MOVING_GLYPH.test(cap.labels[a] ?? '')) continue
       const ab = visibleBox(a)
       if (!ab) continue
       const up = ancestors(a)
+      const la = state.get(a)?.ly ?? 0
       for (const [b, bb] of visible) {
         if (b === a || up.has(b) || ancestors(b).has(a)) continue
-        // A raised opaque layer hides what it covers: only the same layer overprints.
-        if ((state.get(a)?.ly ?? 0) !== (state.get(b)?.ly ?? 0)) continue
+        const lb = state.get(b)?.ly ?? 0
+        // The text sits in a raised opaque layer the moving element is not in: it passes under it.
+        if (la !== lb && la === 0) continue
+        // The moving element's raised layer hides the text under it.
+        const covers = la !== lb
         const i = clipTo(ab, bb)
         if (!i) continue
         const area = (i.r - i.l) * (i.b - i.t)
         if (area <= minArea) continue
+        const moving = cap.labels[a] ?? String(a)
+        const over = cap.labels[b] ?? String(b)
+        if (covers && COVER_OK.some(([m, o]) => m.test(moving) && o.test(over))) continue
         const key = [a, b].sort().join('|')
         if (seen.has(key)) continue
         seen.add(key)
-        out.push({ t: Math.round(f.t - from), moving: cap.labels[a] ?? String(a), over: cap.labels[b] ?? String(b), area: Math.round(area) })
+        out.push({ t: Math.round(f.t - from), moving, over, area: Math.round(area), covers })
       }
     }
+  }
+  return out
+}
+
+// ---------------------------------------------------------------------------
+// R2 GB2: text integrity during motion.
+// ---------------------------------------------------------------------------
+
+export type Integrity = { t: number; label: string; what: string }
+
+/**
+ * A text leaf that is cut (ellipsis or line clamp) or takes a different
+ * number of lines while it moves, enters or leaves, compared with its own
+ * rest: the state it was first seen in (before the action, or as it entered)
+ * and the state it ends in. A leaf whose words change starts a new rest (a
+ * counter, a label that swaps). Only while visible (effective opacity above
+ * 0.1), from `from`. One entry per leaf and kind.
+ */
+export function integrityDuring(cap: Capture, from = 0): Integrity[] {
+  const texts = new Set(cap.texts ?? [])
+  const state = new Map<number, Sample>()
+  const rest = new Map<number, Sample>()
+  const last = new Map<number, Sample>()
+  // The end state of every leaf still on screen at the end.
+  for (const f of cap.frames) {
+    for (const [id, s] of f.rows) if (texts.has(id)) last.set(id, { ...(last.get(id) ?? {}), ...s } as Sample)
+    for (const id of f.gone) last.delete(id)
+  }
+  const out: Integrity[] = []
+  const seen = new Set<string>()
+  for (const f of cap.frames) {
+    for (const [id, s] of f.rows) {
+      if (!texts.has(id)) continue
+      const cur = { ...(state.get(id) ?? {}), ...s } as Sample
+      state.set(id, cur)
+      if (cur.s === undefined) continue
+      const r = rest.get(id)
+      if (!r || r.s !== cur.s) {
+        rest.set(id, cur)
+        continue
+      }
+      if (f.t < from || cur.eff <= 0.1) continue
+      const end = last.get(id)
+      const push = (what: string) => {
+        const key = `${id}|${what}`
+        if (seen.has(key)) return
+        seen.add(key)
+        out.push({ t: Math.round(f.t - from), label: cap.labels[id] ?? String(id), what })
+      }
+      if (cur.ov && (!r.ov || (end && end.s === cur.s && !end.ov))) push('is cut (ellipsis or clamp) while it moves')
+      if (cur.ln !== undefined && r.ln !== undefined && cur.ln !== r.ln && (!end || end.s !== cur.s || end.ln !== cur.ln))
+        push(`rewraps from ${r.ln} to ${cur.ln} lines while it moves`)
+    }
+    for (const id of f.gone) state.delete(id)
   }
   return out
 }
