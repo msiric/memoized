@@ -25,8 +25,9 @@ import { CHOICE_ROW_FIT, LK_CHOICE_WIDTH, dockGhostStrings, type Scene } from '.
  * - one row (the wide variant, `CHOICE_ROW_FIT`): the choices in equal
  *   columns up to `LK_CHOICE_WIDTH`, then the trailing action;
  * - otherwise two columns (an odd last choice takes the full row, so there
- *   is no hole, critique F-LK-06), and the trailing action under them,
- *   its label on the choices' left edge.
+ *   is no hole, critique F-LK-06), and the trailing action under them, its
+ *   label in line with the choices' numerals (both 12 px in), its target
+ *   inside the dock.
  */
 
 const F = '[data-viz-frame="list-keys"]'
@@ -45,12 +46,10 @@ export const dockCss =
   `${F} [data-lk-row]{display:flex;flex-direction:column;align-items:flex-start;gap:${rem(CHOICE.gap)}}` +
   `${F} [data-lk-choices]{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:${rem(CHOICE.gap)}}` +
   `${F} [data-lk-choices]>:last-child:nth-child(odd){grid-column:1/-1}` +
-  `${F} [data-lk-skip]{margin-left:${rem(-12)}}` +
   `@container vz (min-width:${rem(CHOICE_ROW_FIT)}){` +
   `${F} [data-lk-row]{flex-direction:row;align-items:stretch}${F} [data-lk-row]>[data-lk-choices]{flex:0 1 auto;min-width:0}` +
   `${F} [data-lk-choices]{width:auto;grid-template-columns:repeat(var(--lk-n),minmax(0,${rem(LK_CHOICE_WIDTH)}))}` +
   `${F} [data-lk-choices]>:last-child:nth-child(odd){grid-column:auto}` +
-  `${F} [data-lk-skip]{margin-left:0}` +
   `}`
 
 // ---------------------------------------------------------------------------
