@@ -498,6 +498,8 @@ test('zero axe violations in every phase (§7)', async ({ page }) => {
   for (const width of [375, 1024]) {
     await open(page, width)
     const scan = async (label: string) => {
+      // A reveal is scanned once it has landed and its verdict has faded in (H3 R5).
+      if ((await mode(page)) === 'reveal') await expect(frame(page)).toHaveAttribute('data-viz-landed', 'true')
       await page.waitForTimeout(350)
       const result = await new AxeBuilder({ page })
         .include('[data-viz="list-keys"]')

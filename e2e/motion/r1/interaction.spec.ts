@@ -221,7 +221,9 @@ test('touch @375: taps, sticky hover, scrubber vs scroll on reveal controls', as
   await l.scrollIntoViewIfNeeded()
   await page.locator(`${LK}[data-viz-interactive="true"]`).waitFor({ timeout: 30_000 })
   await page.waitForTimeout(300)
-  const btn = l.locator('[data-viz-focus=\"action-reverse\"]')
+  // At 375 the four action segments do not fit (the action is a native
+  // select, H3 R8), so sticky hover is probed on a key segment instead.
+  const btn = l.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { name: 'id', exact: true })
   const card = l.locator('[data-row="before-1"] label')
   res.cardRest = await card.evaluate((el) => getComputedStyle(el).borderColor + ' ' + getComputedStyle(el).backgroundColor)
   await card.tap()
