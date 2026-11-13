@@ -24,7 +24,9 @@ export function Provenance({ runtimes, className }: { runtimes: readonly string[
     <p
       data-viz-part="viz-provenance"
       className={cn(
-        'm-0 vz-wide:absolute vz-wide:right-0 vz-wide:top-0 vz-wide:flex vz-wide:h-11 vz-wide:items-center',
+        // On paper the disclosure beside it is hidden, so it takes its own line
+        // instead of floating over the printed text alternative (G print).
+        'm-0 vz-wide:absolute vz-wide:right-0 vz-wide:top-0 vz-wide:flex vz-wide:h-11 vz-wide:items-center print:!static print:!h-auto',
         typeScale.provenance.cls,
         ink.muted,
         className,

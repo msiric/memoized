@@ -109,10 +109,19 @@ export const ROW_TEXT_MIN = 160
 /** The wide variant's threshold in px at the default root (`vz-wide`, 37.875rem). */
 export const WIDE_MIN = 606
 
-/** A checkpoint's choice column: its longest label plus the row chrome, at most 168. */
+/** The tag a choice carries after Restart when it was the last pick (R4). */
+export const LAST_TIME_TAG = 'last time'
+
+/**
+ * A checkpoint's choice column: its longest label plus the row chrome, at
+ * most 168. Any choice may carry the "last time" tag on its second line, so
+ * the column is never narrower than the tag (G: a one-letter choice row
+ * spilled the tag into its neighbour).
+ */
 export function choiceColumn(cp: Pick<Checkpoint, 'choices'>): number {
   const label = Math.max(...cp.choices.map((c) => Math.ceil(sansWidth(c.label, typeScale.control.size))))
-  return Math.min(CHOICE.wideWidth, label + CHOICE_CHROME)
+  const tag = Math.ceil(sansWidth(LAST_TIME_TAG, typeScale.tag.size))
+  return Math.min(CHOICE.wideWidth, Math.max(label, tag) + CHOICE_CHROME)
 }
 
 /** One row of all choices: its width. */

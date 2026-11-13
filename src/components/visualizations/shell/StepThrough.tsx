@@ -24,7 +24,7 @@ import { SegmentedControl } from '../primitives/SegmentedControl'
 import { TARGET_GAP_PX, ink, motion, motionRules, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
 import { CodePane, codeRows, hasHostNote } from './CodePane'
-import { CHOICE, FRAME, STEP_BAR, choiceColumn, choiceRowBeside, choiceRowWidth, definitionMetrics } from './footprint'
+import { CHOICE, FRAME, LAST_TIME_TAG, STEP_BAR, choiceColumn, choiceRowBeside, choiceRowWidth, definitionMetrics } from './footprint'
 import { RECAP_NONE, allFeedback, allRecaps, feedbackText, recapText } from './feedback'
 import {
   dockMode,
@@ -509,7 +509,9 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       {/* 2. Stage: fixed footprint, code pane inside the stage grid. */}
       <div
         data-viz-region="stage"
-        className={cn('relative', H_CLS)}
+        // Paper grows with the code pane (it prints every line, print:!h-auto),
+        // so the regions under it are never pushed out of the stage.
+        className={cn('relative print:!h-auto', H_CLS)}
         style={heights({ narrow: metrics.narrow.stage, wide: metrics.wide.stage }, { marginTop: rem(FRAME.headerGap) })}
       >
         <Stage
@@ -729,7 +731,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
                       // answer, × on a wrong pick. A prediction judged at the
                       // end keeps its numbers: only the pick is marked (R5).
                       mark={revealed && !deferred ? (isAnswer ? 'right' : isPicked ? 'wrong' : null) : null}
-                      tag={!revealed && lastTime === choice.id ? 'last time' : undefined}
+                      tag={!revealed && lastTime === choice.id ? LAST_TIME_TAG : undefined}
                       tabIndex={atCheckpoint && i === choiceFocus ? 0 : -1}
                       onClick={() => atCheckpoint && dispatch({ type: 'answer', choice: choice.id })}
                       onKeyDown={(e) => {
@@ -758,6 +760,9 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
                 }}
                 className={cn(SKIP_CLS, !atCheckpoint && 'invisible')}
                 data-viz-part="viz-skip"
+                // Stacked, its 44 px target rises 16 px into the step bar on
+                // purpose (F1 ruling 2); the stress detectors allow this side only.
+                data-viz-overhang="top"
               >
                 <span className={SKIP_LABEL_CLS}>Skip</span>
               </Button>

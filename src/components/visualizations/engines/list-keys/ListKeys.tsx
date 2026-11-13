@@ -516,8 +516,9 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       </div>
 
       {/* 4. Footer: outcomes as text, and provenance. */}
-      <footer className="relative" style={{ marginTop: toRem(GAPS.footer) }}>
-        {/* On paper the full text is printed below, open (H3 R10), as in the step-through. */}
+      {/* On paper the full text is printed below, open (H3 R10), with its own
+          recorded-runs line, so the footer stays on screen. */}
+      <footer className="relative print:hidden" style={{ marginTop: toRem(GAPS.footer) }}>
         <Disclosure className="print:hidden" summary="Outcomes as text" summaryProps={{ 'data-viz-focus': 'text-alternative' }}>
           <OutcomesAsText />
         </Disclosure>

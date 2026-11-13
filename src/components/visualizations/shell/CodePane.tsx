@@ -157,7 +157,9 @@ export function CodePane({
                 className={clsx(
                   'relative flex min-h-6 items-start pl-2 pr-2',
                   tween,
-                  active ? 'bg-lime-400/10' : 'bg-transparent',
+                  // Paper keeps the bar and the ▸, not the ground: syntax colors on the
+                  // lime tint fall under 4.5:1 (G print contrast).
+                  active ? 'bg-lime-400/10 print:bg-transparent' : 'bg-transparent',
                 )}
                 style={ground}
               >

@@ -187,11 +187,15 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
     const t = tipRef.current
     const rail = railRef.current
     if (tip === null || !t || !rail) return
-    const host = rail.parentElement!.getBoundingClientRect()
+    // In layout px: `style.left` is laid out before any CSS zoom or scale on
+    // an ancestor, so client rects are divided by that scale (R13 under CSS zoom).
+    const hostEl = rail.parentElement!
+    const host = hostEl.getBoundingClientRect()
+    const k = hostEl.offsetWidth > 0 ? host.width / hostEl.offsetWidth : 1
     const r = rail.getBoundingClientRect()
-    const centre = r.left - host.left + fraction(tip) * r.width
+    const centre = (r.left - host.left) / k + fraction(tip) * rail.offsetWidth
     const w = t.offsetWidth
-    t.style.left = `${Math.max(0, Math.min(host.width - w, centre - w / 2))}px`
+    t.style.left = `${Math.max(0, Math.min(hostEl.offsetWidth - w, centre - w / 2))}px`
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tip, total])
 
@@ -297,6 +301,9 @@ export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(function Scrub
           ref={tipRef}
           aria-hidden
           data-viz-part="scrubber-tip"
+          // It names the step above the thumb, over the bar's top edge on purpose.
+          data-viz-overhang="top"
+          data-viz-layer="overlay"
           className={clsx('pointer-events-none absolute bottom-full left-0 z-10 mb-1 whitespace-nowrap', tooltipCls)}
         >
           {stepLabel(tip, events[tip])}

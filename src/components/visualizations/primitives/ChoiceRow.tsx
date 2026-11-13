@@ -88,9 +88,11 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         {mark === 'right' ? '✓' : mark === 'wrong' ? '×' : index + 1}
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
+        {/* Relative, so its sr-only suffix is clipped with a truncated label
+            instead of sitting past the line's end and widening the page. */}
         <span
           className={cn(
-            'min-w-0 text-sm font-medium leading-5',
+            'relative min-w-0 text-sm font-medium leading-5',
             wrap === 'clamp' && !tag ? 'line-clamp-2' : 'truncate',
             mono && 'font-mono text-xs font-normal',
           )}

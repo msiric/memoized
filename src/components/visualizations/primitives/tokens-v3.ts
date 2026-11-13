@@ -367,6 +367,7 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'code-pane text', kind: 'text', fg: { dark: 'zinc.100', light: 'zinc.100' }, bg: 'code' },
   // Controls
   { use: 'primary button label', kind: 'text', fg: r('onAccent'), bg: 'accent' },
+  // Press is the hover fill at brightness 0.9 (label and fill together): 4.84:1, checked by the crawl.
   { use: 'primary button label, hover and press', kind: 'text', fg: r('onAccent'), bg: 'accentHover' },
   { use: 'secondary button label', kind: 'text', fg: r('inkMuted'), bg: 'secondary' },
   { use: 'secondary button label, hover and press', kind: 'text', fg: { dark: 'white', light: 'zinc.900' }, bg: 'secondaryHover' },
