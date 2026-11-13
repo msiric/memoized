@@ -130,7 +130,12 @@ export function pathCss(data: EnvDiagram): string {
       main.push(rules(`${s}:is(:has(${f}:hover),:not(:has([tabindex]:hover)):has(${f}:focus-visible))`))
       touch.push(rules(`${s}:has(${f}:focus)`))
     }
-  return `${main.join('')}@media (hover:none){${touch.join('')}}`
+  // Screen only: paper never shows a trace, even when a function is focused
+  // as the page prints (lime on white would fail contrast). Hover rules only
+  // where the reader can hover: a touch browser keeps :hover on what was
+  // tapped, which would hold a path lit after a second tap put it down
+  // (R2M-16; WebKit does).
+  return `@media screen and (hover:hover){${main.join('')}}@media screen and (hover:none){${touch.join('')}}`
 }
 
 /** What a focused function announces: its name, its record, the names that refer to it, and what it reads. */

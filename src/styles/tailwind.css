@@ -379,6 +379,18 @@
   @media (prefers-reduced-motion: reduce) {
     .vz-s :is([data-edge], [data-node], .vz-el), .vz-s > g[aria-hidden] > :is(text, rect), .vz-e, .vz-fb { transition: none; }
   }
+  /*
+   * Touch (R2M-16): a tap focuses a function and lights its path; a second
+   * tap on it puts the path down. While focused, the function lets taps
+   * through to the figure behind it, which cannot take focus, so the tap
+   * blurs it, as a tap on empty space does. No script. The figure counts
+   * as clickable (cursor), so iOS sends that tap at all; the trace is the
+   * tap's feedback, so the grey tap flash is off.
+   */
+  @media (hover: none) {
+    .vz-s { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .vz-s [tabindex]:focus { pointer-events: none; }
+  }
 }
 
 /*
