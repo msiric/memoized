@@ -14,8 +14,9 @@ export type ForcedState = 'hover' | 'press' | 'focus'
 
 const VARIANTS: Record<ForcedState, string[]> = {
   hover: ['can-hover:', 'group-can-hover:'],
-  // Press shows the hover color too, as on a hover device.
-  press: ['active:', 'group-active:', 'can-hover:', 'group-can-hover:'],
+  // Press shows the hover color too, as on a hover device; `press:` (R13) is
+  // applied last, so it wins over the hover step like the real variant.
+  press: ['can-hover:', 'group-can-hover:', 'active:', 'group-active:', 'press:', 'group-press:'],
   focus: ['focus-visible:', 'group-focus-visible:', 'has-[:focus-visible]:'],
 }
 
@@ -24,8 +25,9 @@ const VARIANTS: Record<ForcedState, string[]> = {
  * it finds literally in the source, so they are listed here.
  */
 export const FORCED_SAFELIST = [
-  'bg-lime-600 brightness-98 bg-zinc-800 text-zinc-300 text-lime-500 bg-zinc-700 text-zinc-200 bg-zinc-600',
-  'outline outline-2 outline-offset-2 outline-lime-500 text-zinc-200',
+  'bg-lime-600 bg-lime-700 brightness-98 bg-zinc-800 bg-zinc-700 bg-zinc-600 bg-zinc-500 bg-white/5 bg-white/10',
+  'text-zinc-300 text-zinc-200 text-zinc-100 text-white text-lime-500',
+  'outline outline-2 outline-offset-2 outline-offset-4 outline-lime-500',
 ].join(' ')
 
 export function Force({ state, children }: { state: ForcedState; children: ReactNode }) {

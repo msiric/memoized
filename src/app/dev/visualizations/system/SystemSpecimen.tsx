@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { BackIcon, Button, NextIcon, PlayIcon, RestartIcon, type ButtonVariant } from '@/components/visualizations/primitives/Button'
-import { Caption, promptCls } from '@/components/visualizations/primitives/Caption'
+import { Caption, Feedback, promptCls } from '@/components/visualizations/primitives/Caption'
 import { ChoiceRow } from '@/components/visualizations/primitives/ChoiceRow'
 import { cn } from '@/components/visualizations/primitives/cn'
 import { Disclosure } from '@/components/visualizations/primitives/Disclosure'
@@ -10,8 +10,15 @@ import { Frame } from '@/components/visualizations/primitives/Frame'
 import { Provenance } from '@/components/visualizations/primitives/Provenance'
 import { SegmentedControl } from '@/components/visualizations/primitives/SegmentedControl'
 import { Tag, type TagTone } from '@/components/visualizations/primitives/Tag'
+import { CheckBox } from '@/components/visualizations/engines/list-keys/CheckBox'
+import { eventLoopDescriptor } from '@/components/visualizations/engines/event-loop/descriptor'
+import { CodePane, codeRows } from '@/components/visualizations/shell/CodePane'
+import { STATIC_GATE } from '@/components/visualizations/shell/motion'
+import { Scrubber } from '@/components/visualizations/shell/Scrubber'
+import { Lane, type ChipKind, type LaneChip } from '@/components/visualizations/substrates/Lane'
 import {
   DASH,
+  tooltipCls,
   ink,
   now,
   radius,
@@ -61,6 +68,76 @@ function inState(state: (typeof STATES)[number], node: ReactNode) {
 }
 
 const noop = () => {}
+
+const CODE = eventLoopDescriptor.presets[0].log.code!
+const EVENTS = eventLoopDescriptor.presets[0].log.steps.map((st) => st.event)
+const LONG_CODE = [
+  "queueMicrotask(() => console.log('a microtask queued while the queue drains'))",
+  "setTimeout(() => console.log('B'), 0)",
+]
+const ids = (chips: readonly LaneChip[]) => new Set(chips.map((c) => c.id))
+
+/** One lane at rest, with its chips present before and after (no motion). */
+function SpecimenLane({
+  label,
+  kind,
+  chips,
+  focus = [],
+  stack = false,
+}: {
+  label: string
+  kind: ChipKind
+  chips: LaneChip[]
+  focus?: string[]
+  /** The call stack: label on top, chips stacked upward. */
+  stack?: boolean
+}) {
+  const present = ids(chips)
+  return (
+    <Lane
+      id={kind}
+      label={label}
+      kind={kind}
+      chips={chips}
+      labelAt={stack ? { narrow: 'top', wide: 'top' } : { narrow: 'top', wide: 'inline' }}
+      height={stack ? { narrow: 108, wide: 108 } : { narrow: 72, wide: 44 }}
+      focus={new Set(focus)}
+      created={new Set()}
+      present={present}
+      before={present}
+      gate={STATIC_GATE}
+      from={{}}
+      to={{}}
+    />
+  )
+}
+
+/** The specimen scrubber: 9 steps, checkpoints in every status. */
+function SpecimenScrubber({
+  index,
+  interactive = true,
+  checkpoints,
+}: {
+  index: number
+  interactive?: boolean
+  checkpoints: { at: number; status: 'open' | 'answered' | 'skipped' }[]
+}) {
+  return (
+    <div className="w-72 max-w-full">
+      <Scrubber
+        index={index}
+        total={EVENTS.length}
+        events={EVENTS}
+        checkpoints={checkpoints}
+        valueText={`Step ${index + 1} of ${EVENTS.length}`}
+        label="Step"
+        interactive={interactive}
+        animate={false}
+        onSeek={noop}
+      />
+    </div>
+  )
+}
 
 export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: PairRow[] }) {
   const buttons: { variant: ButtonVariant; node: ReactNode; icon?: boolean }[] = [
@@ -233,7 +310,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
       <Section
         id="button"
         title="Button"
-        note="The platform Button variants at a 44 px target: filled (Next), secondary (Back, Restart, Play, actions), text (Skip). Hover applies only on devices that hover; press adds 0.98 brightness."
+        note="The platform Button variants at a 44 px target: filled (Next), secondary (Back, Restart, Play, actions), text (Skip). Hover applies only on devices that hover; press is one more step (R13)."
       >
         <div className="grid gap-6">
           {buttons.map((b, k) => (
@@ -345,6 +422,206 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
                 new
               </Tag>
             </span>
+          </Cell>
+        </div>
+      </Section>
+
+      <Section
+        id="feedback"
+        title="Feedback and recap"
+        note="One feedback style in every visual (R4): the caption, led by a semibold verdict. The recap reuses it."
+      >
+        <div className="grid max-w-2xl gap-3">
+          <Feedback lead="Right." body="C logs before B: the microtask queue drains before the next task." />
+          <Feedback lead="Not quite." body="B waits in the task queue until every microtask has run." />
+          <Feedback lead="" body="Replay to make the prediction yourself." />
+        </div>
+      </Section>
+
+      <Section
+        id="select"
+        title="Select fallback"
+        note="Segments that do not fit their container become the platform select (A2). Forced here by a narrow container and by more options than maxSegments."
+      >
+        <div className="flex flex-wrap items-start gap-6">
+          <Cell label="narrow container">
+            <div className="w-36">
+              <SegmentedControl
+                label="Example narrow"
+                options={[
+                  { id: 'basics', label: 'Basics' },
+                  { id: 'drain', label: 'Microtask drain' },
+                ]}
+                value={0}
+                onChange={noop}
+              />
+            </div>
+          </Cell>
+          <Cell label="over maxSegments">
+            <SegmentedControl
+              label="Action"
+              options={[
+                { id: 'insert-top', label: 'Insert at top' },
+                { id: 'delete-first', label: 'Delete first' },
+                { id: 'append', label: 'Append' },
+                { id: 'reverse', label: 'Reverse' },
+              ]}
+              value={1}
+              onChange={noop}
+              maxSegments={3}
+            />
+          </Cell>
+          <Cell label="focus">
+            <Force state="focus">
+              <div className="w-36">
+                <SegmentedControl
+                  label="Example focus"
+                  options={[
+                    { id: 'basics', label: 'Basics' },
+                    { id: 'drain', label: 'Microtask drain' },
+                  ]}
+                  value={0}
+                  onChange={noop}
+                />
+              </div>
+            </Force>
+          </Cell>
+        </div>
+      </Section>
+
+      <Section
+        id="scrubber"
+        title="Scrubber"
+        note="Track in the line role, progress and thumb in the accent, a tick per step, a diamond on each checkpoint (hollow open, filled answered, crossed skipped); the thumb carries the diamond it sits on. Hover a rail to see the step tooltip."
+      >
+        <div className="grid gap-6 sm:grid-cols-2">
+          <Cell label="start, open checkpoint">
+            <SpecimenScrubber index={0} checkpoints={[{ at: 5, status: 'open' }]} />
+          </Cell>
+          <Cell label="mid, answered and skipped">
+            <SpecimenScrubber
+              index={4}
+              checkpoints={[
+                { at: 2, status: 'answered' },
+                { at: 6, status: 'skipped' },
+              ]}
+            />
+          </Cell>
+          <Cell label="on a checkpoint">
+            <SpecimenScrubber index={5} checkpoints={[{ at: 5, status: 'answered' }]} />
+          </Cell>
+          <Cell label="unavailable">
+            <SpecimenScrubber index={2} interactive={false} checkpoints={[{ at: 5, status: 'open' }]} />
+          </Cell>
+          <Cell label="focus">
+            <Force state="focus">
+              <SpecimenScrubber index={3} checkpoints={[{ at: 5, status: 'open' }]} />
+            </Force>
+          </Cell>
+          <Cell label="tooltip">
+            <span className={tooltipCls}>4 · Run the microtask</span>
+          </Cell>
+        </div>
+      </Section>
+
+      <Section
+        id="code"
+        title="Code pane"
+        note="github-dark tokens on zinc-900, the current line lit with the now bar and ▸, line numbers from 768. Long lines soft-wrap with a hanging indent and a continuation hairline (A4). The host note is reserved only when a step runs outside the code."
+      >
+        <div className="grid gap-6 md:grid-cols-2">
+          <Cell label="current line 2">
+            <div className="grid w-80 max-w-full">
+              <CodePane lines={CODE.lines} tokens={CODE.tokens} line={2} anchor={2} rows={{ narrow: 5, wide: 5 }} animate={false} />
+            </div>
+          </Cell>
+          <Cell label="host step (note)">
+            <div className="grid w-80 max-w-full">
+              <CodePane lines={CODE.lines} tokens={CODE.tokens} line="host" anchor={5} rows={{ narrow: 5, wide: 5 }} animate={false} hostNote />
+            </div>
+          </Cell>
+          <Cell label="soft wrap, current wrapped line">
+            <div className="grid w-64 max-w-full">
+              <CodePane
+                lines={LONG_CODE}
+                line={1}
+                anchor={1}
+                rows={{ narrow: codeRows(LONG_CODE, 26), wide: codeRows(LONG_CODE, 26) }}
+                animate={false}
+              />
+            </div>
+          </Cell>
+          <Cell label="finale: traced lines">
+            <div className="grid w-80 max-w-full">
+              <CodePane
+                lines={CODE.lines}
+                tokens={CODE.tokens}
+                rows={{ narrow: 5, wide: 5 }}
+                animate={false}
+                trace={{ lines: [1, 5, 4, 2], delaysMs: [0, 0, 0, 0] }}
+              />
+            </div>
+          </Cell>
+        </div>
+      </Section>
+
+      <Section
+        id="lanes"
+        title="Lanes and chips"
+        note="Borderless panels on the frame (R2). Chips share one neutral fill with the lane hue on the edge only (R1); a changed chip doubles its edge in its own hue; host chips are dashed; a collapsed tail reads +N more."
+      >
+        <div className="grid gap-2">
+          <SpecimenLane stack label="Call stack" kind="frame" chips={[{ id: 's1', label: 'script' }, { id: 's2', label: 'cb B' }]} focus={['s2']} />
+          <SpecimenLane label="Host (timers)" kind="host" chips={[{ id: 'h1', label: 'timer 0 ms → cb B' }]} focus={['h1']} />
+          <SpecimenLane
+            label="Microtasks"
+            kind="micro"
+            chips={[
+              { id: 'm1', label: 'then cb' },
+              { id: 'm2', label: 'cb micro 2' },
+            ]}
+            focus={['m2']}
+          />
+          <SpecimenLane
+            label="Tasks"
+            kind="task"
+            chips={[
+              { id: 't1', label: 'timer cb' },
+              { id: 't2', label: '+2 more', more: true },
+            ]}
+            focus={['t1']}
+          />
+          <SpecimenLane label="Tasks (empty)" kind="task" chips={[]} />
+        </div>
+      </Section>
+
+      <Section
+        id="checkbox"
+        title="Checkbox"
+        note="List keys: a real checkbox in each Before card, a drawn box in each After card (unknown is dashed, a socket waits for a landing check). Checked is ink on screen and a drawn tick on paper (R10)."
+      >
+        <div className="flex flex-wrap items-start gap-6">
+          <Cell label="unchecked">
+            <label className="flex h-11 items-center">
+              <CheckBox input={{ checked: false, onChange: noop, 'aria-label': 'unchecked' }} shown={false} />
+            </label>
+          </Cell>
+          <Cell label="checked">
+            <label className="flex h-11 items-center">
+              <CheckBox input={{ checked: true, onChange: noop, 'aria-label': 'checked' }} shown />
+            </label>
+          </Cell>
+          <Cell label="drawn: checked">
+            <CheckBox state />
+          </Cell>
+          <Cell label="drawn: empty">
+            <CheckBox state={false} />
+          </Cell>
+          <Cell label="drawn: unknown">
+            <CheckBox state="?" />
+          </Cell>
+          <Cell label="drawn: socket">
+            <CheckBox state="slot" />
           </Cell>
         </div>
       </Section>

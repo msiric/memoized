@@ -16,6 +16,7 @@ import {
   type Layer,
   type PaletteRef,
 } from '@/components/visualizations/primitives/tokens-v3'
+import { Viz } from '@/components/visualizations/Viz'
 import { SystemSpecimen, type PairRow, type RoleRow } from './SystemSpecimen'
 
 /**
@@ -73,6 +74,20 @@ export default function VisualizationSystemPage() {
         <div className="mx-auto mt-8 max-w-2xl lg:max-w-3xl">
           <SystemSpecimen roles={roleRows} pairs={pairRows} />
         </div>
+        {/* The substrates that live inside an engine (the console, the
+            list-keys connectors and state chips, the closures roles and their
+            hover dim) are shown by the engines themselves: the visual gate
+            (e2e/gates/visual.spec.ts) drives these to each state. */}
+        <Prose className="mt-12" data-specimen="engines">
+          <h2>Engines in their states</h2>
+          <p>The closures roles (glyph, header, hatch, edges, the traced path and its dim):</p>
+          <Viz id="environment-records" preset="factory-calls-vs-aliases" />
+          <Viz id="environment-records" preset="var-vs-let-loop" />
+          <p>The event loop (lanes, chips, the console and its finale):</p>
+          <Viz id="event-loop" />
+          <p>List keys (checkboxes, match lines, state chips, the verdict):</p>
+          <Viz id="list-keys" />
+        </Prose>
       </div>
     </div>
   )
