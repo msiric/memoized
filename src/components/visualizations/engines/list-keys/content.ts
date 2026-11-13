@@ -33,7 +33,7 @@ export const WRAPPER_TITLE = 'React identity: type at a slot'
  * stays within two lines on a 375 phone wherever the words allow.
  */
 export const LIST_RULE: Record<`${KeyStrategy}/${ListAction}`, string> = {
-  'index/insert-top': 'Index keys match by position, so each slot keeps its check as the items shift down.',
+  'index/insert-top': 'Index keys match by position, so the check stays in its slot, not with the item.',
   'index/delete-first': 'Index keys match by position, so the last slot unmounts and checks stay in place.',
   'index/append': 'Appending keeps earlier positions, so index keys are safe for append-only lists.',
   'index/reverse': 'Index keys match by position, so the checks stay in their slots as the items swap.',

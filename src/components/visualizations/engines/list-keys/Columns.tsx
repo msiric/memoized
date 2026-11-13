@@ -79,10 +79,14 @@ import { BEAT, HIGHLIGHT_MS, beatFade, beatTransition, type Beat, type RevealVie
  *   and the Before checks as history (R2M-15).
  * - Lime is the landing (Q9): the row that received the tracked check, and
  *   nothing else in the columns but its traced line. A lost check lands
- *   nowhere; its instance takes the removed role like any unmounted one. A
- *   row that shows another item's state, or lost its own, carries a neutral
- *   in-row badge (× or ✓, H3 R1) with the words for assistive tech and on
- *   hover, so the mismatch never depends on color (A7).
+ *   nowhere; its instance takes the removed role like any unmounted one.
+ * - An After badge says one thing (final polish): what happened to that
+ *   row's own item's check. ✓ it kept its check; × it lost it (the check
+ *   stayed in its slot). Rows whose item had no check carry none, and the
+ *   landing row never carries a × (lime already says the check lands
+ *   there): that it is another item's check is the verdict's rule and the
+ *   row's accessible description. The words travel for assistive tech and
+ *   on hover, so the mismatch never depends on color (A7).
  */
 
 const useIsoLayoutEffect =
@@ -230,9 +234,9 @@ function Spine({
 
 /**
  * An in-row verdict badge (D17, H3 R1): one glyph, in flow at the end of
- * the card's key line, never on the border. Neutral zinc for kept, lost and
- * "not its check"; rose only for an unmounted instance (the `removed` role).
- * The words travel as the accessible name and the tooltip.
+ * the card's key line, never on the border. Neutral zinc for the item's own
+ * check (✓ kept, × lost); rose only for an unmounted instance (the
+ * `removed` role). The words travel as the accessible name and the tooltip.
  */
 function StatusBadge({ glyph, removed, words }: { glyph: '×' | '✓'; removed?: boolean; words: string }) {
   return (
@@ -251,10 +255,28 @@ const cardStyle = { height: toRem(CARD.height) }
 const contentCls = 'flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2'
 const lineCls = 'flex min-w-0 items-center gap-2'
 
-const STATUS_TEXT: Record<NonNullable<AfterRow['status']>, string> = {
-  foreign: 'not its check',
+const STATUS_TEXT: Record<'lost' | 'kept', string> = {
   lost: 'lost its check',
   kept: 'kept its check',
+}
+
+/**
+ * What happened to the row's own item's check: kept (it followed the item),
+ * lost (it stayed in its slot), or null when the item had none.
+ */
+function ownFate(r: AfterRow, checks: ExploreState['checks']): 'kept' | 'lost' | null {
+  const own = BEFORE.indexOf(r.item)
+  if (own < 0 || !checks[r.item as 'milk' | 'dog']) return null
+  return r.from === own ? 'kept' : 'lost'
+}
+
+/** The row's accessible description of its state (and the badge's words). */
+function rowState(r: AfterRow, fate: 'kept' | 'lost' | null): string {
+  const shown =
+    r.status === 'foreign' && r.from !== null
+      ? `, shows ${ITEMS[BEFORE[r.from]].text}’s check: it stayed in its slot, not with its item`
+      : ''
+  return `${shown}${fate ? `, ${ITEMS[r.item].text} ${STATUS_TEXT[fate]}` : ''}`
 }
 
 /** An instance letter arrives with its line on the `highlight` beat (120 ms). */
@@ -398,12 +420,15 @@ function ListColumns({
             // into (no outline under it, R1M-08); it shows checked once landed.
             const waiting = destinations.has(rowId) && !landed
             const isDest = i === destination && landed
+            const fate = ownFate(r, s.checks)
+            // One meaning per badge: the item's own check. Never a × on the landing row.
+            const badge = fate === 'kept' || (fate === 'lost' && i !== destination) ? fate : null
             const describe = revealed
               ? `${ITEMS[r.item].text}, ${r.checked ? 'checked' : 'not checked'}, ${
                   mounted
                     ? `new instance ${r.instance}`
                     : `instance ${r.instance} reused from ${ITEMS[BEFORE[r.from!]].text}`
-                }${r.status ? `, ${STATUS_TEXT[r.status]}` : ''}`
+                }${i === destination ? ', the check lands here' : ''}${rowState(r, fate)}`
               : `${ITEMS[r.item].text}, state unknown until you predict`
             return (
               <li
@@ -436,11 +461,11 @@ function ListColumns({
                   </span>
                   <span className="flex min-w-0 items-center gap-1">
                     <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${r.key}`}</span>
-                    {/* The verdicts (kept, lost, not its check) arrive with the
+                    {/* The item's own check (kept or lost) arrives with the
                         dock's verdict, once every carried check has landed. */}
-                    {revealed && r.status && view.landed ? (
+                    {revealed && badge && view.landed ? (
                       <Arrive played={view.sequence} beat={BEAT.badges} className="ml-auto flex">
-                        <StatusBadge glyph={r.status === 'kept' ? '✓' : '×'} words={STATUS_TEXT[r.status]} />
+                        <StatusBadge glyph={badge === 'kept' ? '✓' : '×'} words={STATUS_TEXT[badge]} />
                       </Arrive>
                     ) : null}
                   </span>
