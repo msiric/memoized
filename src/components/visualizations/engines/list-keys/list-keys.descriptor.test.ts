@@ -112,7 +112,18 @@ describe('list-keys explorable machine', () => {
     expect(explore(r, { type: 'check', item: 'dog' })).toMatchObject({
       phase: 'ask',
     })
-    expect(explore(r, { type: 'again' })).toMatchObject({ phase: 'pick' })
+    expect(explore(r, { type: 'apply', action: 'reverse' })).toMatchObject({
+      phase: 'ask',
+      listAction: 'reverse',
+    })
+    expect(explore(r, { type: 'apply', action: 'insert-top' })).toMatchObject({ phase: 'ask' })
+  })
+
+  it('"Try another" moves to the next action and asks', () => {
+    const r = explore(start, { type: 'skip' })
+    expect(explore(r, { type: 'again' })).toMatchObject({ phase: 'ask', listAction: 'delete-first' })
+    const last = explore(explore(start, { type: 'apply', action: 'reverse' }), { type: 'skip' })
+    expect(explore(last, { type: 'again' })).toMatchObject({ phase: 'ask', listAction: 'insert-top', key: 'index' })
   })
 
   it('has nothing to predict when no row is checked', () => {
@@ -121,10 +132,10 @@ describe('list-keys explorable machine', () => {
     expect(explore(none, { type: 'answer', choice: 'wake' })).toBe(none)
   })
 
-  it('switches scenes into the pick phase', () => {
+  it('has no pick phase: a scene switch asks at once', () => {
     expect(explore(start, { type: 'scene', scene: 'wrapper' })).toMatchObject({
       scene: 'wrapper',
-      phase: 'pick',
+      phase: 'ask',
     })
   })
 })

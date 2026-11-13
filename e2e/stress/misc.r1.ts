@@ -386,9 +386,10 @@ const STATES: St[] = [
   { name: 'lk-ask', viz: 'list-keys', go: async () => {} },
   { name: 'lk-reveal', viz: 'list-keys', go: async (p) => void (await pacedClick(p, `${LK} [data-viz-focus="choice-0"]`, 1200)) },
   {
-    name: 'lk-pick',
+    // H3 R8: no pick state; "Try another" asks the next action.
+    name: 'lk-try-another',
     viz: 'list-keys',
-    go: async (p) => void (await pacedClick(p, `${LK} [data-viz-part="viz-back"]`, 500)),
+    go: async (p) => void (await pacedClick(p, `${LK} [data-viz-part="viz-again"]`, 500)),
   },
   { name: 'er-static', viz: 'environment-records', go: async () => {} },
 ]

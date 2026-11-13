@@ -316,7 +316,7 @@ test('list-keys interruptions', async ({ page }) => {
     await m('again')
     await f.locator('[data-viz-part="viz-again"]').click()
     await m('action')
-    await f.getByRole('button', { name: 'Insert at top', exact: true }).click()
+    await f.locator('[data-viz-focus=\"action-insert-top\"]').click()
   })
 
   // c. Resize across 768 80 ms into the reveal.

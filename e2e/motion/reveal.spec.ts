@@ -7,6 +7,7 @@ import {
   REVEAL,
   animated,
   hydrateListKeys,
+  lkChoose,
   mark,
   openGallery,
   recordAction,
@@ -184,16 +185,8 @@ test('event-loop reveal never plays on load or after an instant command, and sna
 // ---------------------------------------------------------------------------
 
 async function toAsk(page: Page, key: string, action: string, both = false) {
-  const f = page.locator(LK)
-  if ((await f.getAttribute('data-viz-mode')) === 'ask') await f.locator('[data-viz-part="viz-back"]').click()
-  if ((await f.getAttribute('data-viz-mode')) === 'reveal') await f.locator('[data-viz-part="viz-again"]').click()
-  await page.waitForTimeout(300)
-  if (both && !(await f.locator('input[type="checkbox"]').nth(1).isChecked()))
-    await f.locator('input[type="checkbox"]').nth(1).check()
-  await f.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { name: key }).click()
-  await page.waitForTimeout(300)
-  await f.getByRole('button', { name: action, exact: true }).click()
-  await page.waitForTimeout(400)
+  // H3 R8: the key and the action are always-visible controls.
+  await lkChoose(page, { both, key, action })
 }
 
 /** Each rider's last recorded box centre (frame coordinates) and its destination checkbox centre after landing. */
@@ -261,10 +254,16 @@ for (const [key, action, both, expectRides] of [
       if (Math.hypot(c.x - d.x, c.y - d.y) > 1.5)
         problems.push(`rider ${i} rests at (${c.x.toFixed(1)}, ${c.y.toFixed(1)}), its checkbox is at (${d.x.toFixed(1)}, ${d.y.toFixed(1)})`)
     }
-    // The destination ticks after its rider lands.
+    // H3 R6: the tick rides at full strength and never redraws on landing
+    // (no fade and redraw, R1M-05); the landing is the rider's own settle.
     const ticks = parts.filter((p) => p.kind === 'tick')
-    if (ticks.length !== want.length) problems.push(`${ticks.length} ticks drew, expected ${want.length}`)
-    for (const t of ticks) if (!moving.some((m) => t.start >= m.end - 34)) problems.push('a tick draws before its checkbox lands')
+    if (ticks.length) problems.push(`${ticks.length} ticks redrew on landing`)
+    // H3 R5: the verdict fades in only after the last rider has landed.
+    const verdict = parts.filter((p) => p.kind === 'verdict')
+    const lastLanding = Math.max(...moving.map((m) => m.end))
+    if (verdict.length !== 1) problems.push(`${verdict.length} verdict fades, expected 1`)
+    for (const v of verdict)
+      if (v.start < lastLanding - 34) problems.push(`the verdict starts at ${v.start} ms, before the landing at ${lastLanding} ms`)
     const end = Math.max(...parts.map((p) => p.end))
     if (end > REVEAL_TOKEN.maxMs) problems.push(`the reveal ends at ${end} ms`)
     await expect(f.locator('[data-viz-reveal="rider"]')).toHaveCount(0)
@@ -316,6 +315,8 @@ test('list-keys ride snaps when interrupted (leaving the reveal, a resize)', asy
   if (late.length) problems.push(`riders still moving after the resize: ${late.map((p) => p.label).join('; ')}`)
   if (await f.locator('[data-viz-reveal="rider"]').count()) problems.push('a rider survived the resize')
   await expect(f.locator('[data-row="after-1"] [data-check] path')).toHaveCount(1)
+  // The verdict lands with it, without a fade (R1M-17).
+  await expect(f).toHaveAttribute('data-viz-landed', 'true')
   report['lk-interrupt'] = problems
   strictCheck('list-keys ride interruptions', problems)
 })

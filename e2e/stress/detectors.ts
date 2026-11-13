@@ -603,13 +603,21 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     const after = [...frame.querySelectorAll('[data-viz-part="after"] li[data-row]')].map((e) =>
       R(e.getBoundingClientRect()),
     )
-    const cy = (r: R) => (r.t + r.b) / 2
-    const nearest = (rs: R[], y: number) => {
+    // H3 R6: a line meets its card at the checkbox's height (the checkbox
+    // sits on the edge that faces the lines), side by side or stacked (R9).
+    const checkY = (side: string, i: number, r: R) => {
+      const box = frame.querySelector(`[data-viz-part="${side}"] li[data-row]:nth-of-type(${i + 1}) [data-lk-check]`)
+      if (!box) return (r.t + r.b) / 2
+      const b = box.getBoundingClientRect()
+      return b.top + b.height / 2
+    }
+    const nearest = (rs: R[], y: number, side: string) => {
       let best = -1
       let d = Infinity
       rs.forEach((r, i) => {
-        if (Math.abs(cy(r) - y) < d) {
-          d = Math.abs(cy(r) - y)
+        const dy = Math.abs(checkY(side, i, r) - y)
+        if (dy < d) {
+          d = dy
           best = i
         }
       })
@@ -622,17 +630,18 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
       if (!m) continue
       const a = p.getPointAtLength(0).matrixTransform(m)
       const z = p.getPointAtLength(p.getTotalLength()).matrixTransform(m)
-      const s = nearest(before, a.y)
-      const t = nearest(after, z.y)
+      const s = nearest(before, a.y, 'before')
+      const t = nearest(after, z.y, 'after')
       if (s.i < 0 || t.i < 0) continue
       got[t.i] = s.i
       const sx2 = Math.abs(a.x - before[s.i].r)
-      const tx2 = Math.abs(z.x - after[t.i].l)
+      // Side by side the line enters the After card's left edge; stacked, its right edge.
+      const tx2 = Math.min(Math.abs(z.x - after[t.i].l), Math.abs(z.x - after[t.i].r))
       if (s.d > 2 || t.d > 2 || sx2 > 2 || tx2 > 2)
         push({
           detector: 'edge-detached',
           sig: `list-keys reused ${s.i}->${t.i}`,
-          msg: `match line ${s.i}->${t.i}: start ${n1(sx2)}px from before-card edge (dy ${n1(s.d)}), end ${n1(tx2)}px from after-card edge (dy ${n1(t.d)})`,
+          msg: `match line ${s.i}->${t.i}: start ${n1(sx2)}px from before-card edge (dy ${n1(s.d)} from its checkbox), end ${n1(tx2)}px from after-card edge (dy ${n1(t.d)})`,
           rects: [page(before[s.i]), page(after[t.i])],
           data: { sx: n1(sx2), sy: n1(s.d), tx: n1(tx2), ty: n1(t.d) },
         })

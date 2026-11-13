@@ -1,6 +1,5 @@
 'use client'
 
-import { m } from 'framer-motion'
 import {
   useEffect,
   useLayoutEffect,
@@ -8,11 +7,13 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { m } from 'framer-motion'
 import { buttonClasses } from '../../primitives/Button'
 import { cn as clsx } from '../../primitives/cn'
 import { Tag as Badge } from '../../primitives/Tag'
 import {
   DASH,
+  EASE,
   focusRingHas,
   ink,
   now,
@@ -25,9 +26,18 @@ import {
   type as typeScale,
 } from '../../primitives/tokens-v3'
 import { transitionFor, type MotionGate } from '../../shell/motion'
-import { CheckRiders, type Ride } from './CheckRider'
 import { toRem } from '../../substrates/units'
-import { CARD, COLUMNS, COLUMNS_HEIGHT, rowTop } from './layout'
+import { CheckBox } from './CheckBox'
+import { RevealDirector, type Ride } from './CheckRider'
+import {
+  AFTER_TOP,
+  CARD,
+  CHECK_Y,
+  COLUMNS,
+  COLUMNS_HEIGHT,
+  STACKED_HEIGHT,
+  rowTop,
+} from './layout'
 import type { ExploreAction, ExploreState } from './machine'
 import {
   BEFORE,
@@ -40,33 +50,35 @@ import {
   type AfterRow,
 } from './model'
 import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
+import { HIGHLIGHT_MS, verdictFade, type RevealView } from './reveal'
 
 /**
  * The stage's Before and After columns with the match lines between them
  * (spec §2.2 "Match line", §8.3).
  *
  * - A card is one instance (a fiber with its DOM node and state). Its spine
- *   names the instance. A mounted instance is drawn dashed, spine included,
- *   with a dashed stub from an open circle: shape, not a `new` word (D22).
- *   An unmounted instance is dashed in the removed role with one ×.
- * - Match lines: solid = reused, a dashed stub = mounted, a × stub = unmounted.
- *   Each line carries `data-from` and `data-to` (row ids) for the harness.
- *   The state chip (✓ or the count) travels along its own line and rests at
- *   its After end, so chips of crossing lines never meet (M09, M11).
- * - The reveal (D21, `CheckRider.tsx`): each carried checkbox rides its own
- *   line from the Before row into the After row its instance now renders and
- *   ticks there; that row's emphasis and badge arrive as it lands.
+ *   names the instance and sits on the card's outer edge; the checkbox sits
+ *   on the edge that faces the lines, on the first line, so every match line
+ *   leaves and enters a card at checkbox height (H3 R6). A mounted instance
+ *   is drawn dashed, spine included, with a dashed stub from an open circle;
+ *   an unmounted one is dashed in the removed role with one ×.
+ * - Side by side (Before | lines | After) wherever two cards keep their text
+ *   whole; under very large text the columns stack, Before above After, and
+ *   the lines run in a rail beside them (H3 R9). The CSS for both lives in
+ *   `stackCss` (container queries on the frame, so the server markup is final).
+ * - The reveal (D21, `CheckRider.tsx`): each carried checkbox lifts out of its
+ *   Before box (which empties), rides its own line as the line draws, and
+ *   settles into the After box its instance now renders. Each After row's
+ *   instance shows when its line reaches it; marks and badges arrive with
+ *   the verdict, once every check has landed (H3 R5).
  * - The row now showing the tracked check carries the `now` emphasis inside
  *   the card (D5). A row that shows another item's state, or lost its own,
- *   carries an in-row badge (× or ✓, D17) with the words for assistive tech
- *   and on hover, so the mismatch never depends on color (A7).
+ *   carries a neutral in-row badge (× or ✓, H3 R1) with the words for
+ *   assistive tech and on hover, so the mismatch never depends on color (A7).
  */
 
 const useIsoLayoutEffect =
   typeof window === 'undefined' ? useEffect : useLayoutEffect
-
-const COLS = `minmax(0,${toRem(COLUMNS.cardMax)}) minmax(${toRem(COLUMNS.linesNarrow)},1fr) minmax(0,${toRem(COLUMNS.cardMax)})`
-const center = (i: number) => rowTop(i) + CARD.height / 2
 
 /** Wrapper geometry: a box (label, then the Counter card), then the +1 button. */
 const BOX = { pad: 4, label: 16, gap: 4, bottom: 8, border: 1 } as const
@@ -80,82 +92,71 @@ export type ColumnsProps = {
   s: ExploreState
   interactive: boolean
   gate: MotionGate
-  /** Animate the reveal (lines draw, the state chip moves). */
-  play: boolean
+  view: RevealView
   dispatch: (a: ExploreAction) => void
 }
 
-export function Columns({
-  s,
-  interactive,
-  gate,
-  play,
-  dispatch,
-}: ColumnsProps) {
+/** The gutter's (or rail's) width in layout units, the root scale, and the layout. */
+type LinesBox = { w: number; k: number; stacked: boolean }
+
+export function Columns({ s, interactive, gate, view, dispatch }: ColumnsProps) {
   const linesRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
-  // The reveal's rides (D21): only on a played list reveal at full motion.
-  const revealKey = `${s.reveals}:${gate.epoch}`
-  const rides = play && !gate.reduce && s.phase === 'reveal' && s.scene === 'list' ? ridesOf(s) : []
-  const [landed, setLanded] = useState<{ key: string; to: readonly string[] }>({ key: '', to: [] })
-  const pending = rides
-    .map((r) => r.to)
-    .filter((to) => !(landed.key === revealKey && landed.to.includes(to)))
-  const onLand = (to: string) =>
-    setLanded((l) => (l.key === revealKey ? (l.to.includes(to) ? l : { key: l.key, to: [...l.to, to] }) : { key: revealKey, to: [to] }))
-  // The gutter's width in layout units (px at a 16 px root) and the root
-  // scale, so lines drawn in units stay on their cards at any text size (D19).
-  const [box, setBox] = useState<LinesBox>({ w: COLUMNS.linesNarrow, k: 1 })
+  // Layout width, not the painted box: `offsetWidth` ignores CSS zoom and
+  // transforms on ancestors, so lines drawn in units stay on their cards
+  // under any zoom or text size (D19, R1 correctness R13).
+  const [box, setBox] = useState<LinesBox>({ w: COLUMNS.linesNarrow, k: 1, stacked: false })
   useIsoLayoutEffect(() => {
     const el = linesRef.current
     if (!el) return
     const measure = () => {
       const k = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
-      const w = Math.round((el.getBoundingClientRect().width / k) * 10) / 10
-      setBox((b) => (b.w === w && b.k === k ? b : { w, k }))
+      const w = Math.round((el.offsetWidth / k) * 10) / 10
+      // Stacked when the After block sits under the Before block (the
+      // container query in `stack-css.ts` decides; this reads its result).
+      const root = rootRef.current
+      const before = root?.querySelector<HTMLElement>('[data-lk-area="before"]')
+      const after = root?.querySelector<HTMLElement>('[data-lk-area="after"]')
+      const stacked = Boolean(before && after && after.offsetTop > before.offsetTop + 1)
+      setBox((b) => (b.w === w && b.k === k && b.stacked === stacked ? b : { w, k, stacked }))
     }
     measure()
     if (typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(measure)
     ro.observe(el)
+    if (rootRef.current) ro.observe(rootRef.current)
     return () => ro.disconnect()
   }, [])
+
+  const rides = s.phase === 'reveal' && s.scene === 'list' ? ridesOf(s) : []
 
   return (
     <div
       ref={rootRef}
       data-viz-region="columns"
-      className="relative grid min-w-0"
-      style={{ height: toRem(COLUMNS_HEIGHT), gridTemplateColumns: COLS }}
+      data-lk-cols
+      data-lk-scene={s.scene}
+      className="relative min-w-0"
     >
       {s.scene === 'list' ? (
-        <ListColumns
-          s={s}
-          interactive={interactive}
-          dispatch={dispatch}
-          pending={pending}
-          landing={rides.length > 0}
-          gate={gate}
-        />
+        <ListColumns s={s} interactive={interactive} dispatch={dispatch} view={view} rides={rides} />
       ) : (
-        <WrapperColumns s={s} interactive={interactive} dispatch={dispatch} />
+        <WrapperColumns s={s} interactive={interactive} dispatch={dispatch} view={view} />
       )}
-      <div
-        ref={linesRef}
-        aria-hidden
-        className="relative col-start-2 row-start-1 min-w-0"
-      >
+      <div ref={linesRef} aria-hidden data-lk-area="lines" data-lk-lines className="relative min-w-0">
         {s.phase === 'reveal' ? (
-          <Lines key={revealKey} s={s} box={box} gate={gate} play={play} />
+          <Lines key={view.key} s={s} box={box} view={view} gate={gate} />
         ) : null}
       </div>
-      {pending.length ? (
-        <CheckRiders
-          key={revealKey}
-          rides={rides.filter((r) => pending.includes(r.to))}
+      {view.directing ? (
+        <RevealDirector
+          key={view.key}
+          scene={s.scene}
+          rides={rides}
           rootRef={rootRef}
-          linesRef={linesRef}
-          onLand={onLand}
+          onArrive={view.onArrive}
+          onLand={view.onLand}
+          onLanded={view.onLanded}
         />
       ) : null}
     </div>
@@ -177,83 +178,57 @@ function ColumnLabel({ children }: { children: ReactNode }) {
   )
 }
 
-function Spine({ label, dashed }: { label: string; dashed?: boolean }) {
+/**
+ * The instance letter. Before a reveal resolves it shows `?`; on the reveal
+ * the letter takes its place when the row's line reaches it (a 120 ms fade).
+ */
+function Spine({
+  label,
+  dashed,
+  side,
+  played,
+}: {
+  label: string
+  dashed?: boolean
+  /** Which column: the After spine moves to the outer edge beside the lines. */
+  side: 'before' | 'after'
+  played?: boolean
+}) {
   return (
     <span
       aria-hidden
+      data-lk-spine={side}
+      data-viz-part="spine"
       className={clsx(
-        'flex w-7 shrink-0 flex-col items-center justify-center whitespace-nowrap border-r',
+        'flex w-7 shrink-0 flex-col items-center justify-center whitespace-nowrap',
+        side === 'before' ? 'border-r' : 'border-x',
         typeScale.glyphHeader.cls,
         dashed ? 'border-dashed border-zinc-500' : stroke.hairline,
         label === '?' ? ink.muted : ink.base,
       )}
     >
-      {label}
-    </span>
-  )
-}
-
-const CHECK_PATH = 'M3.5 8.5 6.5 11.5 12.5 5'
-
-/** A drawn (not interactive) checkbox: filled with a ✓ when checked, `?` while unknown. */
-function CheckGlyph({ state, tick }: { state: boolean | '?'; tick?: MotionGate }) {
-  if (state === '?')
-    // Unknown until the reveal: an empty dashed slot. The row's one `?` is
-    // its instance letter (D22: no duplicate placeholders).
-    return (
-      <span
-        aria-hidden
-        className={clsx('flex h-4 w-4 shrink-0 border border-dashed border-zinc-500', radius.chip.cls)}
-      />
-    )
-  return (
-    <span
-      aria-hidden
-      data-check
-      className={clsx(
-        'flex h-4 w-4 shrink-0 items-center justify-center border',
-        radius.chip.cls,
-        state
-          ? 'border-zinc-100 bg-zinc-100 print:border-zinc-900 print:bg-zinc-900'
-          : 'border-zinc-400',
+      {played && label !== '?' ? (
+        <m.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={ARRIVE_FADE}>
+          {label}
+        </m.span>
+      ) : (
+        label
       )}
-    >
-      {state ? (
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          className="text-zinc-900 print:text-white"
-        >
-          {/* On the reveal's landing the tick draws in (D21). */}
-          <m.path
-            d={CHECK_PATH}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            data-viz-reveal={tick ? 'tick' : undefined}
-            initial={tick ? { pathLength: 0 } : false}
-            animate={{ pathLength: 1 }}
-            transition={tick ? transitionFor('highlight', tick) : { duration: 0 }}
-          />
-        </svg>
-      ) : null}
     </span>
   )
 }
 
 /**
- * An in-row status badge (D17): one glyph, in flow at the end of the card's
- * key line, never on the border. The words travel as the accessible name and
- * the tooltip.
+ * An in-row verdict badge (D17, H3 R1): one glyph, in flow at the end of
+ * the card's key line, never on the border. Neutral zinc for kept, lost and
+ * "not its check"; rose only for an unmounted instance (the `removed` role).
+ * The words travel as the accessible name and the tooltip.
  */
-function StatusBadge({ tone, words }: { tone: 'removed' | 'kept'; words: string }) {
+function StatusBadge({ glyph, removed, words }: { glyph: '×' | '✓'; removed?: boolean; words: string }) {
   return (
-    <Badge tone={tone === 'removed' ? 'removed' : 'neutral'} className="ml-auto h-4 w-3 justify-center bg-transparent px-0">
+    <Badge tone={removed ? 'removed' : 'neutral'} className="ml-auto h-4 w-3 justify-center bg-transparent px-0">
       <span aria-hidden title={words}>
-        {tone === 'removed' ? '×' : '✓'}
+        {glyph}
       </span>
       <span className="sr-only">{words}</span>
     </Badge>
@@ -263,6 +238,8 @@ function StatusBadge({ tone, words }: { tone: 'removed' | 'kept'; words: string 
 /** Cards are glyphs: zinc-800 fill, 8 px corners, 1 px `line` outline (D1, drift C10). */
 const cardCls = clsx('relative flex min-w-0 overflow-visible border', radius.glyph.cls, surface.glyph)
 const cardStyle = { height: toRem(CARD.height) }
+const contentCls = 'flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2'
+const lineCls = 'flex min-w-0 items-center gap-2'
 
 const STATUS_TEXT: Record<NonNullable<AfterRow['status']>, string> = {
   foreign: 'not its check',
@@ -270,38 +247,49 @@ const STATUS_TEXT: Record<NonNullable<AfterRow['status']>, string> = {
   kept: 'kept its check',
 }
 
+/** An instance letter arrives with its line on the `highlight` beat (120 ms). */
+const ARRIVE_FADE = { duration: HIGHLIGHT_MS / 1000, ease: EASE }
+
+function Arrive({ played, children, className }: { played: boolean; children: ReactNode; className?: string }) {
+  return (
+    <m.span
+      className={className}
+      initial={played ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
+      transition={played ? verdictFade : { duration: 0 }}
+    >
+      {children}
+    </m.span>
+  )
+}
+
 function ListColumns({
   s,
   interactive,
   dispatch,
-  pending,
-  landing,
-  gate,
+  view,
+  rides,
 }: {
   s: ExploreState
   interactive: boolean
   dispatch: (a: ExploreAction) => void
-  /** After rows still waiting for their carried checkbox (D21). */
-  pending: readonly string[]
-  /** This reveal plays its rides: landed rows tick and fade their marks in. */
-  landing: boolean
-  gate: MotionGate
+  view: RevealView
+  rides: readonly Ride[]
 }) {
   const action = s.listAction
-  const outcome = action ? LIST_OUTCOMES[`${s.key}/${action}`] : null
-  const rows =
-    action && outcome ? afterRows(s.key, action, outcome, s.checks) : []
-  const gone = outcome && s.phase === 'reveal' ? unmountedRows(outcome) : []
-  const tracked = trackedRow(s.checks)
+  const outcome = LIST_OUTCOMES[`${s.key}/${action}`]
+  const rows = afterRows(s.key, action, outcome, s.checks)
   const revealed = s.phase === 'reveal'
+  const gone = revealed ? unmountedRows(outcome) : []
+  const tracked = trackedRow(s.checks)
   const destination =
-    revealed && tracked !== null
-      ? rows.findIndex((r) => r.from === tracked)
-      : -1
+    revealed && tracked !== null ? rows.findIndex((r) => r.from === tracked) : -1
+  const sources = new Set(rides.map((r) => r.from))
+  const destinations = new Set(rides.map((r) => r.to))
 
   return (
     <>
-      <div className="col-start-1 row-start-1 min-w-0" data-viz-part="before">
+      <div className="min-w-0" data-lk-area="before" data-viz-part="before">
         <ColumnLabel>Before</ColumnLabel>
         <ul
           className="m-0 flex list-none flex-col p-0"
@@ -310,72 +298,72 @@ function ListColumns({
         >
           {BEFORE.map((id, i) => {
             const item = id as 'milk' | 'dog'
-            const isGone = gone.includes(i as 0 | 1)
+            const rowId = `before-${i}`
+            const isGone = gone.includes(i as 0 | 1) && view.arrived(rowId)
             // The tracked check was lost: its unmounted instance is the one highlight.
-            const isLostFocus = revealed && tracked === i && destination === -1
+            const isLostFocus = revealed && view.landed && tracked === i && destination === -1
+            // Its check is riding (D21, H3 R6): the box reads empty until every
+            // check has landed; the accessible state stays checked.
+            const riding = sources.has(rowId) && view.directing && !view.landed
             const key = keyText(s.key, id, i, 'before')
             return (
               <li
                 key={id}
                 className="m-0 p-0"
-                data-row={`before-${i}`}
+                data-row={rowId}
                 data-focus={isLostFocus || undefined}
               >
                 <label
                   className={clsx(
                     cardCls,
-                    'cursor-pointer',
+                    'group',
+                    interactive ? 'cursor-pointer' : 'cursor-default',
                     focusRingHas,
+                    transitionCls.feedback,
                     isGone ? clsx('border-dashed', stroke.removed) : stroke.line,
                     isLostFocus && now.glyph,
-                    !interactive && 'cursor-default',
                   )}
                   style={cardStyle}
                 >
-                  <Spine label={BEFORE_INSTANCES[i]} dashed={isGone} />
-                  <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2">
-                    <span className="flex min-w-0 items-center gap-1.5 xs:gap-2">
-                      <span className="relative flex h-4 w-4 shrink-0">
-                        <input
-                          type="checkbox"
-                          data-viz-focus={`check-${id}`}
-                          checked={s.checks[item]}
-                          aria-disabled={!interactive || undefined}
-                          tabIndex={interactive ? 0 : -1}
-                          onChange={() =>
-                            interactive && dispatch({ type: 'check', item })
-                          }
-                          aria-label={`${ITEMS[id].text}, instance ${BEFORE_INSTANCES[i]}, key ${key}`}
-                          className={clsx(
-                            'peer m-0 h-4 w-4 cursor-[inherit] appearance-none rounded border border-zinc-400 bg-transparent outline-none',
-                            transitionCls.feedback,
-                            'checked:border-zinc-100 checked:bg-zinc-100 print:checked:border-zinc-900 print:checked:bg-zinc-900',
-                          )}
-                        />
-                        <svg
-                          aria-hidden
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          className="pointer-events-none absolute inset-0 hidden text-zinc-900 peer-checked:block print:text-white"
-                        >
-                          <path
-                            d={CHECK_PATH}
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </span>
-                      <span className={clsx('min-w-0 truncate', typeScale.item.cls, ink.base)}>
+                  {/* H3 R13: the card toggles its checkbox, so it answers the
+                      pointer like every control: a white/5 step on hover
+                      devices and white/10 while pressed. */}
+                  {interactive ? (
+                    <span
+                      aria-hidden
+                      className={clsx(
+                        'pointer-events-none absolute inset-0 rounded-[inherit] print:hidden',
+                        'group-can-hover:bg-white/5 group-active:bg-white/10',
+                        transitionCls.feedback,
+                      )}
+                    />
+                  ) : null}
+                  <Spine label={BEFORE_INSTANCES[i]} dashed={isGone} side="before" />
+                  <span className={contentCls}>
+                    <span className={lineCls}>
+                      <span className={clsx('min-w-0 flex-1 truncate', typeScale.item.cls, ink.base)}>
                         {ITEMS[id].text}
                       </span>
+                      <CheckBox
+                        input={{
+                          'data-viz-focus': `check-${id}`,
+                          checked: s.checks[item],
+                          'aria-disabled': !interactive || undefined,
+                          tabIndex: interactive ? 0 : -1,
+                          onChange: () => interactive && dispatch({ type: 'check', item }),
+                          'aria-label': `${ITEMS[id].text}, instance ${BEFORE_INSTANCES[i]}, key ${key}`,
+                        }}
+                        shown={s.checks[item] && !riding}
+                        settle={view.played}
+                      />
                     </span>
                     <span className="flex min-w-0 items-center gap-1">
                       <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${key}`}</span>
-                      {isGone ? <StatusBadge tone="removed" words="unmounted" /> : null}
+                      {isGone ? (
+                        <Arrive played={view.fade} className="ml-auto flex">
+                          <StatusBadge glyph="×" removed words="unmounted" />
+                        </Arrive>
+                      ) : null}
                     </span>
                   </span>
                 </label>
@@ -385,101 +373,76 @@ function ListColumns({
         </ul>
       </div>
 
-      <div className="col-start-3 row-start-1 min-w-0" data-viz-part="after">
+      <div className="min-w-0" data-lk-area="after" data-viz-part="after">
         <ColumnLabel>After</ColumnLabel>
-        {s.phase === 'pick' || !action ? (
-          <Placeholder>Pick an action</Placeholder>
-        ) : (
-          <ul
-            className="m-0 flex list-none flex-col p-0"
-            style={{ gap: toRem(CARD.gap) }}
-            aria-label="After"
-          >
-            {rows.map((r, i) => {
-              const mounted = r.from === null
-              // A row waiting for its checkbox shows an empty box and no
-              // marks yet; they arrive with the checkbox (D21).
-              const waiting = pending.includes(`after-${i}`)
-              const isDest = i === destination && !waiting
-              const describe = revealed
-                ? `${ITEMS[r.item].text}, ${r.checked ? 'checked' : 'not checked'}, ${
-                    mounted
-                      ? `new instance ${r.instance}`
-                      : `instance ${r.instance} reused from ${ITEMS[BEFORE[r.from!]].text}`
-                  }${r.status ? `, ${STATUS_TEXT[r.status]}` : ''}`
-                : `${ITEMS[r.item].text}, state unknown until you predict`
-              return (
-                <li
-                  key={`${r.item}`}
-                  data-row={`after-${i}`}
-                  data-instance={revealed ? r.instance : undefined}
-                  data-checked={revealed ? String(r.checked) : undefined}
-                  data-status={revealed ? (r.status ?? '') : undefined}
-                  data-focus={isDest || undefined}
-                  className={clsx(
-                    cardCls,
-                    'm-0 p-0',
-                    revealed && mounted ? 'border-dashed border-zinc-500' : stroke.line,
-                    isDest && now.glyph,
-                    landing && transitionCls.feedback,
-                  )}
-                  style={cardStyle}
-                >
-                  <span className="sr-only">{describe}</span>
-                  <Spine label={revealed ? r.instance : '?'} dashed={revealed && mounted} />
-                  <span
-                    aria-hidden
-                    className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2"
-                  >
-                    <span className="flex min-w-0 items-center gap-1.5 xs:gap-2">
-                      <CheckGlyph
-                        state={revealed ? (waiting ? false : r.checked) : '?'}
-                        tick={landing && r.checked && !waiting ? gate : undefined}
-                      />
-                      <span className={clsx('min-w-0 truncate', typeScale.item.cls, ink.base)}>
-                        {ITEMS[r.item].text}
-                      </span>
-                    </span>
-                    <span className="flex min-w-0 items-center gap-1">
-                      <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${r.key}`}</span>
-                      {/* The verdicts (kept, lost, not its check) arrive once every
-                          carried checkbox has landed: the ride tells it first. */}
-                      {revealed && r.status && !pending.length ? (
-                        <m.span
-                          className="ml-auto flex"
-                          initial={landing ? { opacity: 0 } : false}
-                          animate={{ opacity: 1 }}
-                          transition={transitionFor('highlight', gate)}
-                        >
-                          <StatusBadge tone={r.status === 'kept' ? 'kept' : 'removed'} words={STATUS_TEXT[r.status]} />
-                        </m.span>
-                      ) : null}
+        <ul
+          className="m-0 flex list-none flex-col p-0"
+          style={{ gap: toRem(CARD.gap) }}
+          aria-label="After"
+        >
+          {rows.map((r, i) => {
+            const rowId = `after-${i}`
+            const mounted = r.from === null
+            const arrived = revealed && view.arrived(rowId)
+            const landed = view.landedRow(rowId)
+            // A row waiting for its check is an empty slot the rider settles
+            // into (no outline under it, R1M-08); it shows checked once landed.
+            const waiting = destinations.has(rowId) && !landed
+            const isDest = i === destination && landed
+            const describe = revealed
+              ? `${ITEMS[r.item].text}, ${r.checked ? 'checked' : 'not checked'}, ${
+                  mounted
+                    ? `new instance ${r.instance}`
+                    : `instance ${r.instance} reused from ${ITEMS[BEFORE[r.from!]].text}`
+                }${r.status ? `, ${STATUS_TEXT[r.status]}` : ''}`
+              : `${ITEMS[r.item].text}, state unknown until you predict`
+            return (
+              <li
+                key={`${r.item}`}
+                data-row={rowId}
+                data-lk-flip
+                data-instance={revealed ? r.instance : undefined}
+                data-checked={revealed ? String(r.checked) : undefined}
+                data-status={revealed ? (r.status ?? '') : undefined}
+                data-focus={isDest || undefined}
+                className={clsx(
+                  cardCls,
+                  'm-0 p-0',
+                  arrived && mounted ? 'border-dashed border-zinc-500' : stroke.line,
+                  isDest && now.glyph,
+                  view.played && transitionCls.feedback,
+                )}
+                style={cardStyle}
+              >
+                <span className="sr-only">{describe}</span>
+                <span aria-hidden className={contentCls}>
+                  <span data-lk-flip className={lineCls}>
+                    <CheckBox
+                      state={!arrived ? '?' : waiting ? 'slot' : r.checked}
+                      settle={view.played}
+                    />
+                    <span className={clsx('min-w-0 flex-1 truncate', typeScale.item.cls, ink.base)}>
+                      {ITEMS[r.item].text}
                     </span>
                   </span>
-                </li>
-              )
-            })}
-          </ul>
-        )}
+                  <span className="flex min-w-0 items-center gap-1">
+                    <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${r.key}`}</span>
+                    {/* The verdicts (kept, lost, not its check) arrive with the
+                        dock's verdict, once every carried check has landed. */}
+                    {revealed && r.status && view.landed ? (
+                      <Arrive played={view.fade} className="ml-auto flex">
+                        <StatusBadge glyph={r.status === 'kept' ? '✓' : '×'} words={STATUS_TEXT[r.status]} />
+                      </Arrive>
+                    ) : null}
+                  </span>
+                </span>
+                <Spine label={arrived ? r.instance : '?'} dashed={arrived && mounted} side="after" played={view.played && arrived && !view.landed} />
+              </li>
+            )
+          })}
+        </ul>
       </div>
     </>
-  )
-}
-
-function Placeholder({ children }: { children: ReactNode }) {
-  return (
-    <div
-      className={clsx(
-        'flex items-center justify-center border border-dashed px-2 text-center',
-        radius.glyph.cls,
-        stroke.hairline,
-        typeScale.item.cls,
-        ink.muted,
-      )}
-      style={{ height: toRem(COLUMNS_HEIGHT - COLUMNS.label - COLUMNS.labelGap) }}
-    >
-      {children}
-    </div>
   )
 }
 
@@ -550,8 +513,8 @@ function CounterCard({
       )}
       style={cardStyle}
     >
-      <Spine label={instance} dashed={mounted} />
-      <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-1 xs:px-2">
+      <Spine label={instance} dashed={mounted} side="before" />
+      <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-2">
         <span className={clsx('truncate', typeScale.item.cls, ink.base)}>Counter</span>
         <span className="flex min-w-0 items-center gap-1">
           <span className={clsx('truncate', typeScale.meta.cls, ink.secondary)}>{count}</span>
@@ -565,24 +528,27 @@ function WrapperColumns({
   s,
   interactive,
   dispatch,
+  view,
 }: {
   s: ExploreState
   interactive: boolean
   dispatch: (a: ExploreAction) => void
+  view: RevealView
 }) {
   const action = s.wrapperAction
-  const revealed = s.phase === 'reveal'
-  const o = action ? WRAPPER_OUTCOMES[action] : null
+  // The outcome shows once the lines have drawn (H3 R5).
+  const revealed = s.phase === 'reveal' && view.landed
+  const o = WRAPPER_OUTCOMES[action]
   const afterTag = action === 'type' ? '<span>' : '<div>'
-  const lost = revealed && o && !o.counterReused
+  const lost = revealed && !o.counterReused
   return (
     <>
-      <div className="col-start-1 row-start-1 min-w-0" data-viz-part="before">
+      <div className="min-w-0" data-lk-area="before" data-viz-part="before">
         <ColumnLabel>Before</ColumnLabel>
         <WrapperBox
           tag="<div>"
-          removed={Boolean(lost)}
-          badge={lost ? <StatusBadge tone="removed" words="unmounted" /> : null}
+          removed={lost}
+          badge={lost ? <Arrive played={view.fade} className="flex"><StatusBadge glyph="×" removed words="unmounted" /></Arrive> : null}
         >
           <CounterCard instance="A" count={`count ${s.count}`} />
         </WrapperBox>
@@ -593,51 +559,41 @@ function WrapperColumns({
           aria-disabled={!interactive || undefined}
           tabIndex={interactive ? 0 : -1}
           onClick={() => interactive && dispatch({ type: 'increment' })}
-          className={clsx(buttonClasses({ variant: 'secondary', unavailable: !interactive }), 'mt-2 w-full')}
+          className={clsx(buttonClasses({ variant: 'secondary', unavailable: !interactive }), 'mt-2 w-full print:hidden')}
         >
           Add 1
         </button>
       </div>
-      <div className="col-start-3 row-start-1 min-w-0" data-viz-part="after">
+      <div className="min-w-0" data-lk-area="after" data-viz-part="after">
         <ColumnLabel>After</ColumnLabel>
-        {s.phase === 'pick' || !action || !o ? (
-          <Placeholder>Pick a change</Placeholder>
-        ) : (
-          <div
-            data-instance={revealed ? (o.counterReused ? 'A' : 'B') : undefined}
-            data-count={
-              revealed ? String(o.counterReused ? s.count : 0) : undefined
-            }
-          >
-            <span className="sr-only">
-              {revealed
-                ? o.counterReused
-                  ? `The same <div>, now with className on. Counter instance A reused, count ${s.count}.`
-                  : 'A new <span>. Counter instance A unmounted; new instance B mounted with count 0.'
-                : `${action === 'class' ? '<div className="on">' : afterTag} wrapping Counter, count unknown until you predict.`}
-            </span>
-            <div aria-hidden>
-              <WrapperBox
-                tag={afterTag}
-                dashed={revealed && !o.wrapperReused}
-                // The className change gets its own line under the tag name, so
-                // it fits at 320 and never sits on the border (D17).
-                attr={action === 'class' ? 'className="on"' : undefined}
-              >
-                <CounterCard
-                  instance={revealed ? (o.counterReused ? 'A' : 'B') : '?'}
-                  count={
-                    revealed
-                      ? `count ${o.counterReused ? s.count : 0}`
-                      : 'count ?'
-                  }
-                  mounted={revealed && !o.counterReused}
-                  focus={revealed}
-                />
-              </WrapperBox>
-            </div>
+        <div
+          data-instance={revealed ? (o.counterReused ? 'A' : 'B') : undefined}
+          data-count={revealed ? String(o.counterReused ? s.count : 0) : undefined}
+        >
+          <span className="sr-only">
+            {revealed
+              ? o.counterReused
+                ? `The same <div>, now with className on. Counter instance A reused, count ${s.count}.`
+                : 'A new <span>. Counter instance A unmounted; new instance B mounted with count 0.'
+              : `${action === 'class' ? '<div className="on">' : afterTag} wrapping Counter, count unknown until you predict.`}
+          </span>
+          <div aria-hidden>
+            <WrapperBox
+              tag={afterTag}
+              dashed={revealed && !o.wrapperReused}
+              // The className change gets its own line under the tag name, so
+              // it fits at 320 and never sits on the border (D17).
+              attr={action === 'class' ? 'className="on"' : undefined}
+            >
+              <CounterCard
+                instance={revealed ? (o.counterReused ? 'A' : 'B') : '?'}
+                count={revealed ? `count ${o.counterReused ? s.count : 0}` : 'count ?'}
+                mounted={revealed && !o.counterReused}
+                focus={revealed}
+              />
+            </WrapperBox>
           </div>
-        )}
+        </div>
       </div>
     </>
   )
@@ -647,16 +603,17 @@ function WrapperColumns({
 // Match lines
 // ---------------------------------------------------------------------------
 
-type LinesBox = { w: number; k: number }
-
 type Link =
   | { kind: 'reused'; y1: number; y2: number; now: boolean; chip?: string; checked?: boolean; from: string; to: string }
   | { kind: 'unmounted'; y: number; from: string }
   | { kind: 'mounted'; y: number; to: string }
 
-function links(s: ExploreState): Link[] {
+/** Where each row's line meets its card: at checkbox height (H3 R6). */
+const beforeY = (i: number) => rowTop(i) + CHECK_Y
+const afterY = (i: number, stacked: boolean) => (stacked ? AFTER_TOP : 0) + rowTop(i) + CHECK_Y
+
+function links(s: ExploreState, stacked: boolean): Link[] {
   if (s.scene === 'wrapper') {
-    if (!s.wrapperAction) return []
     const o = WRAPPER_OUTCOMES[s.wrapperAction]
     const attr = s.wrapperAction === 'class' ? ATTR_LINE : 0
     return o.counterReused
@@ -679,17 +636,16 @@ function links(s: ExploreState): Link[] {
           { kind: 'mounted', y: WRAP_COUNTER_Y, to: 'after-counter' },
         ]
   }
-  if (!s.listAction) return []
   const outcome = LIST_OUTCOMES[`${s.key}/${s.listAction}`]
   const tracked = trackedRow(s.checks)
   const out: Link[] = []
   outcome.reused.forEach((from, i) => {
-    if (from === null) out.push({ kind: 'mounted', y: center(i), to: `after-${i}` })
+    if (from === null) out.push({ kind: 'mounted', y: afterY(i, stacked), to: `after-${i}` })
     else
       out.push({
         kind: 'reused',
-        y1: center(from),
-        y2: center(i),
+        y1: beforeY(from),
+        y2: afterY(i, stacked),
         now: from === tracked,
         // The checkbox itself rides this line on the reveal (D21) and rests
         // in the After row, so the line carries no chip.
@@ -698,7 +654,7 @@ function links(s: ExploreState): Link[] {
         to: `after-${i}`,
       })
   })
-  for (const r of unmountedRows(outcome)) out.push({ kind: 'unmounted', y: center(r), from: `before-${r}` })
+  for (const r of unmountedRows(outcome)) out.push({ kind: 'unmounted', y: beforeY(r), from: `before-${r}` })
   return out
 }
 
@@ -713,6 +669,18 @@ const curve = (w: number, y1: number, y2: number) => ({
     }
   },
 })
+
+/**
+ * Stacked: a C-shaped arc in the rail, leaving and entering the cards' edge
+ * (x = 0) level. Its bulge grows with its span, so nested arcs never cross
+ * and the riders on them never meet.
+ */
+export function arc(w: number, y1: number, y2: number): string {
+  const span = Math.abs(y2 - y1)
+  const max = (w - 4) / 0.75
+  const b = Math.min(max, Math.max(12, (span / STACKED_HEIGHT) * max * 1.15))
+  return `M0 ${y1} C ${b} ${y1} ${b} ${y2} 0 ${y2}`
+}
 
 /** The curve parameter where x reaches `x` (x grows with t on these curves). */
 function tAtX(c: ReturnType<typeof curve>, x: number): number {
@@ -741,19 +709,23 @@ export function chipPath(w: number, y1: number, y2: number): { x: number; y: num
   return Array.from({ length: CHIP_SAMPLES + 1 }, (_, i) => c.at((end * i) / CHIP_SAMPLES))
 }
 
-function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: MotionGate; play: boolean }) {
+function Lines({ s, box, view, gate }: { s: ExploreState; box: LinesBox; view: RevealView; gate: MotionGate }) {
   const { w, k } = box
-  const ls = links(s)
-  // The reveal animates once, at the width it started at. A later resize
-  // (or text size change) re-places everything instantly (M10).
+  const stacked = box.stacked && s.scene === 'list'
+  const ls = links(s, stacked)
+  // While the reveal plays, the director draws each line from its Before
+  // end (stroke dash) and fades the stubs in; until then they are hidden.
+  const hidden = view.directing && !view.landed
+  // The wrapper's state chip still travels its line (framer); it lands at
+  // once on a resize (the reveal animates only at the width it started at).
   const first = useRef(box)
-  const animateNow = play && !gate.reduce && first.current.w === w && first.current.k === k
-  const draw = animateNow ? transitionFor('draw', gate) : { duration: 0 }
+  const animateChip = view.played && !gate.reduce && first.current.w === w && first.current.k === k
   const move = transitionFor('path', gate)
   const stub = Math.min(14, Math.max(8, w * 0.3))
-  const H = COLUMNS_HEIGHT
+  const H = stacked ? STACKED_HEIGHT : COLUMNS_HEIGHT
   // Draw the highlighted line last so it sits on top.
   const ordered = [...ls].sort((a, b) => Number(a.kind === 'reused' && a.now) - Number(b.kind === 'reused' && b.now))
+  const hide = hidden ? { pathLength: 1, strokeDasharray: '1 1', strokeDashoffset: 1.001 } : {}
   return (
     <>
       <svg
@@ -765,7 +737,8 @@ function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: M
       >
         {ordered.map((l) => {
           if (l.kind === 'reused') {
-            const { d } = curve(w, l.y1, l.y2)
+            const d = stacked ? arc(w, l.y1, l.y2) : curve(w, l.y1, l.y2).d
+            const x2 = stacked ? 0 : w
             return (
               <g
                 key={`${l.from}-${l.to}`}
@@ -774,25 +747,24 @@ function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: M
                 data-to={l.to}
                 className={l.now ? svgInk.now : svgInk.line}
               >
-                <m.path
+                <path
                   d={d}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={l.now ? strokeWidth.nowConnector : strokeWidth.connector}
                   strokeLinecap="round"
-                  initial={animateNow ? { pathLength: 0 } : false}
-                  animate={{ pathLength: 1 }}
-                  transition={draw}
+                  data-lk-draw
+                  {...hide}
                 />
                 <circle cx={0} cy={l.y1} r={3} fill="currentColor" />
-                <circle cx={w} cy={l.y2} r={3} fill="currentColor" />
+                <circle cx={x2} cy={l.y2} r={3} fill="currentColor" data-lk-end style={hidden ? { opacity: 0 } : undefined} />
               </g>
             )
           }
           if (l.kind === 'unmounted') {
             const x = stub
             return (
-              <g key={`u-${l.from}`} data-link="unmounted" data-from={l.from} className={svgInk.removed}>
+              <g key={`u-${l.from}`} data-link="unmounted" data-from={l.from} data-lk-stub className={svgInk.removed} style={hidden ? { opacity: 0 } : undefined}>
                 <path
                   d={`M0 ${l.y} H ${x - 3}`}
                   stroke="currentColor"
@@ -810,18 +782,14 @@ function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: M
               </g>
             )
           }
+          // Mounted: an open circle with a dashed stub into the After card
+          // (from the right when side by side, back to the cards when stacked).
+          const cx = stacked ? stub : w - stub
           return (
-            <g key={`m-${l.to}`} data-link="mounted" data-to={l.to} className={svgInk.muted}>
-              <circle
-                cx={w - stub}
-                cy={l.y}
-                r={3}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={strokeWidth.connector}
-              />
+            <g key={`m-${l.to}`} data-link="mounted" data-to={l.to} data-lk-stub className={svgInk.muted} style={hidden ? { opacity: 0 } : undefined}>
+              <circle cx={cx} cy={l.y} r={3} fill="none" stroke="currentColor" strokeWidth={strokeWidth.connector} />
               <path
-                d={`M${w - stub + 3} ${l.y} H ${w}`}
+                d={stacked ? `M${stub - 3} ${l.y} H 0` : `M${w - stub + 3} ${l.y} H ${w}`}
                 stroke="currentColor"
                 strokeWidth={strokeWidth.connector}
                 strokeDasharray={DASH}
@@ -841,9 +809,9 @@ function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: M
             data-from={l.from}
             data-to={l.to}
             className="absolute left-0 top-0 h-0 w-0"
-            initial={animateNow ? { x: pts[0].x, y: pts[0].y } : false}
-            animate={animateNow ? { x: pts.map((p) => p.x), y: pts.map((p) => p.y) } : { x: end.x, y: end.y }}
-            transition={animateNow ? { ...move, times: pts.map((_, i) => i / (pts.length - 1)) } : { duration: 0 }}
+            initial={animateChip ? { x: pts[0].x, y: pts[0].y } : false}
+            animate={animateChip ? { x: pts.map((p) => p.x), y: pts.map((p) => p.y) } : { x: end.x, y: end.y }}
+            transition={animateChip ? { ...move, times: pts.map((_, i) => i / (pts.length - 1)) } : { duration: 0 }}
           >
             <span
               data-viz-part="state-chip"
@@ -851,7 +819,7 @@ function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: M
                 'absolute left-0 top-0 flex h-5 min-w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center px-1 font-semibold',
                 radius.chip.cls,
                 typeScale.meta.cls,
-                'bg-zinc-100 text-zinc-900 print:bg-zinc-900 print:text-white',
+                'bg-zinc-100 text-zinc-900 print:border print:border-zinc-900 print:bg-transparent',
                 l.now ? now.chip : 'ring-1 ring-zinc-500',
               )}
             >
@@ -865,9 +833,9 @@ function Lines({ s, box, gate, play }: { s: ExploreState; box: LinesBox; gate: M
 }
 
 /** The rides of a list reveal (D21): each checked, reused row, the tracked one first. */
-function ridesOf(s: ExploreState): Ride[] {
-  return links(s)
+export function ridesOf(s: ExploreState): Ride[] {
+  return links(s, false)
     .flatMap((l) => (l.kind === 'reused' && l.checked ? [l] : []))
     .sort((a, b) => Number(b.now) - Number(a.now))
-    .map((l) => ({ from: l.from, to: l.to, y1: l.y1, y2: l.y2 }))
+    .map((l) => ({ from: l.from, to: l.to }))
 }

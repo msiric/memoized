@@ -1,4 +1,5 @@
 import { type Page } from '@playwright/test'
+import { lkChoose } from '../helpers'
 import { LK } from './common'
 
 export const LK_PROBE = `(root) => {
@@ -21,7 +22,7 @@ export const LK_PROBE = `(root) => {
     const i = row.querySelector('input[type=checkbox]')
     const svg = row.querySelector('input + svg')
     const b = box(i)
-    return { row: row.getAttribute('data-row'), checked: i.checked, tickShown: svg ? getComputedStyle(svg).display !== 'none' : false, cx: +((b.l + b.r) / 2).toFixed(1), cy: +((b.t + b.b) / 2).toFixed(1) }
+    return { row: row.getAttribute('data-row'), checked: i.checked, tickShown: svg ? getComputedStyle(svg).display !== 'none' && +getComputedStyle(svg).opacity > 0.05 : false, cx: +((b.l + b.r) / 2).toFixed(1), cy: +((b.t + b.b) / 2).toFixed(1) }
   })
   const dest = [...root.querySelectorAll('[data-row^="after-"]')].map((row) => {
     const c = row.querySelector('[data-check]')
@@ -32,22 +33,22 @@ export const LK_PROBE = `(root) => {
   })
   const lines = [...root.querySelectorAll('[data-link="reused"] path')].map((p) => p.getAttribute('stroke-dasharray') || 'full')
   const stubs = root.querySelectorAll('[data-link="unmounted"],[data-link="mounted"]').length
-  const verdict = [...root.querySelectorAll('[data-viz-part="dock-reveal"] p, [data-viz-part="dock-reveal"] [data-viz-part]')].map((n) => getComputedStyle(n).opacity + ':' + (n.textContent || '').slice(0, 30)).slice(0, 3)
+  // The live verdict only (the dock's invisible ghosts are not the verdict): its effective opacity.
+  const fb = root.querySelector('[data-viz-part="viz-feedback"]')
+  let vo = fb ? 1 : 0
+  for (let n = fb; n && n !== root; n = n.parentElement) vo *= +getComputedStyle(n).opacity
+  const verdict = fb ? [vo.toFixed(2) + ':' + (fb.textContent || '').slice(0, 30)] : []
   return { mode: root.getAttribute('data-viz-mode'), riders, src, dest, lines, stubs, verdict }
 }`
 
 export async function toAsk(page: Page, key: string, action: string, both: boolean) {
   const f = page.locator(LK)
-  if ((await f.getAttribute('data-viz-mode')) === 'ask') await f.locator('[data-viz-part="viz-back"]').click()
-  if ((await f.getAttribute('data-viz-mode')) === 'reveal') await f.locator('[data-viz-part="viz-again"]').click()
-  await page.waitForTimeout(300)
   const second = f.locator('input[type="checkbox"]').nth(1)
   if (both !== (await second.isChecked())) await second.click()
   const first = f.locator('input[type="checkbox"]').nth(0)
   if (!(await first.isChecked())) await first.click()
-  await f.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { name: key }).click()
   await page.waitForTimeout(300)
-  await f.getByRole('button', { name: action, exact: true }).click()
-  await page.waitForTimeout(400)
+  // H3 R8: the key and the action are always-visible controls; choosing either asks again.
+  await lkChoose(page, { key, action })
 }
 

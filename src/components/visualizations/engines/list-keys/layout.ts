@@ -1,7 +1,6 @@
 import { TARGET_GAP_PX, TARGET_PX, type as typeScale } from '../../primitives/tokens-v3'
 import { codePaneHeight } from '../../shell/code-geometry'
 import {
-  CAPTION_LINE,
   CHOICE,
   FOOTER,
   FRAME,
@@ -12,14 +11,11 @@ import {
   wrapLines,
 } from '../../shell/footprint'
 import type { PerVariant, Variant } from '../../shell/types'
-import { sansWidth } from '../../substrates/text-metrics'
+import { monoWidth, sansWidth } from '../../substrates/text-metrics'
 import {
-  BACK_LABEL,
   LIST_RULE,
-  SKIP_LABEL,
   NONE_LABEL,
   NO_CHECK_PROMPT,
-  PICK_HINT,
   WRAPPER_RULE,
   feedbackLead,
   listChoices,
@@ -31,24 +27,40 @@ import {
 } from './content'
 import { CODE_ROWS } from './code'
 import {
-  AFTER,
   ITEMS,
   KEY_STRATEGIES,
   LIST_ACTIONS,
   WRAPPER_ACTIONS,
+  keyText,
   type Checks,
 } from './model'
 import { LIST_OUTCOMES } from './outcomes'
 
 /**
  * Fixed footprint of the list-keys explorable (spec §3.3, §3.4). Every region
- * has an explicit height per variant, the maximum over both scenes, every
- * key, action, starting state, prediction and feedback, so switching any of
- * them never moves the page. Text is wrapped with the foundation's
+ * has an explicit height per variant, the maximum over every key, action,
+ * starting state, prediction and feedback of the preset's scene, so switching
+ * any of them never moves the page. Text is wrapped with the foundation's
  * conservative glyph widths at the narrowest width of each variant.
  */
 
-export const CARD = { height: TARGET_PX, gap: 12, spine: 28 } as const
+/**
+ * A card is one instance: its spine (the instance letter) on the outer edge,
+ * the item on the first line with its checkbox at the end that faces the
+ * match lines, and the key on the second line. The checkbox sits on the
+ * first line, so a match line leaves a card at the checkbox's height and the
+ * riding check never crosses the row's text or its instance letter (H3 R6).
+ */
+export const CARD = { height: TARGET_PX, gap: 12, spine: 28, border: 1, pad: 8, padTight: 4, checkGap: 8, lineGap: 2, badge: 12 + 4 } as const
+export const CHECK = 16
+/** The first line's centre (the checkbox's centre) from the card's top edge. */
+export const CHECK_Y =
+  CARD.border +
+  (CARD.height - 2 * CARD.border - (typeScale.item.line + CARD.lineGap + typeScale.meta.line)) / 2 +
+  typeScale.item.line / 2
+/** The checkbox's centre from the card's edge that faces the lines. */
+export const CHECK_INSET = CARD.border + CARD.pad + CHECK / 2
+
 export const COLUMNS = {
   /** Column label row ("Before", "After") and its gap to the first card. */
   label: 16,
@@ -58,92 +70,141 @@ export const COLUMNS = {
   linesNarrow: 32,
   /** Cards stop growing here; the match lines take the rest. */
   cardMax: 224,
+  /** Stacked (very large text, H3 R9): the rail beside the cards that holds the lines. */
+  rail: 32,
+  /** Stacked: the space between the Before block and the After block. */
+  stackGap: 16,
 } as const
 export const COLUMNS_BODY =
   COLUMNS.rows * CARD.height + (COLUMNS.rows - 1) * CARD.gap
 export const COLUMNS_HEIGHT = COLUMNS.label + COLUMNS.labelGap + COLUMNS_BODY
 
-/** Top of card row `i` inside the columns region. */
+/** Top of card row `i` inside a column (below its label). */
 export const rowTop = (i: number) =>
   COLUMNS.label + COLUMNS.labelGap + i * (CARD.height + CARD.gap)
 
-export const KEY_ROW = TARGET_PX
+/** Stacked: the Before block (two rows), then the After block under it. */
+export const BEFORE_BLOCK = rowTop(2) - CARD.gap
+export const AFTER_TOP = BEFORE_BLOCK + COLUMNS.stackGap
+export const STACKED_HEIGHT = AFTER_TOP + COLUMNS_HEIGHT
+
+/**
+ * The narrowest card that keeps its text whole: the spine, the longest item
+ * with its checkbox, or the longest key, whichever is wider. Below two of
+ * them and the narrow gutter the columns stack (H3 R9: Chrome's "Very large"
+ * text on a 375 phone, 200 % text). In rem, so larger text stacks sooner.
+ */
+const longestItem = Math.max(...Object.values(ITEMS).map((i) => sansWidth(i.text, typeScale.item.size)))
+const longestKey = Math.max(
+  ...KEY_STRATEGIES.flatMap((k) =>
+    Object.keys(ITEMS).flatMap((id, i) =>
+      (['before', 'after'] as const).map((ph) =>
+        monoWidth(`key=${keyText(k, id as keyof typeof ITEMS, Math.min(i, ph === 'before' ? 1 : 2), ph)}`, typeScale.meta.size),
+      ),
+    ),
+  ),
+)
+export const CARD_MIN = Math.ceil(
+  // The tight padding below 375 (`px-1 xs:px-2`); the key line holds a badge.
+  2 * CARD.border + CARD.spine + 2 * CARD.padTight + Math.max(longestItem + CARD.checkGap + CHECK, longestKey + CARD.badge),
+)
+export const STACK_BELOW = 2 * CARD_MIN + COLUMNS.linesNarrow
+
+/** The two control rows (key and action), 8 px apart. */
+export const CONTROLS = 2 * TARGET_PX + TARGET_GAP_PX
 export const STAGE_GAP = { narrow: 8, wide: 16 } as const
 export const CODE_HEIGHT = codePaneHeight(CODE_ROWS)
+/** Narrow: the gap between the code strip and the columns. */
+const CODE_GAP = 16
 
 export const STAGE: PerVariant<number> = {
-  // key row, code strip, then the columns
-  narrow: KEY_ROW + STAGE_GAP.narrow + CODE_HEIGHT + 16 + COLUMNS_HEIGHT,
-  // key row, then code (left) beside the columns (right)
-  wide: KEY_ROW + STAGE_GAP.wide + Math.max(CODE_HEIGHT, COLUMNS_HEIGHT),
+  // controls, code strip, then the columns
+  narrow: CONTROLS + STAGE_GAP.narrow + CODE_HEIGHT + CODE_GAP + COLUMNS_HEIGHT,
+  // controls, then code (left) beside the columns (right)
+  wide: CONTROLS + STAGE_GAP.wide + Math.max(CODE_HEIGHT, COLUMNS_HEIGHT),
 }
+/** The narrow stage with the columns stacked (very large text only). */
+export const STAGE_STACKED = STAGE.narrow - COLUMNS_HEIGHT + STACKED_HEIGHT
 
-/** The status line: sans 12/20 (D3). */
-export const STATUS = typeScale.status.line
-export const GAPS = { header: 16, status: 8, dock: 16, footer: 16 } as const
-const PARA_GAP = 8
+export const GAPS = { header: 16, dock: 16, footer: 16 } as const
 
-/** Every string the dock can show, per mode. */
-export function dockStrings() {
-  const hints = [PICK_HINT.list, PICK_HINT.wrapper]
-  const prompts: string[] = [NO_CHECK_PROMPT]
-  const reveals: { feedback: string; lead: string; sentence: string; rule: string }[] = []
-  const subsets: Checks[] = [
-    { milk: false, dog: false },
-    { milk: true, dog: false },
-    { milk: false, dog: true },
-    { milk: true, dog: true },
-  ]
-  for (const key of KEY_STRATEGIES) {
-    for (const action of LIST_ACTIONS) {
-      const outcome = LIST_OUTCOMES[`${key}/${action}`]
-      const choices = listChoices(action)
-      const labelOf = (id: string) =>
-        choices.find((c) => c.id === id)?.label ?? id
-      for (const checks of subsets) {
-        const tracked = checks.milk ? 'milk' : checks.dog ? 'dog' : null
-        if (tracked) prompts.push(listPrompt(tracked))
-        const sentence = listOutcomeSentence(action, outcome, checks)
-        const picks = tracked
-          ? [undefined, null, ...choices.map((c) => c.id)]
-          : [undefined]
-        for (const pick of picks) {
-          // The longest lead is a wrong pick; the answer itself does not change the length bound.
-          const lead = feedbackLead(pick, AFTER[action][0] ?? 'none', labelOf)
-          reveals.push({
-            feedback: `${lead} ${sentence}`.trim(),
-            lead,
-            sentence,
-            rule: LIST_RULE[`${key}/${action}`],
-          })
+/** Dock copy is UI type (H3 R3): 14/24. */
+const BODY_LINE = typeScale.body.line
+/** Feedback, rule and tally are 4 px apart. */
+export const PARA_GAP = 4
+const BLOCK_GAP = 8
+
+export type Scene = 'list' | 'wrapper'
+
+/** Every string the dock can show for a scene, per mode. */
+export function dockStrings(scene: Scene) {
+  const prompts: string[] = []
+  const reveals: { lead: string; sentence: string; rule: string; tally: string }[] = []
+  if (scene === 'list') {
+    prompts.push(NO_CHECK_PROMPT)
+    const subsets: Checks[] = [
+      { milk: false, dog: false },
+      { milk: true, dog: false },
+      { milk: false, dog: true },
+      { milk: true, dog: true },
+    ]
+    for (const key of KEY_STRATEGIES) {
+      for (const action of LIST_ACTIONS) {
+        const outcome = LIST_OUTCOMES[`${key}/${action}`]
+        const choices = listChoices(action)
+        const labelOf = (id: string) => choices.find((c) => c.id === id)?.label ?? id
+        for (const checks of subsets) {
+          const tracked = checks.milk ? 'milk' : checks.dog ? 'dog' : null
+          if (tracked) prompts.push(listPrompt(tracked))
+          const sentence = listOutcomeSentence(action, outcome, checks)
+          const picks = tracked ? [null, ...choices.map((c) => c.id)] : [undefined]
+          for (const pick of picks)
+            for (const answer of choices.map((c) => c.id))
+              reveals.push({
+                lead: feedbackLead(pick, answer, labelOf),
+                sentence,
+                rule: LIST_RULE[`${key}/${action}`],
+                tally: listTally(outcome),
+              })
         }
       }
     }
-  }
-  for (const action of WRAPPER_ACTIONS) {
-    prompts.push(wrapperPrompt(action))
-    for (const count of [7, 99]) {
-      const choices = wrapperChoices(count)
-      const labelOf = (id: string) =>
-        choices.find((c) => c.id === id)?.label ?? id
-      for (const pick of [null, 'kept', 'reset']) {
-        const lead = feedbackLead(pick, 'kept', labelOf)
-        const sentence = wrapperOutcomeSentence(action, count)
-        reveals.push({ feedback: `${lead} ${sentence}`, lead, sentence, rule: WRAPPER_RULE[action] })
+  } else {
+    for (const action of WRAPPER_ACTIONS) {
+      prompts.push(wrapperPrompt(action))
+      for (const count of [7, 99]) {
+        const choices = wrapperChoices(count)
+        const labelOf = (id: string) => choices.find((c) => c.id === id)?.label ?? id
+        for (const pick of [null, 'kept', 'reset'])
+          reveals.push({
+            lead: feedbackLead(pick, 'kept', labelOf),
+            sentence: wrapperOutcomeSentence(action, count),
+            rule: WRAPPER_RULE[action],
+            tally: wrapperTally(action === 'class'),
+          })
       }
     }
   }
-  return {
-    hints,
-    prompts,
-    reveals,
-    maxChoices: Math.max(...LIST_ACTIONS.map((a) => listChoices(a).length)),
-  }
+  const maxChoices =
+    scene === 'list'
+      ? Math.max(...LIST_ACTIONS.map((a) => listChoices(a).length))
+      : wrapperChoices(0).length
+  return { prompts: [...new Set(prompts)], reveals, maxChoices }
 }
 
+/** "2 reused · 1 mounted": what React did, counted. */
+export function listTally(outcome: { reused: readonly (0 | 1 | null)[] }): string {
+  const reused = outcome.reused.filter((r) => r !== null).length
+  const mounted = outcome.reused.length - reused
+  const gone = ([0, 1] as const).filter((r) => !outcome.reused.includes(r)).length
+  return [reused && `${reused} reused`, mounted && `${mounted} mounted`, gone && `${gone} unmounted`]
+    .filter(Boolean)
+    .join(' · ')
+}
+export const wrapperTally = (reused: boolean) => (reused ? 'Counter reused' : 'Counter remounted')
+
 const chars = (width: number, glyph: number) => Math.floor(width / glyph)
-const lines = (t: string, width: number, glyph: number) =>
-  wrapLines(t, chars(width, glyph))
+const lines = (t: string, width: number, glyph: number) => wrapLines(t, chars(width, glyph))
 const maxOf = (xs: number[]) => Math.max(0, ...xs)
 
 export const choicesHeight = (count: number) => {
@@ -151,50 +212,42 @@ export const choicesHeight = (count: number) => {
   return rows * CHOICE.height + (rows - 1) * CHOICE.gap
 }
 
-/** Width of the text beside the choices (ask) or the button (reveal), from 768. */
 /**
  * List-keys choices from 768: two 148 px columns (labels are at most about
- * 9 characters, so the shell's 168 is not needed), which leaves the text
- * column room for "Skip, show me" and "Pick another action" on one row.
+ * 9 characters, so the shell's 168 is not needed), beside the text.
  */
 export const LK_CHOICE_WIDTH = 148
 export const WIDE_CHOICES = 2 * LK_CHOICE_WIDTH + CHOICE.gap
 export const WIDE_SIDE = MIN_TEXT_WIDTH.wide - CHOICE.sideGap - WIDE_CHOICES
-export const REVEAL_BUTTON = 168
 
-/** Text buttons: 8 px padding each side, sans 14/500 (Button `text`). */
-const textButton = (label: string) => Math.ceil(sansWidth(label, 14)) + 16
-
-/** Rows the ask phase's Skip and "Pick another action" take in `width` (they wrap, 8 px apart). */
-export function askActionRows(width: number): number {
-  return textButton(SKIP_LABEL) + 8 + textButton(BACK_LABEL) <= width ? 1 : 2
+/** The reveal text: feedback, the rule, then the tally (4 px apart). */
+function revealTextHeight(r: { lead: string; sentence: string; rule: string }, width: number) {
+  return (
+    (lines(`${r.lead} ${r.sentence}`.trim(), width, GLYPH.caption) + lines(r.rule, width, GLYPH.caption)) * BODY_LINE +
+    2 * PARA_GAP +
+    typeScale.status.line
+  )
 }
 
-export function dockModes(variant: Variant) {
-  const s = dockStrings()
+/** The dock's one action row: Skip, Show me or Try another (44 px targets). */
+const ACTION_ROW = TARGET_PX
+
+export function dockModes(variant: Variant, scene: Scene) {
+  const s = dockStrings(scene)
   const w = MIN_TEXT_WIDTH[variant]
-  const actionRows = variant === 'narrow' ? 2 : 1
-  const actions = actionRows * TARGET_PX + (actionRows - 1) * TARGET_GAP_PX
-  const hint = maxOf(s.hints.map((t) => lines(t, w, GLYPH.caption))) * CAPTION_LINE
-  const pick = hint + PARA_GAP + actions
   const choices = choicesHeight(s.maxChoices)
-  let ask: number
-  let reveal: number
-  // The reveal: feedback, then the rule (8 px apart), then "Try another
-  // action" under them below 768 and beside them from 768.
-  const revealText = (width: number) =>
-    maxOf(s.reveals.map((r) => (lines(r.feedback, width, GLYPH.caption) + lines(r.rule, width, GLYPH.caption)) * CAPTION_LINE)) +
-    PARA_GAP
-  if (variant === 'narrow') {
-    const prompt = maxOf(s.prompts.map((t) => lines(t, w, GLYPH.prompt))) * PROMPT_LINE
-    ask = prompt + PARA_GAP + choices + PARA_GAP + askActionRows(w) * TARGET_PX
-    reveal = revealText(w) + PARA_GAP + TARGET_PX
-  } else {
-    const prompt = maxOf(s.prompts.map((t) => lines(t, WIDE_SIDE, GLYPH.prompt))) * PROMPT_LINE
-    ask = Math.max(prompt + PARA_GAP + askActionRows(WIDE_SIDE) * TARGET_PX, choices)
-    reveal = Math.max(revealText(w - CHOICE.sideGap - REVEAL_BUTTON), TARGET_PX)
-  }
-  return { pick, ask, reveal, dock: Math.max(pick, ask, reveal) }
+  const side = variant === 'narrow' ? w : WIDE_SIDE
+  const text = Math.max(
+    maxOf(s.prompts.map((t) => lines(t, side, GLYPH.prompt))) * PROMPT_LINE,
+    maxOf(s.reveals.map((r) => revealTextHeight(r, side))),
+  )
+  // Narrow: text, choices, the action row. Wide: the text with the action
+  // row under it, beside the choices.
+  const dock =
+    variant === 'narrow'
+      ? text + BLOCK_GAP + choices + BLOCK_GAP + ACTION_ROW
+      : Math.max(text + BLOCK_GAP + ACTION_ROW, choices)
+  return { text, choices, dock }
 }
 
 export type ListKeysMetrics = {
@@ -205,12 +258,12 @@ export type ListKeysMetrics = {
   total: number
 }
 
-export function listKeysMetrics(): PerVariant<ListKeysMetrics> {
+export function listKeysMetrics(scene: Scene = 'list'): PerVariant<ListKeysMetrics> {
   const m = (variant: Variant): ListKeysMetrics => {
     // The title only: each preset is one scene (D17).
     const header = headerHeight(1, variant)
     const stage = STAGE[variant]
-    const dock = dockModes(variant).dock
+    const dock = dockModes(variant, scene).dock
     const footer = FOOTER[variant]
     const total =
       2 * FRAME.border +
@@ -218,8 +271,6 @@ export function listKeysMetrics(): PerVariant<ListKeysMetrics> {
       header +
       GAPS.header +
       stage +
-      GAPS.status +
-      STATUS +
       GAPS.dock +
       dock +
       GAPS.footer +
@@ -229,9 +280,11 @@ export function listKeysMetrics(): PerVariant<ListKeysMetrics> {
   return { narrow: m('narrow'), wide: m('wide') }
 }
 
+/** The lazy mount's placeholder: the taller scene (the list), per variant. */
 export function listKeysFootprint(): readonly [number, number] {
-  const m = listKeysMetrics()
-  return [m.narrow.total, m.wide.total]
+  const a = listKeysMetrics('list')
+  const b = listKeysMetrics('wrapper')
+  return [Math.max(a.narrow.total, b.narrow.total), Math.max(a.wide.total, b.wide.total)]
 }
 
 /** The longest choice label, for the choice grid's minimum width. */
@@ -241,24 +294,24 @@ export const LONGEST_CHOICE = Math.max(
 )
 
 /**
- * The strings the measured dock keeps as invisible ghosts (D15): both pick
- * hints, and the longest prompts, feedback lines and rules. The tallest
- * wrap comes from the longest strings, so a few of each hold the dock's
- * worst case at any width or text size without a ghost for every reveal.
+ * The strings the measured dock keeps as invisible ghosts (D15) for one
+ * scene: the longest prompts and reveal texts. The tallest wrap comes from
+ * the longest strings, so a few of each hold the dock's worst case at any
+ * width or text size without a ghost for every reveal.
  */
-export function dockGhostStrings(keep = 3) {
-  const s = dockStrings()
+export function dockGhostStrings(scene: Scene, keep = 3) {
+  const s = dockStrings(scene)
   const longest = <T>(xs: readonly T[], len: (x: T) => number) =>
     [...new Set(xs)].sort((a, b) => len(b) - len(a)).slice(0, keep)
+  const fb = (r: (typeof s.reveals)[number]) => `${r.lead} ${r.sentence}`.length
   const reveals = [
-    ...longest(s.reveals, (r) => r.feedback.length),
+    ...longest(s.reveals, fb),
     ...longest(s.reveals, (r) => r.rule.length),
+    ...longest(s.reveals, (r) => fb(r) + r.rule.length),
   ]
   return {
-    hints: s.hints,
     prompts: longest(s.prompts, (p) => p.length),
-    reveals: [...new Map(reveals.map((r) => [`${r.feedback}|${r.rule}`, r])).values()],
+    reveals: [...new Map(reveals.map((r) => [`${r.lead}|${r.sentence}|${r.rule}`, r])).values()],
     maxChoices: s.maxChoices,
   }
 }
-
