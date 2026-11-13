@@ -533,7 +533,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         <span className={cn('min-w-0 truncate', typeScale.stepName.cls, ink.base)} data-viz-part="viz-event">
           {shown.event}
         </span>
-        <span className={cn('shrink-0', typeScale.status.cls, ink.muted)} data-viz-part="viz-counter">
+        <span className={cn('shrink-0 print:hidden', typeScale.status.cls, ink.muted)} data-viz-part="viz-counter">
           {counter}
         </span>
       </div>

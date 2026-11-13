@@ -35,4 +35,6 @@ export const stackCss =
   `${F} [data-lk-flip]{flex-direction:row-reverse}` +
   `${F} [data-lk-spine=after]{border-left-width:0;border-right-width:${edge}}` +
   `${F} [data-lk-stage]{height:${rem(STAGE_STACKED)}}` +
-  `}`
+  `}` +
+  // Print (H3 R10): the lines keep the gutter they were drawn in.
+  `@media print{@container vz (min-width:${rem(STACK_BELOW)}){${F} [data-lk-cols]{grid-template-columns:minmax(0,1fr) var(--lk-lines-w) minmax(0,1fr)}}}`

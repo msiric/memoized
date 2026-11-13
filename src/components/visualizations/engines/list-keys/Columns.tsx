@@ -137,6 +137,10 @@ export function Columns({ s, interactive, gate, view, dispatch }: ColumnsProps) 
       data-lk-cols
       data-lk-scene={s.scene}
       className="relative min-w-0"
+      // Print lays the frame out at the paper's width, with no script to
+      // redraw the lines: the gutter keeps the width they were drawn for and
+      // the cards take the rest (H3 R10, `stack-css.ts`).
+      style={{ ['--lk-lines-w' as string]: toRem(box.w) }}
     >
       {s.scene === 'list' ? (
         <ListColumns s={s} interactive={interactive} dispatch={dispatch} view={view} rides={rides} />
