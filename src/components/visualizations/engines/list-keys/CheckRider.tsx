@@ -223,7 +223,13 @@ export function RevealDirector({
     // moment, verdict fade included, fits the reveal budget (D21).
     const k = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
     const clear = 16 * k * RIDE.clearance
-    let travel = scene === 'wrapper' ? WRAPPER_DRAW_MS : RIDE.travelMs
+    // The travel follows the distance: a phone's short ride is not slowed
+    // to a desktop's long one (a 100 px ride at 360 ms read as parked).
+    const longest = Math.max(0, ...plans.map((p) => (p.rider ? p.path.total : p.line) / k))
+    let travel =
+      scene === 'wrapper'
+        ? WRAPPER_DRAW_MS
+        : Math.round(Math.min(RIDE.travelMs, Math.max(RIDE.minTravelMs, RIDE.baseMs + longest * RIDE.msPerPx)))
     let gaps = ridden.map(() => 0)
     for (;;) {
       gaps = ridden.map((p, i) => (i === 0 ? 0 : riderGap(ridden[0], p, travel, clear)))

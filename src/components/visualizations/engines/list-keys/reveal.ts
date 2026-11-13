@@ -14,8 +14,15 @@ const PATH_MS = tween(motion.path.full)
  * `VERDICT_FADE_MS` at it.
  */
 export const RIDE = {
-  /** The travel, before the settle. Shortened when two checks ride, so the whole moment stays inside `reveal.maxMs`. */
+  /**
+   * The travel, before the settle: `baseMs + msPerPx * length`, between
+   * `minTravelMs` and `travelMs` (about 240 ms for a phone's 100 px ride,
+   * 360 ms for a desktop's 250 px one). Shortened when two checks ride, so
+   * the whole moment stays inside `reveal.maxMs`.
+   */
   travelMs: 360,
+  baseMs: 160,
+  msPerPx: 0.8,
   /** H3 R6: a single 120 ms settle on landing (the stage `highlight` duration). */
   settleMs: HIGHLIGHT_MS,
   /**
