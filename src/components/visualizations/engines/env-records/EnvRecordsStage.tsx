@@ -78,6 +78,36 @@ const r1 = (n: number) => Math.round(n * 10) / 10
 /** The touch band around a function object: 31 + 2 x 7 = 45 px (R11, WCAG 2.5.5). */
 export const HIT = 7
 
+export type Band = { l: number; r: number; t: number; b: number }
+
+/**
+ * Each function's band, per side: HIT, or half the gap to a neighbouring
+ * function on that side, so two targets never overlap (the tighter rows of
+ * the narrow layouts are a few px apart sideways; boxes are 44 px wide or
+ * more, so the target still meets 44 px).
+ */
+export function hitBands(boxes: LaidBox[]): Map<string, Band> {
+  const fns = boxes.filter((b) => b.kind === 'function')
+  const out = new Map<string, Band>()
+  for (const f of fns) {
+    const a = f.rect
+    const band: Band = { l: HIT, r: HIT, t: HIT, b: HIT }
+    for (const g of fns) {
+      if (g === f) continue
+      const o = g.rect
+      const rows = a.y - 2 * HIT < o.y + o.h && o.y < a.y + a.h + 2 * HIT
+      const cols = a.x - 2 * HIT < o.x + o.w && o.x < a.x + a.w + 2 * HIT
+      const half = (gap: number) => Math.max(0, Math.floor(gap / 2))
+      if (rows && o.x >= a.x + a.w) band.r = Math.min(band.r, half(o.x - a.x - a.w))
+      if (rows && o.x + o.w <= a.x) band.l = Math.min(band.l, half(a.x - o.x - o.w))
+      if (cols && o.y >= a.y + a.h) band.b = Math.min(band.b, half(o.y - a.y - a.h))
+      if (cols && o.y + o.h <= a.y) band.t = Math.min(band.t, half(a.y - o.y - o.h))
+    }
+    out.set(f.id, band)
+  }
+  return out
+}
+
 const px = (n: number) => Math.round(n) + 0.5
 
 /**
@@ -86,7 +116,19 @@ const px = (n: number) => Math.round(n) + 0.5
  * focusing or tapping it traces its `[[Environment]]` path (`paths.ts`).
  * Rows a function can read carry a tint (`data-b`, the binding name).
  */
-function Box({ box, hatch, label, tints }: { box: LaidBox; hatch: string; label?: string; tints?: Set<string> }) {
+function Box({
+  box,
+  hatch,
+  label,
+  tints,
+  band,
+}: {
+  box: LaidBox
+  hatch: string
+  label?: string
+  tints?: Set<string>
+  band?: Band
+}) {
   const { x, y, w, h } = box.rect
   const X = px(x)
   const Y = px(y)
@@ -96,11 +138,16 @@ function Box({ box, hatch, label, tints }: { box: LaidBox; hatch: string; label?
     const slot = box.kind === 'slot'
     return (
       <g data-node={box.id} tabIndex={label ? 0 : undefined} role={label ? 'img' : undefined} aria-label={label}>
-        {slot ? null : (
-          // A transparent band HIT px around the box: a 45 px target on touch
-          // (R11). The group's focus ring is drawn inset by the same band
-          // (tailwind.css), so it still sits 2 px outside the box.
-          <rect x={X - HIT} y={Y - HIT} width={W + 2 * HIT} height={H + 2 * HIT} className={C.hit} />
+        {slot || !band ? null : (
+          // A transparent band around the box: a 45 px target on touch (R11).
+          // The focus ring is drawn on the box itself (tailwind.css), not the group.
+          <rect
+            x={X - band.l}
+            y={Y - band.t}
+            width={W + band.l + band.r}
+            height={H + band.t + band.b}
+            className={C.hit}
+          />
         )}
         <rect
           x={X}
@@ -268,6 +315,7 @@ function SectionSvg({
   const fns = scene.boxes.filter((b) => b.kind === 'function')
   const labelsOf = (e: LaidEdge) => scene.texts.filter((t) => t.kind === 'label' && t.edge === e.id)
   const tints = litRows(section)
+  const bands = hitBands(scene.boxes)
   return (
     // Only the function objects are exposed (focusable, named); the rest of
     // the picture is described by "Diagram as text". `vz-s`: mono ink,
@@ -319,7 +367,13 @@ function SectionSvg({
       {fns.map((b) => {
         const fn = section.nodes.find((n) => n.id === b.id)
         return (
-          <Box key={b.id} box={b} hatch={hatch} label={fn && isFunction(fn) ? pathLabel(section, fn) : undefined} />
+          <Box
+            key={b.id}
+            box={b}
+            hatch={hatch}
+            band={bands.get(b.id)}
+            label={fn && isFunction(fn) ? pathLabel(section, fn) : undefined}
+          />
         )
       })}
       <g aria-hidden>

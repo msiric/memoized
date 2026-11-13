@@ -11,7 +11,7 @@ import {
 import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
 import { lintEnvDiagram } from './lint'
-import { CONTAINER, EnvRecordsStage, HIT } from './EnvRecordsStage'
+import { CONTAINER, EnvRecordsStage, hitBands } from './EnvRecordsStage'
 import { HINT, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
 import { sansWidth } from '../../substrates/text-metrics'
 import type { EnvSection } from './model'
@@ -265,13 +265,23 @@ describe('the interaction hint (R11)', () => {
 })
 
 describe('touch targets (R11)', () => {
-  it.each(cases)('%s: every function has a 44 px hit area', (_n, data, variant) => {
+  it.each(cases)('%s: every function has a 44 px hit area, and no two overlap', (_n, data, variant) => {
     for (const { scenes } of layoutDiagram(data, variant).sections)
-      for (const s of scenes)
-        for (const b of s.boxes.filter((x) => x.kind === 'function')) {
-          // The hit rect is the drawn box plus a transparent band of HIT px on each side.
-          expect(b.rect.h - 1 + 2 * HIT, b.id).toBeGreaterThanOrEqual(44)
-          expect(b.rect.w - 1 + 2 * HIT, b.id).toBeGreaterThanOrEqual(44)
-        }
+      for (const s of scenes) {
+        const bands = hitBands(s.boxes)
+        const hits = s.boxes
+          .filter((x) => x.kind === 'function')
+          .map((b) => {
+            const d = bands.get(b.id)!
+            // The drawn box is rect - 1 px; the band adds its sides.
+            const r = { x: b.rect.x - d.l, y: b.rect.y - d.t, w: b.rect.w - 1 + d.l + d.r, h: b.rect.h - 1 + d.t + d.b }
+            expect(r.h, `${b.id} @ ${s.width}`).toBeGreaterThanOrEqual(44)
+            expect(r.w, `${b.id} @ ${s.width}`).toBeGreaterThanOrEqual(44)
+            return { id: b.id, r }
+          })
+        for (let i = 0; i < hits.length; i++)
+          for (let j = i + 1; j < hits.length; j++)
+            expect(intersects(hits[i].r, hits[j].r), `${hits[i].id} x ${hits[j].id} @ ${s.width}`).toBe(false)
+      }
   })
 })

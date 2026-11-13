@@ -221,7 +221,7 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
   const focused = await opacities()
   expect([focused.fB, focused.callB, focused['ref:module.counter2'], focused.fA]).toEqual(['1', '1', '1', '0.4'])
   const ring = await svg
-    .locator('[data-node="fB"]')
+    .locator('[data-node="fB"] .vz-fb')
     .evaluate((n) => [getComputedStyle(n).outlineStyle, getComputedStyle(n).outlineWidth])
   expect(ring).toEqual(['solid', '2px'])
   expect(await boxes(), 'nothing moves on focus').toEqual(rest)

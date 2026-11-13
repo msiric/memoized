@@ -331,7 +331,7 @@
   .vz-ah { fill: currentColor; }
   /* A function object: the glyph, tinted when traced (D5: a lime border plus the lime-400/10 fill). */
   .vz-fb { fill: var(--vz-t, theme('colors.zinc.800')); stroke: currentColor; @apply print:fill-white; }
-  /* Its touch target: a transparent band 7 px around the box, 45 px tall (R11, `HIT` in the stage). */
+  /* Its touch target: a transparent band up to 7 px around the box, 45 px tall (R11, `hitBands` in the stage). */
   .vz-hit { fill: transparent; }
   /* A row a function can read: clear until traced, then the lime tint. */
   .vz-rt { color: transparent; fill: currentColor; fill-opacity: 0.16; }
@@ -348,11 +348,10 @@
    */
   .vz-s [tabindex] { outline: none; }
   /*
-   * The focus ring (D5: 2 px lime-500, 2 px off the glyph). The group's box
-   * includes the 7 px touch band, so the ring is drawn 5 px inside it, and
-   * its 15 px radius shrinks by the same 5 to the glyph's 8 plus 2.
+   * The focus ring (D5: 2 px lime-500, 2 px off the glyph), on the glyph
+   * itself: the group also holds the touch band, which would widen it.
    */
-  .vz-s [tabindex]:focus-visible { outline: 2px solid theme('colors.lime.500'); outline-offset: -5px; border-radius: 15px; }
+  .vz-s [tabindex]:focus-visible > .vz-fb { outline: 2px solid theme('colors.lime.500'); outline-offset: 2px; border-radius: 8px; }
   /* Press (R13): the traced tint deepens while held. */
   .vz-s [tabindex]:active > .vz-fb { fill: theme('colors.lime.400 / 20%'); }
   .vz-s :is([data-edge], [data-node]), .vz-s > g[aria-hidden] > :is(text, rect) {
