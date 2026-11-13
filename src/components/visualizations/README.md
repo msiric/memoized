@@ -278,22 +278,25 @@ the course pages, and the build job covers production).
 | --- | --- | --- |
 | Truth tests | `*.truth.test.ts` | a drawn value or claim that a real run contradicts |
 | Footprints | `registry.test.ts` | an entry-table reserve that drifts from the computed footprint |
-| Token lint | `primitives/tokens-lint.test.ts` | raw colors, arbitrary sizes, literal durations, literal SVG strokes and radii anywhere in this folder or in the `.vz-*` stylesheet; a color class the token tables do not paint in that capacity (palette rule) |
+| Token lint | `primitives/tokens-lint.test.ts` | raw colors, arbitrary sizes, literal durations, literal SVG strokes and radii anywhere in this folder or in the `.vz-*` stylesheet; a color class the token tables do not paint in that capacity (palette rule); a literal color class outside `primitives/` that is not a listed exception (`RAW_COLOR`, each with its role); a text color under 4.5:1 on the background set in the same class string, composited on the frame (R2 G-03) |
 | Token contrast | `primitives/tokens-v3.test.ts` | a declared text or graphic pair under 4.5:1 or 3:1, dark and light |
-| Contrast crawl | `e2e/gates/contrast.spec.ts` | a pair that renders below WCAG (text, focus rings, state marks, connectors), or a text color outside the tokens, on the specimen, in seven driven gallery states, in lesson context and in print; only aria-disabled controls are exempt |
-| Visual regression | `e2e/gates/visual.spec.ts` | any changed pixel on the specimen, the gallery states and the lesson-context pages at 375, 768 and 1440, and in print |
-| Functional | `e2e/viz-*.spec.ts` | behavior, keyboard, axe, no-JS rendering, console errors and hydration warnings, footprints |
-| Motion | `e2e/motion/*.spec.ts` (strict by default) | section 4 flags, jumps, more than two animated glyphs, a Back that does not mirror Next by vector, a moving glyph over text, tweens after instant commands, missing press and focus feedback |
-| Stress | `e2e/stress/*.stress.ts` (strict by default) | clipping, spill, overflow, overlap, detached edges, small targets, contrast, layout shift per preset, scroll jumps, hover, print and hydration defects across widths, zooms and text sizes, in full and reduced motion |
+| Contrast crawl | `e2e/gates/contrast.spec.ts` | a pair that renders below WCAG (text, focus rings, state marks, connectors), or a text color outside the tokens, on the specimen, in every driven gallery state (both event-loop presets, every list-keys scene, hover and press inside the frames), in lesson context (list keys through its committed stand-in lesson) and in print, at 375, 768 and 1440; and while each designed motion plays, frozen at +140 and +440 ms (R2 G-01, GB8); only aria-disabled controls are exempt |
+| Consistency | `e2e/gates/consistency.spec.ts` | equivalent elements that compute differently across visuals (choice rows at rest and on the reveal, the marks, Skip, the prompt, the feedback and its lead, the checkpoint anatomy, the frame, the hairline, the current code line), and a frame whose edges are not the lesson's code-block edges at 375, 768 and 1440 (R2 G-05) |
+| Visual regression | `e2e/gates/visual.spec.ts` | any changed pixel on the specimen, the gallery states and the lesson-context pages at 375, 768 and 1440, in print, and at the midpoint of three motions (the Start lock-in, the finale relight, the list-keys ride), frozen at a fixed time |
+| Functional | `e2e/viz-*.spec.ts` | behavior, keyboard, axe, no-JS rendering, console errors and hydration warnings, footprints, the lazy placeholder under text zoom (both interactive visuals), the phone fit in a lesson, and the layout without container queries (emulated: one face per control, list keys stacked, the thumb on its step) |
+| Motion | `e2e/motion/*.spec.ts` (strict by default) | section 4 flags, jumps, more than two animated glyphs, a Back that does not mirror Next by vector, a moving glyph or text over text, a raised layer covering text (only a lifted chip over a lane's own text is allowed), a label cut or rewrapped while it moves, the verdict and every mark or badge before the payoff lands (both visuals), a missing history tick, any list-keys ride that does not start on its box, turns back, crosses text, misses its box or blinks, tweens after instant commands, missing press and focus feedback |
+| Stress | `e2e/stress/*.stress.ts` (strict by default) | clipping, spill, overflow, overlap, detached edges, small targets, contrast, ellipsis and line-clamp truncation, layout shift per preset, scroll jumps, hover, print and hydration defects across widths, zooms and text sizes, in full and reduced motion; a text-zoom run whose root size fell back (R2 G10); box checks measure a function's drawn box, not its touch band |
 
 Commands (a dev server with the gallery at `E2E_BASE_URL`, default
 `http://localhost:3100`):
 
 - `yarn test:viz:gate`: the PR gate, exactly what CI runs on a pull request
   (functional, contrast, motion at 1024, the stress PR tier; visual too
-  inside the image). CI runs it as seven parallel shards
+  inside the image). CI runs it as nine parallel shards
   (`e2e/gate.sh pr <shard>`, listed with their times in the script), so the
-  wall time stays under 10 minutes.
+  wall time stays near 10 minutes. The PR tier runs the full-motion contrast
+  pass at 375 and every list-keys ride at 1024; the full tier runs both at
+  every width, and hydration under very large text.
 - `yarn test:viz:full`: the full matrix (every stress configuration, motion
   from 320 to 1920, so 375 and 1440 too), nightly on master and on demand
   (`.github/workflows/viz-nightly.yml`).
@@ -303,8 +306,12 @@ Commands (a dev server with the gallery at `E2E_BASE_URL`, default
 - `MOTION_STRICT=0` and `STRESS_STRICT=0` only record (for audits).
 
 A new visual is covered by adding it to the gallery (and its states to
-`e2e/gates/drive.ts`), its primitives' states to the specimen, and, once a
-lesson embeds it, its lesson to `src/app/dev/visualizations/lesson/fixtures.ts`.
+`e2e/gates/drive.ts`: at rest in `STATES`, every scene and preset, hover and
+press; its designed motions in `MOTION_STATES`), its primitives' states to
+the specimen, its equivalent elements to `e2e/gates/consistency.spec.ts`,
+and its lesson to `src/app/dev/visualizations/lesson/fixtures.ts` (a
+premium lesson gets a committed stand-in body, as list keys has) and to
+the warm and hydration lists.
 
 ## Principle
 

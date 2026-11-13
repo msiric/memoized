@@ -70,13 +70,14 @@ jobs:
     # G ruling 7: the PR gate is sharded into parallel jobs (each about 4
     # minutes of tests plus about 4 of setup), so the wall time stays under
     # 10 minutes; motion runs at 1024 only on PRs, 375 and 1440 nightly
-    # (viz-nightly.yml). e2e/gate.sh lists the shards and their measured times.
+    # (viz-nightly.yml), and the full-motion contrast pass at 375 only.
+    # e2e/gate.sh lists the shards and their measured times.
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        shard: [functional-a, functional-b, design, motion-a, motion-b, stress-a, stress-b]
+        shard: [functional-a, functional-b, design-a, design-b, motion-a, motion-b, motion-c, stress-a, stress-b]
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble
       options: --ipc=host

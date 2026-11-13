@@ -9,21 +9,27 @@
 # Linux image (VIZ_VISUAL=1, as in CI); locally use `yarn test:viz:visual`.
 #
 # Tiers:
-#   pr    functional e2e, the contrast crawl, visual baselines, the strict
-#         motion gate at 1024 (G ruling 7: 375 and 1440 run nightly) and the
-#         stress PR tier (core widths, CSS zoom, very large text, a
-#         full-motion pass, hover, print, hydration).
+#   pr    functional e2e, the contrast crawl (at rest, and in full motion
+#         at 375), the consistency gate, visual baselines, the strict motion
+#         gate at 1024 (G ruling 7: 375 and 1440 run nightly) with every
+#         list-keys ride, and the stress PR tier (core widths, CSS zoom, very
+#         large text, a full-motion pass, hover, print, hydration).
 #   full  the same suites with every stress configuration and the R1 extras,
-#         and motion at 320 to 1920.
+#         motion and the rides at 320 to 1920, the full-motion crawl at 375,
+#         768 and 1440, and hydration under very large text.
 #
-# PR shards (seconds of test time measured in the CI image, before job setup):
-#   functional-a  viz-list-keys, viz-static                      ~230
-#   functional-b  viz-step-through, viz-shell                    ~220
-#   design        contrast crawl and visual baselines            ~115
-#   motion-a      event-loop steps, reveals, instant, interaction ~210
-#   motion-b      list-keys reveals, interruption                ~285
-#   stress-a      stress flagships                               ~225
-#   stress-b      stress adversarial and hydration               ~110
+# PR shards (seconds of test time, measured natively on macOS against a warm
+# dev server, H3 round 2 integration; the CI image adds job setup):
+#   functional-a  viz-list-keys, viz-static                          ~230
+#   functional-b  viz-step-through, viz-shell, viz-fallbacks          ~235
+#   design-a      contrast crawl at rest (375, 768, 1440)             ~130
+#   design-b      full-motion contrast (375), consistency; visual
+#                 baselines inside the image (~200 more)              ~290
+#   motion-a      event-loop steps, reveals, instant, interaction     ~230
+#   motion-b      list-keys reveals, interruption                     ~305
+#   motion-c      every list-keys ride (1024)                          ~75
+#   stress-a      stress flagships                                    ~225
+#   stress-b      stress adversarial and hydration                    ~100
 # Without a shard, `pr` runs them all in sequence.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -46,9 +52,15 @@ run() {
   case "$1" in
     functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts ;;
     functional-b) pw --project=functional e2e/viz-step-through.spec.ts e2e/viz-shell.spec.ts ;;
-    design) pw --project=gates ${visual[@]+"${visual[@]}"} ;;
+    design-a) pw --project=gates e2e/gates/contrast.spec.ts --grep-invert "full motion" ;;
+    design-b)
+      local a=0 b=0
+      pw --project=gates e2e/gates/contrast.spec.ts --grep "full motion" || a=$?
+      pw --project=gates ${visual[@]+"${visual[@]}"} e2e/gates/consistency.spec.ts e2e/gates/visual.spec.ts || b=$?
+      return $((a || b)) ;;
     motion-a) pw --project=motion e2e/motion/event-loop-steps.spec.ts e2e/motion/reveal.spec.ts e2e/motion/instant-paths.spec.ts e2e/motion/interaction.spec.ts ;;
     motion-b) pw --project=motion e2e/motion/list-keys-reveals.spec.ts e2e/motion/interruption.spec.ts ;;
+    motion-c) pw --project=motion e2e/motion/list-keys-rides.spec.ts ;;
     stress-a) stress flagships ;;
     stress-b) stress adversarial hydration ;;
     *) echo "unknown shard $1" >&2; return 2 ;;
@@ -62,7 +74,7 @@ if [ "$tier" = full ] || [ "$shard" = all ]; then
     pw --project=functional --project=gates --project=motion ${visual[@]+"${visual[@]}"} || status=$?
     stress || status=$?
   else
-    for s in functional-a functional-b design motion-a motion-b stress-a stress-b; do
+    for s in functional-a functional-b design-a design-b motion-a motion-b motion-c stress-a stress-b; do
       t=$(date +%s)
       run "$s" || status=$?
       echo "shard $s: $(($(date +%s) - t)) s"
