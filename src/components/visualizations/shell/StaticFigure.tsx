@@ -72,7 +72,10 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
 
       <figcaption
         data-viz-part="viz-caption"
-        className={clsx(captionCls, H_CLS)}
+        // A floor, like the title: under 200 % text on a phone the caption may
+        // need a line more than its model, and must push "Diagram as text"
+        // down rather than print over it (a static figure never re-renders).
+        className={clsx(captionCls, MIN_H_CLS)}
         style={heights({ narrow: m.narrow.caption, wide: m.wide.caption, col: m.col.caption }, { marginTop: FRAME.headerGap })}
       >
         {p.caption}
