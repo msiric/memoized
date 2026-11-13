@@ -65,13 +65,17 @@ export type ScrubberProps = {
   onSeek: (to: number) => void
 }
 
+/**
+ * One encoding everywhere (final polish): filled light = answered, hollow =
+ * open, crossed = skipped. On the thumb the outline turns dark against the
+ * lime, but an answered diamond keeps its light fill, so it never reads as
+ * a hole in the thumb (a dark diamond on lime looked hollow).
+ */
 function Diamond({ status, onThumb = false }: { status: CheckpointStatus; onThumb?: boolean }) {
   const ink = onThumb ? 'stroke-zinc-900' : 'stroke-zinc-100 print:stroke-zinc-900'
   const fill =
     status === 'answered'
-      ? onThumb
-        ? 'fill-zinc-900'
-        : 'fill-zinc-100 print:fill-zinc-900'
+      ? 'fill-zinc-100 print:fill-zinc-900'
       : onThumb
         ? 'fill-transparent'
         : 'fill-vz-frame print:fill-white'

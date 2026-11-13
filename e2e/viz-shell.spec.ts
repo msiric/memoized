@@ -214,6 +214,61 @@ test('checkpoint diamonds sit on the step they gate; the thumb carries one; the 
   await expect(frame(page).locator('[data-viz-part="scrubber-thumb"] [data-diamond="answered"]')).toHaveCount(1)
 })
 
+test('checkpoint diamonds: hollow while open, filled once answered, crossed once skipped, on and off the thumb, at both checkpoints of both presets', async ({
+  page,
+}) => {
+  test.setTimeout(120_000)
+  // Light fill = answered; the frame (off the thumb) or the lime showing
+  // through (on it) = hollow; a cross = skipped (final polish: an answered
+  // diamond on the thumb was dark and read as a hole).
+  const LIGHT = 'rgb(244, 244, 245)'
+  const look = (sel: string) =>
+    frame(page)
+      .locator(sel)
+      .first()
+      .evaluate((el) => ({
+        status: el.getAttribute('data-diamond'),
+        fill: getComputedStyle(el.querySelector('path')!).fill,
+        cross: el.querySelectorAll('path').length === 2,
+      }))
+  const diamondAt = async (step: number) => {
+    const onThumb = Number(await frame(page).getAttribute('data-viz-step')) === step
+    return look(onThumb ? '[data-viz-part="scrubber-thumb"] [data-diamond]' : `[data-checkpoint-step="${step}"] [data-diamond]`)
+  }
+  for (const preset of ['basic-ordering', 'microtask-queued-during-drain']) {
+    for (const how of ['answer', 'skip'] as const) {
+      await open(page, 1024, `?preset=${preset}`)
+      await slider(page).focus()
+      const steps = (await frame(page).locator('[data-checkpoint-step]').evaluateAll((els) =>
+        els.map((e) => Number(e.getAttribute('data-checkpoint-step'))),
+      )) as number[]
+      expect(steps).toHaveLength(2)
+      for (const at of steps) {
+        // Reach the question with Next (never a jump, which marks it skipped).
+        for (let guard = 0; guard < 12 && Number(await frame(page).getAttribute('data-viz-step')) < at; guard++) {
+          await page.keyboard.press('ArrowRight')
+          await page.waitForTimeout(120)
+        }
+        await expect(frame(page)).toHaveAttribute('data-viz-mode', 'ask')
+        const open_ = await diamondAt(at)
+        expect(open_, `${preset} ${at} open`).toMatchObject({ status: 'open', cross: false })
+        expect(open_.fill, `${preset} ${at} open is hollow`).not.toBe(LIGHT)
+        if (how === 'answer') await page.keyboard.press('1')
+        else await frame(page).getByTestId('viz-skip').click()
+        await page.waitForTimeout(700)
+        await slider(page).focus()
+        // On the thumb (when the answer stays on its step) and off it.
+        const done = await diamondAt(at)
+        const off = await look(`[data-checkpoint-step="${at}"] [data-diamond]`)
+        for (const [where, d] of [['thumb or rail', done], ['rail', off]] as const) {
+          if (how === 'answer') expect(d, `${preset} ${at} answered (${where})`).toMatchObject({ status: 'answered', fill: LIGHT, cross: false })
+          else expect(d, `${preset} ${at} skipped (${where})`).toMatchObject({ status: 'skipped', cross: true })
+        }
+      }
+    }
+  }
+})
+
 test('instant paths land everything in one frame, exits included (D7)', async ({ page }) => {
   test.setTimeout(120_000)
   await open(page, 1024, '?preset=basic-ordering')
