@@ -135,7 +135,7 @@ export const varVsLetLoop: StaticPreset<EnvDiagram> = {
   label: 'var vs let loop',
   title: 'Loop bindings: var vs let',
   caption:
-    'var gives the whole call one i, so every saved function reads the final 3; let gives each iteration its own binding.',
+    'var gives the call one i, so every saved function reads the final 3; let gives each iteration its own i.',
   programs: [varLoopProgram, letLoopProgram],
   data: { sections: [varSection, letSection], align: 'bottom' },
   claims: [varSection, letSection].flatMap((section) =>
