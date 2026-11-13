@@ -318,12 +318,11 @@ test('list-keys keyboard, focus and checkpoint flow', async ({ page }) => {
   // Digit answer while focus is on the key switcher (not replaced): does focus move?
   const toPick = async () => {
     const mode = await f.getAttribute('data-viz-mode')
-    if (mode === 'ask') await f.locator('[data-viz-part="viz-back"]').click()
     if (mode === 'reveal') await f.locator('[data-viz-part="viz-again"]').click()
     await page.waitForTimeout(300)
   }
   await toPick()
-  await f.getByRole('button', { name: 'Insert at top', exact: true }).click()
+  await f.locator('[data-viz-focus=\"action-insert-top\"]').click()
   await page.waitForTimeout(300)
   await f.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { checked: true }).focus()
   await page.keyboard.press('1')
@@ -340,7 +339,7 @@ test('list-keys keyboard, focus and checkpoint flow', async ({ page }) => {
   await f.locator('input[type="checkbox"]').first().uncheck()
   await page.waitForTimeout(300)
   await toPick()
-  await f.getByRole('button', { name: 'Append', exact: true }).click()
+  await f.locator('[data-viz-focus=\"action-append\"]').click()
   await page.waitForTimeout(300)
   flow.noCheckApply = { ...(await st()), live: await takeLive(page) }
   // Key strategy switch by keyboard (the wrapper scene is its own preset, D17).
@@ -378,9 +377,8 @@ test('hover, press and focus styles of equivalent controls', async ({ page }) =>
   r['lk:choice row'] = await feedback(page, lk.locator('[data-choice-index="0"]'))
   r['lk:Skip (quiet)'] = await feedback(page, lk.locator('[data-viz-part="viz-skip"]'))
   r['lk:Outcomes as text'] = await feedback(page, lk.locator('summary'))
-  await lk.locator('[data-viz-part="viz-back"]').click()
   await page.waitForTimeout(300)
-  r['lk:action (secondary)'] = await feedback(page, lk.getByRole('button', { name: 'Append', exact: true }))
+  r['lk:action (secondary)'] = await feedback(page, lk.locator('[data-viz-focus=\"action-append\"]'))
   r['lk:Before card'] = await feedback(page, lk.locator('[data-row="before-0"] label'))
   // Event-loop checkpoint choice row.
   await el.scrollIntoViewIfNeeded()
@@ -409,7 +407,7 @@ test('hover, press and focus styles of equivalent controls', async ({ page }) =>
   await focusRing('el:summary', el.locator('summary'))
   await focusRing('lk:key', lk.getByRole('radiogroup', { name: 'Key strategy' }).getByRole('radio', { checked: true }))
   await focusRing('lk:checkbox', lk.locator('input[type="checkbox"]').first())
-  await focusRing('lk:action', lk.getByRole('button', { name: 'Append', exact: true }))
+  await focusRing('lk:action', lk.locator('[data-viz-focus=\"action-append\"]'))
   await focusRing('lk:summary', lk.locator('summary'))
   out.rings = rings
 })

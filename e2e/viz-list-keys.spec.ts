@@ -59,24 +59,44 @@ const keyRadio = (page: Page, k: KeyStrategy) =>
 async function openWrapper(page: Page, width: number) {
   await open(page, width, '?lk=parent-type-change')
   await expect(frame(page)).toHaveAttribute('data-viz-scene', 'wrapper')
-  await frame(page).getByTestId('viz-back').click()
+}
+
+/**
+ * The action is an always-visible segmented control (H3 R8), a select where
+ * the four segments do not fit.
+ */
+export async function setAction(page: Page, action: string) {
+  const f = frame(page)
+  const seg = f.locator(`[data-viz-focus="action-${action}"]`)
+  if (await seg.isVisible()) await seg.click()
+  else {
+    const select = f.locator('[data-viz-part="actions"] select')
+    const values = await select.locator('option').allTextContents()
+    const ids = ['insert-top', 'delete-first', 'append', 'reverse', 'type', 'class']
+    const labels = ['Insert at top', 'Delete first', 'Append', 'Reverse', '<div> to <span>', 'className only']
+    await select.selectOption({ index: values.indexOf(labels[ids.indexOf(action)]) })
+  }
 }
 
 async function setKey(page: Page, k: KeyStrategy) {
-  await keyRadio(page, k).click()
+  if (await keyRadio(page, k).isVisible()) await keyRadio(page, k).click()
+  else await frame(page).locator('[data-viz-part="keys"] select').selectOption({ index: KEY_STRATEGIES.indexOf(k) })
 }
 
-/** From any phase: go to pick, apply the action, skip the prediction. */
+/** From any phase: choose the action (asks again), skip the prediction. */
 async function reveal(page: Page, action: ListAction | 'type' | 'class') {
   const f = frame(page)
-  if ((await mode(page)) !== 'pick') {
-    if ((await mode(page)) === 'reveal')
-      await f.getByTestId('viz-again').click()
-    else await f.getByTestId('viz-back').click()
+  if ((await f.getAttribute('data-viz-action')) !== action) await setAction(page, action)
+  else if ((await mode(page)) === 'reveal') {
+    // Re-asking the same action: choose it again.
+    await setAction(page, action === 'type' ? 'class' : action === 'class' ? 'type' : action === 'reverse' ? 'append' : 'reverse')
+    await setAction(page, action)
   }
-  await f.locator(`[data-viz-focus="action-${action}"]`).click()
+  await expect(f).toHaveAttribute('data-viz-mode', 'ask')
+  await page.waitForTimeout(260)
   await f.getByTestId('viz-skip').click()
   await expect(f).toHaveAttribute('data-viz-mode', 'reveal')
+  await expect(f).toHaveAttribute('data-viz-landed', 'true')
 }
 
 async function layoutSnapshot(page: Page) {
@@ -84,7 +104,7 @@ async function layoutSnapshot(page: Page) {
     const root = document.querySelector('[data-viz="list-keys"]')!
     const els: [string, Element | null][] = [
       ['frame', root.querySelector('section')],
-      ...['stage', 'keyrow', 'code', 'columns', 'status', 'dock'].map(
+      ...['stage', 'keyrow', 'code', 'columns', 'dock'].map(
         (r) =>
           [r, root.querySelector(`[data-viz-region="${r}"]`)] as [
             string,
@@ -113,6 +133,8 @@ async function layoutSnapshot(page: Page) {
 test('shows exactly what React did, for every key and action (P6)', async ({
   page,
 }) => {
+  // Every reveal now plays to its landing (H3 R5) before the next.
+  test.setTimeout(240_000)
   await open(page, 1024)
   const f = frame(page)
   for (const key of KEY_STRATEGIES) {
@@ -169,14 +191,19 @@ test('predict, then reveal: the answer is checked against React (§5.4)', async 
     f.locator('[data-viz-part="after"] li[data-row]').first(),
   ).not.toHaveAttribute('data-checked')
   await f.locator('[data-choice="milk"]').click()
-  await expect(f.getByTestId('viz-feedback')).toContainText(
-    'Not quite: you picked Buy milk.',
-  )
+  await expect(f.getByTestId('viz-feedback')).toContainText('Not quite.')
   await expect(f.getByTestId('viz-feedback')).toContainText(
     'Instance A now renders Wake up',
   )
+  // The rows stay, and their slots become the result (H3 R4).
+  await expect(f.locator('[data-choice="milk"] [data-choice-slot]')).toHaveAttribute('data-choice-slot', 'wrong')
+  await expect(f.locator('[data-choice="wake"] [data-choice-slot]')).toHaveAttribute('data-choice-slot', 'right')
+  // "Try another" moves to the next action and asks again.
   await f.getByTestId('viz-again').click()
-  await f.locator('[data-viz-focus="action-insert-top"]').click()
+  await expect(f).toHaveAttribute('data-viz-action', 'delete-first')
+  await expect(f).toHaveAttribute('data-viz-mode', 'ask')
+  await setAction(page, 'insert-top')
+  await page.waitForTimeout(260)
   await f.locator('[data-choice="wake"]').click()
   await expect(f.getByTestId('viz-feedback')).toContainText('Right.')
 })
@@ -201,7 +228,9 @@ test('keyboard only: every control, focus never lost (§5.2)', async ({
   await page.keyboard.press('ArrowRight')
   await expect(f).toHaveAttribute('data-viz-key', 'id')
   await expect(keyRadio(page, 'id')).toBeFocused()
-  // The Before checkboxes.
+  // The action, one stop (arrows move), then the Before checkboxes.
+  await page.keyboard.press('Tab')
+  expect(await active()).toBe('action-insert-top')
   await page.keyboard.press('Tab')
   expect(await active()).toBe('check-milk')
   await page.keyboard.press('Tab')
@@ -220,16 +249,11 @@ test('keyboard only: every control, focus never lost (§5.2)', async ({
   expect(await active()).toBe('choice-1')
   await page.keyboard.press('Enter')
   await expect(f).toHaveAttribute('data-viz-mode', 'reveal')
-  expect(
-    await active(),
-    'focus moves to the control that replaced the choice',
-  ).toBe('again')
+  expect(await active(), 'focus moves to the control that continues').toBe('again')
+  // "Try another": the next action, asked at once; focus on the first choice.
   await page.keyboard.press('Enter')
-  await expect(f).toHaveAttribute('data-viz-mode', 'pick')
-  expect(await active()).toBe('action-insert-top')
-  await page.keyboard.press('Tab')
-  expect(await active()).toBe('action-delete-first')
-  await page.keyboard.press('Enter')
+  await expect(f).toHaveAttribute('data-viz-mode', 'ask')
+  await expect(f).toHaveAttribute('data-viz-action', 'delete-first')
   expect(await active()).toBe('choice-0')
   // Esc never resets (D13): the prediction and focus stay.
   await page.keyboard.press('Escape')
@@ -237,12 +261,15 @@ test('keyboard only: every control, focus never lost (§5.2)', async ({
   expect(await active()).toBe('choice-0')
   await page.keyboard.press('1')
   await expect(f).toHaveAttribute('data-viz-mode', 'reveal')
-  expect(await active(), 'the answered choice was replaced').toBe('again')
+  expect(await active(), 'the answered choice hands on').toBe('again')
+  // The action control is reachable and changes the experiment from the keyboard.
+  await f.locator('[data-viz-focus="action-delete-first"]').focus()
+  await page.keyboard.press('ArrowRight')
+  await expect(f).toHaveAttribute('data-viz-action', 'append')
+  await expect(f).toHaveAttribute('data-viz-mode', 'ask')
   // A digit answer from outside the dock leaves focus where it is (M19).
-  await page.keyboard.press('Enter')
-  await expect(f).toHaveAttribute('data-viz-mode', 'pick')
-  await f.locator('[data-viz-focus="action-insert-top"]').click()
   await keyRadio(page, 'id').focus()
+  await page.waitForTimeout(260)
   await page.keyboard.press('2')
   await expect(f).toHaveAttribute('data-viz-mode', 'reveal')
   await expect(keyRadio(page, 'id')).toBeFocused()
@@ -305,10 +332,8 @@ test('touch targets are at least 44×44 with 8 px between them (A5)', async ({
     await check('ask')
     await frame(page).getByTestId('viz-skip').click()
     await check('reveal')
-    await frame(page).getByTestId('viz-again').click()
-    await check('pick')
     await openWrapper(page, width)
-    await check('wrapper pick')
+    await check('wrapper ask')
   }
 })
 
@@ -356,7 +381,7 @@ test('full motion: the checkbox rides its line into its After row, then ticks th
   expect(early).not.toEqual(late)
   // While it rides, the destination waits with an empty box and no marks.
   await expect(f.locator('[data-row="after-0"] [data-check] path')).toHaveCount(0)
-  await page.waitForTimeout(700)
+  await page.waitForTimeout(800)
   await expect(rider).toHaveCount(0)
   await expect(f.locator('[data-row="after-0"] [data-check] path')).toHaveCount(1)
   await expect(f.locator('[data-focus]')).toHaveCount(1)
@@ -365,6 +390,8 @@ test('full motion: the checkbox rides its line into its After row, then ticks th
 test('layout stability: nothing moves across every scene, key, action and phase', async ({
   page,
 }) => {
+  // Every reveal now plays to its landing (H3 R5) before the next.
+  test.setTimeout(240_000)
   for (const width of [375, 1024]) {
     await open(page, width)
     const f = frame(page)
@@ -383,9 +410,7 @@ test('layout stability: nothing moves across every scene, key, action and phase'
         await reveal(page, action)
         await same(`${key}/${action} reveal`)
         await f.getByTestId('viz-again').click()
-        await same(`${key}/${action} pick`)
-        await f.locator(`[data-viz-focus="action-${action}"]`).click()
-        await same(`${key}/${action} ask`)
+        await same(`${key}/${action} try another`)
       }
     }
     // No checks: the prompt changes to the no-state message.
@@ -395,18 +420,16 @@ test('layout stability: nothing moves across every scene, key, action and phase'
     for (let i = 0; i < 10; i++)
       await f.locator('[data-viz-focus="check-dog"]').click()
     await same('burst')
-    // The wrapper case is its own preset (D17) with the same footprint.
+    // The wrapper case is its own preset (D17); its dock is measured for
+    // its own text (H3 R2), so it holds still within itself.
     await openWrapper(page, width)
-    const wrapper = { ...base }
     const w = await layoutSnapshot(page)
-    // The key row holds the setup sentence in this preset; the outer regions hold still.
-    for (const k of ['frame', 'stage', 'status', 'dock', 'after'] as const)
-      expect(w[k], `wrapper ${k}`).toEqual(wrapper[k])
-    for (const a of ['type', 'class'] as const) {
+    expect(w.frame[3], 'wrapper frame within the reserved footprint').toBeLessThanOrEqual(width < 768 ? NARROW : WIDE)
+    for (const a of ['class', 'type'] as const) {
       await reveal(page, a)
       const r = await layoutSnapshot(page)
-      for (const k of ['frame', 'stage', 'status', 'dock', 'after'] as const)
-        expect(r[k], `wrapper ${a} ${k}`).toEqual(wrapper[k])
+      for (const k of ['frame', 'stage', 'dock', 'after'] as const)
+        expect(r[k], `wrapper ${a} ${k}`).toEqual(w[k])
     }
   }
 })
@@ -414,6 +437,8 @@ test('layout stability: nothing moves across every scene, key, action and phase'
 test('no overflow or clipped text at 5 widths, in every phase and scene', async ({
   page,
 }) => {
+  // Every reveal now plays to its landing (H3 R5) before the next.
+  test.setTimeout(240_000)
   for (const width of WIDTHS) {
     await open(page, width)
     const check = async (where: string) => {
@@ -459,9 +484,9 @@ test('no overflow or clipped text at 5 widths, in every phase and scene', async 
       }
     }
     await f.getByTestId('viz-again').click()
-    await check('pick')
+    await check('try another')
     await openWrapper(page, width)
-    await check('wrapper pick')
+    await check('wrapper ask')
     for (const a of ['type', 'class'] as const) {
       await reveal(page, a)
       await check(`wrapper ${a}`)
@@ -498,7 +523,7 @@ test('zero axe violations in every phase (§7)', async ({ page }) => {
     await f.getByTestId('viz-skip').click()
     await scan('reveal')
     await f.getByTestId('viz-again').click()
-    await scan('pick')
+    await scan('try another')
     await openWrapper(page, width)
     await reveal(page, 'type')
     await scan('wrapper reveal')
@@ -549,7 +574,7 @@ test('screenshots at 320, 375, 768, 1024 and 1440', async ({
     await page.waitForTimeout(400)
     await shot(f, `lk-${width}-reveal-random`)
     await f.getByTestId('viz-again').click()
-    await shot(f, `lk-${width}-pick`)
+    await shot(f, `lk-${width}-try-another`)
     await openWrapper(page, width)
     await reveal(page, 'type')
     await page.waitForTimeout(400)

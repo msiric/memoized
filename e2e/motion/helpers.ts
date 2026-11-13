@@ -32,6 +32,42 @@ export async function hydrateListKeys(page: Page) {
   await expect(page.locator(`${LK}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 30_000 })
 }
 
+/**
+ * List keys (H3 R8): the key and the action are always-visible controls (a
+ * select where the segments do not fit); choosing either asks again. A DOM
+ * click reaches a segment hidden behind the select fallback too.
+ */
+export async function lkChoose(page: Page, opts: { key?: string; action?: string; both?: boolean }) {
+  const f = page.locator(LK)
+  if (opts.both !== undefined) {
+    const second = f.locator('input[type="checkbox"]').nth(1)
+    if (opts.both !== (await second.isChecked())) await second.click()
+    await page.waitForTimeout(300)
+  }
+  if (opts.key)
+    await f.evaluate((el, k) => {
+      const radios = [...el.querySelectorAll('[role="radiogroup"][aria-label="Key strategy"] [role="radio"]')] as HTMLElement[]
+      radios.find((r) => r.textContent?.trim().toLowerCase() === k.toLowerCase())?.click()
+    }, opts.key)
+  if (opts.key) await page.waitForTimeout(300)
+  if (opts.action) {
+    const id = LK_ACTION_ID[opts.action] ?? opts.action
+    const same = (await f.getAttribute('data-viz-action')) === id
+    const other = ({ type: 'class', class: 'type', 'insert-top': 'append' } as Record<string, string>)[id] ?? 'insert-top'
+    if (same && (await f.getAttribute('data-viz-mode')) === 'reveal')
+      await f.evaluate((el, a) => (el.querySelector(`[data-viz-focus="action-${a}"]`) as HTMLElement).click(), other)
+    await f.evaluate((el, a) => (el.querySelector(`[data-viz-focus="action-${a}"]`) as HTMLElement).click(), id)
+    await page.waitForTimeout(350)
+  }
+}
+
+export const LK_ACTION_ID: Record<string, string> = {
+  'Insert at top': 'insert-top',
+  'Delete first': 'delete-first',
+  Append: 'append',
+  Reverse: 'reverse',
+}
+
 export async function startRec(page: Page, root: string) {
   await page.evaluate((sel) => (window as any).__vizRec.start(sel), root)
 }

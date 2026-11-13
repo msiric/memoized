@@ -4,7 +4,8 @@ import path from 'node:path'
 
 export const AUDIT =
   '/Users/mariosiric/Documents/memoized-content-audit/audit/content-quality/program-runs/VIZ/2026-11-12-hardening/R1'
-export const SHOTS = path.join(AUDIT, 'shots-motion')
+/** Override with R1_MOTION_OUT so a re-run never overwrites the R1 evidence. */
+export const SHOTS = process.env.R1_MOTION_OUT ?? path.join(AUDIT, 'shots-motion')
 export const DATA = path.join(SHOTS, 'data')
 export const EL = '[data-viz="event-loop"] section'
 export const LK = '[data-viz="list-keys"] section'

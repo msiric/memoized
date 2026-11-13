@@ -59,7 +59,7 @@ export async function walkStepThrough(page: Page, rec: Recorder, scope: string, 
   await settle(page, 30)
 }
 
-/** Drives the list-keys explorable through every key x action (pick, ask, reveal) and the wrapper scene. */
+/** Drives the list-keys explorable through every key x action (ask, reveal) and the wrapper scene. */
 export async function walkListKeys(page: Page, rec: Recorder, scope: string, visual: string, wrapper = false) {
   const frame = `${scope} section[data-viz-frame]`
   await page.waitForSelector(`${frame}[data-viz-interactive="true"]`, { timeout: 30_000 })
@@ -69,16 +69,12 @@ export async function walkListKeys(page: Page, rec: Recorder, scope: string, vis
     if (r) rec.scrollJump(visual, label, r.before, r.after)
     await settle(page, 30)
   }
-  const toPick = async () => {
-    const m = await mode()
-    if (m === 'reveal') await click('[data-viz-part="viz-again"]', 'again')
-    else if (m === 'ask') await click('[data-viz-part="viz-back"]', 'back')
-  }
+  // The action is an always-visible control (H3 R8): choosing it asks again,
+  // from any phase. A hidden segment (the select fallback shows) still takes
+  // a DOM click, so the flow is the same at every width.
   await rec.check(page, scope, visual, `initial ${await mode()}`)
   if (wrapper) {
     for (const action of ['type', 'class']) {
-      await toPick()
-      await rec.check(page, scope, visual, `wrapper pick`)
       await click(`[data-viz-focus="action-${action}"]`, `wrapper ${action}`)
       await rec.check(page, scope, visual, `wrapper ${action} ${await mode()}`)
       await click('[data-viz-part="viz-skip"]', `wrapper ${action} skip`)
@@ -87,7 +83,6 @@ export async function walkListKeys(page: Page, rec: Recorder, scope: string, vis
     return
   }
   for (const key of KEY_STRATEGIES) {
-    await toPick()
     const r = await page.evaluate(
       ({ f, key }) => {
         const before = window.scrollY
@@ -101,8 +96,6 @@ export async function walkListKeys(page: Page, rec: Recorder, scope: string, vis
     )
     rec.scrollJump(visual, `key ${key}`, r.before, r.after)
     for (const action of LIST_ACTIONS) {
-      await toPick()
-      await rec.check(page, scope, visual, `${key} pick`)
       await click(`[data-viz-focus="action-${action}"]`, `${key}/${action}`)
       await rec.check(page, scope, visual, `${key}/${action} ${await mode()}`)
       await click('[data-viz-part="viz-skip"]', `${key}/${action} skip`)
