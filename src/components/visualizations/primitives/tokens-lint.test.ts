@@ -1,7 +1,9 @@
 // @vitest-environment node
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import colors from 'tailwindcss/colors'
 import { describe, expect, it } from 'vitest'
+import { MIN_TEXT_CONTRAST, contrastRatio, over, parseHex, type RGB } from './contrast'
 
 import {
   contrastPairs,
@@ -37,6 +39,14 @@ import {
  *   the hairline; fills (`bg-`, `fill-`) a surface layer, a role or a pair
  *   foreground. So every color that renders is one the contrast suite
  *   checks; anything else needs a row in `ALLOW_COLOR` naming its role.
+ * - raw color classes stay in the primitives (R2 G-03): outside
+ *   `primitives/`, a color class comes from a token (`ink`, `stroke`,
+ *   `surface`, `svgInk`, `now`, ...), never a literal, so a role cannot be
+ *   painted with the right color for the wrong reason. `RAW_COLOR` lists the
+ *   only literals left, per file, each with its role;
+ * - a text color is judged on the surface it is drawn on (R2 G-03): where
+ *   one class string sets both a text color and a background, the text must
+ *   reach 4.5:1 on that background as composited on the frame.
  *
  * Rules (the stylesheet): no raw color, no literal number with or without a
  * unit in a declaration (values come from `theme('vz.*')`, `theme('colors.*')`
@@ -79,8 +89,96 @@ export const ALLOW_COLOR: Record<string, string> = {
   'border-zinc-600':
     'the select fallback edge, the platform outline Select (P: Select.tsx:27): 2.15:1, decorative; its value text and chevron identify it (WCAG 1.4.11 needs no boundary then)',
   'text-zinc-500': 'stylesheet: `currentColor` for SVG strokes (svgInk.line), a graphic tested as `line`',
-  'stroke-zinc-800': 'stylesheet: the knockout halo behind an unused record\'s text, in the glyph fill (surface glyph)',
-  'print:stroke-white': 'stylesheet: the same halo on paper, in the paper color',
+}
+
+/**
+ * Raw color classes outside `primitives/` (R2 G-03), per file (relative to
+ * the visualizations folder), each with the role it paints. Everything else
+ * outside the primitives takes its color from a token.
+ */
+export const RAW_COLOR: Record<string, Record<string, string>> = {
+  'shell/CodePane.tsx': {
+    'bg-zinc-900': 'the code pane surface (P: Code.tsx:297, `surfaces.code`), and the host note that masks the last row',
+    'print:bg-white': 'paper: the code pane surface',
+    'print:border-zinc-300': 'paper: the code pane edge (light hairline family)',
+    'bg-lime-400/10': 'the current line ground (`now` tint, D5) on the code surface, where `now.glyph` would add a ring',
+    'bg-lime-400': 'the current line bar (a 2 px `now` mark, tested as a non-text pair by the crawl)',
+    'print:bg-lime-700': 'paper: the current line bar',
+    'bg-white/10': 'the continuation hairline of a wrapped line (the one hairline as a 1 px fill)',
+    'print:bg-zinc-200': 'paper: the continuation hairline',
+  },
+  'shell/Scrubber.tsx': {
+    'bg-zinc-500': 'the rail and its future ticks (`line` as a 2 px fill)',
+    'bg-lime-500': 'progress, past ticks and the thumb (the platform accent, P: Button.tsx:20)',
+    'bg-lime-600': 'the thumb while dragged',
+    'group-active:bg-lime-600': 'the thumb while pressed',
+    'print:bg-lime-700': 'paper: progress, past ticks and the thumb',
+    'print:border-white': 'paper: the thumb\'s knockout ring in the paper color',
+    'stroke-zinc-100': 'a checkpoint diamond\'s edge on the frame (inverted glyph, `chipState`)',
+    'stroke-zinc-900': 'a diamond\'s edge on the lime thumb',
+    'print:stroke-zinc-900': 'paper: a diamond\'s edge',
+    'fill-zinc-100': 'an answered diamond on the frame',
+    'fill-zinc-900': 'an answered diamond on the lime thumb',
+    'print:fill-zinc-900': 'paper: an answered diamond',
+    'print:fill-white': 'paper: a hollow diamond in the paper color',
+  },
+  'engines/list-keys/CheckBox.tsx': {
+    'border-zinc-100': 'a checked box: the inverted fill and its edge (`chipState`)',
+    'bg-zinc-100': 'a checked box: the inverted fill',
+    'border-zinc-500': 'an empty box edge (`line`, an input\'s own edge)',
+    'print:border-zinc-900': 'paper: a box edge',
+    'text-zinc-900': 'the tick on a checked box (inverted ink on zinc-100)',
+    'text-zinc-400': 'a history tick (`svgInk.muted` on an empty box)',
+    'print:text-zinc-900': 'paper: a history tick',
+  },
+  'engines/list-keys/Columns.tsx': {
+    'bg-zinc-100': 'the state chip that rides a match line (`chipState`, inverted)',
+    'text-zinc-900': 'the state chip\'s label (inverted ink on zinc-100)',
+    'print:border-zinc-900': 'paper: the state chip edge',
+    'ring-zinc-500': 'the state chip ring on a `line` connector',
+    'group-can-hover:bg-white/5': 'a Before card under the pointer: the platform hover step (R13, `transitionCls`)',
+    'group-press:bg-white/10': 'a Before card while pressed: the press step (R13)',
+  },
+}
+
+/** Why a raw color class breaks the token rule in `file`, or null (primitives and listed exceptions pass). */
+export function rawColorViolation(file: string, whole: string): string | null {
+  // The token module, the primitives and the stylesheet's `.vz-*` rules define the language.
+  if (/^(primitives\/|styles\/)/.test(file) || /\.css$/.test(file)) return null
+  return RAW_COLOR[file]?.[whole] ? null : 'a literal color outside the primitives: take it from a token (ink, stroke, surface, svgInk, now)'
+}
+
+const tailwind = colors as unknown as Record<string, Record<string, string> | string>
+const hexOf = (c: string): string | undefined =>
+  c === 'white' ? '#ffffff' : c === 'black' ? '#000000' : (tailwind[c.split('-')[0]] as Record<string, string> | undefined)?.[c.split('-')[1]]
+const rgbOf = (c: string): RGB => parseHex(hexOf(c)!)
+/** The frame as composited on the page (zinc-800 at 40 % on zinc-900). */
+const FRAME_RGB = over(parseHex((tailwind.zinc as Record<string, string>)['800']), 0.4, parseHex((tailwind.zinc as Record<string, string>)['900']))
+
+/**
+ * Text on its own surface (R2 G-03): in one class string, each `text-*`
+ * color against the `bg-*` with the same variant, the background composited
+ * on the frame. Returns the failing pairs.
+ */
+export function surfacePairViolations(str: string): string[] {
+  const out: string[] = []
+  const classes = str.split(/\s+/)
+  const parse = (cls: string, util: 'text' | 'bg') => {
+    const m = cls.match(new RegExp(`^((?:[\\w-]+:)*)${util}-((?:${PALETTE})-\\d{2,3}|white|black)(?:\\/([\\d.]+))?$`))
+    return m ? { variant: m[1], color: m[2], alpha: m[3] ? Number(m[3]) / 100 : 1 } : null
+  }
+  const texts = classes.map((c) => parse(c, 'text')).filter((x): x is NonNullable<typeof x> => !!x)
+  const bgs = classes.map((c) => parse(c, 'bg')).filter((x): x is NonNullable<typeof x> => !!x)
+  for (const t of texts)
+    for (const b of bgs) {
+      // Paper has its own surface; an unknown shade is the palette rule's finding.
+      if (t.variant !== b.variant || /print:/.test(t.variant) || !hexOf(t.color) || !hexOf(b.color)) continue
+      const ground = over(rgbOf(b.color), b.alpha, FRAME_RGB)
+      const ratio = contrastRatio(over(rgbOf(t.color), t.alpha, ground), ground)
+      if (ratio < MIN_TEXT_CONTRAST - 0.005)
+        out.push(`${t.variant}text-${t.color} on ${b.variant}bg-${b.color}${b.alpha < 1 ? `/${b.alpha * 100}` : ''}: ${ratio.toFixed(2)}:1`)
+    }
+  return out
 }
 
 const PALETTE =
@@ -199,7 +297,11 @@ export function lint(file: string, src: string): Finding[] {
     for (const m of l.matchAll(COLOR_CLASS)) {
       const why = paletteViolation(m[1], m[2], m[0].trim())
       if (why) push(k, `off-palette color (${why})`, m[0].trim())
+      const raw = rawColorViolation(file, m[0].trim())
+      if (raw) push(k, `raw color class (${raw})`, m[0].trim())
     }
+    for (const q of l.matchAll(/(['"`])([^'"`]*\b(?:text|bg)-[^'"`]*)\1/g))
+      for (const v of surfacePairViolations(q[2])) push(k, 'text under 4.5:1 on its own background', v)
   })
   return out
 }
@@ -276,6 +378,19 @@ describe('token lint (VIZ-H WS1)', () => {
     const c = lintCss('x.css', css).map((f) => `${f.rule}: ${f.text}`)
     for (const x of ['font-size: 12px', 'opacity: 0.4', '#fff', 'text-[13px]', 'transition: opacity 120ms', 'emerald', 'ring-zinc-600'])
       expect(c.some((r) => r.includes(x)), x).toBe(true)
+  })
+
+  it('flags a raw color outside the primitives and text that fails on its own background (R2 G-03)', () => {
+    const raw = lint('engines/x/Stage.tsx', `const a = 'text-zinc-400 border-zinc-300'`).map((f) => f.rule)
+    expect(raw.filter((r) => r.startsWith('raw color class'))).toHaveLength(2)
+    expect(lint('primitives/X.tsx', `const a = 'text-zinc-400'`)).toEqual([])
+    // A listed exception passes only in its own file.
+    expect(lint('shell/Scrubber.tsx', `const a = 'bg-zinc-500'`)).toEqual([])
+    expect(lint('shell/Lane.tsx', `const a = 'bg-zinc-500'`).map((f) => f.rule)).toEqual([expect.stringMatching(/^raw color class/)])
+    // zinc-400 is a legal text color on the frame, but not on a zinc-600 row (2.9:1).
+    const pair = lint('primitives/X.tsx', `const a = 'bg-zinc-600 text-zinc-400 print:bg-white print:text-zinc-600'`)
+    expect(pair.map((f) => `${f.rule}: ${f.text}`)).toEqual([expect.stringMatching(/^text under 4.5:1 on its own background: text-zinc-400 on bg-zinc-600/)])
+    expect(lint('primitives/X.tsx', `const a = 'bg-zinc-600 text-zinc-100'`)).toEqual([])
   })
 
   it('accepts token references in the stylesheet', () => {

@@ -215,7 +215,7 @@ function Spine({
         'flex w-7 shrink-0 flex-col items-center justify-center whitespace-nowrap',
         side === 'before' ? 'border-r' : 'border-x',
         typeScale.glyphHeader.cls,
-        dashed ? 'border-dashed border-zinc-500' : stroke.hairline,
+        dashed ? clsx('border-dashed', stroke.line) : stroke.hairline,
         label === '?' ? ink.muted : ink.base,
         played && 'transition-colors motion-reduce:transition-none',
       )}
@@ -415,7 +415,7 @@ function ListColumns({
                 className={clsx(
                   cardCls,
                   'm-0 p-0',
-                  arrived && mounted ? 'border-dashed border-zinc-500' : stroke.line,
+                  arrived && mounted ? clsx('border-dashed', stroke.line) : stroke.line,
                   // Q9: lime is the landing, the row that received the check.
                   isDest && now.glyph,
                   transitionCls.feedback,
@@ -477,7 +477,7 @@ function WrapperBox({
         'relative border px-2',
         radius.glyph.cls,
         transitionCls.feedback,
-        removed ? clsx('border-dashed', stroke.removed) : dashed ? 'border-dashed border-zinc-500' : stroke.line,
+        removed ? clsx('border-dashed', stroke.removed) : dashed ? clsx('border-dashed', stroke.line) : stroke.line,
       )}
       style={{ paddingTop: toRem(BOX.pad), paddingBottom: toRem(BOX.bottom), ...beatTransition(sequence, BEAT.badges) }}
     >
@@ -524,7 +524,7 @@ function CounterCard({
       className={clsx(
         cardCls,
         transitionCls.feedback,
-        mounted ? 'border-dashed border-zinc-500' : stroke.line,
+        mounted ? clsx('border-dashed', stroke.line) : stroke.line,
         focus && now.glyph,
       )}
       style={{ ...cardStyle, ...beatTransition(sequence, BEAT.landing) }}

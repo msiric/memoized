@@ -652,10 +652,10 @@ export const radius = {
 /**
  * D1: outlines 1 px; connectors 1.5 px; a `now` connector 2.5 px. `mark` is
  * the drawn tick and chevron inside a control (2 px, the platform icon
- * weight); `knockout` the dark halo that lifts an unused record's text off
- * its hatch (R16).
+ * weight). An unused record's text sits on clear plates over its hatch
+ * (`.vz-p`, R16), so no text needs a halo.
  */
-export const strokeWidth = { outline: 1, connector: 1.5, nowConnector: 2.5, mark: 2, knockout: 4 } as const
+export const strokeWidth = { outline: 1, connector: 1.5, nowConnector: 2.5, mark: 2 } as const
 /** S: §2.2. The one dash pattern. */
 export const DASH = '4 4'
 /** The end dot of a connector (list-keys match lines), radius in px. */
@@ -852,7 +852,6 @@ export const vzTheme = {
   dash: DASH,
   readTint: String(opacityRole.readTint),
   connector: `${strokeWidth.connector}px`,
-  knockout: `${strokeWidth.knockout}px`,
 } as const
 
 /** CSS twins for class-driven transitions. */

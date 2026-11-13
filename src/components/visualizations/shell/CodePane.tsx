@@ -223,13 +223,14 @@ export function CodePane({
                 {/* Line numbers at every width (Q7): 20 px narrow, 24 px from 768. */}
                 <span
                   aria-hidden
-                  className="w-5 shrink-0 select-none pr-1.5 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 vz-wide:w-6 vz-wide:pr-2 print:text-zinc-600"
+                  className={clsx('w-5 shrink-0 select-none pr-1.5 text-right font-mono text-2xs tabular-nums leading-6 vz-wide:w-6 vz-wide:pr-2', ink.muted)}
                 >
                   {n}
                 </span>
                 <code
                   className={clsx(
-                    'min-w-0 flex-1 whitespace-pre-wrap bg-transparent p-0 text-zinc-100 [overflow-wrap:anywhere] print:text-zinc-900',
+                    'min-w-0 flex-1 whitespace-pre-wrap bg-transparent p-0 [overflow-wrap:anywhere]',
+                    ink.base,
                     // The hanging indent: continuation rows start past the line's own indent.
                     'pl-[var(--vz-hang)] [text-indent:calc(-1*var(--vz-hang))]',
                     typeScale.code.cls,
@@ -266,7 +267,7 @@ export function CodePane({
           className="pointer-events-none absolute inset-x-0 bottom-0 flex items-start justify-end bg-zinc-900 px-2 print:hidden"
           style={{ height: rem(CODE_STATUS + CODE_PAD) }}
         >
-          <span className={clsx('font-sans text-2xs leading-4 text-zinc-400', line === 'host' ? 'visible' : 'invisible')}>
+          <span className={clsx('font-sans text-2xs leading-4', ink.muted, line === 'host' ? 'visible' : 'invisible')}>
             host: not a line of your code
           </span>
         </div>

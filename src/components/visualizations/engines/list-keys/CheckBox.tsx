@@ -1,6 +1,6 @@
 import type { CSSProperties, InputHTMLAttributes } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { radius, strokeWidth, transitionCls } from '../../primitives/tokens-v3'
+import { radius, stroke, strokeWidth, transitionCls } from '../../primitives/tokens-v3'
 
 /**
  * The list-keys checkbox, real (a Before row) or drawn (an After row and the
@@ -95,7 +95,7 @@ export function CheckBox(
       className={clsx(
         box,
         state === '?'
-          ? 'border-dashed border-zinc-500'
+          ? clsx('border-dashed', stroke.line)
           : state === 'slot'
             ? 'border-transparent'
             : state
