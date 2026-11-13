@@ -22,8 +22,10 @@ primitives/          the Visualization Design System (VDS, VIZ-H WS1)
   tokens-v3.ts       the only vocabulary: color roles, type, space, radii,
                      strokes, focus vs now, motion; each value traced to a
                      platform file or an H1 decision (contrast-tested)
-  tokens-lint.test.ts  fails on raw hex/rgb, arbitrary sizes and literal
-                     durations in shell/, engines/, substrates/, primitives/
+  tokens-lint.test.ts  fails on raw hex/rgb, arbitrary sizes, literal
+                     durations, literal SVG strokes and radii and off-palette
+                     colors anywhere in this folder and in the .vz-* rules
+                     of src/styles/tailwind.css (see "Gates")
   cn.ts              class merging (tailwind-merge, taught the project theme)
   Frame, Button, SegmentedControl, ChoiceRow, Disclosure, Tag, Caption,
   Provenance         the primitives; every state is on the specimen page
@@ -120,10 +122,13 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
 - **Hover and press (R13).** Hover is a white/5 step on hover devices, press
   one step on (`press:` variant, registered after `can-hover:` so it wins);
   surfaces with their own fill step the fill.
-- **The motion harness asserts.** `MOTION_STRICT=1 npx playwright test
-  e2e/motion` fails on any section 4 flag, more than two animated stage
-  glyphs, a Back that does not mirror Next, a tween after an instant
-  command, or a settled frame that differs from a slow walk.
+- **The motion harness asserts** (strict by default; `MOTION_STRICT=0`
+  only records). `npx playwright test --project=motion` fails on any
+  section 4 flag, a mid-tween jump, more than two animated stage glyphs, a
+  Back that does not mirror Next by vector and duration, a moving or fading
+  text over other text, a tween after an instant command, a settled frame
+  that differs from a slow walk, or a control without visible hover, press
+  and focus feedback; at 375, 1024 and 1440.
 
 ### Payoff moments (VIZ-H WS4, D21)
 
@@ -177,6 +182,45 @@ retired (VIZ-H D20): no lesson used them, and static diagrams are React SVG on
 the box-arrow substrate. The promise-lifecycle seed was cut, not ported: the
 R4 register marks it "remove" (a pending/fulfilled/rejected diagram is low
 value) in favour of the promise-chain static diagram.
+
+## Gates (VIZ-H G)
+
+Every visual, the 52 still to come included, passes the same gates before it
+ships; each fails CI. Unit gates run in the existing test job (`yarn
+test:check`); the browser gates run in the "Visualization gates" CI job,
+inside the Playwright Linux image, against `next dev` (the dev-only gallery,
+specimen, stress and lesson pages need no database; `next build` does, for
+the course pages, and the build job covers production).
+
+| Gate | Where | Catches |
+| --- | --- | --- |
+| Truth tests | `*.truth.test.ts` | a drawn value or claim that a real run contradicts |
+| Footprints | `registry.test.ts` | an entry-table reserve that drifts from the computed footprint |
+| Token lint | `primitives/tokens-lint.test.ts` | raw colors, arbitrary sizes, literal durations, literal SVG strokes and radii anywhere in this folder or in the `.vz-*` stylesheet; a color class the token tables do not paint in that capacity (palette rule) |
+| Token contrast | `primitives/tokens-v3.test.ts` | a declared text or graphic pair under 4.5:1 or 3:1, dark and light |
+| Contrast crawl | `e2e/gates/contrast.spec.ts` | a pair that renders below WCAG (text, focus rings, state marks, connectors), or a text color outside the tokens, on the specimen, in seven driven gallery states, in lesson context and in print; only aria-disabled controls are exempt |
+| Visual regression | `e2e/gates/visual.spec.ts` | any changed pixel on the specimen, the gallery states and the lesson-context pages at 375, 768 and 1440, and in print |
+| Functional | `e2e/viz-*.spec.ts` | behavior, keyboard, axe, no-JS rendering, console errors and hydration warnings, footprints |
+| Motion | `e2e/motion/*.spec.ts` (strict by default) | section 4 flags, jumps, more than two animated glyphs, a Back that does not mirror Next by vector, a moving glyph over text, tweens after instant commands, missing press and focus feedback |
+| Stress | `e2e/stress/*.stress.ts` (strict by default) | clipping, spill, overflow, overlap, detached edges, small targets, contrast, layout shift per preset, scroll jumps, hover, print and hydration defects across widths, zooms and text sizes, in full and reduced motion |
+
+Commands (a dev server with the gallery at `E2E_BASE_URL`, default
+`http://localhost:3100`):
+
+- `yarn test:viz:gate`: the PR gate, exactly what CI runs on a pull request
+  (functional, contrast, motion at 375, 1024 and 1440, the stress PR tier;
+  visual too inside the image).
+- `yarn test:viz:full`: the full matrix (every stress configuration, motion
+  from 320 to 1920), nightly on master and on demand
+  (`.github/workflows/viz-nightly.yml`).
+- `yarn test:viz:visual`: the visual gate in the Playwright image via
+  Docker; `yarn test:viz:visual --update-snapshots` after an intended change,
+  then review the PNG diff. Baselines live in `e2e/gates/__screenshots__/linux`.
+- `MOTION_STRICT=0` and `STRESS_STRICT=0` only record (for audits).
+
+A new visual is covered by adding it to the gallery (and its states to
+`e2e/gates/drive.ts`), its primitives' states to the specimen, and, once a
+lesson embeds it, its lesson to `src/app/dev/visualizations/lesson/fixtures.ts`.
 
 ## Principle
 

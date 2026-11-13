@@ -54,6 +54,86 @@ jobs:
           # Tests mock Prisma; a dummy URL keeps prod credentials out of PR CI.
           DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
 
+  viz-gates:
+    name: Visualization gates
+    # VIZ-H G: every visual is held to the same gates (README "Gates" in
+    # src/components/visualizations). Runs in the Playwright image the visual
+    # baselines were rendered in, so screenshots compare byte for byte.
+    #
+    # The gates run against `next dev`, not a production build: the gallery,
+    # specimen, stress and lesson-context pages are dev-only routes that never
+    # touch the database, while `next build` needs a migrated, seeded
+    # database for the course pages' generateStaticParams (the build job
+    # covers production). Dev mode also reports React hydration mismatches,
+    # which the gates fail on.
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
+    env:
+      # Dummy values (no service is called by the dev-only routes).
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
+      DATABASE_URL_UNPOOLED: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
+      NEXT_PUBLIC_SITE_URL: https://memoized.dev
+      MEILISEARCH_HOST: http://localhost:7700
+      MEILISEARCH_MASTER_KEY: dummy-key-for-ci-build
+      RESEND_TOKEN: re_dummy_key_for_ci_build
+      NEXTAUTH_SECRET: dummy-nextauth-secret-for-ci
+      NEXTAUTH_URL: http://127.0.0.1:3100
+      SENTRY_DISABLE: true
+      NEXT_TELEMETRY_DISABLED: '1'
+      VIZ_GALLERY: '1'
+      VIZ_VISUAL: '1'
+      E2E_BASE_URL: http://127.0.0.1:3100
+      STRESS_OUT: ${{ github.workspace }}/test-results/stress
+      MOTION_OUT: ${{ github.workspace }}/test-results/motion
+    steps:
+      - uses: actions/checkout@v7
+
+      # No setup-node yarn cache here: the image ships neither yarn nor
+      # corepack (its own Node is newer), so yarn exists only after
+      # corepack is enabled on the Node 24 that setup-node installs.
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+
+      - name: Enable the declared package manager
+        run: |
+          corepack enable
+          node --version
+          yarn --version
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Check the image matches the Playwright in the lockfile
+        run: |
+          version=$(node -p "require('@playwright/test/package.json').version")
+          test "$version" = 1.64.1 || { echo "Playwright is $version: update the container image tag and the visual baselines"; exit 1; }
+
+      - name: Pin the gate fonts
+        run: cp e2e/gates/fonts.conf /etc/fonts/local.conf && fc-match system-ui
+
+      - name: Start the dev server
+        run: |
+          nohup node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3100 > "$RUNNER_TEMP/next-dev.log" 2>&1 &
+          node e2e/warm.mjs "$E2E_BASE_URL"
+
+      - name: Visualization gates (PR tier)
+        run: e2e/gate.sh pr
+
+      - name: Upload gate evidence
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: viz-gates
+          path: |
+            test-results
+            ${{ runner.temp }}/next-dev.log
+          if-no-files-found: ignore
+
   build:
     name: Build Check
     runs-on: ubuntu-latest
