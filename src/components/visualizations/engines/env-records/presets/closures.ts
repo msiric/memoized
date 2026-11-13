@@ -282,7 +282,9 @@ const accountSection: EnvSection = {
     {
       kind: 'record',
       id: 'call',
-      title: ['createBankAccount() call', 'createBankAccount()\ncall'],
+      // Two lines at every width, like the counters' `createCounter()` /
+      // `call A` beside it (R2 critique F-CL-02: one figure, one header shape).
+      title: ['createBankAccount()\ncall'],
       bindings: [{ name: 'balance', value: { text: '70' } }],
       outer: null,
     },

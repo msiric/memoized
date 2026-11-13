@@ -17,6 +17,7 @@ import {
   type SectionScene,
 } from './layout'
 import { isFunction, type EnvDiagram, type EnvSection } from './model'
+import { platesPath, textWidth, type TextRun } from '../../substrates/box-arrow'
 import { litRows, pathCss, pathLabel } from './paths'
 
 /**
@@ -67,8 +68,10 @@ const C = {
   head: 'vz-ah',
   /** A binding row's tint: clear until the row is traced. */
   rowTint: 'vz-rt',
-  /** An unused (hatched) record: its text is knocked out of the hatch. */
-  unused: 'vz-u',
+  /** The clear ground under an unused record's text: the hatch never runs through it (R16). */
+  plate: 'vz-p',
+  /** A link's label: muted at rest, lit with its link (R2M-14, `data-o` names the path's owner). */
+  edgeLabel: 'vz-el',
   result: 'vz-r',
   hatch: 'vz-x',
 } as const
@@ -177,10 +180,12 @@ function Box({
     )
   }
   const headerH = 2 * SIZE.headerPad + box.title.length * SIZE.headerLine
+  const headerBase = (i: number) => r1(y + SIZE.headerPad + 12 + i * SIZE.headerLine)
+  const rowBase = (top: number) => r1(top + 18.5)
   return (
     // Row text inherits 13 px ink from the svg (markup budget); unused records
-    // mute it, upright (no italic as a state, N10), knocked out of the hatch.
-    <g data-node={box.id} className={box.unused ? clsx(C.muted, C.unused) : undefined}>
+    // mute it, upright (no italic as a state, N10).
+    <g data-node={box.id} className={box.unused ? C.muted : undefined}>
       <rect
         x={X}
         y={Y}
@@ -190,13 +195,17 @@ function Box({
         className={clsx(C.glyph, box.unused && 'vz-d')}
       />
       {box.unused ? (
-        <rect x={X} y={Y} width={W} height={H} rx={radius.glyph.px} fill={`url(#${hatch})`} />
+        <>
+          <rect x={X} y={Y} width={W} height={H} rx={radius.glyph.px} fill={`url(#${hatch})`} />
+          {/* R16: a clear plate under every run of text, so the hatch never runs through it. */}
+          <path d={unusedPlates(box, headerBase, rowBase)} className={C.plate} />
+        </>
       ) : null}
       {box.title.map((line, i) => (
         <text
           key={i}
           x={r1(x + SIZE.cellPad)}
-          y={r1(y + SIZE.headerPad + 12 + i * SIZE.headerLine)}
+          y={headerBase(i)}
           // `vz-t`: the header role, 12 px medium (tailwind.css).
           className="vz-t"
         >
@@ -231,16 +240,13 @@ function Box({
               className={C.rowTint}
             />
           ) : null}
-          <text
-            x={r1(x + SIZE.cellPad)}
-            y={r1(row.top + 18.5)}
-          >
+          <text x={r1(x + SIZE.cellPad)} y={rowBase(row.top)}>
             {row.name}
           </text>
           {row.value !== null ? (
             <text
               x={r1(x + row.nameWidth + SIZE.cellPad)}
-              y={r1(row.top + 18.5)}
+              y={rowBase(row.top)}
               className={row.uninitialized ? clsx('vz-12', C.muted) : undefined}
             >
               {row.value}
@@ -250,6 +256,25 @@ function Box({
       ))}
     </g>
   )
+}
+
+/** The text runs of an unused record (header lines, names, values) as clear plates. */
+function unusedPlates(box: LaidBox, headerBase: (i: number) => number, rowBase: (top: number) => number): string {
+  const { x } = box.rect
+  const runs: TextRun[] = box.title.map((line, i) => ({
+    x: x + SIZE.cellPad,
+    baseline: headerBase(i),
+    w: textWidth(line, SIZE.header),
+    size: SIZE.header,
+  }))
+  for (const row of box.rows) {
+    runs.push({ x: x + SIZE.cellPad, baseline: rowBase(row.top), w: textWidth(row.name, SIZE.value), size: SIZE.value })
+    if (row.value !== null) {
+      const size = row.uninitialized ? SIZE.header : SIZE.value
+      runs.push({ x: x + row.nameWidth + SIZE.cellPad, baseline: rowBase(row.top), w: textWidth(row.value, size), size })
+    }
+  }
+  return platesPath(runs)
 }
 
 /** A link and the label that names its kind: the label rides the link's hover path. */
@@ -273,7 +298,7 @@ function Text({ t }: { t: LaidText }) {
     t.kind === 'output'
       ? clsx(C.result, 'vz-c')
       : t.kind === 'label'
-        ? clsx('vz-12', C.muted)
+        ? C.edgeLabel
         : clsx('vz-12 font-sans', C.muted)
   return (
     <text
@@ -383,7 +408,7 @@ function SectionSvg({
       {scene.noteMark === 'hatch' && note ? (
         <rect
           data-viz-part="legend-swatch"
-          x={0.5}
+          x={r1(note.rect.x - SIZE.swatch - SIZE.swatchGap) + 0.5}
           y={r1(note.rect.y + 2) + 0.5}
           width={SIZE.swatch - 1}
           height={SIZE.swatch - 1}
@@ -429,7 +454,7 @@ function VariantStage({ data, scene, uid }: { data: EnvDiagram; scene: DiagramSc
         // Paper cannot be hovered: print keeps the space, not the words.
         <p
           data-viz-part="hint"
-          className={clsx('m-0 font-sans text-2xs leading-5 print:invisible', ink.muted)}
+          className={clsx('m-0 print:invisible', typeScale.provenance.cls, ink.muted)}
           style={{ marginBottom: HINT.gap }}
         >
           <span className="[@media(hover:none)]:hidden">{HINT.hover}</span>

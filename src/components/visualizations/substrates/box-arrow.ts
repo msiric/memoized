@@ -159,3 +159,29 @@ export function arrowHead(points: Point[]): string {
 export function wrapMono(text: string, maxWidth: number, size: number): string[] {
   return wrapByWidth(text, maxWidth, (t) => textWidth(t, size))
 }
+
+/** A run of text as drawn: its start, its baseline, its width and its size. */
+export type TextRun = { x: number; baseline: number; w: number; size: number }
+
+/** Ascent and descent of the type, in em: the body a plate clears. */
+export const TEXT_BODY = { ascent: 0.8, descent: 0.25 } as const
+
+/**
+ * One path of clear plates, one per run, `pad` past the text body on every
+ * side: drawn over a pattern (a hatch) and under the text, so no pattern
+ * line ever runs through a glyph (H3 R16), on screen and on paper. One path
+ * per box keeps the markup small (spec §6.5).
+ */
+export function platesPath(runs: TextRun[], pad = 2): string {
+  const r = (n: number) => Math.round(n * 10) / 10
+  return runs
+    .filter((t) => t.w > 0)
+    .map((t) => {
+      const x = r(t.x - pad)
+      const y = r(t.baseline - TEXT_BODY.ascent * t.size - pad)
+      const w = r(t.w + 2 * pad)
+      const h = r((TEXT_BODY.ascent + TEXT_BODY.descent) * t.size + 2 * pad)
+      return `M${x} ${y}h${w}v${h}h${-w}z`
+    })
+    .join('')
+}

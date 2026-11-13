@@ -56,7 +56,8 @@ function describeSection(s: EnvSection): string[] {
           ? `; it reads ${hit.binding.name} = ${hit.binding.value.text}${hit.record.id === n.env ? '' : ` in ${quoted(s, hit.record.id)}`}`
           : ''
       out.push(
-        `Function ƒ ${full(n)}: its [[Environment]] link points to ${quoted(s, n.env)}${reads}${logs}.`,
+        // The drawing labels this link `env` at every width (layout `LABELS`); the text spells it out.
+        `Function ƒ ${full(n)}: its [[Environment]] link (drawn as env) points to ${quoted(s, n.env)}${reads}${logs}.`,
       )
     } else if (isSlot(n)) {
       out.push(`Under ${quoted(s, n.under)}: ${full(n)}.`)

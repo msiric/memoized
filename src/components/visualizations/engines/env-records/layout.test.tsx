@@ -12,7 +12,7 @@ import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
 import { lintEnvDiagram } from './lint'
 import { CONTAINER, EnvRecordsStage, hitBands } from './EnvRecordsStage'
-import { HINT, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
+import { HINT, LABELS, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
 import { sansWidth } from '../../substrates/text-metrics'
 import type { EnvSection } from './model'
 
@@ -102,13 +102,42 @@ describe.each(cases)('environment-records %s', (_name, data, variant) => {
         const labels = s.texts
           .filter((t) => t.kind === 'label')
           .map((t) => t.text)
-        if (kinds.has('env'))
-          expect(
-            labels.some((l) => l === 'env' || l === '[[Environment]]'),
-            s.id,
-          ).toBe(true)
-        if (kinds.has('outer')) expect(labels, s.id).toContain('outer')
+        // One word per kind at every width (critique F-CL-05), never a fallback.
+        if (kinds.has('env')) expect(labels, s.id).toContain(LABELS.env)
+        if (kinds.has('outer')) expect(labels, s.id).toContain(LABELS.outer)
+        expect(labels.every((l) => l === LABELS.env || l === LABELS.outer), s.id).toBe(true)
       }
+  })
+
+  it('names the owner of each labelled link, so the label lights with its path (R2M-14)', () => {
+    for (const { scenes } of scene.sections)
+      for (const s of scenes)
+        for (const t of s.texts.filter((x) => x.kind === 'label'))
+          expect(t.node, t.edge).toBe(t.edge!.slice(t.edge!.indexOf(':') + 1))
+  })
+
+  it('keeps the hatch out of every run of text in an unused record (R16)', () => {
+    const html = renderToStaticMarkup(<EnvRecordsStage data={data} uid="x" />)
+    const unused = scene.sections.flatMap(({ scenes }) => scenes.flatMap((s) => s.boxes.filter((b) => b.unused)))
+    for (const b of unused) {
+      const g = html.match(new RegExp(`<g data-node="${b.id}" class="vz-m">([\\s\\S]*?)</g>`))![1]
+      const plates = [...g.matchAll(/M([\d.]+) ([\d.]+)h([\d.]+)v([\d.]+)/g)].map((m) => m.slice(1).map(Number))
+      const texts = [...g.matchAll(/<text x="([\d.]+)" y="([\d.]+)"[^>]*>([^<]+)<\/text>/g)]
+      expect(texts.length).toBeGreaterThan(0)
+      expect(plates).toHaveLength(texts.length)
+      // The plate is drawn after the hatch and before the text.
+      expect(g.indexOf('class="vz-p"')).toBeGreaterThan(g.indexOf('url(#'))
+      expect(g.indexOf('class="vz-p"')).toBeLessThan(g.indexOf('<text'))
+      texts.forEach((m, i) => {
+        const [x, y, text] = [Number(m[1]), Number(m[2]), m[3]]
+        const size = m[0].includes('vz-t') || m[0].includes('vz-12') ? SIZE.header : SIZE.value
+        const [px, py, pw, ph] = plates[i]
+        expect(px).toBeLessThanOrEqual(x - 1)
+        expect(px + pw).toBeGreaterThanOrEqual(x + textWidth(text, size) + 1)
+        expect(py).toBeLessThanOrEqual(y - 0.75 * size)
+        expect(py + ph).toBeGreaterThanOrEqual(y + 0.2 * size)
+      })
+    }
   })
 
   it('rests every link in the line role: lime is only the traced path (R1)', () => {
@@ -158,6 +187,30 @@ describe('the layout follows the links', () => {
     for (const e of s.edges.filter((x) => x.kind === 'outer'))
       expect(e.points[e.points.length - 1].y).toBeLessThan(e.points[0].y)
     expect(s.edges.find((e) => e.id === 'outer:it3')!.dashed).toBe(true)
+  })
+})
+
+describe('the hatch note sits under its mark (critique F-CL-06)', () => {
+  const letSection = envRecordsDescriptor.presets[0].data.sections[1]
+  // [width, the narrowest width of its variant]: the wrap is decided there.
+  it.each([
+    [288, 288],
+    [343, 288],
+    [295, 295],
+    [359, 295],
+  ])('right-aligned to the hatched record, one wrap per variant @ %i', (w, min) => {
+    const s = layoutSection(letSection, w, min)
+    const notes = s.texts.filter((t) => t.kind === 'note')
+    const ghost = s.boxes.find((b) => b.unused)!.rect
+    const swatch = SIZE.swatch + SIZE.swatchGap
+    const right = Math.max(...notes.map((t) => t.rect.x + t.rect.w))
+    expect(right).toBeLessThanOrEqual(ghost.x + ghost.w + 0.5)
+    expect(right).toBeGreaterThan(ghost.x + ghost.w - 12)
+    for (const t of notes) {
+      expect(t.rect.x).toBe(notes[0].rect.x)
+      expect(t.rect.w).toBeLessThanOrEqual(SIZE.noteMax - swatch)
+    }
+    expect(notes[0].rect.x - swatch).toBeGreaterThanOrEqual(0)
   })
 })
 

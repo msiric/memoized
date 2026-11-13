@@ -20,7 +20,7 @@ const FOOTPRINT: Record<
   { narrow: number; wide: number; col: number }
 > = {
   'var-vs-let-loop': { narrow: 890, wide: 572, col: 548 },
-  'factory-calls-vs-aliases': { narrow: 814, wide: 550, col: 526 },
+  'factory-calls-vs-aliases': { narrow: 830, wide: 550, col: 526 },
 }
 /** The footprint tier a viewport width shows (the frame's container width decides). */
 const tierOf = (width: number) => (width < 768 ? 'narrow' : width < 1280 ? 'wide' : 'col')
@@ -271,18 +271,90 @@ test('rest is grey; the traced path is lime: function, link, record, the row it 
         alias: c('[data-edge="ref:module.sameCounter"] .vz-e'),
         row: c('[data-node=callA] [data-b=count]', 'fill'),
         held: c('[data-node=module] .vz-g'),
+        // The label naming fA's link (R2M-14): muted text at rest, lit with its link.
+        label: c('[data-edge="env:fA"] .vz-el[data-o=fA]', 'fill'),
       }
     })
   const grey = 'rgb(113, 113, 122)'
   const rest = await colors()
   expect([rest.fn, rest.env, rest.record, rest.alias, rest.held]).toEqual([grey, grey, grey, grey, grey])
   expect(rest.row).toBe('rgba(0, 0, 0, 0)')
+  expect(rest.label, 'zinc-400, text contrast at rest').toBe('rgb(161, 161, 170)')
   await svg.locator('[data-node="fA"]').hover()
   await page.waitForTimeout(300)
   const lit = await colors()
   const lime = 'rgb(163, 230, 53)'
-  expect([lit.fn, lit.env, lit.record, lit.alias, lit.row]).toEqual([lime, lime, lime, lime, lime])
+  expect([lit.fn, lit.env, lit.record, lit.alias, lit.row, lit.label]).toEqual([lime, lime, lime, lime, lime, lime])
   expect(lit.held, 'the module holds the names; it is not what fA remembers').toBe(grey)
+})
+
+test('every link label uses one word at every width: env and outer (critique F-CL-05)', async ({ page }) => {
+  const words = new Set<string>()
+  for (const width of WIDTHS) {
+    await open(page, width)
+    const seen = await page.evaluate(() =>
+      [...document.querySelectorAll('[data-viz="environment-records"] svg.vz-s .vz-el')]
+        .filter((t) => t.getBoundingClientRect().width > 0)
+        .map((t) => t.textContent!),
+    )
+    expect(seen.length, `labels at ${width}`).toBeGreaterThan(0)
+    seen.forEach((w) => words.add(w))
+  }
+  expect([...words].sort()).toEqual(['env', 'outer'])
+})
+
+test.describe('touch (R2M-16)', () => {
+  test.use({ hasTouch: true, isMobile: true })
+  test('a tap traces a function; a second tap on it puts the path down; a third lights it again', async ({ page }) => {
+    // Desktop Chrome with touch still reports hover: hover; a phone does not.
+    const cdp = await page.context().newCDPSession(page)
+    await cdp.send('Emulation.setEmulatedMedia', {
+      features: [
+        { name: 'hover', value: 'none' },
+        { name: 'pointer', value: 'coarse' },
+      ],
+    })
+    await open(page, 375)
+    expect(await page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(true)
+    const fig = figure(page, 'factory-calls-vs-aliases')
+    const svg = fig.locator('[data-viz-section="counters"] svg:visible')
+    const lit = () =>
+      svg.evaluate((el) =>
+        ['fA', 'fB'].filter((id) => getComputedStyle(el.querySelector(`[data-node=${id}]`)!).color === 'rgb(163, 230, 53)'),
+      )
+    const tap = async (id: string) => {
+      const box = svg.locator(`[data-node=${id}] .vz-fb`)
+      await box.scrollIntoViewIfNeeded()
+      const b = (await box.boundingBox())!
+      await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2)
+      await page.waitForTimeout(300)
+    }
+    await tap('fA')
+    expect(await lit()).toEqual(['fA'])
+    await tap('fA')
+    expect(await lit(), 'the second tap puts it down').toEqual([])
+    await tap('fA')
+    expect(await lit()).toEqual(['fA'])
+    await tap('fB')
+    expect(await lit(), 'one path at a time').toEqual(['fB'])
+    await page.touchscreen.tap(3, 3)
+    await page.waitForTimeout(300)
+    expect(await lit(), 'a tap elsewhere puts it down').toEqual([])
+  })
+})
+
+test('paper never shows a trace, even with a function focused (print)', async ({ page }) => {
+  await open(page, 1024)
+  const svg = figure(page, 'factory-calls-vs-aliases').locator('[data-viz-section="counters"] svg:visible')
+  await svg.locator('[data-node="fA"]').focus()
+  await page.keyboard.press('Tab')
+  await expect(svg.locator('[data-node="fB"]')).toBeFocused()
+  await page.emulateMedia({ media: 'print' })
+  const colors = await svg.evaluate((el) =>
+    [...el.querySelectorAll('[data-node], [data-edge], .vz-el')].map((n) => getComputedStyle(n).color),
+  )
+  expect(colors).not.toContain('rgb(163, 230, 53)')
+  await page.emulateMedia({ media: 'screen' })
 })
 
 test('every function has a touch target of at least 44 px', async ({ page }) => {

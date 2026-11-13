@@ -62,6 +62,8 @@ export const SIZE = {
   busStep: 12,
   noteGap: 12,
   noteLine: 16,
+  /** A note wraps at this width at most, so it reads as a caption to its mark. */
+  noteMax: 220,
   label: 12,
   labelGap: 6,
   dot: 3,
@@ -112,7 +114,10 @@ export type LaidEdge = {
 export type LaidText = {
   kind: 'output' | 'label' | 'note'
   text: string
-  /** The function an output belongs to (its `› value`), for the hover path. */
+  /**
+   * The node whose traced path lights this text: the function an output
+   * belongs to (its `› value`), or the owner of the link a label names.
+   */
   node?: string
   /** The link a label names: it is drawn with that link and rides its hover path. */
   edge?: EdgeId
@@ -787,18 +792,26 @@ function finishScene(
   let height = contentBottom
   if (section.note) {
     // A legend, not code: upright sans 12/16 (D22), after a hatch swatch
-    // when the note explains the hatch.
+    // when the note explains the hatch. It wraps at a width fixed per
+    // variant (so every width keeps one height), and sits under the mark it
+    // explains: right-aligned to the hatched record's column (R2 critique
+    // F-CL-06), so "no function is saved" is read beside "no ƒ".
     const indent = section.noteMark === 'hatch' ? SIZE.swatch + SIZE.swatchGap : 0
-    const noteLines = wrapByWidth(section.note, minWidth - indent, (t) => sansWidth(t, SIZE.label))
+    const noteLines = wrapByWidth(section.note, Math.min(SIZE.noteMax, minWidth) - indent, (t) =>
+      sansWidth(t, SIZE.label),
+    )
+    const blockW = Math.ceil(indent + Math.max(...noteLines.map((l) => sansWidth(l, SIZE.label))))
+    const mark = section.noteMark === 'hatch' ? boxes.find((b) => b.unused) : undefined
+    const x0 = mark ? Math.max(0, Math.min(width - blockW, right(mark.rect) - blockW)) : 0
     let top = height + SIZE.noteGap
     for (const line of noteLines) {
       texts.push({
         kind: 'note',
         text: line,
-        x: indent,
+        x: x0 + indent,
         y: top + 12,
         anchor: 'start',
-        rect: { x: indent, y: top, w: sansWidth(line, SIZE.label), h: SIZE.noteLine },
+        rect: { x: x0 + indent, y: top, w: sansWidth(line, SIZE.label), h: SIZE.noteLine },
       })
       top += SIZE.noteLine
     }
@@ -852,10 +865,16 @@ function edgeOf(
   }
 }
 
-const LABELS: Record<'env' | 'outer', readonly string[]> = {
-  env: ['[[Environment]]', 'env'],
-  outer: ['outer'],
-}
+/**
+ * One word per link kind at every width and in every section (R2 critique
+ * F-CL-05: a learner on a phone and one on a laptop read the same word).
+ * `[[Environment]]` fits only where the columns are wide, so the drawing
+ * says `env`; "Diagram as text" and each function's name spell it out.
+ */
+export const LABELS = { env: 'env', outer: 'outer' } as const
+
+/** The node a link belongs to: its label lights with that node's path (R2M-14). */
+const ownerOf = (id: EdgeId) => id.slice(id.indexOf(':') + 1).split('.')[0]
 
 function placeLabels(
   edges: LaidEdge[],
@@ -874,12 +893,10 @@ function placeLabels(
     ...texts.map((t) => t.rect),
   ]
   for (const kind of ['outer', 'env'] as const) {
-    const ofKind = edges.filter((e) => e.kind === kind)
-    if (!ofKind.length) continue
-    let done = false
-    for (const text of LABELS[kind]) {
-      const w = textWidth(text, SIZE.label)
-      for (const e of ofKind) {
+    const text = LABELS[kind]
+    const w = textWidth(text, SIZE.label)
+    const place = () => {
+      for (const e of edges.filter((x) => x.kind === kind)) {
         // The segment entering the target, then the one leaving the source.
         const segs = segments(e.points).filter((s) => s.a.x === s.b.x)
         for (const s of [segs[segs.length - 1], segs[0]]) {
@@ -892,24 +909,13 @@ function placeLabels(
             const rect = { x, y: top, w, h: 16 }
             if (x < 0 || x + w > width) continue
             if (obstacles().some((o) => intersects(o, rect))) continue
-            texts.push({
-              kind: 'label',
-              text,
-              edge: e.id,
-              x,
-              y: top + 12,
-              anchor: 'start',
-              rect,
-            })
-            done = true
-            break
+            texts.push({ kind: 'label', text, edge: e.id, node: ownerOf(e.id), x, y: top + 12, anchor: 'start', rect })
+            return
           }
-          if (done) break
         }
-        if (done) break
       }
-      if (done) break
     }
+    place()
   }
 }
 
