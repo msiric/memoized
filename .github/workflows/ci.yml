@@ -55,7 +55,7 @@ jobs:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
 
   viz-gates:
-    name: Visualization gates
+    name: Visualization gates (${{ matrix.shard }})
     # VIZ-H G: every visual is held to the same gates (README "Gates" in
     # src/components/visualizations). Runs in the Playwright image the visual
     # baselines were rendered in, so screenshots compare byte for byte.
@@ -66,8 +66,17 @@ jobs:
     # database for the course pages' generateStaticParams (the build job
     # covers production). Dev mode also reports React hydration mismatches,
     # which the gates fail on.
+    #
+    # G ruling 7: the PR gate is sharded into parallel jobs (each about 4
+    # minutes of tests plus about 4 of setup), so the wall time stays under
+    # 10 minutes; motion runs at 1024 only on PRs, 375 and 1440 nightly
+    # (viz-nightly.yml). e2e/gate.sh lists the shards and their measured times.
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [functional-a, functional-b, design, motion-a, motion-b, stress-a, stress-b]
     container:
       image: mcr.microsoft.com/playwright:v1.64.1-noble
       options: --ipc=host
@@ -121,14 +130,14 @@ jobs:
           nohup node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3100 > "$RUNNER_TEMP/next-dev.log" 2>&1 &
           node e2e/warm.mjs "$E2E_BASE_URL"
 
-      - name: Visualization gates (PR tier)
-        run: e2e/gate.sh pr
+      - name: Visualization gates (PR tier, ${{ matrix.shard }})
+        run: e2e/gate.sh pr "${{ matrix.shard }}"
 
       - name: Upload gate evidence
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: viz-gates
+          name: viz-gates-${{ matrix.shard }}
           path: |
             test-results
             ${{ runner.temp }}/next-dev.log

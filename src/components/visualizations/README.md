@@ -128,7 +128,7 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   Back that does not mirror Next by vector and duration, a moving or fading
   text over other text, a tween after an instant command, a settled frame
   that differs from a slow walk, or a control without visible hover, press
-  and focus feedback; at 375, 1024 and 1440.
+  and focus feedback; at 1024 on pull requests, 320 to 1920 nightly.
 
 ### Payoff moments (VIZ-H WS4, D21)
 
@@ -208,10 +208,12 @@ Commands (a dev server with the gallery at `E2E_BASE_URL`, default
 `http://localhost:3100`):
 
 - `yarn test:viz:gate`: the PR gate, exactly what CI runs on a pull request
-  (functional, contrast, motion at 375, 1024 and 1440, the stress PR tier;
-  visual too inside the image).
+  (functional, contrast, motion at 1024, the stress PR tier; visual too
+  inside the image). CI runs it as seven parallel shards
+  (`e2e/gate.sh pr <shard>`, listed with their times in the script), so the
+  wall time stays under 10 minutes.
 - `yarn test:viz:full`: the full matrix (every stress configuration, motion
-  from 320 to 1920), nightly on master and on demand
+  from 320 to 1920, so 375 and 1440 too), nightly on master and on demand
   (`.github/workflows/viz-nightly.yml`).
 - `yarn test:viz:visual`: the visual gate in the Playwright image via
   Docker; `yarn test:viz:visual --update-snapshots` after an intended change,
