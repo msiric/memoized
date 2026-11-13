@@ -149,7 +149,7 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   await page.keyboard.press('Tab')
   await expect(f.getByRole('radio', { name: 'Basics' })).toBeFocused()
   await page.keyboard.press('Tab')
-  await expect(f.locator('[data-viz-region="dock"] [role="radio"]').first()).toBeFocused()
+  await expect(f.locator('[data-viz-region="dock"] [role="radio"][data-choice]').first()).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(f.getByTestId('viz-skip')).toBeFocused()
   await page.keyboard.press('Tab')

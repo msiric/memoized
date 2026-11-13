@@ -46,7 +46,7 @@ const LK = '[data-viz="list-keys"] section'
 async function answerStart(page: Page, pick: number) {
   const f = page.locator(EL).first()
   if ((await f.getAttribute('data-viz-mode')) === 'ask')
-    await f.locator('[data-viz-region="dock"] [role="radio"]').nth(pick - 1).click()
+    await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
   await settle(page)
 }
 
