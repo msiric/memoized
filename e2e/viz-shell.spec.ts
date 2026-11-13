@@ -184,13 +184,14 @@ test('checkpoint diamonds sit on the step they gate; the thumb carries one; the 
   page,
 }) => {
   await open(page, 320)
-  // Two: the Start prediction (judged at the end, R7) on Start, and the mid-run one on step 6.
+  // Two, each on the step where its question is asked (R2 F-EL-04): the Start
+  // prediction (judged at the end, R7) on Start, and the mid-run one on step 5.
   await expect(frame(page).locator('[data-checkpoint-step]')).toHaveCount(2)
   await expect(frame(page).locator('[data-checkpoint-step="0"]')).toHaveCount(1)
-  const diamond = frame(page).locator('[data-checkpoint-step="6"]')
+  const diamond = frame(page).locator('[data-checkpoint-step="5"]')
   const d = (await diamond.boundingBox())!
-  const six = await stepPoint(page, 6)
-  expect(Math.abs(d.x + d.width / 2 - six.x)).toBeLessThan(1)
+  const five = await stepPoint(page, 5)
+  expect(Math.abs(d.x + d.width / 2 - five.x)).toBeLessThan(1)
 
   // Hovering the last step: the tooltip names it and stays inside the slider.
   await slider(page).evaluate((el) => el.scrollIntoView({ block: 'center' }))
@@ -208,6 +209,8 @@ test('checkpoint diamonds sit on the step they gate; the thumb carries one; the 
   // On the checkpoint's step the thumb carries the diamond in its state.
   await walkTo(page, 6, 300, '1')
   await expect(frame(page)).toHaveAttribute('data-viz-step', '6')
+  await page.keyboard.press('ArrowLeft')
+  await expect(frame(page)).toHaveAttribute('data-viz-step', '5')
   await expect(frame(page).locator('[data-viz-part="scrubber-thumb"] [data-diamond="answered"]')).toHaveCount(1)
 })
 

@@ -1,5 +1,5 @@
 import type { Transition } from 'framer-motion'
-import { motion, motionRules, type MotionTokenName } from '../primitives/tokens-v3'
+import { motion, motionRules, type MotionTokenName, type StepBeats } from '../primitives/tokens-v3'
 
 /**
  * The motion gate (spec §4, VIZ-H D7, D8). Engines never pick durations: they
@@ -42,6 +42,17 @@ export type MotionGate = {
    * budget (R1M-13). Computed by `vacating`.
    */
   vacate?: ReadonlySet<string>
+  /**
+   * When each beat of this step starts, in ms (H3 R2 Q1): the code line,
+   * the moving glyph, then the console line and the caption. Back mirrors
+   * them. All zero on instant renders and under reduced motion.
+   */
+  beats?: StepBeats
+}
+
+/** The delay (s) of a stage glyph's beat on this render (Q1). */
+export function beatDelay(gate: Pick<MotionGate, 'beats'>, beat: 'glyph' | 'land' | 'line'): number {
+  return (gate.beats?.[beat] ?? 0) / 1000
 }
 
 export const STATIC_GATE: MotionGate = {
@@ -71,7 +82,7 @@ export function transitionFor(kind: MotionTokenName, gate: Pick<MotionGate, 'ins
 }
 
 /** Translate distance (px) for enter/exit; zero under reduced or instant motion. */
-export function travel(kind: 'enter' | 'exit', gate: Pick<MotionGate, 'instant' | 'reduce'>): number {
+export function travel(kind: 'enter' | 'exit' | 'land', gate: Pick<MotionGate, 'instant' | 'reduce'>): number {
   if (gate.instant || gate.reduce) return 0
   const t = motion[kind].full
   return t.type === 'tween' ? (t.distance ?? 0) : 0
@@ -166,10 +177,15 @@ export function presence(
   id: string,
   gate: MotionGate,
   vectors: { from: Vector; to: Vector },
-  opts: { moved?: boolean } = {},
+  opts: { moved?: boolean; beat?: 'glyph' | 'land' } = {},
 ) {
   const live = animates(gate, id)
-  const dIn = live ? travel('enter', gate) : 0
+  // Q1: a chip moves on the glyph beat; a console line lands on the third
+  // beat with the `land` token (Back plays the beats in reverse).
+  const beat = opts.beat ?? 'glyph'
+  const token: MotionTokenName = beat === 'land' ? 'land' : 'enter'
+  const outToken: MotionTokenName = beat === 'land' ? 'land' : 'exit'
+  const dIn = live ? travel(token, gate) : 0
   const enterFrom = gate.direction === -1 ? vectors.to : vectors.from
   return {
     initial:
@@ -184,7 +200,7 @@ export function presence(
       opacity: 1,
       x: 0,
       y: 0,
-      transition: live ? transitionFor('enter', gate) : { duration: 0 },
+      transition: live ? { ...transitionFor(token, gate), delay: beatDelay(gate, beat) } : { duration: 0 },
     },
     exit: 'leave',
     custom: { gate } as PresenceCustom,
@@ -192,15 +208,15 @@ export function presence(
       leave: (c: PresenceCustom | undefined) => {
         const g = c?.gate ?? gate
         if (!g.instant && !c?.present?.has(id) && g.vacate?.has(id))
-          return { opacity: 0, transition: transitionFor('vacate', g) }
+          return { opacity: 0, transition: { ...transitionFor('vacate', g), delay: beatDelay(g, 'glyph') } }
         if (c?.present?.has(id) || !animates(g, id)) return { opacity: 0, transition: { duration: 0 } }
-        const dOut = travel('exit', g)
+        const dOut = travel(outToken, g)
         const toward = g.direction === -1 ? vectors.from : vectors.to
         return {
           opacity: 0,
           x: along(toward.x, dOut),
           y: along(toward.y, dOut),
-          transition: transitionFor('exit', g),
+          transition: { ...transitionFor(outToken, g), delay: beatDelay(g, beat) },
         }
       },
     },

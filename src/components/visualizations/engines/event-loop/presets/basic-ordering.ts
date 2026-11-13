@@ -152,7 +152,7 @@ export const basicOrdering: StepLog<EventLoopState> = {
         },
       },
       locked: 'Watch the console.',
-      recap: { right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
+      recap: { claim: '{answer} logs last', right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
     },
     {
       beforeStep: 6,
@@ -167,7 +167,7 @@ export const basicOrdering: StepLog<EventLoopState> = {
         correct: 'Microtasks run before the next task.',
         byChoice: { b: 'A task waits for every microtask.' },
       },
-      recap: { right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
+      recap: { claim: '{answer} ran next', right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
     },
   ],
   observed: { log: ['A', 'D', 'C', 'B'] },

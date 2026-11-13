@@ -10,6 +10,7 @@ import { forwardRef, type ReactNode } from 'react'
 import { cn as clsx } from '../primitives/cn'
 import { Tag } from '../primitives/Tag'
 import {
+  changed,
   ink,
   motion,
   radius,
@@ -17,7 +18,7 @@ import {
   surface,
   type as typeScale,
 } from '../primitives/tokens-v3'
-import { presence, type MotionGate, type PresenceCustom } from '../shell/motion'
+import { beatDelay, presence, type MotionGate, type PresenceCustom } from '../shell/motion'
 import type { PerVariant } from '../shell/types'
 import { H_CLS } from '../shell/vars'
 import { remHeights } from './units'
@@ -34,10 +35,15 @@ import { remHeights } from './units'
  * the lane's hue on its edge only (call stack and host: the neutral `line`,
  * the host dashed because the callback is only registered; microtasks violet;
  * tasks sky). A chip never changes hue between steps, and lime never marks a
- * chip: lime means current, chosen or traced (the code line). The glyph that
- * changed this step doubles its own edge (an inset ring in the same hue, no
- * layout shift). Arrival is shown by the enter motion, so chips carry no
- * `new` tag (D22). Stack frames stack bottom-up, left-aligned.
+ * chip: lime means where something lands (the code line). The glyph that
+ * changed this step (`changed`, H3 R2 Q9) doubles its own edge (an inset
+ * ring in the same hue, no layout shift) and takes its own tint. Arrival is
+ * shown by the enter motion, so chips carry no `new` tag (D22). Stack frames
+ * stack bottom-up (the newest on top), left-aligned.
+ *
+ * One anatomy (Q8): every lane puts its label in the same place per variant
+ * (on top when narrow, in a 96 px left column when wide) and its tokens
+ * start at the same x and the same first row.
  *
  * Layout (D16): queues wrap; a chip never grows past its lane and truncates
  * its label inside (F5). The engine decides which chips are visible per
@@ -86,7 +92,10 @@ const moreCls = clsx(
 /** One chip (R7): 4 px corners, 28 px, content width up to 12 rem, the neutral glyph fill. */
 // 6 px inline padding: at Chrome's "Very large" text on a 375 phone, "cb micro 2"
 // keeps its whole label in a 2x2 lane (R9).
-const chipBase = clsx('h-7 max-w-48 px-1.5', radius.chip.cls, surface.glyph)
+// Under very large text on a phone the lane is narrower than the 320 design
+// width (the frame sits in the column, H3 R2 Q6): 12 px mono and 2 px
+// padding keep a whole ten-character label (R9).
+const chipBase = clsx('h-7 max-w-48 px-1.5 vz-tight:px-0.5 vz-tight:text-2xs', radius.chip.cls, surface.glyph)
 
 /** The lane's hue, on the chip's edge only (R1). */
 const chipEdge: Record<ChipKind, string> = {
@@ -96,12 +105,12 @@ const chipEdge: Record<ChipKind, string> = {
   host: clsx('border-dashed', stroke.line),
 }
 
-/** "Changed this step": the chip doubles its own edge, in its own hue (R1). */
+/** "Changed this step" (Q9): the chip doubles its own edge and takes its own tint, in its own hue. */
 const chipChanged: Record<ChipKind, string> = {
-  frame: 'border-zinc-300 ring-1 ring-inset ring-zinc-300 print:border-zinc-700 print:ring-zinc-700',
-  task: 'ring-1 ring-inset ring-sky-400 print:ring-sky-700',
-  micro: 'ring-1 ring-inset ring-violet-400 print:ring-violet-600',
-  host: 'border-zinc-300 ring-1 ring-inset ring-zinc-300 print:border-zinc-700 print:ring-zinc-700',
+  frame: changed.neutral,
+  task: changed.queued,
+  micro: changed.micro,
+  host: changed.neutral,
 }
 
 export type LaneProps = {
@@ -161,7 +170,14 @@ const LaneItem = forwardRef<
 >(function LaneItem({ id, className, children, ...motionProps }, ref) {
   const present = useIsPresent()
   return (
-    <m.div ref={ref} data-glyph={id} className={className} {...motionProps}>
+    <m.div
+      ref={ref}
+      data-glyph={id}
+      // A leaving chip is popped out of flow at its rounded-down width; it
+      // keeps its whole label until it has gone (R2M-01).
+      className={clsx(className, '[&[data-motion-pop-id]]:!w-max [&[data-motion-pop-id]]:!max-w-none')}
+      {...motionProps}
+    >
       <div data-flip-id={present ? id : undefined}>{children}</div>
     </m.div>
   )
@@ -214,15 +230,16 @@ export function Lane(props: LaneProps) {
         // No visible border (R2): a transparent top and bottom keep the
         // heights; inline, 6 px and no border, so a chip keeps its whole
         // label at very large text on a phone (R9).
-        'relative flex min-w-0 border-y border-transparent px-1.5 py-2',
+        // 6 px above and below on a phone, 8 from 768 (Q15: the phone fit).
+        'relative flex min-w-0 border-y border-transparent px-1.5 py-1.5 vz-wide:py-2 vz-tight:px-1',
         radius.row.cls,
         surface.panel,
         labelAt.narrow === 'top'
           ? 'flex-col gap-1'
-          : 'flex-row items-center gap-2',
+          : 'flex-row items-start gap-2',
         labelAt.wide === 'top'
           ? 'vz-wide:flex-col vz-wide:items-stretch vz-wide:gap-1'
-          : 'vz-wide:flex-row vz-wide:items-center vz-wide:gap-2',
+          : 'vz-wide:flex-row vz-wide:items-start vz-wide:gap-2',
         H_CLS,
         className,
       )}
@@ -233,8 +250,8 @@ export function Lane(props: LaneProps) {
           'shrink-0',
           typeScale.label.cls,
           ink.secondary,
-          labelAt.narrow === 'inline' ? 'w-24' : 'h-4',
-          labelAt.wide === 'inline' ? 'vz-wide:h-auto vz-wide:w-24' : 'vz-wide:h-4 vz-wide:w-auto',
+          labelAt.narrow === 'inline' ? 'flex h-7 w-24 items-center' : 'h-4',
+          labelAt.wide === 'inline' ? 'vz-wide:flex vz-wide:h-7 vz-wide:w-24 vz-wide:items-center' : 'vz-wide:h-4 vz-wide:w-auto',
         )}
       >
         {label}
@@ -242,9 +259,10 @@ export function Lane(props: LaneProps) {
       <div
         className={clsx(
           'relative min-h-0 min-w-0 flex-1',
+          // Tokens from the first row, top left, in every lane (Q8).
           vertical
-            ? 'flex flex-col-reverse items-start justify-start gap-1 self-stretch'
-            : 'flex flex-wrap content-center items-center gap-2 self-stretch',
+            ? 'flex flex-col-reverse items-start justify-end gap-1 self-stretch'
+            : 'flex flex-wrap content-start items-center gap-2 self-stretch',
         )}
       >
         {/* Keyed by the instant epoch: an instant render drops chips that are
@@ -260,14 +278,9 @@ export function Lane(props: LaneProps) {
         <span
           aria-hidden
           className={clsx(
-            'pointer-events-none absolute left-0 flex h-7 items-center',
+            // Where the first token sits, in every lane (Q8).
+            'pointer-events-none absolute left-0 top-0 flex h-7 items-center',
             typeScale.tag.cls,
-            vertical && labelAt.narrow === 'top'
-              ? 'bottom-0'
-              : 'top-1/2 -translate-y-1/2',
-            vertical &&
-              labelAt.wide === 'inline' &&
-              'vz-wide:bottom-auto vz-wide:top-1/2 vz-wide:-translate-y-1/2',
             ink.muted,
             chips.length === 0 ? 'opacity-100' : 'opacity-0',
           )}
@@ -284,10 +297,17 @@ export function Lane(props: LaneProps) {
 
 /** The "empty" word's fade: after the exit when it appears, at once when it hides. */
 function emptyTransition(gate: MotionGate, appearing: boolean) {
-  if (gate.instant || !appearing) return { transition: 'none' }
+  if (gate.instant) return { transition: 'none' }
+  // It goes when the arriving chip starts (the glyph beat, Q1).
+  if (!appearing) {
+    const at = beatDelay(gate, 'glyph') * 1000
+    return { transition: at ? `opacity 0s linear ${at}ms` : 'none' }
+  }
   const exit = gate.reduce ? motion.exit.reduced : motion.exit.full
   const fade = motion.highlight.full
   const exitMs = exit.type === 'tween' ? exit.duration * 1000 : 0
   const fadeMs = fade.type === 'tween' ? fade.duration * 1000 : 0
-  return { transition: `opacity ${gate.reduce ? 0 : fadeMs}ms linear ${exitMs}ms` }
+  // After the glyph beat's exit (Q1).
+  const after = beatDelay(gate, 'glyph') * 1000 + exitMs
+  return { transition: `opacity ${gate.reduce ? 0 : fadeMs}ms linear ${after}ms` }
 }

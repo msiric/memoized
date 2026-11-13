@@ -61,11 +61,15 @@ export type Checkpoint = {
    */
   verdict?: 'end'
   /**
-   * The recap line for this checkpoint at the end, with `{pick}` and
-   * `{answer}` filled in. Default: "You predicted {pick}. Right." and
-   * "You predicted {pick}; it was {answer}."
+   * The recap at the end, with `{pick}` and `{answer}` filled in (H3 R2
+   * Q14). The first answered checkpoint is the headline: one short bold
+   * clause, "Right: {claim}." or "Not quite: {claim}." (a wrong pick adds
+   * "You said {pick}." to the body). Every other answered checkpoint adds
+   * its `right` or `wrong` sentence to the body. Defaults: the claim
+   * "{answer} was the answer", "You predicted {pick}. Right." and "You
+   * predicted {pick}; it was {answer}."
    */
-  recap?: { right: string; wrong: string }
+  recap?: { claim: string; right: string; wrong: string }
   /** After a prediction judged at the end locks in: what to do next (default "Now step through to check it."). */
   locked?: string
   /** At most 80 characters (two lines at 288 px). */

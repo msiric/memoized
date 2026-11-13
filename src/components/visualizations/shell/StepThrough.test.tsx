@@ -145,23 +145,21 @@ describe('StepThrough (event-loop specimen)', () => {
     expect(document.querySelector('[data-choice="c"]')).toHaveTextContent('answer')
   })
 
-  it('never uses the disabled attribute and keeps buttons out of the tab order', () => {
+  it('never uses the disabled attribute; Restart, Back, Next and Play are Tab stops (Q11)', () => {
     const { container } = setup()
     for (const b of container.querySelectorAll('[data-viz-region="bar"] button')) {
       expect(b).not.toHaveAttribute('disabled')
-      expect(b).toHaveAttribute('tabindex', '-1')
+      expect(b).not.toHaveAttribute('tabindex')
     }
     expect(screen.getByRole('button', { name: 'Next' })).toHaveAttribute('aria-keyshortcuts', 'ArrowRight')
   })
 
-  it('puts the controls bar before the dock in the DOM, so Tab from the stepper reaches the question (R1M-16)', () => {
+  it('puts the dock before the controls bar in the DOM: Tab follows what the eye reads (Q11)', () => {
     const { container } = setup()
     const bar = container.querySelector('[data-viz-region="bar"]')!
     const dock = container.querySelector('[data-viz-region="dock"]')!
-    expect(bar.compareDocumentPosition(dock) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // Drawn the other way round.
-    expect(dock.className).toMatch(/\border-1\b/)
-    expect(bar.className).toMatch(/\border-2\b/)
+    expect(dock.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(dock.className).not.toMatch(/\border-\d\b/)
   })
 
   it('switches presets instantly back to Start', () => {
@@ -212,11 +210,19 @@ describe('StepThrough (event-loop specimen)', () => {
     for (let i = 0; i < 5; i++) key('ArrowRight')
     expect(frame.dataset.vizMode).toBe('ask')
     expect(names()).toEqual(before)
+    // Q2: Next cannot act while the question is open, so it looks unavailable,
+    // and a press moves focus to the first choice with a muted nudge.
     const next = screen.getByRole('button', { name: 'Next' })
     expect(next).toHaveAttribute('aria-disabled', 'true')
-    expect(next.className).not.toMatch(/\b(invisible|hidden|opacity-50)\b/)
+    expect(next.className).not.toMatch(/\b(invisible|hidden)\b/)
+    expect(next.className).toMatch(/\bopacity-50\b/)
     expect(next.className).toContain('ring-white/10')
-    expect(next.className).not.toContain('bg-lime-500')
+    expect(next.className).not.toMatch(/bg-lime/)
+    act(() => {
+      fireEvent.click(next)
+    })
+    expect(document.activeElement).toBe(document.querySelector('[data-choice="b"]'))
+    expect(screen.getByTestId('viz-note')).toHaveTextContent('Pick an answer, or Skip.')
     expect(screen.getByRole('button', { name: 'Play' })).toHaveAttribute('aria-disabled', 'true')
     const dock = container.querySelector('[data-viz-region="dock"]')!
     const skip = within(dock as HTMLElement).getByRole('button', { name: 'Skip, show me' })
@@ -237,7 +243,9 @@ describe('StepThrough (event-loop specimen)', () => {
     expect(ghosts.textContent).toContain('The promise is already fulfilled')
     // Per preset: Drain's captions are not reserved while Basics is on screen.
     expect(ghosts.textContent).not.toContain('queueMicrotask adds to the queue')
-    expect(ghosts.querySelectorAll('[data-viz-part], [data-choice], [role="radio"], [id]')).toHaveLength(0)
+    // Real choice rows (Q5: wrapped labels reserve their lines), never focusable, never named.
+    expect(ghosts.querySelectorAll('[data-viz-part], [data-choice], [id]')).toHaveLength(0)
+    for (const r of ghosts.querySelectorAll('[role="radio"], button')) expect(r).toHaveAttribute('tabindex', '-1')
   })
 
   it('ends on Replay in the same slot with a recap of the predictions (D21)', () => {
@@ -255,10 +263,15 @@ describe('StepThrough (event-loop specimen)', () => {
     expect(replay).not.toHaveAttribute('aria-disabled')
     expect(replay).toHaveAttribute('aria-keyshortcuts', 'Home')
     expect(names()).toEqual(['Restart', 'Back', 'Replay', 'Play'])
-    expect(screen.getByTestId('viz-recap')).toHaveTextContent('B logs last, as you said. C ran next, as you predicted.')
+    // Q14: only Replay is offered; Restart and Play keep their place, hidden.
+    expect(bar.querySelector('[aria-label="Restart"]')!.className).toMatch(/\binvisible\b/)
+    expect(bar.querySelector('[aria-label="Play"]')!.className).toMatch(/\binvisible\b/)
+    // Q14: one short bold verdict clause, then regular-weight sentences.
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent('Right: B logs last. C ran next, as you predicted.')
+    expect(screen.getByTestId('viz-recap').querySelector('.font-semibold')).toHaveTextContent(/^Right: B logs last\.$/)
     expect(screen.getByTestId('viz-caption')).toHaveTextContent(/predicted\. The order is always sync code first/)
     settle()
-    expect(screen.getByTestId('viz-live')).toHaveTextContent('B logs last, as you said.')
+    expect(screen.getByTestId('viz-live')).toHaveTextContent('Right: B logs last.')
     // A press that lands on Replay right after the step does not start over.
     act(() => {
       fireEvent.click(replay)
@@ -275,7 +288,7 @@ describe('StepThrough (event-loop specimen)', () => {
     // The answer is kept: a muted line under the Start question names it (G ruling 2);
     // the choice row itself carries no tag.
     expect(frame.dataset.vizMode).toBe('ask')
-    expect(document.querySelector('[data-viz-part="viz-last-time"]')).toHaveTextContent('Last time: B')
+    expect(document.querySelector('[data-viz-part="viz-note"]')).toHaveTextContent('Last time: B')
     expect(document.querySelector('[data-choice="b"]')).not.toHaveTextContent('last time')
   })
 
@@ -287,16 +300,19 @@ describe('StepThrough (event-loop specimen)', () => {
     key('1') // B: wrong
     key('ArrowRight')
     key('ArrowRight')
-    expect(screen.getByTestId('viz-recap')).toHaveTextContent('You said D logs last; it was B. You predicted B next; it was C.')
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent('Not quite: B logs last. You said D. You predicted B next; it was C.')
     key('Home')
     key('End')
-    expect(screen.getByTestId('viz-recap')).toHaveTextContent(RECAP_NONE)
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent(RECAP_NONE.body)
   })
 
   it('reserves every recap in the dock ghosts', () => {
     const { container } = setup()
     const ghosts = container.querySelector('[data-viz-part="dock-ghosts"]')!
-    for (const r of allRecaps(basicOrdering.checkpoints)) expect(ghosts.textContent).toContain(r)
+    for (const r of allRecaps(basicOrdering.checkpoints)) {
+      expect(ghosts.textContent).toContain(r.lead)
+      expect(ghosts.textContent).toContain(r.body)
+    }
   })
 
   it('holds the previous name and caption until the playback lands, then the recap; Replay waits (R5, R1M-11, R1M-12)', () => {
@@ -315,34 +331,64 @@ describe('StepThrough (event-loop specimen)', () => {
     expect(screen.getByTestId('viz-event')).toHaveTextContent('Run the next task')
     expect(screen.getByTestId('viz-caption')).toHaveTextContent(/^Only with no microtasks left/)
     expect(screen.queryByTestId('viz-recap')).toBeNull()
-    const next = screen.getByRole('button', { name: 'Next' })
-    expect(next).toHaveAttribute('aria-disabled', 'true')
-    act(() => {
-      fireEvent.click(next)
-    })
-    expect(frame.dataset.vizStep).toBe('8')
     // The playback has landed: the recap replaces the caption, Replay arrives.
     act(() => {
       vi.advanceTimersByTime(500)
     })
     expect(screen.getByTestId('viz-event')).toHaveTextContent('Done')
-    expect(screen.getByTestId('viz-recap')).toHaveTextContent('B logs last, as you said.')
-    const replay = screen.getByRole('button', { name: 'Replay' })
-    expect(replay).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent('Right: B logs last.')
+    expect(screen.getByRole('button', { name: 'Replay' })).not.toHaveAttribute('aria-disabled')
+    spy.mockRestore()
+  })
+
+  it('lands the finale at once on a press during its playback: Next is never a dead press (Q2)', () => {
+    let t = 10_000
+    const spy = vi.spyOn(performance, 'now').mockImplementation(() => (t += 1_000))
+    const { frame, slider, key } = setup()
+    slider.focus()
+    start(key, '2')
+    for (let i = 0; i < 5; i++) key('ArrowRight')
+    key('2')
+    key('ArrowRight')
+    key('ArrowRight')
+    expect(frame.dataset.vizStep).toBe('8')
+    expect(screen.queryByTestId('viz-recap')).toBeNull()
+    const next = screen.getByRole('button', { name: 'Next' })
+    expect(next).not.toHaveAttribute('aria-disabled')
     act(() => {
-      vi.advanceTimersByTime(200)
+      fireEvent.click(next)
     })
-    expect(replay).not.toHaveAttribute('aria-disabled')
+    expect(frame.dataset.vizStep).toBe('8')
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent('Right: B logs last.')
+    expect(screen.getByRole('button', { name: 'Replay' })).toBeInTheDocument()
+    spy.mockRestore()
+  })
+
+  it("holds the step's words until the moving glyph lands; the counter moves at once (Q1, R2M-07)", () => {
+    let t = 10_000
+    const spy = vi.spyOn(performance, 'now').mockImplementation(() => (t += 1_000))
+    const { frame, slider, key } = setup()
+    slider.focus()
+    start(key, '2')
+    key('ArrowRight')
+    key('ArrowRight')
+    expect(frame.dataset.vizStep).toBe('2')
+    expect(screen.getByTestId('viz-event')).toHaveTextContent('Run the script')
+    expect(screen.getByTestId('viz-counter')).toHaveTextContent('2 of 8')
+    act(() => {
+      vi.advanceTimersByTime(450)
+    })
+    expect(screen.getByTestId('viz-event')).toHaveTextContent('Register the timer')
     spy.mockRestore()
   })
 })
 
 describe('recapText (D21)', () => {
   const cps = basicOrdering.checkpoints
-  it('names each prediction and how it went', () => {
-    expect(recapText(cps, ['b', 'c'])).toBe('B logs last, as you said. C ran next, as you predicted.')
-    expect(recapText(cps, [null, 'b'])).toBe('You predicted B next; it was C.')
-    expect(recapText(cps, ['a', null])).toBe('You said A logs last; it was B.')
+  it('leads with one short verdict clause, then names the rest (Q14)', () => {
+    expect(recapText(cps, ['b', 'c'])).toEqual({ lead: 'Right: B logs last.', body: 'C ran next, as you predicted.' })
+    expect(recapText(cps, [null, 'b'])).toEqual({ lead: 'Not quite: C ran next.', body: 'You said B.' })
+    expect(recapText(cps, ['a', null])).toEqual({ lead: 'Not quite: B logs last.', body: 'You said A.' })
     expect(recapText(cps, [null, null])).toBeNull()
   })
 })

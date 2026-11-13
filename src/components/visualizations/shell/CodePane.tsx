@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, type CSSProperties, type RefObject } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
 import { cn as clsx } from '../primitives/cn'
 import type { CodeToken, StepLine } from '../step-log/types'
 import { CODE_PRINT, CODE_PRINT_INK, EASE_CSS, ink, motion, radius, transitionCls, type as typeScale } from '../primitives/tokens-v3'
@@ -34,7 +34,13 @@ import { H_CLS, TRANSLATE_Y_CLS, heights, rem, translateY } from './vars'
  * narrow lesson column), the window measures the rows the browser drew and
  * keeps the anchor line in view, still at whole rows. The lint keeps
  * authored lines short (authoring guidance), so real presets do not wrap at
- * the default text size.
+ * the default text size from a 375 px phone up.
+ *
+ * H3 R2 Q7: line numbers show at every width (the finale's tags name them),
+ * and a windowed pane follows the finale's relit lines: the window moves to
+ * each traced line as it lights, so the line a tag names is on screen when
+ * the tag appears. Q1: the highlight is the step's first beat going forward
+ * and its last going back (`delayMs`).
  */
 
 export * from './code-geometry'
@@ -59,6 +65,10 @@ export type CodePaneProps = {
   playTrace?: boolean
   /** Reserve the "host: not a line of your code" line (a log with host steps, INTEG 6). */
   hostNote?: boolean
+  /** When the highlight starts on this render (ms, the line beat, Q1). */
+  delayMs?: number
+  /** The previous step's line: lit before the finale, it fades out before relighting in its turn (Q14). */
+  previousLine?: StepLine
 }
 
 export function CodePane({
@@ -73,9 +83,19 @@ export function CodePane({
   trace,
   playTrace = false,
   hostNote = false,
+  delayMs = 0,
+  previousLine,
 }: CodePaneProps) {
+  const [wasFrom, wasTo] =
+    typeof previousLine === 'number' ? [previousLine, previousLine] : Array.isArray(previousLine) ? previousLine : [0, -1]
   const [from, to] = typeof line === 'number' ? [line, line] : Array.isArray(line) ? line : [0, -1]
   const traced = new Map((trace?.lines ?? []).map((l, k) => [l, trace?.delaysMs[k] ?? 0]))
+  // Q7: while the finale plays the window follows each relit line in turn;
+  // once it has played it rests on the last one.
+  const follow = useFollow(trace, playTrace)
+  const lastTraced = trace?.lines[trace.lines.length - 1]
+  anchor = trace?.lines.length ? (follow ?? lastTraced) : anchor
+  const delay: CSSProperties | undefined = delayMs ? { transitionDelay: `${delayMs}ms` } : undefined
   const offset: PerVariant<number> = {
     narrow: -windowOffset(anchor, lines.length, rows.narrow) * LINE,
     wide: -windowOffset(anchor, lines.length, rows.wide) * LINE,
@@ -104,7 +124,7 @@ export function CodePane({
         typeScale.code.cls,
         // From 768 the pane is exactly as wide as the widest line of any preset
         // plus the gutter, so presets never move the stage.
-        cols && 'vz-wide:w-[calc(var(--vz-cols)*1ch+var(--vz-gutter))] vz-xl:w-auto',
+        cols && 'vz-wide:w-[calc(var(--vz-cols)*1ch+var(--vz-gutter))] vz-col:w-auto',
         // From 768 the pane hugs this preset's code and sits at the top.
         'vz-wide:self-start',
         H_CLS,
@@ -128,14 +148,19 @@ export function CodePane({
         style={heights(windowRows, { marginTop: rem(CODE_PAD) })}
       >
         <ol
+          // A fresh element for the finale's follow, so it is read as part of the reveal.
+          key={playTrace && traced.size ? 'follow' : 'list'}
           ref={list}
           aria-label={`Code, current: ${current}`}
+          // While the finale plays the window follows the relit lines (Q7):
+          // part of the reveal, timed with it (reveal.spec.ts).
+          data-viz-reveal={playTrace && traced.size ? 'window' : undefined}
           className={clsx(
             'm-0 list-none p-0 print:![transform:none]',
             TRANSLATE_Y_CLS,
             animate ? transitionCls.highlight : transitionCls.instant,
           )}
-          style={translateY(offset)}
+          style={translateY(offset, delay)}
         >
           {lines.map((text, i) => {
             const n = i + 1
@@ -144,8 +169,12 @@ export function CodePane({
             const active = isCurrent || isTraced
             // A traced line replays from unlit after its own delay while the
             // reveal plays (R7), even if it was already the current line.
-            const ground = playTrace && isTraced ? relight('vz-relight-ground', traced.get(n) ?? 0) : undefined
-            const mark = playTrace && isTraced ? relight('vz-relight-mark', traced.get(n) ?? 0) : undefined
+            // A line lit on the step before fades out first (Q14), never cut to unlit.
+            const wasLit = n >= wasFrom && n <= wasTo
+            const ground =
+              playTrace && isTraced ? relight('vz-relight-ground', traced.get(n) ?? 0, wasLit && 'vz-unlight-ground') : undefined
+            const mark =
+              playTrace && isTraced ? relight('vz-relight-mark', traced.get(n) ?? 0, wasLit && 'vz-unlight-mark') : undefined
             const tween = animate && !playTrace ? transitionCls.highlight : transitionCls.instant
             return (
               <li
@@ -161,7 +190,7 @@ export function CodePane({
                   // lime tint fall under 4.5:1 (G print contrast).
                   active ? 'bg-lime-400/10 print:bg-transparent' : 'bg-transparent',
                 )}
-                style={ground}
+                style={ground ?? delay}
               >
                 <span
                   aria-hidden
@@ -170,11 +199,11 @@ export function CodePane({
                     tween,
                     active ? 'bg-lime-400 print:bg-lime-700' : 'bg-transparent',
                   )}
-                  style={ground}
+                  style={ground ?? delay}
                 />
                 {/* Continuation rows of a wrapped line: a hairline under the marker
                     column, so a wrapped row never reads as a line of its own (A4). */}
-                <span aria-hidden className="absolute bottom-1.5 left-3.5 top-6 w-px bg-zinc-700" />
+                <span aria-hidden className="absolute bottom-1.5 left-3.5 top-6 w-px bg-white/10 print:bg-zinc-200" />
                 <span
                   // A new mark for the finale, so it replays from unlit as its own part.
                   key={mark ? 'relight' : 'mark'}
@@ -185,15 +214,16 @@ export function CodePane({
                     tween,
                     active && (n === from || isTraced) ? 'opacity-100' : 'opacity-0',
                   )}
-                  style={mark}
+                  style={mark ?? delay}
                   // The finale's part (R7): asserted with the reveal (reveal.spec.ts).
                   data-viz-reveal={mark ? 'line' : undefined}
                 >
                   ▸
                 </span>
+                {/* Line numbers at every width (Q7): 20 px narrow, 24 px from 768. */}
                 <span
                   aria-hidden
-                  className="hidden w-6 shrink-0 select-none pr-2 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 vz-wide:inline print:text-zinc-600"
+                  className="w-5 shrink-0 select-none pr-1.5 text-right font-mono text-2xs tabular-nums leading-6 text-zinc-400 vz-wide:w-6 vz-wide:pr-2 print:text-zinc-600"
                 >
                   {n}
                 </span>
@@ -310,9 +340,36 @@ function useWindow(
   }, [anchor, lines])
 }
 
+/**
+ * The line the finale's window follows (Q7): each traced line from its own
+ * delay while the trace plays; `undefined` when nothing plays.
+ */
+function useFollow(trace: CodeTrace | null | undefined, playing: boolean): number | undefined {
+  const [line, setLine] = useState<number | undefined>()
+  // A new trace object every render: key the effect by its content.
+  const key = trace ? `${trace.lines.join(',')}:${trace.delaysMs.join(',')}` : ''
+  useEffect(() => {
+    if (!playing || !trace?.lines.length) {
+      setLine(undefined)
+      return
+    }
+    setLine(trace.lines[0])
+    const ids = trace.lines.slice(1).map((l, k) => window.setTimeout(() => setLine(l), trace.delaysMs[k + 1] ?? 0))
+    return () => ids.forEach((id) => window.clearTimeout(id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, playing])
+  return playing ? (line ?? trace?.lines[0]) : undefined
+}
+
 /** One traced line's replay (R7): the `enter` token, held unlit until its delay. */
-function relight(name: string, delayMs: number): CSSProperties {
+function relight(name: string, delayMs: number, unlight?: string | false): CSSProperties {
   const t = motion.enter.full
   const ms = t.type === 'tween' ? t.duration * 1000 : 0
-  return { animation: `${name} ${ms}ms ${EASE_CSS} ${delayMs}ms backwards` }
+  const replay = `${name} ${ms}ms ${EASE_CSS} ${delayMs}ms backwards`
+  if (!unlight) return { animation: replay }
+  // Listed last, the fade-out wins while it runs; then the replay's
+  // backwards fill holds the line unlit until its turn.
+  const out = motion.exit.full
+  const outMs = out.type === 'tween' ? out.duration * 1000 : 0
+  return { animation: `${replay}, ${unlight} ${outMs}ms ${EASE_CSS}` }
 }

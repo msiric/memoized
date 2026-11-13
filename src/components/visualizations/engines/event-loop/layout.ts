@@ -1,5 +1,5 @@
 import type { StepLog } from '../../step-log/types'
-import { CODE_GUTTER, NARROW_CODE_COLS, codePaneHeight, codeRows as visualRows, hasHostNote } from '../../shell/code-geometry'
+import { CODE_GUTTER, NARROW_CODE_COLS, codePaneHeight, codeRows as visualRows } from '../../shell/code-geometry'
 import type { EngineLayout, PerVariant, Variant } from '../../shell/types'
 import { monoWidth } from '../../substrates/text-metrics'
 import type { ElChip, EventLoopState } from './model'
@@ -22,6 +22,8 @@ import type { ElChip, EventLoopState } from './model'
  *   console (strip) | Host
  *                   | Microtasks
  *                   | Tasks
+ * One lane anatomy per variant (H3 R2 Q8): narrow, every label on top; wide,
+ * every label in the same left column, so tokens start at one x.
  *
  * Overflow policy (A1): a queue wraps to a second row, then collapses its
  * tail into a `+N more` chip; the console keeps the newest outputs and
@@ -34,7 +36,9 @@ import type { ElChip, EventLoopState } from './model'
 
 export const G = {
   gap: 8,
+  /** A lane's block padding: 6 on a phone (Q15), 8 from 768. */
   pad: 8,
+  padNarrow: 6,
   border: 1,
   /** A lane's inline inset: no border, `px-1.5` (R9: room for a whole chip label). */
   laneInset: 6,
@@ -62,7 +66,9 @@ export const G = {
   /** Wide grid: code column min width (from 768, from 1280), lanes column min width. */
   codeMin: { md: 296, xl: 360 },
   regionsMin: 240,
+  /** A phone shows a listing of up to 5 rows whole; a longer one in a 4-row window that follows the code (Q7, Q15). */
   codeRowsNarrow: 5,
+  codeWindowNarrow: 4,
   codeRowsMax: 14,
   codeRowsWindow: 12,
   /** Most rows a queue or the console may take before collapsing. */
@@ -72,15 +78,15 @@ export const G = {
   text: 13,
 } as const
 
-/** Narrowest stage width per variant (the stage at 320 and at 768). */
+/** Narrowest stage width per variant (the stage at 320, where the frame bleeds, and at 768). */
 export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
 /**
  * The frame below the 320 design width (`vz-tight`, under 17.875rem): very
- * large text on a phone (375 at 150 % is 14.3rem) or 200 % text in a lesson
- * column. The console keeps its reserved rows there by collapsing more of
- * its oldest outputs into `N earlier` (R9), measured at 14rem.
+ * large text on a phone (375 at 150 % is 12.9rem) or 200 % text in a lesson
+ * column (14.9rem). The console keeps its reserved rows there by collapsing
+ * more of its oldest outputs into `N earlier` (R9), measured at 12.5rem.
  */
-export const STAGE_TIGHT = 224
+export const STAGE_TIGHT = 200
 
 export type LaneKind = 'frame' | 'host' | 'micro' | 'task'
 
@@ -176,8 +182,8 @@ export function consoleVisible(
 }
 
 /** A lane: border, padding, a 16 px label above (4 px gap), then `content`. */
-const laneTop = (content: number) =>
-  2 * G.border + 2 * G.pad + G.label + G.labelGap + content
+const laneTop = (content: number, pad: number = G.pad) =>
+  2 * G.border + 2 * pad + G.label + G.labelGap + content
 /** A lane with its label inline (wide queues): border, padding, content. */
 const laneInline = (content: number) => 2 * G.border + 2 * G.pad + content
 const rowsHeight = (rows: number, line: number, gap: number) =>
@@ -199,8 +205,6 @@ export type EventLoopMetrics = {
   consoleWidth: PerVariant<number>
   /** Console content width in the tight frame (`vz-tight`, R9). */
   consoleTight: number
-  /** Label on top of the stack lane from 768 (it holds frames or spare height). */
-  stackLabelTopWide: boolean
   maxStack: number
   /** The fixed code column width from 768 and from 1280. */
   codeColumn: { md: number; xl: number }
@@ -330,10 +334,11 @@ export function eventLoopMetrics(
     wideRows = Math.max(wideRows, visualRows(log.code?.lines ?? [], wideCols))
   }
   const codeRows: PerVariant<number> = {
-    narrow: Math.min(G.codeRowsNarrow, narrowRows),
+    narrow: narrowRows <= G.codeRowsNarrow ? narrowRows : G.codeWindowNarrow,
     wide: wideRows <= G.codeRowsMax ? wideRows : G.codeRowsWindow,
   }
-  const code = per((v) => codePaneHeight(codeRows[v], hasHostNote(logs)))
+  // The host note is a word in the step bar now (Q15), not a band under the code.
+  const code = per((v) => codePaneHeight(codeRows[v]))
   const stackContent = (v: Variant) =>
     maxStack * G.frame[v] + (maxStack - 1) * G.frameGap
   const queueContent = (v: Variant) =>
@@ -346,10 +351,10 @@ export function eventLoopMetrics(
 
   // Narrow: two grid rows, each as tall as its taller lane.
   const row1 = Math.max(
-    laneTop(stackContent('narrow')),
-    laneTop(hostContent('narrow')),
+    laneTop(stackContent('narrow'), G.padNarrow),
+    laneTop(hostContent('narrow'), G.padNarrow),
   )
-  const row2 = laneTop(queueContent('narrow'))
+  const row2 = laneTop(queueContent('narrow'), G.padNarrow)
   const narrowStage =
     code.narrow + G.gap + row1 + G.gap + row2 + G.gap + consoleH.narrow
 
@@ -357,14 +362,12 @@ export function eventLoopMetrics(
   // left column (code over console) needs beyond the other three lanes.
   const hostWide = laneInline(hostContent('wide'))
   const queueWide = laneInline(queueContent('wide'))
-  const stackNatural =
-    maxStack > 1 ? laneTop(stackContent('wide')) : laneInline(G.frame.wide)
+  // Q8: the stack's label sits in the same left column as every lane's.
+  const stackNatural = laneInline(stackContent('wide'))
   const left = code.wide + G.gap + consoleH.wide
   const others = hostWide + 2 * queueWide + 3 * G.gap
   const wideStage = Math.max(left, stackNatural + others)
   const stackWide = wideStage - others
-  const stackLabelTopWide =
-    maxStack > 1 || stackWide >= laneTop(stackContent('wide'))
 
   const metrics: EventLoopMetrics = {
     code,
@@ -378,7 +381,6 @@ export function eventLoopMetrics(
     hostWidth: w.hostWidth,
     consoleWidth: w.consoleWidth,
     consoleTight: STAGE_TIGHT - 2 * G.border - 2 * G.pad,
-    stackLabelTopWide,
     maxStack,
     codeColumn: codeColumn(maxCols),
   }

@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
 import { LIFT, liftShadow, motion as motionTokens, motionRules } from '../primitives/tokens-v3'
-import { animates, type MotionGate } from './motion'
+import { animates, beatDelay, type MotionGate } from './motion'
 
 /**
  * The `move` token (spec §4) as FLIP on the Web Animations API: a glyph that
@@ -19,6 +19,10 @@ import { animates, type MotionGate } from './motion'
  * - A glyph that moves between regions renders above every lane, with an
  *   opaque raised backing and the one lift shadow (D6, M04).
  * - Only glyphs the gate allows (the per-step budget) animate; the rest land.
+ * - H3 R2 Q1: the move is the step's second beat (`gate.beats.glyph`): it
+ *   waits at its old place until the code line has highlighted, and a glyph
+ *   crossing regions keeps its own colors (edge, ring, tint) for the whole
+ *   ride, taking its new lane's colors only as it settles.
  *
  * Glyphs opt in with `data-flip-id`. Exiting copies drop the attribute, so a
  * moved glyph is measured once, at its new home.
@@ -32,8 +36,10 @@ type Curve = { duration: number; offsets: number[]; progress: number[] }
 const curves = new Map<string, Curve>()
 
 /**
- * Samples a unit spring until it is within 0.5 % of its target (about
- * 275 ms for the `move` token), capped at the 300 ms transition limit, then
+ * Samples a unit spring until it is within 0.6 % of its target (about
+ * 263 ms for the `move` token, its `settleMs`: the glyph has visibly landed
+ * when the step's third beat starts, H3 R2 Q1), capped at the 300 ms
+ * transition limit, then
  * normalizes the samples so the last one is exactly 1. The curve stays
  * monotonic and ends where the glyph rests: no end snap (M08). The residual
  * speed at the stop is under 0.1 travel per second, a tenth of a pixel per
@@ -57,7 +63,7 @@ export function springCurve({ stiffness, damping, mass }: Spring, stepMs = 1000 
       x += v * sub
     }
     samples.push(1 - x)
-    if (Math.abs(x) < 0.005) break
+    if (Math.abs(x) < 0.006) break
   }
   const end = samples[samples.length - 1]
   const progress = samples.map((p) => p / end)
@@ -69,6 +75,11 @@ export function springCurve({ stiffness, damping, mass }: Spring, stepMs = 1000 
   }
   curves.set(key, curve)
   return curve
+}
+
+/** The `move` token's spring (for callers that time against the sampled curve). */
+export function moveSpringToken(): Spring {
+  return moveSpring()
 }
 
 function moveSpring(): Spring {
@@ -85,7 +96,16 @@ export function liftAt(t: number): number {
   return 1
 }
 
-type Pos = { x: number; y: number; region: string | null }
+/** The glyph's own colors (its first child, the chip), carried through a move between regions (Q1). */
+type Paint = { borderColor: string; boxShadow: string; backgroundColor: string }
+type Pos = { x: number; y: number; region: string | null; paint?: Paint }
+
+function paintOf(node: HTMLElement): Paint | undefined {
+  const chip = node.firstElementChild as HTMLElement | null
+  if (!chip) return undefined
+  const cs = getComputedStyle(chip)
+  return { borderColor: cs.borderColor, boxShadow: cs.boxShadow, backgroundColor: cs.backgroundColor }
+}
 
 /** Layout position relative to `root`: offsets ignore transforms, so moves and enters in flight never skew it. */
 function layoutPosition(node: HTMLElement, root: HTMLElement): { x: number; y: number } {
@@ -111,6 +131,7 @@ function measure(root: HTMLElement): Map<string, Pos> {
     out.set(node.dataset.flipId!, {
       ...layoutPosition(node, root),
       region: regionOf(node, root)?.dataset.vizRegion ?? null,
+      paint: paintOf(node),
     })
   }
   return out
@@ -161,9 +182,11 @@ type Move = {
   dx: number
   dy: number
   between: boolean
+  /** The glyph's colors where it came from (kept for the ride, Q1). */
+  paint?: Paint
 }
 
-function play(root: HTMLElement, { node, dx, dy, between }: Move) {
+function play(root: HTMLElement, { node, dx, dy, between, paint }: Move, delay: number) {
   const curve = springCurve(moveSpring())
   const frames = curve.progress.map((p, i) => {
     const frame: Keyframe = {
@@ -174,11 +197,24 @@ function play(root: HTMLElement, { node, dx, dy, between }: Move) {
     return frame
   })
   const lower = between ? lift(node, regionOf(node, root)) : () => {}
-  const anim = node.animate(frames, {
-    duration: curve.duration,
-    easing: 'linear',
-  })
+  // `backwards`: during the first beat the glyph already sits where it was.
+  const timing: KeyframeAnimationOptions = { duration: curve.duration, delay, easing: 'linear', fill: 'backwards' }
+  const anim = node.animate(frames, timing)
   anim.id = MOVE_ID
+  const chip = node.firstElementChild as HTMLElement | null
+  const now = between && paint && chip ? paintOf(node) : undefined
+  if (chip && paint && now && (paint.borderColor !== now.borderColor || paint.boxShadow !== now.boxShadow || paint.backgroundColor !== now.backgroundColor)) {
+    // Its own colors for the ride, the new lane's as it settles (the last quarter).
+    const keep = chip.animate(
+      [
+        { offset: 0, ...paint },
+        { offset: 0.75, ...paint },
+        { offset: 1, ...now },
+      ],
+      timing,
+    )
+    keep.id = MOVE_ID
+  }
   let done = false
   const end = () => {
     if (done) return
@@ -205,9 +241,14 @@ export function useFlip(root: RefObject<HTMLElement>, gate: MotionGate, key: unk
     const moves: Move[] = []
     for (const node of el.querySelectorAll<HTMLElement>('[data-flip-id]')) {
       const id = node.dataset.flipId!
+      // A color ride still running reads as the old colors: drop it first (Q1).
+      const chip = node.firstElementChild as HTMLElement | null
+      if (chip && typeof chip.getAnimations === 'function')
+        for (const a of chip.getAnimations()) if (a.id === MOVE_ID) a.cancel()
       const at: Pos = {
         ...layoutPosition(node, el),
         region: regionOf(node, el)?.dataset.vizRegion ?? null,
+        paint: paintOf(node),
       }
       next.set(id, at)
       const was = last.current.get(id)
@@ -219,11 +260,13 @@ export function useFlip(root: RefObject<HTMLElement>, gate: MotionGate, key: unk
       if (!was) continue
       const dx = was.x - at.x + now.x
       const dy = was.y - at.y + now.y
-      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) moves.push({ node, id, dx, dy, between: was.region !== at.region })
+      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5)
+        moves.push({ node, id, dx, dy, between: was.region !== at.region, paint: was.paint })
     }
     last.current = next
     if (!canAnimate) return
-    for (const m of moves) if (animates(gate, m.id)) play(el, m)
+    const delay = beatDelay(gate, 'glyph') * 1000
+    for (const m of moves) if (animates(gate, m.id)) play(el, m, delay)
     // Runs once per step (and per instant epoch), not on unrelated re-renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, gate.epoch])

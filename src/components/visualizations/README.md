@@ -20,7 +20,8 @@ registry.ts          id -> descriptor, presets, footprint, text alternative,
 registry.server.tsx  server renderers for the static Start frame
 primitives/          the Visualization Design System (VDS, VIZ-H WS1)
   tokens-v3.ts       the only vocabulary: color roles, type, space, radii,
-                     strokes, focus vs now, motion; each value traced to a
+                     strokes, focus vs changed vs now (Q9), motion; each
+                     value traced to a
                      platform file or an H1 decision (contrast-tested)
   tokens-lint.test.ts  fails on raw hex/rgb, arbitrary sizes, literal
                      durations, literal SVG strokes and radii and off-palette
@@ -71,6 +72,15 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   `presence(id, gate, { from, to })`: forward a glyph enters from `from` and
   exits toward `to`, Back the reverse. Put the presence `custom` (`{ gate }`,
   plus `present` for moved chips) on the `AnimatePresence`.
+- **Three beats per step (H3 R2 Q1).** A paced step plays in order, 560 ms
+  at most (`STEP_BEATS` in `tokens-v3.ts`, `gate.beats`): (1) the code line
+  highlights (120 ms); (2) the moving glyph travels on the `move` spring,
+  keeping its own colors under the lift until it settles (`flip.ts`); (3)
+  the console line and the caption land (`land`, 160 ms). Until beat 3 the
+  previous step's name and caption hold. Back plays the beats in reverse.
+  Bursts, scrubs and instant paths are instant; reduced motion crossfades
+  with no beats. Stage glyphs pass `{ beat: 'glyph' | 'land' }` to
+  `presence()`; the strict motion gate asserts the order.
 - **Two stage glyphs per step.** `motionBudget()` allows at most two glyphs
   (entering, leaving or moving) per step: the step's `focus` first, then
   arrivals, then departures. Chrome (caption, code line, step bar,
@@ -83,12 +93,18 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   ramped with the move. Nothing else casts a shadow.
 - **Geometry in rem (D19).** Author px at the 16 px root and emit through
   `heights()`, `translateY()` or `rem()` (`shell/vars.ts`).
+- **In the lesson column (H3 R2 Q6).** Every frame stays in the lesson's 800
+  px column at every width, with the code-block inset and radius 16 below
+  640 too: no breakout, no bleed. On paper it breaks between regions, never
+  inside one.
 - **The frame picks the variant (D19).** The frame is a size container
   (`vz`); write `vz-wide:` (from 37.875rem, the frame's content at a 768 px
-  viewport), `vz-narrow:` and `vz-xl:` (from 53.875rem), never `md:` or
-  `xl:`. Under 150 % or 200 % text the frame gets the narrow layout
-  wherever the wide one would not fit. Viewport variants stay only for the
-  page itself (the frame's bleed and radius, the mount's max width).
+  viewport), `vz-narrow:`, `vz-col:` (from 47.875rem, the full lesson
+  column) and `vz-tight:` (under 17.875rem), never `md:` or `xl:`. Under 150 % or 200 % text the frame gets the narrow layout
+  wherever the wide one would not fit. Without container-query support
+  (Safari before 16, Firefox before 110, Q17) the default classes are the
+  narrow layout, a segmented control shows only its select and the scrubber
+  thumb is placed by `left` (`src/styles/tailwind.css`).
 - **Segments that do not fit become a select (A2).** `SegmentedControl` is a
   size container; a container query at `segmentedWidth()` (in rem) swaps in
   a native select styled like the platform `Select`. Give its parent the
@@ -110,15 +126,42 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   row is one line, the feedback takes the full row, and checkpoint copy
   fits one line on a 375 px phone; the list-keys verdict is two short
   sentences, with its tally in the action row.
-- **Checkpoints (D9, R4).** The choice rows stay in place and their number
-  slot becomes ✓ or ×; the feedback is the shared `Feedback` line. Next
-  waits as the outline variant (`waiting`), Skip is a muted text button.
+- **Checkpoints (D9, R4, H3 R2 Q2 to Q5).** One layout for every visual
+  (`primitives/Checkpoint.tsx`: `CheckpointBlock`, `PromptBlock`,
+  `SkipButton`, geometry in `primitives/choice-geometry.ts`): the text cell,
+  then the choice row with Skip as its trailing text button (two columns
+  with Skip in the next free cell where one row does not fit). Labels wrap,
+  never truncate. Choices are outline rows with a quiet numeral (the 1 to 4
+  keys); a locked-in pick takes the selected segment look; on the reveal the
+  correct choice gets ✓ on the `now` tint, the rest drop to muted ink and a
+  wrong pick shows ×. The verdict and its marks land with the third beat, on
+  the 160 ms `land` fade. While a question is open Next looks unavailable;
+  a press moves focus to the first choice and the note line under the
+  prompt says "Pick an answer, or Skip." (the same line shows "Last time:
+  B" after Restart, at the end of the prompt's line when both fit).
   A checkpoint with `verdict: 'end'` is a prediction about the whole run
   (the event loop's "Which logs last?" at Start): it locks in with no
   verdict and the verdict lands in the end recap. More than two short
   choices take one row wherever it fits (server-final container rules).
 - **Copy is UI type (R3).** Captions 14/24, the step's name (sentence case,
-  14/600) joined to its caption with the counter ("3 of 8") beside it.
+  14/600) joined to its caption with the counter ("3 of 8") beside it. The
+  counter is a position and moves with the thumb at once; a host step says
+  "not a line of your code" beside its name.
+- **Controls (Q11, Q12, Q13, Q14).** Restart, Back, Next and Play are Tab
+  stops, after the dock in the DOM (the visual order). Next and Replay are
+  the platform `primary` (the lesson's own main action). Autoplay dwells
+  1.6 s plus 25 ms per character of the step's text, at most 4 s. At the
+  finale only Replay is offered (Restart and Play keep their place,
+  hidden), the recap leads with one bold verdict clause ("Right: B logs
+  last."), and a press during the playback lands it at once. On a phone the
+  button row sits above the scrubber, so the code line, the changed glyph,
+  the caption and Next fit a 375x667 screen under the site header (Q15).
+- **Lazy reserve under text zoom (Q16).** A step-through's entry-table row
+  per preset is [narrow, wide, small, tight, tighter]: the frame laid out at
+  the narrowest content width of each band (`footprint.ts` `BANDS`). The
+  placeholder picks the band by its own width in rem, so its reserve holds
+  at any root font size (the title, the dock, the button row and the footer
+  wrap; the stage does not).
 - **Hover and press (R13).** Hover is a white/5 step on hover devices, press
   one step on (`press:` variant, registered after `can-hover:` so it wins);
   surfaces with their own fill step the fill.
@@ -127,8 +170,10 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   section 4 flag, a mid-tween jump, more than two animated stage glyphs, a
   Back that does not mirror Next by vector and duration, a moving or fading
   text over other text, a tween after an instant command, a settled frame
-  that differs from a slow walk, or a control without visible hover, press
-  and focus feedback; at 1024 on pull requests, 320 to 1920 nightly.
+  that differs from a slow walk, a control without visible hover, press
+  and focus feedback, an event-loop step whose beats play out of order or
+  past 560 ms (Q1), or a checkpoint verdict that shows before its step has
+  landed (Q4); at 1024 on pull requests, 320 to 1920 nightly.
 
 ### Payoff moments (VIZ-H WS4, D21)
 

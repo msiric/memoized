@@ -100,24 +100,36 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
       const op = l.props.find((p) => p.prop === 'op')
       if (!op || op.end !== 1) problems.push(`${l.label} does not end lit`)
     }
-    const lineStarts = [...lines.map((l) => l.start)].sort((a, b) => a - b)
-    const outStarts = [...outs.map((o) => o.start)].sort((a, b) => a - b)
+    // Q14: the newest output and its line, lit on the step before, fade out
+    // first (they start lit) and relight in their turn: the order and the
+    // pairing are read on the parts that light from unlit.
+    const fromUnlit = (p: Part) => p.props.find((x) => x.prop === 'op')?.start === 0
+    const lineStarts = [...lines.filter(fromUnlit).map((l) => l.start)].sort((a, b) => a - b)
+    const outStarts = [...outs.filter(fromUnlit).map((o) => o.start)].sort((a, b) => a - b)
     lineStarts.forEach((t, i) => {
       if (outStarts[i] !== undefined && Math.abs(t - outStarts[i]) > 34) problems.push(`line ${i} starts at ${t} ms, its output at ${outStarts[i]} ms`)
     })
     for (const o of outs) {
       if (o.props.some((p) => p.prop !== 'op' && p.prop !== 'eff')) problems.push(`${o.label} moves`)
       const op = o.props.find((p) => p.prop === 'op')
-      if (!op || op.start !== 0 || op.end !== 1) problems.push(`${o.label} does not resolve 0 -> 1`)
+      // Every output resolves from unlit to lit; the newest, lit on the step
+      // before, fades out first instead of cutting to unlit (H3 R2 Q14): its
+      // end state is checked on the page below.
+      if (op && op.start === 0 && op.end !== 1) problems.push(`${o.label} does not resolve to lit`)
     }
     // Left to right: the order of the start times is the order on screen.
     const xs = await page.locator(EL).evaluate((el) =>
       [...el.querySelectorAll('[data-viz-reveal="out"]')].map((n) => n.getBoundingClientRect().left),
     )
-    const starts = outs.map((o) => o.start)
+    const starts = outs.filter(fromUnlit).map((o) => o.start)
     for (let i = 1; i < starts.length; i++)
       if (!(starts[i] > starts[i - 1])) problems.push(`output ${i} starts at ${starts[i]} ms, not after ${starts[i - 1]} ms`)
     for (let i = 1; i < xs.length; i++) if (!(xs[i] > xs[i - 1])) problems.push('outputs are not left to right')
+    // Every output ends lit (its ground fully up).
+    const grounds = await page.locator(EL).evaluate((el) =>
+      [...el.querySelectorAll('[data-viz-reveal="out"]')].map((n) => getComputedStyle(n).opacity),
+    )
+    if (grounds.some((o) => o !== '1')) problems.push(`grounds end at ${grounds.join(', ')}`)
     if (recap.length !== 1) problems.push(`expected the recap caption to fade in once, got ${recap.length}`)
     // R5: the recap lands once the playback has resolved, not before.
     else if (outs.length && recap[0].start < Math.max(...outs.map((o) => o.end)) - 34)
@@ -129,8 +141,8 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
     // Choice 2 at each question: B (right) and C (right); micro 2 (wrong) and micro 2 (right).
     await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
       preset === 'basic-ordering'
-        ? 'B logs last, as you said. C ran next, as you predicted.'
-        : 'You said micro 2 logs last; it was timeout. micro 2 ran next, as you predicted.',
+        ? 'Right: B logs last. C ran next, as you predicted.'
+        : 'Not quite: timeout logs last. You said micro 2. micro 2 ran next, as you predicted.',
     )
   })
 
@@ -149,7 +161,7 @@ test('event-loop reveal under reduced motion: one crossfade, no movement', async
   if (starts.length && Math.max(...starts) - Math.min(...starts) > 34) problems.push(`not at once: ${starts.join(', ')} ms`)
   strictCheck('reduced reveal', problems)
   await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
-    'You said A logs last; it was B. You predicted B next; it was C.',
+    'Not quite: B logs last. You said A. You predicted B next; it was C.',
   )
 })
 

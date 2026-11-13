@@ -11,8 +11,12 @@ import { LINE } from './footprint'
 /** Continuation rows hang this many columns past the line's own indent. */
 export const HANG = 2
 
-/** Code columns a row holds in the narrow variant (the pane at 320 px, the lint's slot). */
-export const NARROW_CODE_COLS = Math.floor(WIDTHS.code / (MONO_ADVANCE * WIDTHS.codeSize))
+/**
+ * Code columns a row holds in the narrow variant: the pane on a 375 px phone,
+ * the lint's slot. Narrower (a 320 px phone, large text), the listing
+ * soft-wraps and the window measures the rows the browser drew (A4).
+ */
+export const NARROW_CODE_COLS = Math.floor(WIDTHS.codePhone / (MONO_ADVANCE * WIDTHS.codeSize))
 
 /** Visual rows of one line soft-wrapped at `cols` columns, with the hanging indent. */
 export function wrappedRows(line: string, cols: number): number {
@@ -34,6 +38,8 @@ export function lineIndent(line: string): number {
 export const CODE_PAD = 8
 /** Gutter: 8 inset + 12 marker + 24 line number + 8 gap, from 768. */
 export const CODE_GUTTER = 8 + 12 + 24 + 8
+/** The same below 768, where the numbers take 20 px (Q7: they show at every width). */
+export const CODE_GUTTER_NARROW = 8 + 12 + 20 + 8
 /** A 16 px status line under the code (plus the bottom padding), so the host note never covers code. */
 export const CODE_STATUS = 16
 

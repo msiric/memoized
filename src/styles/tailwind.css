@@ -203,6 +203,12 @@
     color: #666;
   }
 
+  /* A visualization breaks across pages between its regions, never inside
+     one, and never moves whole to the next page (VIZ-H H3 R2 Q6). */
+  [data-viz-frame] :is(header, [data-viz-region]) {
+    break-inside: avoid;
+  }
+
   /* Code blocks. A visualization's code pane prints its own way (VIZ-H
      R11: light token colors, one box for the pane, none per line). */
   pre:not([data-viz-frame] *),
@@ -211,6 +217,12 @@
     color: black !important;
     border: 1px solid #ddd !important;
     page-break-inside: avoid !important;
+  }
+
+  /* One box per code block, not one per line (R2 platform note). */
+  pre:not([data-viz-frame] *) code {
+    border: 0 !important;
+    background: transparent !important;
   }
 
   /* Ensure proper margins */
@@ -384,3 +396,28 @@
  */
 @keyframes vz-relight-ground { from { background-color: transparent; } }
 @keyframes vz-relight-mark { from { opacity: 0; } }
+/* H3 R2 Q14: a line lit on the step before fades out first (`exit` token). */
+@keyframes vz-unlight-ground { to { background-color: transparent; } }
+@keyframes vz-unlight-mark { to { opacity: 0; } }
+
+/*
+ * VIZ-H H3 R2 Q4: a verdict mark (✓, ×) and a checkpoint's feedback arrive
+ * on the 160 ms `land` fade once the step's motion has landed, in every
+ * visual. Under reduced motion they appear at once.
+ */
+@keyframes vz-land-in { from { opacity: 0; } }
+.vz-land-in { animation: vz-land-in theme('vz.land') theme('vz.ease') backwards; }
+@media (prefers-reduced-motion: reduce) {
+  .vz-land-in { animation: none; }
+}
+/*
+ * Q17: browsers without size container queries (Safari before 16, Firefox
+ * before 110) get the narrow layout, which the frame's default classes
+ * already are; a segmented control shows only its select; the scrubber
+ * thumb is placed by `left` on its rail instead of `cqw`.
+ */
+@supports not (container-type: inline-size) {
+  [data-vz-seg] > [role='radiogroup'] { display: none !important; }
+  [data-vz-seg] > [data-vz-select] { display: inline-flex !important; }
+  [data-viz-part='scrubber-thumb'] { left: var(--vz-at) !important; transform: translateY(var(--vz-up)) !important; }
+}

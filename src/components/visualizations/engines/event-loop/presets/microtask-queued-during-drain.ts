@@ -167,7 +167,7 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
         },
       },
       locked: 'Watch the console.',
-      recap: { right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
+      recap: { claim: '{answer} logs last', right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
     },
     {
       beforeStep: 7,
@@ -185,7 +185,7 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
           timeout: 'A task waits for every microtask.',
         },
       },
-      recap: { right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
+      recap: { claim: '{answer} ran next', right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
     },
   ],
   observed: { log: ['sync', 'micro 1', 'micro 2', 'timeout'] },

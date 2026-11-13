@@ -4,6 +4,9 @@ import {
   WIDTHS,
   animatedGlyphs,
   animsOf,
+  beatProblems,
+  beatStarts,
+  verdictAfterPayoff,
   glyphVectors,
   mirrorProblems,
   openGallery,
@@ -27,6 +30,9 @@ import {
  * - G1: no moving or fading text prints over other text;
  * - G4, D8: Back mirrors Next glyph by glyph: the same glyphs, each
  *   displacement negated, durations matched (helpers `mirrorProblems`).
+ * - H3 R2 Q1: under full motion a step plays its beats in order (code line,
+ *   moving glyph, console line and caption; Back in reverse) and ends within
+ *   560 ms; Q4: a checkpoint's verdict shows only once the step has landed.
  */
 
 const PRESETS = ['basic-ordering', 'microtask-queued-during-drain']
@@ -39,6 +45,8 @@ type Entry = {
   vectors: ReturnType<typeof glyphVectors>
   overlaps: string[]
   flags: { kind: string; detail: string }[]
+  beats: string[]
+  verdict: string[]
 }
 
 for (const width of WIDTHS)
@@ -63,6 +71,11 @@ for (const width of WIDTHS)
             const r = await recordAction(page, EL, () => page.keyboard.press(key))
             const after = await stepOf()
             const s = summarize(r.motions, reduced)
+            const last = after.step !== null && Number(after.step) === Number(await frame.getAttribute('data-viz-last'))
+            const oneStep = before.step !== after.step && Math.abs(Number(after.step) - Number(before.step)) === 1
+            // The finale is the reveal (its own timeline, reveal.spec.ts); every other paced step has beats.
+            const beats = !reduced && oneStep && !last ? beatProblems(beatStarts(r.motions), dir) : []
+            const verdict = !reduced && oneStep && before.mode === 'ask' && after.mode === 'reveal' ? verdictAfterPayoff(r.cap, r.at) : []
             report.push({
               dir,
               before,
@@ -71,6 +84,8 @@ for (const width of WIDTHS)
               vectors: glyphVectors(r.motions),
               overlaps: overlapProblems(r.cap, r.at),
               flags: s.flags,
+              beats,
+              verdict,
               ...({ key, animated: s.animated, anims: animsOf(r.cap) } as object),
             })
             const stuck = after.step === before.step && (dir === 'back' || after.mode === before.mode)
@@ -85,6 +100,8 @@ for (const width of WIDTHS)
         const where = (e: Entry) => `${preset}@${width} ${e.dir} ${e.before.step}->${e.after.step}${reduced ? ' reduced' : ''}`
         strictCheck(`${preset}@${width}: §4 flags`, report.flatMap((e) => e.flags.map((f) => `${where(e)}: ${f.kind} ${f.detail}`)))
         strictCheck(`${preset}@${width}: no text crosses text in motion (G1)`, report.flatMap((e) => e.overlaps.map((o) => `${where(e)} ${o}`)))
+        strictCheck(`${preset}@${width}: three beats in order, 560 ms (Q1)`, report.flatMap((e) => e.beats.map((o) => `${where(e)} ${o}`)))
+        strictCheck(`${preset}@${width}: the verdict lands after the step (Q4)`, report.flatMap((e) => e.verdict.map((o) => `${where(e)} ${o}`)))
         // Back mirrors Next (D8, G4), between the same two steps.
         const fwd = new Map(
           report.filter((e) => e.dir === 'forward' && e.before.step !== e.after.step).map((e) => [`${e.before.step}->${e.after.step}`, e]),

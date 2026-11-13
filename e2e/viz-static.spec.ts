@@ -24,10 +24,14 @@ const FOOTPRINT: Record<
 }
 /** The footprint tier a viewport width shows (the frame's container width decides). */
 const tierOf = (width: number) => (width < 768 ? 'narrow' : width < 1280 ? 'wide' : 'col')
-/** The section layout each width shows (stage 288/343 stacked; 606/638/734 in two columns). */
+/**
+ * The section layout each width shows (stage 288/343 stacked; 606/638/734 in
+ * two columns). From a 375 px phone the frame sits in the lesson column (H3
+ * R2 Q6): 309 px of content there, so it shows the 288 layout.
+ */
 const SECTION_WIDTH: Record<(typeof WIDTHS)[number], number> = {
   320: 288,
-  375: 343,
+  375: 288,
   768: 295,
   1024: 295,
   1440: 359,
