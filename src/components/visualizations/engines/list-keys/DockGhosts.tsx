@@ -156,7 +156,9 @@ export const LkChoice = forwardRef<HTMLButtonElement, LkChoiceProps>(function Lk
             resolved ? ink.muted : 'text-zinc-300 group-press:text-white print:text-zinc-600',
             mark ? 'opacity-0' : 'opacity-100',
           )}
-          style={beat}
+          // The number goes at once when the mark arrives (no crossfade of
+          // two glyphs in one slot, M15); the mark fades in on the beat.
+          style={mark && beat?.transitionDelay ? { transitionDuration: '0s', transitionDelay: beat.transitionDelay } : { transitionProperty: 'none' }}
         >
           {index + 1}
         </span>
@@ -164,7 +166,7 @@ export const LkChoice = forwardRef<HTMLButtonElement, LkChoiceProps>(function Lk
           className={clsx(slot, 'font-sans text-2xs font-semibold leading-4', answer ? ink.base : ink.secondary, mark ? 'opacity-100' : 'opacity-0')}
           style={beat}
         >
-          {mark ?? '✓'}
+          {mark ?? ''}
         </span>
       </span>
       <span

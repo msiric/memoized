@@ -49,6 +49,8 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 /** Every animation the reveal starts carries this id (the harness finds them by it). */
 const RIDE_ID = 'viz-ride'
 const SAMPLES = 64
+/** How long after the planned end the timer lands a ride whose animations never finished. */
+const BACKSTOP_MS = RIDE.minGapMs
 
 type P = { x: number; y: number }
 
@@ -243,6 +245,7 @@ export function RevealDirector({
     const settle = Math.min(0.6, RIDE.settleMs / travel)
 
     const arrivals: { at: number; row: string }[] = []
+    const riderAnims: Animation[] = []
 
     // Riders: samples evenly spaced in time, placed along the path by the
     // shared curve; the lift ramps up over the first 30 % and sets down over
@@ -269,6 +272,7 @@ export function RevealDirector({
       const timing: KeyframeAnimationOptions = { duration: travel, delay, fill: 'both', easing: 'linear' }
       if (node) {
         const a = track(node.animate(frames, timing))
+        riderAnims.push(a)
         a.finished.then(
           () => !done && land(plan.ride.to),
           () => {},
@@ -320,7 +324,15 @@ export function RevealDirector({
     }
     const schedule = () => {
       for (const a of arrivals) timers.push(window.setTimeout(() => !done && arrive(a.row), a.at))
-      timers.push(window.setTimeout(() => finishAll(false), end))
+      // The landing is the riders' own end: their animations start on the
+      // next frame, so a timer from now would remove a rider a frame short
+      // of its box. The timer stays as a backstop (a frame later).
+      if (riderAnims.length)
+        Promise.all(riderAnims.map((a) => a.finished)).then(
+          () => finishAll(false),
+          () => {},
+        )
+      timers.push(window.setTimeout(() => finishAll(false), riderAnims.length ? end + BACKSTOP_MS : end))
     }
     // Timers start now: the animations start on the next frame, so an
     // arrival may lead its line by at most a frame (never visible), and the
