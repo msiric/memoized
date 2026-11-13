@@ -69,6 +69,17 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // Premium: local checkout only. After Example 3 (keys in lists).
     inserts: [{ before: '## **Best Practices**', viz: '<Viz id="list-keys" />' }],
   },
+  {
+    // Not a content-repo copy: an original, non-premium stand-in body with
+    // representative prose, code blocks and notes, so list keys has a
+    // committed lesson context (R2 G-02). It has no content commit.
+    slug: 'list-keys',
+    title: 'List Keys (fixture)',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'fixtures/list-keys.mdx',
+    file: 'fixtures/list-keys.mdx',
+    inserts: [{ before: '## **Choosing a Key**', viz: '<Viz id="list-keys" />' }],
+  },
 ]
 
 const HERE = path.join(process.cwd(), 'src', 'app', 'dev', 'visualizations', 'lesson')
