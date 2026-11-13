@@ -38,7 +38,7 @@ for (const width of WIDTHS)
           if (before.mode === 'ask') key = '2' // a wrong answer first time; the reveal still plays
           const r = await recordAction(page, EL, () => page.keyboard.press(key))
           const after = await stepOf()
-          const glyphs = animatedGlyphs(r.motions)
+          const glyphs = animatedGlyphs(r.motions, reduced)
           report.push({ dir: 'forward', key, before, after, glyphs, ...summarize(r.motions, reduced), anims: animsOf(r.cap) })
           if (after.step === before.step && after.mode === before.mode) break
           await page.waitForTimeout(250)
@@ -48,7 +48,7 @@ for (const width of WIDTHS)
           const before = await stepOf()
           const r = await recordAction(page, EL, () => page.keyboard.press('ArrowLeft'))
           const after = await stepOf()
-          const glyphs = animatedGlyphs(r.motions)
+          const glyphs = animatedGlyphs(r.motions, reduced)
           report.push({ dir: 'back', key: 'ArrowLeft', before, after, glyphs, ...summarize(r.motions, reduced), anims: animsOf(r.cap) })
           if (after.step === before.step) break
           await page.waitForTimeout(250)

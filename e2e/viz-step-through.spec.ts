@@ -11,7 +11,8 @@ const GALLERY = '/dev/visualizations'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
 // entry-table.ts: the client-only placeholder's estimate, an upper bound. The
 // live dock is measured (a ghost stack, D15), so the frame is at most this tall.
-const FOOTPRINT = { narrow: 900, wide: 732 }
+// Basics, the default preset (entry-table.ts; per preset, R2).
+const FOOTPRINT = { narrow: 872, wide: 608 }
 
 const mount = (page: Page) => page.locator('[data-viz="event-loop"]')
 const frame = (page: Page) => mount(page).locator('section')
@@ -104,8 +105,19 @@ async function layoutSnapshot(page: Page) {
   })
 }
 
+/** Start asks "Which logs last?" (VIZ-H R7): lock B in so the stepper can move on. */
+async function lockStart(page: Page) {
+  const s = await state(page)
+  if (s.step === '0' && s.mode === 'ask') {
+    await page.keyboard.press('2')
+    // Outside the burst window, so the next command animates (D13).
+    await page.waitForTimeout(300)
+  }
+}
+
 async function stepTo(page: Page, n: number) {
   await slider(page).focus()
+  await lockStart(page)
   for (let i = 0; i < n; i++) {
     await page.keyboard.press('ArrowRight')
     await page.waitForTimeout(40)
@@ -118,7 +130,8 @@ test('loads paused at Start and stays paused (no autoplay, A1)', async ({
   await page.clock.install()
   await open(page, 1024)
   await page.clock.fastForward(10_000)
-  expect(await state(page)).toEqual({ step: '0', mode: 'controls' })
+  // Start asks for a prediction before anything runs (VIZ-H R7).
+  expect(await state(page)).toEqual({ step: '0', mode: 'ask' })
   await expect(frame(page).getByRole('button', { name: 'Play' })).toBeVisible()
 })
 
@@ -142,9 +155,22 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
     thumb: getComputedStyle(el.querySelector('.rounded-full')!).outlineWidth,
   }))
   expect(ring).toEqual({ track: 'rgba(0, 0, 0, 0)', thumb: '2px' })
+  // At Start the question follows the stepper (R1M-16): the first choice, Skip, then the text alternative.
+  await page.keyboard.press('Tab')
+  await expect(f.locator('[data-viz-region="dock"] [role="radio"]').first()).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(f.getByTestId('viz-skip')).toBeFocused()
   await page.keyboard.press('Tab')
   await expect(f.locator('summary')).toBeFocused()
   await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Shift+Tab')
+  await expect(slider(page)).toBeFocused()
+
+  // A digit locks the Start prediction in; the stepper keeps focus.
+  await page.keyboard.press('2')
+  expect(await state(page)).toEqual({ step: '0', mode: 'reveal' })
+  await expect(f.getByTestId('viz-feedback')).toContainText('Locked in: B.')
   await expect(slider(page)).toBeFocused()
 
   // → and ↑ advance, ← and ↓ go back.
@@ -178,30 +204,31 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
 
   // Finish: the console holds the verified order.
   for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight')
-  await expect(f.getByTestId('viz-counter')).toHaveText('8 / 8')
+  await expect(f.getByTestId('viz-counter')).toHaveText('8 of 8')
   await expect(f.locator('[data-viz-region="console"] li')).toHaveText([
-    // One left-to-right strip in log order: the position is the order (D16).
-    '›A',
-    '›D',
-    '›C',
-    '›B',
+    // One left-to-right strip in log order: the position is the order (D16),
+    // each output tagged with the line that printed it (R7).
+    '›AL1',
+    '›DL5',
+    '›CL4',
+    '›BL2',
   ])
 
   // Home restarts and re-asks with memory; End skips the open checkpoint.
   await page.keyboard.press('Home')
-  expect((await state(page)).step).toBe('0')
+  expect(await state(page)).toEqual({ step: '0', mode: 'ask' })
+  await expect(f.locator('[data-choice="b"]')).toContainText('last time')
+  await page.keyboard.press('2')
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight')
   await expect(f.locator('[data-choice="c"]')).toContainText('last time')
   await page.keyboard.press('Home')
   await page.keyboard.press('End')
   expect((await state(page)).step).toBe('8')
-  await expect(f.locator('[data-checkpoint]')).toHaveAttribute(
-    'data-checkpoint',
-    'skipped',
-  )
+  await expect(f.locator('[data-checkpoint="skipped"]')).toHaveCount(2)
 
   // Space and K toggle play; Escape pauses without resetting.
   await page.keyboard.press('Home')
+  await page.keyboard.press('2')
   await page.keyboard.press('Space')
   await expect(f.getByRole('button', { name: 'Pause' })).toBeVisible()
   await page.keyboard.press('Escape')
@@ -212,6 +239,7 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
 
   // Digits answer an open checkpoint.
   await page.keyboard.press('Home')
+  await page.keyboard.press('2')
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight')
   await page.keyboard.press('1')
   await expect(f.getByTestId('viz-feedback')).toContainText('Not quite.')
@@ -368,6 +396,8 @@ test('interrupting a transition lands on the next end state within one frame', a
 }) => {
   await open(page, 1024)
   await slider(page).focus()
+  await lockStart(page)
+  await page.waitForTimeout(300)
   await page.keyboard.press('ArrowRight')
   await page.waitForTimeout(30)
   await page.keyboard.press('ArrowRight')
@@ -416,7 +446,7 @@ test('the frame never moves: stepping, checkpoint, preset switch, bursts and pla
             (window as unknown as { __shifts: number }).__shifts += e.value
       }).observe({ type: 'layout-shift' })
     })
-    const base = await layoutSnapshot(page)
+    let base = await layoutSnapshot(page)
     expect(base.frame[3], `frame height at ${width}`).toBeLessThanOrEqual(
       width < 768 ? FOOTPRINT.narrow : FOOTPRINT.wide,
     )
@@ -425,6 +455,8 @@ test('the frame never moves: stepping, checkpoint, preset switch, bursts and pla
       expect(await layoutSnapshot(page), `${label} at ${width}`).toEqual(base)
     }
     await slider(page).focus()
+    await lockStart(page)
+    await same('Start prediction locked in')
     for (let i = 0; i < 5; i++) {
       await page.keyboard.press('ArrowRight')
       await same(`step ${i + 1}`)
@@ -435,8 +467,14 @@ test('the frame never moves: stepping, checkpoint, preset switch, bursts and pla
       await page.keyboard.press('ArrowRight')
       await same(`step ${7 + i}`)
     }
+    // Every reserved band is sized to the preset on screen (R2): a preset
+    // switch may change the frame's height; stepping inside it never does.
     await frame(page).getByRole('radio', { name: 'Drain' }).click()
-    await same('preset switch')
+    await page.waitForTimeout(350)
+    base = await layoutSnapshot(page)
+    await slider(page).focus()
+    await lockStart(page)
+    await same('Drain prediction locked in')
     const next = frame(page).getByTestId('viz-next')
     for (let i = 0; i < 5; i++) await next.click({ delay: 0 })
     await same('click burst')
@@ -446,6 +484,8 @@ test('the frame never moves: stepping, checkpoint, preset switch, bursts and pla
       await page.keyboard.press('ArrowRight', { delay: 0 })
     await same('10-key burst')
     await frame(page).getByRole('button', { name: 'Restart' }).click()
+    await slider(page).focus()
+    await lockStart(page)
     await frame(page).getByRole('button', { name: 'Play' }).click()
     await page.waitForTimeout(3_500)
     await same('playing')

@@ -134,12 +134,38 @@ export function glyphKey(label: string): string | null {
   return m[1] ?? `out-${m[2]}`
 }
 
+/**
+ * The vacate exit (R1M-13, H0 S-1): a glyph leaving the place a moving glyph
+ * arrives at fades in place (opacity only) in at most `vacate` (100 ms) plus
+ * two frames of sampling. It is outside the two-glyph budget. Full motion
+ * only: under reduced motion every exit is an opacity fade, so none is exempt.
+ */
+const VACATE_MS = 130
+function vacates(e: ElementMotion): boolean {
+  return e.removed && e.props.every((p) => p.prop === 'op' && p.duration <= VACATE_MS)
+}
+
 /** Distinct stage glyphs that tweened opacity or translate (spec §4 rule 1 counts these). */
-export function animatedGlyphs(ms: ElementMotion[]): string[] {
+export function animatedGlyphs(ms: ElementMotion[], reduced = false): string[] {
   const keys = new Set<string>()
   for (const e of animated(ms)) {
     const k = glyphKey(e.label)
+    if (!reduced && vacates(e)) continue
     if (k && e.props.some((p) => ['op', 'tx', 'ty'].includes(p.prop))) keys.add(k)
   }
   return [...keys].sort()
+}
+
+/**
+ * The event loop asks "Which logs last?" at Start (VIZ-H R7). Answers it
+ * (digit `pick` when focus is in the frame, else a click on that choice) so
+ * a walk can step on; a no-op anywhere else.
+ */
+export async function answerStart(page: Page, frame: string = EL, pick = '2') {
+  const f = page.locator(frame)
+  if ((await f.getAttribute('data-viz-step')) !== '0' || (await f.getAttribute('data-viz-mode')) !== 'ask') return
+  const inside = await f.evaluate((el) => el.contains(document.activeElement))
+  if (inside) await page.keyboard.press(pick)
+  else await f.locator('[data-viz-region="dock"] [role="radio"]').nth(Number(pick) - 1).click()
+  await page.waitForTimeout(300)
 }
