@@ -96,8 +96,12 @@ export function wrapLines(text: string, maxChars: number): number {
 
 const chars = (width: number, glyph: number) => Math.floor(width / glyph)
 
-/** Key cap, gaps and row padding around a choice label (ChoiceRow: 12 + 20 + 8 + label + 12). */
-export const CHOICE_CHROME = 52
+/**
+ * Key cap, gaps and row padding around a choice label (ChoiceRow: 12 + 20 +
+ * 8 + label + 12), plus 4 px of slack: the width model is an average, and a
+ * one-letter label ("A") is wider than it predicts.
+ */
+export const CHOICE_CHROME = 56
 /** The least room the prompt keeps beside a one-row set of choices. */
 export const ROW_TEXT_MIN = 160
 /** The wide variant's threshold in px at the default root (`vz-wide`, 37.875rem). */

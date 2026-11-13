@@ -75,8 +75,8 @@ export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
 
 export type LaneKind = 'frame' | 'host' | 'micro' | 'task'
 
-/** Horizontal padding inside a chip: one chip shape for every kind (R7). */
-const CHIP_PAD = 8
+/** Horizontal padding inside a chip: one chip shape for every kind (R7), `px-1.5`. */
+const CHIP_PAD = 6
 
 export function chipWidth(label: string, _kind?: LaneKind): number {
   return Math.ceil(monoWidth(label, G.text) + 2 * CHIP_PAD + 2 * G.border)

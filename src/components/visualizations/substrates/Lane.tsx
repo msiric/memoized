@@ -84,7 +84,9 @@ const moreCls = clsx(
 )
 
 /** One chip (R7): 4 px corners, 28 px, content width up to 12 rem, the neutral glyph fill. */
-const chipBase = clsx('h-7 max-w-48 px-2', radius.chip.cls, surface.glyph)
+// 6 px inline padding: at Chrome's "Very large" text on a 375 phone, "cb micro 2"
+// keeps its whole label in a 2x2 lane (R9).
+const chipBase = clsx('h-7 max-w-48 px-1.5', radius.chip.cls, surface.glyph)
 
 /** The lane's hue, on the chip's edge only (R1). */
 const chipEdge: Record<ChipKind, string> = {
