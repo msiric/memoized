@@ -64,6 +64,10 @@ describe('closures traced paths (D21, H3 R11)', () => {
     for (const p of envRecordsDescriptor.presets) {
       const css = pathCss(p.data)
       const fns = p.data.sections.flatMap((s) => s.nodes.filter(isFunction))
+      // Screen only (paper never shows a trace), and hover rules only where the
+      // reader can hover: a touch browser keeps :hover on a tapped function (R2M-16).
+      expect(css.startsWith('@media screen and (hover:hover){')).toBe(true)
+      expect(css.match(/@media/g)).toHaveLength(2)
       const [main, touch] = css.split('@media screen and (hover:none)')
       expect(main.match(/\{color:var\(--vz-k\)/g)).toHaveLength(fns.length)
       expect(touch.match(/\{color:var\(--vz-k\)/g)).toHaveLength(fns.length)
