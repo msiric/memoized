@@ -177,6 +177,11 @@ test('touch @375: taps, sticky hover, scrubber vs scroll on reveal controls', as
   const res: Record<string, unknown> = {}
   const next = f.locator('[data-viz-part="viz-next"]')
   const bg = (l: Locator) => l.evaluate((el) => getComputedStyle(el).backgroundColor + ' ' + getComputedStyle(el).filter)
+  // Start asks the prediction (R7): Next waits (aria-disabled) until it is answered.
+  if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+    await f.locator('[data-choice]').first().tap({ timeout: 5000 })
+    await page.waitForTimeout(400)
+  }
   res.nextRest = await bg(next)
   await next.tap()
   await page.waitForTimeout(400)

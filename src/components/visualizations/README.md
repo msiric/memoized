@@ -90,7 +90,8 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
 - **Segments that do not fit become a select (A2).** `SegmentedControl` is a
   size container; a container query at `segmentedWidth()` (in rem) swaps in
   a native select styled like the platform `Select`. Give its parent the
-  width it may use.
+  width it may use. More than `maxSegments` options (default 3) always
+  render the select; the list-keys action raises it to 4 (H3 R8).
 - **Code soft-wraps (A4).** Long lines wrap with a hanging indent and a
   continuation hairline; footprints count wrapped rows
   (`shell/code-geometry.ts`), and the window re-measures rows the browser
@@ -100,7 +101,13 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   preset's worst case at the current width and text size. Every reserved
   band (stage, dock) is sized per preset: a preset switch may change the
   frame's height, stepping never does. The entry table carries per-preset
-  heights for the lazy mount.
+  heights for the lazy mount; `footprint.ts` only estimates them. The
+  list-keys dock works the same way (`engines/list-keys/DockGhosts.tsx`, a
+  ghost of every verdict). Nothing reserves a band no state needs (F1 and F2
+  rulings 2): stacked, Skip's target rises into the step bar so the prompt
+  row is one line, the feedback takes the full row, and checkpoint copy
+  fits one line on a 375 px phone; the list-keys verdict is two short
+  sentences, with its tally in the action row.
 - **Checkpoints (D9, R4).** The choice rows stay in place and their number
   slot becomes ✓ or ×; the feedback is the shared `Feedback` line. Next
   waits as the outline variant (`waiting`), Skip is a muted text button.
@@ -112,9 +119,7 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   14/600) joined to its caption with the counter ("3 of 8") beside it.
 - **Hover and press (R13).** Hover is a white/5 step on hover devices, press
   one step on (`press:` variant, registered after `can-hover:` so it wins);
-  surfaces with their own fill step the fill. `footprint.ts` only estimates it for
-  the client-only placeholder. The list-keys explorable's dock works the same way
-  (`engines/list-keys/DockGhosts.tsx`, ghosts of its tallest strings).
+  surfaces with their own fill step the fill.
 - **The motion harness asserts.** `MOTION_STRICT=1 npx playwright test
   e2e/motion` fails on any section 4 flag, more than two animated stage
   glyphs, a Back that does not mirror Next, a tween after an instant
