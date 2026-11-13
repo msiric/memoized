@@ -25,6 +25,13 @@ export function Caption({
 /** The checkpoint prompt: 16/28 semibold, pretty wrapping (D3, R3). */
 export const promptCls = cn('m-0', typeScale.prompt.cls, ink.base)
 
+/**
+ * The earlier answer, once, as a muted line under the prompt (G ruling 2):
+ * "Last time: micro 2". The choice rows keep their number slot and full
+ * label. 12/20 muted, so it reads as a note, never as a choice or a verdict.
+ */
+export const lastTimeCls = cn('m-0', typeScale.provenance.cls, ink.muted)
+
 /** The bold lead of a feedback or recap line ("Right.", "Not quite."). */
 export const feedbackLeadCls = cn('font-semibold', ink.base)
 

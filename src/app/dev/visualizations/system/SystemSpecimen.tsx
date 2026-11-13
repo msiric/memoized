@@ -2,7 +2,8 @@
 
 import type { ReactNode } from 'react'
 import { BackIcon, Button, NextIcon, PlayIcon, RestartIcon, type ButtonVariant } from '@/components/visualizations/primitives/Button'
-import { Caption, Feedback, promptCls } from '@/components/visualizations/primitives/Caption'
+import { Caption, Feedback, lastTimeCls, promptCls } from '@/components/visualizations/primitives/Caption'
+import { lastTimeText } from '@/components/visualizations/shell/footprint'
 import { ChoiceRow } from '@/components/visualizations/primitives/ChoiceRow'
 import { cn } from '@/components/visualizations/primitives/cn'
 import { Disclosure } from '@/components/visualizations/primitives/Disclosure'
@@ -364,7 +365,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
         </div>
       </Section>
 
-      <Section id="choice" title="Choice row" note="Checkpoint choices: the number slot becomes a check or a cross after the answer. Never amber.">
+      <Section id="choice" title="Choice row" note="Checkpoint choices: the number slot becomes a check or a cross after the answer; the row keeps its full label. The earlier answer is a muted line under the prompt (G ruling 2). Never amber.">
         <div className="grid max-w-3xl grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
           <Cell label="rest">
             <ChoiceRow className="w-44" index={0} label="B, from the timer" />
@@ -384,8 +385,11 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
               <ChoiceRow className="w-44" index={0} label="B, from the timer" />
             </Force>
           </Cell>
-          <Cell label="last time">
-            <ChoiceRow className="w-44" index={1} label="C, from .then" tag="last time" />
+          <Cell label="prompt, last time">
+            <div className="w-44">
+              <p className={promptCls}>What logs after D?</p>
+              <p className={lastTimeCls}>{lastTimeText('C, from .then')}</p>
+            </div>
           </Cell>
           <Cell label="two lines">
             <ChoiceRow className="w-44" index={2} label="micro 2 (microtask) then timeout" />

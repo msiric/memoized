@@ -272,9 +272,11 @@ describe('StepThrough (event-loop specimen)', () => {
     spy.mockRestore()
     expect(frame.dataset.vizStep).toBe('0')
     expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument()
-    // The answer is kept: the Start question marks it as last time.
+    // The answer is kept: a muted line under the Start question names it (G ruling 2);
+    // the choice row itself carries no tag.
     expect(frame.dataset.vizMode).toBe('ask')
-    expect(document.querySelector('[data-choice="b"]')).toHaveTextContent('last time')
+    expect(document.querySelector('[data-viz-part="viz-last-time"]')).toHaveTextContent('Last time: B')
+    expect(document.querySelector('[data-choice="b"]')).not.toHaveTextContent('last time')
   })
 
   it('recaps wrong predictions with what happened, and skipped ones neutrally', () => {

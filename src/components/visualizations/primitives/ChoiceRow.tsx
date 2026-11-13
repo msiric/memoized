@@ -2,7 +2,6 @@
 
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react'
 import { cn } from './cn'
-import { Tag } from './Tag'
 import { UNAVAILABLE } from './Button'
 import { focusRing, ink, radius, transitionCls } from './tokens-v3'
 
@@ -32,8 +31,6 @@ export type ChoiceRowProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disa
   /** Picked in this pass (only shown once resolved). */
   picked?: boolean
   mark?: ChoiceMark
-  /** An in-flow tag under the label, e.g. "last time". */
-  tag?: string
   /** Label face: sans for wording, mono when the choice is code. */
   mono?: boolean
   /** How the label handles overflow: two lines (default) or one with an ellipsis. */
@@ -41,7 +38,7 @@ export type ChoiceRowProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disa
 }
 
 export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function ChoiceRow(
-  { index, label, state = 'ask', picked = false, mark = null, tag, mono = false, wrap = 'clamp', className, onClick, ...rest },
+  { index, label, state = 'ask', picked = false, mark = null, mono = false, wrap = 'clamp', className, onClick, ...rest },
   ref,
 ) {
   const resolved = state === 'resolved'
@@ -93,22 +90,13 @@ export const ChoiceRow = forwardRef<HTMLButtonElement, ChoiceRowProps>(function 
         <span
           className={cn(
             'relative min-w-0 text-sm font-medium leading-5',
-            wrap === 'clamp' && !tag ? 'line-clamp-2' : 'truncate',
+            wrap === 'clamp' ? 'line-clamp-2' : 'truncate',
             mono && 'font-mono text-xs font-normal',
           )}
         >
           {label}
           {mark ? <span className="sr-only">{mark === 'right' ? ', right answer' : ', wrong'}</span> : null}
-          {tag ? <span className="sr-only">{`, ${tag}`}</span> : null}
         </span>
-        {/* The tag takes the label's second line, in flow, so it never squeezes the label sideways. */}
-        {tag ? (
-          // zinc-300 on the row's own fill: the muted tone fails 4.5:1 on
-          // zinc-700 and zinc-600 (drift N01).
-          <Tag aria-hidden tone="neutral" className="h-4 bg-transparent px-0">
-            {tag}
-          </Tag>
-        ) : null}
       </span>
     </button>
   )

@@ -378,9 +378,8 @@ export const contrastPairs: ContrastPair[] = [
   { use: 'choice label', kind: 'text', fg: r('inkSecondary'), bg: 'choice' },
   { use: 'choice label, hover', kind: 'text', fg: { dark: 'zinc.200', light: 'zinc.700' }, bg: 'choiceHover' },
   { use: 'choice label, press', kind: 'text', fg: { dark: 'white', light: 'zinc.900' }, bg: 'choicePress' },
-  // The "last time" tag sits on the row itself (no tag fill), at rest and on hover (N01).
-  { use: 'choice "last time" tag', kind: 'text', fg: r('inkSecondary'), bg: 'choice' },
-  { use: 'choice "last time" tag, hover', kind: 'text', fg: r('inkSecondary'), bg: 'choiceHover' },
+  // The earlier answer, a muted line under the prompt (G ruling 2).
+  { use: '"Last time" line under the prompt', kind: 'text', fg: r('inkMuted'), bg: 'frame' },
   { use: 'picked choice label', kind: 'text', fg: r('ink'), bg: 'choiceSelected' },
   // The ✓ and × marks take the number's slot, so they sit on the key cap (D9).
   // Both are ink (WS1 ruling 3): the glyph shape and the "Right." / "Not

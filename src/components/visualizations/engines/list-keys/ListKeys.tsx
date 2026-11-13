@@ -12,6 +12,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 import { Button } from '../../primitives/Button'
+import { lastTimeCls } from '../../primitives/Caption'
 import { ChoiceRow } from '../../primitives/ChoiceRow'
 import { cn as clsx } from '../../primitives/cn'
 import { Disclosure } from '../../primitives/Disclosure'
@@ -22,6 +23,7 @@ import { TARGET_GAP_PX, TARGET_PX, ink, type as typeScale } from '../../primitiv
 import { CodePane } from '../../shell/CodePane'
 import type { MotionGate } from '../../shell/motion'
 import { BURST_WINDOW_MS, escapePauses, isBurst } from '../../shell/pace'
+import { lastTimeText } from '../../shell/footprint'
 import { H_CLS } from '../../shell/vars'
 import { remHeights, toRem } from '../../substrates/units'
 import {
@@ -175,6 +177,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       : wrapperPrompt(s.wrapperAction)
   const canPredict = answer !== null
   const lastTime = s.memory[experimentId(s)]
+  const lastLabel = lastTime ? choices.find((c) => c.id === lastTime)?.label : undefined
 
   const outcomeSentence =
     s.scene === 'list'
@@ -429,15 +432,27 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
                 <VerdictText live lead={lead} rule={rule} />
               </m.div>
             ) : (
-              // The question stays until the payoff lands (H3 R5).
-              <p id={promptId} className={DOCK.prompt} data-viz-part="viz-prompt">
-                {prompt}
-              </p>
+              // The question stays until the payoff lands (H3 R5); the earlier
+              // answer sits under it once (G ruling 2), its slot always there.
+              <div>
+                <p id={promptId} className={DOCK.prompt} data-viz-part="viz-prompt">
+                  {prompt}
+                </p>
+                <p
+                  id={`${promptId}-last`}
+                  className={clsx(lastTimeCls, !lastLabel && 'invisible')}
+                  data-viz-part={lastLabel ? 'viz-last-time' : undefined}
+                  aria-hidden={lastLabel ? undefined : true}
+                >
+                  {lastLabel ? lastTimeText(lastLabel) : '\u00a0'}
+                </p>
+              </div>
             )}
           </TextCell>
           <div
             role="radiogroup"
             aria-labelledby={promptId}
+            aria-describedby={lastLabel && !revealed ? `${promptId}-last` : undefined}
             className={clsx(DOCK.choices, !canPredict && 'invisible')}
             // As many rows as the scene's longest choice list, so the dock
             // never changes height between actions.
@@ -447,13 +462,11 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             {choices.map((c, i) => {
               const picked = revealed && s.pick === c.id
               const marks = verdictShown && canPredict
-              const tagged = !revealed && lastTime === c.id
               return (
                 <ChoiceRow
                   key={c.id}
                   index={i}
                   label={c.label}
-                  tag={tagged ? 'last time' : undefined}
                   mono={s.scene === 'wrapper'}
                   state={revealed ? 'resolved' : 'ask'}
                   picked={picked}

@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { Feedback, promptCls } from '../../primitives/Caption'
+import { Feedback, lastTimeCls, promptCls } from '../../primitives/Caption'
 import { cn as clsx } from '../../primitives/cn'
 import { ink, type as typeScale } from '../../primitives/tokens-v3'
 import { CHOICE } from '../../shell/footprint'
@@ -44,9 +44,10 @@ export function TextGhosts({ scene }: { scene: Scene }) {
   return (
     <>
       {g.prompts.map((p) => (
-        <p key={`p-${p}`} aria-hidden className={clsx('invisible', cell, DOCK.prompt)}>
-          {p}
-        </p>
+        <div key={`p-${p}`} aria-hidden className={clsx('invisible', cell)}>
+          <p className={DOCK.prompt}>{p}</p>
+          <p className={lastTimeCls}>{g.lastTime}</p>
+        </div>
       ))}
       {g.reveals.map((r) => (
         <div key={`r-${r.lead}|${r.rule}`} aria-hidden data-viz-part="dock-ghosts" className={clsx('invisible', cell)}>

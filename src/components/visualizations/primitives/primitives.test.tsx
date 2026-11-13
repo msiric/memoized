@@ -141,11 +141,12 @@ describe('VDS primitives', () => {
   })
 
   it('ChoiceRow: number slot, then ✓ or × in the same slot; never amber', () => {
-    const ask = renderToStaticMarkup(<ChoiceRow index={1} label="B" tag="last time" />)
+    const ask = renderToStaticMarkup(<ChoiceRow index={1} label="B" />)
     expect(ask).toContain('role="radio"')
     expect(ask).toContain('data-choice-slot="key"')
     expect(ask).toMatch(/>2</)
-    expect(ask).toContain('last time')
+    // G ruling 2: the row never carries a tag; the earlier answer is a line under the prompt.
+    expect(ask).not.toContain('last time')
     const right = renderToStaticMarkup(<ChoiceRow index={0} label="A" state="resolved" picked mark="right" />)
     expect(right).toContain('data-choice-slot="right"')
     expect(right).toContain('✓')

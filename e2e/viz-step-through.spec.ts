@@ -219,10 +219,12 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   // Home restarts and re-asks with memory; End skips the open checkpoint.
   await page.keyboard.press('Home')
   expect(await state(page)).toEqual({ step: '0', mode: 'ask' })
-  await expect(f.locator('[data-choice="b"]')).toContainText('last time')
+  // G ruling 2: the earlier answer is a line under the prompt, never a tag on a row.
+  await expect(f.locator('[data-viz-part="viz-last-time"]')).toHaveText('Last time: B')
+  await expect(f.locator('[data-choice="b"]')).not.toContainText('last time')
   await page.keyboard.press('2')
   for (let i = 0; i < 5; i++) await page.keyboard.press('ArrowRight')
-  await expect(f.locator('[data-choice="c"]')).toContainText('last time')
+  await expect(f.locator('[data-viz-part="viz-last-time"]')).toHaveText('Last time: C, from .then')
   await page.keyboard.press('Home')
   await page.keyboard.press('End')
   expect((await state(page)).step).toBe('8')

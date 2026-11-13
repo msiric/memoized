@@ -5,9 +5,11 @@ import {
   FOOTER,
   FRAME,
   GLYPH,
+  LAST_TIME_LINE,
   MIN_TEXT_WIDTH,
   PROMPT_LINE,
   headerHeight,
+  lastTimeText,
   wrapLines,
 } from '../../shell/footprint'
 import type { PerVariant, Variant } from '../../shell/types'
@@ -173,7 +175,11 @@ export function dockStrings(scene: Scene) {
       ? Math.max(...LIST_ACTIONS.map((a) => listChoices(a).length))
       : wrapperChoices(0).length
   const unique = [...new Map(reveals.map((r) => [`${r.lead}|${r.rule}`, r])).values()]
-  return { prompts: [...new Set(prompts)], reveals: unique, maxChoices }
+  // G ruling 2: the earlier answer as a line under the prompt; its slot holds the longest one.
+  const labels =
+    scene === 'list' ? LIST_ACTIONS.flatMap((a) => listChoices(a).map((c) => c.label)) : wrapperChoices(99).map((c) => c.label)
+  const lastTime = lastTimeText([...labels].sort((a, b) => sansWidth(b, 12) - sansWidth(a, 12))[0])
+  return { prompts: [...new Set(prompts)], reveals: unique, maxChoices, lastTime }
 }
 
 /** "2 reused · 1 mounted": what React did, counted. */
@@ -223,7 +229,8 @@ export function dockModes(variant: Variant, scene: Scene) {
   const choices = choicesHeight(s.maxChoices)
   const side = variant === 'narrow' ? w : WIDE_SIDE
   const text = Math.max(
-    maxOf(s.prompts.map((t) => lines(t, side, GLYPH.prompt))) * PROMPT_LINE,
+    maxOf(s.prompts.map((t) => lines(t, side, GLYPH.prompt))) * PROMPT_LINE +
+      lines(s.lastTime, side, GLYPH.note) * LAST_TIME_LINE,
     maxOf(s.reveals.map((r) => revealTextHeight(r, side))),
   )
   // Narrow: text, choices, the action row. Wide: the text with the action
@@ -288,5 +295,5 @@ export const LONGEST_CHOICE = Math.max(
 export function dockGhostStrings(scene: Scene, keep = 3) {
   const s = dockStrings(scene)
   const prompts = [...s.prompts].sort((a, b) => b.length - a.length).slice(0, keep)
-  return { prompts, reveals: s.reveals, maxChoices: s.maxChoices }
+  return { prompts, reveals: s.reveals, maxChoices: s.maxChoices, lastTime: s.lastTime }
 }

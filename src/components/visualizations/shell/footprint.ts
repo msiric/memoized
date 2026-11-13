@@ -53,7 +53,7 @@ export const COL_TEXT_WIDTH = 766
  * measured in Chromium (6.25 at 14/400, 7.33 at 16/600) to cover other
  * platforms' fonts.
  */
-export const GLYPH = { caption: 7.2, prompt: 8.4 } as const
+export const GLYPH = { caption: 7.2, prompt: 8.4, note: 6.2 } as const
 
 /** Choices sit in two columns; from 768 they sit beside the prompt. */
 export const CHOICE = { height: TARGET_PX, gap: TARGET_GAP_PX, wideWidth: 168, textGap: 8, sideGap: 16 } as const
@@ -109,19 +109,24 @@ export const ROW_TEXT_MIN = 160
 /** The wide variant's threshold in px at the default root (`vz-wide`, 37.875rem). */
 export const WIDE_MIN = 606
 
-/** The tag a choice carries after Restart when it was the last pick (R4). */
-export const LAST_TIME_TAG = 'last time'
-
 /**
- * A checkpoint's choice column: its longest label plus the row chrome, at
- * most 168. Any choice may carry the "last time" tag on its second line, so
- * the column is never narrower than the tag (G: a one-letter choice row
- * spilled the tag into its neighbour).
+ * The earlier answer after Restart (G ruling 2): one muted 12/20 line under
+ * the prompt, "Last time: <label>", never a tag on the choice row. Its slot
+ * is reserved under every prompt (invisible until there is a last answer),
+ * so the prompt never moves.
  */
+export const LAST_TIME_LINE = typeScale.provenance.line
+export const lastTimeText = (label: string) => `Last time: ${label}`
+/** The longest "Last time" line a checkpoint can show (its widest choice label). */
+export function longestLastTime(cp: Pick<Checkpoint, 'choices'>): string {
+  const widest = [...cp.choices].sort((a, b) => sansWidth(b.label, 12) - sansWidth(a.label, 12))[0]
+  return lastTimeText(widest?.label ?? '')
+}
+
+/** A checkpoint's choice column: its longest label plus the row chrome, at most 168. */
 export function choiceColumn(cp: Pick<Checkpoint, 'choices'>): number {
   const label = Math.max(...cp.choices.map((c) => Math.ceil(sansWidth(c.label, typeScale.control.size))))
-  const tag = Math.ceil(sansWidth(LAST_TIME_TAG, typeScale.tag.size))
-  return Math.min(CHOICE.wideWidth, Math.max(label, tag) + CHOICE_CHROME)
+  return Math.min(CHOICE.wideWidth, label + CHOICE_CHROME)
 }
 
 /** One row of all choices: its width. */
@@ -157,6 +162,8 @@ export const WIDE_SIDE_TEXT =
 export type DockText = {
   captions: string[]
   prompts: string[]
+  /** The longest "Last time" line per checkpoint (G ruling 2). */
+  lastTimes: string[]
   feedback: string[]
   maxChoices: number
   checkpoints: Pick<Checkpoint, 'choices'>[]
@@ -164,13 +171,14 @@ export type DockText = {
 
 /** Every caption, prompt and feedback one preset can show in the dock. */
 export function dockText<S>(log: StepLog<S>): DockText {
-  const out: DockText = { captions: [], prompts: [], feedback: [], maxChoices: 0, checkpoints: [] }
+  const out: DockText = { captions: [], prompts: [], lastTimes: [], feedback: [], maxChoices: 0, checkpoints: [] }
   for (const st of log.steps) out.captions.push(st.why)
   // The end caption leads with a recap of the predictions (D21).
   const end = log.steps[log.steps.length - 1].why
   for (const r of allRecaps(log.checkpoints)) out.captions.push(`${r} ${end}`)
   for (const cp of log.checkpoints) {
     out.prompts.push(cp.prompt)
+    out.lastTimes.push(longestLastTime(cp))
     out.feedback.push(...allFeedbackStrings(cp))
     out.maxChoices = Math.max(out.maxChoices, cp.choices.length)
     out.checkpoints.push(cp)
@@ -195,8 +203,10 @@ export function dockSlot(t: DockText, variant: Variant): number {
   // Stacked, the feedback takes the full row (Skip is gone by then) and
   // Skip takes only the prompt's line (its target overhangs, F1 ruling 2).
   const feedbackWidth = variant === 'narrow' ? width : side
+  // The prompt with its "Last time" slot under it (G ruling 2).
   const text = Math.max(
-    maxLines(t.prompts, chars(side, GLYPH.prompt)) * PROMPT_LINE,
+    maxLines(t.prompts, chars(side, GLYPH.prompt)) * PROMPT_LINE +
+      maxLines(t.lastTimes, chars(side, GLYPH.note)) * LAST_TIME_LINE,
     maxLines(t.feedback, chars(feedbackWidth, GLYPH.caption)) * CAPTION_LINE,
   )
   const checkpoint =

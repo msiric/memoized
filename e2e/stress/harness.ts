@@ -100,18 +100,11 @@ export const gated = (c: Config) => STRICT && !c.recordOnly
 
 /**
  * OPEN DECISIONS (not exemption classes): real findings that need a design
- * ruling before they can be fixed. Each matches only its own rows; the rows
- * stay in the JSON (marked `pending`) and the test annotates them. Remove an
- * entry when the lead rules; the gate then fails until the visual is fixed.
- * - R4-last-time: a choice carrying the "last time" tag keeps one label line
- *   in its 44 px row, so a label that needs two lines truncates.
+ * ruling before they can be fixed. Each entry matches only its own rows; the
+ * rows stay in the JSON (marked `pending`) and the test annotates them.
+ * Empty: the G rulings closed R11 (no dim) and R4 (the last-time line).
  */
-export const PENDING: { id: string; match: (r: Row) => boolean }[] = [
-  {
-    id: 'R4-last-time',
-    match: (r) => r.detector === 'truncation' && /\[data-viz-part=viz-checkpoint\] \[data-choice=/.test(r.sig),
-  },
-]
+export const PENDING: { id: string; match: (r: Row) => boolean }[] = []
 export const pendingOf = (r: Row) => PENDING.find((p) => p.match(r))?.id
 
 /** The rows that fail a gated config; pending rows are marked and annotated instead. */

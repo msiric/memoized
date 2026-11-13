@@ -14,7 +14,7 @@ import {
   type ReactNode,
 } from 'react'
 import { BackIcon, Button, NextIcon, PauseIcon, PlayIcon, RestartIcon } from '../primitives/Button'
-import { Feedback, captionCls, feedbackLeadCls, promptCls } from '../primitives/Caption'
+import { Feedback, captionCls, feedbackLeadCls, lastTimeCls, promptCls } from '../primitives/Caption'
 import { ChoiceRow } from '../primitives/ChoiceRow'
 import { cn } from '../primitives/cn'
 import { Disclosure } from '../primitives/Disclosure'
@@ -24,7 +24,7 @@ import { SegmentedControl } from '../primitives/SegmentedControl'
 import { TARGET_GAP_PX, ink, motion, motionRules, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
 import { CodePane, codeRows, hasHostNote } from './CodePane'
-import { CHOICE, FRAME, LAST_TIME_TAG, STEP_BAR, choiceColumn, choiceRowBeside, choiceRowWidth, definitionMetrics } from './footprint'
+import { CHOICE, FRAME, STEP_BAR, choiceColumn, choiceRowBeside, choiceRowWidth, definitionMetrics, lastTimeText, longestLastTime } from './footprint'
 import { RECAP_NONE, allFeedback, allRecaps, feedbackText, recapText } from './feedback'
 import {
   dockMode,
@@ -449,6 +449,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const checkpointIndex = cpIndex ?? -1
   const picked = checkpointIndex >= 0 ? s.picked[checkpointIndex] : null
   const lastTime = checkpointIndex >= 0 ? s.memory[`${s.preset}:${checkpointIndex}`] : undefined
+  const lastLabel = cp && lastTime ? cp.choices.find((c) => c.id === lastTime)?.label : undefined
   const feedback = mode === 'reveal' && cp ? feedbackText(cp, picked) : null
   const atCheckpoint = interactive && mode === 'ask'
   // A prediction judged at the end shows no verdict yet (R5, R7).
@@ -698,9 +699,21 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
               feedback ? (
                 <Feedback data-viz-part="viz-feedback" lead={feedback.lead} body={feedback.body} />
               ) : (
-                <p id={promptId} className={promptCls} data-viz-part="viz-prompt">
-                  {cp.prompt}
-                </p>
+                <div>
+                  <p id={promptId} className={promptCls} data-viz-part="viz-prompt">
+                    {cp.prompt}
+                  </p>
+                  {/* G ruling 2: the earlier answer, once, under the prompt; its
+                      slot is always there, so the prompt never moves. */}
+                  <p
+                    id={`${promptId}-last`}
+                    className={cn(lastTimeCls, !lastLabel && 'invisible')}
+                    data-viz-part={lastLabel ? 'viz-last-time' : undefined}
+                    aria-hidden={lastLabel ? undefined : true}
+                  >
+                    {lastLabel ? lastTimeText(lastLabel) : '\u00a0'}
+                  </p>
+                </div>
               )
             }
             choices={
@@ -708,6 +721,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
                 ref={choicesRef}
                 role="radiogroup"
                 aria-labelledby={promptId}
+                aria-describedby={lastLabel && mode !== 'reveal' ? `${promptId}-last` : undefined}
                 data-viz-own-keys
                 data-vz-choices
                 className={cn(CHOICES_CLS, hidden && 'invisible')}
@@ -731,7 +745,6 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
                       // answer, × on a wrong pick. A prediction judged at the
                       // end keeps its numbers: only the pick is marked (R5).
                       mark={revealed && !deferred ? (isAnswer ? 'right' : isPicked ? 'wrong' : null) : null}
-                      tag={!revealed && lastTime === choice.id ? LAST_TIME_TAG : undefined}
                       tabIndex={atCheckpoint && i === choiceFocus ? 0 : -1}
                       onClick={() => atCheckpoint && dispatch({ type: 'answer', choice: choice.id })}
                       onKeyDown={(e) => {
@@ -886,9 +899,10 @@ function CheckpointBlock({
           holds its own ghosts, so the row is the taller of the two (F1
           ruling 2: no reserved band beyond what a state needs). */}
       <div className="grid min-w-0 content-end [grid-area:text] vz-wide:pr-2">
-        <p aria-hidden className={cn('invisible col-start-1 row-start-1', promptCls)}>
-          {cp.prompt}
-        </p>
+        <div aria-hidden className="invisible col-start-1 row-start-1">
+          <p className={promptCls}>{cp.prompt}</p>
+          <p className={lastTimeCls}>{longestLastTime(cp)}</p>
+        </div>
         {answered ? null : <div className="col-start-1 row-start-1 self-end">{text}</div>}
       </div>
       <div className="grid min-w-0 content-end [grid-column:1/-1] [grid-row:1] vz-wide:pr-2 vz-wide:[grid-area:text]">
