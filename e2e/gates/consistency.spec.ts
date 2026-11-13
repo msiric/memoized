@@ -79,7 +79,16 @@ for (const width of [375, 1440]) {
     same('choice numeral', await look(el.locator('[data-viz-part="viz-checkpoint"] [data-choice-slot]').first()), await look(lk.locator('[data-choice-index="0"] [data-choice-slot]')))
     same('Skip', await look(el.locator('[data-viz-part="viz-skip"]')), await look(lk.locator('[data-viz-part="viz-skip"]')))
     same('prompt', await look(el.locator('[data-viz-part="viz-prompt"]')), await look(lk.locator('[data-viz-part="viz-prompt"]')))
+    // The anatomy follows one rule (final polish): the text beside the row
+    // wherever the row fits next to it, else over it. List keys' four
+    // choices stack at every width, so the beside anatomy is compared on
+    // its three-choice action (Reverse), then the default action returns.
+    if (width >= 768) await lk.locator('[data-viz-focus="action-reverse"]').click()
     same('checkpoint', await anatomy(el), await anatomy(lk))
+    if (width >= 768) {
+      await lk.locator('[data-viz-focus="action-insert-top"]').click()
+      await settle(page)
+    }
     const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
     same('frame', await look(el, FRAME), await look(lk, FRAME))
     // The one hairline (Q10): the frame edge and the list-keys spine are one color.
