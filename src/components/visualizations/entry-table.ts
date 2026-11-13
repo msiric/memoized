@@ -13,11 +13,12 @@ export type VizEntry = readonly [
   narrow: number,
   wide: number,
   /**
-   * Static figures only: [narrow, wide] heights per preset, default first.
+   * Static figures only: [narrow, wide, col] heights per preset, default
+   * first (`col`: the full lesson column, from 1280).
    * Its presence marks the visual static: the server HTML is final and the
    * chunk loads only after a client-side navigation.
    */
-  statics?: Record<string, readonly [number, number]>,
+  statics?: Record<string, readonly [number, number, number]>,
   /**
    * Step-throughs only: [narrow, wide] heights per preset, default first
    * (R2: every reserved band is sized to the preset on screen).
@@ -37,7 +38,7 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/env-records'),
     890,
     572,
-    { 'var-vs-let-loop': [890, 572], 'factory-calls-vs-aliases': [814, 550] },
+    { 'var-vs-let-loop': [890, 572, 572], 'factory-calls-vs-aliases': [814, 550, 526] },
   ],
   'list-keys': [() => import('./engines/list-keys'), 866, 582],
 }

@@ -103,7 +103,7 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
 
   if (!entry) return null
   const sized = statics ?? entry[4]
-  const [narrow, wide] = (sized && (sized[preset ?? ''] ?? Object.values(sized)[0])) || [entry[1], entry[2]]
+  const [narrow, wide, col = wide] = (sized && (sized[preset ?? ''] ?? Object.values(sized)[0])) || [entry[1], entry[2]]
   return (
     <div ref={ref} data-viz={id} className={statics ? 'my-8' : 'my-8 xl:max-w-[960px]'}>
       {Live ? (
@@ -118,11 +118,16 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
           data-viz-placeholder=""
           className={frameCls}
           // In rem, so the reserve follows the reader's text size like the frame (D19).
-          style={{ ['--vz-n' as string]: `${narrow / 16}rem`, ['--vz-w' as string]: `${wide / 16}rem` }}
+          style={{
+            ['--vz-n' as string]: `${narrow / 16}rem`,
+            ['--vz-w' as string]: `${wide / 16}rem`,
+            ['--vz-c' as string]: `${col / 16}rem`,
+          }}
         >
           {/* The frame is the variant's size container, so the reserve sits inside
-              it: the footprint less the frame's 1rem padding and 1 px borders. */}
-          <div className="h-[calc(var(--vz-n)-2rem-2px)] vz-wide:h-[calc(var(--vz-w)-2rem-2px)]" />
+              it: the footprint less the frame's 1rem padding and 1 px borders.
+              `vz-col` is the full lesson column (static figures, INTEG 4). */}
+          <div className="h-[calc(var(--vz-n)-2rem-2px)] vz-wide:h-[calc(var(--vz-w)-2rem-2px)] vz-col:h-[calc(var(--vz-c)-2rem-2px)]" />
         </div>
       )}
     </div>

@@ -15,7 +15,9 @@ import type { PerVariant } from './types'
  * height, offset and gap grows with the text it holds, instead of rem text
  * overflowing px boxes.
  */
-export const H_CLS = 'h-[var(--vz-h-n)] vz-wide:h-[var(--vz-h-w)]'
+export const H_CLS = 'h-[var(--vz-h-n)] vz-wide:h-[var(--vz-h-w)] vz-col:h-[var(--vz-h-c)]'
+/** The same reserve as a floor, for text that may wrap past its model under very large text (a static title). */
+export const MIN_H_CLS = 'min-h-[var(--vz-h-n)] vz-wide:min-h-[var(--vz-h-w)] vz-col:min-h-[var(--vz-h-c)]'
 export const TRANSLATE_Y_CLS = '[transform:translateY(var(--vz-y-n))] vz-wide:[transform:translateY(var(--vz-y-w))]'
 
 /** The px-per-rem the geometry is authored at (the browser default root size). */
@@ -26,11 +28,18 @@ export function rem(px: number): string {
   return px === 0 ? '0' : `${Math.round((px / ROOT_PX) * 10_000) / 10_000}rem`
 }
 
-export function heights(h: PerVariant<number>, style?: CSSProperties): CSSProperties {
+/**
+ * Per-variant heights. `col` is the full lesson column (`vz-col`, from
+ * 47.875rem): a static figure's caption that wraps at 606 px fits one line
+ * there, so it reserves less (H3 INTEG 4). Without it the column keeps the
+ * wide height.
+ */
+export function heights(h: PerVariant<number> & { col?: number }, style?: CSSProperties): CSSProperties {
   return {
     ...style,
     ['--vz-h-n' as string]: rem(h.narrow),
     ['--vz-h-w' as string]: rem(h.wide),
+    ['--vz-h-c' as string]: rem(h.col ?? h.wide),
   }
 }
 

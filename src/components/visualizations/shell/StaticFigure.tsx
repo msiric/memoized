@@ -9,7 +9,7 @@ import { FRAME } from './footprint'
 import { staticMetrics } from './static-footprint'
 import type { StaticDefinition, StaticTextAlternative } from './static-types'
 import { runtimeName } from './StepsAsText'
-import { H_CLS, heights } from './vars'
+import { H_CLS, MIN_H_CLS, heights } from './vars'
 
 /**
  * StaticFigure: the shell for every static diagram (spec §3.3, §6.4).
@@ -44,7 +44,15 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
 
   return (
     <Frame as="figure" data-viz-frame={def.id} data-viz-kind="static" data-viz-preset={p.id}>
-      <p id={titleId} className={clsx('m-0 truncate', typeScale.title.cls, ink.base)}>
+      {/* The title wraps (INTEG 5: it truncated under 200 % text on a phone);
+          each tier reserves the lines it takes at its narrowest width, as a
+          floor: under very large text it may take one more, and a static
+          figure never re-renders, so that is growth, not a shift. */}
+      <p
+        id={titleId}
+        className={clsx('m-0 break-words', typeScale.title.cls, ink.base, MIN_H_CLS)}
+        style={heights({ narrow: m.narrow.title, wide: m.wide.title, col: m.col.title })}
+      >
         {p.title}
       </p>
 
@@ -57,7 +65,7 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
         aria-labelledby={titleId}
         aria-describedby={descId}
         className={clsx('relative', H_CLS)}
-        style={heights({ narrow: m.narrow.stage, wide: m.wide.stage }, { marginTop: FRAME.headerGap })}
+        style={heights({ narrow: m.narrow.stage, wide: m.wide.stage, col: m.col.stage }, { marginTop: FRAME.headerGap })}
       >
         <Stage data={p.data} uid={uid} />
       </div>
@@ -65,7 +73,7 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
       <figcaption
         data-viz-part="viz-caption"
         className={clsx(captionCls, H_CLS)}
-        style={heights({ narrow: m.narrow.caption, wide: m.wide.caption }, { marginTop: FRAME.headerGap })}
+        style={heights({ narrow: m.narrow.caption, wide: m.wide.caption, col: m.col.caption }, { marginTop: FRAME.headerGap })}
       >
         {p.caption}
       </figcaption>

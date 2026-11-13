@@ -83,7 +83,8 @@ export function vizFootprint(id: string, preset?: string): readonly [number, num
   if (!d) return undefined
   if (d.form === 'step') return footprintOf(d, preset)
   if (d.form === 'explorable') return d.footprint
-  return staticFootprints(d)[preset ?? d.defaultPreset]
+  const [narrow, wide] = staticFootprints(d)[preset ?? d.defaultPreset]
+  return [narrow, wide] as const
 }
 
 /** Per-preset footprints of a step-through (R2), default first (the entry table's fifth slot). */
@@ -95,7 +96,7 @@ export function vizStepFootprints(id: string): Record<string, readonly [number, 
 }
 
 /** Per-preset footprints of a static visual, default first (the entry table's fourth slot). */
-export function vizStaticFootprints(id: string): Record<string, readonly [number, number]> | undefined {
+export function vizStaticFootprints(id: string): Record<string, readonly [number, number, number]> | undefined {
   const d = descriptorFor(id)
   return d?.form === 'static' ? staticFootprints(d) : undefined
 }

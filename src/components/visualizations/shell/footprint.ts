@@ -45,6 +45,8 @@ export const PROMPT_LINE = typeScale.prompt.line
 
 /** Narrowest text width per variant: the stage at 320 px and at 768 px. */
 export const MIN_TEXT_WIDTH: PerVariant<number> = { narrow: 288, wide: 606 }
+/** The frame's content in the full lesson column (`vz-col`, 47.875rem): 1280 and up. */
+export const COL_TEXT_WIDTH = 766
 
 /**
  * Average glyph width in px, padded about 15 % above the system UI font

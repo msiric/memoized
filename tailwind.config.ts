@@ -107,9 +107,14 @@ export default {
       // width in rem (VIZ-H D19), so 150 % or 200 % text gets the layout that
       // fits. The frame is the size container `vz` (primitives/frame-cls.ts).
       // vz-wide: from 37.875rem (606 px at the default size, the frame's
-      // content at a 768 px viewport). vz-xl: from 53.875rem (862 px, at 1280).
+      // content at a 768 px viewport). vz-col: from 47.875rem (766 px, the
+      // frame's content in the full lesson column, 1280 and up; static
+      // figures stay in the column). vz-xl: from 53.875rem (862 px, the
+      // step-through breakout at 1280). Registered narrowest first, so a
+      // wider tier wins where two apply.
       addVariant('vz-wide', '@container vz (min-width: 37.875rem)')
       addVariant('vz-narrow', '@container vz (max-width: 37.874rem)')
+      addVariant('vz-col', '@container vz (min-width: 47.875rem)')
       addVariant('vz-xl', '@container vz (min-width: 53.875rem)')
       // Below the 320 design width: Chrome's "Very large" text on a phone,
       // or 200 % text in a lesson column (VIZ-H R9).
