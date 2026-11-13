@@ -126,7 +126,7 @@ const steps: Step<EventLoopState>[] = [
   {
     state: s9,
     event: 'Done',
-    why: 'A microtask that queues another microtask still runs before any waiting task.',
+    why: 'A microtask queued mid-drain still runs before any task.',
     narration: 'Done. The log reads sync, micro 1, micro 2, timeout.',
     focus: ['console'],
     claim: 'modelled',
@@ -171,16 +171,18 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
     },
     {
       beforeStep: 7,
-      prompt: 'micro 2 joined the queue mid-drain. What logs next?',
+      // micro 2 joining mid-drain is the previous step's caption; the
+      // prompt and feedback fit one line on a 375 px phone (F1 ruling 2).
+      prompt: 'What logs after micro 1?',
       choices: [
         { id: 'timeout', label: 'timeout (task)', value: 'timeout' },
         { id: 'micro2', label: 'micro 2 (microtask)', value: 'micro 2' },
       ],
       answer: 'micro2',
       feedback: {
-        correct: 'The queue drains fully, new microtasks included.',
+        correct: 'It joins the current drain.',
         byChoice: {
-          timeout: 'A task runs only once the microtask queue is empty.',
+          timeout: 'A task waits for every microtask.',
         },
       },
       recap: { right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },

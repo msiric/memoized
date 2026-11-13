@@ -137,7 +137,7 @@ export function choicesHeight(count: number): number {
   return rows * CHOICE.height + Math.max(0, rows - 1) * CHOICE.gap
 }
 
-/** Width of the checkpoint text below 768: beside "Skip". */
+/** Width of the checkpoint prompt below 768: beside "Skip". */
 export const NARROW_SIDE_TEXT = MIN_TEXT_WIDTH.narrow - SKIP_WIDTH - CHOICE.textGap
 /** Width of the checkpoint text from 768: beside the choices and "Skip" (8 px gaps plus 8 px padding). */
 export const WIDE_SIDE_TEXT =
@@ -181,14 +181,15 @@ export function dockSlot(t: DockText, variant: Variant): number {
   if (t.maxChoices === 0) return caption
   const choices = Math.max(...t.checkpoints.map((cp) => choicesBlockHeight(cp, variant, width)))
   const side = variant === 'narrow' ? NARROW_SIDE_TEXT : WIDE_SIDE_TEXT
+  // Stacked, the feedback takes the full row (Skip is gone by then) and
+  // Skip takes only the prompt's line (its target overhangs, F1 ruling 2).
+  const feedbackWidth = variant === 'narrow' ? width : side
   const text = Math.max(
     maxLines(t.prompts, chars(side, GLYPH.prompt)) * PROMPT_LINE,
-    maxLines(t.feedback, chars(side, GLYPH.caption)) * CAPTION_LINE,
+    maxLines(t.feedback, chars(feedbackWidth, GLYPH.caption)) * CAPTION_LINE,
   )
   const checkpoint =
-    variant === 'narrow'
-      ? Math.max(text + CHOICE.textGap, TARGET_PX) + CHOICE.textGap + choices
-      : Math.max(text, choices)
+    variant === 'narrow' ? Math.max(text, PROMPT_LINE) + CHOICE.textGap + choices : Math.max(text, choices)
   return Math.max(caption, checkpoint)
 }
 

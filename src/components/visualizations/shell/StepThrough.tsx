@@ -689,6 +689,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           <CheckpointBlock
             cp={cp}
             className="col-start-1 row-start-1 self-start"
+            answered={!!feedback}
             text={
               feedback ? (
                 <Feedback data-viz-part="viz-feedback" lead={feedback.lead} body={feedback.body} />
@@ -753,10 +754,10 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
                   sliderRef.current?.focus({ preventScroll: true })
                   dispatch({ type: 'skip' })
                 }}
-                className={cn(!atCheckpoint && 'invisible')}
+                className={cn(SKIP_CLS, !atCheckpoint && 'invisible')}
                 data-viz-part="viz-skip"
               >
-                Skip
+                <span className={SKIP_LABEL_CLS}>Skip</span>
               </Button>
             }
           />
@@ -791,6 +792,19 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
  * the row fits (`choiceRowCss`), so a four-way question does not reserve two
  * rows of dock on every step (R2).
  */
+/**
+ * Skip when stacked (F1 ruling 2): its 44 px target rises 16 px above the
+ * prompt's 28 px line (into the step bar's empty right half, which holds no
+ * target), so the row is no taller than its text and the choices stay 8 px
+ * under the target. The label sits level with the prompt, and the focus
+ * ring is drawn on the label, so it never crosses the counter above.
+ */
+const SKIP_CLS = 'group vz-narrow:-mt-4 vz-narrow:pt-4 vz-narrow:focus-visible:outline-none'
+const SKIP_LABEL_CLS = cn(
+  'rounded-md',
+  'vz-narrow:group-focus-visible:outline vz-narrow:group-focus-visible:outline-2 vz-narrow:group-focus-visible:outline-offset-4 vz-narrow:group-focus-visible:outline-lime-500',
+)
+
 const CHOICES_CLS = 'grid shrink-0 grid-cols-2 [grid-area:choices] vz-wide:w-[var(--vz-choices-w)]'
 const choicesStyle = { gap: rem(CHOICE.gap) }
 
@@ -831,6 +845,7 @@ function CheckpointBlock({
   skip,
   className,
   ghost = false,
+  answered = false,
 }: {
   cp: Checkpoint
   text: ReactNode
@@ -838,6 +853,8 @@ function CheckpointBlock({
   skip: ReactNode
   className?: string
   ghost?: boolean
+  /** The text is the feedback (the reveal), not the prompt. */
+  answered?: boolean
 }) {
   // Ghosts use the live markup exactly (the feedback lead is semibold): a
   // lighter ghost can wrap one line shorter than the text it reserves for.
@@ -857,15 +874,21 @@ function CheckpointBlock({
       {/* Raw, so the server does not entity-escape the selectors' quotes (the
           rule must hold in the server frame too). Generated CSS only. */}
       <style dangerouslySetInnerHTML={{ __html: choiceRowCss(scope, cp) }} />
-      {/* Stacked, the text's last line sits level with Skip's label (8 px under it, 44 px target). */}
-      <div className="grid min-w-0 content-end [grid-area:text] vz-narrow:pb-2 vz-wide:pr-2">
+      {/* The prompt beside Skip; the feedback (Skip is gone by then) takes
+          the full row when stacked, beside the choices from 768. Each cell
+          holds its own ghosts, so the row is the taller of the two (F1
+          ruling 2: no reserved band beyond what a state needs). */}
+      <div className="grid min-w-0 content-end [grid-area:text] vz-wide:pr-2">
         <p aria-hidden className={cn('invisible col-start-1 row-start-1', promptCls)}>
           {cp.prompt}
         </p>
+        {answered ? null : <div className="col-start-1 row-start-1 self-end">{text}</div>}
+      </div>
+      <div className="grid min-w-0 content-end [grid-column:1/-1] [grid-row:1] vz-wide:pr-2 vz-wide:[grid-area:text]">
         {feedbacks.map((f, k) => (
           <Feedback key={k} aria-hidden className="invisible col-start-1 row-start-1" lead={f.lead} body={f.body} />
         ))}
-        <div className="col-start-1 row-start-1 self-end">{text}</div>
+        {answered ? <div className="col-start-1 row-start-1 self-end">{text}</div> : null}
       </div>
       {choices}
       <div className="[grid-area:skip]">{skip}</div>
@@ -912,8 +935,8 @@ function DockGhosts<S>({ log }: { log: StepLog<S> }) {
             </div>
           }
           skip={
-            <Button variant="text" tabIndex={-1} unavailable>
-              Skip
+            <Button variant="text" tabIndex={-1} unavailable className={SKIP_CLS}>
+              <span className={SKIP_LABEL_CLS}>Skip</span>
             </Button>
           }
         />

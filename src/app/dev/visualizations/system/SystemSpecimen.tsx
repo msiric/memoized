@@ -355,7 +355,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
             The timer callback waits in the task queue: microtasks always drain first, so C logs before B even though the
             timer was set first.
           </Caption>
-          <p className={promptCls}>D has logged. What logs next?</p>
+          <p className={promptCls}>What logs after D?</p>
           <div className="relative">
             <Disclosure summary="Steps as text">
               <Caption>Start. The script is about to run.</Caption>

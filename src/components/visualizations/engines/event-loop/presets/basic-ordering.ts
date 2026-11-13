@@ -156,15 +156,16 @@ export const basicOrdering: StepLog<EventLoopState> = {
     },
     {
       beforeStep: 6,
-      prompt: 'D has logged. What logs next?',
+      prompt: 'What logs after D?',
       choices: [
         { id: 'b', label: 'B, from the timer', value: 'B' },
         { id: 'c', label: 'C, from .then', value: 'C' },
       ],
       answer: 'c',
       feedback: {
-        correct: 'Microtasks run before the next task, so C goes first.',
-        byChoice: { b: "The timer's task waits for an empty microtask queue." },
+        // One line on a 375 px phone with its lead (F1 ruling 2).
+        correct: 'Microtasks run before the next task.',
+        byChoice: { b: 'A task waits for every microtask.' },
       },
       recap: { right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
     },

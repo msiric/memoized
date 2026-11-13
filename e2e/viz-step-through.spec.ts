@@ -12,7 +12,7 @@ const WIDTHS = [320, 375, 768, 1024, 1440] as const
 // entry-table.ts: the client-only placeholder's estimate, an upper bound. The
 // live dock is measured (a ghost stack, D15), so the frame is at most this tall.
 // Basics, the default preset (entry-table.ts; per preset, R2).
-const FOOTPRINT = { narrow: 872, wide: 608 }
+const FOOTPRINT = { narrow: 840, wide: 584 }
 
 const mount = (page: Page) => page.locator('[data-viz="event-loop"]')
 const frame = (page: Page) => mount(page).locator('section')
@@ -186,13 +186,13 @@ test('keyboard-only walkthrough (tab order, every key, focus never lost)', async
   expect(await state(page)).toEqual({ step: '5', mode: 'ask' })
   await expect(slider(page)).toBeFocused()
   await expect(f.getByTestId('viz-live')).toContainText(
-    'Checkpoint: D has logged. What logs next?',
+    'Checkpoint: What logs after D?',
   )
 
   // → moves focus to the first choice; arrows move between choices; Enter commits.
   await page.keyboard.press('ArrowRight')
   const choices = f
-    .getByRole('radiogroup', { name: 'D has logged. What logs next?' })
+    .getByRole('radiogroup', { name: 'What logs after D?' })
     .getByRole('radio')
   await expect(choices.first()).toBeFocused()
   await page.keyboard.press('ArrowDown')
