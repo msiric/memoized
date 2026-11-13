@@ -13,7 +13,6 @@ import { cn as clsx } from '../../primitives/cn'
 import { Tag as Badge } from '../../primitives/Tag'
 import {
   DASH,
-  EASE,
   focusRingHas,
   ink,
   now,
@@ -25,6 +24,7 @@ import {
   transitionCls,
   type as typeScale,
   DOT_R,
+  EASE_CSS,
 } from '../../primitives/tokens-v3'
 import { transitionFor, type MotionGate } from '../../shell/motion'
 import { toRem } from '../../substrates/units'
@@ -51,7 +51,7 @@ import {
   type AfterRow,
 } from './model'
 import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
-import { HIGHLIGHT_MS, verdictFade, type RevealView } from './reveal'
+import { BEAT, HIGHLIGHT_MS, beatFade, beatTransition, type Beat, type RevealView } from './reveal'
 
 /**
  * The stage's Before and After columns with the match lines between them
@@ -70,12 +70,17 @@ import { HIGHLIGHT_MS, verdictFade, type RevealView } from './reveal'
  * - The reveal (D21, `CheckRider.tsx`): each carried checkbox lifts out of its
  *   Before box (which empties), rides its own line as the line draws, and
  *   settles into the After box its instance now renders. Each After row's
- *   instance shows when its line reaches it; marks and badges arrive with
- *   the verdict, once every check has landed (H3 R5).
- * - The row now showing the tracked check carries the `now` emphasis inside
- *   the card (D5). A row that shows another item's state, or lost its own,
- *   carries a neutral in-row badge (× or ✓, H3 R1) with the words for
- *   assistive tech and on hover, so the mismatch never depends on color (A7).
+ *   instance shows when its line reaches it (an unmounted Before instance
+ *   turns dashed, neutral, when the first line arrives). Then, once every
+ *   check has landed, one ordered sequence (`BEAT` in `reveal.ts`, Q18): the
+ *   landing row's lime, the badges and the removed role, the dock's verdict,
+ *   and the Before checks as history (R2M-15).
+ * - Lime is the landing (Q9): the row that received the tracked check, and
+ *   nothing else in the columns but its traced line. A lost check lands
+ *   nowhere; its instance takes the removed role like any unmounted one. A
+ *   row that shows another item's state, or lost its own, carries a neutral
+ *   in-row badge (× or ✓, H3 R1) with the words for assistive tech and on
+ *   hover, so the mismatch never depends on color (A7).
  */
 
 const useIsoLayoutEffect =
@@ -185,7 +190,9 @@ function ColumnLabel({ children }: { children: ReactNode }) {
 
 /**
  * The instance letter. Before a reveal resolves it shows `?`; on the reveal
- * the letter takes its place when the row's line reaches it (a 120 ms fade).
+ * the letter replaces it when the row's line reaches it, at full size in the
+ * same frame, and its ink brightens from the `?`'s muted to the letter's on
+ * the `highlight` beat (120 ms), so the cell is never blank (R2M-06).
  */
 function Spine({
   label,
@@ -210,15 +217,11 @@ function Spine({
         typeScale.glyphHeader.cls,
         dashed ? 'border-dashed border-zinc-500' : stroke.hairline,
         label === '?' ? ink.muted : ink.base,
+        played && 'transition-colors motion-reduce:transition-none',
       )}
+      style={played ? ARRIVE_STYLE : undefined}
     >
-      {played && label !== '?' ? (
-        <m.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={ARRIVE_FADE}>
-          {label}
-        </m.span>
-      ) : (
-        label
-      )}
+      {label}
     </span>
   )
 }
@@ -253,15 +256,17 @@ const STATUS_TEXT: Record<NonNullable<AfterRow['status']>, string> = {
 }
 
 /** An instance letter arrives with its line on the `highlight` beat (120 ms). */
-const ARRIVE_FADE = { duration: HIGHLIGHT_MS / 1000, ease: EASE }
+const ARRIVE_STYLE = { transitionDuration: `${HIGHLIGHT_MS}ms`, transitionTimingFunction: EASE_CSS }
 
-function Arrive({ played, children, className }: { played: boolean; children: ReactNode; className?: string }) {
+/** A part of the verdict sequence, faded in on its beat (`reveal.ts`). */
+function Arrive({ played, beat, children, className }: { played: boolean; beat: Beat; children: ReactNode; className?: string }) {
   return (
     <m.span
       className={className}
       initial={played ? { opacity: 0 } : false}
       animate={{ opacity: 1 }}
-      transition={played ? verdictFade : { duration: 0 }}
+      transition={beatFade(played, beat)}
+      data-lk-beat={beat}
     >
       {children}
     </m.span>
@@ -304,20 +309,17 @@ function ListColumns({
           {BEFORE.map((id, i) => {
             const item = id as 'milk' | 'dog'
             const rowId = `before-${i}`
-            const isGone = gone.includes(i as 0 | 1) && view.arrived(rowId)
-            // The tracked check was lost: its unmounted instance is the one highlight.
-            const isLostFocus = revealed && view.landed && tracked === i && destination === -1
+            const unmounted = gone.includes(i as 0 | 1)
+            // Dashed (neutral) when the first line arrives; the removed role
+            // and its badge once, on the badges beat (R2M-05).
+            const isGone = unmounted && view.arrived(rowId)
+            const removed = unmounted && revealed && view.landed
             // Its check is riding (D21, H3 R6): the box reads empty until every
             // check has landed; the accessible state stays checked.
             const riding = sources.has(rowId) && view.directing && !view.landed
             const key = keyText(s.key, id, i, 'before')
             return (
-              <li
-                key={id}
-                className="m-0 p-0"
-                data-row={rowId}
-                data-focus={isLostFocus || undefined}
-              >
+              <li key={id} className="m-0 p-0" data-row={rowId} data-removed={removed || undefined}>
                 <label
                   className={clsx(
                     cardCls,
@@ -325,10 +327,10 @@ function ListColumns({
                     interactive ? 'cursor-pointer' : 'cursor-default',
                     focusRingHas,
                     transitionCls.feedback,
-                    isGone ? clsx('border-dashed', stroke.removed) : stroke.line,
-                    isLostFocus && now.glyph,
+                    isGone && 'border-dashed',
+                    removed ? stroke.removed : stroke.line,
                   )}
-                  style={cardStyle}
+                  style={{ ...cardStyle, ...beatTransition(view.sequence, BEAT.badges) }}
                 >
                   {/* H3 R13: the card toggles its checkbox, so it answers the
                       pointer like every control: a white/5 step on hover
@@ -359,13 +361,13 @@ function ListColumns({
                           'aria-label': `${ITEMS[id].text}, instance ${BEFORE_INSTANCES[i]}, key ${key}`,
                         }}
                         shown={s.checks[item] && !riding}
-                        settle={view.played}
+                        history={{ on: revealed && view.landed, style: beatTransition(view.sequence, BEAT.history) }}
                       />
                     </span>
                     <span className="flex min-w-0 items-center gap-1">
                       <span className={clsx('truncate', typeScale.meta.cls, ink.muted)}>{`key=${key}`}</span>
-                      {isGone ? (
-                        <Arrive played={view.fade} className="ml-auto flex">
+                      {removed ? (
+                        <Arrive played={view.sequence} beat={BEAT.badges} className="ml-auto flex">
                           <StatusBadge glyph="×" removed words="unmounted" />
                         </Arrive>
                       ) : null}
@@ -414,18 +416,18 @@ function ListColumns({
                   cardCls,
                   'm-0 p-0',
                   arrived && mounted ? 'border-dashed border-zinc-500' : stroke.line,
+                  // Q9: lime is the landing, the row that received the check.
                   isDest && now.glyph,
-                  view.played && transitionCls.feedback,
+                  transitionCls.feedback,
                 )}
-                style={cardStyle}
+                // The lime fades in as this row's own check sets down (with
+                // two checks the tracked one lands first).
+                style={{ ...cardStyle, ...beatTransition(view.fade && landed, BEAT.landing) }}
               >
                 <span className="sr-only">{describe}</span>
                 <span aria-hidden className={contentCls}>
                   <span data-lk-flip className={lineCls}>
-                    <CheckBox
-                      state={!arrived ? '?' : waiting ? 'slot' : r.checked}
-                      settle={view.played}
-                    />
+                    <CheckBox state={!arrived ? '?' : waiting ? 'slot' : r.checked} />
                     <span className={clsx('min-w-0 flex-1 truncate', typeScale.item.cls, ink.base)}>
                       {ITEMS[r.item].text}
                     </span>
@@ -435,7 +437,7 @@ function ListColumns({
                     {/* The verdicts (kept, lost, not its check) arrive with the
                         dock's verdict, once every carried check has landed. */}
                     {revealed && r.status && view.landed ? (
-                      <Arrive played={view.fade} className="ml-auto flex">
+                      <Arrive played={view.sequence} beat={BEAT.badges} className="ml-auto flex">
                         <StatusBadge glyph={r.status === 'kept' ? '✓' : '×'} words={STATUS_TEXT[r.status]} />
                       </Arrive>
                     ) : null}
@@ -458,6 +460,7 @@ function WrapperBox({
   removed,
   children,
   badge,
+  sequence = false,
 }: {
   tag: string
   attr?: string
@@ -465,15 +468,18 @@ function WrapperBox({
   removed?: boolean
   children: ReactNode
   badge?: ReactNode
+  /** The removed role arrives on the badges beat (Q18). */
+  sequence?: boolean
 }) {
   return (
     <div
       className={clsx(
         'relative border px-2',
         radius.glyph.cls,
+        transitionCls.feedback,
         removed ? clsx('border-dashed', stroke.removed) : dashed ? 'border-dashed border-zinc-500' : stroke.line,
       )}
-      style={{ paddingTop: toRem(BOX.pad), paddingBottom: toRem(BOX.bottom) }}
+      style={{ paddingTop: toRem(BOX.pad), paddingBottom: toRem(BOX.bottom), ...beatTransition(sequence, BEAT.badges) }}
     >
       <p
         className={clsx('m-0 flex h-4 items-center justify-between gap-1', typeScale.meta.cls, ink.secondary)}
@@ -485,7 +491,8 @@ function WrapperBox({
       {attr ? (
         <p
           data-viz-part="wrapper-attr"
-          className={clsx('m-0 h-4 truncate', typeScale.meta.cls, ink.now)}
+          // The changed attribute in full ink (lime is the landing only, Q9).
+          className={clsx('m-0 h-4 truncate', typeScale.meta.cls, ink.base)}
           style={{ marginTop: toRem(-BOX.gap), marginBottom: toRem(BOX.gap) }}
         >
           {attr}
@@ -501,11 +508,14 @@ function CounterCard({
   count,
   mounted,
   focus,
+  sequence = false,
 }: {
   instance: string
   count: string
   mounted?: boolean
+  /** The count landed here (Q9): the lime landing, on the first beat. */
   focus?: boolean
+  sequence?: boolean
 }) {
   return (
     <div
@@ -513,10 +523,11 @@ function CounterCard({
       data-focus={focus || undefined}
       className={clsx(
         cardCls,
+        transitionCls.feedback,
         mounted ? 'border-dashed border-zinc-500' : stroke.line,
         focus && now.glyph,
       )}
-      style={cardStyle}
+      style={{ ...cardStyle, ...beatTransition(sequence, BEAT.landing) }}
     >
       <Spine label={instance} dashed={mounted} side="before" />
       <span className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 px-2">
@@ -553,7 +564,14 @@ function WrapperColumns({
         <WrapperBox
           tag="<div>"
           removed={lost}
-          badge={lost ? <Arrive played={view.fade} className="flex"><StatusBadge glyph="×" removed words="unmounted" /></Arrive> : null}
+          sequence={view.sequence}
+          badge={
+            lost ? (
+              <Arrive played={view.sequence} beat={BEAT.badges} className="flex">
+                <StatusBadge glyph="×" removed words="unmounted" />
+              </Arrive>
+            ) : null
+          }
         >
           <CounterCard instance="A" count={`count ${s.count}`} />
         </WrapperBox>
@@ -594,7 +612,10 @@ function WrapperColumns({
                 instance={revealed ? (o.counterReused ? 'A' : 'B') : '?'}
                 count={revealed ? `count ${o.counterReused ? s.count : 0}` : 'count ?'}
                 mounted={revealed && !o.counterReused}
-                focus={revealed}
+                // The count lands only where it was kept; a remount loses it
+                // (the answer is "count 0"), so nothing in After is lime.
+                focus={revealed && o.counterReused}
+                sequence={view.sequence}
               />
             </WrapperBox>
           </div>
@@ -715,6 +736,10 @@ export function chipPath(w: number, y1: number, y2: number): { x: number; y: num
 }
 
 function Lines({ s, box, view, gate }: { s: ExploreState; box: LinesBox; view: RevealView; gate: MotionGate }) {
+  // An unmounted stub draws in `line` grey with the lines and takes the
+  // removed role with its card, on the badges beat (R2M-05).
+  const removedNow = view.landed
+  const stubStyle = beatTransition(view.sequence, BEAT.badges)
   const { w, k } = box
   const stacked = box.stacked && s.scene === 'list'
   const ls = links(s, stacked)
@@ -769,7 +794,14 @@ function Lines({ s, box, view, gate }: { s: ExploreState; box: LinesBox; view: R
           if (l.kind === 'unmounted') {
             const x = stub
             return (
-              <g key={`u-${l.from}`} data-link="unmounted" data-from={l.from} data-lk-stub className={svgInk.removed} style={hidden ? { opacity: 0 } : undefined}>
+              <g
+                key={`u-${l.from}`}
+                data-link="unmounted"
+                data-from={l.from}
+                data-lk-stub
+                className={clsx(removedNow ? svgInk.removed : svgInk.line, 'transition-colors motion-reduce:transition-none')}
+                style={hidden ? { opacity: 0, ...stubStyle } : stubStyle}
+              >
                 <path
                   d={`M0 ${l.y} H ${x - 3}`}
                   stroke="currentColor"
@@ -791,7 +823,7 @@ function Lines({ s, box, view, gate }: { s: ExploreState; box: LinesBox; view: R
           // (from the right when side by side, back to the cards when stacked).
           const cx = stacked ? stub : w - stub
           return (
-            <g key={`m-${l.to}`} data-link="mounted" data-to={l.to} data-lk-stub className={svgInk.muted} style={hidden ? { opacity: 0 } : undefined}>
+            <g key={`m-${l.to}`} data-link="mounted" data-to={l.to} data-lk-stub className={svgInk.line} style={hidden ? { opacity: 0 } : undefined}>
               <circle cx={cx} cy={l.y} r={DOT_R} fill="none" stroke="currentColor" strokeWidth={strokeWidth.connector} />
               <path
                 d={stacked ? `M${stub - 3} ${l.y} H 0` : `M${w - stub + 3} ${l.y} H ${w}`}

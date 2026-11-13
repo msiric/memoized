@@ -4,7 +4,7 @@ import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
 import { cn as clsx } from '../../primitives/cn'
 import { liftShadow } from '../../primitives/tokens-v3'
 import { checkedBoxCls, Tick } from './CheckBox'
-import { RIDE, WRAPPER_DRAW_MS, VERDICT_FADE_MS } from './reveal'
+import { RIDE, SEQUENCE_MS, WRAPPER_DRAW_MS } from './reveal'
 
 /**
  * The list-keys reveal (D21), directed as one gesture (H3 R6).
@@ -21,15 +21,17 @@ import { RIDE, WRAPPER_DRAW_MS, VERDICT_FADE_MS } from './reveal'
  * - **One curve.** The rider and every line share the stage curve. The
  *   ridden line draws behind the rider (its head is under the rider), so the
  *   state pulls its own thread; the other lines draw on the same timing.
- * - **Landing.** The tick rides at full strength; at the box the rider sets
- *   down with a single 120 ms settle (scale and shadow to rest), identical to
- *   the checked box under it, which takes over in the same frame.
+ * - **Landing.** The tick rides at full strength. The rider sets down over
+ *   the last 120 ms of its travel (scale and shadow to rest while it
+ *   decelerates onto the box, R2M-04), identical to the checked box under
+ *   it, which takes over in the same frame: the landing is the end of the
+ *   motion, and the verdict sequence (`reveal.ts`, `BEAT`) starts there.
  * - **Two checks.** The second leaves only when it can no longer meet the
  *   first: the gap is the smallest that keeps the riders `clearance` apart
  *   along both paths (it waits for the first to clear a crossing).
  * - **Arrivals.** A row's instance shows when its line reaches it; mounted
  *   rows and unmounted instances when the first line arrives. The verdict
- *   follows the last landing (`onLanded`).
+ *   sequence follows the last landing (`onLanded`).
  *
  * Web Animations only, started before the first paint of the reveal. A
  * resize lands everything at once; leaving the reveal unmounts the director,
@@ -47,6 +49,8 @@ const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayout
 /** Every animation the reveal starts carries this id (the harness finds them by it). */
 const RIDE_ID = 'viz-ride'
 const SAMPLES = 64
+/** How long after the planned end the timer lands a ride whose animations never finished. */
+const BACKSTOP_MS = RIDE.minGapMs
 
 type P = { x: number; y: number }
 
@@ -118,7 +122,7 @@ function positionAt(plan: Plan, travel: number, t: number): P {
 
 /** The smallest departure gap that keeps two riders `clear` px apart everywhere. */
 export function riderGap(a: Plan, b: Plan, travel: number, clear: number): number {
-  const end = travel + RIDE.settleMs
+  const end = travel
   for (let gap = RIDE.minGapMs; gap <= end; gap += 10) {
     let ok = true
     for (let t = 0; t <= end + gap && ok; t += 8) {
@@ -233,47 +237,42 @@ export function RevealDirector({
     let gaps = ridden.map(() => 0)
     for (;;) {
       gaps = ridden.map((p, i) => (i === 0 ? 0 : riderGap(ridden[0], p, travel, clear)))
-      const total = Math.max(0, ...gaps) + travel + (ridden.length ? RIDE.settleMs : 0) + VERDICT_FADE_MS
+      const total = Math.max(0, ...gaps) + travel + SEQUENCE_MS
       if (total <= RIDE.maxMs || travel <= RIDE.minTravelMs) break
       travel = Math.max(RIDE.minTravelMs, travel - 20)
     }
-    const span = travel + RIDE.settleMs
-    const travelShare = travel / span
+    // The settle is the travel's last `settleMs` (as a share of the travel).
+    const settle = Math.min(0.6, RIDE.settleMs / travel)
 
     const arrivals: { at: number; row: string }[] = []
+    const riderAnims: Animation[] = []
 
-    // Riders: arc-length samples placed in time by the shared curve.
+    // Riders: samples evenly spaced in time, placed along the path by the
+    // shared curve; the lift ramps up over the first 30 % and sets down over
+    // the settle, so scale and position come to rest in the same frame.
     ridden.forEach((plan, i) => {
       const node = refs.current[rides.findIndex((r) => r.from === plan.ride.from && r.to === plan.ride.to)]
       const delay = gaps[i]
       const frames: Keyframe[] = []
       const dash: Keyframe[] = []
       for (let j = 0; j <= SAMPLES; j++) {
-        const u = j / SAMPLES
-        const when = EASE_FN.when(u)
+        const x = j / SAMPLES
+        const u = EASE_FN.at(x)
         const p = plan.path.at(u * plan.path.total)
-        const lift = smooth(Math.min(1, when / 0.3))
+        const lift = smooth(Math.max(0, Math.min(1, x / 0.3, (1 - x) / settle)))
         frames.push({
-          offset: when * travelShare,
+          offset: x,
           transform: `translate(${p.x.toFixed(2)}px, ${p.y.toFixed(2)}px) translate(-50%, -50%) scale(${(1 + RIDE.liftScale * lift).toFixed(3)})`,
           boxShadow: liftShadow(lift),
           opacity: 1,
         })
         const drawn = Math.min(1, Math.max(0, (u * plan.path.total - plan.lead) / (plan.line || 1)))
-        dash.push({ offset: when * travelShare, strokeDashoffset: String(drawn >= 1 ? 0 : 1.001 - drawn) })
+        dash.push({ offset: x, strokeDashoffset: String(drawn >= 1 ? 0 : 1.001 - drawn) })
       }
-      const endP = plan.path.at(plan.path.total)
-      frames[frames.length - 1].easing = EASE_CSS
-      frames.push({
-        offset: 1,
-        transform: `translate(${endP.x.toFixed(2)}px, ${endP.y.toFixed(2)}px) translate(-50%, -50%) scale(1)`,
-        boxShadow: 'none',
-        opacity: 1,
-      })
-      dash.push({ offset: 1, strokeDashoffset: '0' })
-      const timing: KeyframeAnimationOptions = { duration: span, delay, fill: 'both', easing: 'linear' }
+      const timing: KeyframeAnimationOptions = { duration: travel, delay, fill: 'both', easing: 'linear' }
       if (node) {
         const a = track(node.animate(frames, timing))
+        riderAnims.push(a)
         a.finished.then(
           () => !done && land(plan.ride.to),
           () => {},
@@ -313,7 +312,7 @@ export function RevealDirector({
     const reached = new Set(arrivals.map((a) => a.row))
     for (const row of rows()) if (!reached.has(row)) arrivals.push({ at: first, row })
 
-    const end = Math.max(travel, ...ridden.map((_, i) => gaps[i] + span))
+    const end = Math.max(travel, ...ridden.map((_, i) => gaps[i] + travel))
     const finishAll = (instant: boolean) => {
       if (done) return
       done = true
@@ -325,7 +324,15 @@ export function RevealDirector({
     }
     const schedule = () => {
       for (const a of arrivals) timers.push(window.setTimeout(() => !done && arrive(a.row), a.at))
-      timers.push(window.setTimeout(() => finishAll(false), end))
+      // The landing is the riders' own end: their animations start on the
+      // next frame, so a timer from now would remove a rider a frame short
+      // of its box. The timer stays as a backstop (a frame later).
+      if (riderAnims.length)
+        Promise.all(riderAnims.map((a) => a.finished)).then(
+          () => finishAll(false),
+          () => {},
+        )
+      timers.push(window.setTimeout(() => finishAll(false), riderAnims.length ? end + BACKSTOP_MS : end))
     }
     // Timers start now: the animations start on the next frame, so an
     // arrival may lead its line by at most a frame (never visible), and the

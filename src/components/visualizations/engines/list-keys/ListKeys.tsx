@@ -12,14 +12,12 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from 'react'
 import { Button } from '../../primitives/Button'
-import { lastTimeCls } from '../../primitives/Caption'
-import { ChoiceRow } from '../../primitives/ChoiceRow'
 import { cn as clsx } from '../../primitives/cn'
 import { Disclosure } from '../../primitives/Disclosure'
 import { Frame } from '../../primitives/Frame'
 import { Provenance } from '../../primitives/Provenance'
 import { SegmentedControl } from '../../primitives/SegmentedControl'
-import { TARGET_GAP_PX, TARGET_PX, ink, type as typeScale } from '../../primitives/tokens-v3'
+import { TARGET_GAP_PX, ink, type as typeScale } from '../../primitives/tokens-v3'
 import { CodePane } from '../../shell/CodePane'
 import type { MotionGate } from '../../shell/motion'
 import { BURST_WINDOW_MS, escapePauses, isBurst } from '../../shell/pace'
@@ -56,7 +54,7 @@ import {
   wrapperPrompt,
 } from './content'
 import { PRESET_CONFIGS, DEFAULT_PRESET } from './descriptor'
-import { DOCK, TextCell, VerdictText } from './DockGhosts'
+import { ChoiceGhosts, DOCK, LkChoice, TextCell, TrailingGhost, VerdictText, dockCss } from './DockGhosts'
 import {
   CODE_HEIGHT,
   CONTROLS,
@@ -90,7 +88,7 @@ import {
 } from './model'
 import { LIST_OUTCOMES, WRAPPER_OUTCOMES } from './outcomes'
 import { OutcomesAsText, RECORDED_RUNTIMES } from './OutcomesAsText'
-import { useRevealView, verdictFade } from './reveal'
+import { BEAT, BEAT_MS, beatFade, beatTransition, useRevealView } from './reveal'
 import { stackCss } from './stack-css'
 
 /**
@@ -101,8 +99,9 @@ import { stackCss } from './stack-css'
  * (`outcomes.ts`), never computed here.
  *
  * Frame anatomy: header (title), a fixed stage (the two control rows, the
- * code strip, Before | lines | After), one checkpoint dock (H3 R4: question,
- * choices that stay and become ✓ or ×, Skip then "Try another"), and a
+ * code strip, Before | lines | After), one checkpoint dock (H3 R4, Q4:
+ * question, choices that stay and become ✓ or ×, Skip trailing them and then
+ * "Try another" in its place), and a
  * footer with the full text alternative and provenance.
  */
 
@@ -114,10 +113,7 @@ const KEYS = KEY_STRATEGIES.map((k) => ({ id: k, label: KEY_LABEL[k] }))
 type Nav = { s: ExploreState; play: boolean; at: number; epoch: number }
 
 const METRICS = { list: listKeysMetrics('list'), wrapper: listKeysMetrics('wrapper') }
-const CHOICE_ROWS = {
-  list: Math.ceil(dockStrings('list').maxChoices / 2),
-  wrapper: Math.ceil(dockStrings('wrapper').maxChoices / 2),
-}
+const CHOICE_SETS = { list: dockStrings('list').choiceSets, wrapper: dockStrings('wrapper').choiceSets }
 
 export type ListKeysProps = { preset?: string; interactive?: boolean }
 
@@ -177,7 +173,11 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       : wrapperPrompt(s.wrapperAction)
   const canPredict = answer !== null
   const lastTime = s.memory[experimentId(s)]
-  const lastLabel = lastTime ? choices.find((c) => c.id === lastTime)?.label : undefined
+  // The answer is remembered as it is given; the question still on screen
+  // during the payoff keeps the line it was asked with.
+  const askedLast = useRef<string | undefined>(undefined)
+  if (s.phase === 'ask') askedLast.current = lastTime ? choices.find((c) => c.id === lastTime)?.label : undefined
+  const lastLabel = askedLast.current
 
   const outcomeSentence =
     s.scene === 'list'
@@ -195,7 +195,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
     s.scene === 'list' ? `list/${s.key}` : `wrapper/${s.wrapperAction}`
   const code = CODE[codeVariant]
   const metrics = METRICS[s.scene]
-  const choiceRows = CHOICE_ROWS[s.scene]
+  const choiceSets = CHOICE_SETS[s.scene]
 
   const actionOptions =
     s.scene === 'list'
@@ -235,9 +235,10 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
     if (r.bottom < 0 || r.top > window.innerHeight) el.scrollIntoView({ block: 'nearest' })
   }, [s.phase, s.scene, s.listAction, s.wrapperAction])
 
-  // ---- narration (§5.3, R1M-14): one polite status once input settles (the
-  // shared 250 ms window), and the verdict only once the reveal has landed,
-  // never on load. Merge note (H3 F2): use F1's shared narration hook. ------
+  // ---- narration (§5.3, R1M-14, Q18): one polite status once input settles
+  // (the shared 250 ms window), and the verdict when its text appears (the
+  // verdict beat after the landing), never on load. Merge note (H3 F2): use
+  // F1's shared narration hook with the same delay. -------------------------
   const [live, setLive] = useState('')
   const first = useRef(true)
   const liveText = !revealed
@@ -257,8 +258,10 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       return
     }
     if (liveText === null) return
-    const id = window.setTimeout(() => setLive(liveText), revealed ? 0 : BURST_WINDOW_MS)
+    const delay = !revealed ? BURST_WINDOW_MS : view.sequence ? BEAT.verdict * BEAT_MS : 0
+    const id = window.setTimeout(() => setLive(liveText), delay)
     return () => window.clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [liveText, revealed])
 
   // ---- keyboard: 1 to 4 answer (§5.2). Esc never resets (D13): with no
@@ -316,7 +319,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       onKeyDown={onKeyDown}
     >
       {/* Raw, so the server does not entity-escape the selectors' quotes (generated CSS only). */}
-      <style dangerouslySetInnerHTML={{ __html: stackCss }} />
+      <style dangerouslySetInnerHTML={{ __html: stackCss + dockCss }} />
       {/* 1. Header: the title (a div, so the blog's print sheet keeps it, H3 R10). */}
       {/* At least one title line; under very large text the title wraps
           rather than truncates (it never changes within a preset, so the
@@ -339,7 +342,10 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       >
         <div
           className="grid shrink-0 grid-cols-[auto_minmax(0,1fr)] content-start gap-x-3 print:hidden"
-          style={{ height: toRem(CONTROLS), rowGap: toRem(TARGET_GAP_PX) }}
+          // The wrapper's setup line is never clamped: under very large text its
+          // row grows into the stage's spare height (the wrapper's columns are
+          // shorter than the list's the stage reserves).
+          style={s.scene === 'list' ? { height: toRem(CONTROLS), rowGap: toRem(TARGET_GAP_PX) } : { minHeight: toRem(CONTROLS), rowGap: toRem(TARGET_GAP_PX) }}
           data-viz-region="keyrow"
         >
           {s.scene === 'list' ? (
@@ -359,8 +365,8 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               </div>
             </>
           ) : (
-            <p className={clsx('col-span-2 m-0 flex h-11 items-center', typeScale.item.cls, ink.secondary)}>
-              <span className="line-clamp-2">{WRAPPER_SETUP}</span>
+            <p className={clsx('col-span-2 m-0 flex min-h-11 items-center text-pretty', typeScale.item.cls, ink.secondary)}>
+              <span>{WRAPPER_SETUP}</span>
             </p>
           )}
           <span className={controlLabel} aria-hidden>
@@ -408,8 +414,9 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
         {live}
       </div>
 
-      {/* 3. Dock: the checkpoint (H3 R4). The rows stay; the text cell holds
-          the question, then the verdict; the action row Skip, then Try another. */}
+      {/* 3. Dock: the checkpoint (H3 R4, Q4). The text cell holds the
+          question, then the verdict; the choices stay, Skip trails them, and
+          "Try another" takes Skip's place on the reveal. */}
       <div
         ref={dockRef}
         data-viz-region="dock"
@@ -421,109 +428,122 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
             {verdictShown ? (
               <m.div
                 key={view.key}
-                initial={view.fade ? { opacity: 0 } : false}
+                className="col-start-1 row-start-1 self-end"
+                initial={view.sequence ? { opacity: 0 } : false}
                 animate={{ opacity: 1 }}
-                transition={view.fade ? verdictFade : { duration: 0 }}
-                data-viz-reveal={view.fade ? 'verdict' : undefined}
+                transition={beatFade(view.sequence, BEAT.verdict)}
+                data-viz-reveal={view.sequence ? 'verdict' : undefined}
               >
                 <p id={promptId} className="sr-only">
                   {prompt}
                 </p>
                 <VerdictText live lead={lead} rule={rule} />
+                {/* What React did, counted (F2 ruling 2), as the verdict's note line (N2-13). */}
+                <p className={DOCK.note} data-viz-part="viz-counts">
+                  {tally}
+                </p>
               </m.div>
-            ) : (
-              // The question stays until the payoff lands (H3 R5); the earlier
-              // answer sits under it once (G ruling 2), its slot always there.
-              <div>
-                <p id={promptId} className={DOCK.prompt} data-viz-part="viz-prompt">
+            ) : null}
+            {/* The question stays until the payoff lands (H3 R5) and, played,
+                until the verdict's own beat: then it goes at once while the
+                verdict fades in (the caption rule, M15), so the cell is never
+                empty. The earlier answer sits under it once (G ruling 2). */}
+            {!verdictShown || view.sequence ? (
+              <div
+                className="col-start-1 row-start-1 self-end"
+                aria-hidden={verdictShown || undefined}
+                // A step, not a fade: it leaves at the verdict beat's start.
+                style={
+                  verdictShown
+                    ? { opacity: 0, transitionProperty: 'opacity', transitionDuration: '0s', transitionDelay: `${BEAT.verdict * BEAT_MS}ms` }
+                    : undefined
+                }
+              >
+                <p id={verdictShown ? undefined : promptId} className={DOCK.prompt} data-viz-part={verdictShown ? undefined : 'viz-prompt'}>
                   {prompt}
                 </p>
                 <p
-                  id={`${promptId}-last`}
-                  className={clsx(lastTimeCls, !lastLabel && 'invisible')}
-                  data-viz-part={lastLabel ? 'viz-last-time' : undefined}
+                  id={verdictShown ? undefined : `${promptId}-last`}
+                  className={clsx(DOCK.note, !lastLabel && 'invisible')}
+                  data-viz-part={lastLabel && !verdictShown ? 'viz-last-time' : undefined}
                   aria-hidden={lastLabel ? undefined : true}
                 >
                   {lastLabel ? lastTimeText(lastLabel) : '\u00a0'}
                 </p>
               </div>
-            )}
-          </TextCell>
-          <div
-            role="radiogroup"
-            aria-labelledby={promptId}
-            aria-describedby={lastLabel && !revealed ? `${promptId}-last` : undefined}
-            className={clsx(DOCK.choices, !canPredict && 'invisible')}
-            // As many rows as the scene's longest choice list, so the dock
-            // never changes height between actions.
-            style={{ ...DOCK.choicesStyle, gridTemplateRows: `repeat(${choiceRows}, ${toRem(TARGET_PX)})` }}
-            data-viz-part="choices"
-          >
-            {choices.map((c, i) => {
-              const picked = revealed && s.pick === c.id
-              const marks = verdictShown && canPredict
-              return (
-                <ChoiceRow
-                  key={c.id}
-                  index={i}
-                  label={c.label}
-                  mono={s.scene === 'wrapper'}
-                  state={revealed ? 'resolved' : 'ask'}
-                  picked={picked}
-                  // The number slot becomes the result with the verdict (D9, H3 R4, R5).
-                  mark={marks ? (c.id === answer ? 'right' : picked ? 'wrong' : null) : null}
-                  data-choice={c.id}
-                  data-choice-index={i}
-                  data-viz-focus={`choice-${i}`}
-                  tabIndex={canPredict && !revealed && i === choiceFocus ? 0 : -1}
-                  onClick={(e) => fromDock({ type: 'answer', choice: c.id }, 'again', e)}
-                  onKeyDown={(e) => onChoiceKey(e, i)}
-                  onFocus={() => setChoiceFocus(i)}
-                />
-              )
-            })}
-          </div>
-          <div className={DOCK.actions}>
-            {revealed ? (
-              <Button
-                key="again"
-                tabIndex={interactive ? 0 : -1}
-                data-viz-focus="again"
-                data-viz-part="viz-again"
-                onClick={(e) => {
-                  setChoiceFocus(0)
-                  fromDock({ type: 'again' }, canPredict ? 'choice-0' : 'skip', e)
-                }}
-              >
-                {AGAIN_LABEL}
-              </Button>
-            ) : (
-              <Button
-                key="skip"
-                variant="text"
-                tabIndex={interactive ? 0 : -1}
-                aria-label={canPredict ? SKIP_NAME : undefined}
-                data-viz-focus="skip"
-                data-viz-part="viz-skip"
-                onClick={(e) => fromDock({ type: 'skip' }, 'again', e)}
-              >
-                {canPredict ? SKIP_LABEL : SHOW_LABEL}
-              </Button>
-            )}
-            {/* What React did, counted (F2 ruling 2): in the action row the
-                dock already reserves, with the verdict. */}
-            {verdictShown ? (
-              <m.p
-                key={view.key}
-                className={DOCK.tally}
-                initial={view.fade ? { opacity: 0 } : false}
-                animate={{ opacity: 1 }}
-                transition={view.fade ? verdictFade : { duration: 0 }}
-                data-viz-part="viz-counts"
-              >
-                {tally}
-              </m.p>
             ) : null}
+          </TextCell>
+          {/* The choice row: every choice set's ghost in one cell, so the row
+              never changes height between actions (Q5), then the live row. */}
+          <div className="grid min-w-0">
+            <ChoiceGhosts sets={choiceSets} mono={s.scene === 'wrapper'} />
+            <div data-lk-row className="col-start-1 row-start-1 min-w-0">
+              <div
+                role="radiogroup"
+                aria-labelledby={promptId}
+                aria-describedby={lastLabel && !revealed ? `${promptId}-last` : undefined}
+                className={clsx(!canPredict && 'invisible')}
+                style={{ ['--lk-n' as string]: choices.length }}
+                data-lk-choices
+                data-viz-part="choices"
+              >
+                {choices.map((c, i) => (
+                  <LkChoice
+                    key={c.id}
+                    index={i}
+                    label={c.label}
+                    mono={s.scene === 'wrapper'}
+                    // Answered: locked while the payoff plays; the emphasis,
+                    // the ✓ and × wait for the verdict beat (H3 R5, Q3, Q4).
+                    state={!revealed ? 'ask' : verdictShown && canPredict ? 'resolved' : 'locked'}
+                    picked={revealed && s.pick === c.id}
+                    answer={c.id === answer}
+                    beat={beatTransition(view.sequence, BEAT.verdict)}
+                    data-choice={c.id}
+                    data-choice-index={i}
+                    data-viz-focus={`choice-${i}`}
+                    tabIndex={canPredict && !revealed && i === choiceFocus ? 0 : -1}
+                    onClick={(e) => fromDock({ type: 'answer', choice: c.id }, 'again', e)}
+                    onKeyDown={(e) => onChoiceKey(e, i)}
+                    onFocus={() => setChoiceFocus(i)}
+                  />
+                ))}
+              </div>
+              {/* The trailing action, in a cell that also holds "Try another"
+                  as a ghost, so Skip and Try another share one place. */}
+              <div className="grid shrink-0">
+                <TrailingGhost />
+                <div className="col-start-1 row-start-1 flex items-center">
+                  {revealed ? (
+                    <Button
+                      key="again"
+                      tabIndex={interactive ? 0 : -1}
+                      data-viz-focus="again"
+                      data-viz-part="viz-again"
+                      onClick={(e) => {
+                        setChoiceFocus(0)
+                        fromDock({ type: 'again' }, canPredict ? 'choice-0' : 'skip', e)
+                      }}
+                    >
+                      {AGAIN_LABEL}
+                    </Button>
+                  ) : (
+                    <Button
+                      key="skip"
+                      variant="text"
+                      tabIndex={interactive ? 0 : -1}
+                      aria-label={canPredict ? SKIP_NAME : undefined}
+                      data-viz-focus="skip"
+                      data-viz-part="viz-skip"
+                      data-lk-skip
+                      onClick={(e) => fromDock({ type: 'skip' }, 'again', e)}
+                    >
+                      {canPredict ? SKIP_LABEL : SHOW_LABEL}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -539,7 +559,7 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       </footer>
 
       <div className="hidden print:mt-4 print:block">
-        <OutcomesAsText />
+        <OutcomesAsText print />
       </div>
     </Frame>
   )

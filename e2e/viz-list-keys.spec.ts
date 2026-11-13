@@ -377,12 +377,25 @@ test('full motion: the checkbox rides its line into its After row, then ticks th
   // Index keys after an insert at top: Buy milk's check rides to row 0 (Wake up).
   await expect(rider).toHaveAttribute('data-from', 'before-0')
   await expect(rider).toHaveAttribute('data-to', 'after-0')
-  const early = await rider.evaluate((el) => getComputedStyle(el).transform)
-  await page.waitForTimeout(150)
-  const late = await rider.evaluate((el) => getComputedStyle(el).transform)
-  expect(early).not.toEqual(late)
-  // While it rides, the destination waits with an empty box and no marks.
-  await expect(f.locator('[data-row="after-0"] [data-check] path')).toHaveCount(0)
+  // Two reads 50 ms apart in the page: the ride is about 300 ms, its settle
+  // inside the travel (R2M-04), so a round trip per read could miss it.
+  const ride = await f.evaluate(
+    (el) =>
+      new Promise<{ early: string; late: string; destTicks: number }>((res) => {
+        const r = el.querySelector('[data-viz-reveal="rider"]')!
+        const early = getComputedStyle(r).transform
+        setTimeout(() => {
+          res({
+            early,
+            late: getComputedStyle(r).transform,
+            // While it rides, the destination waits with an empty box and no marks.
+            destTicks: el.querySelectorAll('[data-row="after-0"] [data-check] path').length,
+          })
+        }, 50)
+      }),
+  )
+  expect(ride.early).not.toEqual(ride.late)
+  expect(ride.destTicks).toBe(0)
   await page.waitForTimeout(800)
   await expect(rider).toHaveCount(0)
   await expect(f.locator('[data-row="after-0"] [data-check] path')).toHaveCount(1)

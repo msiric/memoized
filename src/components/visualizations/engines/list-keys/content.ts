@@ -63,7 +63,7 @@ export const SETUP_HINT = {
 
 /** The setup line in the key row's place for the wrapper scene. */
 export const WRAPPER_SETUP =
-  'One Counter inside a wrapper: no list, so React matches by position and element type.'
+  'No list here: React matches the Counter by position and element type.'
 
 /** Asked instead of a prediction when no row holds state. */
 export const NO_CHECK_PROMPT =
