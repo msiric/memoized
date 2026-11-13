@@ -36,10 +36,10 @@ export const FRAME = {
   footerGap: 16,
   /**
    * On a phone the scrubber ends the controls: its 44 px band already holds
-   * 20 px of air under the track, so "Steps as text" follows with no gap
-   * (final polish: a 60 px empty band read as dead space).
+   * 20 px of air under the track, so "Steps as text" follows with only the
+   * 8 px two targets keep apart (A5; final polish: the band read as dead space).
    */
-  footerGapNarrow: 0,
+  footerGapNarrow: TARGET_GAP_PX,
 } as const
 
 export const HEADER = { title: typeScale.title.line, presetRowGap: 8 } as const

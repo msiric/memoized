@@ -880,7 +880,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       </div>
 
       {/* 6. Footer: steps as text and provenance. */}
-      {/* On a phone the scrubber's own band is the gap (FRAME.footerGapNarrow). */}
+      {/* On a phone the scrubber's own band is most of the gap (FRAME.footerGapNarrow). */}
       <footer
         className="relative mt-[var(--vz-f-n)] vz-wide:mt-[var(--vz-f-w)]"
         style={{ ['--vz-f-n' as string]: rem(FRAME.footerGapNarrow), ['--vz-f-w' as string]: rem(FRAME.footerGap) }}
