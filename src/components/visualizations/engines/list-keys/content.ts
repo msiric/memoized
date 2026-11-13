@@ -61,9 +61,13 @@ export const WRAPPER_RULE: Record<WrapperAction, string> = {
     'Same type at the same slot, so React only updates className and never touches Counter’s state.',
 }
 
-export const PICK_HINT = {
-  list: 'Check a row, then pick an action. You predict before it runs.',
-  wrapper: 'Press Add 1 to change the count, then pick a change.',
+/**
+ * The Start step's caption in the step-log (the explorable opens at its
+ * prediction, with the key and the action already chosen).
+ */
+export const SETUP_HINT = {
+  list: 'Check a row, choose a key and an action, then predict where its check goes.',
+  wrapper: 'Press Add 1 to change the count, choose a change, then predict.',
 } as const
 
 /** The setup line in the key row's place for the wrapper scene. */
@@ -143,7 +147,7 @@ export function wrapperOutcomeSentence(
 
 export type Pick = string | null | undefined
 
-/** Reveal feedback (spec §5.4): wrong answers name the pick; skipping names the answer. */
+/** Reveal feedback (spec §5.4): skipping names the answer; the rows mark right and wrong. */
 export function feedbackLead(
   pick: Pick,
   answer: string,
@@ -152,13 +156,21 @@ export function feedbackLead(
   if (pick === undefined) return ''
   if (pick === null) return `Answer: ${labelOf(answer)}.`
   if (pick === answer) return 'Right.'
-  return `Not quite: you picked ${labelOf(pick)}.`
+  // The picked row carries the ×, so the lead does not repeat it (as the
+  // event loop's checkpoint feedback, H3 R4).
+  return 'Not quite.'
 }
 
 /** `key={i}`-style label for the status bar and narration. */
 export const keyPhrase = (k: KeyStrategy) => `key={${KEY_EXPR[k]}}`
 
-/** The ask phase's two text buttons (the layout measures them, A2/D16). */
-export const SKIP_LABEL = 'Skip, show me'
+/** The dock's one secondary action per phase (H3 R4): a muted Skip, then "Try another". */
+export const SKIP_LABEL = 'Skip'
+/** Skip's accessible name, as the event loop's. */
+export const SKIP_NAME = 'Skip, show me'
+/** With nothing checked there is no prediction to skip. */
 export const SHOW_LABEL = 'Show me'
-export const BACK_LABEL = 'Pick another action'
+export const AGAIN_LABEL = 'Try another'
+
+/** The two control rows' labels. */
+export const CONTROL_LABEL = { key: 'Key', action: 'Action', change: 'Change' } as const

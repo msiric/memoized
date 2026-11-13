@@ -2,183 +2,344 @@
 
 import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { liftShadow, radius, reveal } from '../../primitives/tokens-v3'
-import { liftAt } from '../../shell/flip'
+import { liftShadow } from '../../primitives/tokens-v3'
+import { checkedBoxCls, Tick } from './CheckBox'
+import { RIDE, WRAPPER_DRAW_MS, VERDICT_FADE_MS } from './reveal'
 
 /**
- * The list-keys reveal (D21): the actual checkbox rides its own match line.
+ * The list-keys reveal (D21), directed as one gesture (H3 R6).
  *
- * Each checked Before row whose instance React reused sends a copy of its
- * checkbox (the checked state glyph) from the Before checkbox, along the
- * row's match line, into the After row that instance now renders. It lifts
- * with the one lift shadow (D6) and sets down on the destination box, which
- * then ticks. The learner sees the state follow the instance, not the text:
- * with index keys it lands on another todo.
+ * - **Lift-off.** Each carried check starts exactly on its Before box, which
+ *   reads empty from the first frame (the state leaves the instance, it is
+ *   not copied). It lifts (scale and the one lift shadow, D6) as it moves.
+ * - **The path.** Out of the box along the first line's height to the card
+ *   edge that faces the lines, along its match line, and into the After box
+ *   at the same height: the checkbox sits on that edge, so the path never
+ *   crosses row text or an instance letter. The path is the drawn SVG line
+ *   itself (`getPointAtLength`), so the rider can never leave it, side by
+ *   side or stacked.
+ * - **One curve.** The rider and every line share the stage curve. The
+ *   ridden line draws behind the rider (its head is under the rider), so the
+ *   state pulls its own thread; the other lines draw on the same timing.
+ * - **Landing.** The tick rides at full strength; at the box the rider sets
+ *   down with a single 120 ms settle (scale and shadow to rest), identical to
+ *   the checked box under it, which takes over in the same frame.
+ * - **Two checks.** The second leaves only when it can no longer meet the
+ *   first: the gap is the smallest that keeps the riders `clearance` apart
+ *   along both paths (it waits for the first to clear a crossing).
+ * - **Arrivals.** A row's instance shows when its line reaches it; mounted
+ *   rows and unmounted instances when the first line arrives. The verdict
+ *   follows the last landing (`onLanded`).
  *
- * - The path is one smooth curve: a level cubic from the Before checkbox to
- *   the line's start, the match line itself (the same cubic the lines use),
- *   and a level cubic into the After checkbox. Sampled by arc length, so the
- *   `reveal.ride` curve sets the pace, not the geometry.
- * - The tracked row's checkbox leaves first; a second leaves
- *   `reveal.riderGapMs` later, so riders on crossing lines never meet.
- * - Web Animations only, started before the first paint of the reveal. A
- *   resize finishes every ride at once (they land), and leaving the reveal
- *   unmounts them, so nothing ever runs after an instant command (D7).
+ * Web Animations only, started before the first paint of the reveal. A
+ * resize lands everything at once; leaving the reveal unmounts the director,
+ * which cancels everything, so nothing runs after an instant command (D7).
  */
 
 export type Ride = {
   /** Before row id (`before-0`) and After row id (`after-1`). */
   from: string
   to: string
-  /** The match line's ends in layout units (px at a 16 px root), as `Lines` draws it. */
-  y1: number
-  y2: number
 }
 
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
-const CHECK_PATH = 'M3.5 8.5 6.5 11.5 12.5 5'
+/** Every animation the reveal starts carries this id (the harness finds them by it). */
 const RIDE_ID = 'viz-ride'
-const SAMPLES = 48
+const SAMPLES = 64
 
 type P = { x: number; y: number }
 
-const cubic = (a: P, b: P, c: P, d: P) => (t: number): P => {
-  const u = 1 - t
+/** A CSS cubic-bezier as a function of progress, and its inverse (bisection). */
+function bezier([x1, y1, x2, y2]: readonly number[]) {
+  const coord = (a: number, b: number) => (t: number) => {
+    const u = 1 - t
+    return 3 * u * u * t * a + 3 * u * t * t * b + t * t * t
+  }
+  const X = coord(x1, x2)
+  const Y = coord(y1, y2)
+  const solve = (f: (t: number) => number, v: number) => {
+    let lo = 0
+    let hi = 1
+    for (let i = 0; i < 30; i++) {
+      const mid = (lo + hi) / 2
+      if (f(mid) < v) lo = mid
+      else hi = mid
+    }
+    return (lo + hi) / 2
+  }
   return {
-    x: u * u * u * a.x + 3 * u * u * t * b.x + 3 * u * t * t * c.x + t * t * t * d.x,
-    y: u * u * u * a.y + 3 * u * u * t * b.y + 3 * u * t * t * c.y + t * t * t * d.y,
+    /** Eased progress at time fraction `x`. */
+    at: (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : Y(solve(X, x))),
+    /** Time fraction at which eased progress reaches `y`. */
+    when: (y: number) => (y <= 0 ? 0 : y >= 1 ? 1 : X(solve(Y, y))),
   }
 }
 
-/** A cubic with level ends from `a` to `b` (the match-line shape). */
-const level = (a: P, b: P) => {
-  const mx = (a.x + b.x) / 2
-  return cubic(a, { x: mx, y: a.y }, { x: mx, y: b.y }, b)
-}
+const EASE_FN = bezier(RIDE.ease)
+const EASE_CSS = `cubic-bezier(${RIDE.ease.join(', ')})`
+const smooth = (t: number) => t * t * (3 - 2 * t)
+/** A line's end dot appears the moment its line arrives. */
+const SNAP: KeyframeAnimationOptions = { duration: RIDE.settleMs, easing: 'steps(1, start)', fill: 'both' }
 
-/** Points along the whole ride, evenly spaced by arc length. */
-export function ridePath(start: P, lineStart: P, lineEnd: P, end: P, n = SAMPLES): P[] {
-  const parts = [level(start, lineStart), level(lineStart, lineEnd), level(lineEnd, end)]
-  const dense: P[] = []
-  for (const f of parts) for (let i = 0; i <= 64; i++) dense.push(f(i / 64))
+/** A polyline with its cumulative arc length. */
+function measure(pts: P[]) {
   const acc = [0]
-  for (let i = 1; i < dense.length; i++)
-    acc.push(acc[i - 1] + Math.hypot(dense[i].x - dense[i - 1].x, dense[i].y - dense[i - 1].y))
+  for (let i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y))
   const total = acc[acc.length - 1] || 1
-  const out: P[] = []
-  let j = 0
-  for (let i = 0; i <= n; i++) {
-    const s = (total * i) / n
+  const at = (s: number): P => {
+    let j = 0
     while (j < acc.length - 2 && acc[j + 1] < s) j++
     const span = acc[j + 1] - acc[j] || 1
     const k = Math.min(1, Math.max(0, (s - acc[j]) / span))
-    out.push({ x: dense[j].x + (dense[j + 1].x - dense[j].x) * k, y: dense[j].y + (dense[j + 1].y - dense[j].y) * k })
+    return { x: pts[j].x + (pts[j + 1].x - pts[j].x) * k, y: pts[j].y + (pts[j + 1].y - pts[j].y) * k }
   }
-  return out
+  return { total, at, acc }
 }
 
-function centerIn(el: Element | null, root: DOMRect): P | null {
-  if (!el) return null
-  const r = el.getBoundingClientRect()
-  return { x: r.left - root.left + r.width / 2, y: r.top - root.top + r.height / 2 }
+type Plan = {
+  ride: Ride
+  /** A check rides this line (otherwise it only draws). */
+  rider: boolean
+  path: ReturnType<typeof measure>
+  /** Arc length of the first leg (box to line) and of the line. */
+  lead: number
+  line: number
+  draw: SVGPathElement | null
+  end: SVGElement | null
 }
 
-/** Finishes every ride under `root` (they land at once). */
-export function finishRides(root: HTMLElement | null) {
-  if (!root || typeof root.getAnimations !== 'function') return
-  for (const a of root.getAnimations({ subtree: true })) if (a.id === RIDE_ID) a.finish()
+/** Rider position at `t` ms after its own start (at rest before and after). */
+function positionAt(plan: Plan, travel: number, t: number): P {
+  if (t <= 0) return plan.path.at(0)
+  if (t >= travel) return plan.path.at(plan.path.total)
+  return plan.path.at(EASE_FN.at(t / travel) * plan.path.total)
 }
 
-export function CheckRiders({
+/** The smallest departure gap that keeps two riders `clear` px apart everywhere. */
+export function riderGap(a: Plan, b: Plan, travel: number, clear: number): number {
+  const end = travel + RIDE.settleMs
+  for (let gap = RIDE.minGapMs; gap <= end; gap += 10) {
+    let ok = true
+    for (let t = 0; t <= end + gap && ok; t += 8) {
+      const p = positionAt(a, travel, t)
+      const q = positionAt(b, travel, t - gap)
+      if (Math.hypot(p.x - q.x, p.y - q.y) < clear) ok = false
+    }
+    if (ok) return gap
+  }
+  return end
+}
+
+export function RevealDirector({
+  scene,
   rides,
   rootRef,
-  linesRef,
+  onArrive,
   onLand,
+  onLanded,
 }: {
-  rides: Ride[]
+  scene: 'list' | 'wrapper'
+  rides: readonly Ride[]
   rootRef: RefObject<HTMLElement>
-  linesRef: RefObject<HTMLElement>
-  onLand: (to: string) => void
+  onArrive: (row: string) => void
+  onLand: (row: string) => void
+  onLanded: (instant: boolean) => void
 }) {
   const refs = useRef<(HTMLSpanElement | null)[]>([])
-  const landRef = useRef(onLand)
-  landRef.current = onLand
+  const cb = useRef({ onArrive, onLand, onLanded })
+  cb.current = { onArrive, onLand, onLanded }
 
-  // Before the first paint of the reveal: measure, then start every ride.
   useIsoLayoutEffect(() => {
     const root = rootRef.current
-    const lines = linesRef.current
-    if (!root || !lines || typeof Element.prototype.animate !== 'function') {
-      rides.forEach((r) => landRef.current(r.to))
+    const { onArrive: arrive, onLand: land, onLanded: landed } = cb.current
+    const rows = () => [...(root?.querySelectorAll<HTMLElement>('[data-row]') ?? [])].map((r) => r.dataset.row!)
+    if (!root || typeof Element.prototype.animate !== 'function') {
+      rows().forEach(arrive)
+      rides.forEach((r) => land(r.to))
+      landed(true)
       return
     }
-    const box = root.getBoundingClientRect()
-    const gutter = lines.getBoundingClientRect()
-    const k = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
-    const left = gutter.left - box.left
-    const top = gutter.top - box.top
+
+    // Local layout px inside the root: client rects divided by any zoom.
+    const rect = root.getBoundingClientRect()
+    const z = rect.width / (root.offsetWidth || rect.width) || 1
+    const local = (x: number, y: number): P => ({ x: (x - rect.left) / z, y: (y - rect.top) / z })
+    const centerOf = (el: Element | null): P | null => {
+      if (!el) return null
+      const r = el.getBoundingClientRect()
+      return local(r.left + r.width / 2, r.top + r.height / 2)
+    }
+    const linePoints = (path: SVGPathElement): P[] => {
+      const ctm = path.getScreenCTM()
+      const L = path.getTotalLength()
+      if (!ctm || !L) return []
+      return Array.from({ length: 41 }, (_, i) => {
+        const p = path.getPointAtLength((L * i) / 40)
+        const q = new DOMPoint(p.x, p.y).matrixTransform(ctm)
+        return local(q.x, q.y)
+      })
+    }
+
     const anims: Animation[] = []
-    rides.forEach((r, i) => {
-      const node = refs.current[i]
-      const start = centerIn(root.querySelector(`[data-row="${r.from}"] input[type="checkbox"]`), box)
-      const end = centerIn(root.querySelector(`[data-row="${r.to}"] [data-check]`), box)
-      if (!node || !start || !end) return landRef.current(r.to)
-      const pts = ridePath(start, { x: left, y: top + r.y1 * k }, { x: left + gutter.width, y: top + r.y2 * k }, end)
-      const timing: KeyframeAnimationOptions = {
-        duration: reveal.ride.duration * 1000,
-        delay: i * reveal.riderGapMs,
-        easing: `cubic-bezier(${reveal.ride.ease.join(', ')})`,
-        fill: 'both',
+    const timers: number[] = []
+    let done = false
+    const track = (a: Animation) => {
+      a.id = RIDE_ID
+      anims.push(a)
+      return a
+    }
+
+    // One plan per reused line: ridden lines carry their rider's path.
+    const plans: Plan[] = []
+    for (const g of root.querySelectorAll<SVGGElement>('[data-link="reused"]')) {
+      const from = g.getAttribute('data-from')!
+      const to = g.getAttribute('data-to')!
+      const draw = g.querySelector<SVGPathElement>('[data-lk-draw]')
+      const line = draw ? linePoints(draw) : []
+      if (line.length < 2) continue
+      const ride = rides.find((r) => r.from === from && r.to === to)
+      const start = ride ? centerOf(root.querySelector(`[data-row="${from}"] [data-lk-check]`)) : null
+      const end = ride ? centerOf(root.querySelector(`[data-row="${to}"] [data-lk-check]`)) : null
+      const pts = start && end ? [start, ...line, end] : line
+      const path = measure(pts)
+      const lineLen = measure(line).total
+      const rider = Boolean(ride && start && end)
+      plans.push({
+        ride: { from, to },
+        rider,
+        path,
+        lead: rider ? Math.hypot(line[0].x - start!.x, line[0].y - start!.y) : 0,
+        line: lineLen,
+        draw,
+        end: g.querySelector<SVGElement>('[data-lk-end]'),
+      })
+    }
+    const ridden = rides
+      .map((r) => plans.find((p) => p.rider && p.ride.from === r.from && p.ride.to === r.to))
+      .filter((p): p is Plan => Boolean(p))
+
+    // Timing: travel shortened (never below the floor) until the whole
+    // moment, verdict fade included, fits the reveal budget (D21).
+    const k = parseFloat(getComputedStyle(document.documentElement).fontSize) / 16 || 1
+    const clear = 16 * k * RIDE.clearance
+    let travel = scene === 'wrapper' ? WRAPPER_DRAW_MS : RIDE.travelMs
+    let gaps = ridden.map(() => 0)
+    for (;;) {
+      gaps = ridden.map((p, i) => (i === 0 ? 0 : riderGap(ridden[0], p, travel, clear)))
+      const total = Math.max(0, ...gaps) + travel + (ridden.length ? RIDE.settleMs : 0) + VERDICT_FADE_MS
+      if (total <= RIDE.maxMs || travel <= RIDE.minTravelMs) break
+      travel = Math.max(RIDE.minTravelMs, travel - 20)
+    }
+    const span = travel + RIDE.settleMs
+    const travelShare = travel / span
+
+    const arrivals: { at: number; row: string }[] = []
+
+    // Riders: arc-length samples placed in time by the shared curve.
+    ridden.forEach((plan, i) => {
+      const node = refs.current[rides.findIndex((r) => r.from === plan.ride.from && r.to === plan.ride.to)]
+      const delay = gaps[i]
+      const frames: Keyframe[] = []
+      const dash: Keyframe[] = []
+      for (let j = 0; j <= SAMPLES; j++) {
+        const u = j / SAMPLES
+        const when = EASE_FN.when(u)
+        const p = plan.path.at(u * plan.path.total)
+        const lift = smooth(Math.min(1, when / 0.3))
+        frames.push({
+          offset: when * travelShare,
+          transform: `translate(${p.x.toFixed(2)}px, ${p.y.toFixed(2)}px) translate(-50%, -50%) scale(${(1 + RIDE.liftScale * lift).toFixed(3)})`,
+          boxShadow: liftShadow(lift),
+          opacity: 1,
+        })
+        const drawn = Math.min(1, Math.max(0, (u * plan.path.total - plan.lead) / (plan.line || 1)))
+        dash.push({ offset: when * travelShare, strokeDashoffset: String(drawn >= 1 ? 0 : 1.001 - drawn) })
       }
-      const ride = node.animate(
-        pts.map((p, j) => {
-          const t = j / (pts.length - 1)
-          return {
-            offset: t,
-            opacity: 1,
-            transform: `translate(${p.x.toFixed(2)}px, ${p.y.toFixed(2)}px) translate(-50%, -50%)`,
-            boxShadow: liftShadow(liftAt(t)),
-          }
-        }),
-        timing,
-      )
-      ride.id = RIDE_ID
-      // The tick it carries sets down with it: the destination draws its own.
-      const tick = node.firstElementChild as SVGElement | null
-      const fade = tick?.animate(
-        [
-          { offset: 0, opacity: 1 },
-          { offset: 0.7, opacity: 1 },
-          { offset: 1, opacity: 0 },
-        ],
-        timing,
-      )
-      if (fade) fade.id = RIDE_ID
-      anims.push(ride)
-      ride.finished.then(
-        () => landRef.current(r.to),
-        () => {},
-      )
+      const endP = plan.path.at(plan.path.total)
+      frames[frames.length - 1].easing = EASE_CSS
+      frames.push({
+        offset: 1,
+        transform: `translate(${endP.x.toFixed(2)}px, ${endP.y.toFixed(2)}px) translate(-50%, -50%) scale(1)`,
+        boxShadow: 'none',
+        opacity: 1,
+      })
+      dash.push({ offset: 1, strokeDashoffset: '0' })
+      const timing: KeyframeAnimationOptions = { duration: span, delay, fill: 'both', easing: 'linear' }
+      if (node) {
+        const a = track(node.animate(frames, timing))
+        a.finished.then(
+          () => !done && land(plan.ride.to),
+          () => {},
+        )
+      }
+      if (plan.draw) track(plan.draw.animate(dash, timing))
+      const arrive = delay + EASE_FN.when(Math.min(1, (plan.lead + plan.line) / plan.path.total)) * travel
+      arrivals.push({ at: arrive, row: plan.ride.to })
+      if (plan.end) track(plan.end.animate([{ opacity: 0 }, { opacity: 1 }], { ...SNAP, delay: arrive }))
     })
-    return () => anims.forEach((a) => a.cancel())
+
+    // Lines nothing rides: drawn on the first rider's timing.
+    for (const plan of plans) {
+      if (ridden.includes(plan)) continue
+      const dash: Keyframe[] = []
+      for (let j = 0; j <= SAMPLES; j++) {
+        const x = j / SAMPLES
+        const drawn = EASE_FN.at(x)
+        dash.push({ offset: x, strokeDashoffset: String(drawn >= 1 ? 0 : 1.001 - drawn) })
+      }
+      if (plan.draw) track(plan.draw.animate(dash, { duration: travel, fill: 'both' }))
+      if (plan.end) track(plan.end.animate([{ opacity: 0 }, { opacity: 1 }], { ...SNAP, delay: travel }))
+      arrivals.push({ at: travel, row: plan.ride.to })
+    }
+
+    // Stubs (mounted, unmounted) fade in with the lines.
+    for (const stub of root.querySelectorAll<SVGElement>('[data-lk-stub]'))
+      track(stub.animate([{ opacity: 0 }, { opacity: 1 }], { duration: travel, easing: EASE_CSS, fill: 'both' }))
+
+    // Rows no line reaches (mounted After rows, unmounted Before rows) show
+    // with the first arrival.
+    const first = arrivals.length ? Math.min(...arrivals.map((a) => a.at)) : travel
+    const reached = new Set(arrivals.map((a) => a.row))
+    for (const row of rows()) if (!reached.has(row)) arrivals.push({ at: first, row })
+
+    const end = Math.max(travel, ...ridden.map((_, i) => gaps[i] + span))
+    const finishAll = (instant: boolean) => {
+      if (done) return
+      done = true
+      timers.forEach((t) => window.clearTimeout(t))
+      for (const a of anims) a.finish()
+      rows().forEach(arrive)
+      rides.forEach((r) => land(r.to))
+      landed(instant)
+    }
+    const schedule = () => {
+      for (const a of arrivals) timers.push(window.setTimeout(() => !done && arrive(a.row), a.at))
+      timers.push(window.setTimeout(() => finishAll(false), end))
+    }
+    // Timers start now: the animations start on the next frame, so an
+    // arrival may lead its line by at most a frame (never visible), and the
+    // landing never depends on an animation becoming ready.
+    schedule()
+
+    // A resize or a font swap mid-reveal lands everything at once (D7, R1M-17).
+    let w = root.offsetWidth
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => {
+      if (root.offsetWidth === w) return
+      w = root.offsetWidth
+      finishAll(true)
+    })
+    ro?.observe(root)
+
+    return () => {
+      done = true
+      ro?.disconnect()
+      timers.forEach((t) => window.clearTimeout(t))
+      anims.forEach((a) => a.cancel())
+    }
     // Once per reveal: the parent keys this component by the reveal.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  // A resize or a font swap mid-ride lands every rider at once.
-  useEffect(() => {
-    const root = rootRef.current
-    if (!root || typeof ResizeObserver === 'undefined') return
-    let w = root.offsetWidth
-    const ro = new ResizeObserver(() => {
-      if (root.offsetWidth === w) return
-      w = root.offsetWidth
-      finishRides(root)
-    })
-    ro.observe(root)
-    return () => ro.disconnect()
-  }, [rootRef])
 
   return (
     <>
@@ -194,20 +355,12 @@ export function CheckRiders({
           data-to={r.to}
           className={clsx(
             // Hidden until its ride places it (the ride starts before paint).
-            'pointer-events-none absolute left-0 top-0 z-20 flex h-4 w-4 items-center justify-center border border-zinc-100 bg-zinc-100 opacity-0',
-            radius.chip.cls,
+            // It looks exactly like the checked box it leaves and lands on.
+            'pointer-events-none absolute left-0 top-0 z-20 flex h-4 w-4 items-center justify-center rounded border opacity-0',
+            checkedBoxCls,
           )}
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" className="text-zinc-900">
-            <path
-              d={CHECK_PATH}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <Tick />
         </span>
       ))}
     </>

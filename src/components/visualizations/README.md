@@ -116,9 +116,17 @@ reduced motion, and it never moves the page. Elements that play it carry
   recap of this pass's predictions (`recapText`, or a neutral invitation).
   The primary becomes Replay in the same slot (restart, answers kept as
   "last time"); a press inside the reveal is ignored.
-- **List keys.** Each carried checkbox rides its own match line into the
-  After row its instance now renders (`CheckRider.tsx`, Web Animations,
-  lifted), and the row ticks as it lands.
+- **List keys.** Each carried checkbox lifts out of its Before box (which
+  empties), rides its own match line as the line draws behind it, and
+  settles into the After box its instance now renders (`CheckRider.tsx`,
+  Web Animations, one curve for rider and lines, a single 120 ms settle).
+  The checkbox sits on the card edge that faces the lines, so the path never
+  crosses row text or an instance letter; a second check leaves only once it
+  can no longer meet the first. Instance letters show as their lines arrive;
+  the verdict, the ✓ and × in the choice slots, badges and tally fade in
+  (160 ms) after the last landing (`reveal.ts` holds the timeline). The key
+  and the action are always-visible controls, and under very large text the
+  columns stack, Before above After, with the lines in a rail (`stack-css.ts`).
 - **Closures.** No script: function objects are focusable and named, and
   hover or focus dims everything but the function's `[[Environment]]` path
   and, in the factory preset, its aliases (`engines/env-records/paths.ts`

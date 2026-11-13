@@ -5,7 +5,7 @@ import { CODE } from './code'
 import {
   LIST_RULE,
   NONE_ID,
-  PICK_HINT,
+  SETUP_HINT,
   TITLE,
   WRAPPER_RULE,
   keyPhrase,
@@ -200,7 +200,7 @@ export function listLog(
       {
         state: { ids: ids.slice(0, BEFORE.length), shown: [] },
         event: '',
-        why: PICK_HINT.list,
+        why: SETUP_HINT.list,
         narration: beforeNarration(p.key, p.checks),
         focus: [],
         claim: 'modelled',
@@ -263,7 +263,7 @@ export function wrapperLog(
       {
         state: { ids: ['before-wrapper', 'before-counter'], shown: [] },
         event: '',
-        why: PICK_HINT.wrapper,
+        why: SETUP_HINT.wrapper,
         narration: `Before: a <div> wrapping Counter A with count ${p.count}.`,
         focus: [],
         claim: 'modelled',
