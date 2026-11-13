@@ -23,7 +23,9 @@ const stacked =
   `${F} [data-lk-cols]{grid-template-columns:minmax(0,1fr) ${rem(COLUMNS.rail)};grid-template-rows:${rem(BEFORE_BLOCK)} ${rem(COLUMNS_HEIGHT)};row-gap:${rem(COLUMNS.stackGap)};height:${rem(STACKED_HEIGHT)}}` +
   `${F} [data-lk-area=after]{grid-area:2/1}` +
   `${F} [data-lk-area=lines]{grid-area:1/2/3/3}` +
-  `${F} [data-lk-scene=wrapper]{grid-template-columns:minmax(0,1fr)}` +
+  // The wrapper's Before block (box and Add 1) is taller than two list rows:
+  // its rows size to content (both blocks fit the stacked height).
+  `${F} [data-lk-scene=wrapper]{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;align-content:start;height:auto}` +
   `${F} [data-lk-scene=wrapper] [data-lk-area=lines]{display:none}` +
   `${F} [data-lk-flip]{flex-direction:row-reverse}` +
   `${F} [data-lk-spine=after]{border-left-width:0;border-right-width:${edge}}` +

@@ -9,7 +9,7 @@ import { CHOICE } from '../../shell/footprint'
 import { rem } from '../../shell/vars'
 import { toRem } from '../../substrates/units'
 import { AGAIN_LABEL } from './content'
-import { CHOICE_ROW_FIT, LK_CHOICE_WIDTH, dockGhostStrings, type Scene } from './layout'
+import { CHOICE_ONE_COLUMN_BELOW, CHOICE_ROW_FIT, LK_CHOICE_WIDTH, dockGhostStrings, type Scene } from './layout'
 
 /**
  * The list-keys dock: one checkpoint block for both phases (H3 R4, Q4: the
@@ -25,7 +25,8 @@ import { CHOICE_ROW_FIT, LK_CHOICE_WIDTH, dockGhostStrings, type Scene } from '.
  * - one row (the wide variant, `CHOICE_ROW_FIT`): the choices in equal
  *   columns up to `LK_CHOICE_WIDTH`, then the trailing action;
  * - otherwise two columns (an odd last choice takes the full row, so there
- *   is no hole, critique F-LK-06), and the trailing action under them, its
+ *   is no hole, critique F-LK-06), or one column where half a row cannot
+ *   hold a label's longest word, and the trailing action under them, its
  *   label in line with the choices' numerals (both 12 px in), its target
  *   inside the dock.
  */
@@ -46,6 +47,7 @@ export const dockCss =
   `${F} [data-lk-row]{display:flex;flex-direction:column;align-items:flex-start;gap:${rem(CHOICE.gap)}}` +
   `${F} [data-lk-choices]{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr));gap:${rem(CHOICE.gap)}}` +
   `${F} [data-lk-choices]>:last-child:nth-child(odd){grid-column:1/-1}` +
+  `@container vz (max-width:${rem(CHOICE_ONE_COLUMN_BELOW - 0.32)}){${F} [data-lk-choices]{grid-template-columns:minmax(0,1fr)}}` +
   `@container vz (min-width:${rem(CHOICE_ROW_FIT)}){` +
   `${F} [data-lk-row]{flex-direction:row;align-items:stretch}${F} [data-lk-row]>[data-lk-choices]{flex:0 1 auto;min-width:0}` +
   `${F} [data-lk-choices]{width:auto;grid-template-columns:repeat(var(--lk-n),minmax(0,${rem(LK_CHOICE_WIDTH)}))}` +

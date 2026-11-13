@@ -230,6 +230,21 @@ export const LK_CHOICE_WIDTH = Math.min(
     Math.max(...choiceLabels.map((c) => (c.mono ? monoWidth(c.label, 13) : sansWidth(c.label, typeScale.control.size)))),
   ) + LK_CHOICE_CHROME,
 )
+/**
+ * Below this frame width (px at the default root) a half-width column cannot
+ * hold the longest word of any label, so the choices take one column
+ * instead of breaking a word (Q5).
+ */
+export const CHOICE_ONE_COLUMN_BELOW = Math.ceil(
+  2 *
+    (Math.max(
+      ...choiceLabels.flatMap((c) =>
+        c.label.split(' ').map((w) => (c.mono ? monoWidth(w, 13) : sansWidth(w, typeScale.control.size))),
+      ),
+    ) +
+      LK_CHOICE_CHROME) +
+    CHOICE.gap,
+)
 /** "Try another", the widest trailing action (outline pill, 16 px sides), plus slack. */
 export const TRAILING_WIDTH = Math.ceil(sansWidth(AGAIN_LABEL, typeScale.control.size)) + 2 * 16 + 4
 /**
@@ -264,7 +279,9 @@ export function choiceRowHeight(scene: Scene, w: number): number {
   const one = w >= CHOICE_ROW_FIT
   const col = one
     ? Math.min(LK_CHOICE_WIDTH, (w - TRAILING_WIDTH - MAX_CHOICES * CHOICE.gap) / MAX_CHOICES)
-    : (w - CHOICE.gap) / 2
+    : w < CHOICE_ONE_COLUMN_BELOW
+      ? w
+      : (w - CHOICE.gap) / 2
   const room = col - LK_CHOICE_CHROME
   const rowOf = (labels: string[]) =>
     Math.max(TARGET_PX, ...labels.map((l) => CHOICE_PAD + lines(l, room, GLYPH.caption) * CHOICE_LINE))
@@ -273,11 +290,9 @@ export function choiceRowHeight(scene: Scene, w: number): number {
     const labels = set.map((c) => c.label)
     if (one) worst = Math.max(worst, rowOf(labels))
     else {
+      const per = w < CHOICE_ONE_COLUMN_BELOW ? 1 : 2
       let h = 0
-      for (let i = 0; i < labels.length; i += 2) {
-        const pair = labels.length - i === 1 ? [labels[i]] : labels.slice(i, i + 2)
-        h += (i ? CHOICE.gap : 0) + rowOf(pair)
-      }
+      for (let i = 0; i < labels.length; i += per) h += (i ? CHOICE.gap : 0) + rowOf(labels.slice(i, i + per))
       worst = Math.max(worst, h + CHOICE.gap + ACTION_ROW)
     }
   }

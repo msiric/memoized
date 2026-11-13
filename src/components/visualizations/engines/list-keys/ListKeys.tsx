@@ -342,7 +342,10 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
       >
         <div
           className="grid shrink-0 grid-cols-[auto_minmax(0,1fr)] content-start gap-x-3 print:hidden"
-          style={{ height: toRem(CONTROLS), rowGap: toRem(TARGET_GAP_PX) }}
+          // The wrapper's setup line is never clamped: under very large text its
+          // row grows into the stage's spare height (the wrapper's columns are
+          // shorter than the list's the stage reserves).
+          style={s.scene === 'list' ? { height: toRem(CONTROLS), rowGap: toRem(TARGET_GAP_PX) } : { minHeight: toRem(CONTROLS), rowGap: toRem(TARGET_GAP_PX) }}
           data-viz-region="keyrow"
         >
           {s.scene === 'list' ? (
@@ -362,8 +365,8 @@ export function ListKeys({ preset, interactive = true }: ListKeysProps) {
               </div>
             </>
           ) : (
-            <p className={clsx('col-span-2 m-0 flex h-11 items-center', typeScale.item.cls, ink.secondary)}>
-              <span className="line-clamp-2">{WRAPPER_SETUP}</span>
+            <p className={clsx('col-span-2 m-0 flex min-h-11 items-center text-pretty', typeScale.item.cls, ink.secondary)}>
+              <span>{WRAPPER_SETUP}</span>
             </p>
           )}
           <span className={controlLabel} aria-hidden>
