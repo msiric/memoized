@@ -160,6 +160,8 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                     column, so a wrapped row never reads as a line of its own (A4). */}
                 <span aria-hidden className="absolute bottom-1.5 left-3.5 top-6 w-px bg-zinc-700" />
                 <span
+                  // A new mark for the finale, so it replays from unlit as its own part.
+                  key={mark ? 'relight' : 'mark'}
                   aria-hidden
                   className={clsx(
                     'w-3 shrink-0 select-none font-mono text-2xs leading-6',
@@ -168,6 +170,8 @@ export function CodePane({ lines, tokens, line, anchor, rows, height, cols, anim
                     active && (n === from || isTraced) ? 'opacity-100' : 'opacity-0',
                   )}
                   style={mark}
+                  // The finale's part (R7): asserted with the reveal (reveal.spec.ts).
+                  data-viz-reveal={mark ? 'line' : undefined}
                 >
                   ▸
                 </span>
