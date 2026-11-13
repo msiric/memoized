@@ -1,16 +1,20 @@
 import { defineConfig, devices } from '@playwright/test'
 
 /**
- * VIZ-H H0-B stress matrix: rendering-correctness detectors over every width,
- * zoom, preset, step and adversarial fixture. Runs against a dev server that
- * is already up (E2E_BASE_URL, default http://localhost:3100) started with
- * VIZ_GALLERY=1 or in dev mode.
+ * VIZ-H stress gate: rendering-correctness detectors over widths, zooms,
+ * text sizes, both motion modes, every preset and step (checkpoints answered
+ * right, wrong and skipped), hover, print, hydration and the adversarial
+ * fixtures. Runs against a dev server that is already up (E2E_BASE_URL,
+ * default http://localhost:3100) started with VIZ_GALLERY=1 or in dev mode.
  *
- *   E2E_BASE_URL=http://localhost:3100 STRESS_OUT=<dir> \
+ *   E2E_BASE_URL=http://localhost:3100 \
  *     npx playwright test -c e2e/stress/playwright.stress.config.ts
  *
- * STRESS_CONFIGS=w320,w1280 limits the matrix. Specs never fail on findings
- * unless STRESS_STRICT=1 (then any finding fails its test): H0 records, H4 gates.
+ * Strict by default: any finding fails its test (STRESS_STRICT=0 only
+ * records). STRESS_TIER=pr (default) is the fast PR gate, STRESS_TIER=full
+ * the nightly matrix (harness.ts lists both); STRESS_CONFIGS=w320,w1280
+ * picks configs by name. Findings JSON and failure screenshots go to
+ * STRESS_OUT (default test-results/stress).
  */
 export default defineConfig({
   testDir: '.',

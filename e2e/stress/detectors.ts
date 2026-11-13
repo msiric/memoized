@@ -12,8 +12,13 @@ import type { Page } from '@playwright/test'
  *                    windowed pane are intentional and ignored)
  *  - text-spill      text drawn outside its own block box (overflow: visible)
  *  - truncation      text-overflow: ellipsis actually truncating (counted separately)
+ *  - text-overlap    two visible runs of HTML text overlap (after clipping), e.g. a
+ *                    footer line drawn over the printed text alternative
  *  - region-overflow a visible element or text outside its [data-viz-region] box,
- *                    or outside the frame
+ *                    or outside the frame. An element marked `data-viz-overhang="top"`
+ *                    (or right, bottom, left) may pass its region on that side only:
+ *                    the component declares the overhang (the stacked Skip target),
+ *                    the harness does not guess it from a selector.
  *  - svg-text-outside   SVG text outside its <svg> viewport
  *  - svg-text-box       SVG text outside the box (rect) it labels
  *  - svg-text-overlap   two SVG texts overlap
@@ -25,7 +30,9 @@ import type { Page } from '@playwright/test'
  *  - edge-untestable    edges without source/target attributes (testability gap)
  *  - target-size        an interactive target under 44 x 44 CSS px (24 for a focus stop
  *                       that triggers nothing, WCAG 2.5.8)
- *  - contrast           text below 4.5:1 (3:1 for large text) against its composited background
+ *  - contrast           text below 4.5:1 (3:1 for large text) against its composited background.
+ *                    The one documented exemption: text inside an `aria-disabled` or
+ *                    disabled control (WCAG 1.4.3 exempts inactive components).
  *  - page-overflow      the document scrolls horizontally
  *
  * Layout stability (frame box per step / preset, page scroll on interaction)
@@ -85,6 +92,36 @@ export async function settle(page: Page, ms = 60) {
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
   })
   if (ms) await page.waitForTimeout(ms)
+}
+
+/**
+ * Full motion: waits until the frame under `scope` stops changing (every
+ * element's box and effective opacity equal over two samples 80 ms apart),
+ * after Web Animations finish. framer-motion drives some values from
+ * requestAnimationFrame, which `getAnimations()` does not list.
+ */
+export async function settleStable(page: Page, scope: string, timeout = 4000) {
+  await settle(page, 0)
+  const sig = () =>
+    page.evaluate((sel) => {
+      const root = document.querySelector(sel)
+      if (!root) return ''
+      return [...root.querySelectorAll('*')]
+        .map((e) => {
+          const r = e.getBoundingClientRect()
+          return `${Math.round(r.x * 2)},${Math.round(r.y * 2)},${Math.round(r.width * 2)},${Math.round(r.height * 2)},${getComputedStyle(e).opacity}`
+        })
+        .join(';')
+    }, scope)
+  const end = Date.now() + timeout
+  let last = await sig()
+  while (Date.now() < end) {
+    await page.waitForTimeout(80)
+    const now = await sig()
+    if (now === last) return true
+    last = now
+  }
+  return false
 }
 
 // ---------------------------------------------------------------------------
@@ -186,10 +223,19 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     if (!t.data.trim()) continue
     const el = t.parentElement
     if (!el || el.closest('svg') || el.closest('script,style,noscript,option')) continue
+    // A closed <details> keeps its body laid out but unpainted (content-visibility).
+    const det = el.closest('details')
+    if (det && !det.open && !el.closest('summary')) continue
     if (!visible(el)) continue
-    const range = document.createRange()
-    range.selectNodeContents(t)
-    const rects = [...range.getClientRects()].filter((r) => r.width > 0 && r.height > 0).map(R)
+    // Ink only: each run of non-space characters. A space that hangs past the
+    // line end under white-space: pre-wrap draws nothing (it is not a spill).
+    const rects: R[] = []
+    for (const m of t.data.matchAll(/\S+/g)) {
+      const range = document.createRange()
+      range.setStart(t, m.index!)
+      range.setEnd(t, m.index! + m[0].length)
+      for (const r of range.getClientRects()) if (r.width > 0 && r.height > 0) rects.push(R(r))
+    }
     if (rects.length) texts.push({ node: t, el, rects })
   }
 
@@ -326,6 +372,62 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     }
   }
 
+  // ---- text over text: two visible runs of ink that overlap -------------------
+  // Each run is cut to its clipping ancestors (a code window's hidden rows, a
+  // truncated label's tail), so only ink a reader sees is compared. An element
+  // declared as an overlay (`data-viz-layer="overlay"`: the scrubber's tooltip,
+  // opaque, over the bar on purpose) is not compared.
+  const clipOf = (el: Element): R | null => {
+    let box: R | null = null
+    for (let e: Element | null = el; e && e !== document.body; e = e.parentElement) {
+      const cs = styleOf(e)
+      if (cs.overflowX === 'visible' && cs.overflowY === 'visible') continue
+      const b = paddingBox(e)
+      box = box ? { l: Math.max(box.l, b.l), t: Math.max(box.t, b.t), r: Math.min(box.r, b.r), b: Math.min(box.b, b.b) } : b
+    }
+    return box
+  }
+  const ink = texts
+    .filter(({ el }) => !el.closest('[data-viz-layer="overlay"]'))
+    .map(({ node, el, rects }) => {
+      const c = clipOf(el)
+      const cut = rects
+        .map((r) => (c ? { l: Math.max(r.l, c.l), t: Math.max(r.t, c.t), r: Math.min(r.r, c.r), b: Math.min(r.b, c.b) } : r))
+        .filter((r) => r.r - r.l > 0.5 && r.b - r.t > 0.5)
+      return { node, el, rects: cut }
+    })
+  for (let i = 0; i < ink.length; i++)
+    for (let j = i + 1; j < ink.length; j++) {
+      const a = ink[i]
+      const b = ink[j]
+      if (a.el === b.el || a.el.contains(b.el) || b.el.contains(a.el)) continue
+      let hit: { w: number; h: number } | null = null
+      let ra: R | null = null
+      let rb: R | null = null
+      for (const x of a.rects) {
+        for (const y of b.rects) {
+          const o = inter(x, y)
+          if (o && o.w * o.h > 4) {
+            hit = o
+            ra = x
+            rb = y
+            break
+          }
+        }
+        if (hit) break
+      }
+      if (!hit) continue
+      const key = `overlap:${sig(a.el)}:${sig(b.el)}`
+      if (reported.has(key)) continue
+      reported.add(key)
+      push({
+        detector: 'text-overlap',
+        sig: `${sig(a.el)} x ${sig(b.el)}`,
+        msg: `"${a.node.data.trim().slice(0, 30)}" overlaps "${b.node.data.trim().slice(0, 30)}" by ${n1(hit.w)}x${n1(hit.h)}px`,
+        rects: [page(ra!), page(rb!)],
+      })
+    }
+
   const cv = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!
   const parse = (c: string): [number, number, number, number] => {
     const m = c.match(/^rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\)$/)
@@ -365,13 +467,16 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
       parseFloat(es.borderTopWidth) + parseFloat(es.borderLeftWidth) > 0 ||
       /^(svg|img|button|input|select)$/i.test(e.tagName)
     if (!paints) continue
+    // A declared overhang (data-viz-overhang="top" ...) may pass its region on that side.
+    const overhang = new Set((e.closest('[data-viz-overhang]')?.getAttribute('data-viz-overhang') ?? '').split(/\s+/))
     for (const [box, name] of [
       [region, 'region'],
       [frame, 'frame'],
     ] as const) {
       if (!box) continue
       const b = name === 'frame' ? frameR : R(box.getBoundingClientRect())
-      const over = Math.max(r.r - b.r, b.l - r.l, r.b - b.b, b.t - r.t)
+      const side = (k: string, v: number) => (name === 'region' && overhang.has(k) ? 0 : v)
+      const over = Math.max(side('right', r.r - b.r), side('left', b.l - r.l), side('bottom', r.b - b.b), side('top', b.t - r.t))
       if (over > 1.5) {
         const key = `region:${sig(e)}:${name}`
         if (reported.has(key)) continue
@@ -766,11 +871,12 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     const r = ratio(eff, bg)
     const large = size >= 24 || (size >= 18.66 && weight >= 700)
     const need = large ? 3 : 4.5
-    if (r < need - 0.005) {
+    // The documented exemption: an inactive control (WCAG 1.4.3).
+    const inactive = Boolean(el.closest('[aria-disabled="true"],[disabled]'))
+    if (r < need - 0.005 && !inactive) {
       const key = `contrast:${sig(el)}:${text}`
       if (reported.has(key)) return
       reported.add(key)
-      const inactive = Boolean(el.closest('[aria-disabled="true"],[disabled]'))
       push({
         detector: 'contrast',
         sig: sig(el),

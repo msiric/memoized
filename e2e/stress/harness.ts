@@ -3,7 +3,7 @@ import path from 'node:path'
 import type { Browser, BrowserContext, Page } from '@playwright/test'
 import { layoutDiagram } from '../../src/components/visualizations/engines/env-records/layout'
 import type { EnvDiagram } from '../../src/components/visualizations/engines/env-records/model'
-import { detect, frameBox, settle, type DetectOptions, type EdgeSpec, type Finding } from './detectors'
+import { detect, frameBox, settle, settleStable, type DetectOptions, type EdgeSpec, type Finding } from './detectors'
 
 /**
  * Matrix, recording and failure screenshots for the stress specs.
@@ -26,6 +26,10 @@ export type Config = {
   cssZoom?: number
   /** Root font size (text-only zoom). */
   rootFont?: string
+  /** Full motion (the reveals and step transitions play); default reduced. */
+  motion?: 'full' | 'reduce'
+  /** Recorded, never failed: a configuration outside the supported targets, with the ruling. */
+  recordOnly?: string
   note?: string
 }
 
@@ -36,19 +40,106 @@ export const CONFIGS: Config[] = [
   { name: 'zoom200-dsf', width: 640, height: 450, dsf: 2, note: '1280x900 at 200% browser zoom: 640 CSS px, DPR 2' },
   { name: 'zoom200-css', width: 1280, height: 900, cssZoom: 2, note: '1280 with html { zoom: 2 }' },
   { name: 'text200-1280', width: 1280, height: 900, rootFont: '200%', note: 'text-only zoom: html { font-size: 200% }' },
-  { name: 'text200-375', width: 375, height: 900, rootFont: '200%', note: 'text-only zoom at 375' },
+  {
+    name: 'text200-375',
+    width: 375,
+    height: 900,
+    rootFont: '200%',
+    note: 'text-only zoom at 375',
+    // A 9.7rem frame: R9 supports 150 % on a phone and 200 % at 1280; F2 lead
+    // ruling 3 (H3 round 1) puts 200 % on a 375 phone beyond the targets.
+    recordOnly: 'beyond R9 (F2 ruling 3): findings recorded for the lead, not gated',
+  },
   { name: 'text150-1280', width: 1280, height: 900, rootFont: '150%', note: "Chrome 'Very large' font size (24px default)" },
   { name: 'text150-375', width: 375, height: 900, rootFont: '150%', note: "Chrome 'Very large' font size at 375" },
+  { name: 'motion-375', width: 375, height: 900, motion: 'full', note: 'full motion on a phone (the reveals play)' },
+  { name: 'motion-1280', width: 1280, height: 900, motion: 'full', note: 'full motion at 1280' },
 ]
 
+/** Browser zoom of a desktop window: CSS viewport = device / zoom, DPR = zoom (R1 extra configs). */
+const browserZoom = (pct: number, base = 1280, h = 900): Config => ({
+  name: `zoom${pct}-${base}`,
+  width: Math.round(base / (pct / 100)),
+  height: Math.round(h / (pct / 100)),
+  dsf: pct / 100,
+  note: `${base}x${h} at ${pct}% browser zoom`,
+})
+
+/** R1's extra configurations, kept for the full tier. */
+export const EXTRA_CONFIGS: Config[] = [
+  browserZoom(67),
+  browserZoom(125),
+  browserZoom(175),
+  browserZoom(175, 1024, 768),
+  { name: 'land-667x375', width: 667, height: 375, dsf: 2 },
+  { name: 'tablet-820x1180', width: 820, height: 1180, dsf: 2 },
+  { name: 'wide-2560', width: 2560, height: 1440 },
+]
+
+/**
+ * Tiers (STRESS_TIER). `pr`, the default, is the fast gate: the narrowest
+ * phone (320) and the common one (375), the wide-variant threshold (768),
+ * the desktop column and the step-through breakout (1280, 1440), Chrome's
+ * "Very large" text on a phone (text150-375, R9: supported, not exempt),
+ * CSS zoom (R13: geometry measured under a scaled ancestor) and one full-
+ * motion config (the reveals play; the rest run reduced). `full` is every
+ * width, zoom, text size and R1 extra config, both motion modes.
+ * STRESS_CONFIGS=a,b picks configs by name from the full list.
+ */
+export const PR_CONFIGS = ['w320', 'w375', 'w768', 'w1280', 'w1440', 'text150-375', 'zoom200-css', 'motion-1280']
+export const ALL_CONFIGS: Config[] = [...CONFIGS, ...EXTRA_CONFIGS]
+export const TIER = process.env.STRESS_TIER === 'full' ? 'full' : 'pr'
 export const ONLY = process.env.STRESS_CONFIGS?.split(',')
-export const activeConfigs = () => CONFIGS.filter((c) => !ONLY || ONLY.includes(c.name))
+export const activeConfigs = () =>
+  ALL_CONFIGS.filter((c) => (ONLY ? ONLY.includes(c.name) : TIER === 'full' || PR_CONFIGS.includes(c.name)))
+
+/** Strict by default: any finding fails its test. STRESS_STRICT=0 only records. */
+export const STRICT = process.env.STRESS_STRICT !== '0'
+/** Whether a config's findings fail its test. */
+export const gated = (c: Config) => STRICT && !c.recordOnly
+
+/**
+ * OPEN DECISIONS (not exemption classes): real findings that need a design
+ * ruling before they can be fixed. Each matches only its own rows; the rows
+ * stay in the JSON (marked `pending`) and the test annotates them. Remove an
+ * entry when the lead rules; the gate then fails until the visual is fixed.
+ * - R11-dim: the closures trace dims the rest to 0.4, below 4.5:1 for text
+ *   (also annotated by e2e/gates/contrast.spec.ts).
+ * - R4-last-time: a choice carrying the "last time" tag keeps one label line
+ *   in its 44 px row, so a label that needs two lines truncates.
+ */
+export const PENDING: { id: string; match: (r: Row) => boolean }[] = [
+  {
+    id: 'R11-dim',
+    match: (r) => r.detector === 'contrast' && r.visual.startsWith('environment-records') && r.state.startsWith('hover'),
+  },
+  {
+    id: 'R4-last-time',
+    match: (r) => r.detector === 'truncation' && /\[data-viz-part=viz-checkpoint\] \[data-choice=/.test(r.sig),
+  },
+]
+export const pendingOf = (r: Row) => PENDING.find((p) => p.match(r))?.id
+
+/** The rows that fail a gated config; pending rows are marked and annotated instead. */
+export function failing(rows: Row[], annotate?: (id: string, n: number) => void): Row[] {
+  const counts = new Map<string, number>()
+  const out: Row[] = []
+  for (const r of rows) {
+    const id = pendingOf(r)
+    if (id) {
+      r.data = { ...r.data, pending: id }
+      counts.set(id, (counts.get(id) ?? 0) + 1)
+    } else out.push(r)
+  }
+  if (annotate) for (const [id, n] of counts) annotate(id, n)
+  return out
+}
 
 export async function openContext(browser: Browser, c: Config): Promise<{ ctx: BrowserContext; page: Page }> {
   const ctx = await browser.newContext({
     viewport: { width: c.width, height: c.height },
     deviceScaleFactor: c.dsf ?? 1,
-    reducedMotion: 'reduce',
+    reducedMotion: c.motion === 'full' ? 'no-preference' : 'reduce',
     colorScheme: 'dark',
   })
   const page = await ctx.newPage()
@@ -98,7 +189,10 @@ export class Recorder {
 
   /** Runs every detector on `scope`, plus the zero-CLS comparison against the first state of `stabilityKey`. */
   async check(page: Page, scope: string, visual: string, state: string, opts: DetectOptions = {}, stabilityKey = visual) {
-    await settle(page)
+    if (this.config.motion === 'full') {
+      if (!(await settleStable(page, scope)))
+        this.note(visual, state, 'unsettled', 'the frame was still changing after 4 s of full motion')
+    } else await settle(page)
     const found = await detect(page, scope, opts)
     const box = await frameBox(page, `${scope} section, ${scope} figure`)
     if (box) {
@@ -196,13 +290,19 @@ export class Recorder {
   }
 }
 
-/** Clicks via the DOM (no Playwright auto-scroll) and reports the page scroll before and after. */
+/**
+ * A pointer click through the DOM (no Playwright auto-scroll), reporting the
+ * page scroll before and after. It carries `detail: 1` like a real mouse or
+ * touch click, so components take their pointer path (H0 N1: `el.click()` has
+ * detail 0, which they treat as a keyboard activation). The keyboard path is
+ * checked separately (`keyActivate`).
+ */
 export async function domClick(page: Page, selector: string) {
   return page.evaluate((sel) => {
     const el = document.querySelector(sel) as HTMLElement | null
     const before = window.scrollY
     if (!el) return null
-    el.click()
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true, detail: 1, view: window }))
     return new Promise<{ before: number; after: number }>((r) =>
       requestAnimationFrame(() => requestAnimationFrame(() => r({ before, after: window.scrollY }))),
     )
