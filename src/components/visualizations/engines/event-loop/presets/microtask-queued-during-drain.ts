@@ -126,7 +126,7 @@ const steps: Step<EventLoopState>[] = [
   {
     state: s9,
     event: 'Done',
-    why: 'A microtask queued mid-drain still runs before any task.',
+    why: 'Microtasks queued mid-drain still run first.',
     narration: 'Done. The log reads sync, micro 1, micro 2, timeout.',
     focus: ['console'],
     claim: 'modelled',
@@ -167,7 +167,7 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
         },
       },
       locked: 'Watch the console.',
-      recap: { claim: '{answer} logs last', right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
+      recap: { right: '{answer} logs last', wrongLead: '{answer} logs last, not {pick}' },
     },
     {
       beforeStep: 7,
@@ -185,7 +185,7 @@ export const microtaskQueuedDuringDrain: StepLog<EventLoopState> = {
           timeout: 'A task waits for every microtask.',
         },
       },
-      recap: { claim: '{answer} ran next', right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
+      recap: { right: '{answer} came next', wrongLead: '{answer} came next, not {pick}', wrong: '{answer}, a microtask, ran before {pick}.' },
     },
   ],
   observed: { log: ['sync', 'micro 1', 'micro 2', 'timeout'] },

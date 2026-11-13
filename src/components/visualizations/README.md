@@ -179,9 +179,13 @@ prints the footprint to use), then check it on `/dev/visualizations` and with
   stops, after the dock in the DOM (the visual order). Next and Replay are
   the platform `primary` (the lesson's own main action). Autoplay dwells
   1.6 s plus 25 ms per character of the step's text, at most 4 s. At the
-  finale only Replay is offered (Restart and Play keep their place,
-  hidden), the recap leads with one bold verdict clause ("Right: B logs
-  last."), and a press during the playback lands it at once. On a phone the
+  finale only Replay is offered: the row reads Back, Replay (Restart's
+  slot moves to the row's end; Restart and Play are hidden and keep their
+  size, so the row never rewraps). The recap is one bold result clause and
+  one sentence, two lines at most on a phone ("Not quite: B logs last, not
+  A." then the run's rule, or "C, a microtask, ran before B." when the
+  later prediction was wrong), and a press during the playback lands it at
+  once. On a phone the
   button row sits above the scrubber, so the code line, the changed glyph,
   the caption and Next fit a 375x667 screen under the site header (Q15).
 - **Lazy reserve under text zoom (Q16).** A step-through's entry-table row

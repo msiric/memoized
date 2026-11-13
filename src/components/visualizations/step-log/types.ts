@@ -62,14 +62,14 @@ export type Checkpoint = {
   verdict?: 'end'
   /**
    * The recap at the end, with `{pick}` and `{answer}` filled in (H3 R2
-   * Q14). The first answered checkpoint is the headline: one short bold
-   * clause, "Right: {claim}." or "Not quite: {claim}." (a wrong pick adds
-   * "You said {pick}." to the body). Every other answered checkpoint adds
-   * its `right` or `wrong` sentence to the body. Defaults: the claim
-   * "{answer} was the answer", "You predicted {pick}. Right." and "You
-   * predicted {pick}; it was {answer}."
+   * Q14, `shell/feedback.ts`): one bold clause, then at most one sentence.
+   * The first answered checkpoint is the headline, "Right: {right}." or
+   * "Not quite: {wrongLead}."; a later checkpoint answered wrong gives the
+   * sentence (`wrong`), otherwise the end step's `why` does. Defaults:
+   * "{answer} was the answer", "{answer} was the answer, not {pick}" and
+   * "It was {answer}, not {pick}."
    */
-  recap?: { claim: string; right: string; wrong: string }
+  recap?: { right?: string; wrongLead?: string; wrong?: string }
   /** After a prediction judged at the end locks in: what to do next (default "Now step through to check it."). */
   locked?: string
   /** At most 80 characters (two lines at 288 px). */

@@ -39,20 +39,27 @@ export function allFeedbackStrings(cp: Checkpoint): string[] {
 
 const fill = (t: string, pick: string, answer: string) => t.replaceAll('{pick}', pick).replaceAll('{answer}', answer)
 
-/** A recap: one short bold verdict clause, then regular-weight sentences (Q14). */
+/** A recap: one short bold verdict clause, then one regular-weight sentence (Q14). */
 export type Recap = { lead: string; body: string }
 
 /**
- * The end-of-run recap (D21, R7, H3 R2 Q14). The first answered checkpoint
- * is the headline, one short clause led by the verdict ("Right: B logs
- * last."); a wrong pick adds "You said D." to the body; every other answered
- * checkpoint adds its sentence. Pure, so the dock can reserve room for every
- * variant. Returns null when nothing was predicted (every checkpoint skipped
- * or jumped over): then the shell shows a neutral invitation instead.
+ * The end-of-run recap (D21, R7, H3 R2 Q14, final polish): one bold result
+ * clause and at most one regular sentence, two lines at most on a 375 px
+ * phone (`feedback.test.ts` measures every combination).
+ *
+ * - The first answered checkpoint is the headline: "Right: B logs last." or
+ *   "Not quite: B logs last, not A." (`recap.right`, `recap.wrongLead`).
+ * - The sentence is a later prediction's correction only when it was wrong
+ *   ("C, a microtask, ran before B.", `recap.wrong`); otherwise the end
+ *   step's own rule (`end`, its `why`). A later right answer adds nothing.
+ * - Nothing predicted in this pass (every checkpoint skipped or jumped
+ *   over): no verdict, a short invitation before the rule (`RECAP_NONE`).
+ *
+ * Pure, so the dock can reserve room for every variant.
  */
-export function recapText(checkpoints: readonly Checkpoint[], picked: readonly (string | null)[]): Recap | null {
+export function recapText(checkpoints: readonly Checkpoint[], picked: readonly (string | null)[], end = ''): Recap {
   let lead = ''
-  const body: string[] = []
+  let correction = ''
   checkpoints.forEach((cp, k) => {
     const p = picked[k]
     if (!p) return
@@ -61,36 +68,42 @@ export function recapText(checkpoints: readonly Checkpoint[], picked: readonly (
       return c ? valueOf(c) : id
     }
     const right = p === cp.answer
-    const answer = value(cp.answer)
     const pick = value(p)
+    const answer = value(cp.answer)
+    const r = { ...DEFAULT_RECAP, ...cp.recap }
     if (!lead) {
-      const claim = fill(cp.recap?.claim ?? '{answer} was the answer', pick, answer)
-      lead = `${right ? 'Right' : 'Not quite'}: ${claim}.`
-      if (!right) body.push(`You said ${pick}.`)
+      lead = `${right ? 'Right' : 'Not quite'}: ${fill(right ? r.right : r.wrongLead, pick, answer)}.`
       return
     }
-    if (cp.recap) body.push(fill(right ? cp.recap.right : cp.recap.wrong, pick, answer))
-    else body.push(right ? `You predicted ${pick}. Right.` : `You predicted ${pick}; it was ${answer}.`)
+    if (!right && !correction) correction = fill(r.wrong, pick, answer)
   })
-  return lead ? { lead, body: body.join(' ') } : null
+  if (!lead) return { lead: '', body: `${RECAP_NONE.body} ${end}`.trim() }
+  return { lead, body: correction || end }
 }
 
-/** The recap when no checkpoint was answered in this pass: no verdict, an invitation. */
-export const RECAP_NONE: Recap = { lead: '', body: 'Replay to make the prediction yourself.' }
+/** The recap's defaults (a checkpoint's `recap` overrides any of them). */
+const DEFAULT_RECAP = {
+  right: '{answer} was the answer',
+  wrongLead: '{answer} was the answer, not {pick}',
+  wrong: 'It was {answer}, not {pick}.',
+}
+
+/** The recap when no checkpoint was answered in this pass: no verdict, an invitation (then the rule). */
+export const RECAP_NONE: Recap = { lead: '', body: 'Replay to predict it.' }
 
 /**
  * Every recap the end step can show (for the dock's ghost stack): each
  * single answer, none, and every checkpoint answered with its longest line
  * (the combinations that can wrap the furthest).
  */
-export function allRecaps(checkpoints: readonly Checkpoint[]): Recap[] {
+export function allRecaps(checkpoints: readonly Checkpoint[], end = ''): Recap[] {
   if (!checkpoints.length) return []
-  const out = new Map<string, Recap>([[`${RECAP_NONE.lead}|${RECAP_NONE.body}`, RECAP_NONE]])
-  const add = (r: Recap | null) => r && out.set(`${r.lead}|${r.body}`, r)
+  const out = new Map<string, Recap>()
+  const add = (r: Recap) => out.set(`${r.lead}|${r.body}`, r)
   // Every combination of picks (checkpoints have at most four choices; two or three checkpoints).
   const options = checkpoints.map((cp) => [null, ...cp.choices.map((c) => c.id)])
   const walk = (k: number, picks: (string | null)[]) => {
-    if (k === options.length) return add(recapText(checkpoints, picks))
+    if (k === options.length) return add(recapText(checkpoints, picks, end))
     for (const o of options[k]) walk(k + 1, [...picks, o])
   }
   walk(0, [])

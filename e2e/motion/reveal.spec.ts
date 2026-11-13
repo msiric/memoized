@@ -141,8 +141,8 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
     // Choice 2 at each question: B (right) and C (right); micro 2 (wrong) and micro 2 (right).
     await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
       preset === 'basic-ordering'
-        ? 'Right: B logs last. C ran next, as you predicted.'
-        : 'Not quite: timeout logs last. You said micro 2. micro 2 ran next, as you predicted.',
+        ? 'Right: B logs last. Sync code first, then every microtask, then one task.'
+        : 'Not quite: timeout logs last, not micro 2. Microtasks queued mid-drain still run first.',
     )
   })
 
@@ -161,7 +161,7 @@ test('event-loop reveal under reduced motion: one crossfade, no movement', async
   if (starts.length && Math.max(...starts) - Math.min(...starts) > 34) problems.push(`not at once: ${starts.join(', ')} ms`)
   strictCheck('reduced reveal', problems)
   await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
-    'Not quite: B logs last. You said A. You predicted B next; it was C.',
+    'Not quite: B logs last, not A. C, a microtask, ran before B.',
   )
 })
 

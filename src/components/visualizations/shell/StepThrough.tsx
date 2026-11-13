@@ -25,7 +25,7 @@ import { STEP_BEATS, TARGET_GAP_PX, ink, motion, motionRules, type StepBeats, ty
 import type { Checkpoint, StepLog } from '../step-log/types'
 import { CodePane, codeRows } from './CodePane'
 import { FRAME, NUDGE_TEXT, STEP_BAR, definitionMetrics, lastTimeText, longestLastTime } from './footprint'
-import { RECAP_NONE, allFeedback, allRecaps, feedbackText, recapText } from './feedback'
+import { allFeedback, allRecaps, feedbackText, recapText } from './feedback'
 import {
   dockMode,
   initialState,
@@ -89,8 +89,9 @@ import { H_CLS, heights, rem } from './vars'
  * - Q11: Restart, Back, Next and Play are Tab stops; the DOM follows the
  *   visual order (dock, then the controls bar).
  * - Q13: autoplay dwells with the length of the step's text.
- * - Q14: at the finale only Replay is offered (Restart and Play keep their
- *   place, hidden).
+ * - Q14: at the finale only Replay is offered: the row reads Back, Replay
+ *   (Restart's slot moves to the row's end; Restart and Play are hidden and
+ *   keep their size, so nothing moves vertically).
  */
 
 /** The third beat's fade (Q1): the caption, the console line and a verdict, 160 ms. */
@@ -280,7 +281,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const atEnd = interactive && s.index === last && mode !== 'ask'
   const recap =
     atEnd && mode === 'controls' && log.checkpoints.length
-      ? (recapText(log.checkpoints, s.picked) ?? RECAP_NONE)
+      ? recapText(log.checkpoints, s.picked, step.why)
       : null
   // The recap replaces the caption once the stage's playback has landed (R5).
   const revealMs = gate.reveal && !gate.reduce ? (def.engine.revealMs?.(step.state) ?? 0) : 0
@@ -413,7 +414,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
     if (key === spoken.current) return
     const where = s.index === 0 ? 'Start.' : `Step ${s.index} of ${last}.`
     let text = `${where} ${step.narration} ${step.why}`
-    if (recap) text = `${where} ${step.narration} ${[recap.lead, recap.body].filter(Boolean).join(' ')} ${step.why}`
+    if (recap) text = `${where} ${step.narration} ${[recap.lead, recap.body].filter(Boolean).join(' ')}`
     if (mode === 'ask' && cp) text += ` Checkpoint: ${cp.prompt}`
     if (mode === 'reveal' && cp && cpIndex !== null) {
       const f = feedbackText(cp, s.picked[cpIndex])
@@ -557,16 +558,17 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           transition={captionT}
           data-viz-reveal={gate.reveal && !holding ? 'recap' : undefined}
         >
+          {/* The recap is one bold clause and one sentence (the end step's
+              rule, or a later prediction's correction): it replaces the caption. */}
           {recap && !holding ? (
-            <>
-              <span data-viz-part="viz-recap">
-                {recap.lead ? <span className={feedbackLeadCls}>{recap.lead}</span> : null}
-                {recap.lead && recap.body ? ' ' : null}
-                {recap.body}
-              </span>{' '}
-            </>
-          ) : null}
-          {shown.why}
+            <span data-viz-part="viz-recap">
+              {recap.lead ? <span className={feedbackLeadCls}>{recap.lead}</span> : null}
+              {recap.lead && recap.body ? ' ' : null}
+              {recap.body}
+            </span>
+          ) : (
+            shown.why
+          )}
         </m.p>
       ) : null}
       {dcp ? (
@@ -795,7 +797,10 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             aria-keyshortcuts="Home"
             unavailable={!interactive || s.index === 0}
             onClick={() => dispatch({ type: 'restart' }, true)}
-            className={cn(replay && 'invisible')}
+            // At the finale its slot moves to the row's end, hidden (Q14):
+            // the row reads Back, Replay, with no gap before Back. Every
+            // button keeps its size, so the row never rewraps.
+            className={cn(replay && 'invisible order-last')}
           >
             <RestartIcon />
           </Button>
@@ -875,7 +880,11 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
       </div>
 
       {/* 6. Footer: steps as text and provenance. */}
-      <footer className="relative" style={{ marginTop: rem(FRAME.footerGap) }}>
+      {/* On a phone the scrubber's own band is the gap (FRAME.footerGapNarrow). */}
+      <footer
+        className="relative mt-[var(--vz-f-n)] vz-wide:mt-[var(--vz-f-w)]"
+        style={{ ['--vz-f-n' as string]: rem(FRAME.footerGapNarrow), ['--vz-f-w' as string]: rem(FRAME.footerGap) }}
+      >
         <Disclosure className="print:hidden" data-viz-own-keys summary="Steps as text" summaryProps={{ 'data-viz-focus': 'text-alternative' }}>
           <StepsAsText log={log} />
         </Disclosure>
@@ -921,9 +930,8 @@ function CheckpointTextGhosts({ cp }: { cp: Checkpoint }) {
 function DockGhosts<S>({ log }: { log: StepLog<S> }) {
   const ghosts = useMemo(() => {
     const captions = [...new Set(log.steps.map((st) => st.why))]
-    // The end caption with every recap it can lead with (D21, Q14).
-    const end = log.steps[log.steps.length - 1].why
-    const recaps = allRecaps(log.checkpoints).map((r) => ({ ...r, end }))
+    // The end step: every recap it can show in its caption's place (D21, Q14).
+    const recaps = allRecaps(log.checkpoints, log.steps[log.steps.length - 1].why)
     return { captions, checkpoints: log.checkpoints, recaps }
   }, [log])
   return (
@@ -938,7 +946,7 @@ function DockGhosts<S>({ log }: { log: StepLog<S> }) {
           key={`${r.lead}|${r.body}`}
           className="col-start-1 row-start-1"
           lead={r.lead}
-          body={`${r.body} ${r.end}`.trim()}
+          body={r.body}
         />
       ))}
       {ghosts.checkpoints.map((c, k) => (

@@ -111,7 +111,7 @@ const steps: Step<EventLoopState>[] = [
   {
     state: s8,
     event: 'Done',
-    why: 'The order is always sync code first, then every microtask, then one task.',
+    why: 'Sync code first, then every microtask, then one task.',
     narration: 'Done. The log reads A, D, C, B.',
     focus: ['console'],
     claim: 'modelled',
@@ -152,7 +152,7 @@ export const basicOrdering: StepLog<EventLoopState> = {
         },
       },
       locked: 'Watch the console.',
-      recap: { claim: '{answer} logs last', right: '{answer} logs last, as you said.', wrong: 'You said {pick} logs last; it was {answer}.' },
+      recap: { right: '{answer} logs last', wrongLead: '{answer} logs last, not {pick}' },
     },
     {
       beforeStep: 6,
@@ -167,7 +167,7 @@ export const basicOrdering: StepLog<EventLoopState> = {
         correct: 'Microtasks run before the next task.',
         byChoice: { b: 'A task waits for every microtask.' },
       },
-      recap: { claim: '{answer} ran next', right: '{answer} ran next, as you predicted.', wrong: 'You predicted {pick} next; it was {answer}.' },
+      recap: { right: '{answer} came after D', wrongLead: '{answer} came after D, not {pick}', wrong: '{answer}, a microtask, ran before {pick}.' },
     },
   ],
   observed: { log: ['A', 'D', 'C', 'B'] },

@@ -34,6 +34,12 @@ export const FRAME = {
   /** On a phone the controls sit 12 under the dock (Q15). */
   barGapNarrow: 12,
   footerGap: 16,
+  /**
+   * On a phone the scrubber ends the controls: its 44 px band already holds
+   * 20 px of air under the track, so "Steps as text" follows with no gap
+   * (final polish: a 60 px empty band read as dead space).
+   */
+  footerGapNarrow: 0,
 } as const
 
 export const HEADER = { title: typeScale.title.line, presetRowGap: 8 } as const
@@ -166,8 +172,7 @@ export function dockText<S>(log: StepLog<S>): DockText {
   const out: DockText = { captions: [], prompts: [], lastTimes: [], feedback: [], feedbackBy: [], maxChoices: 0, checkpoints: [] }
   for (const st of log.steps) out.captions.push(st.why)
   // The end caption leads with a recap of the predictions (D21).
-  const end = log.steps[log.steps.length - 1].why
-  for (const r of allRecaps(log.checkpoints)) out.captions.push(`${r.lead} ${r.body} ${end}`.trim())
+  for (const r of allRecaps(log.checkpoints, log.steps[log.steps.length - 1].why)) out.captions.push(`${r.lead} ${r.body}`.trim())
   for (const cp of log.checkpoints) {
     out.prompts.push(cp.prompt)
     out.lastTimes.push(longestLastTime(cp))
@@ -271,7 +276,7 @@ export function metricsAt<S>(
     dock +
     (variant === 'wide' ? FRAME.barGap : FRAME.barGapNarrow) +
     bar +
-    FRAME.footerGap +
+    (variant === 'wide' ? FRAME.footerGap : FRAME.footerGapNarrow) +
     footer
   return { header, stage, dock, bar, footer, total }
 }

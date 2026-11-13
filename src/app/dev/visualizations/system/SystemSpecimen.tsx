@@ -484,7 +484,7 @@ export function SystemSpecimen({ roles, pairs }: { roles: RoleRow[]; pairs: Pair
         <div className="grid max-w-2xl gap-3">
           <Feedback lead="Right." body="C logs before B: the microtask queue drains before the next task." />
           <Feedback lead="Not quite." body="B waits in the task queue until every microtask has run." />
-          <Feedback lead="" body="Replay to make the prediction yourself." />
+          <Feedback lead="" body="Replay to predict it. Sync code first, then every microtask, then one task." />
         </div>
       </Section>
 

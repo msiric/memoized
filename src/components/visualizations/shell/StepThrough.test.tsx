@@ -2,6 +2,8 @@ import { act, cleanup, configure, fireEvent, render, screen, within } from '@tes
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import EventLoopViz from '../engines/event-loop'
 import { basicOrdering } from '../engines/event-loop/presets/basic-ordering'
+import { microtaskQueuedDuringDrain } from '../engines/event-loop/presets/microtask-queued-during-drain'
+import { sansWidth } from '../substrates/text-metrics'
 import { RECAP_NONE, allRecaps, recapText } from './feedback'
 
 beforeAll(() => {
@@ -263,13 +265,16 @@ describe('StepThrough (event-loop specimen)', () => {
     expect(replay).not.toHaveAttribute('aria-disabled')
     expect(replay).toHaveAttribute('aria-keyshortcuts', 'Home')
     expect(names()).toEqual(['Restart', 'Back', 'Replay', 'Play'])
-    // Q14: only Replay is offered; Restart and Play keep their place, hidden.
+    // Q14: only Replay is offered; Restart and Play are hidden, Restart's
+    // slot moved to the row's end, so the row starts with Back.
     expect(bar.querySelector('[aria-label="Restart"]')!.className).toMatch(/\binvisible\b/)
+    expect(bar.querySelector('[aria-label="Restart"]')!.className).toMatch(/\border-last\b/)
     expect(bar.querySelector('[aria-label="Play"]')!.className).toMatch(/\binvisible\b/)
-    // Q14: one short bold verdict clause, then regular-weight sentences.
-    expect(screen.getByTestId('viz-recap')).toHaveTextContent('Right: B logs last. C ran next, as you predicted.')
+    // Q14: one short bold verdict clause, then one regular sentence: the
+    // end step's rule, since the later prediction was right.
+    expect(screen.getByTestId('viz-recap')).toHaveTextContent('Right: B logs last. Sync code first, then every microtask, then one task.')
     expect(screen.getByTestId('viz-recap').querySelector('.font-semibold')).toHaveTextContent(/^Right: B logs last\.$/)
-    expect(screen.getByTestId('viz-caption')).toHaveTextContent(/predicted\. The order is always sync code first/)
+    expect(screen.getByTestId('viz-caption')).toHaveTextContent(/^Right: B logs last\. Sync code first, then every microtask, then one task\.$/)
     settle()
     expect(screen.getByTestId('viz-live')).toHaveTextContent('Right: B logs last.')
     // A press that lands on Replay right after the step does not start over.
@@ -300,16 +305,17 @@ describe('StepThrough (event-loop specimen)', () => {
     key('1') // B: wrong
     key('ArrowRight')
     key('ArrowRight')
-    expect(screen.getByTestId('viz-recap')).toHaveTextContent('Not quite: B logs last. You said D. You predicted B next; it was C.')
+    // The wrong later prediction is the one sentence; the rule gives way.
+    expect(screen.getByTestId('viz-caption')).toHaveTextContent(/^Not quite: B logs last, not D\. C, a microtask, ran before B\.$/)
     key('Home')
     key('End')
-    expect(screen.getByTestId('viz-recap')).toHaveTextContent(RECAP_NONE.body)
+    expect(screen.getByTestId('viz-caption')).toHaveTextContent(`${RECAP_NONE.body} Sync code first`)
   })
 
   it('reserves every recap in the dock ghosts', () => {
     const { container } = setup()
     const ghosts = container.querySelector('[data-viz-part="dock-ghosts"]')!
-    for (const r of allRecaps(basicOrdering.checkpoints)) {
+    for (const r of allRecaps(basicOrdering.checkpoints, basicOrdering.steps.at(-1)!.why)) {
       expect(ghosts.textContent).toContain(r.lead)
       expect(ghosts.textContent).toContain(r.body)
     }
@@ -385,10 +391,44 @@ describe('StepThrough (event-loop specimen)', () => {
 
 describe('recapText (D21)', () => {
   const cps = basicOrdering.checkpoints
-  it('leads with one short verdict clause, then names the rest (Q14)', () => {
-    expect(recapText(cps, ['b', 'c'])).toEqual({ lead: 'Right: B logs last.', body: 'C ran next, as you predicted.' })
-    expect(recapText(cps, [null, 'b'])).toEqual({ lead: 'Not quite: C ran next.', body: 'You said B.' })
-    expect(recapText(cps, ['a', null])).toEqual({ lead: 'Not quite: B logs last.', body: 'You said A.' })
-    expect(recapText(cps, [null, null])).toBeNull()
+  const end = basicOrdering.steps.at(-1)!.why
+  it('is one bold clause and one sentence, the later prediction only when it was wrong (Q14)', () => {
+    // Start right, wrong or skipped x the later prediction right, wrong or skipped.
+    const lead = { b: 'Right: B logs last.', a: 'Not quite: B logs last, not A.' } as const
+    for (const start of ['b', 'a'] as const) {
+      expect(recapText(cps, [start, 'c'], end)).toEqual({ lead: lead[start], body: end })
+      expect(recapText(cps, [start, null], end)).toEqual({ lead: lead[start], body: end })
+      expect(recapText(cps, [start, 'b'], end)).toEqual({ lead: lead[start], body: 'C, a microtask, ran before B.' })
+    }
+    expect(recapText(cps, [null, 'c'], end)).toEqual({ lead: 'Right: C came after D.', body: end })
+    expect(recapText(cps, [null, 'b'], end)).toEqual({ lead: 'Not quite: C came after D, not B.', body: end })
+    expect(recapText(cps, [null, null], end)).toEqual({ lead: '', body: `${RECAP_NONE.body} ${end}` })
+  })
+
+  // Two lines at most on a 375 px phone (309 px of content), for every
+  // combination of both presets. The shared width model pads every glyph
+  // about 20 % for unknown fonts; this is the measured UI font (6.25 px at
+  // 14/400) padded 5 %, the semibold lead 6 % wider. The dock reserves what
+  // renders, so this only guards the copy.
+  it.each([basicOrdering, microtaskQueuedDuringDrain])('fits two lines at 375 in every combination: $id', (log) => {
+    for (const r of allRecaps(log.checkpoints, log.steps.at(-1)!.why)) {
+      const words = [
+        ...r.lead.split(' ').filter(Boolean).map((w) => ({ w, bold: true })),
+        ...r.body.split(' ').filter(Boolean).map((w) => ({ w, bold: false })),
+      ]
+      const UI = (6.25 * 1.05) / (14 * 0.54)
+      const width = (x: { w: string; bold: boolean }) => sansWidth(x.w, 14) * UI * (x.bold ? 1.06 : 1)
+      const space = sansWidth(' ', 14) * UI
+      let lines = 1
+      let used = 0
+      for (const x of words) {
+        const add = (used ? space : 0) + width(x)
+        if (used && used + add > 309) {
+          lines += 1
+          used = width(x)
+        } else used += add
+      }
+      expect(lines, `${r.lead} ${r.body}`).toBeLessThanOrEqual(2)
+    }
   })
 })
