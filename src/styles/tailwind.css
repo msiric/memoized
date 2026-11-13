@@ -318,7 +318,8 @@
  */
 @layer components {
   .vz-g { @apply fill-zinc-800 print:fill-white; stroke: currentColor; }
-  .vz-hl { @apply fill-none stroke-zinc-700 print:stroke-zinc-200; }
+  /* A record's dividers: the one hairline, white/10 (H3 R2 Q10). */
+  .vz-hl { @apply fill-none stroke-white/10 print:stroke-zinc-200; }
   .vz-m { @apply fill-zinc-400 print:fill-zinc-600; }
   .vz-l { @apply stroke-zinc-500 print:stroke-zinc-500; }
   .vz-r { @apply fill-amber-400 print:fill-amber-700; }
