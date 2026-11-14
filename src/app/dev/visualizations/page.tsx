@@ -10,7 +10,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; ll?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -53,6 +53,51 @@ export default function VisualizationGalleryPage({
     </>
   )
   const onlyStatic = searchParams.static === '1'
+  // `?ll=<preset>`: the linked-list pointer-rewiring step-through alone;
+  // `?ll=static`: its static frames alone (wave 2B).
+  if (searchParams.ll === 'static') {
+    const frames = (
+      <>
+        <Viz id="linked-list-frames" preset="floyd-rho" />
+        <p>Between the two pointer frames.</p>
+        <Viz id="linked-list-frames" preset="full-reversal-strip" />
+      </>
+    )
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>Linked list pointer frames</h1>
+            <p>Snapshots of recorded pointer states, drawn on the server as SVG.</p>
+            {searchParams.mount === 'client' ? <ClientOnly>{frames}</ClientOnly> : frames}
+            <p>Text after the static frames.</p>
+          </Prose>
+        </div>
+      </div>
+    )
+  }
+  if (searchParams.ll)
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>Linked list pointer rewiring</h1>
+            <p>
+              Next pointers rewired one assignment at a time. Every pointer state is recorded from a real Node run of
+              the lesson&apos;s code and re-verified by unit tests.
+            </p>
+            {searchParams.mount === 'client' ? (
+              <ClientOnly>
+                <Viz id="linked-list-pointer-rewiring" preset={searchParams.ll} />
+              </ClientOnly>
+            ) : (
+              <Viz id="linked-list-pointer-rewiring" preset={searchParams.ll} />
+            )}
+            <p>Text after the visual, to show it never moves while stepping.</p>
+          </Prose>
+        </div>
+      </div>
+    )
 
   return (
     <>
