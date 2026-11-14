@@ -61,7 +61,7 @@ export function segmentedWidth(labels: readonly string[]): number {
 export function validateDescriptor(d: {
   id: string
   title: string
-  presets: readonly { id: string; label: string }[]
+  presets: readonly { id: string; label: string; group?: string }[]
 }): string[] {
   const errors: string[] = []
   const title = Math.ceil(emWidth(d.title, WIDTHS.titleAdvance) * WIDTHS.titleSize)
@@ -70,11 +70,14 @@ export function validateDescriptor(d: {
   for (const p of d.presets)
     if ([...p.label].length > LIMITS.presetLabel)
       errors.push(`${d.id} preset "${p.label}": ${[...p.label].length} chars > ${LIMITS.presetLabel}`)
-  if (d.presets.length >= 2 && d.presets.length <= 3) {
-    const row = segmentedWidth(d.presets.map((p) => p.label))
+  // One switcher per lesson group (`Preset.group`).
+  for (const g of new Set(d.presets.map((p) => p.group))) {
+    const set = d.presets.filter((p) => p.group === g)
+    if (set.length < 2 || set.length > 3) continue
+    const row = segmentedWidth(set.map((p) => p.label))
     if (row > WIDTHS.stage)
       errors.push(
-        `${d.id} presets: the switcher is ${row}px wide > ${WIDTHS.stage}px at 320 (shorten the labels: ${d.presets.map((p) => `"${p.label}"`).join(', ')})`,
+        `${d.id} presets: the switcher is ${row}px wide > ${WIDTHS.stage}px at 320 (shorten the labels: ${set.map((p) => `"${p.label}"`).join(', ')})`,
       )
   }
   return errors
