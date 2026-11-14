@@ -34,6 +34,12 @@ export type LessonFixture = {
 export const CONTENT_COMMIT = '189e8b4a27f92ccc32646bb52fe95565f16d4140'
 /** The corrected wording (`fix/batch-2d-wording`), the source of the heap-graph lessons. */
 export const BATCH_2D_COMMIT = '273a7717d6f1f5d32ad8d8c474ce737b7d451215'
+/**
+ * The wave 1B lessons: their corrected bodies are on the content repo's
+ * `fix/batch-2d-wording` branch (not yet on master), so their copies come
+ * from it.
+ */
+export const CONTENT_COMMIT_1B = '273a7717d6f1f5d32ad8d8c474ce737b7d451215'
 
 export const LESSON_FIXTURES: LessonFixture[] = [
   {
@@ -86,6 +92,34 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // After Deep Cloning, the last of the three examples it draws (the
     // shallow-copy gotcha and the nested update come earlier).
     inserts: [{ before: '### **Merging Objects Recursively**', viz: '<Viz id="heap-graph" preset="spread-vs-nested-vs-deep" />' }],
+  },
+  {
+    slug: 'scope-chain',
+    title: 'Scope Chain',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/scope-chain/page.mdx',
+    commit: CONTENT_COMMIT_1B,
+    file: 'fixtures/scope-chain.mdx',
+    inserts: [
+      // After "The Caller Is Not the Lexical Parent" (its code and its answer).
+      {
+        before: '### **Identifiers Are Not Properties**',
+        viz: '<Viz id="environment-records" preset="caller-is-not-lexical-parent" />',
+      },
+      // After Exercise 4's answer, so the figure never answers the exercise.
+      { before: '### **Exercise 5: Function Scope and Closure**', viz: '<Viz id="environment-records" preset="tdz-stops-lookup" />' },
+    ],
+  },
+  {
+    slug: 'promise-patterns',
+    title: 'Promise Patterns',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/promise-patterns/page.mdx',
+    // Premium: local checkout only. The lesson body has no microtask-order
+    // snippet yet (it is in a practice answer): the content PR adds a short
+    // section after Chaining Promises; the visual opens it, before any prose
+    // that states the order.
+    inserts: [{ before: '## **Promise.all and Promise.race**', viz: '<Viz id="event-loop" preset="microtask-vs-timer-12345" />' }],
   },
   {
     slug: 'virtual-dom',

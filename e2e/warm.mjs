@@ -8,6 +8,10 @@ const routes = [
   '/dev/visualizations/stress',
   '/dev/visualizations/lesson/event-loop',
   '/dev/visualizations/lesson/closures',
+  '/dev/visualizations/lesson/scope-chain',
+  // The promise-patterns presets (their own lesson group).
+  '/dev/visualizations?preset=microtask-vs-timer-12345',
+  '/dev/visualizations?preset=await-null',
   '/dev/visualizations/lesson/list-keys',
   '/dev/visualizations/lesson/data-types',
   '/dev/visualizations/lesson/objects',

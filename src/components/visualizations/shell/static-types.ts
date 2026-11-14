@@ -18,6 +18,15 @@ export type VerifiedProgram = {
   sha256: string
   /** Committed output of a real run, line by line. */
   observed: string[]
+  /** The uncaught error the run ends with (`ReferenceError`), for a program that is meant to throw. */
+  throws?: string
+}
+
+/** A program's verified output as one line of text: what it printed, then the error it threw, if any. */
+export function outputText(p: VerifiedProgram): string {
+  const out = p.observed.join(', ')
+  if (!p.throws) return out
+  return out ? `${out}, then throws ${p.throws}` : `no output; throws ${p.throws}`
 }
 
 /**

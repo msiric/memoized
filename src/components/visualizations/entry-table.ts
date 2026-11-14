@@ -38,13 +38,20 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     {
       'basic-ordering': [816, 576, 844, 1008, 1072],
       'microtask-queued-during-drain': [844, 716, 872, 964, 1072],
+      'microtask-vs-timer-12345': [792, 672, 820, 984, 1048],
+      'await-null': [792, 640, 840, 912, 964],
     },
   ],
   'environment-records': [
     () => import('./engines/env-records'),
     890,
     572,
-    { 'var-vs-let-loop': [890, 572, 548], 'factory-calls-vs-aliases': [830, 550, 526] },
+    {
+      'var-vs-let-loop': [890, 572, 548],
+      'factory-calls-vs-aliases': [830, 550, 526],
+      'caller-is-not-lexical-parent': [664, 422, 422],
+      'tdz-stops-lookup': [752, 526, 526],
+    },
   ],
   'heap-graph': [
     () => import('./engines/heap-graph'),

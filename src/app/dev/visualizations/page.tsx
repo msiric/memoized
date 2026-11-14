@@ -36,6 +36,13 @@ export default function VisualizationGalleryPage({
       <p>Between the two closures panels.</p>
       <Viz id="environment-records" preset="factory-calls-vs-aliases" />
       <p>
+        The same records with a call stack beside them, for the Scope Chain lesson: lookup follows outer links, not
+        the stack. Each call&apos;s chain is checked against inspector pauses in a real run.
+      </p>
+      <Viz id="environment-records" preset="caller-is-not-lexical-parent" />
+      <p>Between the two scope-chain panels.</p>
+      <Viz id="environment-records" preset="tdz-stops-lookup" />
+      <p>
         Heap graphs for the Data Types and Objects lessons: names on the left, the objects their values identify on
         the right, built from a recorded Node run.
       </p>

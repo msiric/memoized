@@ -242,6 +242,15 @@ export function presetIndex<S>(def: StepThroughDescriptor<S>, preset?: string): 
 }
 
 /**
+ * The presets one frame offers with preset `index` on screen: those in its
+ * `group` (presets without one form one set), in descriptor order.
+ */
+export function groupIndices(def: { presets: readonly { group?: string }[] }, index: number): number[] {
+  const g = def.presets[index]?.group
+  return def.presets.flatMap((p, i) => (p.group === g ? [i] : []))
+}
+
+/**
  * The frame's footprint with preset `index` on screen (R2: per preset), laid
  * out at content width `width` (px at the default root) in `variant`. The
  * stage is fixed per variant; the title, the dock, the button row and the
@@ -253,11 +262,14 @@ export function metricsAt<S>(
   width: number,
   variant: Variant,
 ): FrameMetrics {
-  const all = def.presets.map((p) => p.log)
-  const log = all[index]
-  const layout = def.engine.layout([log], all)
+  const log = def.presets[index].log
+  const group = groupIndices(def, index)
+  const layout = def.engine.layout(
+    [log],
+    group.map((i) => def.presets[i].log),
+  )
   const text = dockText(log)
-  const header = headerHeight(def.presets.length, variant, titleLines(def.title, variant === 'wide' ? width / 2 : width))
+  const header = headerHeight(group.length, variant, titleLines(def.title, variant === 'wide' ? width / 2 : width))
   const stage = layout.stage[variant]
   const dock = dockAt(text, width, variant)
   const bar = variant === 'wide' ? BAR.wide : barHeight(width)

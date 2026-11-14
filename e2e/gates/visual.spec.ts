@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { GALLERY, LESSONS, MOTION_STATES, SPECIMEN, STATES, freezeAt, lessonUrl, open, settle, stateFrame, stateUrl } from './drive'
+import { GALLERY, LESSONS, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt, lessonUrl, open, settle, stateFrame, stateUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -97,6 +97,14 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, '[data-viz="event-loop"] section', 'print-event-loop.png')
   await frameShot(page, '[data-viz="list-keys"] section', 'print-list-keys.png')
+  // The promise-patterns presets (their own switcher and code column) and the scope-chain figures.
+  await open(page, PP, 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, '[data-viz="event-loop"] section', 'print-promise-patterns.png')
+  await open(page, `${GALLERY}?static=1`, 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, '[data-viz="environment-records"] figure >> nth=2', 'print-scope-chain-caller.png')
+  await frameShot(page, '[data-viz="environment-records"] figure >> nth=3', 'print-scope-chain-tdz.png')
   await open(page, `${GALLERY}?static=1`, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, 'figure[data-viz-preset="identity-alias-rebind-spread"]', 'print-heap-graph-data-types.png')
