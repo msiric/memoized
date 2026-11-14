@@ -315,7 +315,7 @@ function Text({ t }: { t: LaidText }) {
     t.kind === 'output'
       ? clsx(C.result, t.anchor === 'middle' && 'vz-c')
       : t.kind === 'label' || t.kind === 'error'
-        ? clsx(C.edgeLabel, 'font-sans')
+        ? C.edgeLabel
         : t.kind === 'region'
           ? clsx('vz-t font-sans')
           : clsx('vz-12 font-sans', C.muted)
