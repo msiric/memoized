@@ -164,23 +164,35 @@ export function animsOf(cap: Capture) {
 export const STRICT = process.env.MOTION_STRICT !== '0'
 
 /**
- * Timing is enforced wherever frames can be measured. On CI a starved
- * runner may skip it per recording (`frameHealth`), reported as a warning;
- * anywhere else (the local gate, `e2e/gate.sh`) a skip fails, so every
- * merge still passes the timing budgets on a machine that holds 60 Hz.
- * MOTION_REQUIRE_TIMING=1 or 0 overrides.
+ * Timing (tween length, cuts, the beat budget, mirrored durations) is
+ * enforced on a machine that can measure it: locally, and in `e2e/gate.sh`
+ * runs before a merge, where a recording whose frames are not measurable
+ * (`frameHealth`) fails rather than passing unjudged.
+ *
+ * On CI it is advisory. GitHub's free 2-CPU runners advance animations
+ * unevenly even when requestAnimationFrame looks regular (a 120 ms thumb
+ * sampled in uneven chunks, steps starting 20 ms late, PR #57 runs 2 to 4),
+ * so timing findings there are printed as warnings and annotations, while
+ * order, direction, overlap, glyph count and mirrored displacement stay
+ * strict. MOTION_REQUIRE_TIMING=1 makes CI enforce timing too (a capable
+ * runner); =0 makes a local run advisory.
  */
 export const REQUIRE_TIMING = process.env.MOTION_REQUIRE_TIMING ? process.env.MOTION_REQUIRE_TIMING === '1' : !process.env.CI
 
-/** Reports recordings whose timing could not be measured (see REQUIRE_TIMING). */
-export function timingSkips(name: string, skipped: string[]) {
-  if (!skipped.length) return
-  const msg = `${name}: timing not measurable in ${skipped.length} recording(s) (frame gaps p90 > 25 ms): ${skipped.slice(0, 6).join('; ')}`
-  if (REQUIRE_TIMING) expect.soft(skipped, `${name}: timing must be measurable here (MOTION_REQUIRE_TIMING)`).toEqual([])
-  else {
-    console.log(`::warning title=motion timing skipped::${msg}`)
-    test.info().annotations.push({ type: 'timing-skipped', description: msg })
+/** Reports timing findings that are not enforced here, or recordings whose timing could not be measured. */
+export function timingAdvisory(name: string, findings: string[], unmeasurable: string[]) {
+  if (REQUIRE_TIMING) {
+    if (unmeasurable.length) expect.soft(unmeasurable, `${name}: timing must be measurable here (MOTION_REQUIRE_TIMING)`).toEqual([])
+    return
   }
+  const lines = [
+    ...findings,
+    ...(unmeasurable.length ? [`timing not measurable in ${unmeasurable.length} recording(s) (frame gaps p90 > 25 ms)`] : []),
+  ]
+  if (!lines.length) return
+  const msg = `${name}: ${lines.slice(0, 8).join('; ')}`
+  console.log(`::warning title=motion timing (advisory on CI)::${msg}`)
+  test.info().annotations.push({ type: 'timing-advisory', description: msg })
 }
 
 /** Fails (softly) with the list of problems, unless MOTION_STRICT=0. */

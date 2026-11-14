@@ -15,7 +15,8 @@ import {
   save,
   strictCheck,
   summarize,
-  timingSkips,
+  timingAdvisory,
+  REQUIRE_TIMING,
 } from './helpers'
 import { frameHealth } from './analyze'
 
@@ -49,7 +50,8 @@ type Entry = {
   flags: { kind: string; detail: string }[]
   beats: string[]
   verdict: string[]
-  timing: { p90: number; ok: boolean }
+  timing: { p90: number; ok: boolean; enforce: boolean }
+  advisory: string[]
 }
 
 for (const width of WIDTHS)
@@ -74,11 +76,20 @@ for (const width of WIDTHS)
             const r = await recordAction(page, EL, () => page.keyboard.press(key))
             const after = await stepOf()
             const health = frameHealth(r.cap, r.at)
-            const s = summarize(r.motions, reduced, health.ok)
+            // Timing is judged only when measurable, and enforced only where required (REQUIRE_TIMING).
+            const enforce = health.ok && REQUIRE_TIMING
+            const s = summarize(r.motions, reduced, enforce)
+            const timed = health.ok && !REQUIRE_TIMING ? summarize(r.motions, reduced, true) : s
             const last = after.step !== null && Number(after.step) === Number(await frame.getAttribute('data-viz-last'))
             const oneStep = before.step !== after.step && Math.abs(Number(after.step) - Number(before.step)) === 1
             // The finale is the reveal (its own timeline, reveal.spec.ts); every other paced step has beats.
-            const beats = !reduced && oneStep && !last ? beatProblems(beatStarts(r.motions), dir, health.ok) : []
+            const paced = !reduced && oneStep && !last
+            const beats = paced ? beatProblems(beatStarts(r.motions), dir, enforce) : []
+            const timedBeats = paced && health.ok && !REQUIRE_TIMING ? beatProblems(beatStarts(r.motions), dir, true) : beats
+            const advisory = [
+              ...timed.flags.map((f) => `${f.kind} ${f.detail}`).filter((x) => !s.flags.some((f) => `${f.kind} ${f.detail}` === x)),
+              ...timedBeats.filter((x) => !beats.includes(x)),
+            ]
             const verdict = !reduced && oneStep && before.mode === 'ask' && after.mode === 'reveal' ? verdictAfterPayoff(r.cap, r.at) : []
             report.push({
               dir,
@@ -90,7 +101,8 @@ for (const width of WIDTHS)
               flags: s.flags,
               beats,
               verdict,
-              timing: health,
+              timing: { ...health, enforce },
+              advisory,
               ...({ key, animated: s.animated, anims: animsOf(r.cap) } as object),
             })
             const stuck = after.step === before.step && (dir === 'back' || after.mode === before.mode)
@@ -103,7 +115,7 @@ for (const width of WIDTHS)
         save(`event-loop-${preset}-${width}${reduced ? '-reduced' : ''}.json`, report)
 
         const where = (e: Entry) => `${preset}@${width} ${e.dir} ${e.before.step}->${e.after.step}${reduced ? ' reduced' : ''}`
-        timingSkips(`${preset}@${width}`, report.filter((e) => !e.timing.ok).map((e) => `${where(e)} p90 ${e.timing.p90} ms`))
+        const mirrorAdvisory: string[] = []
         strictCheck(`${preset}@${width}: §4 flags`, report.flatMap((e) => e.flags.map((f) => `${where(e)}: ${f.kind} ${f.detail}`)))
         strictCheck(`${preset}@${width}: no text crosses text in motion (G1)`, report.flatMap((e) => e.overlaps.map((o) => `${where(e)} ${o}`)))
         strictCheck(`${preset}@${width}: three beats in order, 560 ms (Q1)`, report.flatMap((e) => e.beats.map((o) => `${where(e)} ${o}`)))
@@ -124,7 +136,15 @@ for (const width of WIDTHS)
                 return ahead.glyphs.join(',') === e.glyphs.join(',')
                   ? []
                   : [`${where(e)}: back animates [${e.glyphs}] but next animated [${ahead.glyphs}]`]
-              return mirrorProblems(ahead.vectors, e.vectors, ahead.timing.ok && e.timing.ok).map((p) => `${where(e)}: ${p}`)
+              const enforced = mirrorProblems(ahead.vectors, e.vectors, ahead.timing.enforce && e.timing.enforce)
+              if (ahead.timing.ok && e.timing.ok && !REQUIRE_TIMING)
+                for (const p of mirrorProblems(ahead.vectors, e.vectors, true)) if (!enforced.includes(p)) mirrorAdvisory.push(`${where(e)}: ${p}`)
+              return enforced.map((p) => `${where(e)}: ${p}`)
             }),
+        )
+        timingAdvisory(
+          `${preset}@${width}`,
+          [...report.flatMap((e) => e.advisory.map((a) => `${where(e)} ${a}`)), ...mirrorAdvisory],
+          report.filter((e) => !e.timing.ok).map((e) => `${where(e)} p90 ${e.timing.p90} ms`),
         )
       })

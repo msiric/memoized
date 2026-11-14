@@ -31,6 +31,11 @@
 #   stress-a      stress flagships                                    ~225
 #   stress-b      stress adversarial and hydration                    ~100
 # Without a shard, `pr` runs them all in sequence.
+#
+# Motion timing (tween length, cuts, the 560 ms beat budget, mirrored
+# durations) is enforced locally and advisory on CI (CI=true), where free
+# runners cannot measure it: run this script locally before every merge.
+# MOTION_REQUIRE_TIMING=1|0 overrides (e2e/motion/helpers.ts).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 tier=${1:-pr}
