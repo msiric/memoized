@@ -262,7 +262,7 @@ function Box({
             <text
               x={r1(x + row.nameWidth + SIZE.cellPad)}
               y={rowBase(row.top)}
-              className={row.uninitialized ? clsx('vz-12', C.muted) : undefined}
+              className={row.uninitialized ? 'vz-u' : undefined}
             >
               {row.value}
             </text>

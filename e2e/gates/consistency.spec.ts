@@ -164,8 +164,11 @@ for (const width of [375, 1440])
     const fn = closures.locator('[tabindex="0"]').first()
     const call = scope.locator('[tabindex="0"]').first()
     const diffs: string[] = []
+    // A straight link has a zero-width box (Playwright calls it hidden): read its style as is.
+    const styleOf = (l: Locator) =>
+      l.evaluate((el, ps) => Object.fromEntries(ps.map((p) => [p, getComputedStyle(el).getPropertyValue(p)])), SVG_LOOK as unknown as string[])
     const same = async (what: string, a: Locator, b: Locator) => {
-      const [x, y] = [await look(a, SVG_LOOK), await look(b, SVG_LOOK)]
+      const [x, y] = [await styleOf(a), await styleOf(b)]
       for (const k of Object.keys(x)) if (x[k] !== y[k]) diffs.push(`${what} ${k}: closures ${x[k]} vs scope chain ${y[k]}`)
     }
     const parts = async (when: string) => {
