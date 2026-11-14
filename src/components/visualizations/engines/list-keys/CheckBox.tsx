@@ -77,7 +77,10 @@ export function CheckBox(
         <Tick
           className={clsx(
             'pointer-events-none absolute inset-0',
-            props.shown && 'transition-[color,opacity] motion-reduce:transition-none',
+            // Opacity only: the color lands at once (it is invisible until the
+            // fade starts), so a returning history tick never fades in dark on
+            // the dark card before reaching its muted ink.
+            props.shown && 'transition-opacity motion-reduce:transition-none',
             props.shown ? 'opacity-100' : 'opacity-0',
             history && historyTickCls,
           )}
