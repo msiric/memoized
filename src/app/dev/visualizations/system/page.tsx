@@ -83,6 +83,9 @@ export default function VisualizationSystemPage() {
           <p>The closures roles (glyph, header, hatch, edges, the traced path):</p>
           <Viz id="environment-records" preset="factory-calls-vs-aliases" />
           <Viz id="environment-records" preset="var-vs-let-loop" />
+          <p>The heap graph (names, objects, identity arrows, the changed mark, the traced path):</p>
+          <Viz id="heap-graph" preset="identity-alias-rebind-spread" />
+          <Viz id="heap-graph" preset="spread-vs-nested-vs-deep" />
           <p>The event loop (lanes, chips, the console and its finale):</p>
           <Viz id="event-loop" />
           <p>List keys (checkboxes, match lines, state chips, the verdict):</p>

@@ -35,6 +35,13 @@ export default function VisualizationGalleryPage({
       <Viz id="environment-records" preset="var-vs-let-loop" />
       <p>Between the two closures panels.</p>
       <Viz id="environment-records" preset="factory-calls-vs-aliases" />
+      <p>
+        Heap graphs for the Data Types and Objects lessons: names on the left, the objects their values identify on
+        the right, built from a recorded Node run.
+      </p>
+      <Viz id="heap-graph" preset="identity-alias-rebind-spread" />
+      <p>Between the two heap graphs.</p>
+      <Viz id="heap-graph" preset="spread-vs-nested-vs-deep" />
       <p>Text after the static diagrams.</p>
     </>
   )

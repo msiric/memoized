@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { ENV_PRESETS } from '../../src/components/visualizations/__stress__/env-records.fixtures'
+import { HEAP_PRESETS } from '../../src/components/visualizations/__stress__/heap-graph.fixtures'
 import { EVENT_LOOP_FIXTURES } from '../../src/components/visualizations/__stress__/event-loop.fixtures'
 import { BASE, Recorder, TIER, gated, activeConfigs, envDetectOptions, goto, openContext } from './harness'
 import { answersOf, walkStepThrough } from './flows'
@@ -39,6 +40,18 @@ for (const c of configs) {
         }
         const before = rec.rows.length
         await rec.check(page, `[data-viz="stress-${p.id}"]`, `fixture ${p.id}`, 'static', ENV_OPTS)
+        for (const r of rec.rows.slice(before)) r.data = { ...r.data, lint: lint.length ? lint : 'accepted' }
+      }
+      // Heap graphs: boxes and arrows name themselves (data-node, data-from, data-to), so no layout model is needed.
+      for (const p of HEAP_PRESETS) {
+        await goto(page, c, `${BASE}/dev/visualizations/stress?f=${p.id}`)
+        const lint = JSON.parse((await page.getAttribute('[data-stress-fixture]', 'data-stress-lint')) ?? '[]')
+        if (await page.locator('[data-stress-error]').count()) {
+          rec.note(`fixture ${p.id}`, 'static', 'layout-throws', lint.join('; '), { lint })
+          continue
+        }
+        const before = rec.rows.length
+        await rec.check(page, `[data-viz="stress-${p.id}"]`, `fixture ${p.id}`, 'static', {})
         for (const r of rec.rows.slice(before)) r.data = { ...r.data, lint: lint.length ? lint : 'accepted' }
       }
     } finally {
