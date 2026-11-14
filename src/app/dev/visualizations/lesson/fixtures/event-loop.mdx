@@ -1,0 +1,747 @@
+export const metadata = {   title: "Event Loop and Asynchronous Programming in JavaScript",   description: "Dive deep into the inner workings of the JavaScript event loop and understand how asynchronous programming operates in JavaScript. Learn about the call stack, task queue, microtask queue, and how the event loop orchestrates the execution of code. This comprehensive lesson will enhance your understanding of JavaScript's concurrency model, help you write efficient asynchronous code, and prepare you for technical interviews by covering these essential topics.", }
+
+# **The JavaScript Event Loop**
+
+JavaScript is single-threaded, but it handles async work without blocking thanks to the **event loop** — the runtime mechanism that coordinates the call stack with the task and microtask queues. This lesson covers the event loop algorithm itself, how microtasks differ from tasks (and why microtasks always win), the semantics of `setTimeout(fn, 0)`, and the most common pitfalls in async code.
+
+<Note>
+**Where this lesson lives in the cluster**: this lesson canonically owns the **event loop**, the **task queue vs microtask queue** distinction, and timer semantics. For how Promises and async/await are introduced as patterns, see [Asynchronous JavaScript](/courses/js-track/core-fundamentals/asynchronous-javascript). For deeper Promise combinator coverage see [Promise Patterns](/courses/js-track/advanced-concepts/promise-patterns); for `async`/`await` semantics in depth see [Async/Await](/courses/js-track/advanced-concepts/async-await). For the call stack itself see [Context and Call Stack](/courses/js-track/core-fundamentals/context-and-call-stack).
+</Note>
+
+## **Understanding the Call Stack**
+
+### **What is the Call Stack?**
+
+- **Definition**: A data structure that records where in the program we are. When a function is called, its execution context is pushed onto the stack. When the function returns, the context is popped off the stack.
+
+- **Purpose**: Manages the execution of function calls.
+
+### **How the Call Stack Works**
+
+- **Function Invocation**: Each time a function is invoked, a new execution context is created and pushed onto the stack.
+
+- **Execution Context**: Contains information about the function, such as local variables and the value of `this`.
+
+- **Stack Overflow**: Occurs when the call stack exceeds its maximum size, often due to infinite recursion.
+
+**Example:**
+
+```javascript
+function first() {
+  console.log('First function')
+  second()
+}
+
+function second() {
+  console.log('Second function')
+  third()
+}
+
+function third() {
+  console.log('Third function')
+}
+
+first()
+```
+
+**Call Stack Execution:**
+
+1. **Global Execution Context**: Created by default.
+
+2. **`first()`** is called.
+
+   - `first` execution context is pushed onto the stack.
+   - Logs: "First function"
+
+3. **`second()`** is called inside `first`.
+
+   - `second` execution context is pushed onto the stack.
+   - Logs: "Second function"
+
+4. **`third()`** is called inside `second`.
+
+   - `third` execution context is pushed onto the stack.
+   - Logs: "Third function"
+
+5. **`third`** finishes execution.
+
+   - `third` execution context is popped off the stack.
+
+6. **`second`** finishes execution.
+
+   - `second` execution context is popped off the stack.
+
+7. **`first`** finishes execution.
+   - `first` execution context is popped off the stack.
+
+## **Synchronous vs. Asynchronous Execution**
+
+### **Synchronous Code**
+
+- **Definition**: Code that is executed sequentially, blocking the thread until completion.
+
+- **Behavior**: Each operation waits for the previous one to complete.
+
+**Example:**
+
+```javascript
+console.log('Start')
+console.log('Middle')
+console.log('End')
+```
+
+**Output:**
+
+```
+Start
+Middle
+End
+```
+
+### **Asynchronous Code**
+
+- **Definition**: Code that initiates an operation and moves on to the next task before the operation completes.
+
+- **Behavior**: Non-blocking; allows other code to run while waiting for the operation to finish.
+
+**Example:**
+
+```javascript
+console.log('Start')
+
+setTimeout(() => {
+  console.log('Timeout')
+}, 1000)
+
+console.log('End')
+```
+
+**Output:**
+
+```
+Start
+End
+Timeout
+```
+
+**Explanation:**
+
+- `setTimeout` is asynchronous; the callback is scheduled to run after 1000ms.
+- The code continues executing without waiting for the timeout.
+
+## **Event Loop Mechanics**
+
+### **What is the Event Loop?**
+
+- **Definition**: A loop that continuously checks the call stack and the task queues to determine what code to execute next.
+
+- **Purpose**: Manages the execution of multiple chunks of code over time, handling asynchronous events without blocking the main thread.
+
+### **Components Involved**
+
+1. **Call Stack**
+
+   - Where the execution context of functions is managed.
+
+2. **Web APIs (Browser Environment)**
+
+   - APIs provided by the browser, such as `setTimeout`, `DOM events`, `HTTP requests`.
+
+3. **Task Queue (Callback Queue / Macrotask Queue)**
+
+   - Holds messages (callbacks) from asynchronous operations ready to be executed.
+
+4. **Microtask Queue**
+
+   - Holds microtasks like promises' `.then()` callbacks and `MutationObserver` callbacks.
+
+5. **Event Loop**
+
+   - Coordinates between the call stack and the task queues.
+
+### **How the Event Loop Works**
+
+1. **Check Call Stack**
+
+   - If the call stack is not empty, the event loop waits for it to be empty.
+
+2. **Process Microtask Queue**
+
+   - Once the call stack is empty, the event loop processes all tasks in the microtask queue before moving on to the task queue.
+
+3. **Process Task Queue**
+
+   - The event loop processes one task from the task queue and executes it.
+
+4. **Repeat**
+
+   - The event loop continues this process indefinitely.
+
+## **Understanding Task Queues**
+
+### **Task Queue (Macrotask Queue)**
+
+- **Examples of Tasks Added to the Task Queue:**
+
+  - `setTimeout` callbacks
+  - `setInterval` callbacks
+  - DOM events (e.g., `click`, `load`)
+
+- **Behavior:**
+
+  - Tasks are queued in the order they are received.
+  - The event loop processes tasks from the task queue after the microtask queue is empty.
+
+### **Microtask Queue**
+
+- **Examples of Microtasks:**
+
+  - Promise callbacks (`.then()`, `.catch()`, `.finally()`)
+  - `MutationObserver` callbacks
+  - `queueMicrotask()` function
+
+- **Behavior:**
+
+  - Microtasks are executed immediately after the current task, before the event loop checks the task queue.
+
+### **Priority of Microtasks Over Tasks**
+
+- The event loop prioritizes the microtask queue over the task queue.
+- This means that all microtasks are executed before moving on to the next task.
+
+**Visualization of Event Loop Cycle:**
+
+1. Execute code in the **call stack**.
+2. When the call stack is empty:
+   - Process all tasks in the **microtask queue**.
+   - Process one task from the **task queue**.
+3. Repeat.
+
+## **Practical Examples**
+
+### **Example 1: setTimeout vs. Promise**
+
+```javascript
+console.log('Start')
+
+setTimeout(() => {
+  console.log('setTimeout')
+}, 0)
+
+Promise.resolve().then(() => {
+  console.log('Promise')
+})
+
+console.log('End')
+```
+
+**Output:**
+
+```
+Start
+End
+Promise
+setTimeout
+```
+
+**Explanation:**
+
+1. **Call Stack Execution:**
+
+   - `console.log('Start')` → Outputs `Start`.
+   - `setTimeout` callback is scheduled in the task queue.
+   - `Promise.resolve().then()` callback is scheduled in the microtask queue.
+   - `console.log('End')` → Outputs `End`.
+
+2. **Microtask Queue Execution:**
+
+   - The call stack is empty.
+   - Microtask queue is processed.
+   - `console.log('Promise')` → Outputs `Promise`.
+
+3. **Task Queue Execution:**
+
+   - Next, the task queue is processed.
+   - `console.log('setTimeout')` → Outputs `setTimeout`.
+
+### **Example 2: Multiple Promises**
+
+```javascript
+console.log('Start')
+
+Promise.resolve().then(() => {
+  console.log('Promise 1')
+})
+
+Promise.resolve().then(() => {
+  console.log('Promise 2')
+})
+
+console.log('End')
+```
+
+**Output:**
+
+```
+Start
+End
+Promise 1
+Promise 2
+```
+
+**Explanation:**
+
+- Both promises are added to the microtask queue.
+- Microtasks are executed in the order they were added.
+
+### **Example 3: setTimeout with Zero Delay**
+
+```javascript
+console.log('Start')
+
+setTimeout(() => {
+  console.log('Timeout 1')
+}, 0)
+
+setTimeout(() => {
+  console.log('Timeout 2')
+}, 0)
+
+console.log('End')
+```
+
+**Output:**
+
+```
+Start
+End
+Timeout 1
+Timeout 2
+```
+
+**Explanation:**
+
+- Both `setTimeout` callbacks are added to the task queue.
+- Tasks are executed in the order they were added.
+
+## **Using `queueMicrotask()`**
+
+### **What is `queueMicrotask()`?**
+
+- A method that allows you to schedule a function to be added to the microtask queue.
+
+### **Example:**
+
+```javascript
+console.log('Start')
+
+queueMicrotask(() => {
+  console.log('Microtask')
+})
+
+console.log('End')
+```
+
+**Output:**
+
+```
+Start
+End
+Microtask
+```
+
+**Explanation:**
+
+- The function passed to `queueMicrotask` is executed after the current task but before the event loop processes the task queue.
+
+## **Async/Await and the Event Loop**
+
+### **Understanding Async Functions**
+
+- **Async Functions**: Functions declared with the `async` keyword, which return a promise.
+
+- **Await Operator**: Pauses the execution of an async function until the awaited promise is settled.
+
+### **Example:**
+
+```javascript
+async function fetchData() {
+  console.log('Fetch Start')
+  const data = await Promise.resolve('Data')
+  console.log('Fetch End:', data)
+}
+
+console.log('Start')
+fetchData()
+console.log('End')
+```
+
+**Output:**
+
+```
+Start
+Fetch Start
+End
+Fetch End: Data
+```
+
+**Explanation:**
+
+1. **Call Stack Execution:**
+
+   - `console.log('Start')` → Outputs `Start`.
+   - `fetchData()` is called.
+     - `console.log('Fetch Start')` → Outputs `Fetch Start`.
+     - Encounters `await`, function execution pauses, and the rest is scheduled as a microtask.
+   - `console.log('End')` → Outputs `End`.
+
+2. **Microtask Queue Execution:**
+
+   - The awaited promise resolves.
+   - The rest of `fetchData()` is resumed.
+   - `console.log('Fetch End:', data)` → Outputs `Fetch End: Data`.
+
+## **Best Practices for Asynchronous Programming**
+
+### **Avoid Blocking the Main Thread**
+
+- **Reason**: Blocking operations prevent the browser from responding to user interactions.
+
+- **Solution**: Use asynchronous APIs for long-running tasks.
+
+### **Understand the Event Loop**
+
+- **Reason**: Knowing how the event loop works helps prevent unexpected behavior.
+
+- **Solution**: Be mindful of how tasks and microtasks are scheduled.
+
+### **Use Promises and Async/Await**
+
+- **Reason**: They provide a cleaner and more manageable way to handle asynchronous code.
+
+- **Example**:
+
+  ```javascript
+  async function loadData() {
+    try {
+      const response = await fetch('/api/data')
+      const data = await response.json()
+      console.log(data)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+  ```
+
+### **Be Careful with `setTimeout`**
+
+- **Issue**: `setTimeout` does not guarantee exact timing.
+
+- **Explanation**: The callback is executed after the specified delay, but only when the call stack is empty and after processing microtasks.
+
+### **Handle Promise Rejections**
+
+- **Reason**: Unhandled promise rejections can lead to uncaught exceptions.
+
+- **Solution**: Always provide a `.catch()` handler or use `try...catch` with async functions.
+
+- **Example**:
+
+  ```javascript
+  fetch('/api/data')
+    .then((response) => response.json())
+    .then((data) => console.log(data))
+    .catch((error) => console.error('Error:', error))
+  ```
+
+### **Limit the Use of Global Variables**
+
+- **Reason**: Helps avoid unintended side effects and makes code more predictable.
+
+## **Exercises**
+
+### **Exercise 1: Understanding Execution Order**
+
+**Question:**
+
+Predict the output of the following code:
+
+```javascript
+console.log('Start')
+
+setTimeout(() => {
+  console.log('Timeout 1')
+}, 0)
+
+Promise.resolve().then(() => {
+  console.log('Promise 1')
+})
+
+setTimeout(() => {
+  console.log('Timeout 2')
+}, 0)
+
+Promise.resolve().then(() => {
+  console.log('Promise 2')
+})
+
+console.log('End')
+```
+
+**Answer:**
+
+```
+Start
+End
+Promise 1
+Promise 2
+Timeout 1
+Timeout 2
+```
+
+**Explanation:**
+
+- **Synchronous Code Execution:**
+
+  - `console.log('Start')` → Outputs `Start`.
+  - `setTimeout` callbacks are scheduled in the task queue.
+  - `Promise` callbacks are scheduled in the microtask queue.
+  - `console.log('End')` → Outputs `End`.
+
+- **Microtask Queue Execution:**
+
+  - `console.log('Promise 1')` → Outputs `Promise 1`.
+  - `console.log('Promise 2')` → Outputs `Promise 2`.
+
+- **Task Queue Execution:**
+
+  - `console.log('Timeout 1')` → Outputs `Timeout 1`.
+  - `console.log('Timeout 2')` → Outputs `Timeout 2`.
+
+### **Exercise 2: Async/Await Execution**
+
+**Question:**
+
+Predict the output of the following code:
+
+```javascript
+async function async1() {
+  console.log('Async 1 Start')
+  await async2()
+  console.log('Async 1 End')
+}
+
+async function async2() {
+  console.log('Async 2')
+}
+
+console.log('Script Start')
+
+setTimeout(() => {
+  console.log('Timeout')
+}, 0)
+
+async1()
+
+new Promise((resolve) => {
+  console.log('Promise 1')
+  resolve()
+}).then(() => {
+  console.log('Promise 2')
+})
+
+console.log('Script End')
+```
+
+**Answer:**
+
+```
+Script Start
+Async 1 Start
+Async 2
+Promise 1
+Script End
+Async 1 End
+Promise 2
+Timeout
+```
+
+**Explanation:**
+
+- **Synchronous Code Execution:**
+
+  - `console.log('Script Start')` → Outputs `Script Start`.
+  - `setTimeout` callback is scheduled in the task queue.
+  - `async1()` is called.
+    - `console.log('Async 1 Start')` → Outputs `Async 1 Start`.
+    - `async2()` is called.
+      - `console.log('Async 2')` → Outputs `Async 2`.
+    - `await` pauses `async1`, the rest is scheduled as a microtask.
+  - `console.log('Promise 1')` → Outputs `Promise 1`.
+  - `console.log('Script End')` → Outputs `Script End`.
+
+- **Microtask Queue Execution:**
+
+  - `async1` resumes.
+    - `console.log('Async 1 End')` → Outputs `Async 1 End`.
+  - Promise `.then()` callback:
+    - `console.log('Promise 2')` → Outputs `Promise 2`.
+
+- **Task Queue Execution:**
+
+  - `setTimeout` callback:
+    - `console.log('Timeout')` → Outputs `Timeout`.
+
+### **Exercise 3: Promise Chaining**
+
+**Question:**
+
+What will be the output of the following code?
+
+```javascript
+console.log('Start')
+
+Promise.resolve(1)
+  .then((value) => {
+    console.log('Promise 1:', value)
+    return value * 2
+  })
+  .then((value) => {
+    console.log('Promise 2:', value)
+  })
+
+Promise.resolve(3).then((value) => {
+  console.log('Promise 3:', value)
+})
+
+console.log('End')
+```
+
+**Answer:**
+
+```
+Start
+End
+Promise 1: 1
+Promise 3: 3
+Promise 2: 2
+```
+
+**Explanation:**
+
+- **Synchronous Code Execution:**
+
+  - `console.log('Start')` → Outputs `Start`.
+  - Promises are created, and their `.then()` callbacks are scheduled in the microtask queue.
+  - `console.log('End')` → Outputs `End`.
+
+- **Microtask Queue Execution:**
+
+  - First Promise chain:
+    - `console.log('Promise 1:', 1)` → Outputs `Promise 1: 1`.
+  - Second Promise:
+    - `console.log('Promise 3:', 3)` → Outputs `Promise 3: 3`.
+  - Continue First Promise chain:
+    - `console.log('Promise 2:', 2)` → Outputs `Promise 2: 2`.
+
+- **Note:** The microtasks are executed in the order they were added.
+
+### **Exercise 4: setTimeout and setImmediate (Node.js)**
+
+**Question:**
+
+In a Node.js environment, what will be the output of the following code?
+
+```javascript
+console.log('Start')
+
+setTimeout(() => {
+  console.log('Timeout')
+}, 0)
+
+setImmediate(() => {
+  console.log('Immediate')
+})
+
+console.log('End')
+```
+
+**Answer:**
+
+```
+Start
+End
+Immediate
+Timeout
+```
+
+**Explanation:**
+
+- **Synchronous Code Execution:**
+
+  - `console.log('Start')` → Outputs `Start`.
+  - `setTimeout` and `setImmediate` callbacks are scheduled.
+  - `console.log('End')` → Outputs `End`.
+
+- **Event Loop Execution:**
+
+  - In Node.js, `setImmediate` callbacks are executed after the poll phase, before `setTimeout` callbacks with a delay of zero.
+  - Therefore, `console.log('Immediate')` → Outputs `Immediate`.
+  - Then `console.log('Timeout')` → Outputs `Timeout`.
+
+### **Exercise 5: Promise and setTimeout Ordering**
+
+**Question:**
+
+Predict the output of the following code:
+
+```javascript
+setTimeout(() => {
+  console.log('Timeout 1')
+}, 0)
+
+Promise.resolve().then(() => {
+  console.log('Promise 1')
+})
+
+setTimeout(() => {
+  console.log('Timeout 2')
+}, 0)
+
+Promise.resolve().then(() => {
+  console.log('Promise 2')
+})
+
+setTimeout(() => {
+  console.log('Timeout 3')
+}, 0)
+```
+
+**Answer:**
+
+```
+Promise 1
+Promise 2
+Timeout 1
+Timeout 2
+Timeout 3
+```
+
+**Explanation:**
+
+- There is no synchronous code to output.
+- Promises' `.then()` callbacks are added to the microtask queue.
+- `setTimeout` callbacks are added to the task queue.
+- **Microtask Queue Execution:**
+
+  - `console.log('Promise 1')` → Outputs `Promise 1`.
+  - `console.log('Promise 2')` → Outputs `Promise 2`.
+
+- **Task Queue Execution:**
+
+  - `console.log('Timeout 1')` → Outputs `Timeout 1`.
+  - `console.log('Timeout 2')` → Outputs `Timeout 2`.
+  - `console.log('Timeout 3')` → Outputs `Timeout 3`.
+
+
+Understanding the event loop, call stack, and task queues is essential for mastering asynchronous programming in JavaScript. With this knowledge, you'll be better equipped to write efficient non-blocking code, debug complex timing issues, and handle event loop-related questions in technical interviews with confidence.

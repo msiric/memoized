@@ -1,0 +1,94 @@
+export const metadata = {   title: "List Keys in React (fixture)",   description: "A stand-in lesson body for the list-keys visualization: how React matches list items between renders, why the key decides which instance keeps its state, and how to choose a key. Written for the lesson-context harness only.", }
+
+# **List Keys in React**
+
+When a list re-renders, React has to decide which of the old items each new item is. That decision is the **reconciliation** of the list, and the `key` prop is the only hint you give it. Get the key right and every row keeps its own state. Get it wrong and a checkbox, an input or a counter can quietly jump to a different row.
+
+This lesson walks through how React pairs items between two renders, what an index key does when the list changes shape, and how to choose a key that survives inserts, deletes and reordering.
+
+<Note>
+**Fixture.** This page is a stand-in lesson body for the list-keys visual. The real lesson is premium and is not part of this repository, so this text exists only to judge the visual between ordinary prose, code blocks and notes. Every claim below matches React 18 and 19.
+</Note>
+
+## **How React Matches List Items**
+
+### **Instances, Not Elements**
+
+A component in a list is more than the JSX you return. Each rendered item is backed by an **instance**: the fiber React keeps between renders, its DOM node, and any state that lives in it, such as `useState` values or what the user typed into an uncontrolled input.
+
+- **Element**: the description you return from render, created fresh every time.
+- **Instance**: what React keeps. Its state survives a re-render only if React matches the new element to it.
+
+### **The Matching Rule**
+
+Among siblings, React matches an element to an old instance by its **key** and its **type**. With no key, the position is the key. If an element finds an instance with the same key and type, that instance is reused and keeps its state. If it finds none, React mounts a new instance. Any old instance left without a match is unmounted, and its state is gone.
+
+```jsx
+function TodoList({ todos }) {
+  return (
+    <ul>
+      {todos.map((todo) => (
+        <li key={todo.id}>
+          <input type="checkbox" />
+          {todo.text}
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+The checkbox here is uncontrolled: its checked state lives in the DOM node of the `<li>` instance, not in `todos`. That makes it a clear signal of which instance ended up where.
+
+## **What an Index Key Does**
+
+### **Position Is Identity**
+
+`key={i}` tells React that the first item is always the same item as the old first item. As long as the list only grows at the end, that is true. As soon as an item is inserted before others, removed from the front or reordered, the positions no longer name the same items.
+
+```jsx
+// Before: ['Buy milk', 'Walk dog']
+// After:  ['Wake up', 'Buy milk', 'Walk dog']
+todos.map((todo, i) => (
+  <li key={i}>
+    <input type="checkbox" />
+    {todo.text}
+  </li>
+))
+```
+
+After the insert, key `0` now renders `Wake up`. React reuses the instance that rendered `Buy milk`, so a check on `Buy milk` stays in the first slot and appears next to `Wake up`. The text moved; the state did not.
+
+### **Try It: Where Does the Check Go?**
+
+Pick a key and an action below, then predict which row shows the check before React's recorded result plays.
+
+## **Choosing a Key**
+
+### **Stable Ids**
+
+Use a value that belongs to the item and never changes while it exists: a database id, a slug, or an id you assign once when the item is created.
+
+```jsx
+const [todos, setTodos] = useState([
+  { id: 'milk', text: 'Buy milk' },
+  { id: 'dog', text: 'Walk dog' },
+])
+```
+
+With `key={todo.id}`, an insert at the top mounts one new instance for the new item and moves the existing instances with their items, so each check stays with its text.
+
+### **Keys That Change Every Render**
+
+`key={Math.random()}` gives every element a key no old instance has. React then unmounts every row and mounts new ones on each render: all state is lost, and the DOM is rebuilt even when nothing changed.
+
+<Note>
+**Index keys are fine** when the list is static, or when items are only appended at the end and never reordered or removed. In every other case, prefer a stable id.
+</Note>
+
+## **Best Practices**
+
+- **Derive keys from data**, not from position or randomness.
+- **Keep keys unique among siblings**. They do not need to be unique across the whole app.
+- **Do not generate ids during render**. Create them when the item is created and store them with it.
+- **Lift row state into the data** when it must survive reordering in any case, for example a `done` field instead of an uncontrolled checkbox.

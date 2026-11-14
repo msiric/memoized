@@ -1,0 +1,533 @@
+export const metadata = {   title: "Closures and Lexical Environment in JavaScript",   description: "Explore the powerful concepts of closures and lexical environments in JavaScript. Understand how closures are created, their practical use cases, and how lexical scoping determines variable accessibility. This comprehensive lesson will deepen your understanding of JavaScript's function execution model, enhance your ability to write sophisticated code, and prepare you for technical interviews by delving into these essential topics.", }
+
+# **Closures in JavaScript**
+
+A counter can keep its count between calls without putting that count in a global variable. Two counters can have separate counts. Two methods can also deliberately share one balance. Closures make all three possible.
+
+You'll learn to explain that continued access, predict which calls share state and build a small factory with private state. Start with ordinary function calls, variables and objects. The function-value bridge below supplies the extra piece needed to read a returned function.
+
+**First pass:** read through the counter and shared-state examples before trying the synchronous saved-callback loop. Check **JavaScript Closures Explained** and the **Closure Capture** practice question. Finish with the bank-account exercise. You can stop when you can distinguish independent factory calls from methods sharing one binding. Classes, timers, IIFEs, recursive caching and memory investigation are optional extensions.
+
+Each JavaScript fence is a separate **Node 24 CommonJS** file. Save it as `example.cjs` and run `node example.cjs`. No browser DOM is needed. The optional timer example waits for a callback but makes no promise about an exact firing time.
+
+<Note>
+[Scope and Hoisting](/courses/js-track/core-fundamentals/scope-and-hoisting) explains binding initialization. [Scope Chain](/courses/js-track/core-fundamentals/scope-chain) explains which binding a name selects. The short lookup below is enough to start this lesson without a full execution-context chapter. For another look at function values, use only [Function Declarations vs. Function Expressions](/courses/js-track/core-fundamentals/function-types#function-declarations-vs-function-expressions).
+</Note>
+
+## **Lexical Scoping**
+
+### **Find the Binding from the Function's Definition**
+
+An identifier read starts in the current environment and searches outward through lexical parents. The first matching binding wins. The locals of a function's caller are not substituted into that chain.
+
+```javascript
+function outer() {
+  var outerVar = 'I am outside!'
+
+  function inner() {
+    console.log(outerVar)
+  }
+
+  inner()
+}
+
+outer()
+```
+
+This logs `I am outside!`. With no local `outerVar`, `inner` reads the binding in this call to `outer`. Notice that `inner` is called without ever being returned. A closure is created with a function, not only when a function escapes its enclosing call.
+
+Source nesting determines lexical relationships. Actual function creation retains access to the relevant outer environment. Different calls to a factory can therefore create functions connected to different instances of its local state.
+
+## **Closures**
+
+### **Returning a Function Is Not Calling It**
+
+This example has two calls with different jobs:
+
+```javascript
+function makeAdder(x) {
+  return function (y) {
+    return x + y
+  }
+}
+
+const addFive = makeAdder(5)
+console.log(typeof addFive)
+console.log(addFive(2))
+```
+
+It logs `function` then `7`.
+
+1. `makeAdder(5)` initializes that call's parameter `x` to `5`.
+2. Evaluating the function expression creates the inner function. It can access that `x`.
+3. `return` gives the function value to the caller. The assignment stores it in `addFive`. The addition has not run yet.
+4. `addFive(2)` calls the inner function with its own parameter `y = 2`. It reads `x`, adds `y` and returns `7`.
+5. `console.log` prints that returned number.
+
+Returning `x + y` is different from returning `function (y) { ... }`. The former would return an already computed value, while the latter returns work that can be called later.
+
+### **What a Closure Keeps**
+
+A **closure** is a function together with access to its surrounding lexical environment. That access can remain useful after an outer call returns. Returning the function is one way to keep it available. Passing it to another function or registering it as a callback works too.
+
+The function reads bindings, not an automatic frozen snapshot of their values. In the next example, `() => message` is a function with no parameters that returns `message`. Assigning that function to `read` does not call it:
+
+```javascript
+function makeReader() {
+  let message = 'before'
+  const read = () => message
+  message = 'after'
+  return read
+}
+
+const read = makeReader()
+console.log(read())
+```
+
+This prints `after`. The assignment changes the binding that `read` later consults.
+
+### **Methods Can Share Private State**
+
+Both methods below use the same `count`. Neither needs a `this` receiver to find it:
+
+```javascript
+function Counter() {
+  let count = 0
+
+  return {
+    increment: function () {
+      count++
+      console.log(count)
+    },
+    decrement: function () {
+      count--
+      console.log(count)
+    },
+  }
+}
+
+const counter = Counter()
+counter.increment()
+counter.decrement()
+```
+
+It prints `1` then `0`. The object exposes operations on `count`, not a public `count` property. An API can still intentionally expose a value through a getter. Privacy of a binding is not a promise that every value derived from it is secret.
+
+## **How Closures Work Internally**
+
+### **A Logical Environment Model**
+
+Use environments as a model of observable lookup. They do not promise a particular stack or heap layout.
+
+Each call to a factory supplies a fresh set of local bindings. A function created during that call retains the lexical access needed by its behavior. Calls to that returned function still have their own parameters and locals.
+
+```text
+createCounter() call A -> count A
+                          ^
+                          |
+                       counter1
+
+createCounter() call B -> count B
+                          ^
+                          |
+                       counter2
+
+createBankAccount() call -> balance
+                            ^   ^
+                            |   |
+                       deposit withdraw
+```
+
+The two counters use different bindings. The account's methods use the same binding. An arrow here means logical access, not a measured pointer or an allocation guarantee.
+
+### **Returning Does Not Erase Needed State**
+
+```javascript
+function outer() {
+  let a = 10
+
+  function inner() {
+    let b = 20
+    console.log(a + b)
+  }
+
+  return inner
+}
+
+const innerFunc = outer()
+innerFunc()
+```
+
+This prints `30`. The outer call is no longer active on the call stack. `innerFunc` still reads its `a` binding. Its own call supplies `b`.
+
+An engine must preserve this behavior. It need not keep every unused local or retain an entire finished execution context in one physical object. Observable output alone does not establish a garbage collector's representation or reclamation schedule.
+
+## **Practical Examples and Code Analysis**
+
+### **Example 1: Independent Counters**
+
+Predict which call starts from zero:
+
+```javascript
+function createCounter() {
+  let count = 0
+  return function () {
+    count++
+    console.log(count)
+  }
+}
+
+const counter1 = createCounter()
+counter1()
+counter1()
+
+const counter2 = createCounter()
+counter2()
+```
+
+The output is `1`, `2` and `1` on separate lines. Reusing `counter1` reuses its binding. Calling `createCounter()` again creates a new binding for `counter2`.
+
+Saving another reference to `counter1` would not create another counter. It would provide another way to call the same function and update the same count.
+
+### **Example 2: Save Functions, Then Call Them**
+
+This first loop example is synchronous. No timer or event-loop knowledge is needed. `push` saves each function in an array without calling it. After the loop, the three calls retrieve and run those saved functions.
+
+Before running it, decide whether each function has its own `i`:
+
+```javascript
+function buildFunctions() {
+  var arr = []
+
+  for (var i = 0; i < 3; i++) {
+    arr.push(function () {
+      console.log(i)
+    })
+  }
+
+  return arr
+}
+
+var fs = buildFunctions()
+fs[0]()
+fs[1]()
+fs[2]()
+```
+
+It prints `3` three times. There is one function-scoped `i`, shared by all three callbacks. The calls happen after the loop has incremented that binding to `3`.
+
+The direct fix is `let` in the loop header:
+
+```javascript
+function buildFunctions() {
+  var arr = []
+
+  for (let i = 0; i < 3; i++) {
+    arr.push(function () {
+      console.log(i)
+    })
+  }
+
+  return arr
+}
+
+var fs = buildFunctions()
+fs[0]()
+fs[1]()
+fs[2]()
+```
+
+Now it prints `0`, `1` and `2` on separate lines. This `for` loop creates a distinct `i` binding for each iteration. The callbacks are still closures. Changing the bindings they share is what fixes the result.
+
+The practice question uses `() => i` to return a number instead of logging it. Its `fns.map(f => f())` calls each saved function and collects the returned numbers into an array. That is the same save-first, call-later sequence as the three explicit calls above.
+
+### **Example 3: Methods Sharing a Result**
+
+A factory can also return several functions connected to one binding:
+
+```javascript
+function createCalculator() {
+  let result = 0
+
+  return {
+    add: function (x) {
+      result += x
+      return result
+    },
+    subtract: function (x) {
+      result -= x
+      return result
+    },
+    reset: function () {
+      result = 0
+    },
+  }
+}
+
+const calculator = createCalculator()
+console.log(calculator.add(5))
+console.log(calculator.subtract(2))
+calculator.reset()
+console.log(calculator.add(10))
+```
+
+It prints `5`, `3` and `10` on separate lines. `reset` changes the same binding that `add` and `subtract` use. Mutating captured state is intentional here. A second factory call would give another calculator independent state.
+
+## **Best Practices with Closures**
+
+- Decide who owns the state. Use one factory result when callers should share it. Call the factory again when they need independent state.
+- Make mutation part of the API rather than an unexpected side effect. A counter is useful precisely because later calls see earlier updates.
+- Name returned functions and methods for their job. It should be clear whether a call creates an operation or performs it.
+- Separate value behavior from lifetime claims. Reading an object property later is not equivalent to capturing that property's current value now.
+- Manage long-lived registrations when their consumer is finished. Supplying an abort signal alone does not remove a listener. Cleanup must actually call `abort()` or remove the registered callback.
+- Investigate memory or timing when there is a concrete problem. The number of closures alone does not establish a leak or a portable performance cost.
+
+## **Exercises**
+
+### **Exercise 1: Understanding Closures**
+
+Use the two complete `buildFunctions` programs above. Explain the `3, 3, 3` result without mentioning timers. Then explain why changing only the loop declaration to `let` changes the output.
+
+#### **Answer**
+
+In the `var` version, all three functions read one binding after its final increment. In the `let` version, each function reads the binding for its own iteration. Calling a saved callback during the `var` loop would read the value at that moment instead. “Closures always see the final value” is not the rule.
+
+### **Exercise 2: Closure and Function Execution**
+
+What does each factory call return? What do the later calls log?
+
+```javascript
+function makeMultiplier(x) {
+  return function (y) {
+    return x * y
+  }
+}
+
+const multiplyByTwo = makeMultiplier(2)
+const multiplyByThree = makeMultiplier(3)
+
+console.log(multiplyByTwo(5))
+console.log(multiplyByThree(5))
+```
+
+#### **Answer**
+
+The factory calls return two function values. The first has access to `x = 2`, the second to a separate `x = 3`. Passing `5` as each inner function's `y` produces `10` then `15`.
+
+### **Exercise 3: Data Privacy with Closures**
+
+Implement `createBankAccount` with private `balance` state and `deposit` and `withdraw` methods. Add `getBalance` to observe the result. Then create a second account and show that a deposit into the first does not affect it.
+
+For this exercise, amounts are safe integer numbers of illustrative units, not strings or fractional currency. A safe integer is an integer from `Number.MIN_SAFE_INTEGER` through `Number.MAX_SAFE_INTEGER`, inclusive. Every accepted running balance must also be a safe integer from `0` through `Number.MAX_SAFE_INTEGER`, including the result of each deposit before any later withdrawal. Accept positive deposits and withdrawals that do not overdraw. These bounds are preconditions assumed by the example, not arbitrary-input validation. This is a state-ownership exercise, not a production financial API.
+
+#### **Answer**
+
+```javascript
+function createBankAccount() {
+  let balance = 0
+
+  return {
+    deposit: function (amount) {
+      if (amount > 0) {
+        balance += amount
+        console.log(`Deposited: $${amount}`)
+      } else {
+        console.log('Invalid deposit amount')
+      }
+    },
+    withdraw: function (amount) {
+      if (amount > 0 && amount <= balance) {
+        balance -= amount
+        console.log(`Withdrew: $${amount}`)
+      } else {
+        console.log('Invalid withdraw amount')
+      }
+    },
+    getBalance: function () {
+      console.log(`Balance: $${balance}`)
+    },
+  }
+}
+
+const account = createBankAccount()
+account.deposit(100)
+account.withdraw(30)
+account.getBalance()
+console.log(account.balance)
+account.withdraw(80)
+
+const secondAccount = createBankAccount()
+secondAccount.getBalance()
+```
+
+```text
+Deposited: $100
+Withdrew: $30
+Balance: $70
+undefined
+Invalid withdraw amount
+Balance: $0
+```
+
+`deposit`, `withdraw` and `getBalance` share the first call's `balance`. `account.balance` is `undefined` because the returned object has no property with that name. The second account's methods use another binding, initialized to zero. The function assumes safe-integer amounts and a safe running balance after every accepted operation, including each intermediate deposit. Its sign and overdraft checks do not validate those numeric bounds.
+
+For a small variation, make `getBalance` return the number instead of logging it and log the returned value at the call site. This changes the public API's observation point, not which methods share state. The same amount and running-balance preconditions apply to this variation.
+
+### **Exercise 4: Lexical Scoping**
+
+Which `x` does `bar` read?
+
+```javascript
+var x = 10
+
+function foo() {
+  var x = 20
+  function bar() {
+    console.log(x)
+  }
+  bar()
+}
+
+foo()
+```
+
+#### **Answer**
+
+It prints `20`. With no local `x`, `bar` finds the binding in this call to `foo` before reaching the module's binding.
+
+### **Exercise 5: Closure Memory**
+
+Does this program establish that `bigData` leaks? Separate what it logs from what you can conclude about memory.
+
+```javascript
+function createBigObject() {
+  const bigData = new Array(1000000).fill('Some data')
+  return function () {
+    console.log('Using big data')
+  }
+}
+
+const func = createBigObject()
+func()
+```
+
+#### **Answer**
+
+It logs `Using big data`. The returned function never reads `bigData`. This source alone does not establish that the array is retained after `createBigObject` returns, much less that it leaks. Engines can omit unused state. With environment sharing and optimizations left to the implementation, neither “every local is always retained” nor “every unused local is always removed” is a sound general rule.
+
+Contrast that with an API whose later behavior actually reads data:
+
+```javascript
+function createDataReader() {
+  let data = new Array(1000).fill('Some data')
+  return {
+    size: () => data === null ? 0 : data.length,
+    dispose: () => { data = null },
+  }
+}
+
+const reader = createDataReader()
+console.log(reader.size())
+reader.dispose()
+console.log(reader.size())
+```
+
+This prints `1000` then `0`. Disposal deliberately changes the binding so these methods no longer access the original array. That is an observable API contract. It is not proof that collection happened immediately or that no other reference could retain an object.
+
+The core route ends here. You can explain the same binding across calls, fresh bindings across factories and shared bindings across methods. The rest offers optional ways to apply or inspect that model.
+
+## **Tips and Best Practices**
+
+### **Optional: Reading an IIFE**
+
+An immediately invoked function expression, or IIFE, creates a function and calls it immediately. In older `var` loops, it can supply a fresh parameter binding for each saved callback:
+
+```javascript
+function buildFunctions() {
+  var arr = []
+
+  for (var i = 0; i < 3; i++) {
+    arr.push(
+      (function (j) {
+        return function () {
+          console.log(j)
+        }
+      })(i),
+    )
+  }
+
+  return arr
+}
+
+var fs = buildFunctions()
+fs[0]()
+fs[1]()
+fs[2]()
+```
+
+It prints `0`, `1` and `2` on separate lines. Each immediate call passes the current `i` value as a new `j`. The saved function reads that call's `j`, not the loop's shared `i`. Prefer the simpler `let` version when writing this loop now. Further IIFE syntax is optional in [Function Types](/courses/js-track/core-fundamentals/function-types#immediately-invoked-function-expressions-iife).
+
+### **Optional: Timers Are Another Place to Save a Function**
+
+Prerequisite: `setTimeout` registers a callback to run later, after the current synchronous work. Its delay is not an exact appointment. This Node 24 example logs `scheduled` followed later by `Hello, Alice!`:
+
+```javascript
+function delayedGreeting(name) {
+  setTimeout(function () {
+    console.log(`Hello, ${name}!`)
+  }, 20)
+}
+
+delayedGreeting('Alice')
+console.log('scheduled')
+```
+
+The callback reads `name` after `delayedGreeting` has returned. Applying timers to the earlier `var` loop does not fix its shared binding. The synchronous saved-callback example already explains that bug without making assumptions about exact elapsed time.
+
+### **Optional: A Small Recursive Cache**
+
+Prerequisites: recursion, an object used as a lookup table and the rule that factorial multiplies down to a base case. Skip this example if those are new. It is not needed to explain a closure.
+
+This demonstration accepts only integer numbers from `0` through `10`. Within that bound, factorial is a pure calculation with one numeric argument. The cache belongs to one factory result:
+
+```javascript
+function memoizedFactorial() {
+  const cache = {}
+
+  return function factorial(n) {
+    if (!Number.isInteger(n) || n < 0 || n > 10) {
+      throw new RangeError('Expected an integer from 0 through 10')
+    }
+    if (Object.hasOwn(cache, n)) {
+      return cache[n]
+    }
+    if (n === 0 || n === 1) return 1
+    cache[n] = n * factorial(n - 1)
+    return cache[n]
+  }
+}
+
+const factorial = memoizedFactorial()
+console.log(factorial(5))
+console.log(factorial(5))
+console.log(factorial(0))
+```
+
+It prints `120`, `120` and `1` on separate lines. Repeated calls can reuse the same cache. This is not a general memoizer for arbitrary objects, multiple arguments or receiver-dependent functions. For the algorithmic application, continue to [Recursion and Memoization](/courses/dsa-track/common-techniques/recursion-and-memoization).
+
+### **Optional: Follow a Retaining Path**
+
+When a long-lived owner keeps a callback, that callback's continued access can also keep needed state reachable. A page-wide event target retaining a handler that uses a removed DOM node is one such path. A detached node and its own listener forming an otherwise unreachable cycle are not, by themselves, proof of a leak.
+
+Remove registrations when the consumer is finished. If a listener was registered with an `AbortController`'s signal, the lifecycle owner still needs to call `abort()`. That removes the registration. It does not promise a garbage-collection deadline or cancel unrelated work.
+
+For a real memory issue, inspect retaining paths and measure the workload. Do not infer a physical memory layout, unused-capture policy or fixed lookup cost from the diagrams in this lesson.
+
+## **Additional Resources**
+
+- [Lexical Scope](/resources/lexical-scope) offers selectable lookup, shadowing and loop contrasts.
+- [Closure Fundamentals](/resources/closure-fundamentals) provides state and lifecycle recipes with their own input and cleanup contracts.
+- [MDN: Closures](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures) gives further examples of private state and loop bindings.
+- [MDN: Abortable event listeners](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener) documents the `signal` option and the explicit abort action.
+
+Use those when you need a particular application. Completing the first state and loop attempts does not require reading every optional recipe.

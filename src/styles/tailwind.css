@@ -126,10 +126,12 @@
 
 /* Print styles for blog posts */
 @media print {
-  /* Hide non-essential UI elements */
+  /* Hide non-essential UI elements. A lesson visualization's own header
+     (its title) and footer print (VIZ-H R10): the frame hides its controls
+     itself with print: utilities. */
   .reading-progress,
-  header,
-  footer,
+  header:not([data-viz-frame] *),
+  footer:not([data-viz-frame] *),
   nav,
   .share-buttons,
   .newsletter-cta,
@@ -137,7 +139,7 @@
   .related-posts,
   .giscus,
   .post-navigation,
-  button,
+  button:not([data-viz-frame] *),
   [role="progressbar"] {
     display: none !important;
   }
@@ -201,12 +203,26 @@
     color: #666;
   }
 
-  /* Code blocks */
-  pre, code {
+  /* A visualization breaks across pages between its regions, never inside
+     one, and never moves whole to the next page (VIZ-H H3 R2 Q6). */
+  [data-viz-frame] :is(header, [data-viz-region]) {
+    break-inside: avoid;
+  }
+
+  /* Code blocks. A visualization's code pane prints its own way (VIZ-H
+     R11: light token colors, one box for the pane, none per line). */
+  pre:not([data-viz-frame] *),
+  code:not([data-viz-frame] *) {
     background: #f5f5f5 !important;
     color: black !important;
     border: 1px solid #ddd !important;
     page-break-inside: avoid !important;
+  }
+
+  /* One box per code block, not one per line (R2 platform note). */
+  pre:not([data-viz-frame] *) code {
+    border: 0 !important;
+    background: transparent !important;
   }
 
   /* Ensure proper margins */
@@ -285,4 +301,150 @@
   .nav-link-idle {
     @apply text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white;
   }
+}
+
+/*
+ * Lesson visualizations. The token lint (components/visualizations/
+ * primitives/tokens-lint.test.ts) scans from this comment to the end of the
+ * file: no literal color, size, duration or opacity; values come from
+ * `theme('vz.*')` (tokens-v3 `vzTheme`), `theme('colors.*')` on the role
+ * palette, or `@apply` of token classes.
+ */
+/*
+ * Static visualization roles (VIZ-01 spec §2.1) as short classes: an inline
+ * SVG repeats them on every glyph, so full utility lists would blow the
+ * markup budget. Dark is the product; `print:` carries the light roles.
+ * Owned by engines/env-records (the closures figure).
+ */
+@layer components {
+  .vz-g { @apply fill-zinc-800 print:fill-white; stroke: currentColor; }
+  /* A record's dividers: the one hairline, white/10 (H3 R2 Q10). */
+  .vz-hl { @apply fill-none stroke-white/10 print:stroke-zinc-200; }
+  .vz-m { @apply fill-zinc-400 print:fill-zinc-600; }
+  .vz-l { @apply stroke-zinc-500 print:stroke-zinc-500; }
+  .vz-r { @apply fill-amber-400 print:fill-amber-700; }
+  .vz-x { @apply stroke-zinc-500 print:stroke-zinc-500; }
+  .vz-d { stroke-dasharray: theme('vz.dash'); }
+  .vz-c { text-anchor: middle; }
+  /*
+   * Type in em of the svg's own size, which the stage sets in user units
+   * (`font-size={SIZE.value}`, 13): the geometry is laid out at those sizes
+   * and the svg is sized in rem, so the text follows text zoom with the
+   * drawing. rem here would scale it twice.
+   */
+  .vz-12 { font-size: calc(12em / 13); }
+  /* A record header and a function title (12 medium), one class each for the markup budget. */
+  .vz-t { @apply fill-zinc-300 font-medium print:fill-zinc-700; font-size: calc(12em / 13); }
+  .vz-f { @apply font-medium; font-size: calc(12em / 13); text-anchor: middle; }
+  /* The ƒ before a function's name and the › before an output: the muted role (N12). */
+  :is(.vz-f, .vz-r) > tspan { @apply fill-zinc-400 print:fill-zinc-600; }
+  /*
+   * The figure's svg: mono ink, drawn past its box, centred, never wider than
+   * its column. Links and glyph outlines draw in `currentColor`: the `line`
+   * role at rest (H3 R1: lime only on the traced path), the `now` lime when
+   * a function's path is traced (`--vz-k`, set by engines/env-records/paths.ts).
+   */
+  .vz-s {
+    @apply mx-auto h-auto max-w-full font-mono fill-zinc-100 print:fill-zinc-900;
+    overflow: visible;
+    --vz-k: theme('colors.lime.400');
+    --vz-kt: theme('colors.lime.400 / 10%');
+  }
+  .vz-s :is([data-edge], [data-node]) { @apply text-zinc-500 print:text-zinc-600; }
+  .vz-e { fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: var(--vz-sw, theme('vz.connector')); }
+  .vz-ah { fill: currentColor; }
+  /* A function object: the glyph, tinted when traced (D5: a lime border plus the lime-400/10 fill). */
+  .vz-fb { fill: var(--vz-t, theme('colors.zinc.800')); stroke: currentColor; @apply print:fill-white; }
+  /* Its touch target: a transparent band up to 7 px around the box, 45 px tall (R11, `hitBands` in the stage). */
+  .vz-hit { fill: transparent; }
+  /* A row a function can read: clear until traced, then the lime tint. */
+  .vz-rt { color: transparent; fill: currentColor; fill-opacity: theme('vz.readTint'); }
+  /* The clear plates under an unused record's text, in the glyph fill: the hatch never runs through a letter (R16). */
+  .vz-p { @apply fill-zinc-800 print:fill-white; }
+  /*
+   * A link's label (`env`, `outer`): muted text at rest; it takes the lit
+   * colour with its link (R2M-14), through `color` like the link itself.
+   */
+  .vz-el { @apply text-zinc-400 print:text-zinc-600; fill: currentColor; font-size: calc(12em / 13); }
+  /*
+   * VIZ-H D21 and H3 R11, the closures moment: hovering a function, focusing
+   * it from the keyboard (`:focus-visible`, so a mouse click never sticks)
+   * or tapping it on a device that cannot hover lights its path by
+   * emphasis only (G ruling 1: nothing dims, so every other element keeps
+   * its rest contrast): the figure's own rules (paths.ts) set the lime
+   * colour, the lime tint and the 2.5 px edge. One path at a time: a
+   * hovered function wins over a keyboard focus. Colour on the `highlight`
+   * token (120 ms, the stage curve), none under reduced motion; print
+   * never hovers.
+   */
+  .vz-s [tabindex] { outline: none; }
+  /*
+   * The focus ring (D5: 2 px lime-500, 2 px off the glyph), on the glyph
+   * itself: the group also holds the touch band, which would widen it.
+   */
+  .vz-s [tabindex]:focus-visible > .vz-fb { @apply rounded-lg outline outline-2 outline-offset-2 outline-lime-500; }
+  /* Press (R13): the traced tint deepens while held. */
+  .vz-s [tabindex]:active > .vz-fb { fill: theme('colors.lime.400 / 20%'); }
+  .vz-s :is([data-edge], [data-node], .vz-el), .vz-s > g[aria-hidden] > :is(text, rect) {
+    transition: color theme('vz.highlight') theme('vz.ease');
+  }
+  .vz-e, .vz-fb { transition: stroke-width theme('vz.highlight') theme('vz.ease'), fill theme('vz.highlight') theme('vz.ease'); }
+  @media (prefers-reduced-motion: reduce) {
+    .vz-s :is([data-edge], [data-node], .vz-el), .vz-s > g[aria-hidden] > :is(text, rect), .vz-e, .vz-fb { transition: none; }
+  }
+  /*
+   * Touch (R2M-16): a tap focuses a function and lights its path; a second
+   * tap on it puts the path down. While focused, the function lets taps
+   * through to the figure behind it, which cannot take focus, so the tap
+   * blurs it, as a tap on empty space does. No script. The figure counts
+   * as clickable (cursor), so iOS sends that tap at all; the trace is the
+   * tap's feedback, so the grey tap flash is off.
+   */
+  @media (hover: none) {
+    .vz-s { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    .vz-s [tabindex]:focus { pointer-events: none; }
+  }
+}
+
+/*
+ * VIZ-H R7, the event loop's finale: the code pane relights the lines that
+ * printed, in run order. Each traced line replays from unlit after its own
+ * delay (inline `animation`, from the `enter` token), so a line that was
+ * already current lights again in its turn instead of staying lit.
+ */
+@keyframes vz-relight-ground { from { background-color: transparent; } }
+@keyframes vz-relight-mark { from { opacity: 0; } }
+/* H3 R2 Q14: a line lit on the step before fades out first (`exit` token). */
+@keyframes vz-unlight-ground { to { background-color: transparent; } }
+@keyframes vz-unlight-mark { to { opacity: 0; } }
+
+/*
+ * VIZ-H H3 R2 Q4: a verdict mark (✓, ×) and a checkpoint's feedback arrive
+ * on the 160 ms `land` fade once the step's motion has landed, in every
+ * visual. Under reduced motion they appear at once.
+ */
+@keyframes vz-land-in { from { opacity: 0; } }
+.vz-land-in { animation: vz-land-in theme('vz.land') theme('vz.ease') var(--vz-land-delay, 0s) backwards; }
+/*
+ * A visual whose verdict lands on a later beat (list keys: `BEAT.verdict`
+ * after the last landing) sets `--vz-land-delay`; what the mark replaces
+ * (the choice's numeral) stays until that beat, then goes at once, so the
+ * slot is never blank and two glyphs never crossfade (M15).
+ */
+@keyframes vz-land-out { to { opacity: 0; } }
+.vz-land-out { animation: vz-land-out 0s var(--vz-land-delay, 0s) forwards; }
+@media (prefers-reduced-motion: reduce) {
+  .vz-land-in { animation: none; }
+  .vz-land-out { display: none; }
+}
+/*
+ * Q17: browsers without size container queries (Safari before 16, Firefox
+ * before 110) get the narrow layout, which the frame's default classes
+ * already are; a segmented control shows only its select; the scrubber
+ * thumb is placed by `left` on its rail instead of `cqw`.
+ */
+@supports not (container-type: inline-size) {
+  [data-vz-seg] > [role='radiogroup'] { display: none !important; }
+  [data-vz-seg] > [data-vz-select] { display: inline-flex !important; }
+  [data-viz-part='scrubber-thumb'] { left: var(--vz-at) !important; transform: translateY(var(--vz-up)) !important; }
 }

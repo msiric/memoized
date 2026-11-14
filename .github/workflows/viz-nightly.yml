@@ -1,0 +1,82 @@
+name: Visualization gates (full matrix)
+
+# VIZ-H G: the full stress matrix (every width, browser and CSS zoom, very
+# large text, the R1 extra configurations) and the motion gate at 320 to
+# 1920, nightly on master and on demand for any branch. The PR gate
+# (ci.yml, "Visualization gates") runs the core subset on every pull request.
+
+permissions:
+  contents: read
+
+env:
+  COREPACK_ENABLE_AUTO_PIN: '0'
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  viz-gates-full:
+    name: Visualization gates (full)
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
+    env:
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
+      DATABASE_URL_UNPOOLED: postgresql://ci:ci@localhost:5432/memoized_ci?schema=public
+      NEXT_PUBLIC_SITE_URL: https://memoized.dev
+      MEILISEARCH_HOST: http://localhost:7700
+      MEILISEARCH_MASTER_KEY: dummy-key-for-ci-build
+      RESEND_TOKEN: re_dummy_key_for_ci_build
+      NEXTAUTH_SECRET: dummy-nextauth-secret-for-ci
+      NEXTAUTH_URL: http://127.0.0.1:3100
+      SENTRY_DISABLE: true
+      NEXT_TELEMETRY_DISABLED: '1'
+      VIZ_GALLERY: '1'
+      VIZ_VISUAL: '1'
+      E2E_BASE_URL: http://127.0.0.1:3100
+      STRESS_OUT: ${{ github.workspace }}/test-results/stress
+      MOTION_OUT: ${{ github.workspace }}/test-results/motion
+    steps:
+      - uses: actions/checkout@v7
+
+      # No setup-node yarn cache here: the image ships neither yarn nor
+      # corepack (its own Node is newer), so yarn exists only after
+      # corepack is enabled on the Node 24 that setup-node installs.
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+
+      - name: Enable the declared package manager
+        run: |
+          corepack enable
+          node --version
+          yarn --version
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Pin the gate fonts
+        run: cp e2e/gates/fonts.conf /etc/fonts/local.conf && fc-match system-ui
+
+      - name: Start the dev server
+        run: |
+          nohup node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3100 > "$RUNNER_TEMP/next-dev.log" 2>&1 &
+          node e2e/warm.mjs "$E2E_BASE_URL"
+
+      - name: Visualization gates (full matrix)
+        run: e2e/gate.sh full
+
+      - name: Upload gate evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: viz-gates-full
+          path: |
+            test-results
+            ${{ runner.temp }}/next-dev.log
+          if-no-files-found: ignore

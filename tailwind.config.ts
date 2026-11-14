@@ -1,6 +1,9 @@
 import headlessuiPlugin from '@headlessui/tailwindcss'
 import typographyPlugin from '@tailwindcss/typography'
 import { type Config } from 'tailwindcss'
+import colors from 'tailwindcss/colors'
+import plugin from 'tailwindcss/plugin'
+import { vzTheme } from './src/components/visualizations/primitives/tokens-v3'
 import typographyStyles from './typography'
 
 export default {
@@ -33,6 +36,19 @@ export default {
     },
     typography: typographyStyles,
     extend: {
+      // Lesson visualizations: the tokens the `.vz-*` stylesheet reads with
+      // `theme('vz.*')` (tokens-v3.ts `vzTheme`; the token lint forbids literals there).
+      vz: vzTheme,
+      colors: {
+        // Lesson visualizations (VIZ-H decision 4): the frame surface
+        // (zinc-800/40 over the zinc-900 page) as one opaque color, derived
+        // from the palette, for fills that must mask what is under them.
+        'vz-frame': `color-mix(in srgb, ${colors.zinc[800]} 40%, ${colors.zinc[900]})`,
+      },
+      brightness: {
+        // Lesson visualizations: press feedback (VIZ-H decision 11).
+        98: '.98',
+      },
       animation: {
         flipVertical: 'flipVertical 0.3s ease-in-out',
         borderFlash: 'borderFlash 3s ease-in-out',
@@ -78,5 +94,33 @@ export default {
       },
     },
   },
-  plugins: [typographyPlugin, headlessuiPlugin],
+  plugins: [
+    typographyPlugin,
+    headlessuiPlugin,
+    // Hover styles only on devices that can hover (VIZ-H decision 11), so a
+    // tap never leaves a control stuck in its hover state.
+    plugin(({ addVariant }) => {
+      addVariant('can-hover', '@media (hover: hover) { &:hover }')
+      addVariant('group-can-hover', '@media (hover: hover) { :merge(.group):hover & }')
+      // The press step (VIZ-H R13). Registered after `can-hover`, so a press
+      // wins over the hover it starts from (a plain `active:` is emitted
+      // before plugin variants and loses to `can-hover:` at equal specificity).
+      addVariant('press', '&:active')
+      addVariant('group-press', ':merge(.group):active &')
+      // Lesson visualizations pick their layout variant by the frame's own
+      // width in rem (VIZ-H D19), so 150 % or 200 % text gets the layout that
+      // fits. The frame is the size container `vz` (primitives/frame-cls.ts).
+      // vz-wide: from 37.875rem (606 px at the default size, the frame's
+      // content at a 768 px viewport). vz-col: from 47.875rem (766 px, the
+      // frame's content in the full lesson column, 1280 and up). Every
+      // visual stays in the lesson column (H3 R2 Q6), so there is no wider
+      // tier. Registered narrowest first, so a wider tier wins where two apply.
+      addVariant('vz-wide', '@container vz (min-width: 37.875rem)')
+      addVariant('vz-narrow', '@container vz (max-width: 37.874rem)')
+      addVariant('vz-col', '@container vz (min-width: 47.875rem)')
+      // Below the 320 design width: Chrome's "Very large" text on a phone,
+      // or 200 % text in a lesson column (VIZ-H R9).
+      addVariant('vz-tight', '@container vz (max-width: 17.874rem)')
+    }),
+  ],
 } satisfies Config

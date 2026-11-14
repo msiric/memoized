@@ -1,0 +1,532 @@
+{
+  "list/index": [
+    [
+      {
+        "text": "todos.",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "map",
+        "color": "#B392F0"
+      },
+      {
+        "text": "((",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "todo",
+        "color": "#FFAB70"
+      },
+      {
+        "text": ", ",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "i",
+        "color": "#FFAB70"
+      },
+      {
+        "text": ") ",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "=>",
+        "color": "#F97583"
+      }
+    ],
+    [
+      {
+        "text": "  <",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "li ",
+        "color": "#85E89D"
+      },
+      {
+        "text": "key",
+        "color": "#B392F0"
+      },
+      {
+        "text": "=",
+        "color": "#F97583"
+      },
+      {
+        "text": "{i}>",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "    <",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "input ",
+        "color": "#85E89D"
+      },
+      {
+        "text": "type",
+        "color": "#B392F0"
+      },
+      {
+        "text": "=",
+        "color": "#F97583"
+      },
+      {
+        "text": "\"checkbox\"",
+        "color": "#9ECBFF"
+      },
+      {
+        "text": " />",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "    {todo.text}",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "  </",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "li",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">)",
+        "color": "#E1E4E8"
+      }
+    ]
+  ],
+  "list/id": [
+    [
+      {
+        "text": "todos.",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "map",
+        "color": "#B392F0"
+      },
+      {
+        "text": "((",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "todo",
+        "color": "#FFAB70"
+      },
+      {
+        "text": ", ",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "i",
+        "color": "#FFAB70"
+      },
+      {
+        "text": ") ",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "=>",
+        "color": "#F97583"
+      }
+    ],
+    [
+      {
+        "text": "  <",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "li ",
+        "color": "#85E89D"
+      },
+      {
+        "text": "key",
+        "color": "#B392F0"
+      },
+      {
+        "text": "=",
+        "color": "#F97583"
+      },
+      {
+        "text": "{todo.id}>",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "    <",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "input ",
+        "color": "#85E89D"
+      },
+      {
+        "text": "type",
+        "color": "#B392F0"
+      },
+      {
+        "text": "=",
+        "color": "#F97583"
+      },
+      {
+        "text": "\"checkbox\"",
+        "color": "#9ECBFF"
+      },
+      {
+        "text": " />",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "    {todo.text}",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "  </",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "li",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">)",
+        "color": "#E1E4E8"
+      }
+    ]
+  ],
+  "list/random": [
+    [
+      {
+        "text": "todos.",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "map",
+        "color": "#B392F0"
+      },
+      {
+        "text": "((",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "todo",
+        "color": "#FFAB70"
+      },
+      {
+        "text": ", ",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "i",
+        "color": "#FFAB70"
+      },
+      {
+        "text": ") ",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "=>",
+        "color": "#F97583"
+      }
+    ],
+    [
+      {
+        "text": "  <",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "li ",
+        "color": "#85E89D"
+      },
+      {
+        "text": "key",
+        "color": "#B392F0"
+      },
+      {
+        "text": "=",
+        "color": "#F97583"
+      },
+      {
+        "text": "{Math.",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "random",
+        "color": "#B392F0"
+      },
+      {
+        "text": "()}>",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "    <",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "input ",
+        "color": "#85E89D"
+      },
+      {
+        "text": "type",
+        "color": "#B392F0"
+      },
+      {
+        "text": "=",
+        "color": "#F97583"
+      },
+      {
+        "text": "\"checkbox\"",
+        "color": "#9ECBFF"
+      },
+      {
+        "text": " />",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "    {todo.text}",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "  </",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "li",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">)",
+        "color": "#E1E4E8"
+      }
+    ]
+  ],
+  "wrapper/none": [
+    [
+      {
+        "text": "// before",
+        "color": "#A1A1AA"
+      }
+    ],
+    [
+      {
+        "text": "<",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div",
+        "color": "#85E89D"
+      },
+      {
+        "text": "><",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "Counter",
+        "color": "#79B8FF"
+      },
+      {
+        "text": " /></",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "// after: pick a change",
+        "color": "#A1A1AA"
+      }
+    ]
+  ],
+  "wrapper/type": [
+    [
+      {
+        "text": "// before",
+        "color": "#A1A1AA"
+      }
+    ],
+    [
+      {
+        "text": "<",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div",
+        "color": "#85E89D"
+      },
+      {
+        "text": "><",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "Counter",
+        "color": "#79B8FF"
+      },
+      {
+        "text": " /></",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "// after",
+        "color": "#A1A1AA"
+      }
+    ],
+    [
+      {
+        "text": "<",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "span",
+        "color": "#85E89D"
+      },
+      {
+        "text": "><",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "Counter",
+        "color": "#79B8FF"
+      },
+      {
+        "text": " /></",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "span",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">",
+        "color": "#E1E4E8"
+      }
+    ]
+  ],
+  "wrapper/class": [
+    [
+      {
+        "text": "// before",
+        "color": "#A1A1AA"
+      }
+    ],
+    [
+      {
+        "text": "<",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div",
+        "color": "#85E89D"
+      },
+      {
+        "text": "><",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "Counter",
+        "color": "#79B8FF"
+      },
+      {
+        "text": " /></",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "// after",
+        "color": "#A1A1AA"
+      }
+    ],
+    [
+      {
+        "text": "<",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div ",
+        "color": "#85E89D"
+      },
+      {
+        "text": "className",
+        "color": "#B392F0"
+      },
+      {
+        "text": "=",
+        "color": "#F97583"
+      },
+      {
+        "text": "\"on\"",
+        "color": "#9ECBFF"
+      },
+      {
+        "text": ">",
+        "color": "#E1E4E8"
+      }
+    ],
+    [
+      {
+        "text": "  <",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "Counter",
+        "color": "#79B8FF"
+      },
+      {
+        "text": " /></",
+        "color": "#E1E4E8"
+      },
+      {
+        "text": "div",
+        "color": "#85E89D"
+      },
+      {
+        "text": ">",
+        "color": "#E1E4E8"
+      }
+    ]
+  ]
+}
