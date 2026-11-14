@@ -149,6 +149,49 @@ for (const width of [375, 1440]) {
 }
 
 /**
+ * The static figures (wave 1B): a scope-chain figure's running call is the
+ * closures figure's function object (box, title, touch band and focus), at
+ * rest and traced, and its records and links are the same glyphs.
+ */
+const SVG_LOOK = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color', 'cursor'] as const
+for (const width of [375, 1440])
+  test(`static figures draw a traced call like a traced function @${width}`, async ({ page }) => {
+    await open(page, `${GALLERY}?static=1`, width)
+    const figs = page.locator('[data-viz="environment-records"] figure')
+    const svgOf = (i: number) => figs.nth(i).locator('svg >> visible=true').first()
+    const closures = svgOf(0)
+    const scope = svgOf(2)
+    const fn = closures.locator('[tabindex="0"]').first()
+    const call = scope.locator('[tabindex="0"]').first()
+    const diffs: string[] = []
+    // A straight link has a zero-width box (Playwright calls it hidden): read its style as is.
+    const styleOf = (l: Locator) =>
+      l.evaluate((el, ps) => Object.fromEntries(ps.map((p) => [p, getComputedStyle(el).getPropertyValue(p)])), SVG_LOOK as unknown as string[])
+    const same = async (what: string, a: Locator, b: Locator) => {
+      const [x, y] = [await styleOf(a), await styleOf(b)]
+      for (const k of Object.keys(x)) if (x[k] !== y[k]) diffs.push(`${what} ${k}: closures ${x[k]} vs scope chain ${y[k]}`)
+    }
+    const parts = async (when: string) => {
+      await same(`${when} box`, fn.locator('rect.vz-fb'), call.locator('rect.vz-fb'))
+      await same(`${when} title`, fn.locator('text'), call.locator('text'))
+    }
+    await parts('rest')
+    await same('record header', closures.locator('.vz-t').first(), scope.locator('[data-node="module"] .vz-t').first())
+    await same('link', closures.locator('[data-edge^="outer:"] .vz-e, [data-edge^="env:"] .vz-e').first(), scope.locator('[data-edge^="outer:"] .vz-e').first())
+    // Traced: hover each (one path at a time per figure).
+    await fn.scrollIntoViewIfNeeded()
+    await fn.hover()
+    await settle(page)
+    const litFn = await look(fn.locator('rect.vz-fb'), SVG_LOOK)
+    await call.scrollIntoViewIfNeeded()
+    await call.hover()
+    await settle(page)
+    const litCall = await look(call.locator('rect.vz-fb'), SVG_LOOK)
+    for (const k of Object.keys(litFn)) if (litFn[k] !== litCall[k]) diffs.push(`traced box ${k}: closures ${litFn[k]} vs scope chain ${litCall[k]}`)
+    expect(diffs).toEqual([])
+  })
+
+/**
  * Q6: in a lesson the visual sits in the column like a code block: its
  * frame's left and right edges are a code block's edges at every width
  * (the documented exception, 320, is the full-bleed tier, ruling 1).
@@ -178,4 +221,79 @@ for (const slug of LESSONS)
           problems.push(`${width}: frame [${f.join(', ')}] vs code block [${want.join(', ')}]`)
     }
     expect(problems).toEqual([])
+  })
+
+/**
+ * The static figures speak one vocabulary (closures and the heap graph):
+ * the frame, the hint, the panel heading, the glyph fill and outline, the
+ * header and value type, the hairline, a link at rest and traced, the
+ * arrowhead, the output role, the focusable glyph at rest and lit, and its
+ * focus ring. A drift in either figure fails here, whatever its baseline says.
+ */
+for (const width of [375, 1440])
+  test(`static figures compute identically: closures and heap graph @${width}`, async ({ page }) => {
+    await open(page, `${GALLERY}?static=1`, width)
+    const er = page.locator('figure[data-viz-preset="factory-calls-vs-aliases"]')
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: closures ${a[k]} vs heap graph ${b[k]}`)
+    }
+    const vis = (root: Locator, sel: string) => root.locator(`${sel}:visible`).first()
+    /** Computed style of the first `sel` inside an svg on screen (a straight link has a zero-width box, so no visibility check). */
+    const inSvg = (root: Locator, sel: string, props: readonly string[] = SVG) =>
+      root.evaluate(
+        (f, [q, ps]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) throw new Error(`nothing matches ${q}`)
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, props] as const,
+      )
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    same('frame', await look(er, FRAME), await look(hg, FRAME))
+    // Text regions reserve the lines their own copy needs (min-height): compare the type, not the reserve.
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    same('title', await look(er.locator('p').first(), TEXT), await look(hg.locator('p').first(), TEXT))
+    same('hint', await look(vis(er, '[data-viz-part="hint"]'), TEXT), await look(vis(hg, '[data-viz-part="hint"]'), TEXT))
+    same('panel heading', await look(vis(er, '[data-viz-section] > p'), TEXT), await look(vis(hg, '[data-viz-section] > p'), TEXT))
+    same('caption', await look(er.locator('figcaption'), TEXT), await look(hg.locator('figcaption'), TEXT))
+    same('glyph', await inSvg(er, 'svg .vz-g'), await inSvg(hg, 'svg .vz-g'))
+    same('header', await inSvg(er, 'svg .vz-t'), await inSvg(hg, 'svg .vz-t'))
+    same('hairline', await inSvg(er, 'svg .vz-hl'), await inSvg(hg, 'svg .vz-hl'))
+    same('link at rest', await inSvg(er, 'svg [data-edge^="ref:"] .vz-e'), await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'))
+    same('arrowhead', await inSvg(er, 'svg [data-edge^="ref:"] .vz-ah'), await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-ah'))
+    same('focusable glyph at rest', await inSvg(er, 'svg [tabindex] .vz-fb'), await inSvg(hg, 'svg [tabindex] .vz-fb'))
+    // Output: the closures `› value` under a function, the heap graph's result line.
+    same('output', await inSvg(page.locator('figure[data-viz-preset="var-vs-let-loop"]'), '.vz-r'), await inSvg(hg, 'svg .vz-r'))
+    // Traced: hover one focusable glyph in each, compare the lit glyph and its link.
+    const erFn = vis(er, 'svg [data-node="deposit"]')
+    await erFn.scrollIntoViewIfNeeded()
+    await erFn.hover()
+    await settle(page)
+    const erLitGlyph = await inSvg(er, '[data-node="deposit"] .vz-fb')
+    const erLitEdge = await inSvg(er, '[data-edge="env:deposit"] .vz-e')
+    const hgName = vis(hg, '[data-viz-section="spread"] svg [data-node="v-copy"]')
+    await hgName.scrollIntoViewIfNeeded()
+    await hgName.hover()
+    await settle(page)
+    same('traced glyph', erLitGlyph, await inSvg(hg, '[data-viz-section="spread"] [data-node="v-copy"] .vz-fb'))
+    same('traced link', erLitEdge, await inSvg(hg, '[data-viz-section="spread"] svg [data-edge="bind:v-copy"] .vz-e'))
+    // The focus ring: the one offset ring (D5).
+    const RING = ['outline-style', 'outline-width', 'outline-color', 'outline-offset'] as const
+    await page.mouse.move(0, 0)
+    await erFn.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    const erRing = await look(page.locator(':focus > .vz-fb'), RING)
+    await hgName.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    same('focus ring', erRing, await look(page.locator(':focus > .vz-fb'), RING))
+    expect(diffs).toEqual([])
   })

@@ -12,9 +12,9 @@ import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
 import { lintEnvDiagram } from './lint'
 import { CONTAINER, EnvRecordsStage, hitBands } from './EnvRecordsStage'
-import { HINT, LABELS, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
+import { HINT, LABELS, SIZE, STAGE, hintOf, layoutDiagram, layoutSection, type SectionScene } from './layout'
 import { sansWidth } from '../../substrates/text-metrics'
-import type { EnvSection } from './model'
+import { isTracer, type EnvSection } from './model'
 
 /**
  * Layout invariants for every preset, variant and width: the picture is
@@ -304,7 +304,8 @@ describe('static markup budget (spec §6.5, raised to 36 KB by H3 R11 for the tr
 
 describe('the interaction hint (R11)', () => {
   it('fits one line at the narrowest stage, in both wordings', () => {
-    for (const text of [HINT.hover, HINT.tap]) {
+    const hints = [HINT, ...envRecordsDescriptor.presets.map((p) => hintOf(p.data))]
+    for (const text of hints.flatMap((h) => [h.hover, h.tap])) {
       expect(sansWidth(text, HINT.size)).toBeLessThanOrEqual(STAGE.narrow.min)
       expect(text).not.toMatch(/\u2014/)
     }
@@ -319,11 +320,13 @@ describe('the interaction hint (R11)', () => {
 
 describe('touch targets (R11)', () => {
   it.each(cases)('%s: every function has a 44 px hit area, and no two overlap', (_n, data, variant) => {
-    for (const { scenes } of layoutDiagram(data, variant).sections)
+    for (const { section, scenes } of layoutDiagram(data, variant).sections)
       for (const s of scenes) {
-        const bands = hitBands(s.boxes)
+        // Functions, and the running call a scope-chain figure traces from.
+        const tracers = new Set(section.nodes.filter(isTracer).map((n) => n.id))
+        const bands = hitBands(s.boxes, tracers)
         const hits = s.boxes
-          .filter((x) => x.kind === 'function')
+          .filter((x) => tracers.has(x.id))
           .map((b) => {
             const d = bands.get(b.id)!
             // The drawn box is rect - 1 px; the band adds its sides.
@@ -336,5 +339,33 @@ describe('touch targets (R11)', () => {
           for (let j = i + 1; j < hits.length; j++)
             expect(intersects(hits[i].r, hits[j].r), `${hits[i].id} x ${hits[j].id} @ ${s.width}`).toBe(false)
       }
+  })
+})
+
+describe('the call-stack column (scope-chain figures)', () => {
+  const caller = envRecordsDescriptor.presets.find((p) => p.id === 'caller-is-not-lexical-parent')!.data
+
+  it('sits beside the records from 768 and above them on a phone, top of the stack first', () => {
+    const at = (v: 'narrow' | 'wide') => layoutDiagram(caller, v).sections[0].scenes[0]
+    const wide = at('wide')
+    const narrow = at('narrow')
+    const frames = (s: SectionScene) => s.boxes.filter((b) => b.kind === 'frame')
+    const records = (s: SectionScene) => s.boxes.filter((b) => b.kind === 'record')
+    expect(frames(wide).map((b) => b.id)).toEqual(['printName', 'shadowName', 'moduleCode'])
+    expect(Math.max(...frames(wide).map((b) => b.rect.x + b.rect.w))).toBeLessThan(Math.min(...records(wide).map((b) => b.rect.x)))
+    expect(Math.max(...frames(narrow).map((b) => b.rect.y + b.rect.h))).toBeLessThan(Math.min(...records(narrow).map((b) => b.rect.y)))
+    // The running call's result sits on its row.
+    const out = wide.texts.find((t) => t.node === 'printName')!
+    expect(out.text).toBe('› Global')
+    expect(out.rect.y).toBeGreaterThanOrEqual(frames(wide)[0].rect.y)
+  })
+
+  it('rejects a stack too wide for the figure (the lint reports it; rendering falls back)', () => {
+    const section = caller.sections[0]
+    const wide: EnvSection = {
+      ...section,
+      nodes: section.nodes.map((n) => (n.id === 'printName' ? { ...n, title: ['printNameWithAnExtraordinarilyLongIdentifier()'] as [string] } : n)),
+    }
+    expect(() => layoutSection(wide, 288, 288)).toThrow(/call stack is \d+px wide/)
   })
 })

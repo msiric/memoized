@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { eventLoopDescriptor } from '../../src/components/visualizations/engines/event-loop/descriptor'
 import { varVsLetLoop, factoryCallsVsAliases } from '../../src/components/visualizations/engines/env-records/presets/closures'
+import { callerIsNotLexicalParent, tdzStopsLookup } from '../../src/components/visualizations/engines/env-records/presets/scope-chain'
 import { BASE, Recorder, type Row, failing, gated, activeConfigs, envDetectOptions, goto, markScope, openContext } from './harness'
 import { answersOf, walkListKeys, walkStepThrough } from './flows'
 
@@ -11,14 +12,16 @@ import { answersOf, walkListKeys, walkStepThrough } from './flows'
  *   skipped;
  * - list keys: every key x action, answered or skipped, plus the wrapper
  *   scene by pointer and by keyboard;
- * - the closures figures (server SVG);
+ * - the closures figures and the heap graphs (server SVG);
  * - hover: each control hovered, detectors run, the frame must not move;
  * - print emulation: the light rendering of each visual through the same
  *   detectors (contrast on paper included).
  * Strict by default (STRESS_STRICT=0 records only).
  */
 
-const ENV_OPTS = envDetectOptions([varVsLetLoop.data, factoryCallsVsAliases.data])
+const ENV_OPTS = envDetectOptions([varVsLetLoop.data, factoryCallsVsAliases.data, callerIsNotLexicalParent.data, tdzStopsLookup.data])
+/** The static gallery's figures, in page order: closures, then the scope-chain figures (wave 1B). */
+const ENV_FIGURES = ['var-vs-let-loop', 'factory-calls-vs-aliases', 'caller-is-not-lexical-parent', 'tdz-stops-lookup']
 const EL_ANSWERS = answersOf(eventLoopDescriptor.presets)
 
 /** Hovers every visible control of the visual and checks each hovered state. */
@@ -59,6 +62,15 @@ for (const c of activeConfigs()) {
       await walkStepThrough(page, rec, el!, 'event-loop', {}, EL_ANSWERS)
       await hoverPass(page, rec, el!, 'event-loop')
 
+      // The Promise Patterns lesson's presets: their own group, switcher and code column.
+      await goto(page, c, `${BASE}/dev/visualizations?preset=microtask-vs-timer-12345`)
+      const pp = await markScope(page, '[data-viz="event-loop"]', 0, 'pp')
+      await page.locator(pp!).scrollIntoViewIfNeeded()
+      await page.locator(pp!).hover()
+      await walkStepThrough(page, rec, pp!, 'event-loop promise-patterns', {}, EL_ANSWERS)
+      await hoverPass(page, rec, pp!, 'event-loop promise-patterns')
+      await goto(page, c, `${BASE}/dev/visualizations`)
+
       // List keys: every key x action, pick / ask / reveal.
       const lk = await markScope(page, '[data-viz="list-keys"]', 0, 'lk')
       await page.locator(lk!).scrollIntoViewIfNeeded()
@@ -90,12 +102,17 @@ for (const c of activeConfigs()) {
       await page.locator(lkw!).hover()
       await walkListKeys(page, rec, lkw!, 'list-keys wrapper', true)
 
-      // Environment records: both presets, server SVG.
+      // Environment records: every preset, server SVG.
       await goto(page, c, `${BASE}/dev/visualizations?static=1`)
-      for (const [i, id] of ['var-vs-let-loop', 'factory-calls-vs-aliases'].entries()) {
+      for (const [i, id] of ENV_FIGURES.entries()) {
         const s = await markScope(page, '[data-viz="environment-records"]', i, `er${i}`)
         await rec.check(page, s!, `environment-records ${id}`, 'static', ENV_OPTS, `environment-records ${id}`)
         await hoverPass(page, rec, s!, `environment-records ${id}`)
+      }
+      for (const [i, id] of ['identity-alias-rebind-spread', 'spread-vs-nested-vs-deep'].entries()) {
+        const s = await markScope(page, '[data-viz="heap-graph"]', i, `hg${i}`)
+        await rec.check(page, s!, `heap-graph ${id}`, 'static', {}, `heap-graph ${id}`)
+        await hoverPass(page, rec, s!, `heap-graph ${id}`)
       }
 
       // Print: the light rendering through the same detectors (R10).
@@ -107,10 +124,21 @@ for (const c of activeConfigs()) {
         await page.waitForSelector(`${s} section[data-viz-interactive="true"]`, { timeout: 30_000 })
         await rec.check(page, s!, `${v} print`, 'start', {}, `${v} | print`)
       }
+      await goto(page, c, `${BASE}/dev/visualizations?preset=await-null`)
+      {
+        const s = await markScope(page, '[data-viz="event-loop"]', 0, 'print-pp')
+        await page.locator(s!).scrollIntoViewIfNeeded()
+        await page.waitForSelector(`${s} section[data-viz-interactive="true"]`, { timeout: 30_000 })
+        await rec.check(page, s!, 'event-loop promise-patterns print', 'start', {}, 'event-loop promise-patterns | print')
+      }
       await goto(page, c, `${BASE}/dev/visualizations?static=1`)
-      for (const [i, id] of ['var-vs-let-loop', 'factory-calls-vs-aliases'].entries()) {
+      for (const [i, id] of ENV_FIGURES.entries()) {
         const s = await markScope(page, '[data-viz="environment-records"]', i, `per${i}`)
         await rec.check(page, s!, `environment-records ${id} print`, 'static', ENV_OPTS, `environment-records ${id} | print`)
+      }
+      for (const [i, id] of ['identity-alias-rebind-spread', 'spread-vs-nested-vs-deep'].entries()) {
+        const s = await markScope(page, '[data-viz="heap-graph"]', i, `phg${i}`)
+        await rec.check(page, s!, `heap-graph ${id} print`, 'static', {}, `heap-graph ${id} | print`)
       }
       await page.emulateMedia({ media: 'screen' })
     } finally {

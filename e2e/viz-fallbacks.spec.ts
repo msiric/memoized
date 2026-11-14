@@ -20,7 +20,7 @@ const GALLERY = '/dev/visualizations'
 const EL = '[data-viz="event-loop"] section'
 const LK = '[data-viz="list-keys"] section'
 
-async function withoutContainerQueries(page: Page) {
+async function withoutContainerQueries(page: Page, least = 4) {
   const applied = await page.evaluate(() => {
     const fallbacks: string[] = []
     const walk = (rules: CSSRuleList) => {
@@ -45,7 +45,7 @@ async function withoutContainerQueries(page: Page) {
     return fallbacks.length
   })
   // The global fallback (segmented controls, the thumb) and list keys' own.
-  expect(applied, 'the @supports fallbacks were found').toBeGreaterThanOrEqual(4)
+  expect(applied, 'the @supports fallbacks were found').toBeGreaterThanOrEqual(least)
 }
 
 async function open(page: Page, width: number) {
@@ -108,5 +108,52 @@ for (const width of [375, 1280])
           .slice(0, 5)
       })
       expect(spill, 'nothing spills out of the frame').toEqual([])
+    }
+  })
+
+/** What leaves a frame's box sideways (none may). */
+const spillOf = (f: ReturnType<Page['locator']>) =>
+  f.evaluate((frame) => {
+    const fr = frame.getBoundingClientRect()
+    return [...frame.querySelectorAll('*')]
+      .filter((e) => {
+        const r = e.getBoundingClientRect()
+        const s = getComputedStyle(e)
+        return r.width > 0 && s.visibility !== 'hidden' && s.display !== 'none' && (r.left < fr.left - 1 || r.right > fr.right + 1)
+      })
+      .map((e) => e.tagName.toLowerCase())
+      .slice(0, 5)
+  })
+
+// Wave 1B: the promise-patterns presets (their own switcher) and the scope-chain figures (a call stack).
+for (const width of [375, 1280])
+  test(`without container queries @${width}: the promise presets and the scope-chain figures keep one face and stay inside`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto(`${GALLERY}?preset=microtask-vs-timer-12345`)
+    const el = page.locator(EL)
+    await el.scrollIntoViewIfNeeded()
+    await expect(page.locator(`${EL}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 60_000 })
+    await withoutContainerQueries(page)
+    const seg = el.locator('header [data-vz-seg]')
+    await expect(seg.locator(':scope > [role="radiogroup"]')).toBeHidden()
+    await expect(seg.locator(':scope > [data-vz-select]')).toBeVisible()
+    // The other preset through the select, then a step past its question.
+    await seg.locator('select').selectOption({ label: 'await null' })
+    await expect(el).toHaveAttribute('data-viz-preset', 'await-null')
+    await el.locator('[data-viz-region="dock"] [role="radio"]').first().click()
+    for (let i = 0; i < 3; i++) await el.getByRole('button', { name: 'Next' }).click()
+    expect(await spillOf(el), 'nothing spills out of the frame').toEqual([])
+
+    await page.goto(`${GALLERY}?static=1`)
+    // Only the global fallback is on this page (no list keys).
+    await withoutContainerQueries(page, 1)
+    for (const preset of ['caller-is-not-lexical-parent', 'tdz-stops-lookup']) {
+      const fig = page.locator(`figure[data-viz-preset="${preset}"]`)
+      await fig.scrollIntoViewIfNeeded()
+      // The first layout of the variant on screen: the stack above the records on the narrow variant.
+      const svg = fig.locator('svg[data-viz-width] >> visible=true')
+      await expect(svg).toHaveCount(1)
+      expect(await spillOf(fig), `${preset}: nothing spills`).toEqual([])
     }
   })

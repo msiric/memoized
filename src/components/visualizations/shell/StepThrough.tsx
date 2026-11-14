@@ -25,7 +25,7 @@ import { SegmentedControl } from '../primitives/SegmentedControl'
 import { STEP_BEATS, TARGET_GAP_PX, ink, motion, motionRules, type StepBeats, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
 import { CodePane, codeRows } from './CodePane'
-import { FRAME, NUDGE_TEXT, STEP_BAR, definitionMetrics, lastTimeText, longestLastTime } from './footprint'
+import { FRAME, NUDGE_TEXT, STEP_BAR, definitionMetrics, groupIndices, lastTimeText, longestLastTime } from './footprint'
 import { allFeedback, allRecaps, feedbackText, recapText } from './feedback'
 import {
   dockMode,
@@ -234,9 +234,11 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const s = nav.state
   // Every reserved band is sized to the preset on screen (R2).
   const metrics = useMemo(() => definitionMetrics(def, s.preset), [def, s.preset])
+  // The switcher offers the starting preset's lesson group (`Preset.group`).
+  const group = useMemo(() => groupIndices(def, s.preset), [def, s.preset])
   const layout = useMemo(
-    () => def.engine.layout([def.presets[s.preset].log], def.presets.map((p) => p.log)),
-    [def, s.preset],
+    () => def.engine.layout([def.presets[s.preset].log], group.map((i) => def.presets[i].log)),
+    [def, s.preset, group],
   )
 
   const prefersReduced = useReducedMotion() ?? false
@@ -686,22 +688,22 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
           {def.title}
         </p>
         {/* One preset has no switcher, and no gap reserved for one (A5). */}
-        {def.presets.length > 1 ? (
+        {group.length > 1 ? (
           // The switcher takes the row's remaining room and falls back to a
           // select when its segments do not fit there (A2).
           <div className={cn('min-w-0 vz-wide:flex-1 print:hidden', hidden && 'invisible')}>
             <SegmentedControl
               className="vz-wide:justify-end"
               label="Example"
-              options={def.presets}
-              value={s.preset}
+              options={group.map((i) => def.presets[i])}
+              value={group.indexOf(s.preset)}
               interactive={interactive}
-              onChange={(i) => dispatch({ type: 'preset', preset: i }, true)}
+              onChange={(i) => dispatch({ type: 'preset', preset: group[i] }, true)}
             />
           </div>
         ) : null}
         {/* On paper the switcher is a line of text (R10). */}
-        {def.presets.length > 1 ? (
+        {group.length > 1 ? (
           <p className={cn('m-0 hidden print:block', typeScale.status.cls, ink.muted)}>{`Example: ${current.label}`}</p>
         ) : null}
       </header>

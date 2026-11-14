@@ -1,9 +1,10 @@
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
+import { heapGraphDescriptor } from './engines/heap-graph/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
 import { footprintOf, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
-import type { StaticDescriptor, StaticTextAlternative } from './shell/static-types'
+import { outputText, type StaticDescriptor, type StaticTextAlternative } from './shell/static-types'
 import { textAlternative, type TextAlternative } from './shell/StepsAsText'
 import type { ExplorableDescriptor } from './shell/explorable'
 import type { StepThroughDescriptor } from './shell/types'
@@ -24,6 +25,7 @@ export const VIZ_DESCRIPTORS = {
   'event-loop': eventLoopDescriptor,
   'environment-records': envRecordsDescriptor,
   'list-keys': listKeysDescriptor,
+  'heap-graph': heapGraphDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS
@@ -126,6 +128,6 @@ export function vizStaticTextAlternative(id: string, preset?: string): StaticTex
   if (!p) return undefined
   return {
     ...d.engine.describe(p.data),
-    outputs: p.programs.map((pr) => ({ label: pr.id, text: pr.observed.join(', ') })),
+    outputs: p.programs.map((pr) => ({ label: pr.id, text: outputText(pr) })),
   }
 }

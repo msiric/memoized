@@ -1,4 +1,4 @@
-import { isFunction, isRecord, resolve, type EnvDiagram, type EnvFunction, type EnvSection } from './model'
+import { isFrame, isRecord, isTracer, resolve, type EnvDiagram, type EnvSection, type Tracer } from './model'
 
 /**
  * The closures figure's one designed moment (VIZ-H D21, H3 R11): hovering a
@@ -18,6 +18,12 @@ import { isFunction, isRecord, resolve, type EnvDiagram, type EnvFunction, type 
  *   its path while no function is hovered;
  * - on devices that cannot hover, a tap focuses the function, and `:focus`
  *   lights it until the reader taps elsewhere.
+ *
+ * The scope-chain figures trace from a running call instead (a frame with
+ * `reads`): the call, the record its lookup starts in, each outer link the
+ * search walks and the record it reaches, and the first binding that
+ * matches, where the search stops, with the call's result. A record the
+ * search never visits (the caller's) keeps its rest colours.
  */
 
 const q = (v: string) => {
@@ -30,7 +36,7 @@ const edge = (id: string) => `[data-edge="${id}"]`
 const row = (record: string, name: string) => `${node(record)} [data-b=${q(name)}]`
 
 /** The row a function reads: the record its lookup lands in, and the binding. */
-export function readRow(section: EnvSection, fn: EnvFunction): { record: string; name: string } | null {
+export function readRow(section: EnvSection, fn: Tracer): { record: string; name: string } | null {
   if (!fn.reads) return null
   const hit = resolve(section, fn.id, fn.reads)
   return hit ? { record: hit.record.id, name: hit.binding.name } : null
@@ -52,7 +58,7 @@ export function litRows(section: EnvSection): Map<string, Set<string>> {
     if (!r) return
     out.set(r.record, (out.get(r.record) ?? new Set()).add(r.name))
   }
-  for (const fn of section.nodes.filter(isFunction)) {
+  for (const fn of section.nodes.filter(isTracer)) {
     add(readRow(section, fn))
     aliasesOf(section, fn.id).forEach(add)
   }
@@ -73,9 +79,12 @@ export type PathParts = {
  * its output, and every name that refers to it with its arrow and row.
  * Everything else, the rest of the outer chain included, keeps its rest colours.
  */
-export function pathParts(section: EnvSection, fn: EnvFunction): PathParts {
+export function pathParts(section: EnvSection, fn: Tracer): PathParts {
   // `[data-o]` marks what the function owns outside its box: its output and its link's label.
-  const lit = [node(fn.id), edge(`env:${fn.id}`), `[data-o=${q(fn.id)}]`, node(fn.env)]
+  // A frame draws no link of its own: its lookup starts in the record it names.
+  const lit = isFrame(fn)
+    ? [node(fn.id), `[data-o=${q(fn.id)}]`, node(fn.env)]
+    : [node(fn.id), edge(`env:${fn.id}`), `[data-o=${q(fn.id)}]`, node(fn.env)]
   const read = readRow(section, fn)
   if (read) {
     let at: string | null = fn.env
@@ -99,7 +108,7 @@ export function pathParts(section: EnvSection, fn: EnvFunction): PathParts {
 }
 
 /** The nodes, links and outputs a function's path brings to full strength (the harness compares them). */
-export function pathSelectors(section: EnvSection, fn: EnvFunction): string[] {
+export function pathSelectors(section: EnvSection, fn: Tracer): string[] {
   const { lit, hold } = pathParts(section, fn)
   return [...lit, ...hold].filter((x) => !x.includes(' '))
 }
@@ -108,7 +117,7 @@ export function pathSelectors(section: EnvSection, fn: EnvFunction): string[] {
 const safe = (id: string) => /^[A-Za-z_][\w-]*$/.test(id)
 
 /** Lit: the `now` colour, the glyph tint and the 2.5 px connector (tailwind.css `.vz-s`). */
-const LIT = '{color:var(--vz-k);--vz-t:var(--vz-kt);--vz-sw:2.5px}'
+export const LIT = '{color:var(--vz-k);--vz-t:var(--vz-kt);--vz-sw:2.5px}'
 
 /**
  * Per function, scoped to its section: the lit rule, plus a hold rule when
@@ -120,7 +129,7 @@ export function pathCss(data: EnvDiagram): string {
   const main: string[] = []
   const touch: string[] = []
   for (const section of data.sections)
-    for (const fn of section.nodes.filter(isFunction)) {
+    for (const fn of section.nodes.filter(isTracer)) {
       if (!safe(section.id) || !safe(fn.id)) throw new Error(`env-records: unsafe id ${section.id}/${fn.id}`)
       // The held outer chain needs no rule: nothing dims, so it stays at rest.
       const { lit } = pathParts(section, fn)
@@ -139,7 +148,8 @@ export function pathCss(data: EnvDiagram): string {
 }
 
 /** What a focused function announces: its name, its record, the names that refer to it, and what it reads. */
-export function pathLabel(section: EnvSection, fn: EnvFunction): string {
+export function pathLabel(section: EnvSection, fn: Tracer): string {
+  if (isFrame(fn)) return frameLabel(section, fn)
   const rec = section.nodes.find((n) => n.id === fn.env)
   const recName = rec && isRecord(rec) ? rec.title[0].replace(/\n/g, ' ') : fn.env
   const names = aliasesOf(section, fn.id).map((a) => a.name)
@@ -149,4 +159,21 @@ export function pathLabel(section: EnvSection, fn: EnvFunction): string {
     hit && 'text' in hit.binding.value ? `; it reads ${hit.binding.name} = ${hit.binding.value.text}` : ''
   // The short title (`#0`), as the narrow figure draws it: the label repeats in every width copy.
   return `ƒ ${fn.title[fn.title.length - 1]}${named}, created in ${recName}${reads}`
+}
+
+/** What a focused call announces: the call, where its lookup starts, and where it stops. */
+function frameLabel(section: EnvSection, f: Extract<Tracer, { kind: 'frame' }>): string {
+  const title = (id: string) => {
+    const n = section.nodes.find((x) => x.id === id)
+    return n ? n.title[0].replace(/\n/g, ' ') : id
+  }
+  const hit = f.reads ? resolve(section, f.id, f.reads) : undefined
+  const found = hit
+    ? hit.binding.uninitialized
+      ? `; ${hit.binding.name} is found uninitialized in ${title(hit.record.id)}, so the read throws ${f.throws ?? 'an error'}`
+      : 'text' in hit.binding.value
+        ? `; it reads ${hit.binding.name} = ${hit.binding.value.text} from ${title(hit.record.id)}`
+        : ''
+    : ''
+  return `${title(f.id)}, running; lookup starts in ${title(f.env)}${found}`
 }

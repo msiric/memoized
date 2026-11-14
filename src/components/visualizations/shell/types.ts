@@ -84,6 +84,15 @@ export type Preset<S> = {
   /** Shown in the preset switcher. At most 18 characters. */
   label: string
   log: StepLog<S>
+  /**
+   * The lesson set this preset belongs to. A frame's switcher offers only the
+   * presets of the group its starting preset is in, and widths a switch must
+   * not move (the code column) come from that group: one engine serves
+   * several lessons, each with its own examples (spec §6.3), and one
+   * lesson's examples never appear in, or resize, another's frame. Presets
+   * without a group form one set (the visual's own lesson).
+   */
+  group?: string
 }
 
 /** A step-through visual without its renderer: what the registry and manifest see. */

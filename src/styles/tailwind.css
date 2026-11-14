@@ -335,6 +335,8 @@
   .vz-12 { font-size: calc(12em / 13); }
   /* A record header and a function title (12 medium), one class each for the markup budget. */
   .vz-t { @apply fill-zinc-300 font-medium print:fill-zinc-700; font-size: calc(12em / 13); }
+  /* A binding in its TDZ (‹uninitialized›): 12 px in the header ink, so it holds 4.5:1 on a traced row's lime tint too. */
+  .vz-u { @apply fill-zinc-300 print:fill-zinc-700; font-size: calc(12em / 13); }
   .vz-f { @apply font-medium; font-size: calc(12em / 13); text-anchor: middle; }
   /* The ƒ before a function's name and the › before an output: the muted role (N12). */
   :is(.vz-f, .vz-r) > tspan { @apply fill-zinc-400 print:fill-zinc-600; }
@@ -366,6 +368,16 @@
    * colour with its link (R2M-14), through `color` like the link itself.
    */
   .vz-el { @apply text-zinc-400 print:text-zinc-600; fill: currentColor; font-size: calc(12em / 13); }
+  /*
+   * engines/heap-graph shares every role above and adds the panel's one rest
+   * mark, "changed" (H3 R2 Q9, never lime, tokens-v3 `changed`): the row a
+   * mutation wrote, its neutral edge brightened to zinc-300 and doubled (the
+   * 2 px `mark` stroke) on the white/5 tint; and the arrow a rebinding
+   * moved, zinc-300 at the 2.5 px weight. A traced path still turns either
+   * lime: the paths' rules are more specific.
+   */
+  .vz-ch { @apply fill-white/5 stroke-zinc-300 print:fill-zinc-100 print:stroke-zinc-700; }
+  .vz-s [data-edge].vz-cm { @apply text-zinc-300 print:text-zinc-700; }
   /*
    * VIZ-H D21 and H3 R11, the closures moment: hovering a function, focusing
    * it from the keyboard (`:focus-visible`, so a mouse click never sticks)

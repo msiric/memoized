@@ -10,8 +10,8 @@ import { expect, type Locator, type Page } from '@playwright/test'
 
 export const GALLERY = '/dev/visualizations'
 export const SPECIMEN = '/dev/visualizations/system'
-/** Lesson-context pages: the two free lessons, and the committed list-keys stand-in (R2 G-02). */
-export const LESSONS = ['event-loop', 'closures', 'list-keys'] as const
+/** Lesson-context pages: the free lessons (closures, event loop, scope chain, the heap-graph lessons) and the committed list-keys stand-in (R2 G-02). */
+export const LESSONS = ['event-loop', 'closures', 'scope-chain', 'list-keys', 'data-types', 'objects'] as const
 export const lessonUrl = (slug: string) => `/dev/visualizations/lesson/${slug}`
 
 /** Hides the dev-mode overlay and build indicator, which are not the product. */
@@ -45,6 +45,12 @@ export async function settle(page: Page) {
 
 const EL = '[data-viz="event-loop"] section'
 const LK = '[data-viz="list-keys"] section'
+const HEAP_DATA_TYPES = 'figure[data-viz-preset="identity-alias-rebind-spread"]'
+const HEAP_OBJECTS = 'figure[data-viz-preset="spread-vs-nested-vs-deep"]'
+
+/** A heap-graph name on screen (one svg per layout width; the visible one). */
+const heapName = (page: Page, frame: string, panel: string, name: string) =>
+  page.locator(`${frame} [data-viz-section="${panel}"] svg [data-node="v-${name}"] >> visible=true`).first()
 
 /** The event loop's Start prediction, answered with choice `pick` (1-based). */
 async function answerStart(page: Page, pick: number) {
@@ -79,15 +85,39 @@ async function lkKey(page: Page, label: string) {
   await settle(page)
 }
 
-/** The page a state opens on: the static figures alone, the list-keys wrapper preset, or the gallery. */
+/** The Promise Patterns lesson's presets (their own group, `?preset=`). */
+export const PP = `${GALLERY}?preset=microtask-vs-timer-12345`
+export const PP_AWAIT = `${GALLERY}?preset=await-null`
+
+/** The scope-chain figures: the third and fourth environment-records figures of the static gallery. */
+const SC: Record<string, string> = {
+  'sc-caller': '[data-viz="environment-records"] figure >> nth=2',
+  'sc-tdz': '[data-viz="environment-records"] figure >> nth=3',
+}
+const scFrame = (name: string) => SC[name.replace(/-hover$/, '')]
+
+/** Hovers the traceable call (or function) of a static figure, in the svg on screen. */
+async function hoverTracer(page: Page, frame: string) {
+  const fn = page.locator(frame).first().locator('svg [tabindex="0"] >> visible=true').first()
+  await fn.scrollIntoViewIfNeeded()
+  await fn.hover()
+  await settle(page)
+}
+
+/** The page a state opens on: the static figures alone, the list-keys wrapper preset, a preset, or the gallery. */
 export function stateUrl(name: string): string {
-  if (name.startsWith('closures')) return `${GALLERY}?static=1`
+  if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
+  if (name.startsWith('pp-await')) return PP_AWAIT
+  if (name.startsWith('pp-')) return PP
   if (name.startsWith('lk-wrapper')) return `${GALLERY}?lk=parent-type-change`
   return GALLERY
 }
 /** The frame a state is judged in. */
 export function stateFrame(name: string): string {
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
+  if (name.startsWith('heap-objects')) return HEAP_OBJECTS
+  if (name.startsWith('heap')) return HEAP_DATA_TYPES
+  if (name.startsWith('sc-')) return scFrame(name)
   return name.startsWith('lk') ? LK : EL
 }
 
@@ -181,6 +211,57 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'lk-wrapper-reveal': async (page) => {
     await STATES['lk-reveal'](page)
   },
+  // The heap graphs at rest (each panel's one changed mark), hovered (a
+  // name's trace reaching a shared object) and keyboard-focused.
+  'heap-rest': async () => {},
+  'heap-hover': async (page) => {
+    const name = heapName(page, HEAP_DATA_TYPES, 'spread', 'copy')
+    await name.scrollIntoViewIfNeeded()
+    await name.hover()
+    await settle(page)
+  },
+  'heap-objects-rest': async () => {},
+  'heap-objects-focus': async (page) => {
+    const name = heapName(page, HEAP_OBJECTS, 'nested', 'updatedPerson')
+    await name.scrollIntoViewIfNeeded()
+    await name.focus()
+    // Focus from a script is not :focus-visible; one Tab round trip makes it so.
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    await page.mouse.move(0, 0)
+    await settle(page)
+  },
+  // Promise patterns (R4 preset A): Start, the question after 5 logs, the finale.
+  'pp-start': async () => {},
+  'pp-checkpoint': async (page) => {
+    await answerStart(page, 2)
+    const f = page.locator(EL).first()
+    for (let i = 0; i < 12 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++)
+      await f.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+  },
+  'pp-finale': async (page) => {
+    await STATES['el-finale'](page)
+  },
+  // Preset B: run paused at await null (its continuation queued), and a wrong prediction's recap.
+  'pp-await-step-3': async (page) => {
+    await answerStart(page, 1)
+    const f = page.locator(EL).first()
+    for (let i = 0; i < 3; i++) await f.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+  },
+  'pp-await-finale': async (page) => {
+    await STATES['el-finale'](page)
+  },
+  // Scope chain: each figure at rest and with its running call traced.
+  'sc-caller': async () => {},
+  'sc-caller-hover': async (page) => {
+    await hoverTracer(page, scFrame('sc-caller'))
+  },
+  'sc-tdz': async () => {},
+  'sc-tdz-hover': async (page) => {
+    await hoverTracer(page, scFrame('sc-tdz'))
+  },
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()
@@ -258,6 +339,22 @@ export const MOTION_STATES: Record<string, MotionState> = {
   // The finale: outputs replay and the code relights (D21, Q14).
   'el-finale': {
     url: GALLERY,
+    frame: EL,
+    setup: toBeforeEnd,
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  'pp-finale': {
+    url: PP,
+    frame: EL,
+    setup: toBeforeEnd,
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  'pp-await-finale': {
+    url: PP_AWAIT,
     frame: EL,
     setup: toBeforeEnd,
     act: async (page) => {

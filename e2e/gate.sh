@@ -20,7 +20,7 @@
 #
 # PR shards (seconds of test time, measured natively on macOS against a warm
 # dev server, H3 round 2 integration; the CI image adds job setup):
-#   functional-a  viz-list-keys, viz-static                          ~230
+#   functional-a  viz-list-keys, viz-static, viz-heap-graph          ~260
 #   functional-b  viz-step-through, viz-shell, viz-fallbacks          ~235
 #   design-a      contrast crawl at rest (375, 768, 1440)             ~130
 #   design-b      full-motion contrast (375), consistency; visual
@@ -55,7 +55,7 @@ stress() { npx playwright test -c e2e/stress/playwright.stress.config.ts "$@"; }
 
 run() {
   case "$1" in
-    functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts ;;
+    functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts e2e/viz-heap-graph.spec.ts ;;
     functional-b) pw --project=functional e2e/viz-step-through.spec.ts e2e/viz-shell.spec.ts ;;
     design-a) pw --project=gates e2e/gates/contrast.spec.ts --grep-invert "full motion" ;;
     design-b)

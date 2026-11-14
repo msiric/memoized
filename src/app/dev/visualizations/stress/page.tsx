@@ -5,8 +5,11 @@ import { StaticFigure } from '@/components/visualizations/shell/StaticFigure'
 import type { StaticDefinition } from '@/components/visualizations/shell/static-types'
 import type { EnvDiagram } from '@/components/visualizations/engines/env-records/model'
 import { ENV_PRESETS, envFixture } from '@/components/visualizations/__stress__/env-records.fixtures'
+import { HEAP_PRESETS, heapFixture } from '@/components/visualizations/__stress__/heap-graph.fixtures'
+import { HeapGraphStage } from '@/components/visualizations/engines/heap-graph/HeapGraphStage'
+import type { HeapDiagram } from '@/components/visualizations/engines/heap-graph/model'
 import { EVENT_LOOP_FIXTURES } from '@/components/visualizations/__stress__/event-loop.fixtures'
-import { staticLint, stepThroughLint } from '@/components/visualizations/__stress__/lint'
+import { heapStaticLint, staticLint, stepThroughLint } from '@/components/visualizations/__stress__/lint'
 import { StressStepThrough } from '@/components/visualizations/__stress__/StressStepThrough'
 
 /**
@@ -60,16 +63,37 @@ function Static({ index }: { index: number }) {
   )
 }
 
+function HeapStatic({ index }: { index: number }) {
+  const p = HEAP_PRESETS[index]
+  const lint = heapStaticLint(p)
+  const throws = lint.some((l) => l.includes('layout ('))
+  const d = heapFixture(p)
+  const def: StaticDefinition<HeapDiagram> = { ...d, engine: { ...d.engine, Stage: HeapGraphStage } }
+  return (
+    <section data-stress-fixture={p.id} data-stress-lint={JSON.stringify(lint)}>
+      <h2>{p.id}</h2>
+      <p>Lint: {lint.length ? `${lint.length} error(s)` : 'accepted'}</p>
+      <div data-viz={`stress-${p.id}`} className="my-8">
+        {throws ? <p data-stress-error="">{lint.join('; ')}</p> : <StaticFigure def={def} preset={p.id} />}
+      </div>
+      <p data-stress-after="">Text after the visual.</p>
+    </section>
+  )
+}
+
 export default function StressPage({ searchParams = {} }: { searchParams?: Params }) {
   if (process.env.NODE_ENV === 'production' && process.env.VIZ_GALLERY !== '1') notFound()
   const f = searchParams.f
   const envIndex = ENV_PRESETS.findIndex((p) => p.id === f)
+  const heapIndex = HEAP_PRESETS.findIndex((p) => p.id === f)
 
   let body
   if (f && f in EVENT_LOOP_FIXTURES) {
     body = <Step id={f as keyof typeof EVENT_LOOP_FIXTURES} />
   } else if (envIndex >= 0) {
     body = <Static index={envIndex} />
+  } else if (heapIndex >= 0) {
+    body = <HeapStatic index={heapIndex} />
   } else {
     body = (
       <>
@@ -78,6 +102,9 @@ export default function StressPage({ searchParams = {} }: { searchParams?: Param
         ))}
         {ENV_PRESETS.map((p, i) => (
           <Static key={p.id} index={i} />
+        ))}
+        {HEAP_PRESETS.map((p, i) => (
+          <HeapStatic key={p.id} index={i} />
         ))}
       </>
     )
