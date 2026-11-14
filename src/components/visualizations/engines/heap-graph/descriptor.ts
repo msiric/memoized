@@ -11,6 +11,8 @@ import { identityAliasRebindSpread } from './presets/data-types'
  */
 
 const title = (p: HeapPanel, id: string) => objectById(p, id).title[0]
+/** A line of code inside a sentence: its own closing semicolon would double the full stop. */
+const code = (s: string) => s.replace(/;\s*$/, '')
 const says = (p: HeapPanel, v: HeapValue) => (isRef(v) ? `→ ${title(p, v.ref)}` : `= ${v.text}`)
 
 function describePanel(p: HeapPanel): string[] {
@@ -36,12 +38,12 @@ function describePanel(p: HeapPanel): string[] {
   if (m && 'row' in m) {
     const v = objectById(p, m.row.object).rows.find((r) => r.key === m.row.key)!.value
     out.push(
-      `Marked: ${title(p, m.row.object)}.${m.row.key} ${says(p, v)}${p.changedBy ? `, written by ${p.changedBy}` : ''}.`,
+      `Marked: ${title(p, m.row.object)}.${m.row.key} ${says(p, v)}${p.changedBy ? `, written by ${code(p.changedBy)}` : ''}.`,
     )
   } else if (m) {
     const b = p.bindings.find((x) => x.id === m.binding)!
     out.push(
-      `Marked: the arrow of ${b.name}, now to ${isRef(b.value) ? title(p, b.value.ref) : b.value.text}${p.changedBy ? `, moved by ${p.changedBy}` : ''}.`,
+      `Marked: the arrow of ${b.name}, now to ${isRef(b.value) ? title(p, b.value.ref) : b.value.text}${p.changedBy ? `, moved by ${code(p.changedBy)}` : ''}.`,
     )
   }
   for (const r of p.results ?? []) out.push(`${r.expr} logs ${r.text}.`)
