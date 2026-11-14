@@ -188,7 +188,7 @@ export function overlapProblems(cap: Capture, at: number): string[] {
 }
 
 /** One glyph's motion for a step: its translate displacement and duration. */
-export type GlyphVector = { dx: number; dy: number; ms: number; kind: 'enter' | 'exit' | 'move' }
+export type GlyphVector = { dx: number; dy: number; ms: number; kind: 'enter' | 'exit' | 'move'; gapMs: number }
 
 /** Per stage glyph, the displacement (end minus start) of its translate and the tween's duration (G4). */
 export function glyphVectors(ms: ElementMotion[]): Record<string, GlyphVector> {
@@ -209,6 +209,7 @@ export function glyphVectors(ms: ElementMotion[]): Record<string, GlyphVector> {
       dy: ty ? num(ty.end) - num(ty.start) : 0,
       ms: Math.max(tx?.duration ?? 0, ty?.duration ?? 0) || (op?.duration ?? 0),
       kind,
+      gapMs: Math.max(tx?.maxGapMs ?? 0, ty?.maxGapMs ?? 0, op?.maxGapMs ?? 0),
     }
     // The element that travels is the glyph; keep the larger displacement.
     const prev = out[k]
@@ -231,9 +232,11 @@ const TOKEN_MS = {
  * e2e/motion/out shows 212 vs 168 at 1024): the difference must then be
  * the tokens' difference. The tolerance is 20 ms plus one 60 Hz frame,
  * because each duration is measured to the frame it was sampled in (a
- * 160 ms exit reads 166 to 182 ms run to run).
+ * 160 ms exit reads 166 to 182 ms run to run). On a loaded machine that
+ * drops paints, the frame is the longest gap observed in either direction.
  */
 const MIRROR_MS = 20 + 17
+const mirrorTolerance = (f: GlyphVector, b: GlyphVector) => 20 + Math.max(17, Math.ceil(f.gapMs), Math.ceil(b.gapMs))
 export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<string, GlyphVector>): string[] {
   const out: string[] = []
   for (const k of new Set([...Object.keys(fwd), ...Object.keys(back)])) {
@@ -249,7 +252,7 @@ export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<st
     const land = /^out-/.test(k)
     const expected =
       !land && f.kind !== b.kind && f.kind !== 'move' && b.kind !== 'move' ? TOKEN_MS[b.kind] - TOKEN_MS[f.kind] : 0
-    if (Math.abs(b.ms - f.ms - expected) > MIRROR_MS)
+    if (Math.abs(b.ms - f.ms - expected) > Math.max(MIRROR_MS, mirrorTolerance(f, b)))
       out.push(`${k}: next ${f.kind} ${f.ms} ms, back ${b.kind} ${b.ms} ms (expected a ${expected} ms difference)`)
   }
   return out
@@ -281,10 +284,10 @@ const BEAT_PART = {
   glyph: /data-glyph|flip-id|chip=/,
   land: /out=|viz-caption/,
 } as const
-export type BeatStarts = Partial<Record<keyof typeof BEAT_PART, number>> & { end: number }
+export type BeatStarts = Partial<Record<keyof typeof BEAT_PART, number>> & { end: number; maxGapMs: number }
 
 export function beatStarts(ms: ElementMotion[]): BeatStarts {
-  const out: BeatStarts = { end: 0 }
+  const out: BeatStarts = { end: 0, maxGapMs: 0 }
   for (const e of ms) {
     const props = e.props.filter((p) => p.prop !== 'x' && p.prop !== 'y' && p.prop !== 'eff' && p.prop !== 'w' && p.prop !== 'h')
     if (!props.length) continue
@@ -294,6 +297,7 @@ export function beatStarts(ms: ElementMotion[]): BeatStarts {
       out[beat] = Math.min(out[beat] ?? Infinity, start)
     }
     out.end = Math.max(out.end, ...props.map((p) => p.delay + p.duration))
+    out.maxGapMs = Math.max(out.maxGapMs, ...props.map((p) => p.maxGapMs ?? 0))
   }
   return out
 }
@@ -305,6 +309,16 @@ const BEAT_SLACK_MS = 20
  * two frames: the held caption is swapped on a timer, then committed.
  */
 export const BEATS_MAX_MS = 560 + 34
+
+/**
+ * The measured end can only be read at a sampled frame, and the caption
+ * swap commits a frame later, so two frames of slack are added; on a loaded
+ * machine (a 2-CPU CI runner) a "frame" is the longest gap actually observed
+ * during the step. The motion itself is time-based, so dropped paints delay
+ * when the end is seen, not when it happens. On a machine that keeps 60 Hz
+ * the budget is exactly `BEATS_MAX_MS`.
+ */
+export const beatsBudget = (maxGapMs: number) => 560 + 2 * Math.max(17, Math.ceil(maxGapMs))
 
 export function beatProblems(b: BeatStarts, dir: 'forward' | 'back'): string[] {
   const order = dir === 'forward' ? (['line', 'glyph', 'land'] as const) : (['land', 'glyph', 'line'] as const)
@@ -318,7 +332,8 @@ export function beatProblems(b: BeatStarts, dir: 'forward' | 'back'): string[] {
   // A forward step's console line and caption wait for the glyph to land.
   if (dir === 'forward' && b.glyph !== undefined && b.land !== undefined && b.land - b.glyph < 200)
     out.push(`land starts ${Math.round(b.land - b.glyph)} ms after the glyph beat (the glyph has not landed)`)
-  if (b.end > BEATS_MAX_MS) out.push(`the step ends at ${Math.round(b.end)} ms (> ${BEATS_MAX_MS})`)
+  const budget = beatsBudget(b.maxGapMs)
+  if (b.end > budget) out.push(`the step ends at ${Math.round(b.end)} ms (> ${budget}, longest frame gap ${b.maxGapMs} ms)`)
   return out
 }
 

@@ -74,8 +74,15 @@ export type PropMotion = {
   duration: number
   intermediates: number
   overshootPx?: number
-  /** Largest single-frame step as a share of the whole travel (1 = all in one frame). */
+  /**
+   * Largest step per 60 Hz frame as a share of the whole travel (1 = all in
+   * one frame). A sample that arrives after dropped frames (a loaded CI
+   * runner) has its step divided by the frames it spans, so a missed paint
+   * is not read as a cut in the tween.
+   */
   maxStepShare?: number
+  /** Longest gap between two samples while the property changed (ms). */
+  maxGapMs?: number
   monotonic: boolean
 }
 
@@ -86,6 +93,9 @@ export type ElementMotion = {
   removed: boolean
   props: PropMotion[]
 }
+
+/** One frame at 60 Hz (ms). */
+export const FRAME_MS = 1000 / 60
 
 const OWN = ['op', 'tx', 'ty', 'sc', 'w', 'h', 'd', 'dash', 'cx', 'cy'] as const
 const BOX = ['x', 'y'] as const
@@ -166,13 +176,17 @@ function propMotion(prop: string, base: number | string | undefined, seq: { t: n
   }
   if (typeof start === 'number' && typeof end === 'number') {
     const nums = [start, ...values.slice(changedIdx, lastChange + 1)] as number[]
+    // Sample times aligned with `nums` (the first is the frame before the change).
+    const times = [changedIdx > 0 ? seq[changedIdx - 1].t : seq[changedIdx].t - FRAME_MS, ...seq.slice(changedIdx, lastChange + 1).map((x) => x.t)]
     const dir = Math.sign(end - start)
     let over = 0
     let maxStep = 0
     for (let i = 1; i < nums.length; i++) {
       const step = nums[i] - nums[i - 1]
       if (dir && Math.sign(step) === -dir && Math.abs(step) > 0.01) pm.monotonic = false
-      maxStep = Math.max(maxStep, Math.abs(step))
+      // Elapsed time in 60 Hz frames, not rounded: a late paint (22 ms) is 1.3 frames.
+      const frames = Math.max(1, (times[i] - times[i - 1]) / FRAME_MS)
+      maxStep = Math.max(maxStep, Math.abs(step) / frames)
       if (dir > 0) over = Math.max(over, nums[i] - end)
       if (dir < 0) over = Math.max(over, end - nums[i])
     }
@@ -185,6 +199,11 @@ function propMotion(prop: string, base: number | string | undefined, seq: { t: n
     pm.overshootPx = Math.round(over * 100) / 100
     const travel = Math.abs(end - start)
     pm.maxStepShare = travel ? Math.round((maxStep / travel) * 100) / 100 : undefined
+  }
+  {
+    let gap = 0
+    for (let i = Math.max(1, changedIdx); i <= lastChange; i++) gap = Math.max(gap, seq[i].t - seq[i - 1].t)
+    pm.maxGapMs = Math.round(gap)
   }
   return pm
 }

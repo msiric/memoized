@@ -370,31 +370,52 @@ test('full motion: the checkbox rides its line into its After row, then ticks th
   await open(page, 1024)
   const f = frame(page)
   await page.waitForTimeout(300)
+  // Watch for the rider from inside the page before the click: on a slow
+  // runner the whole ride can end between two round trips, so its ends are
+  // read where it appears and its transform on every frame of the ride
+  // (its lift pause can outlast a fixed two-read window).
+  await f.evaluate((el) => {
+    const w = window as unknown as { __ride?: Promise<unknown> }
+    w.__ride = new Promise((res) => {
+      const read = (r: Element) => {
+        const from = r.getAttribute('data-from')
+        const to = r.getAttribute('data-to')
+        // While it rides, the destination waits with an empty box and no marks.
+        const destTicks = el.querySelectorAll('[data-row="after-0"] [data-check] path').length
+        // Every frame's transform until it lands (or 1.5 s): it must travel.
+        const seen = new Set<string>()
+        const t0 = performance.now()
+        const tick = () => {
+          if (r.isConnected) seen.add(getComputedStyle(r).transform)
+          if (r.isConnected && performance.now() - t0 < 1500) requestAnimationFrame(tick)
+          else res({ from, to, destTicks, positions: seen.size })
+        }
+        tick()
+      }
+      const now = el.querySelector('[data-viz-reveal="rider"]')
+      if (now) return read(now)
+      const mo = new MutationObserver(() => {
+        const r = el.querySelector('[data-viz-reveal="rider"]')
+        if (r) {
+          mo.disconnect()
+          read(r)
+        }
+      })
+      mo.observe(el, { subtree: true, childList: true })
+    })
+  })
   await f.getByTestId('viz-skip').click()
-  await page.waitForTimeout(60)
   const rider = f.locator('[data-viz-reveal="rider"]')
-  await expect(rider).toHaveCount(1)
+  const ride = (await page.evaluate(() => (window as unknown as { __ride: Promise<unknown> }).__ride)) as {
+    from: string
+    to: string
+    destTicks: number
+    positions: number
+  }
   // Index keys after an insert at top: Buy milk's check rides to row 0 (Wake up).
-  await expect(rider).toHaveAttribute('data-from', 'before-0')
-  await expect(rider).toHaveAttribute('data-to', 'after-0')
-  // Two reads 50 ms apart in the page: the ride is about 300 ms, its settle
-  // inside the travel (R2M-04), so a round trip per read could miss it.
-  const ride = await f.evaluate(
-    (el) =>
-      new Promise<{ early: string; late: string; destTicks: number }>((res) => {
-        const r = el.querySelector('[data-viz-reveal="rider"]')!
-        const early = getComputedStyle(r).transform
-        setTimeout(() => {
-          res({
-            early,
-            late: getComputedStyle(r).transform,
-            // While it rides, the destination waits with an empty box and no marks.
-            destTicks: el.querySelectorAll('[data-row="after-0"] [data-check] path').length,
-          })
-        }, 50)
-      }),
-  )
-  expect(ride.early).not.toEqual(ride.late)
+  expect(ride.from).toBe('before-0')
+  expect(ride.to).toBe('after-0')
+  expect(ride.positions, 'the rider travels through intermediate positions').toBeGreaterThanOrEqual(3)
   expect(ride.destTicks).toBe(0)
   await page.waitForTimeout(800)
   await expect(rider).toHaveCount(0)
