@@ -46,7 +46,12 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/env-records'),
     890,
     572,
-    { 'var-vs-let-loop': [890, 572, 548], 'factory-calls-vs-aliases': [830, 550, 526] },
+    {
+      'var-vs-let-loop': [890, 572, 548],
+      'factory-calls-vs-aliases': [830, 550, 526],
+      'caller-is-not-lexical-parent': [692, 422, 422],
+      'tdz-stops-lookup': [752, 526, 526],
+    },
   ],
   'list-keys': [
     () => import('./engines/list-keys'),

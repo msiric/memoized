@@ -18,6 +18,8 @@ export type VerifiedProgram = {
   sha256: string
   /** Committed output of a real run, line by line. */
   observed: string[]
+  /** The uncaught error the run ends with (`ReferenceError`), for a program that is meant to throw. */
+  throws?: string
 }
 
 /**

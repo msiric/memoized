@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { envRecordsDescriptor } from './descriptor'
-import { isFunction, type EnvSection } from './model'
+import { isFunction, isTracer, type EnvSection } from './model'
 import { litRows, pathCss, pathLabel, pathParts, pathSelectors } from './paths'
 
 const section = (preset: string, id: string): EnvSection =>
@@ -63,7 +63,7 @@ describe('closures traced paths (D21, H3 R11)', () => {
   it('one path at a time: hover wins, keyboard focus only as :focus-visible, :focus only where nothing can hover', () => {
     for (const p of envRecordsDescriptor.presets) {
       const css = pathCss(p.data)
-      const fns = p.data.sections.flatMap((s) => s.nodes.filter(isFunction))
+      const fns = p.data.sections.flatMap((s) => s.nodes.filter(isTracer))
       // Screen only (paper never shows a trace), and hover rules only where the
       // reader can hover: a touch browser keeps :hover on a tapped function (R2M-16).
       expect(css.startsWith('@media screen and (hover:hover){')).toBe(true)

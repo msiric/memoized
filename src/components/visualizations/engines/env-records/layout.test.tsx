@@ -12,9 +12,9 @@ import { ENV_PRESETS } from '../../__stress__/env-records.fixtures'
 import { envRecordsDescriptor } from './descriptor'
 import { lintEnvDiagram } from './lint'
 import { CONTAINER, EnvRecordsStage, hitBands } from './EnvRecordsStage'
-import { HINT, LABELS, SIZE, STAGE, layoutDiagram, layoutSection, type SectionScene } from './layout'
+import { HINT, LABELS, SIZE, STAGE, hintOf, layoutDiagram, layoutSection, type SectionScene } from './layout'
 import { sansWidth } from '../../substrates/text-metrics'
-import type { EnvSection } from './model'
+import { isTracer, type EnvSection } from './model'
 
 /**
  * Layout invariants for every preset, variant and width: the picture is
@@ -304,7 +304,8 @@ describe('static markup budget (spec §6.5, raised to 36 KB by H3 R11 for the tr
 
 describe('the interaction hint (R11)', () => {
   it('fits one line at the narrowest stage, in both wordings', () => {
-    for (const text of [HINT.hover, HINT.tap]) {
+    const hints = [HINT, ...envRecordsDescriptor.presets.map((p) => hintOf(p.data))]
+    for (const text of hints.flatMap((h) => [h.hover, h.tap])) {
       expect(sansWidth(text, HINT.size)).toBeLessThanOrEqual(STAGE.narrow.min)
       expect(text).not.toMatch(/\u2014/)
     }
@@ -319,11 +320,13 @@ describe('the interaction hint (R11)', () => {
 
 describe('touch targets (R11)', () => {
   it.each(cases)('%s: every function has a 44 px hit area, and no two overlap', (_n, data, variant) => {
-    for (const { scenes } of layoutDiagram(data, variant).sections)
+    for (const { section, scenes } of layoutDiagram(data, variant).sections)
       for (const s of scenes) {
-        const bands = hitBands(s.boxes)
+        // Functions, and the running call a scope-chain figure traces from.
+        const tracers = new Set(section.nodes.filter(isTracer).map((n) => n.id))
+        const bands = hitBands(s.boxes, tracers)
         const hits = s.boxes
-          .filter((x) => x.kind === 'function')
+          .filter((x) => tracers.has(x.id))
           .map((b) => {
             const d = bands.get(b.id)!
             // The drawn box is rect - 1 px; the band adds its sides.

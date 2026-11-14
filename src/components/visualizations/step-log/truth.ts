@@ -34,6 +34,24 @@ export function recordNodeTrace(snippet: string): NodeTrace {
   return { log, runtime: `node@${process.versions.node}` }
 }
 
+/**
+ * Like `recordNodeTrace`, for a program that is meant to throw (the
+ * scope-chain figure's TDZ read): what it printed before it stopped, and the
+ * name of the uncaught error (`ReferenceError`), or null when it exits cleanly.
+ */
+export function recordNodeRun(snippet: string): NodeTrace & { error: string | null } {
+  const run = spawnSync(process.execPath, ['--input-type=commonjs', '-e', snippet], {
+    encoding: 'utf8',
+    timeout: 10_000,
+    env: { PATH: process.env.PATH ?? '' } as unknown as NodeJS.ProcessEnv,
+  })
+  if (run.error) throw run.error
+  const log = run.stdout.split('\n')
+  if (log[log.length - 1] === '') log.pop()
+  const error = run.status === 0 ? null : (run.stderr.match(/^(\w*Error)\b/m)?.[1] ?? `exit ${run.status}`)
+  return { log, runtime: `node@${process.versions.node}`, error }
+}
+
 /** `node@24.x` matches any 24.* runtime. */
 export function runtimeMatches(declared: string, actual: string): boolean {
   const [dName, dVersion] = declared.split('@')

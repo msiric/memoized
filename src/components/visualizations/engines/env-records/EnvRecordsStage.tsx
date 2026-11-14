@@ -7,6 +7,7 @@ import {
   HINT,
   SECTION_GAP,
   hasHint,
+  hintOf,
   SIZE,
   edgeEnds,
   layoutDiagramSafe,
@@ -16,7 +17,7 @@ import {
   type LaidText,
   type SectionScene,
 } from './layout'
-import { isFunction, type EnvDiagram, type EnvSection } from './model'
+import { isTracer, type EnvDiagram, type EnvSection } from './model'
 import { platesPath, textWidth, type TextRun } from '../../substrates/box-arrow'
 import { litRows, pathCss, pathLabel } from './paths'
 
@@ -89,8 +90,9 @@ export type Band = { l: number; r: number; t: number; b: number }
  * the narrow layouts are a few px apart sideways; boxes are 44 px wide or
  * more, so the target still meets 44 px).
  */
-export function hitBands(boxes: LaidBox[]): Map<string, Band> {
-  const fns = boxes.filter((b) => b.kind === 'function')
+export function hitBands(boxes: LaidBox[], tracers?: ReadonlySet<string>): Map<string, Band> {
+  // Functions, and the frames that trace (a scope-chain figure's running call).
+  const fns = boxes.filter((b) => b.kind === 'function' || tracers?.has(b.id))
   const out = new Map<string, Band>()
   for (const f of fns) {
     const a = f.rect
@@ -137,8 +139,21 @@ function Box({
   const Y = px(y)
   const W = Math.round(w) - 1
   const H = Math.round(h) - 1
-  if (box.kind === 'function' || box.kind === 'slot') {
+  if (box.kind === 'frame' && !label) {
+    // A call on the stack that reads nothing here: a plain glyph with its
+    // header-role title, never focusable, so it never looks clickable.
+    return (
+      <g data-node={box.id}>
+        <rect x={X} y={Y} width={W} height={H} rx={radius.glyph.px} className={C.glyph} />
+        <text x={r1(x + w / 2)} y={r1(y + h / 2 + 4)} className="vz-t vz-c">
+          {box.title[0]}
+        </text>
+      </g>
+    )
+  }
+  if (box.kind === 'function' || box.kind === 'slot' || box.kind === 'frame') {
     const slot = box.kind === 'slot'
+    const frame = box.kind === 'frame'
     return (
       <g data-node={box.id} tabIndex={label ? 0 : undefined} role={label ? 'img' : undefined} aria-label={label}>
         {slot || !band ? null : (
@@ -166,7 +181,7 @@ function Box({
           // `vz-f`: the 12 px medium title, centred (tailwind.css, the markup budget).
           className={slot ? clsx('vz-12 vz-c', C.muted) : 'vz-f'}
         >
-          {slot ? (
+          {slot || frame ? (
             box.title[0]
           ) : (
             <>
@@ -294,12 +309,16 @@ function Edge({ edge, section, labels }: { edge: LaidEdge; section: EnvSection; 
 
 function Text({ t }: { t: LaidText }) {
   // The note is a legend: upright sans, not italic mono (D22).
+  // An error a traced read threw is UI type in the label role, so it lights
+  // with its call's path (`data-o`), as an output never changes hue.
   const cls =
     t.kind === 'output'
-      ? clsx(C.result, 'vz-c')
-      : t.kind === 'label'
-        ? C.edgeLabel
-        : clsx('vz-12 font-sans', C.muted)
+      ? clsx(C.result, t.anchor === 'middle' && 'vz-c')
+      : t.kind === 'label' || t.kind === 'error'
+        ? clsx(C.edgeLabel, 'font-sans')
+        : t.kind === 'region'
+          ? clsx('vz-t font-sans')
+          : clsx('vz-12 font-sans', C.muted)
   return (
     <text
       x={r1(t.x)}
@@ -337,10 +356,11 @@ function SectionSvg({
   // their record, so they are drawn over the boxes.
   const links = scene.edges.filter((e) => e.kind !== 'ref')
   const refs = scene.edges.filter((e) => e.kind === 'ref')
-  const fns = scene.boxes.filter((b) => b.kind === 'function')
+  const tracers = new Set(section.nodes.filter(isTracer).map((n) => n.id))
+  const fns = scene.boxes.filter((b) => tracers.has(b.id))
   const labelsOf = (e: LaidEdge) => scene.texts.filter((t) => t.kind === 'label' && t.edge === e.id)
   const tints = litRows(section)
-  const bands = hitBands(scene.boxes)
+  const bands = hitBands(scene.boxes, tracers)
   return (
     // Only the function objects are exposed (focusable, named); the rest of
     // the picture is described by "Diagram as text". `vz-s`: mono ink,
@@ -384,7 +404,7 @@ function SectionSvg({
           <Edge key={e.id} edge={e} section={section} labels={labelsOf(e)} />
         ))}
         {scene.boxes
-          .filter((b) => b.kind !== 'function')
+          .filter((b) => !tracers.has(b.id))
           .map((b) => (
             <Box key={b.id} box={b} hatch={hatch} tints={tints.get(b.id)} />
           ))}
@@ -397,7 +417,7 @@ function SectionSvg({
             box={b}
             hatch={hatch}
             band={bands.get(b.id)}
-            label={fn && isFunction(fn) ? pathLabel(section, fn) : undefined}
+            label={fn && isTracer(fn) ? pathLabel(section, fn) : undefined}
           />
         )
       })}
@@ -457,8 +477,8 @@ function VariantStage({ data, scene, uid }: { data: EnvDiagram; scene: DiagramSc
           className={clsx('m-0 print:invisible', typeScale.provenance.cls, ink.muted)}
           style={{ marginBottom: HINT.gap }}
         >
-          <span className="[@media(hover:none)]:hidden">{HINT.hover}</span>
-          <span className="hidden [@media(hover:none)]:inline">{HINT.tap}</span>
+          <span className="[@media(hover:none)]:hidden">{hintOf(data).hover}</span>
+          <span className="hidden [@media(hover:none)]:inline">{hintOf(data).tap}</span>
         </p>
       ) : null}
       <div

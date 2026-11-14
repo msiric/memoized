@@ -14,10 +14,12 @@ import {
 } from '../../substrates/box-arrow'
 import { sansWidth, wrapByWidth } from '../../substrates/text-metrics'
 import {
+  isFrame,
   isFunction,
   isRecord,
   isSlot,
   type EdgeId,
+  type EnvFrame,
   type EnvDiagram,
   type EnvFunction,
   type EnvRecord,
@@ -112,7 +114,8 @@ export type LaidEdge = {
 }
 
 export type LaidText = {
-  kind: 'output' | 'label' | 'note'
+  /** `region`: the call stack's heading; `error`: what a traced read threw. */
+  kind: 'output' | 'label' | 'note' | 'region' | 'error'
   text: string
   /**
    * The node whose traced path lights this text: the function an output
@@ -204,7 +207,7 @@ function kidsOf(section: EnvSection, id: string): EnvNode[] {
 }
 
 function parentOf(section: EnvSection, node: EnvNode): string | null {
-  if (isFunction(node)) return node.env
+  if (isFunction(node) || isFrame(node)) return node.env
   if (isSlot(node)) return node.under
   return node.outer
 }
@@ -514,6 +517,8 @@ export function layoutSection(
   minWidth: number,
   extraBeforeLast = 0,
 ): SectionScene {
+  const frames = section.nodes.filter(isFrame)
+  if (frames.length) return layoutWithStack(section, frames, width, minWidth, extraBeforeLast)
   const plan = besidePlan(section)
   const beside = plan && layoutBeside(section, plan, width, minWidth)
   if (beside) return beside
@@ -920,6 +925,113 @@ function placeLabels(
 }
 
 // ---------------------------------------------------------------------------
+// The call stack beside the records (scope-chain figures, R4).
+// ---------------------------------------------------------------------------
+
+/**
+ * The call-stack column: a region heading (sans 12/16, as the event loop's
+ * lane labels), then one box per frame, top of the stack first, 8 apart (the
+ * figure's least gap between boxes). The running call's result (`› Global`, or the
+ * error its read threw) sits on its row, to its right.
+ */
+export const STACK = {
+  label: 'Call stack',
+  heading: 16,
+  headingGap: 6,
+  frame: 32,
+  gap: 8,
+  resultGap: 8,
+  /** Beside the records from this section width (the wide figures); above them below it. */
+  besideMin: 480,
+  /** Between the stack column and the records beside it, and between the stack and the records under it. */
+  besideGap: 32,
+  aboveGap: 24,
+} as const
+
+/** What a frame shows beside itself: its output or its error. */
+export function frameResult(f: EnvFrame): { kind: 'output' | 'error'; text: string } | null {
+  if (f.throws) return { kind: 'error', text: `throws ${f.throws}` }
+  if (f.logs !== undefined) return { kind: 'output', text: `› ${f.logs}` }
+  return null
+}
+
+function stackColumn(frames: EnvFrame[]): { frameW: number; width: number; height: number } {
+  const frameW = Math.ceil(
+    Math.max(...frames.map((f) => textWidth(f.title[0], SIZE.header) + 2 * SIZE.fnPad)),
+  )
+  const results = frames.map(frameResult).filter((r) => r !== null)
+  const resultW = Math.max(0, ...results.map((r) => textWidth(r.text, r.kind === 'error' ? SIZE.label : SIZE.value)))
+  const width = Math.ceil(Math.max(textWidth(STACK.label, SIZE.label), frameW + (resultW ? STACK.resultGap + resultW : 0)))
+  const height = STACK.heading + STACK.headingGap + frames.length * STACK.frame + (frames.length - 1) * STACK.gap
+  return { frameW, width, height }
+}
+
+const shift = (r: Rect, dx: number, dy: number): Rect => ({ ...r, x: r.x + dx, y: r.y + dy })
+
+function layoutWithStack(
+  section: EnvSection,
+  frames: EnvFrame[],
+  width: number,
+  minWidth: number,
+  extraBeforeLast: number,
+): SectionScene {
+  const col = stackColumn(frames)
+  // One arrangement per variant (decided at its narrowest width), so every width of it has one height.
+  const beside = minWidth >= STACK.besideMin
+  const dx = beside ? col.width + STACK.besideGap : 0
+  const dy = beside ? 0 : col.height + STACK.aboveGap
+  const tree: EnvSection = { ...section, nodes: section.nodes.filter((n) => !isFrame(n)) }
+  const inner = layoutSection(tree, width - dx, minWidth - dx, extraBeforeLast)
+
+  const boxes: LaidBox[] = inner.boxes.map((b) => ({
+    ...b,
+    rect: shift(b.rect, dx, dy),
+    rows: b.rows.map((r) => ({ ...r, top: r.top + dy })),
+  }))
+  const edges: LaidEdge[] = inner.edges.map((e) => {
+    const points = e.points.map((p) => ({ x: p.x + dx, y: p.y + dy }))
+    return { ...edgeOf(e.id, e.kind, points, e.dashed), ...(e.dot ? { dot: { x: e.dot.x + dx, y: e.dot.y + dy } } : {}) }
+  })
+  const texts: LaidText[] = inner.texts.map((t) => ({ ...t, x: t.x + dx, y: t.y + dy, rect: shift(t.rect, dx, dy) }))
+
+  texts.push({
+    kind: 'region',
+    text: STACK.label,
+    x: 0,
+    y: 12,
+    anchor: 'start',
+    rect: { x: 0, y: 0, w: textWidth(STACK.label, SIZE.label), h: STACK.heading },
+  })
+  frames.forEach((f, i) => {
+    const y = STACK.heading + STACK.headingGap + i * (STACK.frame + STACK.gap)
+    boxes.push({ id: f.id, kind: 'frame', rect: { x: 0, y, w: col.frameW, h: STACK.frame }, title: [f.title[0]], rows: [] })
+    const r = frameResult(f)
+    if (!r) return
+    const size = r.kind === 'error' ? SIZE.label : SIZE.value
+    const x = col.frameW + STACK.resultGap
+    texts.push({
+      kind: r.kind,
+      text: r.text,
+      node: f.id,
+      x,
+      y: y + STACK.frame / 2 + 4,
+      anchor: 'start',
+      rect: { x, y: y + (STACK.frame - SIZE.outputLine) / 2, w: textWidth(r.text, size), h: SIZE.outputLine },
+    })
+  })
+  return {
+    id: section.id,
+    width,
+    height: Math.ceil(Math.max(dy + inner.height, beside ? col.height : 0)),
+    boxes,
+    edges,
+    texts,
+    tierTops: inner.tierTops.map((t) => t + dy),
+    noteMark: inner.noteMark,
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Diagram composition per variant.
 // ---------------------------------------------------------------------------
 
@@ -950,7 +1062,10 @@ export const HINT = {
   hover: 'Hover a function to trace what it remembers.',
   tap: 'Tap a function to trace what it remembers.',
 } as const
-export const hasHint = (diagram: EnvDiagram) => diagram.sections.some((s) => s.nodes.some(isFunction))
+export const hasHint = (diagram: EnvDiagram) =>
+  diagram.sections.some((s) => s.nodes.some((n) => isFunction(n) || (isFrame(n) && n.reads !== undefined)))
+/** The figure's hint: its own wording when it traces from calls, else the closures wording. */
+export const hintOf = (diagram: EnvDiagram): { hover: string; tap: string } => diagram.hint ?? HINT
 
 /** Sections stack below 768 and sit side by side from 768 (at most two per row). */
 export function sectionWidths(

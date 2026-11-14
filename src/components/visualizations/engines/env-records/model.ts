@@ -55,10 +55,37 @@ export type EnvFunction = {
   reads?: string
 }
 
+/**
+ * A call on the call stack at the moment the figure draws (the scope-chain
+ * figures, R4: "the caller is not the lexical parent"). Frames are listed
+ * top of the stack first and drawn in their own column, apart from the
+ * records: the stack says which calls are running, the outer links say
+ * where a name is looked up, and the two need not agree.
+ */
+export type EnvFrame = {
+  kind: 'frame'
+  id: string
+  /** The call: `printName()`, or `module` for the file's own code. */
+  title: Label
+  /** Where this call's lookup starts (its running LexicalEnvironment): a record in this section. */
+  env: string
+  /** The program line (1-based) this call is paused at; the truth test breaks there in a real run. */
+  line: number
+  /** The name the running call reads: hovering the frame traces its lookup (R11), first match wins. */
+  reads?: string
+  /** What that read printed in the verified run, shown as `› value`. */
+  logs?: string
+  /** The error that read threw in the verified run (`ReferenceError`), instead of an output. */
+  throws?: string
+}
+
 /** An empty place under a record, saying why nothing is there (`no ƒ`). */
 export type EnvSlot = { kind: 'slot'; id: string; under: string; title: Label }
 
-export type EnvNode = EnvRecord | EnvFunction | EnvSlot
+export type EnvNode = EnvRecord | EnvFunction | EnvSlot | EnvFrame
+
+/** What a hover traces from: a function object (its `[[Environment]]`) or a running call (its lookup). */
+export type Tracer = EnvFunction | EnvFrame
 
 /** Edge ids: `env:<function>`, `outer:<record>`, `ref:<record>.<binding>`. */
 export type EdgeId =
@@ -82,6 +109,11 @@ export type EnvSection = {
 export type EnvDiagram = {
   sections: EnvSection[]
   /**
+   * The one-line hint, per input, when the figure traces from something
+   * other than functions (the closures wording is the default).
+   */
+  hint?: { hover: string; tap: string }
+  /**
    * `bottom`: sections side by side share the function row, so the two
    * halves of a contrast line up. `top`: each section keeps its natural height.
    */
@@ -92,6 +124,9 @@ export const isRecord = (n: EnvNode): n is EnvRecord => n.kind === 'record'
 export const isFunction = (n: EnvNode): n is EnvFunction =>
   n.kind === 'function'
 export const isSlot = (n: EnvNode): n is EnvSlot => n.kind === 'slot'
+export const isFrame = (n: EnvNode): n is EnvFrame => n.kind === 'frame'
+/** What can be hovered to trace a path: every function, and a call that reads a name. */
+export const isTracer = (n: EnvNode): n is Tracer => isFunction(n) || (isFrame(n) && n.reads !== undefined)
 
 export function nodeById(section: EnvSection, id: string): EnvNode {
   const node = section.nodes.find((n) => n.id === id)
@@ -115,7 +150,7 @@ export function resolve(
   name: string,
 ): { record: EnvRecord; binding: EnvBinding } | undefined {
   const fn = nodeById(section, fnId)
-  if (!isFunction(fn)) throw new Error(`${fnId} is not a function`)
+  if (!isFunction(fn) && !isFrame(fn)) throw new Error(`${fnId} is not a function or a frame`)
   let at: string | null = fn.env
   const seen = new Set<string>()
   while (at && !seen.has(at)) {
