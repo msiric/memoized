@@ -179,3 +179,78 @@ for (const slug of LESSONS)
     }
     expect(problems).toEqual([])
   })
+
+/**
+ * The static figures speak one vocabulary (closures and the heap graph):
+ * the frame, the hint, the panel heading, the glyph fill and outline, the
+ * header and value type, the hairline, a link at rest and traced, the
+ * arrowhead, the output role, the focusable glyph at rest and lit, and its
+ * focus ring. A drift in either figure fails here, whatever its baseline says.
+ */
+for (const width of [375, 1440])
+  test(`static figures compute identically: closures and heap graph @${width}`, async ({ page }) => {
+    await open(page, `${GALLERY}?static=1`, width)
+    const er = page.locator('figure[data-viz-preset="factory-calls-vs-aliases"]')
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: closures ${a[k]} vs heap graph ${b[k]}`)
+    }
+    const vis = (root: Locator, sel: string) => root.locator(`${sel}:visible`).first()
+    /** Computed style of the first `sel` inside an svg on screen (a straight link has a zero-width box, so no visibility check). */
+    const inSvg = (root: Locator, sel: string, props: readonly string[] = SVG) =>
+      root.evaluate(
+        (f, [q, ps]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) throw new Error(`nothing matches ${q}`)
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, props] as const,
+      )
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    same('frame', await look(er, FRAME), await look(hg, FRAME))
+    // Text regions reserve the lines their own copy needs (min-height): compare the type, not the reserve.
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    same('title', await look(er.locator('p').first(), TEXT), await look(hg.locator('p').first(), TEXT))
+    same('hint', await look(vis(er, '[data-viz-part="hint"]'), TEXT), await look(vis(hg, '[data-viz-part="hint"]'), TEXT))
+    same('panel heading', await look(vis(er, '[data-viz-section] > p'), TEXT), await look(vis(hg, '[data-viz-section] > p'), TEXT))
+    same('caption', await look(er.locator('figcaption'), TEXT), await look(hg.locator('figcaption'), TEXT))
+    same('glyph', await inSvg(er, 'svg .vz-g'), await inSvg(hg, 'svg .vz-g'))
+    same('header', await inSvg(er, 'svg .vz-t'), await inSvg(hg, 'svg .vz-t'))
+    same('hairline', await inSvg(er, 'svg .vz-hl'), await inSvg(hg, 'svg .vz-hl'))
+    same('link at rest', await inSvg(er, 'svg [data-edge^="ref:"] .vz-e'), await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'))
+    same('arrowhead', await inSvg(er, 'svg [data-edge^="ref:"] .vz-ah'), await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-ah'))
+    same('focusable glyph at rest', await inSvg(er, 'svg [tabindex] .vz-fb'), await inSvg(hg, 'svg [tabindex] .vz-fb'))
+    // Output: the closures `› value` under a function, the heap graph's result line.
+    same('output', await inSvg(page.locator('figure[data-viz-preset="var-vs-let-loop"]'), '.vz-r'), await inSvg(hg, 'svg .vz-r'))
+    // Traced: hover one focusable glyph in each, compare the lit glyph and its link.
+    const erFn = vis(er, 'svg [data-node="deposit"]')
+    await erFn.scrollIntoViewIfNeeded()
+    await erFn.hover()
+    await settle(page)
+    const erLitGlyph = await inSvg(er, '[data-node="deposit"] .vz-fb')
+    const erLitEdge = await inSvg(er, '[data-edge="env:deposit"] .vz-e')
+    const hgName = vis(hg, '[data-viz-section="spread"] svg [data-node="v-copy"]')
+    await hgName.scrollIntoViewIfNeeded()
+    await hgName.hover()
+    await settle(page)
+    same('traced glyph', erLitGlyph, await inSvg(hg, '[data-viz-section="spread"] [data-node="v-copy"] .vz-fb'))
+    same('traced link', erLitEdge, await inSvg(hg, '[data-viz-section="spread"] svg [data-edge="bind:v-copy"] .vz-e'))
+    // The focus ring: the one offset ring (D5).
+    const RING = ['outline-style', 'outline-width', 'outline-color', 'outline-offset'] as const
+    await page.mouse.move(0, 0)
+    await erFn.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    const erRing = await look(page.locator(':focus > .vz-fb'), RING)
+    await hgName.focus()
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    same('focus ring', erRing, await look(page.locator(':focus > .vz-fb'), RING))
+    expect(diffs).toEqual([])
+  })

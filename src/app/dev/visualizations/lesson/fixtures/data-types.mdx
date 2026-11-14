@@ -1,0 +1,413 @@
+export const metadata = { title: "Data Types", description: "Predict assignment and mutation, choose a JavaScript collection and explain key presence before tackling deeper copying." }
+
+# Data Types
+
+If two variables hold the same object, which changes can one of them make visible through the other? We'll use that question to choose between a record, array, Set and Map, then write a small counting function.
+
+You should already be able to run JavaScript, call a function and follow a loop over an array. TypeScript and the DSA track aren't prerequisites. Examples are independent JavaScript blocks unless a file is explicitly named. They run in Node 24 or a browser with the methods shown.
+
+**First pass:** follow assignment and property presence, try the Set identity example and change the counting input. You can skip the API reference paragraphs and weak-key section on this pass. Finish with the small attempt under [Practice and a stopping point](#exercises). The HARD clone problem is a separate implementation extension.
+
+<h2 id="primitive-data-types">Values, bindings and identity</h2>
+
+Start with two names for one object:
+
+```javascript
+const original = { count: 1 }
+const alias = original
+alias.count = 2
+
+console.log(original.count) // 2
+console.log(original === alias) // true
+```
+
+Assignment didn't create another record. Both bindings hold a value that identifies the same object. Changing its `count` is a mutation of that object, not a reassignment of either binding.
+
+| Step in this example | `original` identifies | `alias` identifies | That object's `count` |
+| --- | --- | --- | --- |
+| Create `original` | Object A | Not declared yet | 1 |
+| Assign `alias` | Object A | Object A | 1 |
+| Set `alias.count` | Object A | Object A | 2 |
+
+Object A is a label for the shared identity in this example, not an engine memory address. `const` prevents rebinding a variable. It doesn't freeze the object.
+
+Now compare a primitive:
+
+```javascript
+let a = 10
+let b = a
+b = 20
+console.log(a) // 10
+console.log(b) // 20
+```
+
+The number `10` didn't change. We assigned another value to `b`. JavaScript's seven primitive types are:
+
+- **Number:** numeric values, including fractions, `NaN` and infinities.
+- **String:** sequences of UTF-16 code units. A visible character can occupy more than one code unit.
+- **Boolean:** `true` or `false`.
+- **Undefined:** `let value` initializes `value` to `undefined` when that declaration executes without an initializer. Missing properties and absent return values commonly produce it too. You can also store it explicitly.
+- **Null:** a distinct value often used to mean intentional absence.
+- **Symbol:** an identity-bearing primitive usable as a property key. Separate calls to `Symbol('id')` create different symbols.
+- **BigInt:** integers of arbitrary precision subject to implementation limits, including small values such as `0n` and `-1n`. It isn't only for numbers above the Number safe-integer range.
+
+Primitive values are immutable. A binding containing one can still be reassigned. In strict code, including ES modules, trying to overwrite a string character throws. In a non-strict classic script that write silently fails. Neither changes the string:
+
+```javascript
+'use strict'
+const text = 'Hello'
+try {
+  text[0] = 'h'
+} catch (error) {
+  console.log(error.name) // TypeError
+}
+console.log(text) // Hello
+console.log('h' + text.slice(1)) // hello
+```
+
+Arguments follow the same assignment rule. A function gets its own parameter binding containing the argument value. An object can be shared through that value:
+
+```javascript
+const original = { count: 1 }
+
+function update(record) {
+  record.count = 2
+  record = { count: 99 }
+  return record
+}
+
+const replacement = update(original)
+console.log(original.count) // 2
+console.log(replacement.count) // 99
+console.log(original === replacement) // false
+```
+
+The mutation reached the shared object. Rebinding `record` didn't rebind `original`. This is why “objects are passed by reference” is an incomplete explanation. JavaScript copies argument values, not the caller's variable.
+
+<h2 id="objects">Records and property presence</h2>
+
+A record groups named fields. Arrays, functions, Date objects and the collections below are objects too, but their behavior isn't described by named fields alone.
+
+Object property keys are strings or symbols. Numeric keys become strings. A property can be present even when reading it gives `undefined`:
+
+```javascript
+const settings = { theme: undefined, retries: 0 }
+console.log(settings.theme) // undefined
+console.log(settings.language) // undefined
+console.log(Object.hasOwn(settings, 'theme')) // true
+console.log(Object.hasOwn(settings, 'language')) // false
+console.log(Object.hasOwn(settings, 'retries')) // true
+console.log(Object.hasOwn(settings, 'toString')) // false
+console.log('toString' in settings) // true
+```
+
+`Object.hasOwn` asks whether the object itself has the property. `in` also includes inherited properties. A truthiness check would miss useful values such as `0`, `false` and `''`. Presence isn't a promise that reading a property is safe: a getter can throw. It also doesn't tell you who supplied the property.
+
+Spread makes a new outer object, not a new graph of everything reachable from it:
+
+```javascript
+const original = { name: 'Alice', stats: { count: 1 } }
+const copy = { ...original }
+copy.name = 'Bob'
+copy.stats.count = 2
+console.log(original.name) // Alice
+console.log(original.stats.count) // 2
+console.log(original === copy) // false
+console.log(original.stats === copy.stats) // true
+```
+
+For these ordinary enumerable data fields, spread copies their values. The nested object is still shared. Spread also has descriptor and getter behavior that a general clone must consider. Don't treat it as a deep-copy operation.
+
+<h2 id="arrays">Array operations for this task</h2>
+
+Use an array when order and repeated entries matter. `['apple', 'apple']` records two occurrences. A Set would collapse those equal values before you could count them.
+
+```javascript
+const fruits = ['apple', 'banana', 'cherry']
+for (const fruit of fruits) console.log(fruit)
+console.log(fruits[0]) // apple
+console.log(fruits.length) // 3
+console.log(fruits.at(-1)) // cherry
+console.log(fruits.at(-4)) // undefined
+```
+
+`at(-1)` reads relative to the end. It doesn't clamp an out-of-range index to an endpoint. `fruits[-1]` instead reads an ordinary property named `'-1'`.
+
+For a condition rather than a known position, choose the direction and the result you need:
+
+```javascript
+const users = [
+  { id: 1, active: true },
+  { id: 2, active: false },
+  { id: 3, active: true },
+]
+console.log(users.find(user => user.active).id) // 1
+console.log(users.findLast(user => user.active).id) // 3
+console.log(users.findLastIndex(user => user.active)) // 2
+console.log(users.findLast(user => user.id === 9)) // undefined
+console.log(users.findLastIndex(user => user.id === 9)) // -1
+```
+
+`at` belongs to ES2022. `findLast` and `findLastIndex` belong to ES2023. They don't reverse the array and stop once a predicate matches. The predicate can itself mutate data, so a non-mutating search method doesn't make a callback pure.
+
+### Array API reference
+
+Keep this for lookup rather than memorizing every method before the counting task.
+
+- `[]` creates an empty array. `new Array(1, 2, 3)` stores three values, but `new Array(3)` creates length 3 with holes, not three stored `undefined` values.
+- `push` and `unshift` add at the end and start and return the new length. `pop` and `shift` remove there and return the removed value, or `undefined` for an empty array. These mutate the array.
+- `indexOf` finds the first matching index or `-1`. `includes` answers membership. Both compare objects by identity, but `includes` can find `NaN` while `indexOf` cannot.
+- `map` transforms each present element into a new array. `filter` keeps the elements passing a test. `reduce` combines elements into an accumulator. Supplying an initial accumulator makes an empty input well-defined.
+- `forEach` visits elements for side effects and returns `undefined`. Use `for...of` or an indexed `for` loop when you need normal `break` or `continue`.
+- `slice(start, end)` copies a range with an exclusive end. `splice(start, deleteCount, ...items)` changes the original and returns removed elements.
+- `concat` joins arrays into a new array. `join(separator)` produces a string.
+- `reverse` and `sort` mutate. A default sort compares strings, so supply `(a, b) => a - b` for numeric ascending order. `toReversed` and `toSorted` are copying alternatives in ES2023.
+
+```javascript
+const fruits = ['apple', 'banana', 'cherry']
+console.log(fruits.map(fruit => fruit.length)) // [5, 6, 6]
+console.log(fruits.filter(fruit => fruit.length > 5)) // ['banana', 'cherry']
+console.log(fruits.reduce((total, fruit) => total + fruit.length, 0)) // 17
+console.log(fruits.slice(1, 3)) // ['banana', 'cherry']
+
+const removed = fruits.splice(1, 1, 'blueberry')
+console.log(removed) // ['banana']
+console.log(fruits.concat(['fig']).join(', ')) // apple, blueberry, cherry, fig
+console.log([10, 2, 1].toSorted((a, b) => a - b)) // [1, 2, 10]
+```
+
+Copying an array doesn't clone its object elements. For callback composition, continue with [Higher-Order Functions](/courses/js-track/advanced-concepts/higher-order-functions). For algorithmic uses, see [Arrays](/courses/dsa-track/built-in-data-structures/arrays).
+
+<h2 id="sets">Uniqueness without losing identity</h2>
+
+A Set stores unique values in insertion order. Its equality rule is SameValueZero: `NaN` matches `NaN` and signed zeroes count as the same value. Objects still match by identity, not by their fields.
+
+Predict the size before running this:
+
+```javascript
+const apple = { name: 'apple' }
+const items = [apple, apple, { name: 'apple' }]
+const identities = new Set(items)
+const names = new Set(items.map(item => item.name))
+console.log(identities.size) // 2
+console.log(names.size) // 1
+console.log(identities.has(apple)) // true
+console.log(identities.has({ name: 'apple' })) // false
+```
+
+Choose what “duplicate” means first. Here the first two entries share one identity and the third is a different record with the same name. If the task counts names, use names as keys rather than hoping a Set will compare object contents.
+
+### Set API reference
+
+`new Set()` starts empty. Passing an iterable adds its values. `add(value)` returns the Set, `has(value)` returns a boolean and `delete(value)` reports whether something was removed. `size` counts values and `clear()` removes all entries.
+
+```javascript
+const values = new Set([1, 2, 2, 3])
+values.add(4)
+console.log(values.delete(1)) // true
+console.log([...values]) // [2, 3, 4]
+for (const value of values) console.log(value)
+values.forEach(value => console.log(value))
+values.clear()
+console.log(values.size) // 0
+```
+
+Repeated membership tests are a common reason to use a Set. Its performance depends on the engine and workload, including the cost of building it. Don't assume constructing a Set for one lookup is always faster than `includes`. See [Sets](/courses/dsa-track/built-in-data-structures/sets) for more applications.
+
+<h2 id="maps">Keyed data and counts</h2>
+
+A Map associates keys with values. Keys can be primitives or object identities. Unlike a record, a Map doesn't convert an object key into a string. Map key equality uses the same SameValueZero rule as Set.
+
+```javascript
+const user = { id: 1 }
+const metadata = new Map([[user, { visits: 0 }]])
+console.log(metadata.has(user)) // true
+console.log(metadata.has({ id: 1 })) // false
+
+metadata.set('pending', undefined)
+console.log(metadata.get('pending')) // undefined
+console.log(metadata.get('missing')) // undefined
+console.log(metadata.has('pending')) // true
+console.log(metadata.has('missing')) // false
+```
+
+`get` alone can't distinguish a missing key from one storing `undefined`. Use `has` when that difference matters. Calling `get` on a missing key isn't an error.
+
+For a count, each stored value is a positive integer. Missing means zero occurrences so far:
+
+```javascript
+const words = ['apple', 'banana', 'apple', 'cherry', 'banana', 'apple']
+const wordCount = new Map()
+for (const word of words) {
+  const count = wordCount.get(word) || 0
+  wordCount.set(word, count + 1)
+}
+console.log([...wordCount]) // [['apple', 3], ['banana', 2], ['cherry', 1]]
+```
+
+The `|| 0` default is valid in this positive-count example. It isn't a general presence test because it also replaces stored falsy values. We can use `?? 0` when only `null` and `undefined` should select the default.
+
+**Changed input:** what happens for `['apple', '', 'apple', '']`? The empty string is a key, not a missing item. Its count should be 2. An empty input should produce an empty Map.
+
+### Map API reference
+
+`new Map()` starts empty. `new Map([['name', 'Alice'], ['age', 30]])` consumes key/value pairs. `set` returns the Map, `get` reads a value, `has` tests presence and `delete` reports whether an entry existed. `size` counts entries and `clear()` removes them.
+
+```javascript
+const places = new Map([['city', 'New York'], ['country', 'US']])
+places.set('city', 'London')
+console.log([...places.keys()]) // ['city', 'country']
+console.log([...places.values()]) // ['London', 'US']
+console.log([...places.entries()]) // [['city', 'London'], ['country', 'US']]
+for (const [key, value] of places) console.log(key, value)
+places.forEach((value, key) => console.log(key, value))
+console.log(places.delete('country')) // true
+places.clear()
+console.log(places.size) // 0
+```
+
+Updating an existing key doesn't move it. Deleting and reinserting it puts it at the end. `forEach` receives value before key, unlike the pair destructuring in `for...of`. Continue with [Maps](/courses/dsa-track/built-in-data-structures/maps) for algorithmic use.
+
+<h2 id="weak-set-and-weak-map">Optional weak-key associations</h2>
+
+Skip this section on your first pass if you only need counts or membership.
+
+WeakMap associates metadata with a key without the entry itself keeping that key alive. WeakSet tracks membership with the same weak-key idea. Both accept objects and non-registered symbols. Registered symbols from `Symbol.for` aren't valid weak keys.
+
+```javascript
+const metadata = new WeakMap()
+const visited = new WeakSet()
+let item = { id: 1 }
+metadata.set(item, { visits: 2 })
+visited.add(item)
+console.log(metadata.get(item).visits) // 2
+console.log(visited.has(item)) // true
+item = null
+// No claim about when or whether garbage collection happens.
+
+const token = Symbol('token')
+metadata.set(token, 'local metadata')
+console.log(metadata.get(token)) // local metadata
+try {
+  metadata.set(Symbol.for('shared'), 'not supported')
+} catch (error) {
+  console.log(error.name) // TypeError
+}
+```
+
+WeakMap has `set`, `get`, `has` and `delete`. WeakSet has `add`, `has` and `delete`. Neither exposes `size`, iteration or `clear`. Those are API boundaries, not evidence that an engine must use a particular internal implementation.
+
+With an ordinary Map, a reachable Map's entry keeps its object key reachable until the entry is removed. A WeakMap removes that particular retaining relationship. Other references, such as a live DOM tree, an event listener closure or a separate cache, can still retain the object. Weak collections don't prevent all memory leaks.
+
+Use Map when you need to list or count entries and manage their lifecycle. Use WeakMap for metadata whose usefulness ends with its key. [Memory Management](/courses/js-track/core-fundamentals/memory-management) covers reachability, WeakRef and FinalizationRegistry. None gives a deadline or guaranteed delivery for garbage collection or finalization.
+
+<h2 id="best-practices">Choose a collection and state the contract</h2>
+
+For a user profile with known fields, a record makes those fields easy to read. For an ordered sequence with repeats, use an array. For unique IDs, use a Set. For counts keyed by IDs or values, use a Map.
+
+Before coding, say:
+
+1. **What makes two inputs the same?** Object identity, an ID field or equal text are different rules.
+2. **What does absence mean?** A missing key can differ from a stored `undefined` or zero.
+3. **What may change?** Will the operation mutate input objects or only create a new collection?
+4. **What happens on empty input?** A counting function can return an empty Map without a special failure.
+
+These choices matter more than a blanket “Map is faster” rule. Ordinary objects have ordered own keys too, but array-index keys precede other strings and symbols form a separate group. Map keeps entries in insertion order without mixing them with inherited properties. It still has a prototype as an object.
+
+If you're changing a list but must leave the input alone, a copying method can help. If you also change an element's fields, copying only the list isn't enough. Decide which identities should be shared before reaching for a general clone.
+
+<h2 id="exercises">Practice and a stopping point</h2>
+
+### Count values, then change the input
+
+Write `countValues(values)` for a finite dense array. Return a new Map from each distinct input value to its occurrence count. Use Map's equality rule, keep first-seen key order and don't mutate the input or its elements. Empty input returns an empty Map.
+
+Try strings first, then `['apple', '', 'apple', '']`. Finally try an array containing one object twice and another object with identical fields. Explain whether those should produce one key or two under this contract.
+
+**Feedback:** the loop needs only the count already stored for each key. Object keys don't require a special branch:
+
+```javascript
+function countValues(values) {
+  const counts = new Map()
+  for (const value of values) {
+    counts.set(value, (counts.get(value) ?? 0) + 1)
+  }
+  return counts
+}
+
+console.log([...countValues(['apple', '', 'apple', ''])])
+// [['apple', 2], ['', 2]]
+console.log(countValues([]).size) // 0
+const item = { name: 'apple' }
+const counts = countValues([item, item, { name: 'apple' }])
+console.log(counts.size) // 2
+console.log(counts.get(item)) // 2
+console.log(counts.get({ name: 'apple' })) // undefined
+```
+
+If the requirement changes to “count equal names,” extract `item.name` as the key. That is a different equality policy, not a bug in Map.
+
+**Stop here on the first pass** once you can explain shared mutation versus rebinding, distinguish presence from `undefined` and implement this changed-input count. The Primitives vs Objects, Object vs Map and Object.hasOwn questions below are focused checks. You don't need the clone implementation to reach this stopping point.
+
+### More practice when you need these APIs
+
+**Assignment:** predict the outputs before running:
+
+```javascript
+let a = 5
+let b = a
+b += 5
+const obj1 = { value: 10 }
+const obj2 = obj1
+obj2.value += 10
+console.log(a, b) // 5 10
+console.log(obj1.value, obj2.value) // 20 20
+```
+
+Reassigning `b` affects only `b`. Changing `obj2.value` changes the object both names identify.
+
+**Array mutation:** remove the first number, add zero at the start and replace the middle value with 10. Then produce squares and keep values at least 3 without further changes to the array:
+
+```javascript
+const nums = [1, 2, 3, 4, 5]
+nums.shift()
+nums.unshift(0)
+nums[Math.floor(nums.length / 2)] = 10
+const squares = nums.map(n => n * n)
+const filtered = nums.filter(n => n >= 3)
+console.log(nums) // [0, 2, 10, 4, 5]
+console.log(squares) // [0, 4, 100, 16, 25]
+console.log(filtered) // [10, 4, 5]
+```
+
+**Set intersection:** return the common numbers once each in the first input's order:
+
+```javascript
+const array1 = [1, 2, 3, 4, 3]
+const array2 = [3, 4, 5, 6]
+const set1 = new Set(array1)
+const set2 = new Set(array2)
+const intersection = [...set1].filter(item => set2.has(item))
+console.log(intersection) // [3, 4]
+```
+
+**Character counts:** count every code point in `'hello world'`, including the space. This is a case-sensitive code-point count, not a count of user-perceived grapheme clusters:
+
+```javascript
+const text = 'hello world'
+const counts = new Map()
+for (const character of text) {
+  counts.set(character, (counts.get(character) ?? 0) + 1)
+}
+console.log(counts.get('l')) // 3
+console.log(counts.get(' ')) // 1
+console.log([...counts.values()].reduce((sum, count) => sum + count, 0)) // 11
+```
+
+To exclude spaces, make that a stated input rule and skip them deliberately rather than silently dropping an input value.
+
+**WeakMap lifecycle:** explain why metadata for a DOM node needn't keep the node alive. Then name a separate reference that still could. Removing a node from the document isn't enough if your code still retains it.
+
+The modern-array and weak-key questions are useful reference checks. The HARD deep-clone task adds recursion, descriptors and a visited-node table. Practice those tools and read its current question before attempting it. You can finish the first pass without completing this extension.
+
+For conversion between values rather than storage and identity, continue with [Type Coercion](/courses/js-track/core-fundamentals/type-coercion).

@@ -32,6 +32,8 @@ export type LessonFixture = {
 }
 
 export const CONTENT_COMMIT = '189e8b4a27f92ccc32646bb52fe95565f16d4140'
+/** The corrected wording (`fix/batch-2d-wording`), the source of the heap-graph lessons. */
+export const BATCH_2D_COMMIT = '273a7717d6f1f5d32ad8d8c474ce737b7d451215'
 
 export const LESSON_FIXTURES: LessonFixture[] = [
   {
@@ -61,6 +63,29 @@ export const LESSON_FIXTURES: LessonFixture[] = [
       // After Example 2 (the saved-function loop): var vs let.
       { before: '### **Example 3: Methods Sharing a Result**', viz: '<Viz id="environment-records" preset="var-vs-let-loop" />' },
     ],
+  },
+  {
+    slug: 'data-types',
+    title: 'Data Types',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/data-types/page.mdx',
+    commit: BATCH_2D_COMMIT,
+    file: 'fixtures/data-types.mdx',
+    // After the third identity example (spread shares stats) and its
+    // paragraph, closing "Records and property presence": the figure draws
+    // all three examples, so it follows the last one it explains.
+    inserts: [{ before: '<h2 id="arrays">Array operations for this task</h2>', viz: '<Viz id="heap-graph" preset="identity-alias-rebind-spread" />' }],
+  },
+  {
+    slug: 'objects',
+    title: 'JavaScript Objects',
+    section: { title: 'Built-in Data Structures', href: '/courses/dsa-track/built-in-data-structures' },
+    source: 'content/dsa-track/built-in-data-structures/objects/page.mdx',
+    commit: BATCH_2D_COMMIT,
+    file: 'fixtures/objects.mdx',
+    // After Deep Cloning, the last of the three examples it draws (the
+    // shallow-copy gotcha and the nested update come earlier).
+    inserts: [{ before: '### **Merging Objects Recursively**', viz: '<Viz id="heap-graph" preset="spread-vs-nested-vs-deep" />' }],
   },
   {
     slug: 'virtual-dom',

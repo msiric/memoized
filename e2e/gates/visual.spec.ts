@@ -97,4 +97,8 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, '[data-viz="event-loop"] section', 'print-event-loop.png')
   await frameShot(page, '[data-viz="list-keys"] section', 'print-list-keys.png')
+  await open(page, `${GALLERY}?static=1`, 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, 'figure[data-viz-preset="identity-alias-rebind-spread"]', 'print-heap-graph-data-types.png')
+  await frameShot(page, 'figure[data-viz-preset="spread-vs-nested-vs-deep"]', 'print-heap-graph-objects.png')
 })
