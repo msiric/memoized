@@ -139,10 +139,15 @@ for (const preset of ['basic-ordering', 'microtask-queued-during-drain', 'microt
     strictCheck(`${preset}@${width}: reveal sequence`, problems)
     await expect(page.locator(EL).getByRole('button', { name: 'Replay' })).toBeVisible()
     // Choice 2 at each question: B (right) and C (right); micro 2 (wrong) and micro 2 (right).
+    // Promise patterns: 3 (right) and 2 (right); c (wrong) at await null's one question.
+    const RECAPS: Record<string, string> = {
+      'basic-ordering': 'Right: B logs last. Sync code first, then every microtask, then one task.',
+      'microtask-queued-during-drain': 'Not quite: timeout logs last, not micro 2. Microtasks queued mid-drain still run first.',
+      'microtask-vs-timer-12345': 'Right: 3 logs last. Sync code first, then every microtask, then one task.',
+      'await-null': 'Not quite: b logs last, not c. Code after an await runs only once the script has ended.',
+    }
     await expect(page.locator(EL).locator('[data-viz-part="viz-recap"]')).toHaveText(
-      preset === 'basic-ordering'
-        ? 'Right: B logs last. Sync code first, then every microtask, then one task.'
-        : 'Not quite: timeout logs last, not micro 2. Microtasks queued mid-drain still run first.',
+      RECAPS[preset],
     )
   })
 
