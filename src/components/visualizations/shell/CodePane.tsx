@@ -223,7 +223,7 @@ export function CodePane({
                 {/* Line numbers at every width (Q7): 20 px narrow, 24 px from 768. */}
                 <span
                   aria-hidden
-                  className={clsx('w-5 shrink-0 select-none pr-1.5 text-right font-mono text-2xs tabular-nums leading-6 vz-wide:w-6 vz-wide:pr-2', ink.muted)}
+                  className={clsx('w-5 shrink-0 select-none whitespace-nowrap pr-1.5 text-right font-mono text-2xs tabular-nums leading-6 vz-wide:w-6 vz-wide:pr-2', ink.muted)}
                 >
                   {n}
                 </span>
