@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import fs from 'node:fs'
 import path from 'node:path'
 import { RECORDER } from './recorder'
@@ -110,7 +110,7 @@ export function animated(ms: ElementMotion[]) {
     .filter((e) => e.props.length)
 }
 
-export function summarize(ms: ElementMotion[], reduced = false) {
+export function summarize(ms: ElementMotion[], reduced = false, timing = true) {
   return {
     animated: animated(ms).map((e) => ({
       label: e.label,
@@ -128,7 +128,7 @@ export function summarize(ms: ElementMotion[], reduced = false) {
         monotonic: p.monotonic,
       })),
     })),
-    flags: flagsFor(ms, { reduced, maxGlyphs: motionRules.maxAnimatedPerStep }),
+    flags: flagsFor(ms, { reduced, maxGlyphs: motionRules.maxAnimatedPerStep, timing }),
   }
 }
 
@@ -162,6 +162,26 @@ export function animsOf(cap: Capture) {
 // ---------------------------------------------------------------------------
 
 export const STRICT = process.env.MOTION_STRICT !== '0'
+
+/**
+ * Timing is enforced wherever frames can be measured. On CI a starved
+ * runner may skip it per recording (`frameHealth`), reported as a warning;
+ * anywhere else (the local gate, `e2e/gate.sh`) a skip fails, so every
+ * merge still passes the timing budgets on a machine that holds 60 Hz.
+ * MOTION_REQUIRE_TIMING=1 or 0 overrides.
+ */
+export const REQUIRE_TIMING = process.env.MOTION_REQUIRE_TIMING ? process.env.MOTION_REQUIRE_TIMING === '1' : !process.env.CI
+
+/** Reports recordings whose timing could not be measured (see REQUIRE_TIMING). */
+export function timingSkips(name: string, skipped: string[]) {
+  if (!skipped.length) return
+  const msg = `${name}: timing not measurable in ${skipped.length} recording(s) (frame gaps p90 > 25 ms): ${skipped.slice(0, 6).join('; ')}`
+  if (REQUIRE_TIMING) expect.soft(skipped, `${name}: timing must be measurable here (MOTION_REQUIRE_TIMING)`).toEqual([])
+  else {
+    console.log(`::warning title=motion timing skipped::${msg}`)
+    test.info().annotations.push({ type: 'timing-skipped', description: msg })
+  }
+}
 
 /** Fails (softly) with the list of problems, unless MOTION_STRICT=0. */
 export function strictCheck(name: string, problems: string[]) {
@@ -237,7 +257,7 @@ const TOKEN_MS = {
  */
 const MIRROR_MS = 20 + 17
 const mirrorTolerance = (f: GlyphVector, b: GlyphVector) => 20 + Math.max(17, Math.ceil(f.gapMs), Math.ceil(b.gapMs))
-export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<string, GlyphVector>): string[] {
+export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<string, GlyphVector>, timing = true): string[] {
   const out: string[] = []
   for (const k of new Set([...Object.keys(fwd), ...Object.keys(back)])) {
     const f = fwd[k]
@@ -252,7 +272,7 @@ export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<st
     const land = /^out-/.test(k)
     const expected =
       !land && f.kind !== b.kind && f.kind !== 'move' && b.kind !== 'move' ? TOKEN_MS[b.kind] - TOKEN_MS[f.kind] : 0
-    if (Math.abs(b.ms - f.ms - expected) > Math.max(MIRROR_MS, mirrorTolerance(f, b)))
+    if (timing && Math.abs(b.ms - f.ms - expected) > Math.max(MIRROR_MS, mirrorTolerance(f, b)))
       out.push(`${k}: next ${f.kind} ${f.ms} ms, back ${b.kind} ${b.ms} ms (expected a ${expected} ms difference)`)
   }
   return out
@@ -320,7 +340,7 @@ export const BEATS_MAX_MS = 560 + 34
  */
 export const beatsBudget = (maxGapMs: number) => 560 + 2 * Math.max(17, Math.ceil(maxGapMs))
 
-export function beatProblems(b: BeatStarts, dir: 'forward' | 'back'): string[] {
+export function beatProblems(b: BeatStarts, dir: 'forward' | 'back', timing = true): string[] {
   const order = dir === 'forward' ? (['line', 'glyph', 'land'] as const) : (['land', 'glyph', 'line'] as const)
   const seen = order.filter((k) => b[k] !== undefined)
   const out: string[] = []
@@ -333,7 +353,7 @@ export function beatProblems(b: BeatStarts, dir: 'forward' | 'back'): string[] {
   if (dir === 'forward' && b.glyph !== undefined && b.land !== undefined && b.land - b.glyph < 200)
     out.push(`land starts ${Math.round(b.land - b.glyph)} ms after the glyph beat (the glyph has not landed)`)
   const budget = beatsBudget(b.maxGapMs)
-  if (b.end > budget) out.push(`the step ends at ${Math.round(b.end)} ms (> ${budget}, longest frame gap ${b.maxGapMs} ms)`)
+  if (timing && b.end > budget) out.push(`the step ends at ${Math.round(b.end)} ms (> ${budget}, longest frame gap ${b.maxGapMs} ms)`)
   return out
 }
 

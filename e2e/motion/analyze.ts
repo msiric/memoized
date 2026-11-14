@@ -309,7 +309,21 @@ export function animatedGlyphs(ms: ElementMotion[], reduced = false): string[] {
  *   (spec §4 rule 1; reveal parts and vacate exits are exempt);
  * - under reduced motion: any movement, or an opacity fade over 150 ms.
  */
-export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyphs?: number } = {}): Flag[] {
+/**
+ * Whether frame timing after `from` can be measured: 90% of the sampled
+ * frame gaps within 25 ms (a starved 2-CPU CI runner paints at 50 to 75 ms,
+ * where every duration reads a frame or more long). Below that, timing
+ * flags (`too-long`, `jump`) and timing budgets are not evidence either way.
+ */
+export function frameHealth(cap: Capture, from = 0): { p90: number; ok: boolean } {
+  const ts = cap.frames.filter((f) => f.t >= from).map((f) => f.t)
+  const gaps = ts.slice(1).map((t, i) => t - ts[i]).sort((a, b) => a - b)
+  const p90 = gaps.length ? gaps[Math.min(gaps.length - 1, Math.floor(gaps.length * 0.9))] : 0
+  return { p90: Math.round(p90), ok: p90 <= 25 }
+}
+
+export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyphs?: number; timing?: boolean } = {}): Flag[] {
+  const timing = opts.timing ?? true
   const flags: Flag[] = []
   for (const e of ms) {
     // An element of the designed reveal, or inside one (the rider's svg and
@@ -317,7 +331,7 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyp
     // to 800 ms here and asserted beat by beat in reveal.spec.ts.
     if (/\bwithin-reveal=/.test(e.label) || REVEAL.test(e.label)) {
       for (const p of e.props)
-        if (p.intermediates > 0 && ['op', 'tx', 'ty', 'd', 'dash', 'sc'].includes(p.prop) && p.duration > TOKENS.reveal)
+        if (timing && p.intermediates > 0 && ['op', 'tx', 'ty', 'd', 'dash', 'sc'].includes(p.prop) && p.duration > TOKENS.reveal)
           flags.push({ kind: 'too-long', detail: `${e.label}: ${p.prop} ${p.duration}ms` })
       continue
     }
@@ -326,11 +340,11 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyp
       if ((p.prop === 'w' || p.prop === 'h') && tweened)
         flags.push({ kind: 'size-tween', detail: `${e.label}: ${p.prop} ${p.start}->${p.end} over ${p.duration}ms` })
       if (['op', 'tx', 'ty', 'd', 'dash', 'sc'].includes(p.prop) && tweened) {
-        if (p.duration > TOKENS.max)
+        if (timing && p.duration > TOKENS.max)
           flags.push({ kind: 'too-long', detail: `${e.label}: ${p.prop} ${p.duration}ms` })
         if ((p.prop === 'tx' || p.prop === 'ty') && (p.overshootPx ?? 0) > 0.5)
           flags.push({ kind: 'overshoot', detail: `${e.label}: ${p.prop} overshoot ${p.overshootPx}px` })
-        if (['tx', 'ty', 'd', 'dash'].includes(p.prop) && p.intermediates >= 3 && (p.maxStepShare ?? 0) > 0.5)
+        if (timing && ['tx', 'ty', 'd', 'dash'].includes(p.prop) && p.intermediates >= 3 && (p.maxStepShare ?? 0) > 0.5)
           flags.push({ kind: 'jump', detail: `${e.label}: ${p.prop} ${p.start}->${p.end}, one frame covers ${Math.round((p.maxStepShare ?? 0) * 100)}% of it` })
         if (p.prop === 'sc') flags.push({ kind: 'scale', detail: `${e.label}: scale ${p.start}->${p.end}` })
         if (opts.reduced && p.prop !== 'op')

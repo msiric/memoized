@@ -15,7 +15,9 @@ import {
   save,
   strictCheck,
   summarize,
+  timingSkips,
 } from './helpers'
+import { frameHealth } from './analyze'
 
 /**
  * H0-C task 1, G: frame-sample every transition of every event-loop step, in
@@ -47,6 +49,7 @@ type Entry = {
   flags: { kind: string; detail: string }[]
   beats: string[]
   verdict: string[]
+  timing: { p90: number; ok: boolean }
 }
 
 for (const width of WIDTHS)
@@ -70,11 +73,12 @@ for (const width of WIDTHS)
             const key = dir === 'back' ? 'ArrowLeft' : before.mode === 'ask' ? '2' : 'ArrowRight'
             const r = await recordAction(page, EL, () => page.keyboard.press(key))
             const after = await stepOf()
-            const s = summarize(r.motions, reduced)
+            const health = frameHealth(r.cap, r.at)
+            const s = summarize(r.motions, reduced, health.ok)
             const last = after.step !== null && Number(after.step) === Number(await frame.getAttribute('data-viz-last'))
             const oneStep = before.step !== after.step && Math.abs(Number(after.step) - Number(before.step)) === 1
             // The finale is the reveal (its own timeline, reveal.spec.ts); every other paced step has beats.
-            const beats = !reduced && oneStep && !last ? beatProblems(beatStarts(r.motions), dir) : []
+            const beats = !reduced && oneStep && !last ? beatProblems(beatStarts(r.motions), dir, health.ok) : []
             const verdict = !reduced && oneStep && before.mode === 'ask' && after.mode === 'reveal' ? verdictAfterPayoff(r.cap, r.at) : []
             report.push({
               dir,
@@ -86,6 +90,7 @@ for (const width of WIDTHS)
               flags: s.flags,
               beats,
               verdict,
+              timing: health,
               ...({ key, animated: s.animated, anims: animsOf(r.cap) } as object),
             })
             const stuck = after.step === before.step && (dir === 'back' || after.mode === before.mode)
@@ -98,6 +103,7 @@ for (const width of WIDTHS)
         save(`event-loop-${preset}-${width}${reduced ? '-reduced' : ''}.json`, report)
 
         const where = (e: Entry) => `${preset}@${width} ${e.dir} ${e.before.step}->${e.after.step}${reduced ? ' reduced' : ''}`
+        timingSkips(`${preset}@${width}`, report.filter((e) => !e.timing.ok).map((e) => `${where(e)} p90 ${e.timing.p90} ms`))
         strictCheck(`${preset}@${width}: §4 flags`, report.flatMap((e) => e.flags.map((f) => `${where(e)}: ${f.kind} ${f.detail}`)))
         strictCheck(`${preset}@${width}: no text crosses text in motion (G1)`, report.flatMap((e) => e.overlaps.map((o) => `${where(e)} ${o}`)))
         strictCheck(`${preset}@${width}: three beats in order, 560 ms (Q1)`, report.flatMap((e) => e.beats.map((o) => `${where(e)} ${o}`)))
@@ -118,7 +124,7 @@ for (const width of WIDTHS)
                 return ahead.glyphs.join(',') === e.glyphs.join(',')
                   ? []
                   : [`${where(e)}: back animates [${e.glyphs}] but next animated [${ahead.glyphs}]`]
-              return mirrorProblems(ahead.vectors, e.vectors).map((p) => `${where(e)}: ${p}`)
+              return mirrorProblems(ahead.vectors, e.vectors, ahead.timing.ok && e.timing.ok).map((p) => `${where(e)}: ${p}`)
             }),
         )
       })
