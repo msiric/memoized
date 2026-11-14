@@ -10,7 +10,7 @@ import {
   vizTextAlternative,
 } from './registry'
 import { VIZ_SERVER } from './registry.server'
-import { definitionMetrics } from './shell/footprint'
+import { definitionMetrics, groupIndices } from './shell/footprint'
 import { LIMITS, validateDescriptor } from './step-log/validate'
 
 describe('visualization registry', () => {
@@ -70,7 +70,7 @@ describe('visualization registry', () => {
     expect(manifest.visuals['event-loop']).toEqual({
       form: 'step',
       engine: 'event-loop',
-      presets: ['basic-ordering', 'microtask-queued-during-drain'],
+      presets: ['basic-ordering', 'microtask-queued-during-drain', 'microtask-vs-timer-12345', 'await-null'],
       defaultPreset: 'basic-ordering',
       since: '2026-11',
     })
@@ -101,6 +101,15 @@ describe('visualization registry', () => {
     ])
     expect(fig.parts.map((p) => p.heading)).toEqual(['for (var i = 0; i < 3; i++)', 'for (let i = 0; i < 3; i++)'])
     expect(vizStaticTextAlternative('environment-records', 'nope')).toBeUndefined()
+  })
+
+  it("offers each lesson only its own presets (Preset.group)", () => {
+    const d = VIZ_DESCRIPTORS['event-loop']
+    const ids = (i: number) => groupIndices(d, i).map((k) => d.presets[k].id)
+    const at = (id: string) => d.presets.findIndex((p) => p.id === id)
+    expect(ids(at('basic-ordering'))).toEqual(['basic-ordering', 'microtask-queued-during-drain'])
+    expect(ids(at('await-null'))).toEqual(['microtask-vs-timer-12345', 'await-null'])
+    // The entry table pins the flagship's reserves: another lesson's presets never resize its frame.
   })
 
   it('documents the footprint arithmetic for the specimen', () => {

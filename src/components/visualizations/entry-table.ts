@@ -38,6 +38,8 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     {
       'basic-ordering': [816, 576, 844, 1008, 1072],
       'microtask-queued-during-drain': [844, 716, 872, 964, 1072],
+      'microtask-vs-timer-12345': [792, 672, 820, 984, 1048],
+      'await-null': [792, 640, 840, 912, 964],
     },
   ],
   'environment-records': [

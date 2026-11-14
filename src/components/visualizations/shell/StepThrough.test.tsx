@@ -2,7 +2,9 @@ import { act, cleanup, configure, fireEvent, render, screen, within } from '@tes
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import EventLoopViz from '../engines/event-loop'
 import { basicOrdering } from '../engines/event-loop/presets/basic-ordering'
+import { awaitNull } from '../engines/event-loop/presets/await-null'
 import { microtaskQueuedDuringDrain } from '../engines/event-loop/presets/microtask-queued-during-drain'
+import { microtaskVsTimer12345 } from '../engines/event-loop/presets/microtask-vs-timer-12345'
 import { sansWidth } from '../substrates/text-metrics'
 import { RECAP_NONE, allRecaps, recapText } from './feedback'
 
@@ -410,7 +412,7 @@ describe('recapText (D21)', () => {
   // about 20 % for unknown fonts; this is the measured UI font (6.25 px at
   // 14/400) padded 5 %, the semibold lead 6 % wider. The dock reserves what
   // renders, so this only guards the copy.
-  it.each([basicOrdering, microtaskQueuedDuringDrain])('fits two lines at 375 in every combination: $id', (log) => {
+  it.each([basicOrdering, microtaskQueuedDuringDrain, microtaskVsTimer12345, awaitNull])('fits two lines at 375 in every combination: $id', (log) => {
     for (const r of allRecaps(log.checkpoints, log.steps.at(-1)!.why)) {
       const words = [
         ...r.lead.split(' ').filter(Boolean).map((w) => ({ w, bold: true })),

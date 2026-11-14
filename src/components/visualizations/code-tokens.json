@@ -324,5 +324,330 @@
     "color": "#E1E4E8"
    }
   ]
+ ],
+ "event-loop/microtask-vs-timer-12345": [
+  [
+   {
+    "text": "console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'1'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "Promise",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ".",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "resolve",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  .",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "then",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(() ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'2'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": "))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "setTimeout",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(() ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'3'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}, ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "Promise",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ".",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "resolve",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  .",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "then",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(() ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'4'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": "))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'5'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "event-loop/await-null": [
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "run",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'a'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "null",
+    "color": "#79B8FF"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'b'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "run",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'c'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ]
  ]
 }
