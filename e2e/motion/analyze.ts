@@ -94,6 +94,9 @@ export type ElementMotion = {
   props: PropMotion[]
 }
 
+/** The least translate travel the `jump` flag judges (px). */
+export const JUMP_MIN_PX = 12
+
 /** One frame at 60 Hz (ms). */
 export const FRAME_MS = 1000 / 60
 
@@ -340,11 +343,16 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyp
       if ((p.prop === 'w' || p.prop === 'h') && tweened)
         flags.push({ kind: 'size-tween', detail: `${e.label}: ${p.prop} ${p.start}->${p.end} over ${p.duration}ms` })
       if (['op', 'tx', 'ty', 'd', 'dash', 'sc'].includes(p.prop) && tweened) {
-        if (timing && p.duration > TOKENS.max)
+        // A duration is read to the sampled frame: one late frame inside the
+        // tween lengthens it by that frame's lateness, not the motion.
+        if (timing && p.duration - Math.max(0, (p.maxGapMs ?? 0) - FRAME_MS) > TOKENS.max)
           flags.push({ kind: 'too-long', detail: `${e.label}: ${p.prop} ${p.duration}ms` })
         if ((p.prop === 'tx' || p.prop === 'ty') && (p.overshootPx ?? 0) > 0.5)
           flags.push({ kind: 'overshoot', detail: `${e.label}: ${p.prop} overshoot ${p.overshootPx}px` })
-        if (timing && ['tx', 'ty', 'd', 'dash'].includes(p.prop) && p.intermediates >= 3 && (p.maxStepShare ?? 0) > 0.5)
+        // A cut is a visible teleport: under JUMP_MIN_PX of travel (an 8 px
+        // console nudge) no single frame can read as one.
+        if (timing && ['tx', 'ty', 'd', 'dash'].includes(p.prop) && p.intermediates >= 3 && (p.maxStepShare ?? 0) > 0.5 &&
+            (p.prop === 'dash' || p.prop === 'd' || Math.abs(Number(p.end) - Number(p.start)) >= JUMP_MIN_PX))
           flags.push({ kind: 'jump', detail: `${e.label}: ${p.prop} ${p.start}->${p.end}, one frame covers ${Math.round((p.maxStepShare ?? 0) * 100)}% of it` })
         if (p.prop === 'sc') flags.push({ kind: 'scale', detail: `${e.label}: scale ${p.start}->${p.end}` })
         if (opts.reduced && p.prop !== 'op')
