@@ -37,8 +37,8 @@ export const SIZE = {
   tagPad: 5,
   /** Lane pitch: the tag plus 4 px between lanes. */
   lane: 22,
-  /** Upper and lower tracks: 4 px either side of the row's middle. */
-  track: 4,
+  /** Upper and lower tracks: 5 px either side of the row's middle. */
+  track: 5,
   /** Gap between a box edge and the start or end of a straight arrow. */
   inset: 3,
   /** Where an arc leaves or enters a box: 6 px off its centre. */
@@ -48,7 +48,7 @@ export const SIZE = {
   arcStep: 9,
   /** Null stub: its length and the bar's half height. */
   stub: 8,
-  bar: 5,
+  bar: 4,
   /** Gap between the lanes and the arc band, and above the console row. */
   bandGap: 4,
   consoleGap: 8,
@@ -107,7 +107,8 @@ function skips(states: readonly LLState[]) {
  * overlap would cross, so the later arc takes the other side.
  */
 export function assignArcs(states: readonly LLState[]): Record<string, ArcSlot> {
-  const all = [...skips(states).entries()]
+  // Inner arcs first, so an arc that contains another takes the level over it.
+  const all = [...skips(states).entries()].sort(([, a], [, b]) => Math.abs(a.to - a.from) - Math.abs(b.to - b.from))
   const placed: { id: string; lo: number; hi: number; at: Set<number>; slot: ArcSlot }[] = []
   const out: Record<string, ArcSlot> = {}
   for (const [id, e] of all) {

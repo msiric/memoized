@@ -3,13 +3,14 @@
 import { AnimatePresence, m } from 'framer-motion'
 import { useLayoutEffect, useMemo, useRef, type CSSProperties, type RefObject } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { radius, strokeWidth } from '../../primitives/tokens-v3'
+import { strokeWidth } from '../../primitives/tokens-v3'
 import { finishMoves, moveSpringToken, springCurve } from '../../shell/flip'
 import { animates, beatDelay, presence, type MotionGate } from '../../shell/motion'
 import type { StageProps } from '../../shell/types'
 import { toRem } from '../../substrates/units'
-import { SIZE, linkShape, tagBox, type ListGeometry } from './geometry'
+import { SIZE, linkShape, tagBox } from './geometry'
 import { G, type LinkedListMetrics } from './layout'
+import { Arrow, NodeBox, TagBody, r1 } from './glyphs'
 import { NULL_ID, OUTPUT_ID, linkId, nodeId, pointerId, type LLState } from './model'
 
 /**
@@ -31,7 +32,6 @@ import { NULL_ID, OUTPUT_ID, linkId, nodeId, pointerId, type LLState } from './m
  */
 
 const MOVE_ID = 'viz-move'
-const r1 = (n: number) => Math.round(n * 10) / 10
 
 type Pos = { x: number; y: number }
 
@@ -77,26 +77,6 @@ function useTagMoves(root: RefObject<SVGSVGElement>, gate: MotionGate, key: unkn
     // Once per step (and per instant epoch), not on unrelated re-renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, gate.epoch])
-}
-
-function Node({ g, i, label }: { g: ListGeometry; i: number; label: string }) {
-  const x = g.cols[i] - SIZE.node / 2
-  return (
-    <g data-node={nodeId(i)}>
-      <rect
-        x={r1(x) + 0.5}
-        y={g.rowTop + 0.5}
-        width={SIZE.node - 1}
-        height={SIZE.node - 1}
-        rx={radius.glyph.px}
-        strokeWidth={strokeWidth.outline}
-        className="vz-g"
-      />
-      <text x={r1(g.cols[i])} y={r1(g.mid + 4.5)} className="vz-c">
-        {label}
-      </text>
-    </g>
-  )
 }
 
 export function LinkedListStage({ step, codePane, layout, motion: gate, label }: StageProps<LLState>) {
@@ -156,7 +136,7 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
             null
           </text>
           {state.nodes.map((n, i) => (
-            <Node key={n.id} g={g} i={i} label={n.label} />
+            <NodeBox key={n.id} id={n.id} x={g.cols[i] - SIZE.node / 2} y={g.rowTop} label={n.label} />
           ))}
 
           {/* Arrows: one glyph per node; a new target cross-fades in place on the glyph beat. */}
@@ -176,8 +156,7 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
                   style={lit ? ({ '--vz-sw': `${strokeWidth.nowConnector}px` } as CSSProperties) : undefined}
                   {...presence(id, gate, { from: {}, to: {} })}
                 >
-                  <path d={shape.d} className="vz-e" />
-                  {shape.head ? <path d={shape.head} className="vz-ah" /> : null}
+                  <Arrow d={shape.d} head={shape.head} />
                 </m.g>
               )
             })}
@@ -196,18 +175,7 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
                     data-at={t.at === null ? NULL_ID : nodeId(t.at)}
                     transform={`translate(${t.box.x} ${t.box.y})`}
                   >
-                    <rect
-                      x={0.5}
-                      y={0.5}
-                      width={t.box.w - 1}
-                      height={t.box.h - 1}
-                      rx={radius.chip.px}
-                      strokeWidth={lit ? strokeWidth.mark : strokeWidth.outline}
-                      className={lit ? 'vz-ch' : 'vz-p vz-l'}
-                    />
-                    <text x={r1(t.box.w / 2)} y={r1(SIZE.tag / 2 + 4)} className="vz-12 vz-c">
-                      {t.name}
-                    </text>
+                    <TagBody name={t.name} w={t.box.w} changed={lit} />
                   </g>
                 </m.g>
               )

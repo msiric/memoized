@@ -2,6 +2,7 @@ import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
 import { heapGraphDescriptor } from './engines/heap-graph/descriptor'
 import { linkedListDescriptor } from './engines/linked-list/descriptor'
+import { linkedListFramesDescriptor } from './engines/linked-list/frames/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
 import { footprintOf, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
@@ -28,6 +29,7 @@ export const VIZ_DESCRIPTORS = {
   'list-keys': listKeysDescriptor,
   'heap-graph': heapGraphDescriptor,
   'linked-list-pointer-rewiring': linkedListDescriptor,
+  'linked-list-frames': linkedListFramesDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS

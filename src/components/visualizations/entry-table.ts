@@ -59,6 +59,12 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     874,
     { 'identity-alias-rebind-spread': [1013, 874, 874], 'spread-vs-nested-vs-deep': [1533, 1088, 1088] },
   ],
+  'linked-list-frames': [
+    () => import('./engines/linked-list/frames'),
+    704,
+    422,
+    { 'floyd-rho': [704, 422, 422], 'full-reversal-strip': [914, 528, 528] },
+  ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),
     850,
