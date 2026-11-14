@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import Link from 'next/link'
 import React, { MutableRefObject } from 'react'
 
-function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function ArrowIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
       <path

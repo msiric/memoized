@@ -31,9 +31,10 @@ describe('Node runtime release contract', () => {
   it('takes current CI and deployment runtimes from the package contract', () => {
     const ci = read('.github/workflows/ci.yml')
     const production = read('.github/workflows/production.yml')
-    expect(ci.match(/node-version-file: package\.json/g)).toHaveLength(2)
+    // test, build and the visualization gates (the G4 rehearsal pins Node 20 on purpose).
+    expect(ci.match(/node-version-file: package\.json/g)).toHaveLength(3)
     expect(production.match(/node-version-file: package\.json/g)).toHaveLength(1)
-    expect(ci.match(/uses: actions\/setup-node@v7/g)).toHaveLength(3)
+    expect(ci.match(/uses: actions\/setup-node@v7/g)).toHaveLength(4)
     expect(production.match(/uses: actions\/setup-node@v7/g)).toHaveLength(1)
     expect(production).not.toMatch(/node-version:\s*['"]?20/)
     expect(ci).toContain('corepack enable')
