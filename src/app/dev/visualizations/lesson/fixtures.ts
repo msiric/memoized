@@ -12,10 +12,10 @@ import path from 'node:path'
  * local content checkout (`src/content`, the gitignored sync folder), never
  * in CI or the snapshots.
  *
- * Placements follow the VIZ-01 visual table (audit repo,
- * `VIZ/2026-11-11-plan/visual-table.md`): the lessons do not embed the
- * visuals yet, so these are the proposed spots, beside the example each
- * visual illustrates.
+ * Placements match the content repo's placement branch
+ * (`feat/viz-placement-flagships`): a visual that asks for a prediction sits
+ * before any prose that states its answer; a static figure sits after the
+ * example it explains.
  */
 
 export type LessonFixture = {
@@ -41,8 +41,9 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     source: 'content/js-track/core-fundamentals/event-loop/page.mdx',
     commit: CONTENT_COMMIT,
     file: 'fixtures/event-loop.mdx',
-    // Beside Example 1 (setTimeout vs. Promise): the same ordering question.
-    inserts: [{ before: '### **Example 2: Multiple Promises**', viz: '<Viz id="event-loop" />' }],
+    // Before Practical Examples: Example 1 is the visual's program with its
+    // output printed, so the prediction comes first (content PR placement).
+    inserts: [{ before: '## **Practical Examples**', viz: '<Viz id="event-loop" />' }],
   },
   {
     slug: 'closures',

@@ -29,27 +29,29 @@ export const WRAPPER_TITLE = 'React identity: type at a slot'
 
 /**
  * One rule per combination: the verdict's second sentence (H3 F2 ruling 2:
- * two short sentences), so at most 84 characters, which with the longest lead
- * stays within two lines on a 375 phone wherever the words allow.
+ * two short sentences), so at most 64 characters: with the longest lead
+ * ("Answer: It’s lost.") the verdict stays within two lines at 320, so the
+ * dock's reserve above the question is one tally line, not a third line of
+ * verdict (final polish).
  */
 export const LIST_RULE: Record<`${KeyStrategy}/${ListAction}`, string> = {
-  'index/insert-top': 'Index keys match by position, so the check stays in its slot, not with the item.',
-  'index/delete-first': 'Index keys match by position, so the last slot unmounts and checks stay in place.',
-  'index/append': 'Appending keeps earlier positions, so index keys are safe for append-only lists.',
-  'index/reverse': 'Index keys match by position, so the checks stay in their slots as the items swap.',
-  'id/insert-top': 'Stable ids match items, so every row keeps its state and only Wake up mounts.',
-  'id/delete-first': 'Stable ids match items, so only Buy milk unmounts and Walk dog keeps its state.',
-  'id/append': 'Stable ids match items, so earlier rows keep their state and only Call mom mounts.',
-  'id/reverse': 'Stable ids match items, so React moves the instances and each check moves along.',
-  'random/insert-top': 'New keys on every render match nothing, so every row remounts and loses its state.',
-  'random/delete-first': 'New keys on every render match nothing, so even Walk dog remounts and loses state.',
-  'random/append': 'New keys on every render match nothing, so every row remounts and loses its state.',
-  'random/reverse': 'New keys on every render match nothing, so every row remounts and loses its state.',
+  'index/insert-top': 'Index keys match by position, so the check stays in its slot.',
+  'index/delete-first': 'Index keys match by position, so the last slot unmounts.',
+  'index/append': 'Appending keeps earlier positions, so index keys are safe here.',
+  'index/reverse': 'Index keys match by position, so checks stay in their slots.',
+  'id/insert-top': 'Stable ids match items, so rows keep state; only Wake up mounts.',
+  'id/delete-first': 'Stable ids match items, so only Buy milk unmounts.',
+  'id/append': 'Stable ids match items, so only Call mom mounts.',
+  'id/reverse': 'Stable ids match items, so each check moves with its item.',
+  'random/insert-top': 'Keys change every render, so every row loses its state.',
+  'random/delete-first': 'Keys change every render, so even Walk dog loses its state.',
+  'random/append': 'Keys change every render, so every row loses its state.',
+  'random/reverse': 'Keys change every render, so every row loses its state.',
 }
 
 export const WRAPPER_RULE: Record<WrapperAction, string> = {
-  type: 'Type is part of identity, so a new element type at the slot unmounts the subtree.',
-  class: 'Same type at the same slot, so React updates className and Counter keeps its state.',
+  type: 'Type is part of identity, so a new type unmounts the subtree.',
+  class: 'Same type at the same slot, so Counter keeps its state.',
 }
 
 /**

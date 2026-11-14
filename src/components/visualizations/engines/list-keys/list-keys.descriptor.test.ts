@@ -61,7 +61,7 @@ describe('list-keys authored text', () => {
       ...Object.values(LIST_RULE),
       ...Object.values(WRAPPER_RULE),
     ]) {
-      expect(t.length).toBeLessThanOrEqual(Math.min(LIMITS.why, 84))
+      expect(t.length).toBeLessThanOrEqual(Math.min(LIMITS.why, 64))
       expect(t.match(/[.!?](\s|$)/g)?.length, t).toBe(1)
     }
   })

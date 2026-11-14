@@ -16,6 +16,7 @@ import { BackIcon, Button, NextIcon, PauseIcon, PlayIcon, RestartIcon } from '..
 import { Feedback, captionCls, feedbackLeadCls } from '../primitives/Caption'
 import { CheckpointBlock, PromptBlock, SkipButton } from '../primitives/Checkpoint'
 import { ChoiceRow } from '../primitives/ChoiceRow'
+import { WIDE_FROM, choiceGeometry } from '../primitives/choice-geometry'
 import { cn } from '../primitives/cn'
 import { Disclosure } from '../primitives/Disclosure'
 import { Frame } from '../primitives/Frame'
@@ -542,12 +543,14 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const replay = atEnd && !holding
 
   const dock = (
-    <div data-viz-region="dock" className="relative grid print:hidden" style={{ marginTop: rem(FRAME.nameGap) }}>
+    <div data-viz-region="dock" data-vz-dock={uid} className="relative grid print:hidden" style={{ marginTop: rem(FRAME.nameGap) }}>
+      <CaptionAlign log={log} scope={uid} />
       <DockGhosts log={log} />
       {dMode === 'controls' ? (
         <m.p
           key={`${s.preset}:${shownIndex}:${nav.pace.epoch}`}
           data-viz-part="viz-caption"
+          data-vz-caption=""
           className={cn('col-start-1 row-start-1 self-start', captionCls)}
           // The old sentence goes at once and the new one fades in from 0.3:
           // two sentences never share the cell (M15) and it never reads empty
@@ -918,6 +921,26 @@ function CheckpointTextGhosts({ cp }: { cp: Checkpoint }) {
       ))}
     </>
   )
+}
+
+/**
+ * Where every checkpoint of the preset sits beside its text (one band: the
+ * text centred on the choice row), the step caption and the recap centre in
+ * the dock too, so the text line never jumps between a step and a
+ * checkpoint, and a one-line recap sits level with where the question sat
+ * instead of at the top of a band reserved for the choice row (final
+ * polish). Where a checkpoint stacks (its text on top), the caption stays at
+ * the top, level with that text. Same thresholds as `checkpointCss`.
+ */
+function CaptionAlign<S>({ log, scope }: { log: StepLog<S>; scope: string }) {
+  if (log.checkpoints.length === 0) return null
+  const from = Math.max(
+    WIDE_FROM,
+    ...log.checkpoints.map((c) => choiceGeometry(c.choices.map((ch) => ch.label)).rowWide),
+  )
+  const css = `@container vz (min-width:${rem(from)}){[data-vz-dock="${scope}"]>[data-vz-caption]{align-self:center}}`
+  // Raw, so the server does not entity-escape the selector's quotes.
+  return <style dangerouslySetInnerHTML={{ __html: css }} />
 }
 
 /**
