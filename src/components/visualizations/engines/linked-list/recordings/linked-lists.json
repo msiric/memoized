@@ -1,0 +1,568 @@
+{
+ "palindrome-12321": {
+  "sha256": "70f771a44c909d331e392a3463a8cc7aed0f3ad7668e5f3c466d40b9cb42d053",
+  "observed": [
+   "true"
+  ],
+  "labels": [
+   "1",
+   "2",
+   "3",
+   "2",
+   "1"
+  ],
+  "hits": [
+   {
+    "probe": "start",
+    "vars": {
+     "head": 0
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     null
+    ]
+   },
+   {
+    "probe": "init",
+    "vars": {
+     "head": 0,
+     "slow": 0,
+     "fast": 1
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     null
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     null
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "head": 0,
+     "slow": 2,
+     "fast": null
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     null
+    ]
+   },
+   {
+    "probe": "cut",
+    "vars": {
+     "head": 0,
+     "slow": 2,
+     "fast": null,
+     "cur": 3
+    },
+    "next": [
+     1,
+     2,
+     null,
+     4,
+     null
+    ]
+   },
+   {
+    "probe": "prev-null",
+    "vars": {
+     "head": 0,
+     "slow": 2,
+     "fast": null,
+     "cur": 3,
+     "prev": null
+    },
+    "next": [
+     1,
+     2,
+     null,
+     4,
+     null
+    ]
+   },
+   {
+    "probe": "flip",
+    "vars": {
+     "head": 0,
+     "slow": 2,
+     "fast": null,
+     "cur": 3,
+     "prev": null,
+     "t": 4
+    },
+    "next": [
+     1,
+     2,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "probe": "advance",
+    "vars": {
+     "head": 0,
+     "slow": 2,
+     "fast": null,
+     "cur": 4,
+     "prev": 3,
+     "t": 4
+    },
+    "next": [
+     1,
+     2,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "probe": "flip",
+    "vars": {
+     "head": 0,
+     "slow": 2,
+     "fast": null,
+     "cur": 4,
+     "prev": 3,
+     "t": null
+    },
+    "next": [
+     1,
+     2,
+     null,
+     null,
+     3
+    ]
+   },
+   {
+    "probe": "advance",
+    "vars": {
+     "head": 0,
+     "slow": 2,
+     "fast": null,
+     "cur": null,
+     "prev": 4,
+     "t": null
+    },
+    "next": [
+     1,
+     2,
+     null,
+     null,
+     3
+    ]
+   },
+   {
+    "probe": "compare",
+    "vars": {
+     "head": 1,
+     "slow": 2,
+     "fast": null,
+     "cur": null,
+     "prev": 3
+    },
+    "next": [
+     1,
+     2,
+     null,
+     null,
+     3
+    ]
+   },
+   {
+    "probe": "compare",
+    "vars": {
+     "head": 2,
+     "slow": 2,
+     "fast": null,
+     "cur": null,
+     "prev": null
+    },
+    "next": [
+     1,
+     2,
+     null,
+     null,
+     3
+    ]
+   }
+  ]
+ },
+ "palindrome-1221": {
+  "sha256": "c5e29a88d26df6b63a609bffc207b3eccd37046d7e7b6488ab6a37da7cd6044e",
+  "observed": [
+   "true"
+  ],
+  "labels": [
+   "1",
+   "2",
+   "2",
+   "1"
+  ],
+  "hits": [
+   {
+    "probe": "start",
+    "vars": {
+     "head": 0
+    },
+    "next": [
+     1,
+     2,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "init",
+    "vars": {
+     "head": 0,
+     "slow": 0,
+     "fast": 1
+    },
+    "next": [
+     1,
+     2,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3
+    },
+    "next": [
+     1,
+     2,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "cut",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 2
+    },
+    "next": [
+     1,
+     null,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "prev-null",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 2,
+     "prev": null
+    },
+    "next": [
+     1,
+     null,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "flip",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 2,
+     "prev": null,
+     "t": 3
+    },
+    "next": [
+     1,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "probe": "advance",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 3,
+     "prev": 2,
+     "t": 3
+    },
+    "next": [
+     1,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "probe": "flip",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 3,
+     "prev": 2,
+     "t": null
+    },
+    "next": [
+     1,
+     null,
+     null,
+     2
+    ]
+   },
+   {
+    "probe": "advance",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": null,
+     "prev": 3,
+     "t": null
+    },
+    "next": [
+     1,
+     null,
+     null,
+     2
+    ]
+   },
+   {
+    "probe": "compare",
+    "vars": {
+     "head": 1,
+     "slow": 1,
+     "fast": 3,
+     "cur": null,
+     "prev": 2
+    },
+    "next": [
+     1,
+     null,
+     null,
+     2
+    ]
+   },
+   {
+    "probe": "compare",
+    "vars": {
+     "head": null,
+     "slow": 1,
+     "fast": 3,
+     "cur": null,
+     "prev": null
+    },
+    "next": [
+     1,
+     null,
+     null,
+     2
+    ]
+   }
+  ]
+ },
+ "palindrome-1231": {
+  "sha256": "c01063c8b7280017721377dd4e0a77c80898fc6b523f7cd4d084080a94b78d36",
+  "observed": [
+   "false"
+  ],
+  "labels": [
+   "1",
+   "2",
+   "3",
+   "1"
+  ],
+  "hits": [
+   {
+    "probe": "start",
+    "vars": {
+     "head": 0
+    },
+    "next": [
+     1,
+     2,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "init",
+    "vars": {
+     "head": 0,
+     "slow": 0,
+     "fast": 1
+    },
+    "next": [
+     1,
+     2,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3
+    },
+    "next": [
+     1,
+     2,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "cut",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 2
+    },
+    "next": [
+     1,
+     null,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "prev-null",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 2,
+     "prev": null
+    },
+    "next": [
+     1,
+     null,
+     3,
+     null
+    ]
+   },
+   {
+    "probe": "flip",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 2,
+     "prev": null,
+     "t": 3
+    },
+    "next": [
+     1,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "probe": "advance",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 3,
+     "prev": 2,
+     "t": 3
+    },
+    "next": [
+     1,
+     null,
+     null,
+     null
+    ]
+   },
+   {
+    "probe": "flip",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": 3,
+     "prev": 2,
+     "t": null
+    },
+    "next": [
+     1,
+     null,
+     null,
+     2
+    ]
+   },
+   {
+    "probe": "advance",
+    "vars": {
+     "head": 0,
+     "slow": 1,
+     "fast": 3,
+     "cur": null,
+     "prev": 3,
+     "t": null
+    },
+    "next": [
+     1,
+     null,
+     null,
+     2
+    ]
+   },
+   {
+    "probe": "compare",
+    "vars": {
+     "head": 1,
+     "slow": 1,
+     "fast": 3,
+     "cur": null,
+     "prev": 2
+    },
+    "next": [
+     1,
+     null,
+     null,
+     2
+    ]
+   }
+  ]
+ }
+}

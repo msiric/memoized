@@ -54,6 +54,7 @@
     "publish:content": "cross-env tsx src/scripts/publish-content.ts",
     "viz:tokens": "tsx src/scripts/viz-code-tokens.ts",
     "viz:heap": "tsx src/scripts/viz-heap-record.ts",
+    "viz:linked-list": "tsx src/scripts/viz-linked-list-record.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
     "test": "vitest",
     "test:check": "vitest run",
