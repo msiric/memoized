@@ -38,7 +38,8 @@ import { frameHealth } from './analyze'
  *   560 ms; Q4: a checkpoint's verdict shows only once the step has landed.
  */
 
-const PRESETS = ['basic-ordering', 'microtask-queued-during-drain']
+// The Event Loop lesson's presets, then the Promise Patterns lesson's (their own group).
+const PRESETS = ['basic-ordering', 'microtask-queued-during-drain', 'microtask-vs-timer-12345', 'await-null']
 
 type Entry = {
   dir: string

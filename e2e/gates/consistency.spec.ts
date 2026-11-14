@@ -149,6 +149,46 @@ for (const width of [375, 1440]) {
 }
 
 /**
+ * The static figures (wave 1B): a scope-chain figure's running call is the
+ * closures figure's function object (box, title, touch band and focus), at
+ * rest and traced, and its records and links are the same glyphs.
+ */
+const SVG_LOOK = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color', 'cursor'] as const
+for (const width of [375, 1440])
+  test(`static figures draw a traced call like a traced function @${width}`, async ({ page }) => {
+    await open(page, `${GALLERY}?static=1`, width)
+    const figs = page.locator('[data-viz="environment-records"] figure')
+    const svgOf = (i: number) => figs.nth(i).locator('svg >> visible=true').first()
+    const closures = svgOf(0)
+    const scope = svgOf(2)
+    const fn = closures.locator('[tabindex="0"]').first()
+    const call = scope.locator('[tabindex="0"]').first()
+    const diffs: string[] = []
+    const same = async (what: string, a: Locator, b: Locator) => {
+      const [x, y] = [await look(a, SVG_LOOK), await look(b, SVG_LOOK)]
+      for (const k of Object.keys(x)) if (x[k] !== y[k]) diffs.push(`${what} ${k}: closures ${x[k]} vs scope chain ${y[k]}`)
+    }
+    const parts = async (when: string) => {
+      await same(`${when} box`, fn.locator('rect.vz-fb'), call.locator('rect.vz-fb'))
+      await same(`${when} title`, fn.locator('text'), call.locator('text'))
+    }
+    await parts('rest')
+    await same('record header', closures.locator('.vz-t').first(), scope.locator('[data-node="module"] .vz-t').first())
+    await same('link', closures.locator('[data-edge^="outer:"] .vz-e, [data-edge^="env:"] .vz-e').first(), scope.locator('[data-edge^="outer:"] .vz-e').first())
+    // Traced: hover each (one path at a time per figure).
+    await fn.scrollIntoViewIfNeeded()
+    await fn.hover()
+    await settle(page)
+    const litFn = await look(fn.locator('rect.vz-fb'), SVG_LOOK)
+    await call.scrollIntoViewIfNeeded()
+    await call.hover()
+    await settle(page)
+    const litCall = await look(call.locator('rect.vz-fb'), SVG_LOOK)
+    for (const k of Object.keys(litFn)) if (litFn[k] !== litCall[k]) diffs.push(`traced box ${k}: closures ${litFn[k]} vs scope chain ${litCall[k]}`)
+    expect(diffs).toEqual([])
+  })
+
+/**
  * Q6: in a lesson the visual sits in the column like a code block: its
  * frame's left and right edges are a code block's edges at every width
  * (the documented exception, 320, is the full-bleed tier, ruling 1).

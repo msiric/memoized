@@ -1,0 +1,362 @@
+export const metadata = {   title: "Understanding Execution Context and Scope Chain in JavaScript",   description: "Delve into the fundamental concepts of execution context and scope chain in JavaScript. Learn how JavaScript manages variable scope during code execution, how scope chain lookup works, and how variable shadowing can impact your programs. This comprehensive lesson will enhance your understanding of JavaScript's execution model, help you write more predictable and maintainable code, and prepare you for technical interviews by covering these essential topics.", }
+
+# **Understanding the Scope Chain in JavaScript**
+
+When two variables have the same name, which one does a function read? Follow the enclosing scopes in the source, not the path of function calls. JavaScript stops at the first matching binding. It does not keep searching for a more convenient value.
+
+In this lesson, you'll trace that search through functions and blocks, explain why a caller's locals do not replace a function's outer bindings and distinguish a missing name from an uninitialized one.
+
+**First pass:** trace the lookup and caller examples and work through shadowing. Then try the first four exercises. Use **Scope Chain Lookup Mechanics** and **Variable Shadowing** in practice to check your explanation. You can stop when you can name the selected binding and explain why lookup stops there. The returned-function example and execution-context sections are optional bridges, not prerequisites for the first attempt.
+
+Each JavaScript fence is a separate **Node 24 CommonJS** file. Save one as `example.cjs` and run `node example.cjs`. Top-level declarations in these files are module-local, not properties on a browser's `window`. Examples that intentionally throw say so.
+
+<Note>
+Bring basic calls and the declaration model from [Scope and Hoisting](/courses/js-track/core-fundamentals/scope-and-hoisting): `var` starts initialized to `undefined`, while `let` and `const` cannot be read until initialized. We use that rule locally below. [Closures](/courses/js-track/core-fundamentals/closures) extends the same lookup to functions used after an outer call returns.
+</Note>
+
+## **Scope Chain Lookup**
+
+### **Start Where the Read Happens**
+
+Before running this file, find a declaration for each name read in `innerFunction`. The final read intentionally fails.
+
+```javascript
+var globalVar = 'Global'
+
+function outerFunction() {
+  var outerVar = 'Outer'
+
+  function innerFunction() {
+    var innerVar = 'Inner'
+    console.log(innerVar)
+    console.log(outerVar)
+    console.log(globalVar)
+    console.log(nonExistent)
+  }
+
+  innerFunction()
+}
+
+outerFunction()
+```
+
+It prints `Inner`, `Outer` and `Global` on separate lines. The final read throws `ReferenceError: nonExistent is not defined`. It does not log `undefined`.
+
+| Read | Search | Result |
+| --- | --- | --- |
+| `innerVar` | Current function environment | `Inner` |
+| `outerVar` | Current environment -> this call to `outerFunction` | `Outer` |
+| `globalVar` | Current environment -> outer call -> this file's module environment | `Global` |
+| `nonExistent` | No matching binding in any enclosing environment | `ReferenceError` |
+
+The name `globalVar` is inherited from the example, not a claim about its host scope. In this CommonJS file it belongs to the module. Host-provided globals are available farther outward.
+
+This is a logical lookup diagram, not a required memory layout:
+
+```text
+innerFunction call
+  innerVar = "Inner"
+        |
+        v
+outerFunction call
+  outerVar = "Outer"
+        |
+        v
+module
+  globalVar = "Global"
+        |
+        v
+host global environment
+
+At every step: does this environment contain the name?
+Yes -> use that binding and stop searching.
+No  -> try the outer environment.
+```
+
+If the read is inside a nested block, start with that block's environment. Starting every search at the function boundary would skip block-scoped bindings.
+
+### **The Caller Is Not the Lexical Parent**
+
+Predict this before running it:
+
+```javascript
+let name = 'Global'
+
+function printName() {
+  console.log(name)
+}
+
+function shadowName() {
+  let name = 'Local'
+  printName()
+}
+
+shadowName()
+```
+
+It prints `Global`. `printName` was defined at the top level of this file. Its outer lookup reaches the module's `name`, not the local `name` of the function calling it.
+
+The call stack includes `shadowName`, but the scope chain for the read does not pass through `shadowName`'s locals. Calling the same function from somewhere else does not rewrite its lexical parent.
+
+Source nesting determines which scopes enclose the function. When a function object is created, it retains access to the relevant outer environment. Calling it creates a new environment for that call's parameters and locals. These are related steps, not a choice between “everything happens at compilation” and “everything depends on the caller.”
+
+### **Identifiers Are Not Properties**
+
+In `account.balance`, scope lookup first resolves the identifier `account`. Reading `balance` then uses that object's property rules. It does not search surrounding scopes for a variable named `balance`. You do not need prototype-chain details to trace the identifiers in this lesson.
+
+## **Shadowing and First-Binding Lookup**
+
+### **Function Scope Shadowing**
+
+An inner declaration with the same name hides an outer declaration from reads in that inner scope.
+
+```javascript
+var value = 'Global'
+
+function shadowingExample() {
+  var value = 'Local'
+  console.log(value)
+}
+
+shadowingExample()
+console.log(value)
+```
+
+This prints `Local` then `Global`. The function's assignment did not update the module's `value`.
+
+### **Block Scope Shadowing**
+
+```javascript
+let number = 10
+
+if (true) {
+  let number = 20
+  console.log(number)
+}
+
+console.log(number)
+```
+
+This prints `20` then `10`. The same first-binding rule works for blocks.
+
+Now move the inner read earlier. Does JavaScript fall back to the outer `10`?
+
+```javascript
+let number = 10
+
+if (true) {
+  console.log(number)
+  let number = 20
+}
+```
+
+No. The inner binding already shadows the outer one, but it is uninitialized. This file throws a `ReferenceError` with no output. “Not found here” means keep searching. “Found but uninitialized” means the read fails.
+
+### **Shadowing with Parameters**
+
+Parameters are bindings too:
+
+```javascript
+var name = 'Global'
+
+function greet(name) {
+  console.log('Hello, ' + name)
+}
+
+greet('Alice')
+```
+
+The output is `Hello, Alice`. The argument initializes the call's parameter binding, which is nearer than the module's `name`.
+
+### **A Nested Block Is Not a New `var` Scope**
+
+These are separate files. In the first, the nested function gives `var` its own scope:
+
+```javascript
+let x = 1
+function showInner() {
+  var x = 2
+  console.log(x)
+}
+showInner()
+console.log(x)
+```
+
+It prints `2` then `1`. The ordinary block in this second file does not do the same:
+
+```javascript
+let x = 1
+{
+  var x = 2
+}
+```
+
+The whole file has a `SyntaxError`. That `var x` belongs to the surrounding module wrapper's variable scope and conflicts with `let x`. No assignment runs.
+
+## **Best Practices for Managing Scope**
+
+- Prefer local state with an obvious owner. A global name gives more code an opportunity to change it.
+- Use `let` or `const` when a value should stay within a block. `var` does not acquire a new scope just because it appears between braces.
+- Shadow names deliberately. A different name is often clearer when both values matter to the same piece of work.
+- Trace declarations before values. An uninitialized inner binding still stops lookup.
+- Do not add caller locals to a scope diagram. Draw the call stack separately when you need to explain execution order.
+- Treat an assignment without a declaration as a read-like search for an existing binding, followed by a write. It does not declare a function-local variable. If no binding exists, strict code and modules throw a `ReferenceError`. Non-strict code can create a global-object property instead.
+
+Configurable lint rules such as `no-shadow` and `no-undef` can help catch mistakes. Their behavior depends on the project's enabled rules, not on every linter having the same defaults.
+
+## **Exercises**
+
+### **Exercise 1: Scope Chain Lookup**
+
+Predict both logs. For the first, name every environment searched before the match.
+
+```javascript
+var x = 10
+
+function outer() {
+  var x = 20
+
+  function inner() {
+    console.log(x)
+  }
+
+  inner()
+}
+
+outer()
+console.log(x)
+```
+
+#### **Answer**
+
+The output is `20` then `10`. Inside `inner`, no local `x` exists. The search reaches this call to `outer` and stops at its `x`. The final log runs in the module and reads the module's `x`.
+
+### **Exercise 2: Variable Shadowing**
+
+Return to the complete `printName`/`shadowName` example above. Why does it print `Global` even though `shadowName` is currently running? What would change if the `printName` declaration were moved inside `shadowName`, after its local declaration?
+
+#### **Answer**
+
+The original function's lexical parent is the module. Moving the declaration inside `shadowName` creates a different program: the new function would close over that call's environment and print `Local`. Merely moving the call does not have that effect.
+
+### **Exercise 3: Block Scope**
+
+Which reads succeed? Which errors are caught?
+
+```javascript
+if (true) {
+  var a = 5
+  let b = 10
+  const c = 15
+}
+
+console.log(a)
+try {
+  console.log(b)
+} catch (err) {
+  console.log(err.message)
+}
+try {
+  console.log(c)
+} catch (err) {
+  console.log(err.message)
+}
+```
+
+#### **Answer**
+
+In Node 24:
+
+```text
+5
+b is not defined
+c is not defined
+```
+
+`a` belongs to the module wrapper's variable scope, not the `if` block. `b` and `c` are absent from the outer lookup. These are not TDZ errors. Catching the first error allows execution to reach the second failing read. Without the catches, the first error would stop the trace.
+
+### **Exercise 4: Hoisting and Temporal Dead Zone**
+
+Predict the changed-input trace. The caller has an `x`, the module has an `x` and the current block has an `x`. Which one matters?
+
+```javascript
+let x = 'module'
+
+function read() {
+  {
+    console.log(x)
+    let x = 'block'
+  }
+}
+
+function caller() {
+  let x = 'caller'
+  read()
+}
+
+caller()
+```
+
+#### **Answer**
+
+There is no output. The current block's uninitialized `x` causes a `ReferenceError`. Lookup neither falls through to the module's initialized value nor substitutes the caller's local.
+
+For a second attempt, move the block's declaration above its log. That variation prints `block`. Removing the block declaration entirely instead makes the read reach `module`.
+
+You can stop the core route here if you can explain those three outcomes. The stored **Lexical Capture Output Prediction** question is a simpler returned-function bridge, not this changed-input exercise.
+
+### **Exercise 5: Function Scope and Closure**
+
+Optional bridge: `return function () { ... }` returns a function value without calling it. Assigning that result gives you a function you can call later. The later `counter1()` and `counter2()` calls run the returned functions.
+
+```javascript
+function makeCounter() {
+  let count = 0
+  return function () {
+    count += 1
+    console.log(count)
+  }
+}
+
+const counter1 = makeCounter()
+counter1()
+counter1()
+
+const counter2 = makeCounter()
+counter2()
+```
+
+#### **Answer**
+
+It prints `1`, `2` and `1` on separate lines. Each factory call creates a fresh `count`. Repeated calls to `counter1` read and update its one binding. `counter2` has a different outer environment from its separate factory call.
+
+The outer calls have returned, but the returned functions still have the required lexical access. Continue to [Closures](/courses/js-track/core-fundamentals/closures) for shared methods, independent state and saved callbacks.
+
+## **Understanding Scope**
+
+This is a reference bridge if the scope names still feel unfamiliar:
+
+| Scope | Useful question | Example here |
+| --- | --- | --- |
+| Block | Was this lexical declaration made in a nearer block? | Inner `number` |
+| Function | Which call supplied this parameter or local? | `greet`'s `name` |
+| Module | Was this declaration made at the file's top level? | The CommonJS `globalVar` example |
+| Global | Is this a host/global binding outside the module? | Host-provided `console` |
+
+An inner scope can use accessible outer bindings. Outer code cannot search inward into a function's locals. In browser classic scripts, top-level declarations use the global environment instead of the module environment shown here. Their global-object behavior is covered in the [declaration lesson](/courses/js-track/core-fundamentals/scope-and-hoisting).
+
+## **Introduction to Execution Context**
+
+Optional terminology: an **execution context** tracks information needed to run a piece of code. An ordinary function invocation creates a new context with its call's parameters and local state. Scripts, modules and evaluated code also have execution-context rules.
+
+That is different from a function's retained lexical parent. A function does not execute by reusing an old caller's context just because it reads an outer binding. The caller matters to the order of work and the return destination, not to choosing the lexical parent.
+
+The **call stack** tracks active calls. The **scope chain** explains name resolution. For a fuller call-stack trace, use [Context and Call Stack](/courses/js-track/core-fundamentals/context-and-call-stack). No `eval` or `this` machinery is needed for the lookup examples above.
+
+## **Variable Environments and Lexical Environments**
+
+Optional specification vocabulary: an environment record models bindings and has an outer-environment link. A function object retains its defining environment. A call creates a new function environment with that retained environment as its outer link. Entering a block can add a nearer lexical environment.
+
+An execution context's **LexicalEnvironment** identifies where lexical lookup currently starts. Its **VariableEnvironment** is used for variable-scoped declarations such as `var`. They can initially refer to the same environment and differ while a nested block is active. Neither term means that all declarations must live in one physical object.
+
+Use this vocabulary to label the earlier traces, not as a second lookup algorithm. Find the first binding and apply its initialization and access rules. The abstract model explains observable behavior without prescribing an engine's storage layout or lookup speed.

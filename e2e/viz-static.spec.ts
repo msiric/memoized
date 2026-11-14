@@ -11,7 +11,9 @@ import { expect, test, type Page, type Request } from '@playwright/test'
 
 const GALLERY = '/dev/visualizations?static=1'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
-const PRESETS = ['var-vs-let-loop', 'factory-calls-vs-aliases'] as const
+// The closures figures, then the scope-chain figures (one section each, with a call stack).
+const PRESETS = ['var-vs-let-loop', 'factory-calls-vs-aliases', 'caller-is-not-lexical-parent', 'tdz-stops-lookup'] as const
+const ONE_SECTION = new Set<string>(['caller-is-not-lexical-parent', 'tdz-stops-lookup'])
 // entry-table.ts (checked against the computed footprint by registry.test.ts).
 // `col`: the full lesson column (vz-col, from 1280), whose caption reserve is
 // only the lines it needs there (INTEG 4).
@@ -21,6 +23,8 @@ const FOOTPRINT: Record<
 > = {
   'var-vs-let-loop': { narrow: 890, wide: 572, col: 548 },
   'factory-calls-vs-aliases': { narrow: 830, wide: 550, col: 526 },
+  'caller-is-not-lexical-parent': { narrow: 664, wide: 422, col: 422 },
+  'tdz-stops-lookup': { narrow: 752, wide: 526, col: 526 },
 }
 /** The footprint tier a viewport width shows (the frame's container width decides). */
 const tierOf = (width: number) => (width < 768 ? 'narrow' : width < 1280 ? 'wide' : 'col')
@@ -36,6 +40,8 @@ const SECTION_WIDTH: Record<(typeof WIDTHS)[number], number> = {
   1024: 295,
   1440: 359,
 }
+/** A figure with one section takes the whole stage: 288 stacked; 606 and 734 from 768. */
+const FULL_WIDTH: Record<(typeof WIDTHS)[number], number> = { 320: 288, 375: 288, 768: 606, 1024: 606, 1440: 734 }
 
 const figure = (page: Page, preset: string) =>
   page.locator(`figure[data-viz-preset="${preset}"]`)
@@ -95,7 +101,7 @@ test('hard load ships no visualization JavaScript: the server SVG is final', asy
   // The server markup is kept as is: never re-rendered on the client.
   await expect(
     page.locator('[data-viz="environment-records"] > [data-viz-ssr]'),
-  ).toHaveCount(2)
+  ).toHaveCount(4)
 })
 
 test('client-only render: the placeholder reserves each preset footprint, then the same figure', async ({
@@ -165,10 +171,9 @@ test('fixed footprint and no overflow at any width', async ({ page }) => {
       })
       expect(report.out, `${p} at ${width}`).toEqual([])
       // One SVG per section, laid out for this width (never scaled below 1:1).
-      expect(report.widths, `${p} at ${width}`).toEqual([
-        SECTION_WIDTH[width],
-        SECTION_WIDTH[width],
-      ])
+      expect(report.widths, `${p} at ${width}`).toEqual(
+        ONE_SECTION.has(p) ? [FULL_WIDTH[width]] : [SECTION_WIDTH[width], SECTION_WIDTH[width]],
+      )
     }
     expect(
       await page.evaluate(
@@ -254,6 +259,58 @@ test('hover or focus on a function brings its [[Environment]] path forward, CSS 
   expect(Object.values(await opacities()).every((o) => o === 'rest')).toBe(true)
 })
 
+test('scope chain: the running call traces its lookup by outer links, not the stack; the first match stops it (R4)', async ({
+  page,
+}) => {
+  await open(page, 1024)
+  const states = async (svg: ReturnType<typeof page.locator>) =>
+    svg.evaluate((el) => {
+      const out: Record<string, string> = {}
+      for (const n of el.querySelectorAll('[data-node], [data-edge]')) {
+        const cs = getComputedStyle(n)
+        if (cs.opacity !== '1') throw new Error(`dimmed: ${n.outerHTML.slice(0, 60)}`)
+        out[n.getAttribute('data-node') ?? n.getAttribute('data-edge')!] = cs.color === 'rgb(163, 230, 53)' ? 'lit' : 'rest'
+      }
+      return out
+    })
+  const cases = [
+    {
+      preset: 'caller-is-not-lexical-parent',
+      call: 'printName',
+      lit: ['printName', 'printCall', 'outer:printCall', 'module'],
+      rest: ['shadowName', 'moduleCode', 'shadowCall', 'outer:shadowCall'],
+      name: "printName(), running; lookup starts in printName() call; it reads name = 'Global' from module",
+    },
+    {
+      preset: 'tdz-stops-lookup',
+      call: 'read',
+      // The search stops at the block: nothing past it lights.
+      lit: ['read', 'block'],
+      rest: ['caller', 'moduleCode', 'outer:block', 'readCall', 'outer:readCall', 'module', 'callerCall', 'outer:callerCall'],
+      name: 'read(), running; lookup starts in block in read(); x is found uninitialized in block in read(), so the read throws ReferenceError',
+    },
+  ]
+  for (const c of cases) {
+    const fig = figure(page, c.preset)
+    await fig.scrollIntoViewIfNeeded()
+    const svg = fig.locator('svg:visible').first()
+    expect(Object.values(await states(svg)).every((o) => o === 'rest'), `${c.preset} at rest`).toBe(true)
+    // Only the running call is focusable: the frames under it never look clickable.
+    await expect(svg.locator('[tabindex="0"]')).toHaveCount(1)
+    await expect(svg.locator(`[data-node="${c.call}"]`)).toHaveAccessibleName(c.name)
+    await svg.locator(`[data-node="${c.call}"]`).hover()
+    await page.waitForTimeout(300)
+    const lit = await states(svg)
+    for (const k of c.lit) expect(lit[k], `${c.preset} ${k}`).toBe('lit')
+    for (const k of c.rest) expect(lit[k], `${c.preset} ${k}`).toBe('rest')
+    // The binding where the search stops lights as a row.
+    const row = svg.locator('[data-b]').first()
+    expect(await row.evaluate((n) => getComputedStyle(n).color)).toBe('rgb(163, 230, 53)')
+    await page.mouse.move(0, 0)
+    await page.waitForTimeout(300)
+  }
+})
+
 test('rest is grey; the traced path is lime: function, link, record, the row it reads, its aliases (R1, R11)', async ({
   page,
 }) => {
@@ -293,7 +350,8 @@ test('every link label uses one word at every width: env and outer (critique F-C
   for (const width of WIDTHS) {
     await open(page, width)
     const seen = await page.evaluate(() =>
-      [...document.querySelectorAll('[data-viz="environment-records"] svg.vz-s .vz-el')]
+      // Link labels ride their link's group (a traced read's error is not a link label).
+      [...document.querySelectorAll('[data-viz="environment-records"] svg.vz-s [data-edge] .vz-el')]
         .filter((t) => t.getBoundingClientRect().width > 0)
         .map((t) => t.textContent!),
     )

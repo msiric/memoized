@@ -25,6 +25,10 @@ const PAGES = [
   '/dev/visualizations?lk=parent-type-change',
   '/dev/visualizations/lesson/event-loop',
   '/dev/visualizations/lesson/closures',
+  '/dev/visualizations/lesson/scope-chain',
+  // The promise-patterns presets (their own lesson group).
+  '/dev/visualizations?preset=microtask-vs-timer-12345',
+  '/dev/visualizations?preset=await-null',
   // The committed stand-in lesson body for list keys (R2 G-02).
   '/dev/visualizations/lesson/list-keys',
 ]

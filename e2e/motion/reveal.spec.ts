@@ -79,7 +79,7 @@ const outIndexes = (page: Page) =>
   )
 
 for (const width of WIDTHS)
-for (const preset of ['basic-ordering', 'microtask-queued-during-drain'])
+for (const preset of ['basic-ordering', 'microtask-queued-during-drain', 'microtask-vs-timer-12345', 'await-null'])
   test(`event-loop ${preset} @${width}: the console plays back, then the recap (D21)`, async ({ page }) => {
     await openGallery(page, { width, query: `?preset=${preset}` })
     await toEventLoopEnd(page, '2')
