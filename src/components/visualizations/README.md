@@ -266,6 +266,41 @@ reduced motion, and it never moves the page. Elements that play it carry
   writes the per-figure rules; `.vz-s` in `tailwind.css` holds the rest
   colours and the lit colours (`--vz-k`); nothing dims (G ruling 1).
 
+### Heap graph (R4 shared visual 4, identity mode)
+
+`<Viz id="heap-graph" preset="…" />`, one id for the shared system and one
+preset per lesson (as environment-records): `identity-alias-rebind-spread`
+(Data Types) and `spread-vs-nested-vs-deep` (Objects). Names sit on the
+left, the objects their values identify on the right, an arrow meaning
+"identifies"; each panel is one of the lesson's own examples.
+
+- **Built from a recording.** `programs/` holds each lesson program
+  verbatim and its snapshot points; `yarn viz:heap` runs them in Node with
+  a probe after each point (`truth/record.ts`: every object gets the index
+  of its first discovery, so two names for one object record one index)
+  and writes `recordings/<lesson>.json`. `build.ts` turns a snapshot into a
+  panel (`Object A`, `Object B` in discovery order); the preset adds only
+  the heading, the emphasis and which recorded change to mark. The truth
+  test re-records every program, rebuilds the drawing from the fresh
+  recording and probes the register's verification assertions and the
+  identities the drawing claims, so the figure cannot disagree with a run.
+- **Layout** (`layout.ts`). Columns by distance from the names where every
+  panel fits them at the variant's narrowest width (wide), else one object
+  column in reading order where a property's arrow drops into the object
+  under it or turns back through a lane on the right (phones). Columns line
+  up from panel to panel; rows are fit so arrows run straight (isotonic
+  sweeps); converging arrows fan in with no jog under 16 px.
+- **One rest mark per panel**, the neutral `changed` role (Q9, never lime):
+  the row a mutation wrote (`.vz-ch`) or the arrow a rebinding moved
+  (`.vz-cm`). Lime is only the trace: hovering, focusing or tapping a name
+  lights it, its arrow and every object it reaches (`paths.ts`, server CSS
+  on the closures rules, `.vz-*` shared). Names keep a 46 px touch band.
+- **Gates.** `layout.test.tsx` (collisions, crossings, kinks, targets,
+  every stress fixture), `heap-graph.truth.test.ts`,
+  `e2e/viz-heap-graph.spec.ts`, the `heap-*` gate states, the lesson pages
+  `data-types` and `objects`, and the static-figure consistency check
+  against the closures figure.
+
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for
 the lint, manifest and text alternative. `engines/list-keys/` is the first: its

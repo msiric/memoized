@@ -10,8 +10,8 @@ import { expect, type Locator, type Page } from '@playwright/test'
 
 export const GALLERY = '/dev/visualizations'
 export const SPECIMEN = '/dev/visualizations/system'
-/** Lesson-context pages: the two free lessons, and the committed list-keys stand-in (R2 G-02). */
-export const LESSONS = ['event-loop', 'closures', 'list-keys'] as const
+/** Lesson-context pages: the free lessons (closures, event loop, the heap-graph lessons) and the committed list-keys stand-in (R2 G-02). */
+export const LESSONS = ['event-loop', 'closures', 'list-keys', 'data-types', 'objects'] as const
 export const lessonUrl = (slug: string) => `/dev/visualizations/lesson/${slug}`
 
 /** Hides the dev-mode overlay and build indicator, which are not the product. */
@@ -45,6 +45,12 @@ export async function settle(page: Page) {
 
 const EL = '[data-viz="event-loop"] section'
 const LK = '[data-viz="list-keys"] section'
+const HEAP_DATA_TYPES = 'figure[data-viz-preset="identity-alias-rebind-spread"]'
+const HEAP_OBJECTS = 'figure[data-viz-preset="spread-vs-nested-vs-deep"]'
+
+/** A heap-graph name on screen (one svg per layout width; the visible one). */
+const heapName = (page: Page, frame: string, panel: string, name: string) =>
+  page.locator(`${frame} [data-viz-section="${panel}"] svg [data-node="v-${name}"] >> visible=true`).first()
 
 /** The event loop's Start prediction, answered with choice `pick` (1-based). */
 async function answerStart(page: Page, pick: number) {
@@ -81,13 +87,15 @@ async function lkKey(page: Page, label: string) {
 
 /** The page a state opens on: the static figures alone, the list-keys wrapper preset, or the gallery. */
 export function stateUrl(name: string): string {
-  if (name.startsWith('closures')) return `${GALLERY}?static=1`
+  if (name.startsWith('closures') || name.startsWith('heap')) return `${GALLERY}?static=1`
   if (name.startsWith('lk-wrapper')) return `${GALLERY}?lk=parent-type-change`
   return GALLERY
 }
 /** The frame a state is judged in. */
 export function stateFrame(name: string): string {
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
+  if (name.startsWith('heap-objects')) return HEAP_OBJECTS
+  if (name.startsWith('heap')) return HEAP_DATA_TYPES
   return name.startsWith('lk') ? LK : EL
 }
 
@@ -180,6 +188,26 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'lk-wrapper-ask': async () => {},
   'lk-wrapper-reveal': async (page) => {
     await STATES['lk-reveal'](page)
+  },
+  // The heap graphs at rest (each panel's one changed mark), hovered (a
+  // name's trace reaching a shared object) and keyboard-focused.
+  'heap-rest': async () => {},
+  'heap-hover': async (page) => {
+    const name = heapName(page, HEAP_DATA_TYPES, 'spread', 'copy')
+    await name.scrollIntoViewIfNeeded()
+    await name.hover()
+    await settle(page)
+  },
+  'heap-objects-rest': async () => {},
+  'heap-objects-focus': async (page) => {
+    const name = heapName(page, HEAP_OBJECTS, 'nested', 'updatedPerson')
+    await name.scrollIntoViewIfNeeded()
+    await name.focus()
+    // Focus from a script is not :focus-visible; one Tab round trip makes it so.
+    await page.keyboard.press('Shift+Tab')
+    await page.keyboard.press('Tab')
+    await page.mouse.move(0, 0)
+    await settle(page)
   },
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.

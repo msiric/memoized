@@ -9,6 +9,8 @@ const routes = [
   '/dev/visualizations/lesson/event-loop',
   '/dev/visualizations/lesson/closures',
   '/dev/visualizations/lesson/list-keys',
+  '/dev/visualizations/lesson/data-types',
+  '/dev/visualizations/lesson/objects',
   '/dev/visualizations?lk=parent-type-change',
 ]
 const deadline = Date.now() + 300_000

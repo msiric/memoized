@@ -27,6 +27,9 @@ const PAGES = [
   '/dev/visualizations/lesson/closures',
   // The committed stand-in lesson body for list keys (R2 G-02).
   '/dev/visualizations/lesson/list-keys',
+  // The heap-graph lessons (both FREE, committed copies).
+  '/dev/visualizations/lesson/data-types',
+  '/dev/visualizations/lesson/objects',
 ]
 const CONFIGS: Config[] =
   TIER === 'full'

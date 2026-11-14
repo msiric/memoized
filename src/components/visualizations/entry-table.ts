@@ -46,6 +46,12 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     572,
     { 'var-vs-let-loop': [890, 572, 548], 'factory-calls-vs-aliases': [830, 550, 526] },
   ],
+  'heap-graph': [
+    () => import('./engines/heap-graph'),
+    1013,
+    874,
+    { 'identity-alias-rebind-spread': [1013, 874, 874], 'spread-vs-nested-vs-deep': [1533, 1088, 1088] },
+  ],
   'list-keys': [
     () => import('./engines/list-keys'),
     862,

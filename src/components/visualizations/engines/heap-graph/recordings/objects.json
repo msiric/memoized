@@ -1,0 +1,273 @@
+{
+ "shallow": {
+  "sha256": "87a8cce907be037a562fa6fb05b0c4b29c4f494cc230eed7ae56274a2c7090fa",
+  "observed": [
+   "3"
+  ],
+  "snapshots": {
+   "shallow": {
+    "bindings": [
+     [
+      "original",
+      {
+       "ref": 1
+      }
+     ],
+     [
+      "copy",
+      {
+       "ref": 2
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "array": false,
+      "rows": [
+       [
+        "a",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "b",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "array": false,
+      "rows": [
+       [
+        "a",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "b",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "array": false,
+      "rows": [
+       [
+        "c",
+        {
+         "text": "3"
+        }
+       ]
+      ]
+     }
+    ],
+    "results": [
+     [
+      "original.b.c",
+      "3"
+     ]
+    ]
+   }
+  }
+ },
+ "nested": {
+  "sha256": "b324de6f55638023025e2fea2e054e26e1d74ca47512278b08cdf4d4d98f3090",
+  "observed": [
+   "{ name: 'John', address: { city: 'Newtown', zip: '12345' } }"
+  ],
+  "snapshots": {
+   "nested": {
+    "bindings": [
+     [
+      "person",
+      {
+       "ref": 1
+      }
+     ],
+     [
+      "updatedPerson",
+      {
+       "ref": 2
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "array": false,
+      "rows": [
+       [
+        "name",
+        {
+         "text": "'John'"
+        }
+       ],
+       [
+        "address",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "array": false,
+      "rows": [
+       [
+        "name",
+        {
+         "text": "'John'"
+        }
+       ],
+       [
+        "address",
+        {
+         "ref": 4
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "array": false,
+      "rows": [
+       [
+        "city",
+        {
+         "text": "'Anytown'"
+        }
+       ],
+       [
+        "zip",
+        {
+         "text": "'12345'"
+        }
+       ]
+      ]
+     },
+     {
+      "id": 4,
+      "array": false,
+      "rows": [
+       [
+        "city",
+        {
+         "text": "'Newtown'"
+        }
+       ],
+       [
+        "zip",
+        {
+         "text": "'12345'"
+        }
+       ]
+      ]
+     }
+    ],
+    "results": []
+   }
+  }
+ },
+ "deep": {
+  "sha256": "b05d5e369f9940c258bf818b68bc146c6d59a98d99499b51f785ee8e7c40a38e",
+  "observed": [
+   "2"
+  ],
+  "snapshots": {
+   "deep": {
+    "bindings": [
+     [
+      "original",
+      {
+       "ref": 1
+      }
+     ],
+     [
+      "copy",
+      {
+       "ref": 2
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "array": false,
+      "rows": [
+       [
+        "a",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "b",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "array": false,
+      "rows": [
+       [
+        "a",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "b",
+        {
+         "ref": 4
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "array": false,
+      "rows": [
+       [
+        "c",
+        {
+         "text": "2"
+        }
+       ]
+      ]
+     },
+     {
+      "id": 4,
+      "array": false,
+      "rows": [
+       [
+        "c",
+        {
+         "text": "3"
+        }
+       ]
+      ]
+     }
+    ],
+    "results": [
+     [
+      "original.b.c",
+      "2"
+     ]
+    ]
+   }
+  }
+ }
+}

@@ -11,7 +11,7 @@ import { answersOf, walkListKeys, walkStepThrough } from './flows'
  *   skipped;
  * - list keys: every key x action, answered or skipped, plus the wrapper
  *   scene by pointer and by keyboard;
- * - the closures figures (server SVG);
+ * - the closures figures and the heap graphs (server SVG);
  * - hover: each control hovered, detectors run, the frame must not move;
  * - print emulation: the light rendering of each visual through the same
  *   detectors (contrast on paper included).
@@ -97,6 +97,11 @@ for (const c of activeConfigs()) {
         await rec.check(page, s!, `environment-records ${id}`, 'static', ENV_OPTS, `environment-records ${id}`)
         await hoverPass(page, rec, s!, `environment-records ${id}`)
       }
+      for (const [i, id] of ['identity-alias-rebind-spread', 'spread-vs-nested-vs-deep'].entries()) {
+        const s = await markScope(page, '[data-viz="heap-graph"]', i, `hg${i}`)
+        await rec.check(page, s!, `heap-graph ${id}`, 'static', {}, `heap-graph ${id}`)
+        await hoverPass(page, rec, s!, `heap-graph ${id}`)
+      }
 
       // Print: the light rendering through the same detectors (R10).
       await page.emulateMedia({ media: 'print' })
@@ -111,6 +116,10 @@ for (const c of activeConfigs()) {
       for (const [i, id] of ['var-vs-let-loop', 'factory-calls-vs-aliases'].entries()) {
         const s = await markScope(page, '[data-viz="environment-records"]', i, `per${i}`)
         await rec.check(page, s!, `environment-records ${id} print`, 'static', ENV_OPTS, `environment-records ${id} | print`)
+      }
+      for (const [i, id] of ['identity-alias-rebind-spread', 'spread-vs-nested-vs-deep'].entries()) {
+        const s = await markScope(page, '[data-viz="heap-graph"]', i, `phg${i}`)
+        await rec.check(page, s!, `heap-graph ${id} print`, 'static', {}, `heap-graph ${id} | print`)
       }
       await page.emulateMedia({ media: 'screen' })
     } finally {

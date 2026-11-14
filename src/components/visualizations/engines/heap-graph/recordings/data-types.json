@@ -1,0 +1,188 @@
+{
+ "alias": {
+  "sha256": "fd1eb57f1c2a61314b9aa5711519b8cc652e1c531ea2742a24ce974cfb86b09d",
+  "observed": [
+   "2",
+   "true"
+  ],
+  "snapshots": {
+   "alias": {
+    "bindings": [
+     [
+      "original",
+      {
+       "ref": 1
+      }
+     ],
+     [
+      "alias",
+      {
+       "ref": 1
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "array": false,
+      "rows": [
+       [
+        "count",
+        {
+         "text": "2"
+        }
+       ]
+      ]
+     }
+    ],
+    "results": [
+     [
+      "original === alias",
+      "true"
+     ]
+    ]
+   }
+  }
+ },
+ "update": {
+  "sha256": "df471379bb4e1ae1b8e11184bcc342d485ea7bc3e59e5707195abf525f13fac3",
+  "observed": [
+   "2",
+   "99",
+   "false"
+  ],
+  "snapshots": {
+   "rebind": {
+    "bindings": [
+     [
+      "original",
+      {
+       "ref": 1
+      }
+     ],
+     [
+      "record",
+      {
+       "ref": 2
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "array": false,
+      "rows": [
+       [
+        "count",
+        {
+         "text": "2"
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "array": false,
+      "rows": [
+       [
+        "count",
+        {
+         "text": "99"
+        }
+       ]
+      ]
+     }
+    ],
+    "results": [
+     [
+      "original.count",
+      "2"
+     ]
+    ]
+   }
+  }
+ },
+ "spread": {
+  "sha256": "2e6a056f2a7a8547b3a3e5606ef2d3fe2e64cbe11d256269c68476b36d87c2c3",
+  "observed": [
+   "Alice",
+   "2",
+   "false",
+   "true"
+  ],
+  "snapshots": {
+   "spread": {
+    "bindings": [
+     [
+      "original",
+      {
+       "ref": 1
+      }
+     ],
+     [
+      "copy",
+      {
+       "ref": 2
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "array": false,
+      "rows": [
+       [
+        "name",
+        {
+         "text": "'Alice'"
+        }
+       ],
+       [
+        "stats",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "array": false,
+      "rows": [
+       [
+        "name",
+        {
+         "text": "'Bob'"
+        }
+       ],
+       [
+        "stats",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "array": false,
+      "rows": [
+       [
+        "count",
+        {
+         "text": "2"
+        }
+       ]
+      ]
+     }
+    ],
+    "results": [
+     [
+      "original.stats === copy.stats",
+      "true"
+     ]
+    ]
+   }
+  }
+ }
+}
