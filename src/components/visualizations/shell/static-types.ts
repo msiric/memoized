@@ -22,6 +22,13 @@ export type VerifiedProgram = {
   throws?: string
 }
 
+/** A program's verified output as one line of text: what it printed, then the error it threw, if any. */
+export function outputText(p: VerifiedProgram): string {
+  const out = p.observed.join(', ')
+  if (!p.throws) return out
+  return out ? `${out}, then throws ${p.throws}` : `no output; throws ${p.throws}`
+}
+
 /**
  * An observable fact the picture claims, checked by running the program
  * with `probe` appended in a fresh Node process: the probe must print

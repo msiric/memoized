@@ -976,11 +976,22 @@ function layoutWithStack(
   extraBeforeLast: number,
 ): SectionScene {
   const col = stackColumn(frames)
-  // One arrangement per variant (decided at its narrowest width), so every width of it has one height.
-  const beside = minWidth >= STACK.besideMin
+  if (col.width > minWidth) throw new Error(`${section.id}: the call stack is ${col.width}px wide > ${minWidth}px`)
+  const tree: EnvSection = { ...section, nodes: section.nodes.filter((n) => !isFrame(n)) }
+  // One arrangement per variant, decided at its narrowest width, so every
+  // width of it has one height: beside the records where they still fit
+  // next to the stack, else above them.
+  const besideAt = (w: number) => {
+    try {
+      layoutSection(tree, w, w)
+      return true
+    } catch {
+      return false
+    }
+  }
+  const beside = minWidth >= STACK.besideMin && besideAt(minWidth - col.width - STACK.besideGap)
   const dx = beside ? col.width + STACK.besideGap : 0
   const dy = beside ? 0 : col.height + STACK.aboveGap
-  const tree: EnvSection = { ...section, nodes: section.nodes.filter((n) => !isFrame(n)) }
   const inner = layoutSection(tree, width - dx, minWidth - dx, extraBeforeLast)
 
   const boxes: LaidBox[] = inner.boxes.map((b) => ({

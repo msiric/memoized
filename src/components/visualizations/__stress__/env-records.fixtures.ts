@@ -177,7 +177,54 @@ const erTextOver = preset(
   },
 )
 
-export const ENV_PRESETS = [erLongNames, erNearLimit, erManyBindings, erWideTier, erDeep, erUnicode, erTextLimit, erTextOver]
+// 6. A call stack beside the records (the scope-chain figures): a deep stack
+// of long and CJK call names, a traced read whose result is a long output,
+// and a second section whose read stops at an uninitialized binding.
+const frame = (id: string, title: string, env: string, line: number, extra = {}): EnvNode => ({
+  kind: 'frame',
+  id,
+  title: [title],
+  env,
+  line,
+  ...extra,
+})
+const stackOutput: EnvSection = {
+  id: 'stackOut',
+  heading: 'console.log(configurationValue)',
+  emphasis: 'configurationValue',
+  nodes: [
+    frame('reader', 'readConfiguration()', 'readCall', 3, { reads: 'configurationValue', logs: '"eu-west-1"' }),
+    frame('loader', 'loadSettingsFromDisk()', 'loadCall', 7),
+    frame('cjk', '設定を読み込む()', 'cjkCall', 9),
+    frame('boot', 'bootstrapApplication()', 'bootCall', 11),
+    frame('mod', 'module', 'module', 13),
+    rec('module', ['module'], [['configurationValue', '"eu-west-1"']], null),
+    rec('readCall', ['readConfiguration() call', 'readConfiguration()\ncall'], [], 'module'),
+    // Nested in bootstrapApplication: a deeper chain beside the short one the read walks.
+    rec('loadCall', ['loadSettingsFromDisk() call', 'loadSettings…()\ncall'], [['configurationValue', '"staging"']], 'bootCall'),
+    rec('cjkCall', ['設定を読み込む() 呼び出し', '設定()\n呼び出し'], [['値', '"漢字"']], 'loadCall'),
+    rec('bootCall', ['bootstrapApplication() call', 'bootstrap…()\ncall'], [], 'module'),
+  ],
+}
+const stackThrows: EnvSection = {
+  id: 'stackThrow',
+  heading: 'console.log(x)',
+  emphasis: 'x',
+  nodes: [
+    frame('read', 'read()', 'block', 5, { reads: 'x', throws: 'ReferenceError' }),
+    frame('caller', 'caller()', 'callerCall', 12),
+    frame('mod', 'module', 'module', 15),
+    rec('module', ['module'], [['x', "'module'"]], null),
+    rec('readCall', ['read() call', 'read()\ncall'], [], 'module'),
+    rec('callerCall', ['caller() call', 'caller()\ncall'], [['x', "'caller'"]], 'module'),
+    { kind: 'record', id: 'block', title: ['block in read()', 'block'], bindings: [{ name: 'x', value: { text: "'block'" }, uninitialized: true }], outer: 'readCall' },
+  ],
+}
+const hint = { hover: 'Hover the running call to trace its lookup.', tap: 'Tap the running call to trace its lookup.' }
+const erStack = preset('er-stack', { sections: [stackOutput], align: 'top', hint })
+const erStackThrows = preset('er-stack-throws', { sections: [stackThrows], align: 'top', hint })
+
+export const ENV_PRESETS = [erLongNames, erNearLimit, erManyBindings, erWideTier, erDeep, erUnicode, erTextLimit, erTextOver, erStack, erStackThrows]
 
 export function envFixture(p: StaticPreset<EnvDiagram>): StaticDescriptor<EnvDiagram> {
   return {

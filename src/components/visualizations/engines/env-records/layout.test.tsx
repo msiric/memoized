@@ -341,3 +341,31 @@ describe('touch targets (R11)', () => {
       }
   })
 })
+
+describe('the call-stack column (scope-chain figures)', () => {
+  const caller = envRecordsDescriptor.presets.find((p) => p.id === 'caller-is-not-lexical-parent')!.data
+
+  it('sits beside the records from 768 and above them on a phone, top of the stack first', () => {
+    const at = (v: 'narrow' | 'wide') => layoutDiagram(caller, v).sections[0].scenes[0]
+    const wide = at('wide')
+    const narrow = at('narrow')
+    const frames = (s: SectionScene) => s.boxes.filter((b) => b.kind === 'frame')
+    const records = (s: SectionScene) => s.boxes.filter((b) => b.kind === 'record')
+    expect(frames(wide).map((b) => b.id)).toEqual(['printName', 'shadowName', 'moduleCode'])
+    expect(Math.max(...frames(wide).map((b) => b.rect.x + b.rect.w))).toBeLessThan(Math.min(...records(wide).map((b) => b.rect.x)))
+    expect(Math.max(...frames(narrow).map((b) => b.rect.y + b.rect.h))).toBeLessThan(Math.min(...records(narrow).map((b) => b.rect.y)))
+    // The running call's result sits on its row.
+    const out = wide.texts.find((t) => t.node === 'printName')!
+    expect(out.text).toBe('› Global')
+    expect(out.rect.y).toBeGreaterThanOrEqual(frames(wide)[0].rect.y)
+  })
+
+  it('rejects a stack too wide for the figure (the lint reports it; rendering falls back)', () => {
+    const section = caller.sections[0]
+    const wide: EnvSection = {
+      ...section,
+      nodes: section.nodes.map((n) => (n.id === 'printName' ? { ...n, title: ['printNameWithAnExtraordinarilyLongIdentifier()'] as [string] } : n)),
+    }
+    expect(() => layoutSection(wide, 288, 288)).toThrow(/call stack is \d+px wide/)
+  })
+})

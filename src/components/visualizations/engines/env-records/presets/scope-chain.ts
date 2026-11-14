@@ -77,7 +77,7 @@ const printed = (section: EnvSection, frame: string, name: string): string => {
 export const callerIsNotLexicalParent: StaticPreset<EnvDiagram> = {
   id: 'caller-is-not-lexical-parent',
   label: 'Caller vs parent',
-  title: 'The caller is not the lexical parent',
+  title: 'Caller vs lexical parent',
   caption:
     "printName runs while shadowName is on the stack, but its lookup follows its outer link to the module, so it finds 'Global'.",
   programs: [callerProgram],

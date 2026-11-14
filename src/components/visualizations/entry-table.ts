@@ -49,7 +49,7 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     {
       'var-vs-let-loop': [890, 572, 548],
       'factory-calls-vs-aliases': [830, 550, 526],
-      'caller-is-not-lexical-parent': [692, 422, 422],
+      'caller-is-not-lexical-parent': [664, 422, 422],
       'tdz-stops-lookup': [752, 526, 526],
     },
   ],

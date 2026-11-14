@@ -7,7 +7,7 @@ import { Provenance } from '../primitives/Provenance'
 import { ink, type as typeScale } from '../primitives/tokens-v3'
 import { FRAME } from './footprint'
 import { staticMetrics } from './static-footprint'
-import type { StaticDefinition, StaticTextAlternative } from './static-types'
+import { outputText, type StaticDefinition, type StaticTextAlternative } from './static-types'
 import { runtimeName } from './StepsAsText'
 import { H_CLS, MIN_H_CLS, heights } from './vars'
 
@@ -34,7 +34,7 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
     ...def.engine.describe(p.data),
     outputs: p.programs.map((pr) => ({
       label: pr.id,
-      text: pr.observed.join(', '),
+      text: outputText(pr),
     })),
   }
   const titleId = `${uid}-title`
