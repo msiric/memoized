@@ -108,7 +108,7 @@ export function pathSelectors(section: EnvSection, fn: EnvFunction): string[] {
 const safe = (id: string) => /^[A-Za-z_][\w-]*$/.test(id)
 
 /** Lit: the `now` colour, the glyph tint and the 2.5 px connector (tailwind.css `.vz-s`). */
-const LIT = '{color:var(--vz-k);--vz-t:var(--vz-kt);--vz-sw:2.5px}'
+export const LIT = '{color:var(--vz-k);--vz-t:var(--vz-kt);--vz-sw:2.5px}'
 
 /**
  * Per function, scoped to its section: the lit rule, plus a hold rule when

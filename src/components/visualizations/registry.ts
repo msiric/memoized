@@ -1,5 +1,6 @@
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
+import { heapGraphDescriptor } from './engines/heap-graph/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
 import { footprintOf, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
@@ -24,6 +25,7 @@ export const VIZ_DESCRIPTORS = {
   'event-loop': eventLoopDescriptor,
   'environment-records': envRecordsDescriptor,
   'list-keys': listKeysDescriptor,
+  'heap-graph': heapGraphDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS
