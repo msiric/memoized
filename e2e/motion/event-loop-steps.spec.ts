@@ -136,9 +136,9 @@ for (const width of WIDTHS)
                 return ahead.glyphs.join(',') === e.glyphs.join(',')
                   ? []
                   : [`${where(e)}: back animates [${e.glyphs}] but next animated [${ahead.glyphs}]`]
-              const enforced = mirrorProblems(ahead.vectors, e.vectors, ahead.timing.enforce && e.timing.enforce)
+              const enforced = mirrorProblems(ahead.vectors, e.vectors, ahead.timing.enforce && e.timing.enforce, ahead.timing.ok && e.timing.ok)
               if (ahead.timing.ok && e.timing.ok && !REQUIRE_TIMING)
-                for (const p of mirrorProblems(ahead.vectors, e.vectors, true)) if (!enforced.includes(p)) mirrorAdvisory.push(`${where(e)}: ${p}`)
+                for (const p of mirrorProblems(ahead.vectors, e.vectors, true, true)) if (!enforced.includes(p)) mirrorAdvisory.push(`${where(e)}: ${p}`)
               return enforced.map((p) => `${where(e)}: ${p}`)
             }),
         )

@@ -269,13 +269,20 @@ const TOKEN_MS = {
  */
 const MIRROR_MS = 20 + 17
 const mirrorTolerance = (f: GlyphVector, b: GlyphVector) => 20 + Math.max(17, Math.ceil(f.gapMs), Math.ceil(b.gapMs))
-export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<string, GlyphVector>, timing = true): string[] {
+/**
+ * `presence`: whether "animates only one way" can be judged. A tween that
+ * runs entirely between two samples of a starved recording (`frameHealth`)
+ * leaves no intermediate value, so it is judged only when both recordings
+ * are measurable; direction and displacement are judged whenever both sides
+ * were seen.
+ */
+export function mirrorProblems(fwd: Record<string, GlyphVector>, back: Record<string, GlyphVector>, timing = true, presence = true): string[] {
   const out: string[] = []
   for (const k of new Set([...Object.keys(fwd), ...Object.keys(back)])) {
     const f = fwd[k]
     const b = back[k]
     if (!f || !b) {
-      out.push(`${k}: animates only ${f ? 'forward' : 'back'}`)
+      if (presence) out.push(`${k}: animates only ${f ? 'forward' : 'back'}`)
       continue
     }
     if (Math.abs(b.dx + f.dx) > 1 || Math.abs(b.dy + f.dy) > 1)
