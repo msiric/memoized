@@ -151,7 +151,7 @@ describe('register: linked-lists (palindrome presets)', () => {
     const even = slowStop(palindromeEvenSpec)
     expect(even.slow).toBe(1)
     const cp2 = even.log.checkpoints[0]
-    expect(cp2.choices.find((c) => c.id === cp2.answer)!.label).toBe('the first 2')
+    expect(cp2.choices.find((c) => c.id === cp2.answer)!.label).toBe('1st 2')
     expect(pointerAt(even.log.steps[cp2.beforeStep].state, 'slow')).toBe(1)
   })
 

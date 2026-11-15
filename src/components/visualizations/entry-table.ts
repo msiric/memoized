@@ -67,13 +67,13 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
   ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),
-    850,
-    690,
+    798,
+    722,
     undefined,
     {
-      'reverse-between-m2-n4': [850, 690, 850, 998, 1118],
-      'palindrome-split-reverse-compare': [836, 686, 836, 980, 1068],
-      'palindrome-1221': [836, 706, 836, 1000, 1084],
+      'reverse-between-m2-n4': [798, 722, 838, 978, 1058],
+      'palindrome-split-reverse-compare': [796, 682, 796, 936, 988],
+      'palindrome-1221': [796, 682, 796, 956, 1004],
       'palindrome-1231': [784, 654, 784, 936, 1004],
     },
   ],

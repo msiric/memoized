@@ -132,6 +132,51 @@ test('palindrome presets: one switcher for the lesson, the question on the step 
   expect((await drawn(page)).tags.slow).toBe('n1')
 })
 
+// The flagship's phone fit (Q15, owner ruling for wave 2): at 375×667, with the code pane scrolled to
+// just under the site header, the current line, the drawing, the caption and Next are all on screen,
+// at every step of every preset.
+test('375×667: code line, drawing, caption and Next fit under the site header at every step', async ({ page }) => {
+  test.setTimeout(180_000)
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  for (const preset of linkedListDescriptor.presets.map((x) => x.id)) {
+    await page.setViewportSize({ width: 375, height: 667 })
+    await page.goto(`/dev/visualizations?ll=${preset}`, { waitUntil: 'load' })
+    const f = page.locator(STEP)
+    await f.scrollIntoViewIfNeeded()
+    await expect(page.locator(`${STEP}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 30_000 })
+    await f.getByRole('slider').focus()
+    for (let i = 0; i <= 20; i++) {
+      const v = await page.evaluate((sel) => {
+        const root = document.querySelector(sel)!
+        const header = [...document.querySelectorAll('div.fixed')]
+          .map((e) => e.getBoundingClientRect())
+          .find((r) => r.top <= 0 && r.height > 30 && r.height < 120)
+        const top = header ? header.bottom : 0
+        window.scrollBy(0, root.querySelector('[data-viz-region="code"]')!.getBoundingClientRect().top - top - 8)
+        const visible = (el: Element | null) => {
+          if (!el) return true
+          const r = el.getBoundingClientRect()
+          return r.top >= top - 0.5 && r.bottom <= window.innerHeight + 0.5
+        }
+        return {
+          line: visible(root.querySelector('[aria-current="true"]')),
+          drawing: visible(root.querySelector('[data-viz-region="list"] svg')),
+          caption: visible(root.querySelector('[data-viz-part="viz-caption"]')),
+          next: visible(root.querySelector('[data-viz-part="viz-next"]')),
+          step: root.getAttribute('data-viz-step'),
+          mode: root.getAttribute('data-viz-mode'),
+          end: root.querySelector('[data-viz-part="viz-next"]')!.hasAttribute('data-viz-end'),
+        }
+      }, STEP)
+      const { step, mode, end, ...seen } = v
+      expect(seen, `${preset} step ${step} (${mode})`).toEqual({ line: true, drawing: true, caption: true, next: true })
+      if (end) break
+      await page.keyboard.press(mode === 'ask' ? '2' : 'ArrowRight')
+      await page.waitForTimeout(30)
+    }
+  }
+})
+
 test('axe: no violations on the step-through (every preset) and the frames', async ({ page }) => {
   for (const p of ['reverse-between-m2-n4', 'palindrome-split-reverse-compare']) {
     await openStep(page, p)

@@ -148,9 +148,9 @@ export const palindromeOddSpec: PresetSpec = {
       beforeStep: slowStops(steps),
       prompt: 'For 1,2,3,2,1, which node does slow stop on?',
       choices: [
-        { id: 'first-2', label: 'the first 2' },
+        { id: 'first-2', label: '1st 2' },
         { id: 'three', label: '3' },
-        { id: 'second-2', label: 'the second 2' },
+        { id: 'second-2', label: '2nd 2' },
       ],
       answer: 'three',
       feedback: {
@@ -175,8 +175,8 @@ export const palindromeEvenSpec: PresetSpec = {
       prompt: 'For 1,2,2,1, which node does slow stop on?',
       choices: [
         { id: 'one', label: '1' },
-        { id: 'first-2', label: 'the first 2' },
-        { id: 'second-2', label: 'the second 2' },
+        { id: 'first-2', label: '1st 2' },
+        { id: 'second-2', label: '2nd 2' },
       ],
       answer: 'first-2',
       feedback: {

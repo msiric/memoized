@@ -133,7 +133,7 @@ export const reverseBetweenSpec: PresetSpec = {
       prompt: 'After connection.next = previous, what comes after 2, walking from head?',
       choices: [
         { id: 'five', label: '5' },
-        { id: 'loop', label: '1 again: a loop' },
+        { id: 'loop', label: '1: a loop' },
         { id: 'null', label: 'null' },
       ],
       answer: 'loop',
