@@ -301,6 +301,47 @@ left, the objects their values identify on the right, an arrow meaning
   `data-types` and `objects`, and the static-figure consistency check
   against the closures figure.
 
+### Pointer rewiring (R4 shared visual 3, wave 2B)
+
+`<Viz id="linked-list-pointer-rewiring" preset="…" />` (step-through) and
+`<Viz id="linked-list-frames" preset="…" />` (its static frames), one
+engine (`engines/linked-list/`) and one lesson group per lesson:
+`reverse-between-m2-n4` (Linked List Reversal), the palindrome presets
+`palindrome-split-reverse-compare`, `palindrome-1221` and `palindrome-1231`
+(Linked Lists), and the frames `floyd-rho` (Fast and Slow Pointers) and
+`full-reversal-strip` (Linked List Reversal).
+
+- **Built from a recording.** `programs/` holds each lesson program
+  verbatim and its probes; `yarn viz:linked-list` runs it in Node 24 with
+  the node class wrapped (one inserted line, so every node numbers itself
+  in creation order) and a probe after each probed line, never editing a
+  lesson line, and writes `recordings/<lesson>.json`: which node each
+  pointer held and where every `next` pointed, every time a probe ran.
+  `build.ts` makes one step per probe hit (the end step adds the printed
+  output); presets add only words and checkpoints. The code pane shows the
+  lesson function reflowed to the pane: `reflowMap` fails on any change
+  beyond whitespace. The truth test re-records every program, rebuilds every
+  log and frame, checks the register's assertions and that tampered
+  recordings, steps, snippets and code fail; locally it also checks the
+  snippets byte for byte against the lesson (premium bodies never ship).
+- **Drawing** (`geometry.ts`, 288 wide, 1:1 at the default text size).
+  Nodes never move. Each pointer variable has its own lane (above or below
+  the row), so a tag slides to its node without crossing another tag; a
+  pointer holding null sits in the `null` column. Arrows: to the right
+  neighbour on the upper track, to the left neighbour on the lower track (a
+  two-node cycle reads as two arrows), further as an arc whose side and
+  level are fixed for the whole preset (never crossing, never jumping), and
+  null as a grounded stub.
+- **Motion.** A changed arrow cross-fades in place (one glyph, `link-i`), a
+  tag slides on the `move` spring, both on the glyph beat; Back mirrors
+  Next. The step's changed glyphs take the neutral `changed` mark (never
+  lime). No designed reveal.
+- **Gates.** `linked-list.truth.test.ts`, `frames/frames.truth.test.ts`,
+  `layout.test.ts`, `e2e/viz-linked-list.spec.ts`,
+  `e2e/motion/linked-list-steps.spec.ts`, `e2e/stress/linked-list.stress.ts`,
+  the `ll-*` and `llf-*` gate states (gallery `?ll=<preset>`,
+  `?ll=static`) and the heap-graph consistency check.
+
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for
 the lint, manifest and text alternative. `engines/list-keys/` is the first: its
