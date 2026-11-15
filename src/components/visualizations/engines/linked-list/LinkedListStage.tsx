@@ -123,7 +123,7 @@ function useTagMoves(root: RefObject<SVGSVGElement>, gate: MotionGate, key: unkn
   }, [key, gate.epoch])
 }
 
-export function LinkedListStage({ index, step, codePane, layout, motion: gate, label }: StageProps<LLState>) {
+export function LinkedListStage({ log, index, step, codePane, layout, motion: gate, label }: StageProps<LLState>) {
   const metrics = layout.detail as LinkedListMetrics
   const g = metrics.geometry
   const state = step.state
@@ -143,8 +143,10 @@ export function LinkedListStage({ index, step, codePane, layout, motion: gate, l
   // What the step changed, against the step the reader came from (the shell's `previous` is the step
   // before this one, which on Back is not where the reader was). Held for the whole step, so a re-render
   // during its beats keeps the leaving glyphs; none on a first render.
-  const origin = useRef<{ step: typeof step; from?: LLState }>({ step })
-  if (origin.current.step !== step) origin.current = { step, from: origin.current.step.state }
+  // Another preset is another list: nothing to diff against.
+  const origin = useRef<{ log: typeof log; step: typeof step; from?: LLState }>({ log, step })
+  if (origin.current.step !== step)
+    origin.current = { log, step, from: origin.current.log === log ? origin.current.step.state : undefined }
   const was = origin.current.from
   const prevOut = was ? was.output.join(' ') : out
   const prevTags = new Map((was?.pointers ?? state.pointers).map((p) => [p.name, p.at]))
