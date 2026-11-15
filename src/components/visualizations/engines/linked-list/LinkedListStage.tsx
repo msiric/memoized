@@ -3,9 +3,9 @@
 import { AnimatePresence, m } from 'framer-motion'
 import { useLayoutEffect, useMemo, useRef, type CSSProperties, type RefObject } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { strokeWidth } from '../../primitives/tokens-v3'
+import { motion as motionTokens, strokeWidth } from '../../primitives/tokens-v3'
 import { finishMoves, moveSpringToken, springCurve } from '../../shell/flip'
-import { animates, beatDelay, presence, type MotionGate } from '../../shell/motion'
+import { animates, beatDelay, presence, transitionFor, type MotionGate } from '../../shell/motion'
 import type { StageProps } from '../../shell/types'
 import { toRem } from '../../substrates/units'
 import { SIZE, linkShape, tagBox } from './geometry'
@@ -32,6 +32,14 @@ import { NULL_ID, OUTPUT_ID, linkId, nodeId, pointerId, type LLState } from './m
  */
 
 const MOVE_ID = 'viz-move'
+
+/** "no output yet" comes back only once the leaving output has faded (its `land` exit, on the land beat). */
+function placeholderIn(gate: MotionGate) {
+  if (gate.instant) return { duration: 0 }
+  const land = motionTokens.land[gate.reduce ? 'reduced' : 'full']
+  const out = land.type === 'tween' ? land.duration : 0
+  return { ...transitionFor('enter', gate), delay: beatDelay(gate, 'land') + out }
+}
 
 type Pos = { x: number; y: number }
 
@@ -187,7 +195,9 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
               <text x={0} y={r1(g.consoleTop + 14)} className="vz-m vz-12 font-sans">
                 Console
               </text>
-              <AnimatePresence key={`o${gate.epoch}`} initial={false} custom={custom} mode="popLayout">
+              {/* The output lands on the third beat (opacity only, so the row never changes size); the
+                  placeholder waits until a leaving output has gone, so the two never overlap (G1). */}
+              <AnimatePresence key={`o${gate.epoch}`} initial={false} custom={custom}>
                 {out ? (
                   <m.text
                     key={out}
@@ -195,7 +205,7 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
                     x={56}
                     y={r1(g.consoleTop + 14)}
                     className="vz-r"
-                    {...presence(OUTPUT_ID, gate, { from: { y: 1 }, to: { y: 1 } }, { beat: 'land' })}
+                    {...presence(OUTPUT_ID, gate, { from: {}, to: {} }, { beat: 'land' })}
                   >
                     <tspan>› </tspan>
                     {out}
@@ -207,7 +217,7 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
                     y={r1(g.consoleTop + 14)}
                     className="vz-m vz-12 font-sans"
                     initial={gate.instant ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    animate={{ opacity: 1, transition: placeholderIn(gate) }}
                     exit={{ opacity: 0, transition: { duration: 0 } }}
                   >
                     no output yet

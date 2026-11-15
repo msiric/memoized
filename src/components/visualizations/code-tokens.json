@@ -952,7 +952,13 @@
     "color": "#79B8FF"
    },
    {
-    "text": "; i ",
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "       i ",
     "color": "#E1E4E8"
    },
    {
@@ -980,13 +986,7 @@
     "color": "#79B8FF"
    },
    {
-    "text": ";",
-    "color": "#E1E4E8"
-   }
-  ],
-  [
-   {
-    "text": "       i",
+    "text": "; i",
     "color": "#E1E4E8"
    },
    {
@@ -1211,7 +1211,9 @@
    {
     "text": "null",
     "color": "#79B8FF"
-   },
+   }
+  ],
+  [
    {
     "text": ")",
     "color": "#E1E4E8"
@@ -1383,9 +1385,11 @@
    {
     "text": "=",
     "color": "#F97583"
-   },
+   }
+  ],
+  [
    {
-    "text": " slow.next;",
+    "text": "    slow.next;",
     "color": "#E1E4E8"
    }
   ],
@@ -1709,7 +1713,9 @@
    {
     "text": "null",
     "color": "#79B8FF"
-   },
+   }
+  ],
+  [
    {
     "text": ")",
     "color": "#E1E4E8"
@@ -1881,9 +1887,11 @@
    {
     "text": "=",
     "color": "#F97583"
-   },
+   }
+  ],
+  [
    {
-    "text": " slow.next;",
+    "text": "    slow.next;",
     "color": "#E1E4E8"
    }
   ],
@@ -2207,7 +2215,9 @@
    {
     "text": "null",
     "color": "#79B8FF"
-   },
+   }
+  ],
+  [
    {
     "text": ")",
     "color": "#E1E4E8"
@@ -2379,9 +2389,11 @@
    {
     "text": "=",
     "color": "#F97583"
-   },
+   }
+  ],
+  [
    {
-    "text": " slow.next;",
+    "text": "    slow.next;",
     "color": "#E1E4E8"
    }
   ],

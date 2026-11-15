@@ -15,7 +15,8 @@ import type { PointerProgram, PointerRecording } from '../program'
 
 export const PALINDROME_DISPLAY = [
   'function isPalindrome(',
-  '  head: ListNode | null): boolean {',
+  '  head: ListNode | null',
+  '): boolean {',
   '  let slow: ListNode = head,',
   '    fast: ListNode = head.next;',
   '  while (fast != null &&',
@@ -23,7 +24,8 @@ export const PALINDROME_DISPLAY = [
   '    slow = slow.next;',
   '    fast = fast.next.next;',
   '  }',
-  '  let cur: ListNode = slow.next;',
+  '  let cur: ListNode =',
+  '    slow.next;',
   '  slow.next = null;',
   '  let prev: ListNode = null;',
   '  while (cur != null) {',
