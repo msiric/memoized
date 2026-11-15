@@ -1,3 +1,5 @@
+import type { DisplayRow, ProgramSource } from './lesson-source'
+
 /**
  * The step-log contract (VIZ-01 spec §6.2).
  *
@@ -91,8 +93,12 @@ export type StepLog<S> = {
   id: string
   schema: 1
   source: {
-    /** The exact program that was run. */
-    snippet: string
+    /**
+     * The exact program that was run, when the repo may hold it (a short
+     * lesson example). Absent for a program composed from premium content
+     * blocks (`ProgramSource`, `lesson-source.ts`): only its hash is kept.
+     */
+    snippet?: string
     /** `node@24.x`: the generator refuses to verify on another major. */
     runtime: string
     /** Which recorder produced `observed` (bump when the recorder changes). */
@@ -106,6 +112,14 @@ export type StepLog<S> = {
     lines: readonly string[]
     /** Optional pre-computed syntax tokens, one array per line. */
     tokens?: readonly (readonly CodeToken[])[]
+    /**
+     * A practice answer's lines (the premium-code policy): `lines` are
+     * same-width placeholders, so layout and footprints are the real ones,
+     * and the text is resolved from the content when a page is built
+     * (`resolve-code.ts`), never committed or bundled. Without it, the
+     * visual renders nothing.
+     */
+    premium?: { source: ProgramSource; rows: readonly DisplayRow[] }
   }
   /** `steps[0]` is Start: no focus, no line. */
   steps: readonly Step<S>[]

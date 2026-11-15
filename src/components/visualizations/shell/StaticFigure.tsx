@@ -7,7 +7,7 @@ import { Provenance } from '../primitives/Provenance'
 import { ink, type as typeScale } from '../primitives/tokens-v3'
 import { FRAME } from './footprint'
 import { staticMetrics } from './static-footprint'
-import { outputText, type StaticDefinition, type StaticTextAlternative } from './static-types'
+import { outputText, type AnyProgram, type StaticDefinition, type StaticTextAlternative } from './static-types'
 import { runtimeName } from './StepsAsText'
 import { H_CLS, MIN_H_CLS, heights } from './vars'
 
@@ -22,7 +22,7 @@ import { H_CLS, MIN_H_CLS, heights } from './vars'
  * Every region has a fixed height per layout variant (`static-footprint`).
  */
 
-export type StaticFigureProps<D> = { def: StaticDefinition<D>; preset?: string }
+export type StaticFigureProps<D> = { def: StaticDefinition<D, AnyProgram>; preset?: string }
 
 export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
   const uid = useId().replace(/:/g, '')

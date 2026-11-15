@@ -3,6 +3,7 @@ import path from 'node:path'
 import { expect, test, type Page } from '@playwright/test'
 import { BASE, OUT, Recorder, STRICT, TIER, openContext, type Config } from './harness'
 import { settle } from './detectors'
+import { urlLocalOnly } from '../premium'
 
 /**
  * Hydration (R12, H0 N6): the server frame and the hydrated frame are the
@@ -19,7 +20,7 @@ import { settle } from './detectors'
  *   chrome's are logged with the platform shifts).
  */
 
-const PAGES = [
+const ALL_PAGES = [
   '/dev/visualizations',
   '/dev/visualizations?static=1',
   '/dev/visualizations?lk=parent-type-change',
@@ -29,12 +30,23 @@ const PAGES = [
   // The promise-patterns presets (their own lesson group).
   '/dev/visualizations?preset=microtask-vs-timer-12345',
   '/dev/visualizations?preset=await-null',
+  // The frontier step-through (wave 2A), one page per lesson group.
+  '/dev/visualizations?fr=bfs-levels',
+  '/dev/visualizations?fr=dijkstra-lazy-heap',
+  '/dev/visualizations?fr=bst-iterator-stack',
   // The committed stand-in lesson body for list keys (R2 G-02).
   '/dev/visualizations/lesson/list-keys',
   // The heap-graph lessons (both FREE, committed copies).
   '/dev/visualizations/lesson/data-types',
   '/dev/visualizations/lesson/objects',
+  // Pointer rewiring (wave 2B): both lesson groups and the static frames.
+  '/dev/visualizations?ll=reverse-between-m2-n4',
+  '/dev/visualizations?ll=palindrome-split-reverse-compare',
+  '/dev/visualizations?ll=static',
 ]
+/** A practice-answer frame is local-only: checked only where the content checkout has it (never CI). */
+const PAGES = ALL_PAGES.filter((u) => !urlLocalOnly(u))
+const SKIPPED = ALL_PAGES.flatMap((u) => (urlLocalOnly(u) ? [urlLocalOnly(u)!] : []))
 const CONFIGS: Config[] =
   TIER === 'full'
     ? [
@@ -101,6 +113,7 @@ async function boxes(page: Page): Promise<Box[]> {
 for (const c of CONFIGS)
   test(`hydration @ ${c.name}`, async ({ browser }) => {
     test.setTimeout(5 * 60_000)
+    for (const description of SKIPPED) test.info().annotations.push({ type: 'skipped page', description })
     const rec = new Recorder(c, 'hydration')
     const shots = path.join(OUT, 'hydration')
     fs.mkdirSync(shots, { recursive: true })

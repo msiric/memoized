@@ -378,6 +378,26 @@
    */
   .vz-ch { @apply fill-white/5 stroke-zinc-300 print:fill-zinc-100 print:stroke-zinc-700; }
   .vz-s [data-edge].vz-cm { @apply text-zinc-300 print:text-zinc-700; }
+  /* engines/linked-list: a null stub (a grounded `next`, not an arrow between boxes) is drawn like a link. */
+  .vz-s [data-stub] { @apply text-zinc-500 print:text-zinc-600; }
+  .vz-s [data-stub].vz-cm { @apply text-zinc-300 print:text-zinc-700; }
+  /*
+   * engines/frontier (bfs-dfs-frontier): the step-through's canvas shares
+   * the glyph, outline, dash, muted, result, plate and changed roles above,
+   * and adds the two vertex states the static figures have no use for. A
+   * vertex waiting in the frontier takes the queued chip's look (the sky edge
+   * on its tint), so it reads as the chip of the same name in the lane; a
+   * finished vertex is filled solid (`done`), its label in the done-fill
+   * ink. The edge the code examines takes the lime `now` colour (its weight
+   * is set inline from `strokeWidth.nowConnector`).
+   */
+  .vz-fr { @apply mx-auto h-auto max-w-full font-mono fill-zinc-100 print:fill-zinc-900; overflow: visible; }
+  .vz-fr [data-fr-edge] { @apply text-zinc-500 print:text-zinc-600; }
+  .vz-fr [data-fr-edge].vz-ea { @apply text-lime-400 print:text-lime-700; }
+  /* On paper the waiting vertex keeps its sky edge on white (the tint does not print). */
+  .vz-nq { @apply fill-sky-400/10 stroke-sky-400 print:fill-white print:stroke-sky-700; }
+  .vz-nd { @apply fill-zinc-400 print:fill-zinc-600; stroke: none; }
+  .vz-ndt { @apply fill-zinc-950 print:fill-white; }
   /*
    * VIZ-H D21 and H3 R11, the closures moment: hovering a function, focusing
    * it from the keyboard (`:focus-visible`, so a mouse click never sticks)

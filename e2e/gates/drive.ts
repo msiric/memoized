@@ -85,6 +85,32 @@ async function lkKey(page: Page, label: string) {
   await settle(page)
 }
 
+/** The pointer-rewiring step-through (wave 2B) alone on its page (`?ll=<preset>`), and its static frames (`?ll=static`). */
+export const LL = '[data-viz="linked-list-pointer-rewiring"] section'
+export const llUrl = (preset: string) => `${GALLERY}?ll=${preset}`
+const LL_STATES: Record<string, string> = {
+  'll-start': 'reverse-between-m2-n4',
+  'll-loop': 'reverse-between-m2-n4',
+  'll-finale': 'reverse-between-m2-n4',
+  'll-pal-ask': 'palindrome-split-reverse-compare',
+  'll-pal-flip': 'palindrome-split-reverse-compare',
+  'll-pal-false-finale': 'palindrome-1231',
+}
+const LLF: Record<string, string> = {
+  'llf-rho': 'figure[data-viz-preset="floyd-rho"]',
+  'llf-strip': 'figure[data-viz-preset="full-reversal-strip"]',
+}
+
+/** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
+async function llWalk(page: Page, done: (f: Locator) => Promise<boolean>) {
+  const f = page.locator(LL).first()
+  for (let i = 0; i < 30 && !(await done(f)); i++) {
+    if ((await f.getAttribute('data-viz-mode')) === 'ask') await f.locator('[data-viz-part="viz-skip"]').click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await settle(page)
+}
+
 /** The Promise Patterns lesson's presets (their own group, `?preset=`). */
 export const PP = `${GALLERY}?preset=microtask-vs-timer-12345`
 export const PP_AWAIT = `${GALLERY}?preset=await-null`
@@ -104,8 +130,48 @@ async function hoverTracer(page: Page, frame: string) {
   await settle(page)
 }
 
+/** The frontier step-through (wave 2A): one lesson group per page, `?fr=<preset>`. */
+export const FR = '[data-viz="bfs-dfs-frontier"] section'
+export const frUrl = (preset: string) => `${GALLERY}?fr=${preset}`
+/** The preset each `fr-*` state opens on, by its name's second word. */
+const FR_PRESET: Record<string, string> = {
+  bfs: 'bfs-levels',
+  matrix: 'binary-matrix-8dir',
+  dijkstra: 'dijkstra-lazy-heap',
+  effort: 'min-effort-grid',
+  bst: 'bst-iterator-stack',
+}
+export const frPreset = (name: string) => FR_PRESET[name.split('-')[1]]
+
+/**
+ * Steps a frontier frame forward with Next until `stop` holds (or its end),
+ * answering an open question with choice `pick` (1-based) on the way.
+ */
+async function frWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(FR).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
+  await settle(page)
+}
+const frAsk = (page: Page) => frWalk(page, (_s, mode) => mode === 'ask')
+const frStep = (page: Page, n: number, pick = 1) => frWalk(page, (s) => s >= n, pick)
+const frEnd = async (page: Page, pick = 1) => {
+  await frWalk(page, () => false, pick)
+  await page.waitForTimeout(800)
+  await settle(page)
+}
+
 /** The page a state opens on: the static figures alone, the list-keys wrapper preset, a preset, or the gallery. */
 export function stateUrl(name: string): string {
+  if (name.startsWith('fr-')) return frUrl(frPreset(name))
+  if (name.startsWith('llf-')) return llUrl('static')
+  if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
   if (name.startsWith('pp-')) return PP
@@ -114,6 +180,9 @@ export function stateUrl(name: string): string {
 }
 /** The frame a state is judged in. */
 export function stateFrame(name: string): string {
+  if (name.startsWith('fr-')) return FR
+  if (LLF[name]) return LLF[name]
+  if (LL_STATES[name]) return LL
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
   if (name.startsWith('heap')) return HEAP_DATA_TYPES
@@ -262,6 +331,84 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'sc-tdz-hover': async (page) => {
     await hoverTracer(page, scFrame('sc-tdz'))
   },
+  // The frontier (wave 2A), one or more states per lesson group: Start, a
+  // question open, a reveal (a wrong pick), mid-run lanes and the end.
+  'fr-bfs-start': async () => {},
+  'fr-bfs-ask': async (page) => {
+    await frAsk(page)
+  },
+  'fr-bfs-reveal-wrong': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-bfs-end': async (page) => {
+    await frEnd(page)
+  },
+  'fr-matrix-level': async (page) => {
+    await frStep(page, 2)
+  },
+  'fr-matrix-end': async (page) => {
+    await frEnd(page, 2)
+  },
+  'fr-dijkstra-reveal': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-dijkstra-stale': async (page) => {
+    await frWalk(page, (s) => s >= 12)
+  },
+  'fr-effort-ask': async (page) => {
+    await frAsk(page)
+  },
+  'fr-effort-end': async (page) => {
+    await frEnd(page, 3)
+  },
+  'fr-bst-reveal': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-bst-end': async (page) => {
+    await frEnd(page)
+  },
+  // Pointer rewiring (wave 2B): Start, the temporary loop revealed after a
+  // wrong pick, the printed list; the palindrome's question, a flip with t
+  // saved, and the false preset's end. Then the two static frames.
+  'll-start': async () => {},
+  'll-loop': async (page) => {
+    const f = page.locator(LL).first()
+    await llWalk(page, async (x) => (await x.getAttribute('data-viz-mode')) === 'ask')
+    await f.locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await settle(page)
+  },
+  'll-finale': async (page) => {
+    const f = page.locator(LL).first()
+    await f.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await page.waitForTimeout(1200)
+    await settle(page)
+  },
+  'll-pal-ask': async (page) => {
+    await llWalk(page, async (x) => (await x.getAttribute('data-viz-mode')) === 'ask')
+  },
+  'll-pal-flip': async (page) => {
+    await llWalk(page, async (x) => Number(await x.getAttribute('data-viz-step')) === 8 && (await x.getAttribute('data-viz-mode')) !== 'ask')
+  },
+  'll-pal-false-finale': async (page) => {
+    const f = page.locator(LL).first()
+    if ((await f.getAttribute('data-viz-mode')) === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await f.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await page.waitForTimeout(1200)
+    await settle(page)
+  },
+  'llf-rho': async () => {},
+  'llf-strip': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()
@@ -365,6 +512,34 @@ export const MOTION_STATES: Record<string, MotionState> = {
     url: `${GALLERY}?preset=microtask-queued-during-drain`,
     frame: EL,
     setup: toBeforeEnd,
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The frontier: q = nq, chips travel from one lane to the other (FLIP).
+  'fr-matrix-swap': {
+    url: frUrl('binary-matrix-8dir'),
+    frame: FR,
+    setup: async (page) => {
+      await frStep(page, 1)
+      await page.waitForTimeout(900)
+    },
+    act: async (page) => {
+      await page.locator(FR).first().getByRole('button', { name: 'Next' }).click()
+    },
+  },
+  // Pointer rewiring: a paced flip (the arrow cross-fades, the tag slides, Q1).
+  'll-step': {
+    url: llUrl('reverse-between-m2-n4'),
+    frame: LL,
+    setup: async (page) => {
+      const f = page.locator(LL).first()
+      await f.getByRole('slider').focus()
+      for (let i = 0; i < 4; i++) {
+        await page.keyboard.press('ArrowRight')
+        await page.waitForTimeout(650)
+      }
+    },
     act: async (page) => {
       await page.keyboard.press('ArrowRight')
     },

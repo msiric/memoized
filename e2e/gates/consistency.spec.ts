@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { GALLERY, LESSONS, lessonUrl, open, settle } from './drive'
+import { urlLocalOnly } from '../premium'
+import { FR, GALLERY, LESSONS, frUrl, lessonUrl, open, settle } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -149,6 +150,55 @@ for (const width of [375, 1440]) {
 }
 
 /**
+ * The frontier (wave 2A) is a step-through like the event loop: the same
+ * shell, so its frame, question, choices, Skip, current code line, reveal
+ * marks and lane panel compute as the event loop's do.
+ */
+for (const width of [375, 1440])
+  test(`the frontier draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
+    // Its lesson group includes a practice answer: local-only without the content checkout (CI).
+    test.skip(urlLocalOnly(frUrl('bfs-levels')) !== null, urlLocalOnly(frUrl('bfs-levels')) ?? '')
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [url, sel] of [
+      [GALLERY, EL],
+      [frUrl('bfs-levels'), FR],
+    ] as const) {
+      await open(page, url, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      out.lane = await look(f.locator('[data-viz-region="micro"], [data-viz-region="queue"]').first(), PANEL)
+      // To the first question (the event loop asks at Start; answer it and step once for a code line).
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]'), ['background-color'])
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      // A wrong pick: the event loop's mid-run answer is its second choice, the frontier's first.
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      looks.push(out)
+    }
+    const [a, b] = looks
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frontier ${b[what][k]}`)
+    expect(diffs).toEqual([])
+  })
+
+/**
  * The static figures (wave 1B): a scope-chain figure's running call is the
  * closures figure's function object (box, title, touch band and focus), at
  * rest and traced, and its records and links are the same glyphs.
@@ -295,5 +345,62 @@ for (const width of [375, 1440])
     await page.keyboard.press('Shift+Tab')
     await page.keyboard.press('Tab')
     same('focus ring', erRing, await look(page.locator(':focus > .vz-fb'), RING))
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The pointer-rewiring visuals (wave 2B) speak the static figures'
+ * vocabulary: a node is the heap graph's glyph, an arrow its link and head,
+ * the one rest mark its changed glyph, and the frames' title
+ * and caption are the heap graph's. The step-through's stage uses the same
+ * glyphs as its static frames.
+ */
+for (const width of [375, 1440])
+  test(`pointer-rewiring glyphs compute like the heap graph's @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    const inSvg = (root: Locator, sel: string) =>
+      root.evaluate(
+        (f, [q, ps]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) throw new Error(`nothing matches ${q}`)
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as unknown as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, SVG] as const,
+      )
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: heap graph ${a[k]} vs pointer rewiring ${b[k]}`)
+    }
+    await open(page, `${GALLERY}?static=1`, width)
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const heap = {
+      frame: await look(hg, FRAME),
+      title: await look(hg.locator('p').first(), TEXT),
+      caption: await look(hg.locator('figcaption'), TEXT),
+      glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
+      link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
+      head: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-ah'),
+      changed: await inSvg(hg, 'svg .vz-ch'),
+    }
+    await open(page, `${GALLERY}?ll=static`, width)
+    const rho = page.locator('figure[data-viz-preset="floyd-rho"]')
+    same('frame', heap.frame, await look(rho, FRAME))
+    same('title', heap.title, await look(rho.locator('p').first(), TEXT))
+    same('caption', heap.caption, await look(rho.locator('figcaption'), TEXT))
+    same('node glyph', heap.glyph, await inSvg(rho, 'svg [data-node] .vz-g'))
+    same('link', heap.link, await inSvg(rho, 'svg [data-edge] .vz-e'))
+    same('arrowhead', heap.head, await inSvg(rho, 'svg [data-edge] .vz-ah'))
+    same('changed mark', heap.changed, await inSvg(rho, 'svg [data-node] .vz-ch'))
+    await open(page, `${GALLERY}?ll=reverse-between-m2-n4`, width)
+    const step = page.locator('[data-viz="linked-list-pointer-rewiring"] section')
+    same('stage node glyph', heap.glyph, await inSvg(step, 'svg [data-node] .vz-g'))
+    same('stage link', heap.link, await inSvg(step, 'svg [data-edge] .vz-e'))
+    same('stage arrowhead', heap.head, await inSvg(step, 'svg [data-edge] .vz-ah'))
     expect(diffs).toEqual([])
   })

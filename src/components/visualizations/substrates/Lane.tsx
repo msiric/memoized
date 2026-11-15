@@ -131,6 +131,8 @@ export type LaneProps = {
   /** Arrival side for `enter` and departure side for `exit`, going forward (Back mirrors them). */
   from: { x?: number; y?: number }
   to: { x?: number; y?: number }
+  /** Chips stack bottom-up with the top marked (default: stack frames only); the frontier's stack lane sets it for queued chips. */
+  vertical?: boolean
   className?: string
 }
 
@@ -199,7 +201,7 @@ export function Lane(props: LaneProps) {
     to,
     className,
   } = props
-  const vertical = kind === 'frame'
+  const vertical = props.vertical ?? kind === 'frame'
   // The live gate and the ids on stage, handed to chips that are leaving.
   const custom: PresenceCustom = { gate, present }
 

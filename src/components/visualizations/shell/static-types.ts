@@ -22,8 +22,16 @@ export type VerifiedProgram = {
   throws?: string
 }
 
+/**
+ * A premium lesson program a diagram draws: like `VerifiedProgram`, without
+ * its code (the repo keeps only the hash; the truth test re-runs it from a
+ * local content checkout).
+ */
+export type HashedProgram = Omit<VerifiedProgram, 'snippet'>
+export type AnyProgram = VerifiedProgram | HashedProgram
+
 /** A program's verified output as one line of text: what it printed, then the error it threw, if any. */
-export function outputText(p: VerifiedProgram): string {
+export function outputText(p: VerifiedProgram | HashedProgram): string {
   const out = p.observed.join(', ')
   if (!p.throws) return out
   return out ? `${out}, then throws ${p.throws}` : `no output; throws ${p.throws}`
@@ -49,7 +57,7 @@ export type StaticTextAlternative = {
   model?: string
 }
 
-export type StaticPreset<D> = {
+export type StaticPreset<D, P extends VerifiedProgram | HashedProgram = VerifiedProgram> = {
   id: string
   /** Manifest and gallery name. At most 18 characters. */
   label: string
@@ -57,7 +65,7 @@ export type StaticPreset<D> = {
   title: string
   /** The why-sentence (§5.3), at most 140 characters. */
   caption: string
-  programs: VerifiedProgram[]
+  programs: P[]
   claims: Claim[]
   data: D
 }
@@ -77,18 +85,18 @@ export type StaticEngine<D> = StaticEngineCore<D> & {
   Stage: ComponentType<StaticStageProps<D>>
 }
 
-export type StaticDescriptor<D> = {
+export type StaticDescriptor<D, P extends VerifiedProgram | HashedProgram = VerifiedProgram> = {
   id: string
   form: 'static'
   /** Manifest name of the shared visual. At most 40 characters. */
   title: string
   engine: StaticEngineCore<D>
-  presets: readonly StaticPreset<D>[]
+  presets: readonly StaticPreset<D, P>[]
   defaultPreset: string
   since: string
 }
 
-export type StaticDefinition<D> = Omit<StaticDescriptor<D>, 'engine'> & {
+export type StaticDefinition<D, P extends VerifiedProgram | HashedProgram = VerifiedProgram> = Omit<StaticDescriptor<D, P>, 'engine'> & {
   engine: StaticEngine<D>
 }
 

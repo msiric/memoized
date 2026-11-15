@@ -1,7 +1,10 @@
 import type { ComponentType } from 'react'
 import EnvRecordsViz from './engines/env-records'
 import EventLoopViz from './engines/event-loop'
+import FrontierViz from './engines/frontier'
 import HeapGraphViz from './engines/heap-graph'
+import LinkedListViz from './engines/linked-list'
+import LinkedListFramesViz from './engines/linked-list/frames'
 import ListKeysViz from './engines/list-keys'
 import type { VizComponentProps } from './shell/types'
 
@@ -17,4 +20,7 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'environment-records': EnvRecordsViz,
   'list-keys': ListKeysViz,
   'heap-graph': HeapGraphViz,
+  'bfs-dfs-frontier': FrontierViz,
+  'linked-list-pointer-rewiring': LinkedListViz,
+  'linked-list-frames': LinkedListFramesViz,
 }

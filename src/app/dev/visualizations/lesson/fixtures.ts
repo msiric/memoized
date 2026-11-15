@@ -115,10 +115,11 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     title: 'Promise Patterns',
     section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
     source: 'content/js-track/advanced-concepts/promise-patterns/page.mdx',
-    // Premium: local checkout only. The lesson body has no microtask-order
-    // snippet yet (it is in a practice answer): the content PR adds a short
-    // section after Chaining Promises; the visual opens it, before any prose
-    // that states the order.
+    // Premium: local checkout only. The content placement branch adds "When
+    // Promise Callbacks Run" after Chaining Promises, whose two examples are
+    // the presets' programs (lesson examples, never the practice answer); the
+    // visual opens it, before any prose that states the order. On a checkout
+    // with that section the lesson's own tag places it; otherwise this insert does.
     inserts: [{ before: '## **Promise.all and Promise.race**', viz: '<Viz id="event-loop" preset="microtask-vs-timer-12345" />' }],
   },
   {
@@ -128,6 +129,72 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     source: 'content/js-track/frontend-development/virtual-dom/page.mdx',
     // Premium: local checkout only. After Example 3 (keys in lists).
     inserts: [{ before: '## **Best Practices**', viz: '<Viz id="list-keys" />' }],
+  },
+  // Wave 2A, the frontier (all three lessons PREMIUM: local checkout only,
+  // from `fix/batch-2d-wording` at 273a771).
+  {
+    slug: 'graph-bfs',
+    title: 'Graph BFS',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/graph-bfs/page.mdx',
+    // After the shortest-path example it steps through (its output names no
+    // vertex that sets F's distance), before the section's tips.
+    inserts: [{ before: '### **Tips and Tricks:**', viz: '<Viz id="bfs-dfs-frontier" preset="bfs-levels" />' }],
+  },
+  {
+    slug: 'shortest-path-algorithms',
+    title: 'Shortest Path Algorithms',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/shortest-path-algorithms/page.mdx',
+    // Before Dijkstra's steps and example: the example's output comment
+    // ([ 0, 8, 6, 5, 3 ]) would answer the question about dist[1].
+    inserts: [{ before: '**Steps:**', viz: '<Viz id="bfs-dfs-frontier" preset="dijkstra-lazy-heap" />' }],
+  },
+  {
+    slug: 'trees',
+    title: 'Trees',
+    section: { title: 'User-Defined Data Structures', href: '/courses/dsa-track/user-defined-data-structures' },
+    source: 'content/dsa-track/user-defined-data-structures/trees/page.mdx',
+    // After the Lowest Common Ancestor example, which builds the BST the
+    // iterator walks.
+    inserts: [{ before: '### **Serialize and Deserialize a Binary Tree**', viz: '<Viz id="bfs-dfs-frontier" preset="bst-iterator-stack" />' }],
+  },
+  {
+    slug: 'linked-list-reversal',
+    title: 'Linked List Reversal',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/linked-list-reversal/page.mdx',
+    // Premium: local checkout only (wave 2B).
+    inserts: [
+      // After the full-reversal example (its first Tips and Tricks): the strip of its passes.
+      { before: '### **Tips and Tricks:**', viz: '<Viz id="linked-list-frames" preset="full-reversal-strip" />' },
+      // After "Reversing a Part of the Linked List" (no prose states the temporary loop).
+      { before: '## **Reversing Nodes in k-Sized Groups**', viz: '<Viz id="linked-list-pointer-rewiring" />' },
+    ],
+  },
+  {
+    slug: 'linked-lists',
+    title: 'Linked Lists',
+    section: { title: 'User-Defined Data Structures', href: '/courses/dsa-track/user-defined-data-structures' },
+    source: 'content/dsa-track/user-defined-data-structures/linked-lists/page.mdx',
+    // Premium: local checkout only. The palindrome answer is a practice
+    // question's; the body has no palindrome section yet. After Detecting a
+    // Cycle (slow and fast), before Merging.
+    inserts: [
+      {
+        before: '### **Merging Two Sorted Lists**',
+        viz: '<Viz id="linked-list-pointer-rewiring" preset="palindrome-split-reverse-compare" />',
+      },
+    ],
+  },
+  {
+    slug: 'fast-and-slow-pointers',
+    title: 'Fast and Slow Pointers',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/fast-and-slow-pointers/page.mdx',
+    // Premium: local checkout only. After "Finding the Start of a Cycle" (its
+    // example, tips and gotchas): the figure explains why phase 2 works.
+    inserts: [{ before: '## **Finding the Middle of a Linked List**', viz: '<Viz id="linked-list-frames" preset="floyd-rho" />' }],
   },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
@@ -153,6 +220,8 @@ export function lessonSource(f: LessonFixture): string | null {
   if (!fs.existsSync(file)) return null
   let mdx = fs.readFileSync(file, 'utf8')
   for (const { before, viz } of f.inserts) {
+    // A lesson that already places this visual (a content placement branch) keeps its own tag.
+    if (mdx.includes(viz)) continue
     // A heading match is anchored at a line start; the first one wins.
     const at = mdx.search(new RegExp(`^${before.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'm'))
     if (at < 0) throw new Error(`${f.slug}: no line starting with "${before}" to place ${viz} before`)

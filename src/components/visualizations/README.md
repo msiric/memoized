@@ -301,6 +301,109 @@ left, the objects their values identify on the right, an arrow meaning
   `data-types` and `objects`, and the static-figure consistency check
   against the closures figure.
 
+### Frontier (R4 shared visual 1, `bfs-dfs-frontier`)
+
+`<Viz id="bfs-dfs-frontier" preset="…" />`, a step-through with one preset
+group per lesson: `bfs-levels` and `binary-matrix-8dir` (Graph BFS),
+`dijkstra-lazy-heap` and `min-effort-grid` (Shortest Path Algorithms),
+`bst-iterator-stack` (Trees). A canvas (graph, grid or tree, server-final
+SVG), the frontier lane(s) on the shared `Lane` substrate (a queue, `q` and
+`nq`, a heap in key order, a stack bottom-up) and the console.
+
+- **Recorded under the inspector.** `programs/` names each lesson's code
+  block by locator and sha256 (`source`, never its text: see "Premium
+  code" below; a `code` part adds the register's input, a call, for a
+  practice answer with no example usage) and its probes: lines to pause
+  before and expressions to read there. `yarn viz:frontier` reads each
+  block from the local content checkout, checks its hash, runs it in Node 24
+  with breakpoints only (`truth/record.ts`, TypeScript through Node's own
+  type stripping) and writes `recordings/<program>.json` (values only); the
+  presets build every drawn value from it, captions included.
+- **The pane** shows the lesson's lines rewrapped to 35 columns, only at
+  their own spaces (`display`, checked token for token against the
+  checkout): a lesson example's rows as text, a practice answer's as
+  `wrap` rows with no text.
+- **Gates.** `frontier.truth.test.ts` (with a checkout: the hash, a fresh
+  re-recording, the rows against the block; everywhere: the register's
+  assertions, every drawn frontier one the run passed through, lies that
+  must fail),
+  `e2e/viz-frontier.spec.ts`, `e2e/motion/frontier-steps.spec.ts`,
+  `e2e/stress/frontier.stress.ts`, the `fr-*` gate states and the
+  consistency check against the event loop. Gallery: `?fr=<preset>`.
+### Pointer rewiring (R4 shared visual 3, wave 2B)
+
+`<Viz id="linked-list-pointer-rewiring" preset="…" />` (step-through) and
+`<Viz id="linked-list-frames" preset="…" />` (its static frames), one
+engine (`engines/linked-list/`) and one lesson group per lesson:
+`reverse-between-m2-n4` (Linked List Reversal), the palindrome presets
+`palindrome-split-reverse-compare`, `palindrome-1221` and `palindrome-1231`
+(Linked Lists), and the frames `floyd-rho` (Fast and Slow Pointers) and
+`full-reversal-strip` (Linked List Reversal).
+
+- **Built from a recording.** `programs/` names each lesson program by
+  its blocks' locators and sha256s (never the text; a `code` part is the
+  harness, calls only) and its probes, by line of the program as run;
+  `yarn viz:linked-list` reads it from the local content checkout and runs it in Node 24 with
+  the node class wrapped (one inserted line, so every node numbers itself
+  in creation order) and a probe after each probed line, never editing a
+  lesson line, and writes `recordings/<lesson>.json`: which node each
+  pointer held and where every `next` pointed, every time a probe ran.
+  `build.ts` makes one step per probe hit (the end step adds the printed
+  output); presets add only words and checkpoints. The code pane shows the
+  lesson function reflowed to the pane (rows by program line; the
+  palindrome answer's as `wrap` rows with no text): the display check fails
+  on any change beyond whitespace. With a checkout the truth test checks
+  every hash, re-records every program and checks every row; everywhere it
+  rebuilds every log and frame from the committed recordings, checks the
+  register's assertions and that tampered recordings, steps and code fail.
+- **Drawing** (`geometry.ts`, 288 wide, 1:1 at the default text size).
+  Nodes never move. Each pointer variable has its own lane (above or below
+  the row), so a tag slides to its node without crossing another tag; a
+  pointer holding null sits in the `null` column. Arrows: to the right
+  neighbour on the upper track, to the left neighbour on the lower track (a
+  two-node cycle reads as two arrows), further as an arc whose side and
+  level are fixed for the whole preset (never crossing, never jumping), and
+  null as a grounded stub.
+- **Motion.** A changed arrow cross-fades in place (one glyph, `link-i`), a
+  tag slides on the `move` spring, both on the glyph beat; Back mirrors
+  Next. The step's changed glyphs take the neutral `changed` mark (never
+  lime). No designed reveal.
+- **Gates.** `linked-list.truth.test.ts`, `frames/frames.truth.test.ts`,
+  `layout.test.ts`, `e2e/viz-linked-list.spec.ts`,
+  `e2e/motion/linked-list-steps.spec.ts`, `e2e/stress/linked-list.stress.ts`,
+  the `ll-*` and `llf-*` gate states (gallery `?ll=<preset>`,
+  `?ll=static`) and the heap-graph consistency check.
+
+### Premium code (owner policy, wave 2)
+
+The app repo is public. It holds the engines, presets (captions,
+questions), recordings (recorded values only), each program's locators and
+sha256s, and the short lines a visual displays from a lesson example. It
+never holds a lesson's full code block or any text of a practice answer,
+including the lines of a visual that steps through one.
+
+- `step-log/lesson-source.ts` (no Node): `BlockRef` (a lesson fence under a
+  heading, or a practice answer in `_lessons.json`), `ProgramSource` (the
+  program as run: block parts with their `lessonSha256`, then harness
+  calls), `DisplayRow` (`text` for a lesson example, `wrap: [indent, from,
+  to]` for an answer) and the display check.
+- `step-log/lesson-block.ts` (Node): reads a block from `src/content`
+  (gitignored, `yarn setup:content`), checks its sha256 and composes the
+  program. Truth tests and the `yarn viz:*` recorders use it; without the
+  checkout (CI) they skip what needs the text, saying so, and run the rest.
+- A practice answer's log carries same-width placeholders and
+  `code.premium`; its tokens are not in `code-tokens.json`.
+  `step-log/resolve-code.ts` resolves the rows (and tokens) from the
+  content when a page is built: `remark-viz-code.ts` adds them to a
+  serialized lesson's `<Viz code>` (`sync-content.ts`, the dev lesson
+  pages), the dev gallery resolves them on the server. The entry table's
+  sixth slot lists, per preset, the answers its frame needs; a frame
+  missing any renders nothing (server and client alike). Footprints never
+  depend on the text.
+- Such frames are local-only: e2e gates skip them without the checkout
+  (`e2e/premium.ts`), and their visual baselines go to the gitignored
+  `__screenshots__/*/local-only/`.
+
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for
 the lint, manifest and text alternative. `engines/list-keys/` is the first: its

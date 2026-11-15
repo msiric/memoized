@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest'
+import { readBlock } from '../../step-log/lesson-block'
 import { validateDescriptor, validateStepLog } from '../../step-log/validate'
 import {
   recordNodeTrace,
@@ -32,6 +33,33 @@ describe.each(eventLoopDescriptor.presets.map((p) => [p.id, p.log] as const))(
     })
   },
 )
+
+/**
+ * The Promise Patterns presets (premium lesson): the repo may hold a
+ * visual's short lines only when they are a lesson example. Both programs
+ * are the lesson's own examples in "When Promise Callbacks Run" (content
+ * placement branch `feat/viz-placement-flagships`, 341b699), the section
+ * that places the visual; with a local content checkout each snippet must
+ * be that fence exactly. (They also appear, worded differently, in a
+ * practice answer; the answer is never the source.)
+ */
+const PROMISE_PATTERNS = { path: 'content/js-track/advanced-concepts/promise-patterns/page.mdx', heading: '## **When Promise Callbacks Run**', lang: 'javascript' }
+const LESSON_EXAMPLES: Record<string, { nth: number }> = { 'microtask-vs-timer-12345': { nth: 1 }, 'await-null': { nth: 2 } }
+describe.each(Object.entries(LESSON_EXAMPLES))('event-loop/%s is a lesson example', (id, { nth }) => {
+  const block = (() => {
+    try {
+      return readBlock({ ...PROMISE_PATTERNS, nth })
+    } catch {
+      return undefined
+    }
+  })()
+  const why = block === null ? ' (skipped: needs the premium Promise Patterns lesson from a local content checkout, src/content)' : ''
+  it.skipIf(block === null)(`is the lesson's own fence under "When Promise Callbacks Run", exactly${why}`, () => {
+    expect(block, 'the lesson has no such section: these lines would be practice-answer text').toBeDefined()
+    const log = eventLoopDescriptor.presets.find((p) => p.id === id)!.log
+    expect(log.source.snippet).toBe(block)
+  })
+})
 
 describe('event-loop width lint (A1, A2, A7, F4, F5)', () => {
   it('every preset fits at 320: chips, outputs, queues, title and switcher', () => {
@@ -92,7 +120,7 @@ describe('the truth harness catches a lying log', () => {
       ...log,
       source: {
         ...log.source,
-        snippet: log.source.snippet.replace("'D'", "'E'"),
+        snippet: log.source.snippet!.replace("'D'", "'E'"),
       },
     }
     expect(verifyStepLogTruth(edited).errors.join('\n')).toMatch(

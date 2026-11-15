@@ -1,5 +1,5 @@
 import type { ComponentType, ReactNode } from 'react'
-import type { StateIntrospection, Step, StepLog } from '../step-log/types'
+import type { CodeToken, StateIntrospection, Step, StepLog } from '../step-log/types'
 import type { MotionGate } from './motion'
 
 /**
@@ -110,5 +110,12 @@ export type StepThroughDescriptor<S> = {
 
 export type StepThroughDefinition<S> = Omit<StepThroughDescriptor<S>, 'engine'> & { engine: Engine<S> }
 
+/**
+ * A practice answer's pane, resolved from the content when the page was
+ * built (`step-log/resolve-code.ts`), by preset id: never committed or
+ * bundled, it reaches the browser only inside the (gated) page that shows it.
+ */
+export type VizCode = Record<string, { lines: readonly string[]; tokens?: readonly (readonly CodeToken[])[] }>
+
 /** Props every lazily loaded visual component accepts. */
-export type VizComponentProps = { preset?: string; interactive?: boolean }
+export type VizComponentProps = { preset?: string; interactive?: boolean; code?: VizCode }

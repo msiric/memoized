@@ -4,11 +4,12 @@ import { EMPTY, type EventLoopState } from '../model'
 /**
  * Promise patterns lesson (js-track/advanced-concepts/promise-patterns), R4
  * preset A: two `.then` callbacks either side of a 0 ms timer, between two
- * synchronous logs (1, 5, 2, 4, 3). The program is the lesson's own
- * ("Promise Execution Semantics: the Microtask Queue"), with every statement
- * kept and two lines broken where a 375 px phone would wrap them (the
- * step-log's 36-column slot): `.then` on its own line, as in Basics, and the
- * timer's body as in Drain.
+ * synchronous logs (1, 5, 2, 4, 3). The program is the lesson example in
+ * "When Promise Callbacks Run" (the section that places this visual, content
+ * branch `feat/viz-placement-flagships`), exactly: the truth test compares it
+ * with a local content checkout. A lesson example, so the repo may hold its
+ * lines; it is never taken from the practice answer that discusses the same
+ * order.
  *
  * `observed.log` was recorded by `recordNodeTrace` on Node 24 and is
  * re-verified by `event-loop.truth.test.ts`. Queue membership is `modelled`.

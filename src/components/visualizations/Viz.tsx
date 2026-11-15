@@ -1,9 +1,9 @@
 'use client'
 
-import { createElement, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from 'react'
+import { createElement, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ComponentType } from 'react'
 import { VIZ_TABLE } from './entry-table'
 import { frameCls } from './primitives/frame-cls'
-import type { VizComponentProps } from './shell/types'
+import type { VizCode, VizComponentProps } from './shell/types'
 
 /**
  * `<Viz id preset />`: the only visualization code in a lesson's first-load
@@ -23,6 +23,11 @@ import type { VizComponentProps } from './shell/types'
  *   hydration keeps them and no chunk is ever requested. Only a client-only
  *   render loads the figure's chunk, at once, over a placeholder of the
  *   preset's exact footprint.
+ * - Practice-answer presets (premium-code policy): their pane's text is never
+ *   in the repo or a bundle. The page brings it as `code` (resolved from the
+ *   content when it was built: a JSON string from MDX, or an object); a
+ *   frame missing any it needs renders nothing, on the server and the
+ *   client alike, so there is no broken pane and no shift.
  */
 
 type Loaded = ComponentType<VizComponentProps>
@@ -34,8 +39,9 @@ const KEEP = { __html: '' }
 const subscribe = () => () => {}
 const loaded: Record<string, Loaded> = {}
 
-export function Viz({ id, preset }: { id: string; preset?: string }) {
+export function Viz({ id, preset, code: given }: { id: string; preset?: string; code?: VizCode | string }) {
   const entry = VIZ_TABLE[id]
+  const code = useMemo(() => (typeof given === 'string' ? (JSON.parse(given) as VizCode) : given), [given])
   const hydrating = useSyncExternalStore(
     subscribe,
     () => false,
@@ -102,6 +108,9 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
   }, [Live])
 
   if (!entry) return null
+  // The default preset is the first key of the per-preset tables.
+  const need = entry[5]?.[preset ?? Object.keys(entry[4] ?? {})[0]]
+  if (need?.some((p) => !code?.[p])) return null
   const sized: Record<string, readonly number[]> | undefined = statics ?? entry[4]
   const row = (sized && (sized[preset ?? ''] ?? Object.values(sized)[0])) || [entry[1], entry[2]]
   // Static figures: [narrow, wide, col]. Step-throughs: [narrow, wide, small,
@@ -114,9 +123,9 @@ export function Viz({ id, preset }: { id: string; preset?: string }) {
   return (
     <div ref={ref} data-viz={id} className="my-8">
       {Live ? (
-        <Live preset={preset} />
+        <Live preset={preset} code={code} />
       ) : SERVER?.[id] ? (
-        <div data-viz-ssr="">{createElement(SERVER[id], { preset, interactive: false })}</div>
+        <div data-viz-ssr="">{createElement(SERVER[id], { preset, interactive: false, code })}</div>
       ) : keep ? (
         <div data-viz-ssr="" suppressHydrationWarning dangerouslySetInnerHTML={KEEP} />
       ) : (

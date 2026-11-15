@@ -649,5 +649,1315 @@
     "color": "#E1E4E8"
    }
   ]
+ ],
+ "bfs-dfs-frontier/bfs-levels": [
+  [
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "bfsShortestPath",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "graph",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "start",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " distances ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " {};",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " queue ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " [start];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  distances[start] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "while",
+    "color": "#F97583"
+   },
+   {
+    "text": " (queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "> ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " vertex ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "shift",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " neighbor ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        graph[vertex]) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "!",
+    "color": "#F97583"
+   },
+   {
+    "text": "(neighbor ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "          distances)) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        distances[neighbor] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "          distances[vertex] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+ ",
+    "color": "#F97583"
+   },
+   {
+    "text": "1",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(neighbor);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " distances;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "bfs-dfs-frontier/dijkstra-lazy-heap": [
+  [
+   {
+    "text": "dijkstra",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(src) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "dist ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "Array",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "this",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ".",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "V",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ").",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "fill",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "Infinity",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ");",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  dist[src] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "minHeap ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "= new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "MinHeap",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  minHeap.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "insert",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ", src);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "while",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "!",
+    "color": "#F97583"
+   },
+   {
+    "text": "minHeap.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "isEmpty",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const",
+    "color": "#F97583"
+   },
+   {
+    "text": " { ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "key",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ": ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "uDist",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "value",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ": ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "u",
+    "color": "#79B8FF"
+   },
+   {
+    "text": " }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " minHeap.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "extractMin",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (uDist ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": ">",
+    "color": "#F97583"
+   },
+   {
+    "text": " dist[u]) ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "continue",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "this",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ".adj.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "has",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(u)) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const",
+    "color": "#F97583"
+   },
+   {
+    "text": " [",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "v",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "weight",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "          ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "this",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ".adj.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "get",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(u)) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (dist[u] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+",
+    "color": "#F97583"
+   },
+   {
+    "text": " weight ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "            dist[v]) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "          dist[v] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "            dist[u] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+",
+    "color": "#F97583"
+   },
+   {
+    "text": " weight;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "          minHeap.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "insert",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(dist[v],",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "            v);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " dist;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "linked-list/reverse-between-m2-n4": [
+  [
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "reverseBetween",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "head",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "m",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "n",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (m ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "===",
+    "color": "#F97583"
+   },
+   {
+    "text": " n) ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " head;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " current ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " head,",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    previous ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "null",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "1",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "; i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   },
+   {
+    "text": " m; i",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    previous ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " current;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    current ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " current.next;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "connection ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " previous;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "tail ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " current;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " next ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "null",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "       i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   },
+   {
+    "text": " n ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "-",
+    "color": "#F97583"
+   },
+   {
+    "text": " m ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+ ",
+    "color": "#F97583"
+   },
+   {
+    "text": "1",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "; i",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    next ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " current.next;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    current.next ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " previous;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    previous ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " current;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    current ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " next;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (connection ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "!== ",
+    "color": "#F97583"
+   },
+   {
+    "text": "null",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    connection.next ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " previous;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  } ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "else",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    head ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " previous;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "  tail.next ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " current;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " head;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
  ]
 }

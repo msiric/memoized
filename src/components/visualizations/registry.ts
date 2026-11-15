@@ -1,8 +1,11 @@
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
+import { frontierDescriptor } from './engines/frontier/descriptor'
 import { heapGraphDescriptor } from './engines/heap-graph/descriptor'
+import { linkedListDescriptor } from './engines/linked-list/descriptor'
+import { linkedListFramesDescriptor } from './engines/linked-list/frames/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
-import { footprintOf, presetFootprints } from './shell/footprint'
+import { footprintOf, groupIndices, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
 import { outputText, type StaticDescriptor, type StaticTextAlternative } from './shell/static-types'
 import { textAlternative, type TextAlternative } from './shell/StepsAsText'
@@ -19,13 +22,16 @@ import type { StepThroughDescriptor } from './shell/types'
  * keeps all three in step.
  */
 
-type AnyDescriptor = StepThroughDescriptor<any> | StaticDescriptor<any> | ExplorableDescriptor<any>
+type AnyDescriptor = StepThroughDescriptor<any> | StaticDescriptor<any, any> | ExplorableDescriptor<any>
 
 export const VIZ_DESCRIPTORS = {
   'event-loop': eventLoopDescriptor,
   'environment-records': envRecordsDescriptor,
   'list-keys': listKeysDescriptor,
   'heap-graph': heapGraphDescriptor,
+  'bfs-dfs-frontier': frontierDescriptor,
+  'linked-list-pointer-rewiring': linkedListDescriptor,
+  'linked-list-frames': linkedListFramesDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS
@@ -130,4 +136,30 @@ export function vizStaticTextAlternative(id: string, preset?: string): StaticTex
     ...d.engine.describe(p.data),
     outputs: p.programs.map((pr) => ({ label: pr.id, text: outputText(pr) })),
   }
+}
+
+/**
+ * The practice-answer presets a frame of `preset` (default: the visual's
+ * default) can show: its lesson group's presets whose pane is premium text
+ * (`code.premium`), resolved from the content when the page is built. A
+ * frame missing any of them renders nothing (never a pane of placeholders).
+ */
+export function vizPremiumPresets(id: string, preset?: string): string[] {
+  const d = descriptorFor(id)
+  if (d?.form !== 'step') return []
+  const at = d.presets.findIndex((p) => p.id === (preset ?? d.defaultPreset))
+  if (at < 0) return []
+  return groupIndices(d, at).flatMap((i) => (d.presets[i].log.code?.premium ? [d.presets[i].id] : []))
+}
+
+/** Per preset, the premium presets its frame needs (the entry table's sixth slot); undefined when none do. */
+export function vizPremiumTable(id: string): Record<string, readonly string[]> | undefined {
+  const d = descriptorFor(id)
+  if (d?.form !== 'step') return undefined
+  const out: Record<string, readonly string[]> = {}
+  for (const p of d.presets) {
+    const need = vizPremiumPresets(id, p.id)
+    if (need.length) out[p.id] = need
+  }
+  return Object.keys(out).length ? out : undefined
 }

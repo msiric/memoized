@@ -1,0 +1,1100 @@
+{
+ "generator": "node-inspector-frontier@1",
+ "sha256": "7421e8d741dc734a213b771dcf5a5455be2af4dc969796137373dfe7d8dcb701",
+ "stdout": [
+  "5",
+  "10",
+  "15",
+  "20",
+  "25",
+  "30",
+  "35"
+ ],
+ "pauses": [
+  {
+   "probe": "push",
+   "line": 18,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [],
+    "cur": 20
+   }
+  },
+  {
+   "probe": "push",
+   "line": 18,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20
+    ],
+    "cur": 10
+   }
+  },
+  {
+   "probe": "push",
+   "line": 18,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20,
+     10
+    ],
+    "cur": 5
+   }
+  },
+  {
+   "probe": "pop",
+   "line": 24,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20,
+     10,
+     5
+    ]
+   }
+  },
+  {
+   "probe": "popped",
+   "line": 25,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20,
+     10
+    ],
+    "res": 5
+   }
+  },
+  {
+   "probe": "return",
+   "line": 32,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20,
+     10
+    ],
+    "res": 5
+   }
+  },
+  {
+   "probe": "pop",
+   "line": 24,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20,
+     10
+    ]
+   }
+  },
+  {
+   "probe": "popped",
+   "line": 25,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20
+    ],
+    "res": 10
+   }
+  },
+  {
+   "probe": "spine",
+   "line": 28,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20
+    ],
+    "cur": 15,
+    "res": 10
+   }
+  },
+  {
+   "probe": "return",
+   "line": 32,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20,
+     15
+    ],
+    "res": 10
+   }
+  },
+  {
+   "probe": "pop",
+   "line": 24,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20,
+     15
+    ]
+   }
+  },
+  {
+   "probe": "popped",
+   "line": 25,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20
+    ],
+    "res": 15
+   }
+  },
+  {
+   "probe": "return",
+   "line": 32,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20
+    ],
+    "res": 15
+   }
+  },
+  {
+   "probe": "pop",
+   "line": 24,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     20
+    ]
+   }
+  },
+  {
+   "probe": "popped",
+   "line": 25,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [],
+    "res": 20
+   }
+  },
+  {
+   "probe": "spine",
+   "line": 28,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [],
+    "cur": 30,
+    "res": 20
+   }
+  },
+  {
+   "probe": "spine",
+   "line": 28,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     30
+    ],
+    "cur": 25,
+    "res": 20
+   }
+  },
+  {
+   "probe": "return",
+   "line": 32,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     30,
+     25
+    ],
+    "res": 20
+   }
+  },
+  {
+   "probe": "pop",
+   "line": 24,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     30,
+     25
+    ]
+   }
+  },
+  {
+   "probe": "popped",
+   "line": 25,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     30
+    ],
+    "res": 25
+   }
+  },
+  {
+   "probe": "return",
+   "line": 32,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     30
+    ],
+    "res": 25
+   }
+  },
+  {
+   "probe": "pop",
+   "line": 24,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     30
+    ]
+   }
+  },
+  {
+   "probe": "popped",
+   "line": 25,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [],
+    "res": 30
+   }
+  },
+  {
+   "probe": "spine",
+   "line": 28,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [],
+    "cur": 35,
+    "res": 30
+   }
+  },
+  {
+   "probe": "return",
+   "line": 32,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     35
+    ],
+    "res": 30
+   }
+  },
+  {
+   "probe": "pop",
+   "line": 24,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [
+     35
+    ]
+   }
+  },
+  {
+   "probe": "popped",
+   "line": 25,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [],
+    "res": 35
+   }
+  },
+  {
+   "probe": "return",
+   "line": 32,
+   "vars": {
+    "tree": [
+     20,
+     [
+      10,
+      [
+       5,
+       null,
+       null
+      ],
+      [
+       15,
+       null,
+       null
+      ]
+     ],
+     [
+      30,
+      [
+       25,
+       null,
+       null
+      ],
+      [
+       35,
+       null,
+       null
+      ]
+     ]
+    ],
+    "stack": [],
+    "res": 35
+   }
+  }
+ ]
+}

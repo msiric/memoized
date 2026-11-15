@@ -26,8 +26,13 @@ export async function tokenizeLines(lines: readonly string[], lang: keyof typeof
   })
 }
 
+/**
+ * Tokens for every committed pane. A practice answer's pane (`code.premium`)
+ * is not committed text, so its tokens are made when a page resolves it
+ * (`resolve-code.ts`), never written to `code-tokens.json`.
+ */
 export async function tokensFor(logs: readonly StepLog<unknown>[]): Promise<Record<string, CodeToken[][]>> {
   const out: Record<string, CodeToken[][]> = {}
-  for (const log of logs) if (log.code) out[log.id] = await tokenizeLines(log.code.lines, log.code.lang)
+  for (const log of logs) if (log.code && !log.code.premium) out[log.id] = await tokenizeLines(log.code.lines, log.code.lang)
   return out
 }

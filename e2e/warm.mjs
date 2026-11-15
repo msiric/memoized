@@ -16,6 +16,14 @@ const routes = [
   '/dev/visualizations/lesson/data-types',
   '/dev/visualizations/lesson/objects',
   '/dev/visualizations?lk=parent-type-change',
+  // The frontier step-through (wave 2A), one page per lesson group.
+  '/dev/visualizations?fr=bfs-levels',
+  '/dev/visualizations?fr=dijkstra-lazy-heap',
+  '/dev/visualizations?fr=bst-iterator-stack',
+  // Pointer rewiring (wave 2B).
+  '/dev/visualizations?ll=reverse-between-m2-n4',
+  '/dev/visualizations?ll=palindrome-split-reverse-compare',
+  '/dev/visualizations?ll=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

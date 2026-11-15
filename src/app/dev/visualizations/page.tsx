@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Prose } from '@/components/Prose'
 import { Viz } from '@/components/visualizations/Viz'
+import { resolveVizCode } from '@/components/visualizations/step-log/resolve-code'
 import { ClientOnly } from './ClientOnly'
 
 /**
@@ -10,7 +11,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -21,6 +22,9 @@ export default function VisualizationGalleryPage({
   // (`VIZ_GALLERY=1 yarn build`); never set in deployed environments.
   if (process.env.NODE_ENV === 'production' && process.env.VIZ_GALLERY !== '1')
     notFound()
+
+  // `?fr=<preset>`: the frontier step-through alone (wave 2A), one lesson group per page.
+  if (searchParams.fr) return <FrontierGallery preset={searchParams.fr} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
   // Static figures: final server markup, no client JavaScript. `?static=1`
@@ -53,6 +57,46 @@ export default function VisualizationGalleryPage({
     </>
   )
   const onlyStatic = searchParams.static === '1'
+  // `?ll=<preset>`: the linked-list pointer-rewiring step-through alone;
+  // `?ll=static`: its static frames alone (wave 2B).
+  if (searchParams.ll === 'static') {
+    const frames = (
+      <>
+        <Viz id="linked-list-frames" preset="floyd-rho" />
+        <p>Between the two pointer frames.</p>
+        <Viz id="linked-list-frames" preset="full-reversal-strip" />
+      </>
+    )
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>Linked list pointer frames</h1>
+            <p>Snapshots of recorded pointer states, drawn on the server as SVG.</p>
+            {searchParams.mount === 'client' ? <ClientOnly>{frames}</ClientOnly> : frames}
+            <p>Text after the static frames.</p>
+          </Prose>
+        </div>
+      </div>
+    )
+  }
+  if (searchParams.ll)
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>Linked list pointer rewiring</h1>
+            <p>
+              Next pointers rewired one assignment at a time. Every pointer state is recorded from a real Node run of
+              the lesson&apos;s code and re-verified by unit tests.
+            </p>
+            {searchParams.spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+            <PremiumViz id="linked-list-pointer-rewiring" preset={searchParams.ll} mount={searchParams.mount} />
+            <p>Text after the visual, to show it never moves while stepping.</p>
+          </Prose>
+        </div>
+      </div>
+    )
 
   return (
     <>
@@ -95,4 +139,43 @@ export default function VisualizationGalleryPage({
       </div>
     </>
   )
+}
+
+/** The frontier step-through (graphs, grids, trees) through the lazy mount, between lesson text. */
+function FrontierGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Frontier step-through</h1>
+          <p>
+            Which vertex is expanded next: a queue, a heap or a stack decides. Every drawn queue, distance and stack is
+            recorded from a real Node run of the lesson&apos;s code and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="bfs-dfs-frontier" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A step-through whose frame may show a practice answer (premium-code
+ * policy): its pane is resolved here, on the server, from the local content
+ * checkout, as `sync-content.ts` does for a lesson. Without the content (CI)
+ * the frame is local-only, like a premium lesson fixture: a note stands in.
+ */
+async function PremiumViz({ id, preset, mount }: { id: string; preset: string; mount?: string }) {
+  const r = await resolveVizCode(id, preset)
+  if (r.kind === 'missing')
+    return (
+      <p data-viz-local-only={`${id}/${preset}`} className="text-sm text-zinc-300">
+        This frame shows a practice answer, which is premium and never committed. It renders from a local content
+        checkout (<code>src/content</code>) only.
+      </p>
+    )
+  const viz = <Viz id={id} preset={preset} code={r.kind === 'resolved' ? r.code : undefined} />
+  return mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz
 }

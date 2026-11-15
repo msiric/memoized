@@ -4,6 +4,7 @@ import {
   VIZ_DESCRIPTORS,
   buildVizManifest,
   vizFootprint,
+  vizPremiumTable,
   vizStaticFootprints,
   vizStaticTextAlternative,
   vizStepFootprints,
@@ -22,7 +23,9 @@ describe('visualization registry', () => {
   })
 
   it.each(ids)('%s: the entry table reserves exactly the computed footprint', (id) => {
-    const [, narrow, wide, statics, steps] = VIZ_TABLE[id]
+    const [, narrow, wide, statics, steps, premium] = VIZ_TABLE[id]
+    // Which frames need a practice answer's pane resolved for the page.
+    expect(JSON.parse(JSON.stringify(premium ?? null)), 'update entry-table.ts').toEqual(JSON.parse(JSON.stringify(vizPremiumTable(id) ?? null)))
     expect([narrow, wide], 'update entry-table.ts').toEqual([...vizFootprint(id)!])
     const d = VIZ_DESCRIPTORS[id as keyof typeof VIZ_DESCRIPTORS]
     if (d.form === 'static') {

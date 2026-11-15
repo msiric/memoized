@@ -27,6 +27,12 @@ export type VizEntry = readonly [
    * text), so the reserve holds at any text size.
    */
   steps?: Record<string, readonly [number, number, number, number, number]>,
+  /**
+   * Step-throughs with practice-answer presets: per preset, the presets its
+   * frame needs resolved code for (`code` on `<Viz>`, from the content when
+   * the page is built). Without them the frame renders nothing.
+   */
+  premium?: Record<string, readonly string[]>,
 ]
 
 export const VIZ_TABLE: Record<string, VizEntry> = {
@@ -53,11 +59,54 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'tdz-stops-lookup': [752, 526, 526],
     },
   ],
+  'bfs-dfs-frontier': [
+    () => import('./engines/frontier'),
+    854,
+    654,
+    undefined,
+    {
+      'bfs-levels': [854, 654, 854, 998, 1054],
+      'binary-matrix-8dir': [854, 654, 854, 1034, 1046],
+      'dijkstra-lazy-heap': [876, 654, 876, 1028, 1064],
+      'min-effort-grid': [854, 654, 854, 1034, 1034],
+      'bst-iterator-stack': [826, 638, 826, 978, 1006],
+    },
+    {
+      'bfs-levels': ['binary-matrix-8dir'],
+      'binary-matrix-8dir': ['binary-matrix-8dir'],
+      'dijkstra-lazy-heap': ['min-effort-grid'],
+      'min-effort-grid': ['min-effort-grid'],
+      'bst-iterator-stack': ['bst-iterator-stack'],
+    },
+  ],
   'heap-graph': [
     () => import('./engines/heap-graph'),
     1013,
     874,
     { 'identity-alias-rebind-spread': [1013, 874, 874], 'spread-vs-nested-vs-deep': [1533, 1088, 1088] },
+  ],
+  'linked-list-frames': [
+    () => import('./engines/linked-list/frames'),
+    704,
+    422,
+    { 'floyd-rho': [704, 422, 422], 'full-reversal-strip': [914, 528, 528] },
+  ],
+  'linked-list-pointer-rewiring': [
+    () => import('./engines/linked-list'),
+    786,
+    694,
+    undefined,
+    {
+      'reverse-between-m2-n4': [786, 694, 838, 966, 1006],
+      'palindrome-split-reverse-compare': [796, 682, 796, 936, 988],
+      'palindrome-1221': [796, 682, 796, 956, 1004],
+      'palindrome-1231': [784, 654, 784, 936, 1004],
+    },
+    {
+      'palindrome-split-reverse-compare': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
+      'palindrome-1221': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
+      'palindrome-1231': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
+    },
   ],
   'list-keys': [
     () => import('./engines/list-keys'),

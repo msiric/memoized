@@ -8,7 +8,7 @@ import {
   MIN_TEXT_WIDTH,
   wrapLines,
 } from './footprint'
-import type { StaticDescriptor, StaticPreset } from './static-types'
+import type { AnyProgram, StaticDescriptor, StaticPreset } from './static-types'
 import type { PerVariant, Variant } from './types'
 
 /**
@@ -46,8 +46,8 @@ export function titleHeight(title: string, tier: StaticTier): number {
 }
 
 export function staticMetrics<D>(
-  def: StaticDescriptor<D>,
-  preset: StaticPreset<D>,
+  def: StaticDescriptor<D, AnyProgram>,
+  preset: StaticPreset<D, AnyProgram>,
 ): Record<StaticTier, StaticMetrics> {
   const stage = def.engine.stageHeight(preset.data)
   const metrics = (tier: StaticTier): StaticMetrics => {
@@ -72,7 +72,7 @@ export function staticMetrics<D>(
 
 /** [narrow, wide, col] frame heights for every preset, default first. */
 export function staticFootprints<D>(
-  def: StaticDescriptor<D>,
+  def: StaticDescriptor<D, AnyProgram>,
 ): Record<string, readonly [number, number, number]> {
   const ordered = [...def.presets].sort((a, b) =>
     a.id === def.defaultPreset ? -1 : b.id === def.defaultPreset ? 1 : 0,

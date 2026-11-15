@@ -91,13 +91,16 @@ async function serializeMdxContent(content: string, filePath?: string): Promise<
 
   try {
     const { mdxOptions } = await import('@/mdx/index.mjs')
+    // A `<Viz>` that shows a practice answer gets its pane from this content
+    // checkout, inside the serialized (gated) lesson: never in the app repo.
+    const { remarkVizCode } = await import('@/components/visualizations/step-log/remark-viz-code')
 
     console.log('✅ Serializing MDX content...')
 
     const serialized = await serialize({
       source: content,
       options: {
-        mdxOptions,
+        mdxOptions: { ...mdxOptions, remarkPlugins: [...mdxOptions.remarkPlugins, remarkVizCode] },
         scope: {},
       },
     })

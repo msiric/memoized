@@ -5,8 +5,11 @@ import { EMPTY, type EventLoopState } from '../model'
  * Promise patterns lesson (js-track/advanced-concepts/promise-patterns), R4
  * preset B: `await null` pauses an async function and queues the rest of it
  * as a microtask, so the caller's next log comes first (a, c, b). The
- * program is the lesson's own, without its comments (one of them states the
- * answer).
+ * program is the second lesson example in "When Promise Callbacks Run" (the
+ * section that places this visual, content branch
+ * `feat/viz-placement-flagships`), exactly: the truth test compares it with a
+ * local content checkout. A lesson example, so the repo may hold its lines;
+ * it is never taken from the practice answer that discusses the same order.
  *
  * The paused function keeps one chip, `run`, from the call stack to the
  * microtask queue and back (R7: one shape, one name across lanes): what
