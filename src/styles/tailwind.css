@@ -378,6 +378,9 @@
    */
   .vz-ch { @apply fill-white/5 stroke-zinc-300 print:fill-zinc-100 print:stroke-zinc-700; }
   .vz-s [data-edge].vz-cm { @apply text-zinc-300 print:text-zinc-700; }
+  /* engines/linked-list: a null stub (a grounded `next`, not an arrow between boxes) is drawn like a link. */
+  .vz-s [data-stub] { @apply text-zinc-500 print:text-zinc-600; }
+  .vz-s [data-stub].vz-cm { @apply text-zinc-300 print:text-zinc-700; }
   /*
    * engines/frontier (bfs-dfs-frontier): the step-through's canvas shares
    * the glyph, outline, dash, muted, result, plate and changed roles above,

@@ -72,6 +72,24 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     874,
     { 'identity-alias-rebind-spread': [1013, 874, 874], 'spread-vs-nested-vs-deep': [1533, 1088, 1088] },
   ],
+  'linked-list-frames': [
+    () => import('./engines/linked-list/frames'),
+    704,
+    422,
+    { 'floyd-rho': [704, 422, 422], 'full-reversal-strip': [914, 528, 528] },
+  ],
+  'linked-list-pointer-rewiring': [
+    () => import('./engines/linked-list'),
+    798,
+    722,
+    undefined,
+    {
+      'reverse-between-m2-n4': [798, 722, 838, 978, 1058],
+      'palindrome-split-reverse-compare': [796, 682, 796, 936, 988],
+      'palindrome-1221': [796, 682, 796, 956, 1004],
+      'palindrome-1231': [784, 654, 784, 936, 1004],
+    },
+  ],
   'list-keys': [
     () => import('./engines/list-keys'),
     862,

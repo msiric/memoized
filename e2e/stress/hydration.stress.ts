@@ -38,6 +38,10 @@ const PAGES = [
   // The heap-graph lessons (both FREE, committed copies).
   '/dev/visualizations/lesson/data-types',
   '/dev/visualizations/lesson/objects',
+  // Pointer rewiring (wave 2B): both lesson groups and the static frames.
+  '/dev/visualizations?ll=reverse-between-m2-n4',
+  '/dev/visualizations?ll=palindrome-split-reverse-compare',
+  '/dev/visualizations?ll=static',
 ]
 const CONFIGS: Config[] =
   TIER === 'full'

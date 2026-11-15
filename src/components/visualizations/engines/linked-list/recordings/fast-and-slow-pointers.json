@@ -1,0 +1,158 @@
+{
+ "detect-cycle": {
+  "sha256": "33e889aa9cbf3b902582c5e45411e0847304a021f4f5cb8d7c0d37d74b38fa49",
+  "observed": [
+   "3"
+  ],
+  "labels": [
+   "1",
+   "2",
+   "3",
+   "4",
+   "5",
+   "6"
+  ],
+  "hits": [
+   {
+    "probe": "start",
+    "vars": {
+     "head": 0
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "init",
+    "vars": {
+     "slow": 0,
+     "fast": 0
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "slow": 1,
+     "fast": 2
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "slow": 2,
+     "fast": 4
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "slow": 3,
+     "fast": 2
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "stride",
+    "vars": {
+     "slow": 4,
+     "fast": 4
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "reset",
+    "vars": {
+     "slow": 4,
+     "fast": 4,
+     "pointer1": 0,
+     "pointer2": 4
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "walk",
+    "vars": {
+     "slow": 4,
+     "fast": 4,
+     "pointer1": 1,
+     "pointer2": 5
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   },
+   {
+    "probe": "walk",
+    "vars": {
+     "slow": 4,
+     "fast": 4,
+     "pointer1": 2,
+     "pointer2": 2
+    },
+    "next": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     2
+    ]
+   }
+  ]
+ }
+}

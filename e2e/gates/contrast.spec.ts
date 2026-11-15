@@ -8,7 +8,7 @@ import {
   type PaletteRef,
 } from '../../src/components/visualizations/primitives/tokens-v3'
 import { auditContrast, type Pair } from './contrast-audit'
-import { GALLERY, LESSONS, MOTION_STATES, PP, PP_AWAIT, SPECIMEN, STATES, freezeForContrast, frUrl, lessonUrl, open, stateUrl } from './drive'
+import { GALLERY, LESSONS, MOTION_STATES, PP, PP_AWAIT, SPECIMEN, STATES, freezeForContrast, frUrl, lessonUrl, llUrl, open, stateUrl } from './drive'
 
 /**
  * Contrast gate (VIZ-H G, R1 L05): the token table (`tokens-v3.test.ts`)
@@ -112,7 +112,7 @@ test('print: the light rendering passes', async ({ page }) => {
   const problems: string[] = []
   // The frontier: one page per lesson group (graph, grid and tree canvases).
   const frontier = ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack'].map(frUrl)
-  for (const url of [SPECIMEN, GALLERY, PP, PP_AWAIT, `${GALLERY}?static=1`, ...frontier]) {
+  for (const url of [SPECIMEN, GALLERY, PP, PP_AWAIT, `${GALLERY}?static=1`, ...frontier, llUrl('reverse-between-m2-n4'), llUrl('static')]) {
     await open(page, url, 1024)
     await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
     // Paper has no focus: forced focus rings on the specimen are not printed pairs.
