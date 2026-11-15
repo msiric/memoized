@@ -297,3 +297,62 @@ for (const width of [375, 1440])
     same('focus ring', erRing, await look(page.locator(':focus > .vz-fb'), RING))
     expect(diffs).toEqual([])
   })
+
+/**
+ * The pointer-rewiring visuals (wave 2B) speak the static figures'
+ * vocabulary: a node is the heap graph's glyph, an arrow its link and head,
+ * the one rest mark its changed glyph, and the frames' title, panel heading
+ * and caption are the heap graph's. The step-through's stage uses the same
+ * glyphs as its static frames.
+ */
+for (const width of [375, 1440])
+  test(`pointer-rewiring glyphs compute like the heap graph's @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    const inSvg = (root: Locator, sel: string) =>
+      root.evaluate(
+        (f, [q, ps]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) throw new Error(`nothing matches ${q}`)
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as unknown as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, SVG] as const,
+      )
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: heap graph ${a[k]} vs pointer rewiring ${b[k]}`)
+    }
+    await open(page, `${GALLERY}?static=1`, width)
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const heap = {
+      frame: await look(hg, FRAME),
+      title: await look(hg.locator('p').first(), TEXT),
+      heading: await look(hg.locator('[data-viz-section] > p:visible').first(), TEXT),
+      caption: await look(hg.locator('figcaption'), TEXT),
+      glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
+      link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
+      head: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-ah'),
+      changed: await inSvg(hg, 'svg .vz-ch'),
+    }
+    await open(page, `${GALLERY}?ll=static`, width)
+    const rho = page.locator('figure[data-viz-preset="floyd-rho"]')
+    same('frame', heap.frame, await look(rho, FRAME))
+    same('title', heap.title, await look(rho.locator('p').first(), TEXT))
+    same('panel heading', heap.heading, await look(rho.locator('[data-viz-section] > p').first(), TEXT))
+    same('caption', heap.caption, await look(rho.locator('figcaption'), TEXT))
+    same('node glyph', heap.glyph, await inSvg(rho, 'svg [data-node] .vz-g'))
+    same('link', heap.link, await inSvg(rho, 'svg [data-edge] .vz-e'))
+    same('arrowhead', heap.head, await inSvg(rho, 'svg [data-edge] .vz-ah'))
+    same('changed mark', heap.changed, await inSvg(rho, 'svg [data-node] .vz-ch'))
+    await open(page, `${GALLERY}?ll=reverse-between-m2-n4`, width)
+    const step = page.locator('[data-viz="linked-list-pointer-rewiring"] section')
+    same('stage node glyph', heap.glyph, await inSvg(step, 'svg [data-node] .vz-g'))
+    same('stage link', heap.link, await inSvg(step, 'svg [data-edge] .vz-e'))
+    same('stage arrowhead', heap.head, await inSvg(step, 'svg [data-edge] .vz-ah'))
+    expect(diffs).toEqual([])
+  })

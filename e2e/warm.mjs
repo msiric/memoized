@@ -16,6 +16,10 @@ const routes = [
   '/dev/visualizations/lesson/data-types',
   '/dev/visualizations/lesson/objects',
   '/dev/visualizations?lk=parent-type-change',
+  // Pointer rewiring (wave 2B).
+  '/dev/visualizations?ll=reverse-between-m2-n4',
+  '/dev/visualizations?ll=palindrome-split-reverse-compare',
+  '/dev/visualizations?ll=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

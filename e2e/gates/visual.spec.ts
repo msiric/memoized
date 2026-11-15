@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { GALLERY, LESSONS, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt, lessonUrl, open, settle, stateFrame, stateUrl } from './drive'
+import { GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt, lessonUrl, llUrl, open, settle, stateFrame, stateUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -109,4 +109,12 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, 'figure[data-viz-preset="identity-alias-rebind-spread"]', 'print-heap-graph-data-types.png')
   await frameShot(page, 'figure[data-viz-preset="spread-vs-nested-vs-deep"]', 'print-heap-graph-objects.png')
+  // Pointer rewiring (wave 2B): the step-through's Start and both static frames.
+  await open(page, llUrl('reverse-between-m2-n4'), 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, LL, 'print-linked-list-reverse-between.png')
+  await open(page, llUrl('static'), 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, 'figure[data-viz-preset="floyd-rho"]', 'print-linked-list-floyd-rho.png')
+  await frameShot(page, 'figure[data-viz-preset="full-reversal-strip"]', 'print-linked-list-full-reversal.png')
 })

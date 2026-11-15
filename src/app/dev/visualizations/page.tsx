@@ -86,6 +86,7 @@ export default function VisualizationGalleryPage({
               Next pointers rewired one assignment at a time. Every pointer state is recorded from a real Node run of
               the lesson&apos;s code and re-verified by unit tests.
             </p>
+            {searchParams.spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
             {searchParams.mount === 'client' ? (
               <ClientOnly>
                 <Viz id="linked-list-pointer-rewiring" preset={searchParams.ll} />
