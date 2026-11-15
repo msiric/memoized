@@ -321,7 +321,7 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
       ref={root}
       className={clsx(
         'relative flex h-full flex-col',
-        'vz-wide:grid vz-wide:[grid-template-columns:var(--vz-cols-md)] vz-wide:[grid-template-rows:auto_minmax(0,1fr)] vz-col:[grid-template-columns:var(--vz-cols-xl)]',
+        'vz-wide:grid vz-wide:[grid-template-columns:var(--vz-cols-md)] vz-wide:[grid-template-rows:minmax(0,1fr)] vz-wide:items-start vz-col:[grid-template-columns:var(--vz-cols-xl)]',
       )}
       style={{
         gap: toRem(G.gap),
@@ -333,7 +333,7 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
       <div className="flex min-w-0 flex-col vz-wide:col-start-1 vz-wide:row-start-1 vz-wide:[&>*]:!w-full vz-wide:[&>*]:self-stretch">{codePane}</div>
 
       {/* The machine: the canvas and the frontier. Its accessible name describes every vertex, lane and output. */}
-      <div role="img" aria-label={label} className="flex min-w-0 flex-col vz-wide:col-start-2 vz-wide:row-span-2 vz-wide:row-start-1" style={{ gap: toRem(G.gap) }}>
+      <div role="img" aria-label={label} className="flex min-w-0 flex-col vz-wide:col-start-2 vz-wide:row-start-1" style={{ gap: toRem(G.gap) }}>
         <div
           data-viz-region="canvas"
           className={clsx('relative flex min-w-0 flex-col border-y border-transparent px-1.5 py-1.5 vz-wide:py-2 vz-tight:px-1', radius.row.cls, surface.panel, H_CLS)}
