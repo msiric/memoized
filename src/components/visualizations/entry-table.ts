@@ -93,11 +93,11 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
   ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),
-    798,
-    722,
+    786,
+    694,
     undefined,
     {
-      'reverse-between-m2-n4': [798, 722, 838, 978, 1058],
+      'reverse-between-m2-n4': [786, 694, 838, 966, 1006],
       'palindrome-split-reverse-compare': [796, 682, 796, 936, 988],
       'palindrome-1221': [796, 682, 796, 956, 1004],
       'palindrome-1231': [784, 654, 784, 936, 1004],

@@ -135,14 +135,14 @@ export const reverseBetweenSpec: PresetSpec = {
       prompt: 'After connection.next = previous, what comes after 2, walking from head?',
       choices: [
         { id: 'five', label: '5' },
-        { id: 'loop', label: '1: a loop' },
+        { id: 'loop', label: '1' },
         { id: 'null', label: 'null' },
       ],
       answer: 'loop',
       feedback: {
         correct: '2 still points back at 1 until tail.next = current.',
         byChoice: {
-          five: 'Not yet: tail.next = current links 2 to 5 next.',
+          five: '2 still points back at 1: tail.next = current links it to 5 on the next step.',
           null: '2.next was set to previous, node 1, on the first pass.',
         },
       },

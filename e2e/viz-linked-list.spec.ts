@@ -144,7 +144,7 @@ test('palindrome presets: one switcher for the lesson, the question on the step 
 
 // The flagship's phone fit (Q15, owner ruling for wave 2): at 375×667, with the code pane scrolled to
 // just under the site header, the current line, the drawing, the caption and Next are all on screen,
-// at every step of every preset.
+// at every step of every preset, and every choice label stays on one line.
 test('375×667: code line, drawing, caption and Next fit under the site header at every step', async ({ page }) => {
   test.setTimeout(180_000)
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -169,7 +169,12 @@ test('375×667: code line, drawing, caption and Next fit under the site header a
           const r = el.getBoundingClientRect()
           return r.top >= top - 0.5 && r.bottom <= window.innerHeight + 0.5
         }
+        // Every choice label on one line (a label that wraps reads as two choices on a phone).
+        const wrapped = [...root.querySelectorAll('[data-viz-part="viz-checkpoint"] [role="radio"] [data-choice-slot] + span')]
+          .filter((l) => l.getBoundingClientRect().height > parseFloat(getComputedStyle(l).lineHeight) + 0.5)
+          .map((l) => l.textContent)
         return {
+          oneLineChoices: wrapped.length ? wrapped : true,
           line: visible(root.querySelector('[aria-current="true"]')),
           drawing: visible(root.querySelector('[data-viz-region="list"] svg')),
           caption: visible(root.querySelector('[data-viz-part="viz-caption"]')),
@@ -180,7 +185,7 @@ test('375×667: code line, drawing, caption and Next fit under the site header a
         }
       }, STEP)
       const { step, mode, end, ...seen } = v
-      expect(seen, `${preset} step ${step} (${mode})`).toEqual({ line: true, drawing: true, caption: true, next: true })
+      expect(seen, `${preset} step ${step} (${mode})`).toEqual({ oneLineChoices: true, line: true, drawing: true, caption: true, next: true })
       if (end) break
       await page.keyboard.press(mode === 'ask' ? '2' : 'ArrowRight')
       await page.waitForTimeout(30)
