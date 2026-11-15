@@ -10,7 +10,6 @@ import { H_CLS } from '../../shell/vars'
 import { presence, transitionFor, type MotionGate } from '../../shell/motion'
 import type { StageProps } from '../../shell/types'
 import { Lane } from '../../substrates/Lane'
-import { monoWidth } from '../../substrates/text-metrics'
 import { remHeights, toRem } from '../../substrates/units'
 import { CANVAS, G, type CanvasGeometry, type FrontierMetrics } from './layout'
 import { frontierIntrospection, outId, type FEdge, type FNode, type FrontierState } from './model'
@@ -51,18 +50,12 @@ const STATUS_TEXT: Record<FNode['status'], string | undefined> = {
   wall: 'vz-m',
 }
 
-/** A small value tag: the plate in the glyph fill, so no edge runs through it. */
-function Badge({ x, y, text, anchor }: { x: number; y: number; text: string; anchor: 'start' | 'end' }) {
-  const w = Math.ceil(monoWidth(text, G.small)) + 6
-  const h = 16
-  const left = anchor === 'start' ? x : x - w
+/** A recorded value beside a vertex (its distance): amber output text, `∞` muted until one is written. */
+function Badge({ x, y, text }: { x: number; y: number; text: string }) {
   return (
-    <g data-badge>
-      <rect className="vz-p" x={left} y={y - h / 2} width={w} height={h} rx={radius.chip.px} />
-      <text className={clsx('vz-12', text === '∞' ? 'vz-m' : 'vz-r')} x={left + w / 2} y={y} textAnchor="middle" dominantBaseline="central">
-        {text}
-      </text>
-    </g>
+    <text data-badge className={clsx('vz-12', text === '∞' ? 'vz-m' : 'vz-r')} x={x} y={y} textAnchor="start" dominantBaseline="central">
+      {text}
+    </text>
   )
 }
 
@@ -87,7 +80,7 @@ function Edge({ edge, geo, directed }: { edge: FEdge; geo: CanvasGeometry; direc
   const back = { x: tip.x - ux * head * 1.4, y: tip.y - uy * head * 1.4 }
   return (
     <g
-      data-edge={edge.id}
+      data-fr-edge={edge.id}
       data-active={edge.active || undefined}
       className={edge.active ? 'vz-ea' : undefined}
       style={edge.active ? ({ ['--vz-sw' as string]: `${strokeWidth.nowConnector}px` } as React.CSSProperties) : undefined}
@@ -143,15 +136,10 @@ function Canvas({ state, geo }: { state: FrontierState; geo: CanvasGeometry }) {
           {state.edges.map((e) => {
             if (e.weight === undefined) return null
             const at = weightAt(e, geo)
-            const text = String(e.weight)
-            const w = Math.ceil(monoWidth(text, G.small)) + 4
             return (
-              <g key={e.id}>
-                <rect className="vz-p" x={at.x - w / 2} y={at.y - 7} width={w} height={14} rx={radius.chip.px} />
-                <text className="vz-12 vz-m" x={at.x} y={at.y} textAnchor="middle" dominantBaseline="central">
-                  {text}
-                </text>
-              </g>
+              <text key={e.id} className="vz-12 vz-m" x={at.x} y={at.y} textAnchor="middle" dominantBaseline="central">
+                {e.weight}
+              </text>
             )
           })}
         </g>
@@ -161,7 +149,7 @@ function Canvas({ state, geo }: { state: FrontierState; geo: CanvasGeometry }) {
         const shape = clsx(STATUS_SHAPE[n.status])
         const ring = n.status === 'current' ? strokeWidth.mark : strokeWidth.outline
         return (
-          <g key={n.id} data-node={n.id} data-status={n.status} className={n.status === 'idle' || n.status === 'wall' ? svgInk.line : undefined}>
+          <g key={n.id} data-fr-node={n.id} data-status={n.status} className={n.status === 'idle' || n.status === 'wall' ? svgInk.line : undefined}>
             {grid ? (
               <rect
                 className={shape}
@@ -197,7 +185,7 @@ function Canvas({ state, geo }: { state: FrontierState; geo: CanvasGeometry }) {
                   {n.badge}
                 </text>
               ) : (
-                <Badge x={at.x + r - 2} y={at.y - r + 1} text={n.badge} anchor="start" />
+                <Badge x={at.x + r} y={at.y - r + 2} text={n.badge} />
               )
             ) : null}
           </g>

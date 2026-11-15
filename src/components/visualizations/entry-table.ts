@@ -61,9 +61,9 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     {
       'bfs-levels': [1004, 796, 1016, 1176, 1256],
       'binary-matrix-8dir': [994, 748, 994, 1174, 1174],
-      'dijkstra-lazy-heap': [1022, 784, 1022, 1182, 1330],
+      'dijkstra-lazy-heap': [1058, 784, 1058, 1218, 1366],
       'min-effort-grid': [960, 748, 960, 1140, 1168],
-      'bst-iterator-stack': [984, 756, 984, 1136, 1224],
+      'bst-iterator-stack': [1008, 756, 1008, 1160, 1248],
     },
   ],
   'heap-graph': [

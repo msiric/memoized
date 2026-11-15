@@ -57,7 +57,7 @@ const pauses = rec.pauses
 const first = pauses[0].vars as { heap: Heap; dist: unknown[] }
 steps.push({
   state: state({ heap: first.heap, dist: first.dist, done }),
-  event: 'Start: (0, 0) in the heap',
+  event: 'Start',
   why: 'dist[0] = 0 and every other distance is ∞, so the only entry, (0, 0), is the first to pop.',
   narration: 'dist is 0 for vertex 0 and ∞ for the rest; the heap holds (0, 0).',
   focus: [],

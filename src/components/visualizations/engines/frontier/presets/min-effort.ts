@@ -52,7 +52,7 @@ const popped = pausesOf(rec, 'popped')
 const first = pops[0].vars as { heap: Entry[]; dist: Grid }
 steps.push({
   state: state({ heap: first.heap, dist: first.dist, done }),
-  event: 'Start: [0, 0, 0] in the heap',
+  event: 'Start',
   why: 'The start costs nothing, so its effort is 0 and every other effort is ∞ until a route reaches it.',
   narration: 'The heap holds [0, 0, 0]; every other effort is ∞.',
   focus: [],

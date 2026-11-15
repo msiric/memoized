@@ -63,8 +63,8 @@ const spineOf = pausesOf(rec, 'push').map((p) => p.vars.cur as number)
 const ctor = pausesOf(rec, 'pop')[0].vars.stack as number[]
 steps.push({
   state: state({ stack: ctor, done, console: out }),
-  event: `Constructor: push ${list(spineOf.map(String))}`,
-  why: `The constructor pushes the root and keeps going left, so the smallest value, ${ctor[ctor.length - 1]}, is on top.`,
+  event: 'Push the left spine',
+  why: `The constructor pushes ${list(spineOf.map(String))}, going left from the root, so the smallest value, ${ctor[ctor.length - 1]}, is on top.`,
   narration: `The stack holds ${list(ctor.map(String))}, with ${ctor[ctor.length - 1]} on top.`,
   focus: [],
   claim: 'modelled',
@@ -84,7 +84,7 @@ for (let k = 0; k < pauses.length; k++) {
     if (res === 20) reveal = steps.length
     steps.push({
       state: state({ stack: after, current: res, done, console: out }),
-      event: `Pop ${res}, push ${list(spine.map(String))}`,
+      event: `Pop ${res}: push ${spine.join(', ')}`,
       why: `${res} has a right child, ${right[res]}, so next() pushes it and its left spine: the next smallest is on top again.`,
       narration: `${res} is popped; ${list(spine.map(String))} ${spine.length > 1 ? 'are' : 'is'} pushed.`,
       line: lines(P, 27, 29),

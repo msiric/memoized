@@ -389,8 +389,8 @@
    * is set inline from `strokeWidth.nowConnector`).
    */
   .vz-fr { @apply mx-auto h-auto max-w-full font-mono fill-zinc-100 print:fill-zinc-900; overflow: visible; }
-  .vz-fr [data-edge] { @apply text-zinc-500 print:text-zinc-600; }
-  .vz-fr [data-edge].vz-ea { @apply text-lime-400 print:text-lime-700; }
+  .vz-fr [data-fr-edge] { @apply text-zinc-500 print:text-zinc-600; }
+  .vz-fr [data-fr-edge].vz-ea { @apply text-lime-400 print:text-lime-700; }
   /* On paper the waiting vertex keeps its sky edge on white (the tint does not print). */
   .vz-nq { @apply fill-sky-400/10 stroke-sky-400 print:fill-white print:stroke-sky-700; }
   .vz-nd { @apply fill-zinc-400 print:fill-zinc-600; stroke: none; }

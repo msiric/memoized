@@ -75,7 +75,7 @@ const v = (p: Pause) => p.vars as { ans: number; q?: Cell[]; nq?: Cell[]; grid: 
 const first = v(pauses[0])
 steps.push({
   state: state({ grid: first.grid, q: first.q!, nq: [], ans: first.ans, done }),
-  event: 'Start: q holds [0, 0]',
+  event: 'Start',
   why: '[0, 0] is open, so it is marked 1 (visited, the same value as a wall) and q starts with it; ans = 1 counts that cell.',
   narration: 'The start cell is marked 1 and q holds [0, 0]; ans is 1.',
   focus: [],

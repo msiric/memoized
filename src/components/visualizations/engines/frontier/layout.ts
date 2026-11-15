@@ -68,6 +68,8 @@ export const CANVAS = {
 } as const
 
 export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
+/** The narrow stage under very large text on a phone (`vz-tight`), px at the default root (as the event loop's). */
+export const STAGE_TIGHT = 200
 
 export type Point = { x: number; y: number }
 
@@ -191,12 +193,15 @@ export function frontierMetrics(
   const per = <T>(f: (v: Variant) => T): PerVariant<T> => ({ narrow: f('narrow'), wide: f('wide') })
 
   const right = STAGE_MIN.wide - cols.md - 16
+  // Narrow rows are counted where the frame is narrowest in rem: a phone at
+  // very large text (`STAGE_TIGHT`), so a lane or the console never wraps
+  // past its reserve when the reader's text is larger (R9).
   const laneWidth: PerVariant<number> = {
-    narrow: STAGE_MIN.narrow - 2 * G.laneInset,
+    narrow: STAGE_TIGHT - 2 * G.laneInset,
     wide: right - 2 * G.laneInset,
   }
   const consoleWidth: PerVariant<number> = {
-    narrow: STAGE_MIN.narrow - 2 * G.border - 2 * G.pad,
+    narrow: STAGE_TIGHT - 2 * G.border - 2 * G.pad,
     wide: cols.md - 2 * G.border - 2 * G.pad,
   }
 
