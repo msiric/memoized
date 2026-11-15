@@ -100,7 +100,7 @@ const checkpoints: Checkpoint[] = [
   {
     beforeStep: askAt + 1,
     verdict: 'end',
-    prompt: '[2, 2] has effort 3 in the heap. What will the call return?',
+    prompt: 'What will the call return?',
     choices: ['1', '2', '3'].map((x) => ({ id: x, label: x, value: x })),
     answer: rec.stdout[0],
     feedback: {

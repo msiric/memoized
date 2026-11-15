@@ -55,15 +55,15 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
   ],
   'bfs-dfs-frontier': [
     () => import('./engines/frontier'),
-    1004,
-    796,
+    854,
+    654,
     undefined,
     {
-      'bfs-levels': [1004, 796, 1016, 1176, 1256],
-      'binary-matrix-8dir': [994, 748, 994, 1174, 1174],
-      'dijkstra-lazy-heap': [1058, 784, 1058, 1218, 1366],
-      'min-effort-grid': [960, 748, 960, 1140, 1168],
-      'bst-iterator-stack': [1008, 756, 1008, 1160, 1248],
+      'bfs-levels': [854, 654, 854, 998, 1054],
+      'binary-matrix-8dir': [854, 654, 854, 1034, 1046],
+      'dijkstra-lazy-heap': [876, 654, 876, 1028, 1064],
+      'min-effort-grid': [854, 654, 854, 1034, 1034],
+      'bst-iterator-stack': [826, 638, 826, 978, 1006],
     },
   ],
   'heap-graph': [

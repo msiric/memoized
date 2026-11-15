@@ -11,9 +11,11 @@ import type { FrontierScene, FrontierState } from './model'
  * column) come from the preset's lesson group.
  *
  * narrow (< 768): code (a 4-row window that follows the line), the canvas
- *   panel, the frontier lane(s), the console. Labels on top.
- * wide (>= 768): code over the console on the left (source, then what it
- *   printed, as the event loop), the canvas and the lane(s) on the right.
+ *   panel with the console under the drawing, the frontier lane(s). Labels
+ *   on top. Sized so the code line, the canvas, the caption and Next fit a
+ *   375x667 phone under the site header (Q15), as the event loop does.
+ * wide (>= 768): code on the left, the canvas panel and the lane(s) on the
+ *   right.
  *   Labels stay on top (one anatomy, Q8): the right column is narrow at
  *   768, and a heap entry needs the lane's whole width.
  *
@@ -55,11 +57,11 @@ export const G = {
 export const CANVAS = {
   /** The widest drawing: it must fit the right column at 768 (606 - code - 16) less the panel inset. */
   maxWidth: 244,
-  node: 32,
-  cell: 44,
-  cellGap: 6,
+  node: 28,
+  cell: 32,
+  cellGap: 4,
   /** Graph and tree pitches (layout unit to px), before fitting `maxWidth`. */
-  pitch: { graph: { x: 80, y: 60 }, tree: { x: 34, y: 56 } },
+  pitch: { graph: { x: 80, y: 46 }, tree: { x: 34, y: 44 } },
   /** Room around the drawing for badges (right, top) and weight labels. */
   margin: { x: 4, top: 12, right: 22, bottom: 4 },
   gridMargin: { x: 18, top: 18, right: 4, bottom: 2 },
@@ -107,8 +109,8 @@ export function canvasGeometry(scene: FrontierScene): CanvasGeometry {
     Object.entries(scene.pos).map(([id, [x, y]]) => [id, { x: m.x + r + (x - minX) * px, y: m.top + r + (y - minY) * pitch.y }]),
   )
   return {
-    width: m.x + CANVAS.node + spanX * px + m.right,
-    height: m.top + CANVAS.node + spanY * pitch.y + m.bottom,
+    width: Math.ceil(m.x + CANVAS.node + spanX * px + m.right),
+    height: Math.ceil(m.top + CANVAS.node + spanY * pitch.y + m.bottom),
     at,
     size: CANVAS.node,
   }
@@ -158,12 +160,12 @@ export function consoleRows(out: readonly string[], width: number): number {
 export type FrontierMetrics = {
   code: PerVariant<number>
   canvas: CanvasGeometry
+  /** The canvas panel: heading, drawing and, under it, the console line(s). */
   canvasPanel: PerVariant<number>
-  /** Height per lane id, per variant. */
+  /** Console rows reserved inside the canvas panel. */
+  consoleRows: PerVariant<number>
+  /** Height per lane id, per variant (lanes side by side share their row's height). */
   lanes: Record<string, PerVariant<number>>
-  console: PerVariant<number>
-  laneWidth: PerVariant<number>
-  consoleWidth: PerVariant<number>
   codeColumn: { md: number; xl: number }
 }
 
@@ -174,6 +176,8 @@ export function codeColumn(codeCols: number): { md: number; xl: number } {
 
 const laneTop = (content: number, pad: number) => 2 * G.border + 2 * pad + G.label + G.labelGap + content
 const rowsHeight = (rows: number, line: number, gap: number) => Math.max(1, rows) * line + (Math.max(1, rows) - 1) * gap
+/** A chip in the tight frame (`vz-tight`): mono 12 with 2 px padding (`Lane`'s chip). */
+const tightChipWidth = (label: string) => Math.ceil(monoWidth(label, G.small) + 2 * 2 + 2 * G.border)
 
 /** The canvas header's width: its title and every local it names, so the lint can keep it on one line. */
 export function headerWidth(state: FrontierState): number {
@@ -191,44 +195,44 @@ export function frontierMetrics(
   const scene = logs[0].steps[0].state.scene
   const canvas = canvasGeometry(scene)
   const per = <T>(f: (v: Variant) => T): PerVariant<T> => ({ narrow: f('narrow'), wide: f('wide') })
-
   const right = STAGE_MIN.wide - cols.md - 16
-  // Narrow rows are counted where the frame is narrowest in rem: a phone at
-  // very large text (`STAGE_TIGHT`), so a lane or the console never wraps
-  // past its reserve when the reader's text is larger (R9).
-  const laneWidth: PerVariant<number> = {
-    narrow: STAGE_TIGHT - 2 * G.laneInset,
-    wide: right - 2 * G.laneInset,
-  }
-  const consoleWidth: PerVariant<number> = {
-    narrow: STAGE_TIGHT - 2 * G.border - 2 * G.pad,
-    wide: cols.md - 2 * G.border - 2 * G.pad,
-  }
+  const columns = scene.laneRow ? scene.lanes.length : 1
+  /** A lane's content width in a stage `w` wide (lanes side by side split it). */
+  const laneIn = (w: number) => (w - (columns - 1) * G.gap) / columns - 2 * G.laneInset
+  const panelIn = (w: number) => w - 2 * G.laneInset - 2 * G.border
 
-  // Rows per lane and console over every step.
+  // Rows over every step. Narrow is counted at a 375 phone (full chips) and
+  // where the frame is narrowest in rem, a phone at very large text
+  // (`STAGE_TIGHT`, compact chips), so nothing wraps past its reserve (R9).
   const laneRows: Record<string, PerVariant<number>> = {}
-  let outRows = { narrow: 1, wide: 1 }
   for (const lane of scene.lanes) laneRows[lane.id] = { narrow: 1, wide: 1 }
+  const outRows = { narrow: 1, wide: 1 }
   for (const log of logs)
     for (const { state } of log.steps) {
       for (const lane of scene.lanes) {
         const chips = state.lanes[lane.id] ?? []
-        for (const v of ['narrow', 'wide'] as const) {
-          const rows = lane.vertical ? chips.length : flowRows(chips.map((c) => chipWidth(c.label)), laneWidth[v], G.chipGap)
-          laneRows[lane.id][v] = Math.max(laneRows[lane.id][v], rows)
-        }
+        const flow = (w: number, measure: (l: string) => number) =>
+          lane.vertical ? chips.length : flowRows(chips.map((c) => measure(c.label)), laneIn(w), G.chipGap)
+        laneRows[lane.id].narrow = Math.max(laneRows[lane.id].narrow, flow(309, chipWidth), flow(STAGE_TIGHT, tightChipWidth))
+        laneRows[lane.id].wide = Math.max(laneRows[lane.id].wide, flow(right, chipWidth))
       }
-      outRows = per((v) => Math.max(outRows[v], consoleRows(state.console, consoleWidth[v])))
+      outRows.narrow = Math.max(outRows.narrow, consoleRows(state.console, panelIn(STAGE_TIGHT)))
+      outRows.wide = Math.max(outRows.wide, consoleRows(state.console, panelIn(right)))
     }
 
   const lanes: Record<string, PerVariant<number>> = {}
-  for (const lane of scene.lanes) {
-    const content = (v: Variant) =>
-      lane.vertical ? rowsHeight(laneRows[lane.id][v], G.chip, G.frameGap) : rowsHeight(laneRows[lane.id][v], G.chip, G.chipGap)
-    lanes[lane.id] = { narrow: laneTop(content('narrow'), G.padNarrow), wide: laneTop(content('wide'), G.pad) }
+  for (const v of ['narrow', 'wide'] as const) {
+    const height = (id: string) => {
+      const lane = scene.lanes.find((l) => l.id === id)!
+      const content = rowsHeight(laneRows[id][v], G.chip, lane.vertical ? G.frameGap : G.chipGap)
+      return laneTop(content, v === 'wide' ? G.pad : G.padNarrow)
+    }
+    // Side by side, a row is as tall as its tallest lane.
+    const row = Math.max(...scene.lanes.map((l) => height(l.id)))
+    for (const lane of scene.lanes) (lanes[lane.id] ??= { narrow: 0, wide: 0 })[v] = scene.laneRow ? row : height(lane.id)
   }
-  const consoleH = per((v) => laneTop(rowsHeight(outRows[v], G.outLine, G.outRowGap), v === 'wide' ? G.pad : G.padNarrow))
-  const canvasPanel = per((v) => laneTop(canvas.height, v === 'wide' ? G.pad : G.padNarrow))
+  const consoleH = per((v) => rowsHeight(outRows[v], G.outLine, G.outRowGap))
+  const canvasPanel = per((v) => laneTop(canvas.height + G.labelGap + consoleH[v], v === 'wide' ? G.pad : G.padNarrow))
 
   // Code rows count soft-wrapped lines at each variant's narrowest pane (A4).
   let narrowRows = 1
@@ -243,23 +247,12 @@ export function frontierMetrics(
   }
   const code = per((v) => codePaneHeight(codeRows[v]))
 
-  const laneSum = (v: Variant) => scene.lanes.reduce((s, l) => s + G.gap + lanes[l.id][v], 0)
-  const narrowStage = code.narrow + G.gap + canvasPanel.narrow + laneSum('narrow') + G.gap + consoleH.narrow
-  const left = code.wide + G.gap + consoleH.wide
-  const rightH = canvasPanel.wide + laneSum('wide')
-  const wideStage = Math.max(left, rightH)
+  const laneSum = (v: Variant) =>
+    scene.laneRow ? G.gap + lanes[scene.lanes[0].id][v] : scene.lanes.reduce((s, l) => s + G.gap + lanes[l.id][v], 0)
+  const narrowStage = code.narrow + G.gap + canvasPanel.narrow + laneSum('narrow')
+  const wideStage = Math.max(code.wide, canvasPanel.wide + laneSum('wide'))
 
-  const metrics: FrontierMetrics = {
-    code,
-    canvas,
-    canvasPanel,
-    lanes,
-    // From 768 the console fills the left column under the code (both columns end on one line).
-    console: { narrow: consoleH.narrow, wide: wideStage - code.wide - G.gap },
-    laneWidth,
-    consoleWidth,
-    codeColumn: cols,
-  }
+  const metrics: FrontierMetrics = { code, canvas, canvasPanel, consoleRows: outRows, lanes, codeColumn: cols }
   return {
     ...metrics,
     layout: { stage: { narrow: narrowStage, wide: wideStage }, codeRows, codeCols: maxCols, detail: metrics },

@@ -151,7 +151,7 @@ for (const width of [375, 1440]) {
 /**
  * The frontier (wave 2A) is a step-through like the event loop: the same
  * shell, so its frame, question, choices, Skip, current code line, reveal
- * marks, lane panel and console compute as the event loop's do.
+ * marks and lane panel compute as the event loop's do.
  */
 for (const width of [375, 1440])
   test(`the frontier draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
@@ -168,8 +168,6 @@ for (const width of [375, 1440])
       const out: Record<string, Record<string, string>> = {}
       out.frame = await look(f, FRAME)
       out.lane = await look(f.locator('[data-viz-region="micro"], [data-viz-region="queue"]').first(), PANEL)
-      out.console = await look(f.locator('[data-viz-region="console"]'), ['background-color', 'border-top-left-radius'])
-      out['console label'] = await look(f.locator('[data-viz-region="console"] > span').first())
       // To the first question (the event loop asks at Start; answer it and step once for a code line).
       if ((await f.getAttribute('data-viz-mode')) === 'ask') {
         await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()

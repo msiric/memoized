@@ -166,8 +166,9 @@ function Canvas({ state, geo }: { state: FrontierState; geo: CanvasGeometry }) {
             )}
             <text
               className={STATUS_TEXT[n.status]}
-              x={grid ? at.x + r : at.x}
-              y={grid ? at.y + r + (n.badge ? 4 : 0) : at.y}
+              // In a cell with an effort in its corner, the value sits low and left of centre.
+              x={grid ? at.x + r - (n.badge ? 4 : 0) : at.x}
+              y={grid ? at.y + r + (n.badge ? 5 : 0) : at.y}
               textAnchor="middle"
               dominantBaseline="central"
             >
@@ -177,8 +178,8 @@ function Canvas({ state, geo }: { state: FrontierState; geo: CanvasGeometry }) {
               grid ? (
                 <text
                   className={clsx('vz-12', n.status === 'done' ? 'vz-ndt' : n.badge === '∞' ? 'vz-m' : 'vz-r')}
-                  x={at.x + geo.size - 5}
-                  y={at.y + 10}
+                  x={at.x + geo.size - 3}
+                  y={at.y + 8}
                   textAnchor="end"
                   dominantBaseline="central"
                 >
@@ -310,6 +311,10 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
   const root = useRef<HTMLDivElement>(null)
   useFlip(root, gate, step)
   const out = state.console
+  const consoleH = {
+    narrow: metrics.consoleRows.narrow * G.outLine + (metrics.consoleRows.narrow - 1) * G.outRowGap,
+    wide: metrics.consoleRows.wide * G.outLine + (metrics.consoleRows.wide - 1) * G.outRowGap,
+  }
 
   return (
     <div
@@ -348,42 +353,16 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
               </span>
             ))}
           </div>
-          <div className="flex min-h-0 flex-1 items-start justify-center">
+          <div className="flex shrink-0 items-start justify-center" style={{ height: toRem(metrics.canvas.height) }}>
             <Canvas state={state} geo={metrics.canvas} />
           </div>
-        </div>
-        {state.scene.lanes.map((lane) => (
-          <Lane
-            key={lane.id}
-            {...common}
-            gate={gateFor(lane.id)}
-            id={lane.id}
-            label={lane.label}
-            kind="task"
-            vertical={lane.vertical}
-            chips={state.lanes[lane.id] ?? []}
-            labelAt={{ narrow: 'top', wide: 'top' }}
-            height={metrics.lanes[lane.id]}
-            // A queue fills at the back and empties at the head; a stack and a heap at their own end.
-            from={lane.vertical ? { y: -1 } : { x: 1 }}
-            to={lane.vertical ? { y: -1 } : { x: -1 }}
-          />
-        ))}
-      </div>
-
-      <div
-        aria-hidden
-        data-viz-region="console"
-        className={clsx(
-          'relative flex min-w-0 flex-col border border-transparent px-1.5 py-1.5 vz-wide:col-start-1 vz-wide:row-start-2 vz-wide:min-h-[var(--vz-h-w)] vz-wide:self-stretch vz-wide:p-2',
-          'h-[var(--vz-h-n)] vz-wide:h-auto',
-          radius.row.cls,
-          surface.panel,
-        )}
-        style={remHeights(metrics.console, { gap: toRem(G.labelGap) })}
-      >
-        <span className={clsx('h-4 shrink-0', typeScale.label.cls, ink.secondary)}>Console</span>
-        <ol className="m-0 flex min-h-0 min-w-0 list-none flex-wrap content-start items-start p-0" style={{ columnGap: toRem(G.outGap), rowGap: toRem(G.outRowGap) }}>
+          {/* What the run printed, under the drawing (the event loop's console line: amber output in run order). */}
+        <ol
+            data-viz-region="console"
+            aria-label="Console"
+            className={clsx('m-0 flex min-w-0 shrink-0 list-none flex-wrap content-start items-start overflow-hidden p-0', H_CLS)}
+            style={remHeights(consoleH, { columnGap: toRem(G.outGap), rowGap: toRem(G.outRowGap) })}
+          >
           <AnimatePresence key={gate.epoch} initial={false} mode="popLayout" custom={{ gate }}>
             {out.map((text, k) => {
               const isNew = focus.has(outId(k))
@@ -420,7 +399,28 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
             </m.li>
           ) : null}
         </ol>
+        </div>
+        <div className={clsx('flex min-w-0 flex-col', state.scene.laneRow && 'grid grid-cols-2')} style={{ gap: toRem(G.gap) }}>
+        {state.scene.lanes.map((lane) => (
+          <Lane
+            key={lane.id}
+            {...common}
+            gate={gateFor(lane.id)}
+            id={lane.id}
+            label={lane.label}
+            kind="task"
+            vertical={lane.vertical}
+            chips={state.lanes[lane.id] ?? []}
+            labelAt={{ narrow: 'top', wide: 'top' }}
+            height={metrics.lanes[lane.id]}
+            // A queue fills at the back and empties at the head; a stack and a heap at their own end.
+            from={lane.vertical ? { y: -1 } : { x: 1 }}
+            to={lane.vertical ? { y: -1 } : { x: -1 }}
+          />
+        ))}
+        </div>
       </div>
+
     </div>
   )
 }

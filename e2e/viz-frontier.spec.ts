@@ -197,6 +197,44 @@ test('lazy mount: the client placeholder reserves the entry table, at least the 
     }
 })
 
+// Q15, as the event loop: with the code pane just under the site header on
+// a 375x667 phone, the current line, the changed glyphs, the caption and
+// Next are all on screen, at every step of every preset.
+test('375x667 fit: code line, changed glyph, caption and Next stay visible under the site header (Q15)', async ({ page }) => {
+  test.setTimeout(180_000)
+  for (const preset of PRESETS) {
+    await open(page, 375, preset, '', 667)
+    await slider(page).focus()
+    for (let g = 0; g < 40; g++) {
+      const v = await page.evaluate(() => {
+        const root = document.querySelector('[data-viz="bfs-dfs-frontier"] section')!
+        const header = [...document.querySelectorAll('div.fixed')]
+          .map((e) => e.getBoundingClientRect())
+          .find((r) => r.top <= 0 && r.height > 30 && r.height < 120)
+        const top = header ? header.bottom : 0
+        const code = root.querySelector('[data-viz-region="code"]')!
+        window.scrollBy(0, code.getBoundingClientRect().top - top - 8)
+        const visible = (el: Element | null) => {
+          if (!el) return true
+          const r = el.getBoundingClientRect()
+          return r.top >= top - 0.5 && r.bottom <= window.innerHeight + 0.5
+        }
+        return {
+          line: visible(root.querySelector('[aria-current="true"]')),
+          changed: [...root.querySelectorAll('[data-focus]')].every(visible),
+          caption: visible(root.querySelector('[data-viz-part="viz-caption"]')),
+          next: visible(root.querySelector('[data-viz-part="viz-next"]')),
+        }
+      })
+      const s = await state(page)
+      expect(v, `${preset} step ${s.step} (${s.mode})`).toEqual({ line: true, changed: true, caption: true, next: true })
+      if (s.step === s.last) break
+      await page.keyboard.press(s.mode === 'ask' ? '1' : 'ArrowRight')
+      await page.waitForTimeout(30)
+    }
+  }
+})
+
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false })
   test('the Start frame and a working "Steps as text" are server-rendered', async ({ page }) => {

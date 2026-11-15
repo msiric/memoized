@@ -135,18 +135,16 @@ const reveal = labelledAt.F
 const checkpoints: Checkpoint[] = [
   {
     beforeStep: reveal,
-    prompt: 'F neighbors both C and E. Which one sets distances[F]?',
+    prompt: 'Which vertex sets distances[F]?',
     choices: [
-      { id: 'c', label: 'C, now' },
-      { id: 'e', label: 'E, later' },
-      { id: 'both', label: 'E overwrites C' },
+      { id: 'c', label: 'C' },
+      { id: 'e', label: 'E' },
     ],
     answer: 'c',
     feedback: {
       correct: 'C is dequeued before E, so it reaches F first.',
       byChoice: {
-        e: 'E is dequeued after C and finds F labelled.',
-        both: 'The in check skips F: a label is never rewritten.',
+        e: 'E comes later, and the in check never relabels F.',
       },
     },
     recap: { right: 'C set distances[F]', wrongLead: 'C set distances[F], not {pick}' },

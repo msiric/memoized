@@ -36,7 +36,7 @@ const scene: FrontierScene = {
   kind: 'tree',
   title: 'BST',
   pos,
-  lanes: [{ id: 'stack', label: 'this.stack', vertical: true }],
+  lanes: [{ id: 'stack', label: 'this.stack, bottom to top' }],
 }
 const chip = (v: number) => ({ id: `k-${v}`, label: String(v) })
 
@@ -116,21 +116,21 @@ for (let k = 0; k < pauses.length; k++) {
 const checkpoints: Checkpoint[] = [
   {
     beforeStep: reveal,
-    prompt: 'next() pops 20. What is on the stack after the call?',
+    prompt: 'next() pops 20. What is on top after?',
     choices: [
-      { id: 'a', label: '[30]' },
-      { id: 'b', label: '[30, 25]' },
-      { id: 'c', label: '[25, 30, 35]' },
+      { id: '30', label: '30' },
+      { id: '25', label: '25' },
+      { id: '35', label: '35' },
     ],
-    answer: 'b',
+    answer: '25',
     feedback: {
-      correct: '30 goes on, then its left spine: 25 on top.',
+      correct: '30 goes on, then its left child 25, on top.',
       byChoice: {
-        a: "30's left child 25 is pushed too, on top.",
-        c: 'Only the left spine: 35 waits until 30 pops.',
+        '30': "30's left child 25 is pushed after it, on top.",
+        '35': 'Only the left spine: 35 waits until 30 pops.',
       },
     },
-    recap: { right: 'The stack was [30, 25]', wrongLead: 'The stack was [30, 25], not {pick}' },
+    recap: { right: '25 was on top, over 30', wrongLead: '25 was on top, not {pick}' },
   },
 ]
 

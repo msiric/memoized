@@ -25,7 +25,7 @@ const scene: FrontierScene = {
   kind: 'graph',
   title: 'Graph',
   directed: true,
-  pos: { 'n-0': [0, 1.25], 'n-1': [2.5, 0], 'n-2': [2.5, 1.25], 'n-3': [2.5, 2.5], 'n-4': [1.15, 2.5] },
+  pos: { 'n-0': [0, 0.8], 'n-1': [2, 0], 'n-2': [3, 0.8], 'n-3': [2, 1.6], 'n-4': [0.55, 1.6] },
   lanes: [{ id: 'heap', label: 'minHeap' }],
 }
 
@@ -144,21 +144,21 @@ for (let k = 0; k < pauses.length; k++) {
 const checkpoints: Checkpoint[] = [
   {
     beforeStep: reveal,
-    prompt: 'dist[1] is 9. After the edge from 2 to 1, what happens?',
+    prompt: 'After 2 relaxes 1, heap entries for 1?',
     choices: [
-      { id: 'a', label: '8, and (9, 1) stays' },
-      { id: 'b', label: '8, and (9, 1) goes' },
-      { id: 'c', label: 'It stays 9' },
+      { id: '1', label: '1' },
+      { id: '2', label: '2' },
+      { id: '0', label: '0' },
     ],
-    answer: 'a',
+    answer: '2',
     feedback: {
-      correct: 'The heap cannot change a key: the old entry waits.',
+      correct: '(8, 1) joins and (9, 1) stays: a key never changes.',
       byChoice: {
-        b: 'Nothing removes it now: it is skipped when popped.',
-        c: '6 + 2 = 8 is less than 9, so dist[1] drops.',
+        '1': 'Nothing removes (9, 1) now: it is skipped when popped.',
+        '0': '6 + 2 = 8 is less than 9, so (8, 1) is pushed.',
       },
     },
-    recap: { right: 'dist[1] dropped to 8 and (9, 1) stayed', wrongLead: 'dist[1] dropped to 8 and (9, 1) stayed' },
+    recap: { right: 'Two: (8, 1) and the stale (9, 1)', wrongLead: 'Two, (8, 1) and the stale (9, 1), not {pick}' },
   },
 ]
 

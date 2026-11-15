@@ -60,6 +60,8 @@ export type FrontierScene = {
   pos: Record<string, readonly [number, number]>
   /** The frontier lanes, in order: what each one is called (`queue`, `nq`) and how it is drawn. */
   lanes: readonly { id: string; label: string; vertical?: boolean }[]
+  /** The lanes sit side by side in one row (`q` and `nq`, one level beside the next). */
+  laneRow?: boolean
 }
 
 export type FrontierState = {

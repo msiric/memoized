@@ -41,6 +41,7 @@ const scene: FrontierScene = {
     { id: 'q', label: 'q' },
     { id: 'nq', label: 'nq' },
   ],
+  laneRow: true,
 }
 
 function state(o: { grid: Grid; q: Cell[]; nq: Cell[]; ans: number; current?: Cell; done: readonly Cell[]; console?: string[] }): FrontierState {
@@ -136,7 +137,7 @@ const checkpoints: Checkpoint[] = [
   {
     beforeStep: askAt + 1,
     verdict: 'end',
-    prompt: '[2, 2] just joined nq. What will the call return?',
+    prompt: 'What will the call return?',
     choices: ['3', '4', '5'].map((x) => ({ id: x, label: x, value: x })),
     answer: rec.stdout[0],
     feedback: {
