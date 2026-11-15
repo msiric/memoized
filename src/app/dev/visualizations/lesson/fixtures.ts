@@ -115,10 +115,11 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     title: 'Promise Patterns',
     section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
     source: 'content/js-track/advanced-concepts/promise-patterns/page.mdx',
-    // Premium: local checkout only. The lesson body has no microtask-order
-    // snippet yet (it is in a practice answer): the content PR adds a short
-    // section after Chaining Promises; the visual opens it, before any prose
-    // that states the order.
+    // Premium: local checkout only. The content placement branch adds "When
+    // Promise Callbacks Run" after Chaining Promises, whose two examples are
+    // the presets' programs (lesson examples, never the practice answer); the
+    // visual opens it, before any prose that states the order. On a checkout
+    // with that section the lesson's own tag places it; otherwise this insert does.
     inserts: [{ before: '## **Promise.all and Promise.race**', viz: '<Viz id="event-loop" preset="microtask-vs-timer-12345" />' }],
   },
   {
@@ -219,6 +220,8 @@ export function lessonSource(f: LessonFixture): string | null {
   if (!fs.existsSync(file)) return null
   let mdx = fs.readFileSync(file, 'utf8')
   for (const { before, viz } of f.inserts) {
+    // A lesson that already places this visual (a content placement branch) keeps its own tag.
+    if (mdx.includes(viz)) continue
     // A heading match is anchored at a line start; the first one wins.
     const at = mdx.search(new RegExp(`^${before.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'm'))
     if (at < 0) throw new Error(`${f.slug}: no line starting with "${before}" to place ${viz} before`)
