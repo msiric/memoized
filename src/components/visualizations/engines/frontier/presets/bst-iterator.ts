@@ -87,7 +87,7 @@ for (let k = 0; k < pauses.length; k++) {
       event: `Pop ${res}, push ${list(spine.map(String))}`,
       why: `${res} has a right child, ${right[res]}, so next() pushes it and its left spine: the next smallest is on top again.`,
       narration: `${res} is popped; ${list(spine.map(String))} ${spine.length > 1 ? 'are' : 'is'} pushed.`,
-      line: lines(P, 24, 29),
+      line: lines(P, 27, 29),
       focus: spine.slice(-2).map((v) => chip(v).id),
       claim: 'modelled',
     })

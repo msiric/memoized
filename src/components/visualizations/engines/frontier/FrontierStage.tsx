@@ -4,10 +4,10 @@ import { AnimatePresence, m } from 'framer-motion'
 import { useEffect, useMemo, useRef } from 'react'
 import { cn as clsx } from '../../primitives/cn'
 import { Tag } from '../../primitives/Tag'
-import { ink, radius, strokeWidth, surface, svgInk, type as typeScale } from '../../primitives/tokens-v3'
+import { ink, motion as motionTokens, radius, strokeWidth, surface, svgInk, type as typeScale } from '../../primitives/tokens-v3'
 import { useFlip } from '../../shell/flip'
 import { H_CLS } from '../../shell/vars'
-import { presence } from '../../shell/motion'
+import { presence, transitionFor, type MotionGate } from '../../shell/motion'
 import type { StageProps } from '../../shell/types'
 import { Lane } from '../../substrates/Lane'
 import { monoWidth } from '../../substrates/text-metrics'
@@ -234,19 +234,91 @@ function GridIndices({ state, geo }: { state: FrontierState; geo: CanvasGeometry
   )
 }
 
-export function FrontierStage({ step, previous, codePane, layout, motion: gate, label }: StageProps<FrontierState>) {
+/**
+ * Which lane chips land at once on this step. A chip that enters or leaves
+ * at the end of its lane, with every other chip staying put, plays its
+ * enter or exit; one that leaves the head of a queue (or the middle of a
+ * heap) while the rest close up behind it, or arrives where others make
+ * room, would cross them mid-fade (G1), so the change lands in one frame,
+ * forward and back alike (D8): the canvas shows what happened to it.
+ */
+function frozenChips(prev: FrontierState | undefined, next: FrontierState): Set<string> {
+  const out = new Set<string>()
+  if (!prev) return out
+  for (const lane of next.scene.lanes) {
+    const a = (prev.lanes[lane.id] ?? []).map((c) => c.id)
+    const b = (next.lanes[lane.id] ?? []).map((c) => c.id)
+    const kept = b.filter((id) => a.includes(id))
+    const shifted = kept.some((id) => a.indexOf(id) !== b.indexOf(id))
+    const leaving = a.filter((id) => !b.includes(id))
+    const arriving = b.filter((id) => !a.includes(id))
+    // Leaving while others close up or arrive in its place, or arriving while
+    // others make room: the whole lane's change lands at once, so both
+    // directions animate the same (nothing) in it.
+    // A stack packs from its top edge, so a push or a pop moves every chip under it.
+    const stacked = lane.vertical && (leaving.length > 0 || arriving.length > 0)
+    if (stacked || (leaving.length && (shifted || arriving.length)) || (arriving.length && shifted))
+      for (const id of [...leaving, ...arriving]) out.add(id)
+  }
+  return out
+}
+
+/** The gate with `frozen` taken out of the step's budget. */
+function without(gate: MotionGate, frozen: ReadonlySet<string>, ids: Iterable<string>): MotionGate {
+  if (!frozen.size) return gate
+  const allow = new Set([...(gate.allow ?? ids)].filter((id) => !frozen.has(id)))
+  return { ...gate, allow }
+}
+
+/** How long a leaving glyph takes (s), so "no output yet" appears only once the last output has gone. */
+function exitSeconds(gate: MotionGate): number {
+  if (gate.instant) return 0
+  const t = gate.reduce ? motionTokens.exit.reduced : motionTokens.exit.full
+  return t.type === 'tween' ? t.duration : 0
+}
+
+export function FrontierStage({ step, codePane, layout, motion: gate, label }: StageProps<FrontierState>) {
   const metrics = layout.detail as FrontierMetrics
   const state = step.state
   const focus = useMemo(() => new Set(step.focus), [step.focus])
   const ids = frontierIntrospection.ids(state)
-  const prevIds = previous ? frontierIntrospection.ids(previous.state) : new Set<string>()
-  const created = new Set([...focus].filter((f) => !prevIds.has(f) && !f.startsWith('out-')))
   const rendered = useRef<ReadonlySet<string>>(ids)
   const before = rendered.current
   useEffect(() => {
     rendered.current = ids
   })
-  const common = { focus, created, present: ids, before, gate }
+  // The state on screen before this render (the shell's `previous` is the
+  // step before in the log, which Back does not come from). Both directions
+  // judge the pair in log order, so Back mirrors Next.
+  const shownRef = useRef<FrontierState>(state)
+  const from = shownRef.current
+  useEffect(() => {
+    shownRef.current = state
+  })
+  const prevIds = frontierIntrospection.ids(from)
+  const created = new Set([...focus].filter((f) => !prevIds.has(f) && !f.startsWith('out-')))
+  const frozen = useMemo(
+    () => (gate.direction === -1 ? frozenChips(state, from) : frozenChips(from, state)),
+    [gate.direction, from, state],
+  )
+  const laneGate = without(gate, frozen, [...ids, ...prevIds])
+  // A lane whose chip lands at once drops it in the same frame: its
+  // presence group remounts (a per-lane epoch that only ever grows), so a
+  // leaving chip is never painted over the chip that closes up behind it.
+  const epochs = useRef<Record<string, number>>({})
+  const seen = useRef<unknown>(null)
+  if (seen.current !== step) {
+    seen.current = step
+    for (const lane of state.scene.lanes) {
+      const shown = from.lanes[lane.id] ?? []
+      if (shown.some((c) => frozen.has(c.id))) epochs.current[lane.id] = (epochs.current[lane.id] ?? 0) + 1
+    }
+  }
+  const gateFor = (lane: string): MotionGate => {
+    const extra = epochs.current[lane] ?? 0
+    return extra ? { ...laneGate, epoch: laneGate.epoch * 1000 + extra } : laneGate
+  }
+  const common = { focus, created, present: ids, before }
   const root = useRef<HTMLDivElement>(null)
   useFlip(root, gate, step)
   const out = state.console
@@ -296,6 +368,7 @@ export function FrontierStage({ step, previous, codePane, layout, motion: gate, 
           <Lane
             key={lane.id}
             {...common}
+            gate={gateFor(lane.id)}
             id={lane.id}
             label={lane.label}
             kind="task"
@@ -346,7 +419,18 @@ export function FrontierStage({ step, previous, codePane, layout, motion: gate, 
               )
             })}
           </AnimatePresence>
-          {out.length === 0 ? <li className={clsx('m-0 flex h-5 items-center p-0', typeScale.tag.cls, ink.muted)}>no output yet</li> : null}
+          {out.length === 0 ? (
+            // As a lane's "empty": it appears once a leaving output has gone (G1); instant renders land it (D7).
+            <m.li
+              aria-hidden
+              className={clsx('m-0 flex h-5 items-center p-0', typeScale.tag.cls, ink.muted)}
+              initial={gate.instant ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ ...transitionFor('highlight', gate), delay: exitSeconds(gate) }}
+            >
+              no output yet
+            </m.li>
+          ) : null}
         </ol>
       </div>
     </div>

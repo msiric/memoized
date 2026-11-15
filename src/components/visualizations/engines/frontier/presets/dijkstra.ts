@@ -121,7 +121,7 @@ for (let k = 0; k < pauses.length; k++) {
         ? `${du} + ${weight} = ${after} is less than ${show(before)}, so dist[${v}] drops and (${after}, ${v}) is pushed${before < Infinity ? `; (${before}, ${v}) stays in the heap` : ''}.`
         : `${du} + ${weight} = ${du + weight} is not less than dist[${v}] = ${show(before)}, so nothing changes.`,
       narration: improved ? `dist[${v}] becomes ${after}; (${after}, ${v}) is pushed.` : `${du} + ${weight} is not shorter than ${show(before)}.`,
-      line: improved ? lines(P, 95, 96) : lines(P, 94),
+      line: improved ? lines(P, 95) : lines(P, 94),
       focus: improved ? [`k-${after}-${v}`, nodeId(v)] : [`e-${u}-${v}`, nodeId(v)],
       claim: 'modelled',
     })

@@ -24,7 +24,12 @@ const size = walls.length
 const cells: Cell[] = walls.flatMap((row, i) => row.map((_, j) => [i, j] as Cell))
 const cid = ([i, j]: Cell) => `${i}-${j}`
 const nid = (c: Cell) => `n-${cid(c)}`
-const kid = (c: Cell) => `k-${cid(c)}`
+/**
+ * A cell's chip per lane: q and nq are two arrays, and `q = nq` hands the
+ * next level over at once (the chips fade over in place rather than travel
+ * across the nq label).
+ */
+const kid = (c: Cell, lane: 'q' | 'nq' = 'q') => `${lane}-${cid(c)}`
 const name = ([i, j]: Cell) => `[${i}, ${j}]`
 const has = (xs: readonly Cell[], c: Cell) => xs.some((x) => x[0] === c[0] && x[1] === c[1])
 
@@ -56,7 +61,7 @@ function state(o: { grid: Grid; q: Cell[]; nq: Cell[]; ans: number; current?: Ce
     scene,
     nodes,
     edges: [],
-    lanes: { q: o.q.map((c) => ({ id: kid(c), label: name(c) })), nq: o.nq.map((c) => ({ id: kid(c), label: name(c) })) },
+    lanes: { q: o.q.map((c) => ({ id: kid(c), label: name(c) })), nq: o.nq.map((c) => ({ id: kid(c, 'nq'), label: name(c) })) },
     vars: [{ name: 'ans', value: String(o.ans) }, ...(o.current ? [{ name: '[i, j]', value: name(o.current) }] : [])],
     console: o.console ?? [],
   }
@@ -105,8 +110,8 @@ for (let k = 1; k < pauses.length; k++) {
         ? `${name(c)} is not the goal, so its 8 neighbors are checked: ${list(fresh.map(name))} ${fresh.length > 1 ? 'are' : 'is'} 0, so marked 1 and pushed to nq.`
         : `Every neighbor of ${name(c)} is a wall or already marked 1, so nq gets nothing new: a cell is queued once.`,
       narration: fresh.length ? `${list(fresh.map(name))} marked 1 and pushed to nq.` : `Nothing new from ${name(c)}.`,
-      line: fresh.length ? lines(P, 16, 18) : line(P, 16),
-      focus: fresh.length ? fresh.slice(0, 2).map(kid) : [nid(c)],
+      line: fresh.length ? lines(P, 17, 18) : line(P, 16),
+      focus: fresh.length ? fresh.slice(0, 2).map((x) => kid(x, 'nq')) : [nid(c)],
       claim: 'modelled',
     })
     done.push(c)
@@ -119,7 +124,7 @@ for (let k = 1; k < pauses.length; k++) {
       why: `Every cell in nq is one move further, so q = nq starts the next level and ++ans makes the count ${lvl.ans}.`,
       narration: `q takes nq's cells; ans is now ${lvl.ans}.`,
       line: line(P, 23),
-      focus: lvl.q!.slice(0, 2).map(kid),
+      focus: lvl.q!.slice(0, 2).map((x) => kid(x)),
       claim: 'modelled',
     })
     k++

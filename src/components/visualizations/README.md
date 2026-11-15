@@ -301,6 +301,31 @@ left, the objects their values identify on the right, an arrow meaning
   `data-types` and `objects`, and the static-figure consistency check
   against the closures figure.
 
+### Frontier (R4 shared visual 1, `bfs-dfs-frontier`)
+
+`<Viz id="bfs-dfs-frontier" preset="…" />`, a step-through with one preset
+group per lesson: `bfs-levels` and `binary-matrix-8dir` (Graph BFS),
+`dijkstra-lazy-heap` and `min-effort-grid` (Shortest Path Algorithms),
+`bst-iterator-stack` (Trees). A canvas (graph, grid or tree, server-final
+SVG), the frontier lane(s) on the shared `Lane` substrate (a queue, `q` and
+`nq`, a heap in key order, a stack bottom-up) and the console.
+
+- **Recorded under the inspector.** `programs/` holds each lesson's code
+  block byte for byte (a JSON string; `harness` adds the register's input
+  for a practice answer with no example usage) and its probes: lines to
+  pause before and expressions to read there. `yarn viz:frontier` runs each
+  in Node 24 with breakpoints only (`truth/record.ts`, TypeScript through
+  Node's own type stripping) and writes `recordings/<program>.json`; the
+  presets build every drawn value from it, captions included.
+- **The pane** shows the lesson's lines rewrapped to 35 columns, only at
+  their own spaces (`display`, checked token for token).
+- **Gates.** `frontier.truth.test.ts` (fresh re-recording, the register's
+  assertions, every drawn frontier one the run passed through, lies that
+  must fail, byte identity with a local content checkout),
+  `e2e/viz-frontier.spec.ts`, `e2e/motion/frontier-steps.spec.ts`,
+  `e2e/stress/frontier.stress.ts`, the `fr-*` gate states and the
+  consistency check against the event loop. Gallery: `?fr=<preset>`.
+
 Explorables (`form: 'explorable'`, `shell/explorable.ts`) own their controls
 and report their footprint directly; their presets still carry step-logs for
 the lint, manifest and text alternative. `engines/list-keys/` is the first: its
