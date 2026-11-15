@@ -360,7 +360,7 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
         <ol
             data-viz-region="console"
             aria-label="Console"
-            className={clsx('m-0 flex min-w-0 shrink-0 list-none flex-wrap content-start items-start overflow-hidden p-0', H_CLS)}
+            className={clsx('relative m-0 flex min-w-0 shrink-0 list-none flex-wrap content-start items-start overflow-hidden p-0', H_CLS)}
             style={remHeights(consoleH, { columnGap: toRem(G.outGap), rowGap: toRem(G.outRowGap) })}
           >
           <AnimatePresence key={gate.epoch} initial={false} mode="popLayout" custom={{ gate }}>
@@ -372,7 +372,8 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
                   data-out={k}
                   data-focus={isNew || undefined}
                   className={clsx(
-                    'm-0 grid min-w-0 max-w-full items-start p-0 [grid-template-columns:auto_minmax(0,1fr)] [&[data-motion-pop-id]]:!w-max [&[data-motion-pop-id]]:whitespace-nowrap',
+                    // A leaving output keeps the line's whole width, so a long value keeps its wrap as it fades (G1).
+                    'm-0 grid min-w-0 max-w-full items-start p-0 [grid-template-columns:auto_minmax(0,1fr)] [&[data-motion-pop-id]]:!w-full',
                     typeScale.value.cls,
                   )}
                   style={{ columnGap: toRem(G.outMark) }}
@@ -381,7 +382,7 @@ export function FrontierStage({ step, codePane, layout, motion: gate, label }: S
                   <span aria-hidden className={clsx('flex h-5 items-center', ink.muted)}>
                     ›
                   </span>
-                  <span className={clsx('relative -mx-1 break-all px-1', ink.result, radius.chip.cls, isNew && surface.resultTint)}>{text}</span>
+                  <span className={clsx('relative break-all', ink.result, radius.chip.cls, isNew && surface.resultTint)}>{text}</span>
                 </m.li>
               )
             })}
