@@ -130,6 +130,43 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     inserts: [{ before: '## **Best Practices**', viz: '<Viz id="list-keys" />' }],
   },
   {
+    slug: 'linked-list-reversal',
+    title: 'Linked List Reversal',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/linked-list-reversal/page.mdx',
+    // Premium: local checkout only (wave 2B).
+    inserts: [
+      // After the full-reversal example (its first Tips and Tricks): the strip of its passes.
+      { before: '### **Tips and Tricks:**', viz: '<Viz id="linked-list-frames" preset="full-reversal-strip" />' },
+      // After "Reversing a Part of the Linked List" (no prose states the temporary loop).
+      { before: '## **Reversing Nodes in k-Sized Groups**', viz: '<Viz id="linked-list-pointer-rewiring" />' },
+    ],
+  },
+  {
+    slug: 'linked-lists',
+    title: 'Linked Lists',
+    section: { title: 'User-Defined Data Structures', href: '/courses/dsa-track/user-defined-data-structures' },
+    source: 'content/dsa-track/user-defined-data-structures/linked-lists/page.mdx',
+    // Premium: local checkout only. The palindrome answer is a practice
+    // question's; the body has no palindrome section yet. After Detecting a
+    // Cycle (slow and fast), before Merging.
+    inserts: [
+      {
+        before: '### **Merging Two Sorted Lists**',
+        viz: '<Viz id="linked-list-pointer-rewiring" preset="palindrome-split-reverse-compare" />',
+      },
+    ],
+  },
+  {
+    slug: 'fast-and-slow-pointers',
+    title: 'Fast and Slow Pointers',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/fast-and-slow-pointers/page.mdx',
+    // Premium: local checkout only. After "Finding the Start of a Cycle" (its
+    // example, tips and gotchas): the figure explains why phase 2 works.
+    inserts: [{ before: '## **Finding the Middle of a Linked List**', viz: '<Viz id="linked-list-frames" preset="floyd-rho" />' }],
+  },
+  {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a
     // committed lesson context (R2 G-02). It has no content commit.
