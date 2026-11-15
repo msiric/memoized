@@ -52,7 +52,7 @@ const drawn = (page: Page) =>
     const tags = Object.fromEntries([...svg.querySelectorAll('[data-pointer]')].map((t) => [t.getAttribute('data-pointer'), t.getAttribute('data-at')]))
     // A leaving arrow (fading) is not the state: only the ones at full opacity.
     const links = Object.fromEntries(
-      [...svg.querySelectorAll('[data-edge]')]
+      [...svg.querySelectorAll('[data-edge], [data-stub]')]
         .filter((e) => getComputedStyle(e).opacity === '1')
         .map((e) => [e.getAttribute('data-from'), e.getAttribute('data-to')]),
     )

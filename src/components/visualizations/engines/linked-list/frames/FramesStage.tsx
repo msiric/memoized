@@ -49,7 +49,7 @@ function RowSvg({ p, g }: { p: RowPanel; g: ListGeometry }) {
         return (
           <g
             key={i}
-            data-edge={linkId(i)}
+            {...(to === null ? { 'data-stub': linkId(i) } : { 'data-edge': linkId(i) })}
             data-from={nodeId(i)}
             data-to={to === null ? NULL_ID : nodeId(to)}
             data-changed={lit ? '' : undefined}

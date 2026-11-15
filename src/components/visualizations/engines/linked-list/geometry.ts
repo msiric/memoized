@@ -40,7 +40,7 @@ export const SIZE = {
   /** Upper and lower tracks: 5 px either side of the row's middle. */
   track: 5,
   /** Gap between a box edge and the start or end of a straight arrow. */
-  inset: 3,
+  inset: 2,
   /** Where an arc leaves or enters a box: 6 px off its centre. */
   arcFoot: 6,
   /** First arc level above the row, then one more per level. */

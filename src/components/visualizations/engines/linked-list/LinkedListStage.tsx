@@ -1,11 +1,10 @@
 'use client'
 
-import { AnimatePresence, m } from 'framer-motion'
 import { useLayoutEffect, useMemo, useRef, type CSSProperties, type RefObject } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { motion as motionTokens, strokeWidth } from '../../primitives/tokens-v3'
+import { motion as motionTokens, strokeWidth, type MotionTokenName } from '../../primitives/tokens-v3'
 import { finishMoves, moveSpringToken, springCurve } from '../../shell/flip'
-import { animates, beatDelay, presence, transitionFor, type MotionGate } from '../../shell/motion'
+import { animates, beatDelay, transitionFor, type MotionGate } from '../../shell/motion'
 import type { StageProps } from '../../shell/types'
 import { toRem } from '../../substrates/units'
 import { SIZE, linkShape, tagBox } from './geometry'
@@ -20,7 +19,12 @@ import { NULL_ID, OUTPUT_ID, linkId, nodeId, pointerId, type LLState } from './m
  * tag (a pointer variable). An arrow that changes target cross-fades in
  * place on the step's glyph beat, its old shape out as the new one comes in
  * (one glyph, `link-i`); a tag slides along its own lane on the `move`
- * spring, so it never passes over another tag. Both are the step's
+ * spring, so it never passes over another tag. Every fade is a Web
+ * Animation on the motion tokens (framer animates svg opacity in script,
+ * which an instant command or a frozen frame cannot land): what leaves is
+ * drawn once more, as it was on the step the reader came from, and fades
+ * out (`data-fade="out …"`, at rest invisible); what arrives fades in.
+ * Both are the step's
  * `changed` glyphs (H3 R2 Q9, never lime): the arrow at the 2.5 px weight in
  * zinc-300, the tag with its edge doubled on the white/5 tint. Back mirrors
  * Next (D8): the tag slides back, the arrow fades back.
@@ -33,12 +37,44 @@ import { NULL_ID, OUTPUT_ID, linkId, nodeId, pointerId, type LLState } from './m
 
 const MOVE_ID = 'viz-move'
 
-/** "no output yet" comes back only once the leaving output has faded (its `land` exit, on the land beat). */
-function placeholderIn(gate: MotionGate) {
-  if (gate.instant) return { duration: 0 }
-  const land = motionTokens.land[gate.reduce ? 'reduced' : 'full']
-  const out = land.type === 'tween' ? land.duration : 0
-  return { ...transitionFor('enter', gate), delay: beatDelay(gate, 'land') + out }
+const FADE_ID = 'viz-fade'
+
+/** One fade on a token: `in|out`, the token, its beat and an extra delay (ms). */
+const fade = (dir: 'in' | 'out', token: MotionTokenName, beat: 'glyph' | 'land', extraMs = 0) =>
+  `${dir} ${token} ${beat} ${extraMs}`
+
+/** The `land` token's length (ms) on this render: "no output yet" waits for a leaving output to finish. */
+function landMs(gate: MotionGate): number {
+  const t = motionTokens.land[gate.reduce ? 'reduced' : 'full']
+  return t.type === 'tween' ? t.duration * 1000 : 0
+}
+
+/** Plays every `[data-fade]` of this step on its token and beat; instant renders and glyphs past the budget land. */
+function useFades(root: RefObject<SVGSVGElement>, gate: MotionGate, key: unknown) {
+  useLayoutEffect(() => {
+    const el = root.current
+    if (!el) return
+    for (const node of el.querySelectorAll<SVGElement>('[data-fade]'))
+      for (const a of node.getAnimations?.() ?? []) if (a.id === FADE_ID) a.finish()
+    if (gate.instant || typeof Element.prototype.animate !== 'function') return
+    for (const node of el.querySelectorAll<SVGElement>('[data-fade]')) {
+      const id = node.dataset.glyph
+      if (id && !animates(gate, id)) continue
+      const [dir, token, beat, extra] = node.dataset.fade!.split(' ')
+      const t = transitionFor(token as MotionTokenName, gate) as { duration?: number; ease?: number[] | string }
+      if (!t.duration) continue
+      const anim = node.animate(dir === 'in' ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 1 }, { opacity: 0 }], {
+        duration: t.duration * 1000,
+        easing: Array.isArray(t.ease) ? `cubic-bezier(${t.ease.join(', ')})` : 'linear',
+        delay: beatDelay(gate, beat as 'glyph' | 'land') * 1000 + Number(extra || 0),
+        // Before its beat a leaving glyph is still there and an arriving one not yet.
+        fill: 'backwards',
+      })
+      anim.id = FADE_ID
+    }
+    // Once per step (and per instant epoch).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, gate.epoch])
 }
 
 type Pos = { x: number; y: number }
@@ -87,7 +123,7 @@ function useTagMoves(root: RefObject<SVGSVGElement>, gate: MotionGate, key: unkn
   }, [key, gate.epoch])
 }
 
-export function LinkedListStage({ step, codePane, layout, motion: gate, label }: StageProps<LLState>) {
+export function LinkedListStage({ index, step, previous, codePane, layout, motion: gate, label }: StageProps<LLState>) {
   const metrics = layout.detail as LinkedListMetrics
   const g = metrics.geometry
   const state = step.state
@@ -102,8 +138,15 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
     [step],
   )
   useTagMoves(svg, gate, step, positions)
-  const custom = { gate }
+  useFades(svg, gate, step)
   const out = state.output.join(' ')
+  // What the step changed, against the step the reader came from (none on a first render).
+  const was = previous?.state
+  const prevOut = was ? was.output.join(' ') : out
+  const prevTags = new Map((was?.pointers ?? state.pointers).map((p) => [p.name, p.at]))
+  const nowTags = new Set(state.pointers.map((p) => p.name))
+  const leftTags = (was?.pointers ?? []).filter((p) => !nowTags.has(p.name))
+  const changedLinks = was ? state.next.flatMap((to, i) => (was.next[i] !== to ? [i] : [])) : []
 
   return (
     <div
@@ -147,83 +190,113 @@ export function LinkedListStage({ step, codePane, layout, motion: gate, label }:
             <NodeBox key={n.id} id={n.id} x={g.cols[i] - SIZE.node / 2} y={g.rowTop} label={n.label} />
           ))}
 
-          {/* Arrows: one glyph per node; a new target cross-fades in place on the glyph beat. */}
-          <AnimatePresence key={gate.epoch} initial={false} custom={custom}>
-            {state.next.map((to, i) => {
-              const id = linkId(i)
-              const shape = linkShape(g, i, to)
-              const lit = focus.has(id)
-              return (
-                <m.g
-                  key={`${id}>${to}`}
-                  data-glyph={id}
-                  data-edge={id}
-                  data-from={nodeId(i)}
-                  data-to={to === null ? NULL_ID : nodeId(to)}
-                  className={lit ? 'vz-cm' : undefined}
-                  style={lit ? ({ '--vz-sw': `${strokeWidth.nowConnector}px` } as CSSProperties) : undefined}
-                  {...presence(id, gate, { from: {}, to: {} })}
-                >
-                  <Arrow d={shape.d} head={shape.head} />
-                </m.g>
-              )
-            })}
-          </AnimatePresence>
+          {/* Arrows: one glyph per node. A new target fades in on the glyph beat while the old arrow,
+              drawn once more as it was, fades out in place. */}
+          {changedLinks.map((i) => {
+            const shape = linkShape(g, i, was!.next[i])
+            return (
+              <g key={`ghost-link-${i}-${index}`} data-glyph={linkId(i)} data-ghost="" data-fade={fade('out', 'exit', 'glyph')} style={{ opacity: 0 }}>
+                <Arrow d={shape.d} head={shape.head} />
+              </g>
+            )
+          })}
+          {state.next.map((to, i) => {
+            const id = linkId(i)
+            const shape = linkShape(g, i, to)
+            const lit = focus.has(id)
+            return (
+              <g
+                key={`${id}>${to}`}
+                data-glyph={id}
+                // A null stub is not an arrow between boxes: it says so (`data-stub`), and the edge checks skip it.
+                {...(to === null ? { 'data-stub': id } : { 'data-edge': id })}
+                data-from={nodeId(i)}
+                data-to={to === null ? NULL_ID : nodeId(to)}
+                data-fade={changedLinks.includes(i) ? fade('in', 'enter', 'glyph') : undefined}
+                className={lit ? 'vz-cm' : undefined}
+                style={lit ? ({ '--vz-sw': `${strokeWidth.nowConnector}px` } as CSSProperties) : undefined}
+              >
+                <Arrow d={shape.d} head={shape.head} />
+              </g>
+            )
+          })}
 
-          {/* Pointer tags, one lane each: a tag slides to its new node on the glyph beat. */}
-          <AnimatePresence key={`t${gate.epoch}`} initial={false} custom={custom}>
-            {tags.map((t) => {
-              const lit = focus.has(t.id)
-              return (
-                <m.g key={t.id} {...presence(t.id, gate, { from: {}, to: {} })}>
-                  <g
-                    data-tag=""
-                    data-glyph={t.id}
-                    data-pointer={t.name}
-                    data-at={t.at === null ? NULL_ID : nodeId(t.at)}
-                    transform={`translate(${t.box.x} ${t.box.y})`}
-                  >
-                    <TagBody name={t.name} w={t.box.w} changed={lit} />
-                  </g>
-                </m.g>
-              )
-            })}
-          </AnimatePresence>
+          {/* Pointer tags, one lane each: a tag slides to its new node on the glyph beat; a new one fades
+              in, one going out of scope fades out where it was. */}
+          {leftTags.map((p) => {
+            const box = tagBox(g, p.name, p.at)
+            return (
+              <g
+                key={`ghost-tag-${p.name}-${index}`}
+                data-glyph={pointerId(p.name)}
+                data-ghost=""
+                data-fade={fade('out', 'exit', 'glyph')}
+                style={{ opacity: 0 }}
+                transform={`translate(${box.x} ${box.y})`}
+              >
+                <TagBody name={p.name} w={box.w} />
+              </g>
+            )
+          })}
+          {tags.map((t) => (
+            <g
+              key={t.id}
+              data-tag=""
+              data-glyph={t.id}
+              data-pointer={t.name}
+              data-at={t.at === null ? NULL_ID : nodeId(t.at)}
+              data-fade={was && !prevTags.has(t.name) ? fade('in', 'enter', 'glyph') : undefined}
+              transform={`translate(${t.box.x} ${t.box.y})`}
+            >
+              <TagBody name={t.name} w={t.box.w} changed={focus.has(t.id)} />
+            </g>
+          ))}
 
           {g.consoleTop !== null ? (
             <g data-viz-part="console">
               <text x={0} y={r1(g.consoleTop + 14)} className="vz-m vz-12 font-sans">
                 Console
               </text>
-              {/* The output lands on the third beat (opacity only, so the row never changes size); the
-                  placeholder waits until a leaving output has gone, so the two never overlap (G1). */}
-              <AnimatePresence key={`o${gate.epoch}`} initial={false} custom={custom}>
-                {out ? (
-                  <m.text
-                    key={out}
-                    data-glyph={OUTPUT_ID}
-                    x={56}
-                    y={r1(g.consoleTop + 14)}
-                    className="vz-r"
-                    {...presence(OUTPUT_ID, gate, { from: {}, to: {} }, { beat: 'land' })}
-                  >
-                    <tspan>› </tspan>
-                    {out}
-                  </m.text>
-                ) : (
-                  <m.text
-                    key="none"
-                    x={56}
-                    y={r1(g.consoleTop + 14)}
-                    className="vz-m vz-12 font-sans"
-                    initial={gate.instant ? false : { opacity: 0 }}
-                    animate={{ opacity: 1, transition: placeholderIn(gate) }}
-                    exit={{ opacity: 0, transition: { duration: 0 } }}
-                  >
-                    no output yet
-                  </m.text>
-                )}
-              </AnimatePresence>
+              {/* The output lands on the third beat (opacity only); "no output yet" comes back only once a
+                  leaving output has faded, so the two never overlap (G1). */}
+              {prevOut && !out ? (
+                <text
+                  key={`ghost-out-${index}`}
+                  data-glyph={OUTPUT_ID}
+                  data-ghost=""
+                  data-fade={fade('out', 'land', 'land')}
+                  style={{ opacity: 0 }}
+                  x={56}
+                  y={r1(g.consoleTop + 14)}
+                  className="vz-r"
+                >
+                  <tspan>› </tspan>
+                  {prevOut}
+                </text>
+              ) : null}
+              {out ? (
+                <text
+                  key="out"
+                  data-glyph={OUTPUT_ID}
+                  data-fade={out !== prevOut ? fade('in', 'land', 'land') : undefined}
+                  x={56}
+                  y={r1(g.consoleTop + 14)}
+                  className="vz-r"
+                >
+                  <tspan>› </tspan>
+                  {out}
+                </text>
+              ) : (
+                <text
+                  key="none"
+                  data-fade={prevOut ? fade('in', 'enter', 'land', landMs(gate)) : undefined}
+                  x={56}
+                  y={r1(g.consoleTop + 14)}
+                  className="vz-m vz-12 font-sans"
+                >
+                  no output yet
+                </text>
+              )}
             </g>
           ) : null}
         </svg>
