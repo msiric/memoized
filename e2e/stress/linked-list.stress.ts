@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { linkedListDescriptor } from '../../src/components/visualizations/engines/linked-list/descriptor'
 import { BASE, Recorder, type Row, failing, gated, activeConfigs, goto, markScope, openContext } from './harness'
 import { answersOf, walkStepThrough } from './flows'
+import { localOnly, localOnlyNote } from '../premium'
 
 /**
  * The pointer-rewiring visuals (wave 2B) across the tier's configs, as the
@@ -12,7 +13,10 @@ import { answersOf, walkStepThrough } from './flows'
  */
 
 const ANSWERS = answersOf(linkedListDescriptor.presets)
-const GROUPS = ['reverse-between-m2-n4', 'palindrome-split-reverse-compare']
+const ALL_GROUPS = ['reverse-between-m2-n4', 'palindrome-split-reverse-compare']
+/** The palindrome group shows a practice answer: local-only, walked only where the content checkout has it (never CI). */
+const GROUPS = ALL_GROUPS.filter((p) => !localOnly('linked-list-pointer-rewiring', p))
+const SKIPPED = ALL_GROUPS.filter((p) => !GROUPS.includes(p)).map((p) => localOnlyNote('linked-list-pointer-rewiring', p))
 
 async function hoverPass(page: Page, rec: Recorder, scope: string, visual: string) {
   const n = await page.evaluate((s) => {
@@ -38,6 +42,7 @@ async function hoverPass(page: Page, rec: Recorder, scope: string, visual: strin
 
 for (const c of activeConfigs()) {
   test(`linked list @ ${c.name}`, async ({ browser }) => {
+    for (const description of SKIPPED) test.info().annotations.push({ type: 'skipped group', description })
     test.setTimeout(10 * 60_000)
     const { ctx, page } = await openContext(browser, c)
     const rec = new Recorder(c, 'linked-list')

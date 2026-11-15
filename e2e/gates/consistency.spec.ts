@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import { urlLocalOnly } from '../premium'
 import { FR, GALLERY, LESSONS, frUrl, lessonUrl, open, settle } from './drive'
 
 /**
@@ -155,6 +156,8 @@ for (const width of [375, 1440]) {
  */
 for (const width of [375, 1440])
   test(`the frontier draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
+    // Its lesson group includes a practice answer: local-only without the content checkout (CI).
+    test.skip(urlLocalOnly(frUrl('bfs-levels')) !== null, urlLocalOnly(frUrl('bfs-levels')) ?? '')
     const diffs: string[] = []
     const looks: Record<string, Record<string, string>>[] = []
     const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const

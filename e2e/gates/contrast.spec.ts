@@ -7,6 +7,7 @@ import {
   roles,
   type PaletteRef,
 } from '../../src/components/visualizations/primitives/tokens-v3'
+import { urlLocalOnly } from '../premium'
 import { auditContrast, type Pair } from './contrast-audit'
 import { GALLERY, LESSONS, MOTION_STATES, PP, PP_AWAIT, SPECIMEN, STATES, freezeForContrast, frUrl, lessonUrl, llUrl, open, stateUrl } from './drive'
 
@@ -67,6 +68,12 @@ for (const width of WIDTHS) {
     test.setTimeout(300_000)
     const problems: string[] = []
     for (const [name, drive] of Object.entries(STATES)) {
+      // A practice-answer frame is local-only: skipped without the content checkout (CI).
+      const skip = urlLocalOnly(stateUrl(name))
+      if (skip) {
+        test.info().annotations.push({ type: 'skipped state', description: `${name}: ${skip}` })
+        continue
+      }
       await open(page, stateUrl(name), width)
       await drive(page)
       problems.push(...(await audit(page, `${name} @${width}`)))
@@ -97,6 +104,11 @@ for (const width of MOTION_CONTRAST_WIDTHS)
     const problems: string[] = []
     for (const [name, st] of Object.entries(MOTION_STATES))
       for (const ms of [140, 440]) {
+        const skip = urlLocalOnly(st.url)
+        if (skip) {
+          if (ms === 140) test.info().annotations.push({ type: 'skipped state', description: `${name}: ${skip}` })
+          continue
+        }
         await open(page, st.url, width, 900, 'no-preference')
         await st.setup(page)
         await st.act(page)
@@ -113,6 +125,11 @@ test('print: the light rendering passes', async ({ page }) => {
   // The frontier: one page per lesson group (graph, grid and tree canvases).
   const frontier = ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack'].map(frUrl)
   for (const url of [SPECIMEN, GALLERY, PP, PP_AWAIT, `${GALLERY}?static=1`, ...frontier, llUrl('reverse-between-m2-n4'), llUrl('static')]) {
+    const skip = urlLocalOnly(url)
+    if (skip) {
+      test.info().annotations.push({ type: 'skipped page', description: skip })
+      continue
+    }
     await open(page, url, 1024)
     await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
     // Paper has no focus: forced focus rings on the specimen are not printed pairs.

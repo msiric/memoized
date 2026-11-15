@@ -2,6 +2,8 @@
 src/content/js-track
 src/content/dsa-track
 src/resources
+# Visual baselines of practice-answer frames: premium text, rendered locally only
+e2e/gates/__screenshots__/*/local-only/
 
 # Logs
 logs

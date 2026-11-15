@@ -18,6 +18,7 @@ import {
 } from './helpers'
 import { frameHealth } from './analyze'
 import { RECORDER } from './recorder'
+import { localOnly, localOnlyNote } from '../premium'
 
 /**
  * The motion gate for the pointer-rewiring step-through (wave 2B), as
@@ -50,6 +51,7 @@ for (const width of WIDTHS)
   for (const preset of PRESETS)
     for (const reduced of [false, true])
       test(`linked-list ${preset} @${width}${reduced ? ' reduced' : ''}: every step both ways`, async ({ page }) => {
+        test.skip(localOnly('linked-list-pointer-rewiring', preset), localOnlyNote('linked-list-pointer-rewiring', preset))
         test.setTimeout(240_000)
         await page.addInitScript(RECORDER)
         if (reduced) await page.emulateMedia({ reducedMotion: 'reduce' })

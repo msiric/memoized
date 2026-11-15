@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { baselineName, urlLocalOnly } from '../premium'
 import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl } from './drive'
 
 /**
@@ -17,6 +18,11 @@ import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt
  * Deterministic: reduced motion, `animations: 'disabled'`, fonts loaded,
  * caret hidden, the dev overlay hidden, states reached through the real
  * controls.
+ *
+ * Practice-answer frames (the premium-code policy) show premium text, so
+ * their baselines are rendered from the local content checkout into the
+ * gitignored `local-only/` folder and never committed; without the checkout
+ * (CI) those states skip, each named in the test's annotations.
  */
 
 test.skip(process.env.VIZ_VISUAL !== '1', 'visual baselines render in the Playwright Linux image (yarn test:viz:visual)')
@@ -45,9 +51,15 @@ for (const width of WIDTHS) {
   test(`gallery states @${width}`, async ({ page }) => {
     test.setTimeout(300_000)
     for (const [name, drive] of Object.entries(STATES)) {
-      await open(page, stateUrl(name), width)
+      const url = stateUrl(name)
+      const skip = urlLocalOnly(url)
+      if (skip) {
+        test.info().annotations.push({ type: 'skipped state', description: `${name}: ${skip}` })
+        continue
+      }
+      await open(page, url, width)
       await drive(page)
-      await frameShot(page, stateFrame(name), `${name}-${width}.png`)
+      await frameShot(page, stateFrame(name), baselineName(url, `${name}-${width}.png`))
     }
   })
 
@@ -111,9 +123,14 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await frameShot(page, 'figure[data-viz-preset="spread-vs-nested-vs-deep"]', 'print-heap-graph-objects.png')
   // The frontier: a graph, a grid and a tree on paper.
   for (const preset of ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack']) {
+    const skip = urlLocalOnly(frUrl(preset))
+    if (skip) {
+      test.info().annotations.push({ type: 'skipped state', description: `print ${preset}: ${skip}` })
+      continue
+    }
     await open(page, frUrl(preset), 768)
     await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
-    await frameShot(page, FR, `print-frontier-${preset}.png`)
+    await frameShot(page, FR, baselineName(frUrl(preset), `print-frontier-${preset}.png`))
   }
   // Pointer rewiring (wave 2B): the step-through's Start and both static frames.
   await open(page, llUrl('reverse-between-m2-n4'), 768)

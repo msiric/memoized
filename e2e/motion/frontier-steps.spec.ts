@@ -19,6 +19,7 @@ import {
 } from './helpers'
 import { frameHealth } from './analyze'
 import { RECORDER } from './recorder'
+import { localOnly, localOnlyNote } from '../premium'
 
 /**
  * The frontier step-through (wave 2A): every step of every preset, in both
@@ -59,6 +60,7 @@ for (const width of WIDTHS)
   for (const preset of PRESETS)
     for (const reduced of [false, true])
       test(`frontier ${preset} @${width}${reduced ? ' reduced' : ''}: every step both ways`, async ({ page }) => {
+        test.skip(localOnly('bfs-dfs-frontier', preset), localOnlyNote('bfs-dfs-frontier', preset))
         test.setTimeout(240_000)
         await openGallery(page, { width, query: `?fr=${preset}`, reduced })
         const frame = page.locator(EL)

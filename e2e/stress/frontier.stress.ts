@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { frontierDescriptor } from '../../src/components/visualizations/engines/frontier/descriptor'
 import { BASE, Recorder, type Row, failing, gated, activeConfigs, goto, markScope, openContext } from './harness'
 import { answersOf, walkStepThrough } from './flows'
+import { localOnly, localOnlyNote } from '../premium'
 
 /**
  * The frontier step-through (wave 2A) across the tier's configs, as the
@@ -14,7 +15,10 @@ import { answersOf, walkStepThrough } from './flows'
 
 const ANSWERS = answersOf(frontierDescriptor.presets)
 /** The first preset of each lesson group: its page offers the rest of the group. */
-const GROUPS = ['bfs-levels', 'dijkstra-lazy-heap', 'bst-iterator-stack']
+const ALL_GROUPS = ['bfs-levels', 'dijkstra-lazy-heap', 'bst-iterator-stack']
+/** A group with a practice answer is local-only: walked only where the content checkout has it (never CI). */
+const GROUPS = ALL_GROUPS.filter((p) => !localOnly('bfs-dfs-frontier', p))
+const SKIPPED = ALL_GROUPS.filter((p) => !GROUPS.includes(p)).map((p) => localOnlyNote('bfs-dfs-frontier', p))
 
 async function hoverPass(page: Page, rec: Recorder, scope: string, visual: string) {
   const n = await page.evaluate((s) => {
@@ -40,6 +44,8 @@ async function hoverPass(page: Page, rec: Recorder, scope: string, visual: strin
 
 for (const c of activeConfigs()) {
   test(`frontier @ ${c.name}`, async ({ browser }) => {
+    test.skip(GROUPS.length === 0, SKIPPED.join('; '))
+    for (const description of SKIPPED) test.info().annotations.push({ type: 'skipped group', description })
     test.setTimeout(15 * 60_000)
     const { ctx, page } = await openContext(browser, c)
     const rec = new Recorder(c, 'frontier')

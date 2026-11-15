@@ -3,6 +3,7 @@ import { expect, test, type Page, type Request } from '@playwright/test'
 import { linkedListDescriptor } from '../src/components/visualizations/engines/linked-list/descriptor'
 import { linkedListFramesDescriptor } from '../src/components/visualizations/engines/linked-list/frames/descriptor'
 import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
+import { localOnly, localOnlyNote } from './premium'
 
 /**
  * The pointer-rewiring visuals (R4 shared visual 3, wave 2B) through the
@@ -23,6 +24,13 @@ const STEPS = VIZ_TABLE['linked-list-pointer-rewiring'][4]!
 const FRAMES = VIZ_TABLE['linked-list-frames'][3]!
 const tierOf = (width: number) => (width < 768 ? 0 : width < 1280 ? 1 : 2)
 const figure = (page: Page, preset: string) => page.locator(`figure[data-viz-preset="${preset}"]`)
+/** A palindrome frame shows a practice answer: local-only (no content checkout on CI). */
+const ID = 'linked-list-pointer-rewiring'
+const skipped = (preset: string) => {
+  if (!localOnly(ID, preset)) return false
+  test.info().annotations.push({ type: 'skipped preset', description: localOnlyNote(ID, preset) })
+  return true
+}
 
 let errors: string[] = []
 test.beforeEach(({ page }) => {
@@ -61,6 +69,7 @@ const drawn = (page: Page) =>
 
 for (const p of linkedListDescriptor.presets)
   test(`${p.id}: every step draws its recorded state, both ways, and the frame never moves`, async ({ page }) => {
+    test.skip(localOnly(ID, p.id), localOnlyNote(ID, p.id))
     test.setTimeout(120_000)
     await page.emulateMedia({ reducedMotion: 'reduce' })
     const f = await openStep(page, p.id)
@@ -121,6 +130,7 @@ test('reverse-between: the prediction comes before the loop, and the loop is dra
 })
 
 test('palindrome presets: one switcher for the lesson, the question on the step before slow stops', async ({ page }) => {
+  test.skip(localOnly(ID, 'palindrome-split-reverse-compare'), localOnlyNote(ID, 'palindrome-split-reverse-compare'))
   const f = await openStep(page, 'palindrome-split-reverse-compare')
   await expect(f.getByRole('radio')).toHaveCount(3)
   await f.getByRole('radio', { name: '1,2,2,1' }).click()
@@ -139,6 +149,7 @@ test('375×667: code line, drawing, caption and Next fit under the site header a
   test.setTimeout(180_000)
   await page.emulateMedia({ reducedMotion: 'reduce' })
   for (const preset of linkedListDescriptor.presets.map((x) => x.id)) {
+    if (skipped(preset)) continue
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto(`/dev/visualizations?ll=${preset}`, { waitUntil: 'load' })
     const f = page.locator(STEP)
@@ -179,6 +190,7 @@ test('375×667: code line, drawing, caption and Next fit under the site header a
 
 test('axe: no violations on the step-through (every preset) and the frames', async ({ page }) => {
   for (const p of ['reverse-between-m2-n4', 'palindrome-split-reverse-compare']) {
+    if (skipped(p)) continue
     await openStep(page, p)
     const r = await new AxeBuilder({ page }).include('[data-viz]').analyze()
     expect(r.violations.map((v) => `${v.id}: ${v.nodes.length}`)).toEqual([])
@@ -208,6 +220,7 @@ test('without JavaScript the Start frame is complete', async ({ browser }) => {
 test('client-only render: the placeholder reserves each preset’s estimate, an upper bound for the live frame', async ({ page }) => {
   for (const preset of ['reverse-between-m2-n4', 'palindrome-1231'])
     for (const width of [375, 1024]) {
+      if (skipped(preset)) continue
       await page.setViewportSize({ width, height: 900 })
       await page.goto(`/dev/visualizations?ll=${preset}&spacer=1&mount=client`, { waitUntil: 'load' })
       const mount = page.locator('[data-viz="linked-list-pointer-rewiring"]')

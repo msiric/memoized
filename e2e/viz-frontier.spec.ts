@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
+import { localOnly, localOnlyNote } from './premium'
 
 /**
  * The frontier step-through (wave 2A, `bfs-dfs-frontier`) on
@@ -15,6 +16,12 @@ const GALLERY = '/dev/visualizations'
 const PRESETS = ['bfs-levels', 'binary-matrix-8dir', 'dijkstra-lazy-heap', 'min-effort-grid', 'bst-iterator-stack'] as const
 const STEPS = VIZ_TABLE['bfs-dfs-frontier'][4]!
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
+
+// Every lesson group of the frontier has a practice-answer preset (binary
+// matrix, minimum effort, the BST iterator): its frames are local-only, so
+// without the content checkout (CI) this file skips, saying why.
+const LOCAL_ONLY = PRESETS.filter((p) => localOnly('bfs-dfs-frontier', p))
+test.skip(() => LOCAL_ONLY.length > 0, LOCAL_ONLY.map((p) => localOnlyNote('bfs-dfs-frontier', p)).join('; '))
 
 const mount = (page: Page) => page.locator('[data-viz="bfs-dfs-frontier"]')
 const frame = (page: Page) => mount(page).locator('section')
