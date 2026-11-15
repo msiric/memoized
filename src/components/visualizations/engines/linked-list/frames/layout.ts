@@ -81,7 +81,7 @@ export function rhoLink(g: RhoGeometry, from: number, to: number): { d: string; 
     { x: a.x + dx * half, y: a.y + dy * half },
     { x: b.x - dx * half, y: b.y - dy * half },
   ]
-  return { d: routePath(pts, 6, 6), head: arrowHead(pts) }
+  return { d: routePath(pts, 6, 4), head: arrowHead(pts) }
 }
 
 /** Tag boxes under each node of the rho, in the panel's pointer order. */
