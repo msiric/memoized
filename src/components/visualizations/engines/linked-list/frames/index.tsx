@@ -1,5 +1,5 @@
 import { StaticFigure } from '../../../shell/StaticFigure'
-import type { StaticDefinition, VizStaticProps } from '../../../shell/static-types'
+import type { HashedProgram, StaticDefinition, VizStaticProps } from '../../../shell/static-types'
 import { linkedListFramesDescriptor, linkedListFramesEngineCore } from './descriptor'
 import { FramesStage } from './FramesStage'
 import type { FramesData } from './model'
@@ -10,7 +10,7 @@ import type { FramesData } from './model'
  * client-side navigation, where there is no server HTML to keep.
  */
 
-const definition: StaticDefinition<FramesData> = {
+const definition: StaticDefinition<FramesData, HashedProgram> = {
   ...linkedListFramesDescriptor,
   engine: { ...linkedListFramesEngineCore, Stage: FramesStage },
 }

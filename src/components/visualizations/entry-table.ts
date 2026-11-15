@@ -27,6 +27,12 @@ export type VizEntry = readonly [
    * text), so the reserve holds at any text size.
    */
   steps?: Record<string, readonly [number, number, number, number, number]>,
+  /**
+   * Step-throughs with practice-answer presets: per preset, the presets its
+   * frame needs resolved code for (`code` on `<Viz>`, from the content when
+   * the page is built). Without them the frame renders nothing.
+   */
+  premium?: Record<string, readonly string[]>,
 ]
 
 export const VIZ_TABLE: Record<string, VizEntry> = {
@@ -65,6 +71,13 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'min-effort-grid': [854, 654, 854, 1034, 1034],
       'bst-iterator-stack': [826, 638, 826, 978, 1006],
     },
+    {
+      'bfs-levels': ['binary-matrix-8dir'],
+      'binary-matrix-8dir': ['binary-matrix-8dir'],
+      'dijkstra-lazy-heap': ['min-effort-grid'],
+      'min-effort-grid': ['min-effort-grid'],
+      'bst-iterator-stack': ['bst-iterator-stack'],
+    },
   ],
   'heap-graph': [
     () => import('./engines/heap-graph'),
@@ -88,6 +101,11 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'palindrome-split-reverse-compare': [796, 682, 796, 936, 988],
       'palindrome-1221': [796, 682, 796, 956, 1004],
       'palindrome-1231': [784, 654, 784, 936, 1004],
+    },
+    {
+      'palindrome-split-reverse-compare': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
+      'palindrome-1221': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
+      'palindrome-1231': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
     },
   ],
   'list-keys': [

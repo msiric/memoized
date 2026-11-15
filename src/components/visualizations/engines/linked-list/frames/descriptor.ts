@@ -1,4 +1,4 @@
-import type { StaticDescriptor, StaticEngineCore, StaticTextAlternative } from '../../../shell/static-types'
+import type { HashedProgram, StaticDescriptor, StaticEngineCore, StaticTextAlternative } from '../../../shell/static-types'
 import { nodeName, type LLState } from '../model'
 import { layoutFrames } from './layout'
 import type { FramePanel, FramesData } from './model'
@@ -45,7 +45,7 @@ export const linkedListFramesEngineCore: StaticEngineCore<FramesData> = {
   describe: describeFrames,
 }
 
-export const linkedListFramesDescriptor: StaticDescriptor<FramesData> = {
+export const linkedListFramesDescriptor: StaticDescriptor<FramesData, HashedProgram> = {
   id: 'linked-list-frames',
   form: 'static',
   title: 'Linked list: pointer frames',

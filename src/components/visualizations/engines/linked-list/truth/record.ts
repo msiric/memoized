@@ -1,6 +1,7 @@
 /**
  * The pointer recorder (spec P6, "truthful by construction"): runs a lesson
- * program in a fresh Node 24 process with one probe call inserted after
+ * program (read from a local content checkout: the repo never holds its
+ * text) in a fresh Node 24 process with one probe call inserted after
  * each probed line, and records, every time a probe runs, which node each
  * pointer variable holds and where every node's `next` points. Nodes are
  * numbered in creation order: the class is wrapped (one line inserted after
@@ -13,7 +14,7 @@
  */
 import { spawnSync } from 'node:child_process'
 import { sha256 } from '../../../step-log/truth'
-import { resolveLine, type PointerProgram, type PointerRecording, type ProbeHit } from '../program'
+import type { PointerProgram, PointerRecording, ProbeHit } from '../program'
 
 const MARK = '\u0000LL'
 
@@ -32,18 +33,21 @@ function __ll(probe, vars) {
   process.stderr.write(${JSON.stringify(MARK)} + JSON.stringify({ probe, vars: out, next, labels }) + '\\n')
 }`
 
-/** The program with node registration and a probe after each probed line (same indentation). */
-export function instrument(p: PointerProgram): string {
-  const lines = p.snippet.split('\n')
+/**
+ * The program (`code`, as run, from the local content checkout) with node
+ * registration and a probe after each probed line (same indentation).
+ */
+export function instrument(p: PointerProgram, code: string): string {
+  const lines = code.split('\n')
   const after = new Map<number, string[]>()
   const add = (i: number, text: string) => after.set(i, [...(after.get(i) ?? []), text])
-  const where = `${p.id}: `
-  add(
-    resolveLine(lines, p.classEnd, where),
-    `${p.nodeClass} = class extends ${p.nodeClass} { constructor(...a) { super(...a); __llNodes.push(this) } };`,
-  )
+  const at = (line: number) => {
+    if (!lines[line - 1]?.trim()) throw new Error(`${p.id}: line ${line} is not a statement of the program`)
+    return line - 1
+  }
+  add(at(p.classEnd), `${p.nodeClass} = class extends ${p.nodeClass} { constructor(...a) { super(...a); __llNodes.push(this) } };`)
   for (const probe of p.probes) {
-    const i = resolveLine(lines, probe.after, where)
+    const i = at(probe.after)
     const indent = lines[i].match(/^\s*/)![0]
     add(i, `${indent}__ll(${JSON.stringify(probe.id)}, { ${probe.vars.join(', ')} });`)
   }
@@ -67,14 +71,14 @@ function run(p: PointerProgram, code: string) {
   return { stdout, stderr: res.stderr }
 }
 
-/** What the plain program prints: its snippet, untouched, in a fresh process. */
-export function runPlain(p: PointerProgram): string[] {
-  return run(p, p.snippet).stdout
+/** What the plain program prints: its code, untouched, in a fresh process. */
+export function runPlain(p: PointerProgram, code: string): string[] {
+  return run(p, code).stdout
 }
 
 /** Runs the instrumented program in a clean Node process and returns its recording. */
-export function recordPointers(p: PointerProgram): PointerRecording & { runtime: string } {
-  const { stdout, stderr } = run(p, instrument(p))
+export function recordPointers(p: PointerProgram, code: string): PointerRecording & { runtime: string } {
+  const { stdout, stderr } = run(p, instrument(p, code))
   const hits: ProbeHit[] = []
   let labels: string[] = []
   for (const line of stderr.split('\n')) {
@@ -85,5 +89,5 @@ export function recordPointers(p: PointerProgram): PointerRecording & { runtime:
   }
   for (const probe of p.probes)
     if (!hits.some((h) => h.probe === probe.id)) throw new Error(`${p.id}/${probe.id}: the probe never ran`)
-  return { sha256: sha256(p.snippet), observed: stdout, labels, hits, runtime: `node@${process.versions.node}` }
+  return { sha256: sha256(code), observed: stdout, labels, hits, runtime: `node@${process.versions.node}` }
 }

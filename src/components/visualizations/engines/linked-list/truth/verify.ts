@@ -13,15 +13,18 @@ import { recordPointers, runPlain } from './record'
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
-/** The recording against a fresh run: hash, runtime, plain output, probe hits. */
-export function verifyRecording(p: PointerProgram, committed: PointerRecording): string[] {
+/**
+ * The recording against a fresh run of `code` (the program as run, from the
+ * local content checkout): hash, runtime, plain output, probe hits.
+ */
+export function verifyRecording(p: PointerProgram, committed: PointerRecording, code: string): string[] {
   const errors: string[] = []
-  const hash = sha256(p.snippet)
-  if (hash !== p.sha256) errors.push(`${p.id}: snippet changed (sha256 ${hash}); re-record`)
-  if (committed.sha256 !== p.sha256) errors.push(`${p.id}: the recording is of another snippet; re-record`)
-  const fresh = recordPointers(p)
+  const hash = sha256(code)
+  if (hash !== p.sha256) errors.push(`${p.id}: program changed (sha256 ${hash}); re-record`)
+  if (committed.sha256 !== p.sha256) errors.push(`${p.id}: the recording is of another program; re-record`)
+  const fresh = recordPointers(p, code)
   if (!runtimeMatches(p.runtime, fresh.runtime)) errors.push(`${p.id}: recorded on ${p.runtime} but verifying on ${fresh.runtime}`)
-  const plain = runPlain(p)
+  const plain = runPlain(p, code)
   if (!same(plain, p.observed)) errors.push(`${p.id}: the program prints ${JSON.stringify(plain)}, not ${JSON.stringify(p.observed)}`)
   if (!same(fresh.observed, plain)) errors.push(`${p.id}: the probes changed the program's output`)
   for (const k of ['observed', 'labels', 'hits'] as const)
@@ -34,8 +37,8 @@ export function verifyRecording(p: PointerProgram, committed: PointerRecording):
 export function verifyLog(log: StepLog<LLState>, spec: PresetSpec): string[] {
   const errors: string[] = []
   if (log.source.generator !== POINTER_GENERATOR) errors.push(`${log.id}: generator ${log.source.generator}`)
-  if (log.source.snippet !== spec.program.snippet || log.source.sha256 !== spec.program.sha256)
-    errors.push(`${log.id}: the log's source is not the program`)
+  if (log.source.snippet !== undefined || log.source.sha256 !== spec.program.sha256)
+    errors.push(`${log.id}: the log's source is not the program (by hash, never its text)`)
   const rebuilt = buildLog(spec)
   if (rebuilt.steps.length !== log.steps.length) errors.push(`${log.id}: ${log.steps.length} steps, the recording makes ${rebuilt.steps.length}`)
   rebuilt.steps.forEach((s, i) => {
@@ -45,6 +48,6 @@ export function verifyLog(log: StepLog<LLState>, spec: PresetSpec): string[] {
       if (!same(c[k], s[k])) errors.push(`${log.id} step ${i}: ${k} ${JSON.stringify(c[k]).slice(0, 120)} is not the recorded ${JSON.stringify(s[k]).slice(0, 120)}`)
   })
   if (!same(log.observed, rebuilt.observed)) errors.push(`${log.id}: observed ${JSON.stringify(log.observed)} is not the run's`)
-  if (!same(log.code?.lines, rebuilt.code?.lines)) errors.push(`${log.id}: the code differs from the reflowed lesson code`)
+  if (!same(log.code?.lines, rebuilt.code?.lines) || !same(log.code?.premium, rebuilt.code?.premium)) errors.push(`${log.id}: the code differs from the preset's rows`)
   return errors
 }

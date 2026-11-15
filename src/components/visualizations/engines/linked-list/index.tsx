@@ -1,7 +1,9 @@
 'use client'
 
+import { useMemo } from 'react'
 import { StepThrough } from '../../shell/StepThrough'
 import type { StepThroughDefinition, VizComponentProps } from '../../shell/types'
+import { withCode } from '../../shell/with-code'
 import { linkedListDescriptor, linkedListEngineCore } from './descriptor'
 import { LinkedListStage } from './LinkedListStage'
 import type { LLState } from './model'
@@ -16,6 +18,8 @@ const definition: StepThroughDefinition<LLState> = {
   engine: { ...linkedListEngineCore, Stage: LinkedListStage },
 }
 
-export default function LinkedListViz({ preset, interactive }: VizComponentProps) {
-  return <StepThrough def={definition} preset={preset} interactive={interactive} />
+export default function LinkedListViz({ preset, interactive, code }: VizComponentProps) {
+  // A practice answer's pane arrives with the page (`code`), never in this chunk.
+  const def = useMemo(() => withCode(definition, code), [code])
+  return <StepThrough def={def} preset={preset} interactive={interactive} />
 }

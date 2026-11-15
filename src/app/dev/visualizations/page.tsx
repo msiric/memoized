@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Prose } from '@/components/Prose'
 import { Viz } from '@/components/visualizations/Viz'
+import { resolveVizCode } from '@/components/visualizations/step-log/resolve-code'
 import { ClientOnly } from './ClientOnly'
 
 /**
@@ -90,13 +91,7 @@ export default function VisualizationGalleryPage({
               the lesson&apos;s code and re-verified by unit tests.
             </p>
             {searchParams.spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
-            {searchParams.mount === 'client' ? (
-              <ClientOnly>
-                <Viz id="linked-list-pointer-rewiring" preset={searchParams.ll} />
-              </ClientOnly>
-            ) : (
-              <Viz id="linked-list-pointer-rewiring" preset={searchParams.ll} />
-            )}
+            <PremiumViz id="linked-list-pointer-rewiring" preset={searchParams.ll} mount={searchParams.mount} />
             <p>Text after the visual, to show it never moves while stepping.</p>
           </Prose>
         </div>
@@ -148,7 +143,6 @@ export default function VisualizationGalleryPage({
 
 /** The frontier step-through (graphs, grids, trees) through the lazy mount, between lesson text. */
 function FrontierGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
-  const viz = <Viz id="bfs-dfs-frontier" preset={preset} />
   return (
     <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
       <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
@@ -159,10 +153,29 @@ function FrontierGallery({ preset, mount, spacer }: { preset: string; mount?: st
             recorded from a real Node run of the lesson&apos;s code and re-verified by unit tests.
           </p>
           {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
-          {mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz}
+          <PremiumViz id="bfs-dfs-frontier" preset={preset} mount={mount} />
           <p>Text after the visual, to show it never moves while stepping.</p>
         </Prose>
       </div>
     </div>
   )
+}
+
+/**
+ * A step-through whose frame may show a practice answer (premium-code
+ * policy): its pane is resolved here, on the server, from the local content
+ * checkout, as `sync-content.ts` does for a lesson. Without the content (CI)
+ * the frame is local-only, like a premium lesson fixture: a note stands in.
+ */
+async function PremiumViz({ id, preset, mount }: { id: string; preset: string; mount?: string }) {
+  const r = await resolveVizCode(id, preset)
+  if (r.kind === 'missing')
+    return (
+      <p data-viz-local-only={`${id}/${preset}`} className="text-sm text-zinc-300">
+        This frame shows a practice answer, which is premium and never committed. It renders from a local content
+        checkout (<code>src/content</code>) only.
+      </p>
+    )
+  const viz = <Viz id={id} preset={preset} code={r.kind === 'resolved' ? r.code : undefined} />
+  return mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz
 }

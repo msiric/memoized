@@ -1,6 +1,7 @@
 /**
  * The frontier recorder (spec P6, "truthful by construction"): runs a
- * lesson's code block, byte for byte, in a fresh Node 24 process under the
+ * lesson's code block, byte for byte (read from a local content checkout:
+ * the repo never holds it), in a fresh Node 24 process under the
  * inspector, pauses before each probed line and records what the paused
  * frame holds (the queue, the stack, the heap, the distances), plus what the
  * program printed. Nothing is inserted into the program: the probes are
@@ -71,14 +72,12 @@ process.stdin.on('end', () => {
 })
 `
 
-/** The program as run: the lesson's block, then (practice answers only) the register's input. */
-export function programText(p: Pick<FrontierProgram, 'lesson' | 'harness'>): string {
-  return p.harness ? `${p.lesson}\n${p.harness}` : p.lesson
-}
-
-/** Runs the program under the inspector in a clean Node process and returns its recording. */
-export function recordFrontier(program: FrontierProgram): FrontierRecording & { runtime: string } {
-  const code = programText(program)
+/**
+ * Runs the program under the inspector in a clean Node process and returns
+ * its recording. `code` is the program as run, composed from a local
+ * content checkout (`loadProgram(program.source)`, `step-log/lesson-block.ts`).
+ */
+export function recordFrontier(program: FrontierProgram, code: string): FrontierRecording & { runtime: string } {
   const run = spawnSync(process.execPath, ['--no-warnings', '-e', RECORDER], {
     input: JSON.stringify({ code, lang: program.lang, probes: program.probes, watch: program.watch }),
     encoding: 'utf8',

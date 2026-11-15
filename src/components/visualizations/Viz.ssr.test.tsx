@@ -54,6 +54,32 @@ describe('<Viz> on the server', () => {
 })
 
 /**
+ * Practice-answer presets (premium-code policy): the page brings the pane's
+ * text as `code`; a frame missing any it needs renders nothing at all, never
+ * a pane of placeholders.
+ */
+describe('<Viz> with a practice-answer preset', () => {
+  it('renders nothing without the resolved pane, for the answer and for a lesson preset sharing its group', () => {
+    expect(renderToString(<Viz id="bfs-dfs-frontier" preset="bst-iterator-stack" />)).toBe('')
+    expect(renderToString(<Viz id="bfs-dfs-frontier" preset="bfs-levels" />)).toBe('')
+    expect(renderToString(<Viz id="linked-list-pointer-rewiring" preset="palindrome-1221" />)).toBe('')
+    // A group with no answer is unaffected.
+    expect(renderToString(<Viz id="linked-list-pointer-rewiring" preset="reverse-between-m2-n4" />)).toContain('data-viz-ssr=""')
+  })
+
+  it('shows the pane the page brings (a JSON string from MDX), at the committed widths', async () => {
+    const { VIZ_DESCRIPTORS } = await import('./registry')
+    const log = VIZ_DESCRIPTORS['bfs-dfs-frontier'].presets.find((p) => p.id === 'bst-iterator-stack')!.log
+    // Stand-in text of the same widths (no answer text in the repo).
+    const lines = log.code!.lines.map((l) => l.replace(/\u00b7/g, 'q'))
+    const html = renderToString(<Viz id="bfs-dfs-frontier" preset="bst-iterator-stack" code={JSON.stringify({ 'bst-iterator-stack': { lines } })} />)
+    expect(html).toContain('data-viz-ssr=""')
+    expect(html).toContain(lines[0].trim())
+    expect(html).not.toContain('\u00b7')
+  })
+})
+
+/**
  * Static figures (spec §3.3, §6.4): final server markup, an image role named
  * by the title and described by the full text alternative, and nothing that
  * needs JavaScript.

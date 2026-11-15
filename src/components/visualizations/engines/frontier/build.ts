@@ -1,3 +1,4 @@
+import { hasWrapRows, placeholderText } from '../../step-log/lesson-source'
 import type { StepLine, StepLog } from '../../step-log/types'
 import type { FrontierProgram, FrontierRecording, Pause } from './programs/types'
 import type { FrontierState } from './model'
@@ -41,13 +42,21 @@ export function list(xs: readonly string[]): string {
   return `${xs.slice(0, -1).join(', ')} and ${xs[xs.length - 1]}`
 }
 
-/** The log's source block: the program as run, which the truth test re-runs. */
-export function source(p: FrontierProgram, rec: FrontierRecording): StepLog<FrontierState>['source'] {
-  const snippet = p.harness ? `${p.lesson}\n${p.harness}` : p.lesson
-  return { snippet, runtime: RUNTIME, generator: GENERATOR, sha256: rec.sha256 }
+/**
+ * The log's source: the hash of the program as run (its text is a premium
+ * lesson block, never committed; the truth test re-runs it from a local
+ * content checkout).
+ */
+export function source(_p: FrontierProgram, rec: FrontierRecording): StepLog<FrontierState>['source'] {
+  return { runtime: RUNTIME, generator: GENERATOR, sha256: rec.sha256 }
 }
 
+/**
+ * The pane: a lesson example's rows as committed; a practice answer's as
+ * same-width placeholders, resolved from the content for a page.
+ */
 export const code = (p: FrontierProgram): NonNullable<StepLog<FrontierState>['code']> => ({
   lang: p.lang,
-  lines: p.display.map((d) => d.text),
+  lines: placeholderText(p.display),
+  ...(hasWrapRows(p.display) ? { premium: { source: p.source, rows: p.display } } : {}),
 })

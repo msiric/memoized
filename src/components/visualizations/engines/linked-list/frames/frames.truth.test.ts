@@ -2,6 +2,10 @@
 import { describe, expect, it } from 'vitest'
 import { detectCycleProgram } from '../programs/fast-and-slow-pointers'
 import { reverseFullProgram } from '../programs/linked-list-reversal'
+import { loadProgram } from '../../../step-log/lesson-block'
+import type { PointerRecording } from '../program'
+import fastSlow from '../recordings/fast-and-slow-pointers.json'
+import reversal from '../recordings/linked-list-reversal.json'
 import { recordPointers } from '../truth/record'
 import { linkedListFramesDescriptor } from './descriptor'
 import type { RhoPanel } from './model'
@@ -11,11 +15,19 @@ import { floydData, floydRho, fullReversalData, fullReversalStrip } from './pres
  * The static frames are rebuilt from a fresh Node 24 run and must equal the
  * committed presets: every node, arrow, tag, mark and listed pair is a
  * recorded probe hit (the recordings themselves are checked hit by hit in
- * `linked-list.truth.test.ts`).
+ * `linked-list.truth.test.ts`). Without a local content checkout (CI) the
+ * lesson's code is absent, so the presets are rebuilt from the committed
+ * recordings, which that test checks against a fresh run where it can.
  */
 
+const REC = { ...reversal, ...fastSlow } as unknown as Record<string, PointerRecording>
+const committed = (p: typeof reverseFullProgram) => REC[p.id]
+
+/** A fresh run from the local content checkout, or the committed recording where the checkout lacks it (CI). */
 const fresh = (p: typeof reverseFullProgram) => {
-  const { runtime: _r, ...rec } = recordPointers(p)
+  const loaded = loadProgram(p.source)
+  if (!loaded.ok) return committed(p)
+  const { runtime: _r, ...rec } = recordPointers(p, loaded.text)
   return rec
 }
 

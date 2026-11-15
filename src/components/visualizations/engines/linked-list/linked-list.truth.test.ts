@@ -1,7 +1,7 @@
 // @vitest-environment node
-import fs from 'node:fs'
-import path from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { loadProgram, skipNote } from '../../step-log/lesson-block'
+import { displayProblems, isAnswerSource } from '../../step-log/lesson-source'
 import { validateDescriptor, validateStepLog } from '../../step-log/validate'
 import { buildLog, type PresetSpec } from './build'
 import { linkedListDescriptor } from './descriptor'
@@ -20,10 +20,13 @@ import fastSlow from './recordings/fast-and-slow-pointers.json'
 
 /**
  * Truthful by construction (spec P6): every pointer state on screen is a
- * probe hit of a real Node 24 run of the lesson's own code. These tests
- * re-run every program, compare the committed recordings, rebuild every
- * log from the fresh recording, and check the register's verification
- * assertions (R4) against the recorded run.
+ * probe hit of a real Node 24 run of the lesson's own code. The code is
+ * premium lesson text, never committed: with a local content checkout these
+ * tests check each block's sha256, re-run every program, compare the
+ * committed recordings and check every pane row against the program. Without
+ * one (CI) those tests skip, saying why; the rest (rebuilding every log from
+ * the committed recording, the register's verification assertions (R4) and
+ * the lies that must fail) run everywhere.
  */
 
 const RECORDINGS = { 'linked-list-reversal': reversal, 'linked-lists': lists, 'fast-and-slow-pointers': fastSlow } as unknown as Record<
@@ -42,19 +45,39 @@ const SPECS: Record<string, PresetSpec> = {
 
 const programs = Object.values(POINTER_PROGRAMS).flat() as PointerProgram[]
 
+/** Each program as run, from the local content checkout (or why it is absent). */
+const LOADED = new Map(programs.map((p) => [p.id, loadProgram(p.source)] as const))
+const textOf = (p: PointerProgram) => {
+  const l = LOADED.get(p.id)!
+  if (!l.ok) throw new Error(skipNote(l.missing))
+  return l.text
+}
+const absent = (p: PointerProgram) => !LOADED.get(p.id)!.ok
+/** The test's name, with the reason when it skips (no checkout). */
+const named = (p: PointerProgram, name: string) => {
+  const l = LOADED.get(p.id)!
+  return l.ok ? name : `${name} (skipped: ${skipNote(l.missing)})`
+}
+
 describe.each(programs.map((p) => [p.id, p] as const))('program %s', (_id, p) => {
-  it('matches a fresh Node 24 run: hash, plain output, every probe hit', () => {
-    expect(verifyRecording(p, recordingOf(p))).toEqual([])
+  it.skipIf(absent(p))(named(p, 'is the lesson blocks it names (sha256) and matches a fresh Node 24 run: plain output, every probe hit'), () => {
+    expect(verifyRecording(p, recordingOf(p), textOf(p))).toEqual([])
   })
 
-  it('runs the lesson lines untouched: the probes only add lines', () => {
-    const out = instrument(p).split('\n')
+  it.skipIf(absent(p))(named(p, 'runs the lesson lines untouched: the probes only add lines'), () => {
+    const out = instrument(p, textOf(p)).split('\n')
     let k = 0
-    for (const line of p.snippet.split('\n')) {
+    for (const line of textOf(p).split('\n')) {
       while (k < out.length && out[k] !== line) k++
       expect(k, `lost "${line}"`).toBeLessThan(out.length)
       k++
     }
+  })
+
+  it('commits no solution code: the harness is calls and a blank line, the recording values only', () => {
+    for (const part of p.source) if ('code' in part) expect(part.code).not.toMatch(/^\s*(class|function)\s/m)
+    const rec = recordingOf(p)
+    expect(Object.keys(rec).sort()).toEqual(['hits', 'labels', 'observed', 'sha256'])
   })
 })
 
@@ -67,13 +90,17 @@ describe.each(linkedListDescriptor.presets.map((p) => [p.id, p.log] as const))('
     expect(verifyLog(log, SPECS[id])).toEqual([])
   })
 
-  it('shows the lesson function, only reflowed (whitespace aside, every character is the lesson’s)', () => {
-    const p = SPECS[id].program
-    const lines = p.snippet.split('\n')
-    const first = lines.findIndex((l) => l.trim() === p.shown.first.text)
-    const fn = lines.slice(first, first + 60).join('\n')
-    const shown = log.code!.lines.join('\n').replace(/\s+/g, '')
-    expect(fn.replace(/\s+/g, '').startsWith(shown)).toBe(true)
+  it.skipIf(absent(SPECS[id].program))(named(SPECS[id].program, 'shows the lesson function, only reflowed (whitespace aside, every character is the lesson’s)'), () => {
+    const spec = SPECS[id]
+    expect(displayProblems(textOf(spec.program).split('\n'), spec.display, { maxCols: 40, blankRows: true })).toEqual([])
+  })
+
+  it('commits a practice answer only as rows without text, a lesson example as its rows', () => {
+    const spec = SPECS[id]
+    const answer = isAnswerSource(spec.program.source)
+    for (const r of spec.display) expect('wrap' in r, `${id} row ${r.src}`).toBe(answer)
+    expect(Boolean(log.code?.premium)).toBe(answer)
+    expect(log.source.snippet).toBeUndefined()
   })
 })
 
@@ -209,25 +236,25 @@ describe('the truth harness catches a lying recording', () => {
   const p = reverseBetweenSpec.program
   const rec = recordingOf(p)
 
-  it('fails when a recorded pointer differs from the real run', () => {
+  it.skipIf(absent(p))(named(p, 'fails when a recorded pointer differs from the real run'), () => {
     const hits = rec.hits.map((h, i) => (i === 2 ? { ...h, vars: { ...h.vars, current: 3 } } : h))
-    expect(verifyRecording(p, { ...rec, hits }).join('\n')).toMatch(/committed hits .* differs from a real run/)
+    expect(verifyRecording(p, { ...rec, hits }, textOf(p)).join('\n')).toMatch(/committed hits .* differs from a real run/)
   })
 
-  it('fails when a recorded arrow differs from the real run', () => {
+  it.skipIf(absent(p))(named(p, 'fails when a recorded arrow differs from the real run'), () => {
     const hits = rec.hits.map((h, i) => (i === 5 ? { ...h, next: [1, 2, 3, 4, null] } : h))
-    expect(verifyRecording(p, { ...rec, hits }).join('\n')).toMatch(/differs from a real run/)
+    expect(verifyRecording(p, { ...rec, hits }, textOf(p)).join('\n')).toMatch(/differs from a real run/)
   })
 
-  it('fails when the snippet changes without re-recording', () => {
-    const edited = { ...p, snippet: p.snippet.replace('new ListNode(5);', 'new ListNode(6);') }
-    const errors = verifyRecording(edited, rec).join('\n')
-    expect(errors).toMatch(/snippet changed/)
+  it.skipIf(absent(p))(named(p, 'fails when the program changes without re-recording'), () => {
+    const edited = textOf(p).replace('new ListNode(5);', 'new ListNode(6);')
+    const errors = verifyRecording(p, rec, edited).join('\n')
+    expect(errors).toMatch(/program changed/)
     expect(errors).toMatch(/differs from a real run/)
   })
 
-  it('fails when the committed output is not what the program prints', () => {
-    expect(verifyRecording({ ...p, observed: ['1', '2', '3', '4', '5'] }, rec).join('\n')).toMatch(/the program prints/)
+  it.skipIf(absent(p))(named(p, 'fails when the committed output is not what the program prints'), () => {
+    expect(verifyRecording({ ...p, observed: ['1', '2', '3', '4', '5'] }, rec, textOf(p)).join('\n')).toMatch(/the program prints/)
   })
 
   it('fails when a step draws a pointer or an arrow the run never had', () => {
@@ -242,54 +269,19 @@ describe('the truth harness catches a lying recording', () => {
     expect(verifyLog({ ...log, steps: moved }, reverseBetweenSpec).join('\n')).toMatch(/step 3: state/)
   })
 
-  it('fails when the code shown is not the lesson’s beyond whitespace', () => {
-    const display = reverseBetweenSpec.display.map((l) => l.replace('n - m + 1', 'n - m'))
-    expect(() => buildLog({ ...reverseBetweenSpec, display })).toThrow(/differs from the lesson code beyond whitespace/)
+  it.skipIf(absent(p))(named(p, 'fails when the code shown is not the lesson’s beyond whitespace'), () => {
+    const display = reverseBetweenSpec.display.map((r) => ('text' in r ? { ...r, text: r.text.replace('n - m + 1', 'n - m') } : r))
+    expect(displayProblems(textOf(p).split('\n'), display, { maxCols: 40, blankRows: true }).join('\n')).toMatch(/is not the next part of/)
+  })
+
+  it.skipIf(absent(palindromeOddSpec.program))(named(palindromeOddSpec.program, 'fails when an answer row slices its line wrong'), () => {
+    const display = palindromeOddSpec.display.map((r, i) => (i === 1 && 'wrap' in r ? { ...r, wrap: [r.wrap[0], r.wrap[1] + 2, r.wrap[2]] as const } : r))
+    expect(displayProblems(textOf(palindromeOddSpec.program).split('\n'), display, { maxCols: 40, blankRows: true }).join('\n')).toMatch(/line 10/)
   })
 
   it('fails when the output a step shows is not the trace (the shared lint)', () => {
     const log = buildLog(reverseBetweenSpec)
     const steps = log.steps.map((s, i) => (i === 4 ? { ...s, state: { ...s.state, output: ['1'] } } : s))
     expect(validateStepLog({ ...log, steps }, linkedListIntrospection).join('\n')).toMatch(/trace so far is \[\]/)
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Local only (premium lessons are never committed): the snippets are the
-// lesson's code blocks, byte for byte, in a local content checkout.
-// ---------------------------------------------------------------------------
-
-const CONTENT = path.join(process.cwd(), 'src', 'content', 'dsa-track')
-const lesson = (rel: string) => path.join(CONTENT, rel)
-const blocks = (file: string) => [...fs.readFileSync(file, 'utf8').matchAll(/```(?:javascript|typescript)\n([\s\S]*?)```/g)].map((m) => m[1])
-
-describe.skipIf(!fs.existsSync(lesson('common-techniques/linked-list-reversal/page.mdx')))('byte identity with the local lessons', () => {
-  it('reverseBetween and the full reversal are the lesson’s JavaScript blocks', () => {
-    const b = blocks(lesson('common-techniques/linked-list-reversal/page.mdx'))
-    const rb = reverseBetweenSpec.program.snippet
-    expect(rb.endsWith(b[2].replace(/\n$/, ''))).toBe(true)
-    expect(b[0].startsWith(rb.split('\n\n')[0])).toBe(true)
-    expect(reverseFullProgram.snippet).toBe(b[0].replace(/\n$/, ''))
-  })
-
-  it('detectCycle is the lesson’s JavaScript block (the function, before its example)', () => {
-    const b = blocks(lesson('common-techniques/fast-and-slow-pointers/page.mdx'))
-    const fn = b[2].split('// Example usage:')[0].replace(/\n+$/, '')
-    expect(detectCycleProgram.snippet).toContain(fn)
-    expect(b[0].startsWith(detectCycleProgram.snippet.split('\n\n')[0])).toBe(true)
-  })
-
-  it('isPalindrome is the practice answer, byte for byte', () => {
-    const file = lesson('user-defined-data-structures/_lessons.json')
-    const all = JSON.parse(fs.readFileSync(file, 'utf8')).lessons.flatMap((l: { problems: { id: string; answer: string }[] }) => l.problems)
-    const answer: string = all.find((q: { id: string }) => q.id === 'palindrome-linked-list').answer
-    const code = answer.match(/```typescript\n([\s\S]*?)```/)![1]
-    const [comment, fn] = code.split('*/\n\n')
-    for (const spec of [palindromeOddSpec, palindromeEvenSpec, palindromeFalseSpec]) {
-      expect(spec.program.snippet).toContain(fn.replace(/\n$/, ''))
-      // The harness class is the answer's own comment, uncommented.
-      const cls = comment.split('\n').slice(2, -1).map((l) => l.slice(3)).join('\n')
-      expect(spec.program.snippet.startsWith(cls)).toBe(true)
-    }
   })
 })

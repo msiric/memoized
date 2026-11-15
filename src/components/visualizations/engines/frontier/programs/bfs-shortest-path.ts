@@ -9,9 +9,9 @@ import type { FrontierProgram } from './types'
 export const bfsShortestPath: FrontierProgram = {
   id: "bfs-shortest-path",
   lang: "js",
-  source: { path: "content/dsa-track/common-techniques/graph-bfs/page.mdx", at: "## **Graph BFS for Finding Shortest Path** (javascript)" },
-  // Byte for byte (a JSON string, so no character is reinterpreted).
-  lesson: "function bfsShortestPath(graph, start) {\n    let distances = {};\n    let queue = [start];\n    distances[start] = 0;\n\n    while (queue.length > 0) {\n        let vertex = queue.shift();\n\n        for (let neighbor of graph[vertex]) {\n            if (!(neighbor in distances)) {\n                distances[neighbor] = distances[vertex] + 1;\n                queue.push(neighbor);\n            }\n        }\n    }\n\n    return distances;\n}\n\n// Example usage:\nconst graph = {\n    A: ['B', 'C'],\n    B: ['A', 'D', 'E'],\n    C: ['A', 'F'],\n    D: ['B'],\n    E: ['B', 'F'],\n    F: ['C', 'E']\n};\nconsole.log(bfsShortestPath(graph, 'A'));  // Output: { A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }",
+  source: [
+    { block: { path: "content/dsa-track/common-techniques/graph-bfs/page.mdx", heading: "## **Graph BFS for Finding Shortest Path**", lang: "javascript" }, lessonSha256: "6f493663e73930157902c7cb20a6e5243e50eea50bd304530baac030fbe314e1" },
+  ],
   display: [
     { text: "function bfsShortestPath(graph,", src: 1 },
     { text: "    start) {", src: 1 },

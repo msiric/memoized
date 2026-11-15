@@ -1,3 +1,4 @@
+import type { DisplayRow } from '../../../step-log/lesson-source'
 import { buildLog, type PresetSpec, type WordsContext } from '../build'
 import { nodeName, pointerAt, type LLState } from '../model'
 import { palindromeEvenProgram, palindromeFalseProgram, palindromeOddProgram } from '../programs/linked-lists'
@@ -13,35 +14,40 @@ import type { PointerProgram, PointerRecording } from '../program'
  * recorded probe hit; the presets add words and the prediction.
  */
 
-export const PALINDROME_DISPLAY = [
-  'function isPalindrome(',
-  '  head: ListNode | null',
-  '): boolean {',
-  '  let slow: ListNode = head,',
-  '    fast: ListNode = head.next;',
-  '  while (fast != null &&',
-  '         fast.next != null) {',
-  '    slow = slow.next;',
-  '    fast = fast.next.next;',
-  '  }',
-  '  let cur: ListNode =',
-  '    slow.next;',
-  '  slow.next = null;',
-  '  let prev: ListNode = null;',
-  '  while (cur != null) {',
-  '    let t: ListNode = cur.next;',
-  '    cur.next = prev;',
-  '    prev = cur;',
-  '    cur = t;',
-  '  }',
-  '  while (prev != null) {',
-  '    if (prev.val != head.val)',
-  '      return false;',
-  '    prev = prev.next;',
-  '    head = head.next;',
-  '  }',
-  '  return true;',
-  '}',
+/**
+ * The pane: the answer's function, reflowed to the pane. A practice answer
+ * is never committed as text: each row is [indent, from, to] of a line of
+ * the program as run, resolved from the content for a page.
+ */
+export const PALINDROME_DISPLAY: readonly DisplayRow[] = [
+  { src: 10, wrap: [0, 0, 22] },
+  { src: 10, wrap: [2, 22, 43] },
+  { src: 10, wrap: [0, 43, 55] },
+  { src: 11, wrap: [2, 0, 26] },
+  { src: 12, wrap: [4, 0, 27] },
+  { src: 13, wrap: [2, 0, 22] },
+  { src: 13, wrap: [9, 23, 43] },
+  { src: 14, wrap: [4, 0, 17] },
+  { src: 15, wrap: [4, 0, 22] },
+  { src: 16, wrap: [2, 0, 1] },
+  { src: 17, wrap: [2, 0, 19] },
+  { src: 17, wrap: [4, 20, 30] },
+  { src: 18, wrap: [2, 0, 17] },
+  { src: 19, wrap: [2, 0, 26] },
+  { src: 20, wrap: [2, 0, 21] },
+  { src: 21, wrap: [4, 0, 27] },
+  { src: 22, wrap: [4, 0, 16] },
+  { src: 23, wrap: [4, 0, 11] },
+  { src: 24, wrap: [4, 0, 8] },
+  { src: 25, wrap: [2, 0, 1] },
+  { src: 26, wrap: [2, 0, 22] },
+  { src: 27, wrap: [4, 0, 25] },
+  { src: 27, wrap: [6, 26, 39] },
+  { src: 28, wrap: [4, 0, 17] },
+  { src: 29, wrap: [4, 0, 17] },
+  { src: 30, wrap: [2, 0, 1] },
+  { src: 31, wrap: [2, 0, 12] },
+  { src: 32, wrap: [0, 0, 1] },
 ]
 
 const rec = recordings as unknown as Record<string, PointerRecording>
@@ -120,7 +126,7 @@ const START = (list: string) => ({
 })
 
 const TRUE_END = {
-  line: { text: 'return true;' },
+  line: 31,
   event: 'Return true',
   why: 'prev reached null with every pair equal, so the list reads the same both ways. The input list stays cut.',
   narration: 'isPalindrome returns true, and the harness prints it.',
@@ -195,7 +201,7 @@ export const palindromeFalseSpec: PresetSpec = {
   ...spec('palindrome-1231', palindromeFalseProgram),
   start: START('1, 2, 3, 1'),
   end: {
-    line: { text: 'if (prev.val != head.val) return false;' },
+    line: 27,
     event: '3 is not 2: return false',
     why: 'prev.val is 3 and head.val is 2, so the halves differ and the function returns false at once.',
     narration: 'isPalindrome returns false, and the harness prints it.',

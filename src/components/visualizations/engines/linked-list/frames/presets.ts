@@ -1,4 +1,4 @@
-import type { StaticPreset, VerifiedProgram } from '../../../shell/static-types'
+import type { HashedProgram, StaticPreset } from '../../../shell/static-types'
 import { stateOf } from '../build'
 import { walk, type LLState } from '../model'
 import type { PointerProgram, PointerRecording, ProbeHit } from '../program'
@@ -18,9 +18,8 @@ import type { FramesData, RhoPanel, RowPanel } from './model'
 
 const REC = { ...reversal, ...fastSlow } as unknown as Record<string, PointerRecording>
 
-export const verified = (p: PointerProgram, rec: PointerRecording): VerifiedProgram => ({
+export const verified = (p: PointerProgram, rec: PointerRecording): HashedProgram => ({
   id: p.id,
-  snippet: p.snippet,
   runtime: p.runtime,
   sha256: p.sha256,
   observed: rec.observed,
@@ -105,7 +104,7 @@ export function floydData(rec: PointerRecording): FramesData {
 const reversalRec = REC[reverseFullProgram.id]
 const floydRec = REC[detectCycleProgram.id]
 
-export const fullReversalStrip: StaticPreset<FramesData> = {
+export const fullReversalStrip: StaticPreset<FramesData, HashedProgram> = {
   id: 'full-reversal-strip',
   label: 'Full reversal',
   title: 'Reversal: one arrow per pass',
@@ -115,7 +114,7 @@ export const fullReversalStrip: StaticPreset<FramesData> = {
   data: fullReversalData(reversalRec),
 }
 
-export const floydRho: StaticPreset<FramesData> = {
+export const floydRho: StaticPreset<FramesData, HashedProgram> = {
   id: 'floyd-rho',
   label: 'Floyd rho',
   title: 'Floyd: meeting point, then entry',

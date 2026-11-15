@@ -78,7 +78,13 @@ export default async function LessonContextPage({ params }: { params: { slug: st
     )
   } else {
     const { mdxOptions } = await import('@/mdx/index.mjs')
-    const serialized = await serialize({ source, options: { mdxOptions, scope: {} } })
+    // As `sync-content.ts` does: a practice answer's pane comes from the local
+    // content checkout (absent: that visual renders nothing).
+    const { remarkVizCode } = await import('@/components/visualizations/step-log/remark-viz-code')
+    const serialized = await serialize({
+      source,
+      options: { mdxOptions: { ...mdxOptions, remarkPlugins: [...mdxOptions.remarkPlugins, remarkVizCode] }, scope: {} },
+    })
     if ('error' in serialized) throw serialized.error
     body = (
       <div data-lesson-context={fixture.slug}>

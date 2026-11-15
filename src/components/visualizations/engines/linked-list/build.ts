@@ -7,7 +7,8 @@ import {
   type LLLanes,
   type LLState,
 } from './model'
-import { reflowMap, resolveLine, shownLines, type LineRef, type PointerProgram, type PointerRecording, type ProbeHit } from './program'
+import { hasWrapRows, placeholderText, type DisplayRow } from '../../step-log/lesson-source'
+import type { PointerProgram, PointerRecording, ProbeHit } from './program'
 
 /**
  * Builds a step-through from a recording (spec P6): one step per probe hit,
@@ -38,11 +39,17 @@ export type PresetSpec = {
   program: PointerProgram
   recording: PointerRecording
   lanes: LLLanes
-  /** The reader's code: the lesson function reflowed to the pane (only whitespace may differ). */
-  display: readonly string[]
+  /**
+   * The reader's code: the lesson function reflowed to the pane (only
+   * whitespace may differ), one row per entry, `src` a line of the program
+   * as run. A practice answer's rows carry no text (`wrap`, resolved for a
+   * page); the truth test checks every row against the content locally.
+   */
+  display: readonly DisplayRow[]
   start: StepWords
   words: Record<string, (c: WordsContext) => StepWords>
-  end: StepWords & { line: LineRef }
+  /** The end step's line of the program as run. */
+  end: StepWords & { line: number }
   checkpoints: (steps: readonly Step<LLState>[]) => Checkpoint[]
 }
 
@@ -72,19 +79,17 @@ export function changes(before: LLState, after: LLState): string[] {
 
 export function buildLog(spec: PresetSpec): StepLog<LLState> {
   const { program: p, recording: rec } = spec
-  const lines = p.snippet.split('\n')
-  const shownFirst = resolveLine(lines, p.shown.first, `${p.id}: `)
-  const map = reflowMap(shownLines(p), spec.display)
-  const displayLine = (ref: LineRef): number => {
-    const i = resolveLine(lines, ref, `${p.id}: `) - shownFirst
-    const r = map.get(i)
-    if (!r) throw new Error(`${p.id}: "${ref.text}" is not in the shown code`)
-    return r[0]
+  // The pane's rows (1-based) that show program lines `a` to `b`.
+  const rowsOf = (a: number, b: number) => spec.display.flatMap((d, i) => (d.src >= a && d.src <= b && ('text' in d ? d.text.trim() : d.wrap[2] > d.wrap[1]) ? [i + 1] : []))
+  const displayLine = (line: number): number => {
+    const rows = rowsOf(line, line)
+    if (!rows.length) throw new Error(`${p.id}: line ${line} is not in the shown code`)
+    return rows[0]
   }
-  const range = (ref: LineRef, from?: LineRef): StepLine => {
-    const a = from ? displayLine(from) : displayLine(ref)
-    const bLine = resolveLine(lines, ref, `${p.id}: `) - shownFirst
-    const b = map.get(bLine)![1]
+  const range = (after: number, from?: number): StepLine => {
+    const rows = rowsOf(from ?? after, after)
+    if (!rows.length) throw new Error(`${p.id}: lines ${from ?? after}-${after} are not in the shown code`)
+    const [a, b] = [rows[0], rows[rows.length - 1]]
     return a === b ? a : [a, b]
   }
   const v = (state: LLState) => (i: number | null) => (i === null ? 'null' : state.nodes[i].label)
@@ -128,8 +133,12 @@ export function buildLog(spec: PresetSpec): StepLog<LLState> {
   const log: StepLog<LLState> = {
     id: spec.id,
     schema: 1,
-    source: { snippet: p.snippet, runtime: p.runtime, generator: POINTER_GENERATOR, sha256: p.sha256 },
-    code: { lang: p.lang, lines: spec.display },
+    source: { runtime: p.runtime, generator: POINTER_GENERATOR, sha256: p.sha256 },
+    code: {
+      lang: p.lang,
+      lines: placeholderText(spec.display),
+      ...(hasWrapRows(spec.display) ? { premium: { source: p.source, rows: spec.display } } : {}),
+    },
     steps,
     checkpoints: [],
     observed: { log: rec.observed },

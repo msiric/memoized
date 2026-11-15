@@ -1,7 +1,7 @@
 // @vitest-environment node
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
+import { loadProgram, skipNote } from '../../step-log/lesson-block'
+import { displayProblems as rowProblems, displayText, isAnswerSource } from '../../step-log/lesson-source'
 import { sha256 } from '../../step-log/truth'
 import type { StepLog } from '../../step-log/types'
 import { LIMITS, validateDescriptor, validateStepLog } from '../../step-log/validate'
@@ -15,16 +15,18 @@ import matrixRec from './recordings/binary-matrix.json'
 import iteratorRec from './recordings/bst-iterator.json'
 import dijkstraRec from './recordings/dijkstra.json'
 import effortRec from './recordings/min-effort.json'
-import { programText, recordFrontier } from './truth/record'
+import { recordFrontier } from './truth/record'
 
 /**
  * Truthful by construction (spec P6): every frontier preset is built from a
  * recording of the lesson's own code block (byte for byte), run in Node 24
- * under the inspector. These tests re-record every program and require the
- * committed recording to match exactly, check the register's verification
- * assertions against the fresh run, check that what each step draws is a
- * state the run passed through, and show that a lying recording, an edited
- * program or a lying step fails.
+ * under the inspector. The block is premium text, never committed: with a
+ * local content checkout these tests check its sha256, re-record every
+ * program and require the committed recording to match exactly, and check
+ * the pane's rows against the block. Without one (CI), those tests skip,
+ * saying why, and everything else runs on the committed recordings: the
+ * register's verification assertions, that what each step draws is a state
+ * the run passed through, and that a lying recording or step fails.
  */
 
 const RECORDINGS: Record<string, FrontierRecording> = {
@@ -37,12 +39,27 @@ const RECORDINGS: Record<string, FrontierRecording> = {
 const program = (id: string) => FRONTIER_PROGRAMS.find((p) => p.id === id)!
 const log = (id: string) => frontierDescriptor.presets.find((p) => p.id === id)!.log
 
+/** Each program as run, from the local content checkout (or why it is absent). */
+const LOADED = new Map(FRONTIER_PROGRAMS.map((p) => [p.id, loadProgram(p.source)] as const))
+const textOf = (id: string) => {
+  const l = LOADED.get(id)!
+  if (!l.ok) throw new Error(skipNote(l.missing))
+  return l.text
+}
+/** A test that needs the program's text: skipped, with the reason in its name, when the checkout lacks it. */
+const withText = (id: string, name: string) => {
+  const l = LOADED.get(id)!
+  return [l.ok ? name : `${name} (skipped: ${skipNote(l.missing)})`, !l.ok] as const
+}
+
 /** Fresh recordings, one per program (each is a Node run under the inspector). */
 const fresh = new Map<string, FrontierRecording & { runtime: string }>()
 const record = (id: string) => {
-  if (!fresh.has(id)) fresh.set(id, recordFrontier(program(id)))
+  if (!fresh.has(id)) fresh.set(id, recordFrontier(program(id), textOf(id)))
   return fresh.get(id)!
 }
+/** The committed recording: equal to a fresh run wherever the checkout can check it. */
+const recorded = (id: string) => RECORDINGS[id]
 
 /** Which program each preset is built from. */
 const PRESET_PROGRAM: Record<string, string> = {
@@ -84,33 +101,39 @@ function drawnNotRecorded(id: string, l: StepLog<FrontierState>, rec: FrontierRe
 }
 
 describe.each(FRONTIER_PROGRAMS.map((p) => [p.id, p] as const))('program %s', (id, p) => {
-  it('matches a fresh Node 24 run under the inspector (hash, output, every pause)', () => {
+  it.skipIf(withText(id, '')[1])(withText(id, 'is the lesson block it names (sha256) and matches a fresh Node 24 run under the inspector')[0], () => {
     const run = record(id)
     expect(run.runtime).toMatch(/^node@24\./)
     const { runtime: _r, ...rec } = run
     expect(rec).toEqual(RECORDINGS[id])
-    expect(rec.sha256).toBe(sha256(programText(p)))
+    expect(rec.sha256).toBe(sha256(textOf(id)))
   })
 
-  it('shows the lesson lines, rewrapped only at their own spaces, in 35 columns', () => {
-    expect(displayProblems(p)).toEqual([])
+  it.skipIf(withText(id, '')[1])(withText(id, 'shows the lesson lines, rewrapped only at their own spaces, in 35 columns')[0], () => {
+    expect(displayProblems(p, textOf(id))).toEqual([])
+  })
+
+  it('commits a practice answer only as rows without text, a lesson example as its rows', () => {
+    const answer = isAnswerSource(p.source)
+    for (const r of p.display) expect('wrap' in r, `${id} row ${r.src}`).toBe(answer)
+    // The harness is a call with the register's input, never a declaration.
+    for (const part of p.source) if ('code' in part) expect(part.code).not.toMatch(/^\s*(class|function)\s/m)
   })
 })
 
-/** The pane's rows rejoin into the lesson's lines (whitespace runs only), in order, over one contiguous span. */
-function displayProblems(p: FrontierProgram): string[] {
-  const problems: string[] = []
-  const lesson = p.lesson.split('\n')
-  const srcs = [...new Set(p.display.map((d) => d.src))]
-  for (let k = 1; k < srcs.length; k++) if (srcs[k] <= srcs[k - 1]) problems.push(`line ${srcs[k]} after ${srcs[k - 1]}`)
-  const [a, b] = [srcs[0], srcs[srcs.length - 1]]
-  for (let l = a; l <= b; l++) {
-    const want = lesson[l - 1].trim().replace(/\s+/g, ' ')
-    const rows = p.display.filter((d) => d.src === l).map((d) => d.text.trim())
-    if (!want && rows.length) problems.push(`blank line ${l} is shown`)
-    if (want && rows.join(' ') !== want) problems.push(`line ${l}: ${JSON.stringify(rows)} is not ${JSON.stringify(want)}`)
+/**
+ * The pane's rows (`lesson-source.ts`), and for a lesson example, its rows
+ * rejoin into the lesson's lines at their own spaces only.
+ */
+function displayProblems(p: FrontierProgram, text: string): string[] {
+  const lines = text.split('\n')
+  const problems = rowProblems(lines, p.display, { maxCols: 35, blankRows: false })
+  const shown = displayText(lines, p.display)
+  for (const l of new Set(p.display.map((d) => d.src))) {
+    const want = lines[l - 1].trim().replace(/\s+/g, ' ')
+    const rows = p.display.flatMap((d, i) => (d.src === l ? [shown[i].trim()] : []))
+    if (rows.join(' ') !== want) problems.push(`line ${l}: ${JSON.stringify(rows)} is not ${JSON.stringify(want)}`)
   }
-  for (const d of p.display) if ([...d.text].length > 35) problems.push(`"${d.text}" is over 35 columns`)
   return problems
 }
 
@@ -119,15 +142,17 @@ describe.each(frontierDescriptor.presets.map((p) => [p.id, p.log] as const))('bf
     expect(validateStepLog(l, frontierIntrospection)).toEqual([])
   })
 
-  it('runs exactly the program it was recorded from', () => {
+  it('names the program it was recorded from (hash and output), never its text', () => {
     const p = program(PRESET_PROGRAM[id])
-    expect(l.source.snippet).toBe(programText(p))
-    expect(l.source.sha256).toBe(sha256(l.source.snippet))
-    expect(l.observed.log).toEqual(record(p.id).stdout)
+    expect(l.source.snippet).toBeUndefined()
+    expect(l.source.sha256).toBe(recorded(p.id).sha256)
+    expect(l.observed.log).toEqual(recorded(p.id).stdout)
+    // A practice answer's pane is placeholders until a page resolves it.
+    expect(Boolean(l.code?.premium)).toBe(isAnswerSource(p.source))
   })
 
   it('draws only frontiers the run passed through', () => {
-    expect(drawnNotRecorded(PRESET_PROGRAM[id], l, record(PRESET_PROGRAM[id]))).toEqual([])
+    expect(drawnNotRecorded(PRESET_PROGRAM[id], l, recorded(PRESET_PROGRAM[id]))).toEqual([])
   })
 
   it('keeps the canvas header on one line at 320 (title and locals)', () => {
@@ -154,9 +179,9 @@ describe('bfs-dfs-frontier descriptor', () => {
   })
 })
 
-describe('the register verification assertions hold on a fresh run', () => {
+describe('the register verification assertions hold on the recorded run (a fresh one, where the checkout can check it)', () => {
   it('Graph BFS: bfsShortestPath ends A0 B1 C1 D2 E2 F2; C, not E, labels F', () => {
-    const run = record('bfs-shortest-path')
+    const run = recorded('bfs-shortest-path')
     expect(run.stdout).toEqual(['{ A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 }'])
     expect(run.pauses.at(-1)!.vars.distances).toEqual({ A: 0, B: 1, C: 1, D: 2, E: 2, F: 2 })
     const firstF = run.pauses.find((p) => p.probe === 'check' && p.vars.neighbor === 'F')!
@@ -172,7 +197,7 @@ describe('the register verification assertions hold on a fresh run', () => {
   })
 
   it('Graph BFS: shortestPathBinaryMatrix logs q per level and returns 4', () => {
-    const run = record('binary-matrix')
+    const run = recorded('binary-matrix')
     expect(run.stdout).toEqual(['4'])
     const levels = run.pauses.filter((p) => p.probe === 'level').map((p) => [p.vars.ans, p.vars.q])
     expect(levels).toEqual([
@@ -184,7 +209,7 @@ describe('the register verification assertions hold on a fresh run', () => {
   })
 
   it('Shortest paths: pops 0@0 4@3 3@5 2@6 1@8, skips the stale (9, 1), returns [0, 8, 6, 5, 3]', () => {
-    const run = record('dijkstra')
+    const run = recorded('dijkstra')
     const popped = run.pauses.filter((p) => p.probe === 'popped').map((p) => {
       const { u, uDist, dist } = p.vars as { u: number; uDist: number; dist: unknown[] }
       return uDist > (dist[u] as number) ? `stale(${u},${uDist})` : `${u}@${uDist}`
@@ -199,14 +224,14 @@ describe('the register verification assertions hold on a fresh run', () => {
   })
 
   it('Shortest paths: the minimum-effort answer is 2, after [2, 2] was first offered 3', () => {
-    const run = record('min-effort')
+    const run = recorded('min-effort')
     expect(run.stdout).toEqual(['2'])
     const offers = run.pauses.filter((p) => p.probe === 'relax' && p.vars.x === 2 && p.vars.y === 2).map((p) => p.vars.d)
     expect(offers).toEqual([3, 2])
   })
 
   it('Trees: the constructor leaves [20, 10, 5]; after next() returns 20 the stack is [30, 25]', () => {
-    const run = record('bst-iterator')
+    const run = recorded('bst-iterator')
     expect(run.pauses.find((p) => p.probe === 'pop')!.vars.stack).toEqual([20, 10, 5])
     const ret20 = run.pauses.find((p) => p.probe === 'return' && p.vars.res === 20)!
     expect(ret20.vars.stack).toEqual([30, 25])
@@ -217,7 +242,7 @@ describe('the register verification assertions hold on a fresh run', () => {
 })
 
 describe('the truth checks catch a lie', () => {
-  it('fails when a committed pause differs from the real run', () => {
+  it.skipIf(withText('bfs-shortest-path', '')[1])(withText('bfs-shortest-path', 'fails when a committed pause differs from the real run')[0], () => {
     const rec = structuredClone(RECORDINGS['bfs-shortest-path'])
     const check = rec.pauses.find((p) => p.probe === 'check' && p.vars.neighbor === 'F')!
     check.vars.vertex = 'E'
@@ -225,11 +250,11 @@ describe('the truth checks catch a lie', () => {
     expect(run).not.toEqual(rec)
   })
 
-  it('fails when the program changes without re-recording', () => {
-    const p = program('dijkstra')
-    const edited = { ...p, lesson: p.lesson.replace('graph.addEdge(2, 1, 2);', 'graph.addEdge(2, 1, 4);') }
-    expect(sha256(programText(edited))).not.toBe(RECORDINGS.dijkstra.sha256)
-    expect(recordFrontier(edited).stdout).not.toEqual(RECORDINGS.dijkstra.stdout)
+  it.skipIf(withText('dijkstra', '')[1])(withText('dijkstra', 'fails when the program changes without re-recording')[0], () => {
+    // One more edge, 0 to 1 of weight 1, ahead of the example's own: dist[1] changes.
+    const edited = textOf('dijkstra').replace('graph.addEdge(', 'graph.addEdge(0, 1, 1);\ngraph.addEdge(')
+    expect(sha256(edited)).not.toBe(RECORDINGS.dijkstra.sha256)
+    expect(recordFrontier(program('dijkstra'), edited).stdout).not.toEqual(RECORDINGS.dijkstra.stdout)
   })
 
   it('fails when a step draws a frontier the run never had', () => {
@@ -238,7 +263,7 @@ describe('the truth checks catch a lie', () => {
     const steps = l.steps.map((s, i) =>
       i === reveal ? { ...s, state: { ...s.state, lanes: { stack: [{ id: 'k-25', label: '25' }] } } } : s,
     )
-    expect(drawnNotRecorded('bst-iterator', { ...l, steps }, record('bst-iterator'))).toEqual([`step ${reveal} stack ["25"]`])
+    expect(drawnNotRecorded('bst-iterator', { ...l, steps }, recorded('bst-iterator'))).toEqual([`step ${reveal} stack ["25"]`])
   })
 
   it('fails when a step claims output the run did not print', () => {
@@ -248,34 +273,15 @@ describe('the truth checks catch a lie', () => {
     expect(validateStepLog({ ...l, steps }, frontierIntrospection).join('\n')).toMatch(/trace so far is/)
   })
 
-  it('fails when the display drops or rewrites a lesson token', () => {
+  it.skipIf(withText('bfs-shortest-path', '')[1])(withText('bfs-shortest-path', 'fails when the display drops or rewrites a lesson token')[0], () => {
     const p = program('bfs-shortest-path')
-    const display = p.display.map((d) => (d.src === 11 && d.text.includes('+ 1') ? { ...d, text: d.text.replace('+ 1', '+ 2') } : d))
-    expect(displayProblems({ ...p, display }).join('\n')).toMatch(/line 11/)
+    const display = p.display.map((d) => ('text' in d && d.src === 11 && d.text.includes('+ 1') ? { ...d, text: d.text.replace('+ 1', '+ 2') } : d))
+    expect(displayProblems({ ...p, display }, textOf('bfs-shortest-path')).join('\n')).toMatch(/line 11/)
+  })
+
+  it.skipIf(withText('bst-iterator', '')[1])(withText('bst-iterator', 'fails when an answer row slices the line wrong')[0], () => {
+    const p = program('bst-iterator')
+    const display = p.display.map((d, i) => (i === 3 && 'wrap' in d ? { ...d, wrap: [d.wrap[0], d.wrap[1] + 1, d.wrap[2]] as const } : d))
+    expect(displayProblems({ ...p, display }, textOf('bst-iterator')).join('\n')).toMatch(/line 14/)
   })
 })
-
-/**
- * Byte identity with the lesson: when a local content checkout is present
- * (`src/content`, gitignored: premium lessons are never committed), each
- * program's block must be exactly the block the lesson or answer holds.
- */
-const CONTENT = join(process.cwd(), 'src', 'content')
-describe.each(FRONTIER_PROGRAMS.map((p) => [p.id, p] as const))('lesson block %s', (_id, p) => {
-  const file = join(CONTENT, p.source.path.replace(/^content\//, ''))
-  it.skipIf(!existsSync(file))('is byte-identical to the local content checkout', () => {
-    const text = readFileSync(file, 'utf8')
-    const blocks: string[] = []
-    if (file.endsWith('.json')) {
-      for (const lesson of JSON.parse(text).lessons) for (const q of lesson.problems) blocks.push(...fences(q.answer, 'typescript'))
-    } else blocks.push(...fences(text, 'javascript'))
-    expect(blocks).toContain(p.lesson)
-  })
-})
-
-function fences(text: string, lang: string): string[] {
-  const out: string[] = []
-  const re = new RegExp('```' + lang + '\\n([\\s\\S]*?)\\n```', 'g')
-  for (const m of text.matchAll(re)) out.push(m[1])
-  return out
-}

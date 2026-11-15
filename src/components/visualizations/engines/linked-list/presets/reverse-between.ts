@@ -1,3 +1,4 @@
+import type { DisplayRow } from '../../../step-log/lesson-source'
 import { buildLog, type PresetSpec } from '../build'
 import { reverseBetweenProgram } from '../programs/linked-list-reversal'
 import recordings from '../recordings/linked-list-reversal.json'
@@ -11,43 +12,44 @@ import type { PointerRecording } from '../program'
  * before `tail.next = current` (the temporary 1 -> 4 -> 3 -> 2 -> 1 loop).
  *
  * The code is the lesson function with its lines broken where a 375 px phone
- * would wrap them (the truth test checks only whitespace differs).
+ * would wrap them (the truth test checks only whitespace differs, against a
+ * local content checkout); `src` is the line of the program as run.
  */
 
-export const REVERSE_BETWEEN_DISPLAY = [
-  'function reverseBetween(',
-  '  head, m, n) {',
-  '  if (m === n) return head;',
-  '',
-  '  let current = head,',
-  '    previous = null;',
-  '  for (let i = 1; i < m; i++) {',
-  '    previous = current;',
-  '    current = current.next;',
-  '  }',
-  '',
-  '  const connection = previous;',
-  '  const tail = current;',
-  '',
-  '  let next = null;',
-  '  for (let i = 0;',
-  '       i < n - m + 1; i++) {',
-  '    next = current.next;',
-  '    current.next = previous;',
-  '    previous = current;',
-  '    current = next;',
-  '  }',
-  '',
-  '  if (connection !== null) {',
-  '    connection.next = previous;',
-  '  } else {',
-  '    head = previous;',
-  '  }',
-  '',
-  '  tail.next = current;',
-  '',
-  '  return head;',
-  '}',
+export const REVERSE_BETWEEN_DISPLAY: readonly DisplayRow[] = [
+  { src: 8, text: "function reverseBetween(" },
+  { src: 8, text: "  head, m, n) {" },
+  { src: 9, text: "  if (m === n) return head;" },
+  { src: 10, text: "" },
+  { src: 11, text: "  let current = head," },
+  { src: 11, text: "    previous = null;" },
+  { src: 12, text: "  for (let i = 1; i < m; i++) {" },
+  { src: 13, text: "    previous = current;" },
+  { src: 14, text: "    current = current.next;" },
+  { src: 15, text: "  }" },
+  { src: 16, text: "" },
+  { src: 17, text: "  const connection = previous;" },
+  { src: 18, text: "  const tail = current;" },
+  { src: 19, text: "" },
+  { src: 20, text: "  let next = null;" },
+  { src: 21, text: "  for (let i = 0;" },
+  { src: 21, text: "       i < n - m + 1; i++) {" },
+  { src: 22, text: "    next = current.next;" },
+  { src: 23, text: "    current.next = previous;" },
+  { src: 24, text: "    previous = current;" },
+  { src: 25, text: "    current = next;" },
+  { src: 26, text: "  }" },
+  { src: 27, text: "" },
+  { src: 28, text: "  if (connection !== null) {" },
+  { src: 29, text: "    connection.next = previous;" },
+  { src: 30, text: "  } else {" },
+  { src: 31, text: "    head = previous;" },
+  { src: 32, text: "  }" },
+  { src: 33, text: "" },
+  { src: 34, text: "  tail.next = current;" },
+  { src: 35, text: "" },
+  { src: 36, text: "  return head;" },
+  { src: 37, text: "}" },
 ]
 
 const recording = (recordings as unknown as Record<string, PointerRecording>)['reverse-between']
@@ -122,7 +124,7 @@ export const reverseBetweenSpec: PresetSpec = {
     }),
   },
   end: {
-    line: { text: 'return head;' },
+    line: 36,
     event: 'Print the list',
     why: 'head never moved because m > 1, so walking from it prints the reversed sublist between 1 and 5.',
     narration: 'The example prints 1 4 3 2 5.',

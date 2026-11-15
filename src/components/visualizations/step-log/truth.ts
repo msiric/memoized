@@ -68,6 +68,7 @@ export function verifyStepLogTruth<S>(log: StepLog<S>): { errors: string[]; reco
   if (source.generator !== NODE_CONSOLE_GENERATOR) {
     return { errors: [`${log.id}: no verifier for generator "${source.generator}"`] }
   }
+  if (source.snippet === undefined) return { errors: [`${log.id}: no committed snippet to re-run`] }
   const hash = sha256(source.snippet)
   if (hash !== source.sha256) errors.push(`${log.id}: snippet changed (sha256 ${hash}); re-record the log`)
 

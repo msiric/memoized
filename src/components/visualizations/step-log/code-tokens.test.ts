@@ -13,8 +13,8 @@ describe('pre-computed code tokens', () => {
     expect(await tokensFor(logs)).toEqual(committed)
   }, 60_000)
 
-  it('are attached to every preset that shows code', () => {
-    for (const log of logs) if (log.code) expect(log.code.tokens, log.id).toBeDefined()
+  it('are attached to every preset that shows committed code (a practice answer gets its tokens when a page resolves it)', () => {
+    for (const log of logs) if (log.code) expect(log.code.tokens, log.id)[log.code.premium ? 'toBeUndefined' : 'toBeDefined']()
   })
 
   it('stay readable on the code surface (4.5:1 against zinc-900)', () => {
