@@ -2,6 +2,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { descriptorFor, vizPremiumPresets } from '../src/components/visualizations/registry'
 
+// `part.block.path` is `content/<track>/...`: under `src/` in the app checkout.
+
 /**
  * Practice-answer frames are local-only (the premium-code policy): their
  * pane's text is resolved from a local content checkout (`src/content`),
@@ -15,7 +17,7 @@ export function localOnly(id: string, preset: string): boolean {
   return vizPremiumPresets(id, preset).some((p) =>
     d.presets
       .find((x) => x.id === p)!
-      .log.code!.premium!.source.some((part) => 'block' in part && !fs.existsSync(path.join(process.cwd(), 'src', part.block.path.replace(/^content\//, '')))),
+      .log.code!.premium!.source.some((part) => 'block' in part && !fs.existsSync(path.join(process.cwd(), 'src', part.block.path))),
   )
 }
 
