@@ -10,7 +10,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -21,6 +21,9 @@ export default function VisualizationGalleryPage({
   // (`VIZ_GALLERY=1 yarn build`); never set in deployed environments.
   if (process.env.NODE_ENV === 'production' && process.env.VIZ_GALLERY !== '1')
     notFound()
+
+  // `?fr=<preset>`: the frontier step-through alone (wave 2A), one lesson group per page.
+  if (searchParams.fr) return <FrontierGallery preset={searchParams.fr} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
   // Static figures: final server markup, no client JavaScript. `?static=1`
@@ -94,5 +97,26 @@ export default function VisualizationGalleryPage({
         </div>
       </div>
     </>
+  )
+}
+
+/** The frontier step-through (graphs, grids, trees) through the lazy mount, between lesson text. */
+function FrontierGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  const viz = <Viz id="bfs-dfs-frontier" preset={preset} />
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Frontier step-through</h1>
+          <p>
+            Which vertex is expanded next: a queue, a heap or a stack decides. Every drawn queue, distance and stack is
+            recorded from a real Node run of the lesson&apos;s code and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          {mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz}
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
   )
 }

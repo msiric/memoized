@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import { GALLERY, LESSONS, lessonUrl, open, settle } from './drive'
+import { FR, GALLERY, LESSONS, frUrl, lessonUrl, open, settle } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -147,6 +147,55 @@ for (const width of [375, 1440]) {
     expect(diffs).toEqual([])
   })
 }
+
+/**
+ * The frontier (wave 2A) is a step-through like the event loop: the same
+ * shell, so its frame, question, choices, Skip, current code line, reveal
+ * marks, lane panel and console compute as the event loop's do.
+ */
+for (const width of [375, 1440])
+  test(`the frontier draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [url, sel] of [
+      [GALLERY, EL],
+      [frUrl('bfs-levels'), FR],
+    ] as const) {
+      await open(page, url, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      out.lane = await look(f.locator('[data-viz-region="micro"], [data-viz-region="queue"]').first(), PANEL)
+      out.console = await look(f.locator('[data-viz-region="console"]'), ['background-color', 'border-top-left-radius'])
+      out['console label'] = await look(f.locator('[data-viz-region="console"] > span').first())
+      // To the first question (the event loop asks at Start; answer it and step once for a code line).
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]'), ['background-color'])
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      // A wrong pick: the event loop's mid-run answer is its second choice, the frontier's first.
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      looks.push(out)
+    }
+    const [a, b] = looks
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frontier ${b[what][k]}`)
+    expect(diffs).toEqual([])
+  })
 
 /**
  * The static figures (wave 1B): a scope-chain figure's running call is the

@@ -29,6 +29,10 @@ const PAGES = [
   // The promise-patterns presets (their own lesson group).
   '/dev/visualizations?preset=microtask-vs-timer-12345',
   '/dev/visualizations?preset=await-null',
+  // The frontier step-through (wave 2A), one page per lesson group.
+  '/dev/visualizations?fr=bfs-levels',
+  '/dev/visualizations?fr=dijkstra-lazy-heap',
+  '/dev/visualizations?fr=bst-iterator-stack',
   // The committed stand-in lesson body for list keys (R2 G-02).
   '/dev/visualizations/lesson/list-keys',
   // The heap-graph lessons (both FREE, committed copies).

@@ -16,6 +16,10 @@ const routes = [
   '/dev/visualizations/lesson/data-types',
   '/dev/visualizations/lesson/objects',
   '/dev/visualizations?lk=parent-type-change',
+  // The frontier step-through (wave 2A), one page per lesson group.
+  '/dev/visualizations?fr=bfs-levels',
+  '/dev/visualizations?fr=dijkstra-lazy-heap',
+  '/dev/visualizations?fr=bst-iterator-stack',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

@@ -129,6 +129,35 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // Premium: local checkout only. After Example 3 (keys in lists).
     inserts: [{ before: '## **Best Practices**', viz: '<Viz id="list-keys" />' }],
   },
+  // Wave 2A, the frontier (all three lessons PREMIUM: local checkout only,
+  // from `fix/batch-2d-wording` at 273a771).
+  {
+    slug: 'graph-bfs',
+    title: 'Graph BFS',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/graph-bfs/page.mdx',
+    // After the shortest-path example it steps through (its output names no
+    // vertex that sets F's distance), before the section's tips.
+    inserts: [{ before: '### **Tips and Tricks:**', viz: '<Viz id="bfs-dfs-frontier" preset="bfs-levels" />' }],
+  },
+  {
+    slug: 'shortest-path-algorithms',
+    title: 'Shortest Path Algorithms',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/shortest-path-algorithms/page.mdx',
+    // Before Dijkstra's steps and example: the example's output comment
+    // ([ 0, 8, 6, 5, 3 ]) would answer the question about dist[1].
+    inserts: [{ before: '**Steps:**', viz: '<Viz id="bfs-dfs-frontier" preset="dijkstra-lazy-heap" />' }],
+  },
+  {
+    slug: 'trees',
+    title: 'Trees',
+    section: { title: 'User-Defined Data Structures', href: '/courses/dsa-track/user-defined-data-structures' },
+    source: 'content/dsa-track/user-defined-data-structures/trees/page.mdx',
+    // After the Lowest Common Ancestor example, which builds the BST the
+    // iterator walks.
+    inserts: [{ before: '### **Serialize and Deserialize a Binary Tree**', viz: '<Viz id="bfs-dfs-frontier" preset="bst-iterator-stack" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a

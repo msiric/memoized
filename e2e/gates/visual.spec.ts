@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { GALLERY, LESSONS, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt, lessonUrl, open, settle, stateFrame, stateUrl } from './drive'
+import { FR, GALLERY, LESSONS, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt, frUrl, lessonUrl, open, settle, stateFrame, stateUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -109,4 +109,10 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, 'figure[data-viz-preset="identity-alias-rebind-spread"]', 'print-heap-graph-data-types.png')
   await frameShot(page, 'figure[data-viz-preset="spread-vs-nested-vs-deep"]', 'print-heap-graph-objects.png')
+  // The frontier: a graph, a grid and a tree on paper.
+  for (const preset of ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack']) {
+    await open(page, frUrl(preset), 768)
+    await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+    await frameShot(page, FR, `print-frontier-${preset}.png`)
+  }
 })
