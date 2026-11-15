@@ -51,7 +51,8 @@ export function urlLocalOnly(url: string): string | null {
  * `local-only/` (gitignored: rendered from the local checkout, never
  * committed), everything else with the committed baselines.
  */
-export function baselineName(url: string, name: string): string {
+export function baselineName(url: string, name: string): string | string[] {
   const f = galleryFrame(url)
-  return f && showsAnswer(f.id, f.preset) ? `local-only/${name}` : name
+  // Path segments (Playwright flattens a "/" inside a single name).
+  return f && showsAnswer(f.id, f.preset) ? ['local-only', name] : name
 }

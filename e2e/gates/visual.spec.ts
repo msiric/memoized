@@ -30,7 +30,7 @@ test.skip(process.env.VIZ_VISUAL !== '1', 'visual baselines render in the Playwr
 const WIDTHS = [375, 768, 1440] as const
 const SHOT = { animations: 'disabled', caret: 'hide', scale: 'css' } as const
 
-async function frameShot(page: Page, selector: string, name: string) {
+async function frameShot(page: Page, selector: string, name: string | string[]) {
   const el = page.locator(selector).first()
   await el.scrollIntoViewIfNeeded()
   await settle(page)
