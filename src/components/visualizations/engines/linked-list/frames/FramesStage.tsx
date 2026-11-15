@@ -6,6 +6,7 @@ import { SIZE, linkShape, tagBox, type ListGeometry } from '../geometry'
 import { Arrow, NodeBox, TagBody, r1 } from '../glyphs'
 import { NULL_ID, linkId, nodeId } from '../model'
 import { FRAME_G, RHO, labelWidth, layoutFrames, rhoLink, rhoTags, type RhoGeometry } from './layout'
+import { monoWidth } from '../../../substrates/text-metrics'
 import type { FramesData, RhoPanel, RowPanel } from './model'
 
 /**
@@ -17,7 +18,7 @@ import type { FramesData, RhoPanel, RowPanel } from './model'
  * panels; from 768 they sit two to a row. Paper keeps every panel whole.
  */
 
-function Svg({ g, children, id }: { g: { width: number; height: number }; children: React.ReactNode; id: string }) {
+function Svg({ g, children, id, heading }: { g: { width: number; height: number }; children: React.ReactNode; id: string; heading: string }) {
   return (
     <svg
       aria-hidden
@@ -28,6 +29,10 @@ function Svg({ g, children, id }: { g: { width: number; height: number }; childr
       style={{ maxWidth: toRem(g.width), height: toRem(g.height) }}
       fontSize={SIZE.value}
     >
+      {/* The panel heading, in the drawing so it scales with it under large text. */}
+      <text x={0} y={14} className="vz-u" data-viz-part="panel-heading">
+        {heading}
+      </text>
       {children}
     </svg>
   )
@@ -36,7 +41,7 @@ function Svg({ g, children, id }: { g: { width: number; height: number }; childr
 function RowSvg({ p, g }: { p: RowPanel; g: ListGeometry }) {
   const s = p.state
   return (
-    <Svg g={g} id={p.id}>
+    <Svg g={g} id={p.id} heading={p.heading}>
       <text data-node={NULL_ID} x={r1(g.nullX)} y={r1(g.mid + 4)} className="vz-m vz-12 vz-c">
         null
       </text>
@@ -80,8 +85,10 @@ function RhoSvg({ p, g }: { p: RhoPanel; g: RhoGeometry }) {
   const tail = p.rho.tail.map((n) => g.pos[n])
   const corner = g.pos[p.rho.cycle[1]]
   const below = g.pos[p.rho.cycle[2]]
+  const dimY = g.dy + RHO.dimY
+  const pairsLabel = `${p.pairs.names.join(', ')}:`
   return (
-    <Svg g={g} id={p.id}>
+    <Svg g={g} id={p.id} heading={p.heading}>
       {s.nodes.map((n, i) => (
         <NodeBox key={n.id} id={n.id} x={g.pos[i].x - half} y={g.pos[i].y - half} label={n.label} changed={p.mark?.node === i} />
       ))}
@@ -95,7 +102,7 @@ function RhoSvg({ p, g }: { p: RhoPanel; g: RhoGeometry }) {
       {/* The mark's word: "meet" right of the meeting node, "entry" over the entry. */}
       {p.mark ? (
         p.mark.label === 'entry' || p.mark.node === p.rho.entry ? (
-          <text x={r1(entry.x)} y={RHO.labelBase} className="vz-t vz-c" data-viz-part="mark-label">
+          <text x={r1(entry.x)} y={g.dy + RHO.labelBase} className="vz-t vz-c" data-viz-part="mark-label">
             {p.mark.label}
           </text>
         ) : (
@@ -110,7 +117,7 @@ function RhoSvg({ p, g }: { p: RhoPanel; g: RhoGeometry }) {
         )
       ) : null}
       {p.mark?.label === 'meet' ? (
-        <text x={r1(entry.x)} y={RHO.labelBase} className="vz-m vz-12 vz-c" data-viz-part="entry-label">
+        <text x={r1(entry.x)} y={g.dy + RHO.labelBase} className="vz-m vz-12 vz-c" data-viz-part="entry-label">
           entry
         </text>
       ) : null}
@@ -118,15 +125,15 @@ function RhoSvg({ p, g }: { p: RhoPanel; g: RhoGeometry }) {
         <g aria-hidden data-viz-part="distances">
           {/* a: head to the entry, a dashed dimension over the tail. */}
           <path
-            d={`M${r1(tail[0].x)} ${RHO.dimY - RHO.tick}V${RHO.dimY + RHO.tick}M${r1(tail[0].x)} ${RHO.dimY}H${r1(entry.x - 10)}M${r1(entry.x - 10)} ${RHO.dimY - RHO.tick}V${RHO.dimY + RHO.tick}`}
+            d={`M${r1(tail[0].x)} ${dimY - RHO.tick}V${dimY + RHO.tick}M${r1(tail[0].x)} ${dimY}H${r1(entry.x - 10)}M${r1(entry.x - 10)} ${dimY - RHO.tick}V${dimY + RHO.tick}`}
             className="vz-x vz-d fill-none"
           />
-          <text x={r1((tail[0].x + entry.x - 10) / 2)} y={RHO.labelBase} className="vz-u vz-c">
+          <text x={r1((tail[0].x + entry.x - 10) / 2)} y={g.dy + RHO.labelBase} className="vz-u vz-c">
             {`a = ${d.a}`}
           </text>
           {/* b: the entry to the meeting node, along the cycle's first two links. */}
           <path
-            d={`M${r1(entry.x + 10)} ${RHO.dimY - RHO.tick}V${RHO.dimY + RHO.tick}M${r1(entry.x + 10)} ${RHO.dimY}H${r1(corner.x + half + 8)}V${r1(below.y)}M${r1(corner.x + half + 8 - RHO.tick)} ${r1(below.y)}H${r1(corner.x + half + 8 + RHO.tick)}`}
+            d={`M${r1(entry.x + 10)} ${dimY - RHO.tick}V${dimY + RHO.tick}M${r1(entry.x + 10)} ${dimY}H${r1(corner.x + half + 8)}V${r1(below.y)}M${r1(corner.x + half + 8 - RHO.tick)} ${r1(below.y)}H${r1(corner.x + half + 8 + RHO.tick)}`}
             className="vz-x vz-d fill-none"
           />
           <text x={r1(corner.x + half + 14)} y={r1((corner.y + below.y) / 2 + 4)} className="vz-u">
@@ -138,6 +145,13 @@ function RhoSvg({ p, g }: { p: RhoPanel; g: RhoGeometry }) {
           </text>
         </g>
       ) : null}
+      {/* The recorded pairs, under the drawing. */}
+      <text x={0} y={g.height - 6} className="vz-u" data-viz-part="pairs">
+        {pairsLabel}
+      </text>
+      <text x={r1(monoWidth(pairsLabel, SIZE.small) + 7)} y={g.height - 6} className="vz-m vz-12">
+        {p.pairs.values.join(' ')}
+      </text>
       {rhoTags(g, p).map((t) => (
         <g key={t.name} data-pointer={t.name} data-at={nodeId(t.at)} transform={`translate(${r1(t.x)} ${r1(t.y)})`}>
           <TagBody name={t.name} w={t.w} />
@@ -166,22 +180,7 @@ export function FramesStage({ data }: StaticStageProps<FramesData>) {
             className="min-w-0 print:break-inside-avoid"
             style={{ height: toRem(scene.blocks[i]) }}
           >
-            <p
-              className={clsx('m-0 truncate', typeScale.value.cls, ink.secondary)}
-              style={{ marginBottom: toRem(FRAME_G.headingGap) }}
-            >
-              {p.heading}
-            </p>
             {p.kind === 'row' ? <RowSvg p={p} g={scene.row!} /> : <RhoSvg p={p} g={scene.rho[p.id]} />}
-            {p.kind === 'rho' ? (
-              <p
-                data-viz-part="pairs"
-                className={clsx('m-0 truncate', typeScale.meta.cls, ink.muted)}
-                style={{ marginTop: toRem(FRAME_G.pairsGap), lineHeight: toRem(FRAME_G.pairs) }}
-              >
-                <span className={ink.secondary}>{`${p.pairs.names.join(', ')}:`}</span> {p.pairs.values.join(' ')}
-              </p>
-            ) : null}
           </div>
         ))}
       </div>

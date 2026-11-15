@@ -51,7 +51,7 @@ const at = (c: WordsContext, p: string) => name(c.state, pointerAt(c.state, p))
 
 const words: PresetSpec['words'] = {
   init: (c) => ({
-    event: 'slow on head, fast one ahead',
+    event: 'slow at head, fast next',
     why: 'fast starts at head.next, so when it cannot move two more nodes, slow is on the last node of the first half.',
     narration: `slow is on ${at(c, 'slow')} and fast on ${at(c, 'fast')}.`,
   }),
@@ -59,7 +59,7 @@ const words: PresetSpec['words'] = {
     const fast = pointerAt(c.state, 'fast')
     const stops = fast === null || c.state.next[fast!] === null
     return {
-      event: 'slow moves 1, fast moves 2',
+      event: 'Move slow 1, fast 2',
       why: stops
         ? `fast cannot move two more nodes, so the loop stops with slow on ${at(c, 'slow')}.`
         : 'fast and fast.next both exist, so slow moves one node and fast moves two.',
@@ -81,7 +81,7 @@ const words: PresetSpec['words'] = {
     const to = c.state.next[cur]
     const t = pointerAt(c.state, 't')
     return {
-      event: to === null ? `Save t, point ${name(c.state, cur)} at null` : `Save t, point ${name(c.state, cur)} back`,
+      event: to === null ? 'Save t, flip cur to null' : 'Save t, flip cur back',
       why:
         t === null
           ? 't saves null: this is the last node, so pointing it back at prev finishes the reversal.'
@@ -104,7 +104,7 @@ const words: PresetSpec['words'] = {
     const a = c.before.nodes[pointerAt(c.before, 'prev')!].label
     const b = c.before.nodes[pointerAt(c.before, 'head')!].label
     return {
-      event: `${a} equals ${b}: move both on`,
+      event: `${a} equals ${b}: move on`,
       why: 'The pair matches, so prev and head both move on; a mismatch would return false at once.',
       narration: `prev.val ${a} equals head.val ${b}. prev is ${at(c, 'prev') === 'null' ? 'null' : `on ${at(c, 'prev')}`}, head ${at(c, 'head') === 'null' ? 'is null' : `is on ${at(c, 'head')}`}.`,
     }
@@ -127,7 +127,7 @@ const TRUE_END = {
 }
 
 function slowStops(steps: readonly { event: string; why: string }[]) {
-  return steps.findIndex((s) => s.event === 'slow moves 1, fast moves 2' && s.why.startsWith('fast cannot'))
+  return steps.findIndex((s) => s.event === 'Move slow 1, fast 2' && s.why.startsWith('fast cannot'))
 }
 
 const spec = (id: string, program: PointerProgram) => ({
@@ -196,7 +196,7 @@ export const palindromeFalseSpec: PresetSpec = {
   start: START('1, 2, 3, 1'),
   end: {
     line: { text: 'if (prev.val != head.val) return false;' },
-    event: '3 differs from 2: return false',
+    event: '3 is not 2: return false',
     why: 'prev.val is 3 and head.val is 2, so the halves differ and the function returns false at once.',
     narration: 'isPalindrome returns false, and the harness prints it.',
   },

@@ -301,7 +301,7 @@ for (const width of [375, 1440])
 /**
  * The pointer-rewiring visuals (wave 2B) speak the static figures'
  * vocabulary: a node is the heap graph's glyph, an arrow its link and head,
- * the one rest mark its changed glyph, and the frames' title, panel heading
+ * the one rest mark its changed glyph, and the frames' title
  * and caption are the heap graph's. The step-through's stage uses the same
  * glyphs as its static frames.
  */
@@ -332,7 +332,6 @@ for (const width of [375, 1440])
     const heap = {
       frame: await look(hg, FRAME),
       title: await look(hg.locator('p').first(), TEXT),
-      heading: await look(hg.locator('[data-viz-section] > p:visible').first(), TEXT),
       caption: await look(hg.locator('figcaption'), TEXT),
       glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
       link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
@@ -343,7 +342,6 @@ for (const width of [375, 1440])
     const rho = page.locator('figure[data-viz-preset="floyd-rho"]')
     same('frame', heap.frame, await look(rho, FRAME))
     same('title', heap.title, await look(rho.locator('p').first(), TEXT))
-    same('panel heading', heap.heading, await look(rho.locator('[data-viz-section] > p').first(), TEXT))
     same('caption', heap.caption, await look(rho.locator('figcaption'), TEXT))
     same('node glyph', heap.glyph, await inSvg(rho, 'svg [data-node] .vz-g'))
     same('link', heap.link, await inSvg(rho, 'svg [data-edge] .vz-e'))

@@ -14,6 +14,7 @@ import type { FramePanel, FramesData, RhoPanel, RowPanel } from './model'
  */
 
 export const FRAME_G = {
+  /** The panel heading and the pairs line, drawn in the panel's svg (they scale with it under large text). */
   heading: 20,
   headingGap: 4,
   pairs: 20,
@@ -39,16 +40,18 @@ export type RhoGeometry = {
   height: number
   pos: Record<number, { x: number; y: number }>
   rowTop: [number, number]
+  /** Where the drawing starts (under the heading). */
+  dy: number
 }
 
 /** The rho: the tail along the top row into the cycle's top-left corner, the cycle clockwise round a square. */
-export function layoutRho(p: RhoPanel): RhoGeometry {
+export function layoutRho(p: RhoPanel, dy = 0): RhoGeometry {
   const { tail, cycle } = p.rho
   if (cycle.length !== 4) throw new Error('linked-list frames: the rho layout draws a four-node cycle')
   const half = SIZE.node / 2
   const x0 = half + 2
   const pos: RhoGeometry['pos'] = {}
-  const top0 = RHO.top
+  const top0 = RHO.top + dy
   const top1 = top0 + RHO.pitch
   tail.forEach((n, i) => (pos[n] = { x: x0 + i * RHO.pitch, y: top0 + half }))
   const cx = x0 + tail.length * RHO.pitch
@@ -64,7 +67,7 @@ export function layoutRho(p: RhoPanel): RhoGeometry {
   for (const ptr of p.state.pointers) if (ptr.at !== null) stacks.set(ptr.at, (stacks.get(ptr.at) ?? 0) + 1)
   let bottom = top1 + SIZE.node
   for (const [n, k] of stacks) bottom = Math.max(bottom, pos[n].y + half + SIZE.bandGap + k * SIZE.lane - (SIZE.lane - SIZE.tag))
-  return { width: W, height: Math.ceil(bottom), pos, rowTop: [top0, top1] }
+  return { width: W, height: Math.ceil(bottom), pos, rowTop: [top0, top1], dy }
 }
 
 /** A straight arrow between two rho nodes (neighbours on the grid). */
@@ -78,7 +81,7 @@ export function rhoLink(g: RhoGeometry, from: number, to: number): { d: string; 
     { x: a.x + dx * half, y: a.y + dy * half },
     { x: b.x - dx * half, y: b.y - dy * half },
   ]
-  return { d: routePath(pts, 6, 7), head: arrowHead(pts) }
+  return { d: routePath(pts, 6, 6), head: arrowHead(pts) }
 }
 
 /** Tag boxes under each node of the rho, in the panel's pointer order. */
@@ -97,6 +100,21 @@ export function rhoTags(g: RhoGeometry, p: RhoPanel) {
 
 export const labelWidth = (t: string) => Math.ceil(monoWidth(t, SIZE.small))
 
+/** The step engine's list geometry moved down by `dy` (under the panel heading). */
+export function shiftList(g: ListGeometry, dy: number): ListGeometry {
+  return {
+    ...g,
+    height: g.height + dy,
+    rowTop: g.rowTop + dy,
+    mid: g.mid + dy,
+    lanes: Object.fromEntries(Object.entries(g.lanes).map(([k, l]) => [k, { ...l, y: l.y + dy }])),
+    consoleTop: g.consoleTop === null ? null : g.consoleTop + dy,
+  }
+}
+
+export const HEAD = FRAME_G.heading + FRAME_G.headingGap
+export const PAIRS = FRAME_G.pairsGap + FRAME_G.pairs
+
 export type FramesScene = {
   row?: ListGeometry
   rho: Record<string, RhoGeometry>
@@ -111,14 +129,13 @@ function rowPanels(d: FramesData) {
 
 export function layoutFrames(d: FramesData): FramesScene {
   const rows = rowPanels(d)
-  const row = rows.length ? layoutList(rows.map((p) => p.state)) : undefined
+  const row = rows.length ? shiftList(layoutList(rows.map((p) => p.state)), HEAD) : undefined
   const rho: Record<string, RhoGeometry> = {}
   const blocks = d.panels.map((p: FramePanel) => {
-    const head = FRAME_G.heading + FRAME_G.headingGap
-    if (p.kind === 'row') return head + row!.height
-    const g = layoutRho(p)
-    rho[p.id] = g
-    return head + g.height + FRAME_G.pairsGap + FRAME_G.pairs
+    if (p.kind === 'row') return row!.height
+    const g = layoutRho(p, HEAD)
+    rho[p.id] = { ...g, height: g.height + PAIRS }
+    return g.height + PAIRS
   })
   const foot = d.footnote ? FRAME_G.footnoteGap + FRAME_G.footnote : 0
   const narrow = blocks.reduce((s, h) => s + h, 0) + (blocks.length - 1) * FRAME_G.panelGap + foot

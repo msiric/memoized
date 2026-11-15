@@ -94,7 +94,7 @@ export const reverseBetweenSpec: PresetSpec = {
       const cur = state.pointers.find((p) => p.name === 'current')!.at
       const to = state.next[cur!]
       return {
-        event: `Save next, point ${v(cur)} back at ${v(to)}`,
+        event: `Save next, flip ${v(cur)} to ${v(to)}`,
         why: FLIP_WHY[pass - 1],
         narration: `next is ${v(state.pointers.find((p) => p.name === 'next')!.at)}, then ${v(cur)}.next is ${v(to)}.`,
       }
@@ -102,7 +102,7 @@ export const reverseBetweenSpec: PresetSpec = {
     advance: ({ pass, state, v }) => {
       const at = (name: string) => v(state.pointers.find((p) => p.name === name)!.at)
       return {
-        event: `Move previous to ${at('previous')}, current to ${at('current')}`,
+        event: 'Advance both pointers',
         why:
           pass < 3
             ? 'previous takes current and current takes the saved next, so the next pass flips the next arrow.'
@@ -111,7 +111,7 @@ export const reverseBetweenSpec: PresetSpec = {
       }
     },
     connect: () => ({
-      event: 'Connect 1 to the new front',
+      event: 'Connect 1 to the front',
       why: 'connection.next = previous links 1 to 4, but 2 still points back at 1, so for now the list loops.',
       narration: '1 now points to 4. Walking from head: 1, 4, 3, 2, then 1 again.',
     }),
@@ -129,7 +129,7 @@ export const reverseBetweenSpec: PresetSpec = {
   },
   checkpoints: (steps) => [
     {
-      beforeStep: steps.findIndex((s) => s.event === 'Connect 1 to the new front'),
+      beforeStep: steps.findIndex((s) => s.event === 'Connect 1 to the front'),
       prompt: 'After connection.next = previous, what comes after 2, walking from head?',
       choices: [
         { id: 'five', label: '5' },

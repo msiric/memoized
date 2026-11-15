@@ -40,7 +40,7 @@ export const SIZE = {
   /** Upper and lower tracks: 5 px either side of the row's middle. */
   track: 5,
   /** Gap between a box edge and the start or end of a straight arrow. */
-  inset: 2,
+  inset: 1,
   /** Where an arc leaves or enters a box: 6 px off its centre. */
   arcFoot: 6,
   /** First arc level above the row, then one more per level. */
@@ -204,14 +204,14 @@ export function linkShape(g: ListGeometry, from: number, to: number | null): Lin
       { x: c + half + SIZE.inset, y: g.mid - SIZE.track },
       { x: t - half - SIZE.inset, y: g.mid - SIZE.track },
     ]
-    return { d: routePath(pts, 6, 7), head: arrowHead(pts), kind: 'next' }
+    return { d: routePath(pts, 6, 6), head: arrowHead(pts), kind: 'next' }
   }
   if (to === from - 1) {
     const pts: Point[] = [
       { x: c - half - SIZE.inset, y: g.mid + SIZE.track },
       { x: t + half + SIZE.inset, y: g.mid + SIZE.track },
     ]
-    return { d: routePath(pts, 6, 7), head: arrowHead(pts), kind: 'back' }
+    return { d: routePath(pts, 6, 6), head: arrowHead(pts), kind: 'back' }
   }
   const slot = g.arcs[key(from, to)]
   const dir = Math.sign(to - from)
@@ -225,5 +225,5 @@ export function linkShape(g: ListGeometry, from: number, to: number | null): Lin
     { x: t - dir * SIZE.arcFoot, y: level },
     { x: t - dir * SIZE.arcFoot, y: edge },
   ]
-  return { d: routePath(pts, 6, 7), head: arrowHead(pts), kind: 'arc' }
+  return { d: routePath(pts, 6, 6), head: arrowHead(pts), kind: 'arc' }
 }
