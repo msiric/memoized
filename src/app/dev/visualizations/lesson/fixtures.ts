@@ -249,6 +249,45 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // SuffixTree, buildSuffixArray, buildLCPArray and its "ana").
     inserts: [{ before: '## **Interview Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="suffix-tree-banana" />' }],
   },
+  // Wave 3A, DSA singles (all four lessons PREMIUM: local checkout only).
+  {
+    slug: 'dynamic-programming',
+    title: 'Dynamic Programming',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/dynamic-programming/page.mdx',
+    // A prediction: after the Knapsack Problem example (the 2D table the 1D
+    // loop compresses), before Edit Distance. No prose in the body states
+    // which way j must run (the loop direction is in the practice answer's
+    // follow-ups only).
+    inserts: [{ before: '### **Edit Distance**', viz: '<Viz id="dp-table-dependencies" preset="knapsack-1d-desc-vs-asc" />' }],
+  },
+  {
+    slug: 'backtracking',
+    title: 'Backtracking',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/backtracking/page.mdx',
+    // After Subset Sum, the body's include/exclude example the take/skip
+    // tree generalises (it draws the Combination Sum answer), before the tips.
+    inserts: [{ before: '## **Practical Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="combination-sum-take-skip" />' }],
+  },
+  {
+    slug: 'minimum-spanning-trees',
+    title: 'Minimum Spanning Trees (MST)',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/minimum-spanning-trees/page.mdx',
+    // After Kruskal's Algorithm, the Union-Find accept/reject loop the
+    // figure's run is, before Prim's.
+    inserts: [{ before: "### **Prim's Algorithm**", viz: '<Viz id="annotated-tree" preset="water-wells-virtual-source" />' }],
+  },
+  {
+    slug: 'k-way-merge',
+    title: 'K-way Merge',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/k-way-merge/page.mdx',
+    // After Merging K Sorted Arrays, the heap of fronts the grid's frontier
+    // is, before the linked-list version.
+    inserts: [{ before: '## **Merging K Sorted Linked Lists**', viz: '<Viz id="annotated-tree" preset="k-pairs-lazy-grid" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a
