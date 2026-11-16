@@ -109,6 +109,18 @@ const AT: Record<string, string> = {
   'at-suffix': 'figure[data-viz-preset="suffix-tree-banana"]',
 }
 
+/** The wave 3B JavaScript-track figures, static, alone on their page (`?js=static`). */
+export const jsUrl = `${GALLERY}?js=static`
+export const JS: Record<string, string> = {
+  'js-proto-lookup': 'figure[data-viz-preset="lookup-and-shadowing"]',
+  'js-proto-ctor': 'figure[data-viz-preset="constructor-fix"]',
+  'js-hidden-class': 'figure[data-viz-preset="hidden-class-transitions"]',
+  'js-timers': 'figure[data-viz-preset="debounce-vs-throttle"]',
+  'js-dispatch': 'figure[data-viz-preset="event-dispatch-path"]',
+  'js-pkce': 'figure[data-viz-preset="oauth-pkce-channels"]',
+  'js-types': 'figure[data-viz-preset="union-vs-intersection"]',
+}
+
 /** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
 async function llWalk(page: Page, done: (f: Locator) => Promise<boolean>) {
   const f = page.locator(LL).first()
@@ -217,6 +229,7 @@ export function stateUrl(name: string): string {
   if (name.startsWith('fr-')) return frUrl(frPreset(name))
   if (name.startsWith('llf-')) return llUrl('static')
   if (name.startsWith('at-')) return atUrl
+  if (name.startsWith('js-')) return jsUrl
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
@@ -230,6 +243,7 @@ export function stateFrame(name: string): string {
   if (name.startsWith('fr-')) return FR
   if (LLF[name]) return LLF[name]
   if (AT[name]) return AT[name]
+  if (JS[name]) return JS[name]
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
@@ -495,6 +509,14 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'at-gain': async () => {},
   'at-trie': async () => {},
   'at-suffix': async () => {},
+  // The wave 3B JavaScript-track figures: static, at rest only.
+  'js-proto-lookup': async () => {},
+  'js-proto-ctor': async () => {},
+  'js-hidden-class': async () => {},
+  'js-timers': async () => {},
+  'js-dispatch': async () => {},
+  'js-pkce': async () => {},
+  'js-types': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()

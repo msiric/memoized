@@ -29,6 +29,8 @@ const routes = [
   '/dev/visualizations?sw=set-shrink-longest-substring',
   // The annotated trees (wave 2D).
   '/dev/visualizations?at=static',
+  // The wave 3B JavaScript-track figures (static).
+  '/dev/visualizations?js=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

@@ -249,6 +249,62 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // SuffixTree, buildSuffixArray, buildLCPArray and its "ana").
     inserts: [{ before: '## **Interview Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="suffix-tree-banana" />' }],
   },
+  // Wave 3B, the JavaScript-track figures. Local checkout only: the two free
+  // lessons too (the app repo keeps no lesson body under the premium-code
+  // policy). Static figures, each after the example it explains.
+  {
+    slug: 'prototypes',
+    title: 'Prototypes and Prototypal Inheritance',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/prototypes/page.mdx',
+    inserts: [
+      // After alice.toString(), the lookup it draws, in place of the ASCII chain above it.
+      { before: '## **Inheritance Patterns in JavaScript**', viz: '<Viz id="prototype-object-graph" preset="lookup-and-shadowing" />' },
+      // After Exercise 3's answer and explanation, the fix it draws.
+      { before: '### **Exercise 4: ES6 Class Inheritance**', viz: '<Viz id="prototype-object-graph" preset="constructor-fix" />' },
+    ],
+  },
+  {
+    slug: 'engine-and-runtime',
+    title: 'Engine and Runtime',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/engine-and-runtime/page.mdx',
+    // After Example 1's problem and solution, the two trees it draws.
+    inserts: [{ before: '#### **Example 2: Avoiding Deoptimization**', viz: '<Viz id="annotated-tree" preset="hidden-class-transitions" />' }],
+  },
+  {
+    slug: 'advanced-types',
+    title: 'Advanced Types',
+    section: { title: 'TypeScript Introduction', href: '/courses/js-track/typescript-introduction' },
+    source: 'content/js-track/typescript-introduction/advanced-types/page.mdx',
+    // After Defining Intersection Types, once both unions and intersections are defined.
+    inserts: [{ before: '### **Use Cases for Intersection Types**', viz: '<Viz id="lanes" preset="union-vs-intersection" />' }],
+  },
+  {
+    slug: 'event-handling',
+    title: 'Event Handling',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/event-handling/page.mdx',
+    // In Event Flow in the DOM, after the three phases, where the hotlinked MDN image is.
+    inserts: [{ before: '### **Capturing Phase**', viz: '<Viz id="lanes" preset="event-dispatch-path" />' }],
+  },
+  {
+    slug: 'performance-optimization',
+    title: 'Performance Optimization',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/performance-optimization/page.mdx',
+    // After Implementing Throttle, the second of the two functions it runs.
+    inserts: [{ before: '### **Use Cases and Examples**', viz: '<Viz id="lanes" preset="debounce-vs-throttle" />' }],
+  },
+  {
+    slug: 'security',
+    title: 'Security',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/security/page.mdx',
+    // The body has no OAuth example (it is in the practice answer): at the end
+    // of Secure Authentication Practices, before authorization.
+    inserts: [{ before: '## **Secure Authorization Practices**', viz: '<Viz id="lanes" preset="oauth-pkce-channels" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a

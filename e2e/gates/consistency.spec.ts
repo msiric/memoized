@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, lessonUrl, open, settle, swUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, jsUrl, lessonUrl, open, settle, swUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -546,6 +546,67 @@ for (const width of [375, 1440])
       same(`${preset} link`, heap.link, await inSvg(at, 'svg [data-edge]:not([data-changed]) .vz-e'))
       same(`${preset} changed link`, heap.changedLink, await inSvg(at, 'svg [data-edge][data-changed] .vz-e'))
       same(`${preset} changed mark`, heap.changed, await inSvg(at, 'svg .vz-ch'))
+    }
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The wave 3B JavaScript-track figures speak the same vocabulary: each
+ * figure's frame, title, caption and panel heading compute like the heap
+ * graph's and the pointer frames', its glyphs like the heap graph's glyph,
+ * its links at rest like the heap graph's links, and every rest mark it has
+ * like the heap graph's changed mark and changed link (never lime).
+ */
+for (const width of [375, 1440])
+  test(`wave 3B figures compute like the heap graph @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    const inSvg = (root: Locator, sel: string, optional = false) =>
+      root.evaluate(
+        (f, [q, ps, opt]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) {
+            if (opt) return null
+            throw new Error(`nothing matches ${q}`)
+          }
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as unknown as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, SVG, optional] as const,
+      )
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string> | null, b: Record<string, string> | null) => {
+      if (!a || !b) return
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: heap graph ${a[k]} vs ${b[k]}`)
+    }
+    await open(page, `${GALLERY}?static=1`, width)
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const heap = {
+      frame: await look(hg, FRAME),
+      title: await look(hg.locator('p').first(), TEXT),
+      caption: await look(hg.locator('figcaption'), TEXT),
+      glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
+      link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
+      changedLink: await inSvg(hg, 'svg [data-edge][data-changed] .vz-e'),
+      changed: await inSvg(hg, 'svg .vz-ch'),
+    }
+    await open(page, `${GALLERY}?ll=static`, width)
+    const heading = await inSvg(page.locator('figure[data-viz-preset="floyd-rho"]'), 'svg [data-viz-part="panel-heading"]')
+    await open(page, jsUrl, width)
+    for (const preset of ['lookup-and-shadowing', 'constructor-fix', 'hidden-class-transitions', 'debounce-vs-throttle', 'event-dispatch-path', 'oauth-pkce-channels', 'union-vs-intersection']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(f, FRAME))
+      same(`${preset} title`, heap.title, await look(f.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(f.locator('figcaption'), TEXT))
+      same(`${preset} panel heading`, heading, await inSvg(f, 'svg [data-viz-part="panel-heading"]'))
+      same(`${preset} glyph`, heap.glyph, await inSvg(f, 'svg [data-node] > .vz-g', true))
+      same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge]:not([data-changed]):not([data-kind="constructor"]) > .vz-e', true))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
+      same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch', true))
     }
     expect(diffs).toEqual([])
   })
