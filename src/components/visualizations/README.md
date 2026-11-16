@@ -374,6 +374,57 @@ engine (`engines/linked-list/`) and one lesson group per lesson:
   the `ll-*` and `llf-*` gate states (gallery `?ll=<preset>`,
   `?ll=static`) and the heap-graph consistency check.
 
+### Sliding window (R4 shared visual 2, wave 2C)
+
+`<Viz id="sliding-window" preset="…" />`, a step-through with one lesson
+group per lesson: `araaci-k2` and `araaci-k2-if` (Sliding Window Technique:
+the lesson's longestSubstringWithKDistinct on "araaci", K = 2, as written and
+with its shrink `while` written as `if`), and `set-shrink-longest-substring`
+("pwwkew"), `set-shrink-abcabcbb`, `set-shrink-abba` and `set-shrink-abba-if`
+(JavaScript Strings: the practice answer to longest substring without
+repeating characters, a Set-backed window).
+
+- **Recorded under the inspector** (the frontier's method): `programs/`
+  names each lesson block or answer by locator and sha256 and the lines to
+  pause before; `yarn viz:sliding-window` runs each program in Node 24 with
+  breakpoints only and reads the edges, the count map (`[key, count]`
+  pairs) or the Set's members, the best length and the string at every
+  pause, writing `recordings/<lesson>.json` (values only). `build.ts` reads
+  an iteration as the first shrink check (the right edge on its new
+  character), every later pause whose left edge moved (one per pass of a
+  `while`, the single pass of an `if`) and the record; presets add words
+  and checkpoints only. An `if` program is the lesson's own block with one
+  keyword changed (`SourcePart.replace: ['while', 'if']`), so the variant
+  of a practice answer commits no answer text either.
+- **Steps.** A count map's iteration is one step while it stays within K
+  (count, no shrink, record), else count, one step per shrink pass, record;
+  a Set's is one step per delete (the first also moves the right edge onto
+  the character it read, drawn dashed until the Set takes it) and the add
+  with its record. Each prediction is asked on the step before its reveal:
+  where windowStart stops (asked after the first of two passes), which
+  character leaves first (asked before j reads the repeat), and, judged at
+  the end, what each `if` variant returns (4 for araaci, right by luck; 3
+  for abba, wrong: the window holds b twice while `ss` holds one).
+- **Drawing** (`layout.ts`): one svg strip of 30 px cells with their indices
+  over them, the window band under them (one segment per cell, joined across
+  the gaps) and the two edge tags in their own lanes, named as the code
+  names them; the heading names K, the window's length (the Set) and the
+  best length (amber, tinted on the step that records it); the store is the
+  shared `Lane`, labelled with its key count or size. A tag slides on the
+  `move` spring and the band's segment it took in or let go fades on the
+  same beat; a store chip enters or leaves at its end, and a change that
+  would make chips close up lands at once. Nothing changes size, and the
+  best length switches without a fade.
+- **Gates.** `sliding-window.truth.test.ts` (with a checkout: hashes, fresh
+  re-recordings, every row against the content, each `if` program the
+  lesson's with one keyword changed; everywhere: the register's assertions,
+  the `if` variants' real answers, lies that must fail), `layout.test.ts`,
+  `e2e/viz-sliding-window.spec.ts` (with the 375x667 fit, the site header
+  reserved on the gallery page), `e2e/motion/sliding-window-steps.spec.ts`,
+  `e2e/stress/sliding-window.stress.ts`, the `sw-*` gate states (gallery
+  `?sw=<preset>`) and the consistency checks against the event loop's shell
+  and the pointer-rewiring glyphs.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,
