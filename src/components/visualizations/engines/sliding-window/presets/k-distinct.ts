@@ -78,16 +78,15 @@ const words = (variant: 'while' | 'if') => (c: WordsContext): StepWords => {
   switch (c.kind) {
     case 'grow': {
       const n = kinds(s)
-      const grew = s.best > c.before.best
       return {
-        event: `Count ${c.ch}: ${plural(n, 'key', 'keys')}, ${grew ? `max ${s.best}` : `max stays ${s.best}`}`,
+        event: `Count ${c.ch}: ${plural(n, 'key', 'keys')}, max ${s.best}`,
         why: `${plural(n, 'key is', 'keys are')} not more than K = ${k}, so the ${variant} is skipped and ${win}, ${c.length} long, is recorded.`,
         narration: `windowEnd moves to ${s.right}; ${c.ch} counts ${countOf(s, c.ch)}. maxLength is ${s.best}.`,
       }
     }
     case 'extend':
       return {
-        event: `Count ${c.ch}: ${kinds(s)} keys, more than K`,
+        event: `Count ${c.ch}: ${kinds(s)} keys, over K`,
         why: `charFrequency has ${kinds(s)} keys and K is ${k}, so the ${variant} must drop characters from the left before anything is recorded.`,
         narration: `windowEnd moves to ${s.right}; ${c.ch} counts 1, and charFrequency has ${kinds(s)} keys.`,
       }
@@ -104,7 +103,7 @@ const words = (variant: 'while' | 'if') => (c: WordsContext): StepWords => {
             ? `${c.left} still counts ${left}, so ${n} keys remain, but if never runs a second pass.`
             : `${c.left} still counts ${left}, so its key stays: ${n} keys are still more than K, so the loop runs again.`
       return {
-        event: gone ? (over ? `Drop ${c.left}: key goes, ${n} keys left` : `Drop ${c.left}: its key goes`) : `Drop ${c.left}: still ${n} keys`,
+        event: gone ? (over ? `Drop ${c.left}: ${n} keys left` : `Drop ${c.left}: its key goes`) : `Drop ${c.left}: still ${n} keys`,
         why,
         narration: `windowStart moves to ${s.left}; ${gone ? `${c.left} leaves charFrequency` : `${c.left} counts ${left}`}. The window is ${win}.`,
       }
@@ -177,7 +176,7 @@ export const kDistinctWhileSpec: PresetSpec = {
 export const kDistinctIfSpec: PresetSpec = {
   ...spec('araaci-k2-if', kDistinctIfProgram, 'if'),
   end: {
-    event: 'Return 4, from a bad window',
+    event: 'Return 4, window invalid',
     why: 'The window never grows while it holds 3 keys, so araa’s 4 is still the best; but from c on, the window was not valid.',
     narration: 'The if version returns 4 too, and the example prints it.',
   },

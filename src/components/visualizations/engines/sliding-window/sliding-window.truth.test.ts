@@ -138,7 +138,7 @@ describe('register: sliding-window (araaci, K = 2, while vs if)', () => {
   })
 
   it('never records an invalid window with while', () => {
-    for (const s of log.steps.filter((x) => x.event.startsWith('Record') || x.event.startsWith('Count') && !x.event.includes('more than')))
+    for (const s of log.steps.filter((x) => x.event.startsWith('Record') || x.event.startsWith('Count') && !x.event.includes('over K')))
       expect(s.state.store.length).toBeLessThanOrEqual(s.state.k!)
   })
 
