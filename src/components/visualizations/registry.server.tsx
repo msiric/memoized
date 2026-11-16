@@ -2,6 +2,9 @@ import type { ComponentType } from 'react'
 import AnnotatedTreeViz from './engines/annotated-tree'
 import EnvRecordsViz from './engines/env-records'
 import EventLoopViz from './engines/event-loop'
+import EmitFramesViz from './engines/frames/emit-frames'
+import GeneratorFramesViz from './engines/frames/generator-frames'
+import WorkerPoolViz from './engines/frames/worker-pool'
 import FrontierViz from './engines/frontier'
 import HeapGraphViz from './engines/heap-graph'
 import LinkedListViz from './engines/linked-list'
@@ -27,4 +30,7 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'linked-list-frames': LinkedListFramesViz,
   'sliding-window': SlidingWindowViz,
   'annotated-tree': AnnotatedTreeViz,
+  'generator-frames': GeneratorFramesViz,
+  'worker-pool': WorkerPoolViz,
+  'emit-frames': EmitFramesViz,
 }

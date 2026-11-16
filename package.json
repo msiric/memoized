@@ -58,6 +58,7 @@
     "viz:linked-list": "tsx src/scripts/viz-linked-list-record.ts",
     "viz:sliding-window": "tsx src/scripts/viz-sliding-window-record.ts",
     "viz:tree": "tsx src/scripts/viz-annotated-tree-record.ts",
+    "viz:frames": "tsx src/scripts/viz-frames-record.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
     "test": "vitest",
     "test:check": "vitest run",

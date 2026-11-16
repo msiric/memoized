@@ -1,6 +1,7 @@
 import { annotatedTreeDescriptor } from './engines/annotated-tree/descriptor'
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
+import { emitFramesDescriptor, generatorFramesDescriptor, workerPoolDescriptor } from './engines/frames/descriptor'
 import { frontierDescriptor } from './engines/frontier/descriptor'
 import { heapGraphDescriptor } from './engines/heap-graph/descriptor'
 import { linkedListDescriptor } from './engines/linked-list/descriptor'
@@ -36,6 +37,9 @@ export const VIZ_DESCRIPTORS = {
   'linked-list-frames': linkedListFramesDescriptor,
   'sliding-window': slidingWindowDescriptor,
   'annotated-tree': annotatedTreeDescriptor,
+  'generator-frames': generatorFramesDescriptor,
+  'worker-pool': workerPoolDescriptor,
+  'emit-frames': emitFramesDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS
