@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Prose } from '@/components/Prose'
 import { Viz } from '@/components/visualizations/Viz'
 import { resolveVizCode } from '@/components/visualizations/step-log/resolve-code'
+import { framesVizFor } from '@/components/visualizations/engines/frames/gallery'
 import { ClientOnly } from './ClientOnly'
 
 /**
@@ -11,7 +12,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; fx?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -27,6 +28,8 @@ export default function VisualizationGalleryPage({
   if (searchParams.fr) return <FrontierGallery preset={searchParams.fr} mount={searchParams.mount} spacer={searchParams.spacer} />
   // `?sw=<preset>`: the sliding-window step-through alone (wave 2C), one lesson group per page.
   if (searchParams.sw) return <SlidingWindowGallery preset={searchParams.sw} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?fx=<preset>`: a frames step-through alone (wave 3C: generators, mapLimit, reentrant emit), its own lesson's presets.
+  if (searchParams.fx) return <FramesGallery preset={searchParams.fx} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
   // Static figures: final server markup, no client JavaScript. `?static=1`
@@ -200,6 +203,28 @@ function SlidingWindowGallery({ preset, mount, spacer }: { preset: string; mount
           </p>
           {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
           <PremiumViz id="sliding-window" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
+/** A frames step-through (practice answers from the checkout), between lesson text: the visual is found by its preset. */
+function FramesGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  const id = framesVizFor(preset)
+  if (!id) notFound()
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Frames step-through</h1>
+          <p>
+            Code that runs in pieces over time: suspended generator frames, worker slots, nested emits. Every state is
+            recorded from a real Node run and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id={id} preset={preset} mount={mount} />
           <p>Text after the visual, to show it never moves while stepping.</p>
         </Prose>
       </div>
