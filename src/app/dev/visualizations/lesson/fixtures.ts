@@ -196,6 +196,28 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // example, tips and gotchas): the figure explains why phase 2 works.
     inserts: [{ before: '## **Finding the Middle of a Linked List**', viz: '<Viz id="linked-list-frames" preset="floyd-rho" />' }],
   },
+  // Wave 2C, the sliding window (both lessons PREMIUM: local checkout only).
+  {
+    slug: 'sliding-window',
+    title: 'Sliding Window Technique',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/sliding-window/page.mdx',
+    // After the variable-size example it steps through, before that
+    // section's own Tips and Tricks (two lines: the fixed-size section has
+    // its own first). No prose states where windowStart stops or what the
+    // `if` version returns.
+    inserts: [{ before: '### **Tips and Tricks:**\n- Use a hashmap', viz: '<Viz id="sliding-window" />' }],
+  },
+  {
+    slug: 'strings',
+    title: 'JavaScript Strings',
+    section: { title: 'Built-in Data Structures', href: '/courses/dsa-track/built-in-data-structures' },
+    source: 'content/dsa-track/built-in-data-structures/strings/page.mdx',
+    // The window is the practice answer's (longest substring without
+    // repeating characters); the body has no window section. At the end of
+    // String Algorithms, before the interview tips: no prose discusses it.
+    inserts: [{ before: '## **Interview Tips and Tricks**', viz: '<Viz id="sliding-window" preset="set-shrink-longest-substring" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a
