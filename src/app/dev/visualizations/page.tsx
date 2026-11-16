@@ -11,7 +11,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -27,6 +27,8 @@ export default function VisualizationGalleryPage({
   if (searchParams.fr) return <FrontierGallery preset={searchParams.fr} mount={searchParams.mount} spacer={searchParams.spacer} />
   // `?sw=<preset>`: the sliding-window step-through alone (wave 2C), one lesson group per page.
   if (searchParams.sw) return <SlidingWindowGallery preset={searchParams.sw} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?dp=<preset>`: the dp-table step-through alone (wave 3A), one lesson group per page.
+  if (searchParams.dp) return <DpTableGallery preset={searchParams.dp} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
   // Static figures: final server markup, no client JavaScript. `?static=1`
@@ -82,7 +84,7 @@ export default function VisualizationGalleryPage({
       </div>
     )
   }
-  // `?at=static`: the annotated-tree figures alone (wave 2D).
+  // `?at=static`: the annotated-tree figures alone (waves 2D and 3A).
   if (searchParams.at === 'static') {
     const trees = (
       <>
@@ -91,6 +93,13 @@ export default function VisualizationGalleryPage({
         <Viz id="annotated-tree" preset="trie-end-markers" />
         <p>Between the annotated trees.</p>
         <Viz id="annotated-tree" preset="suffix-tree-banana" />
+        {/* Wave 3A: a call tree, a spanning tree and a push forest. */}
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="combination-sum-take-skip" />
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="water-wells-virtual-source" />
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="k-pairs-lazy-grid" />
       </>
     )
     return (
@@ -200,6 +209,26 @@ function SlidingWindowGallery({ preset, mount, spacer }: { preset: string; mount
           </p>
           {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
           <PremiumViz id="sliding-window" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
+/** The dp-table step-through (a practice answer from the checkout), between lesson text. */
+function DpTableGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>DP table step-through</h1>
+          <p>
+            Which cell each write reads, and whether the current item already wrote it. Every cell is recorded from a
+            real Node run of the answer&apos;s code and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="dp-table-dependencies" preset={preset} mount={mount} />
           <p>Text after the visual, to show it never moves while stepping.</p>
         </Prose>
       </div>
