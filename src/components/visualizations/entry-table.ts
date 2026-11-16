@@ -91,6 +91,12 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     422,
     { 'floyd-rho': [704, 422, 422], 'full-reversal-strip': [914, 528, 528] },
   ],
+  'annotated-tree': [
+    () => import('./engines/annotated-tree'),
+    826,
+    472,
+    { 'max-path-gain-vs-through': [826, 472, 472], 'trie-end-markers': [812, 558, 558], 'suffix-tree-banana': [610, 542, 542] },
+  ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),
     786,

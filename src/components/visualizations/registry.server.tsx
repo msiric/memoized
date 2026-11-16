@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import AnnotatedTreeViz from './engines/annotated-tree'
 import EnvRecordsViz from './engines/env-records'
 import EventLoopViz from './engines/event-loop'
 import FrontierViz from './engines/frontier'
@@ -23,4 +24,5 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'bfs-dfs-frontier': FrontierViz,
   'linked-list-pointer-rewiring': LinkedListViz,
   'linked-list-frames': LinkedListFramesViz,
+  'annotated-tree': AnnotatedTreeViz,
 }

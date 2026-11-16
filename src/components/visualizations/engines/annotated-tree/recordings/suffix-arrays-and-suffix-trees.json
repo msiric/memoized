@@ -1,0 +1,153 @@
+{
+ "suffix-tree": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "b03316df8f70d0fac68ff5fb0c0df97a244c73c2728fa8d660afbf14a33e457b",
+  "stdout": [
+   "banana$ 7"
+  ],
+  "pauses": [
+   {
+    "probe": "built",
+    "line": 146,
+    "vars": {
+     "text": "banana$",
+     "tree": {
+      "start": -1,
+      "end": -1,
+      "index": -1,
+      "kids": [
+       [
+        "b",
+        {
+         "start": 0,
+         "end": 6,
+         "index": 0,
+         "kids": []
+        }
+       ],
+       [
+        "a",
+        {
+         "start": 1,
+         "end": 1,
+         "index": -1,
+         "kids": [
+          [
+           "$",
+           {
+            "start": 6,
+            "end": 6,
+            "index": 5,
+            "kids": []
+           }
+          ],
+          [
+           "n",
+           {
+            "start": 2,
+            "end": 3,
+            "index": -1,
+            "kids": [
+             [
+              "$",
+              {
+               "start": 6,
+               "end": 6,
+               "index": 3,
+               "kids": []
+              }
+             ],
+             [
+              "n",
+              {
+               "start": 4,
+               "end": 6,
+               "index": 1,
+               "kids": []
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ],
+       [
+        "n",
+        {
+         "start": 2,
+         "end": 3,
+         "index": -1,
+         "kids": [
+          [
+           "$",
+           {
+            "start": 6,
+            "end": 6,
+            "index": 4,
+            "kids": []
+           }
+          ],
+          [
+           "n",
+           {
+            "start": 4,
+            "end": 6,
+            "index": 2,
+            "kids": []
+           }
+          ]
+         ]
+        }
+       ],
+       [
+        "$",
+        {
+         "start": 6,
+         "end": 6,
+         "index": 6,
+         "kids": []
+        }
+       ]
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "suffix-array-lcp": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "3366c83f848a70be01a693f556977ffe7b582ba99b22138f7c440927c83ba669",
+  "stdout": [
+   "[6,5,3,1,0,4,2]",
+   "[0,0,1,3,0,0,2]",
+   "ana"
+  ],
+  "pauses": [
+   {
+    "probe": "sorted",
+    "line": 56,
+    "vars": {
+     "sa": [
+      6,
+      5,
+      3,
+      1,
+      0,
+      4,
+      2
+     ],
+     "suffixes": [
+      "$",
+      "a$",
+      "ana$",
+      "anana$",
+      "banana$",
+      "na$",
+      "nana$"
+     ]
+    }
+   }
+  ]
+ }
+}

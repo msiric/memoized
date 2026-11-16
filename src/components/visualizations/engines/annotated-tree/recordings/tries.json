@@ -1,0 +1,639 @@
+{
+ "trie-search": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "5df83674c9d3c90f76a4243c002d4599c46b06393efa9c9d9ee9904ba6106489",
+  "stdout": [
+   "false",
+   "true"
+  ],
+  "pauses": [
+   {
+    "probe": "inserted",
+    "line": 47,
+    "vars": {
+     "trie": {
+      "end": false,
+      "kids": [
+       [
+        "a",
+        {
+         "end": false,
+         "kids": [
+          [
+           "p",
+           {
+            "end": false,
+            "kids": [
+             [
+              "p",
+              {
+               "end": true,
+               "kids": [
+                [
+                 "l",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "e",
+                    {
+                     "end": true,
+                     "kids": [
+                      [
+                       "t",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ],
+       [
+        "b",
+        {
+         "end": false,
+         "kids": [
+          [
+           "a",
+           {
+            "end": false,
+            "kids": [
+             [
+              "n",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "a",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "n",
+                    {
+                     "end": false,
+                     "kids": [
+                      [
+                       "a",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "trie-delete": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "52e28eca270dfb1a31b94acbec2f8350a1be5a327020e2ba574806b80aef9892",
+  "stdout": [],
+  "pauses": [
+   {
+    "probe": "before",
+    "line": 41,
+    "vars": {
+     "word": "app",
+     "trie": {
+      "end": false,
+      "kids": [
+       [
+        "a",
+        {
+         "end": false,
+         "kids": [
+          [
+           "p",
+           {
+            "end": false,
+            "kids": [
+             [
+              "p",
+              {
+               "end": true,
+               "kids": [
+                [
+                 "l",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "e",
+                    {
+                     "end": true,
+                     "kids": [
+                      [
+                       "t",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ],
+       [
+        "b",
+        {
+         "end": false,
+         "kids": [
+          [
+           "a",
+           {
+            "end": false,
+            "kids": [
+             [
+              "n",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "a",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "n",
+                    {
+                     "end": false,
+                     "kids": [
+                      [
+                       "a",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    }
+   },
+   {
+    "probe": "end-of-word",
+    "line": 30,
+    "vars": {
+     "word": "app",
+     "depth": 3
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "app",
+     "depth": 2
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "app",
+     "depth": 1
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "app",
+     "depth": 0
+    },
+    "returned": false
+   },
+   {
+    "probe": "after",
+    "line": 42,
+    "vars": {
+     "word": "app",
+     "trie": {
+      "end": false,
+      "kids": [
+       [
+        "a",
+        {
+         "end": false,
+         "kids": [
+          [
+           "p",
+           {
+            "end": false,
+            "kids": [
+             [
+              "p",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "l",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "e",
+                    {
+                     "end": true,
+                     "kids": [
+                      [
+                       "t",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ],
+       [
+        "b",
+        {
+         "end": false,
+         "kids": [
+          [
+           "a",
+           {
+            "end": false,
+            "kids": [
+             [
+              "n",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "a",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "n",
+                    {
+                     "end": false,
+                     "kids": [
+                      [
+                       "a",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    }
+   },
+   {
+    "probe": "before",
+    "line": 41,
+    "vars": {
+     "word": "applet",
+     "trie": {
+      "end": false,
+      "kids": [
+       [
+        "a",
+        {
+         "end": false,
+         "kids": [
+          [
+           "p",
+           {
+            "end": false,
+            "kids": [
+             [
+              "p",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "l",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "e",
+                    {
+                     "end": true,
+                     "kids": [
+                      [
+                       "t",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ],
+       [
+        "b",
+        {
+         "end": false,
+         "kids": [
+          [
+           "a",
+           {
+            "end": false,
+            "kids": [
+             [
+              "n",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "a",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "n",
+                    {
+                     "end": false,
+                     "kids": [
+                      [
+                       "a",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    }
+   },
+   {
+    "probe": "end-of-word",
+    "line": 30,
+    "vars": {
+     "word": "applet",
+     "depth": 6
+    },
+    "returned": true
+   },
+   {
+    "probe": "pruned-child",
+    "line": 36,
+    "vars": {
+     "word": "applet",
+     "depth": 5
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "applet",
+     "depth": 4
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "applet",
+     "depth": 3
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "applet",
+     "depth": 2
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "applet",
+     "depth": 1
+    },
+    "returned": false
+   },
+   {
+    "probe": "kept-child",
+    "line": 38,
+    "vars": {
+     "word": "applet",
+     "depth": 0
+    },
+    "returned": false
+   },
+   {
+    "probe": "after",
+    "line": 42,
+    "vars": {
+     "word": "applet",
+     "trie": {
+      "end": false,
+      "kids": [
+       [
+        "a",
+        {
+         "end": false,
+         "kids": [
+          [
+           "p",
+           {
+            "end": false,
+            "kids": [
+             [
+              "p",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "l",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "e",
+                    {
+                     "end": true,
+                     "kids": []
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ],
+       [
+        "b",
+        {
+         "end": false,
+         "kids": [
+          [
+           "a",
+           {
+            "end": false,
+            "kids": [
+             [
+              "n",
+              {
+               "end": false,
+               "kids": [
+                [
+                 "a",
+                 {
+                  "end": false,
+                  "kids": [
+                   [
+                    "n",
+                    {
+                     "end": false,
+                     "kids": [
+                      [
+                       "a",
+                       {
+                        "end": true,
+                        "kids": []
+                       }
+                      ]
+                     ]
+                    }
+                   ]
+                  ]
+                 }
+                ]
+               ]
+              }
+             ]
+            ]
+           }
+          ]
+         ]
+        }
+       ]
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

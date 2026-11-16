@@ -32,10 +32,13 @@ export function StaticFigure<D>({ def, preset }: StaticFigureProps<D>) {
   const m = staticMetrics(def, p)
   const alt: StaticTextAlternative = {
     ...def.engine.describe(p.data),
-    outputs: p.programs.map((pr) => ({
-      label: pr.id,
-      text: outputText(pr),
-    })),
+    // A program that prints nothing and does not throw (a recorded delete) has no output line.
+    outputs: p.programs
+      .map((pr) => ({
+        label: pr.id,
+        text: outputText(pr),
+      }))
+      .filter((o) => o.text),
   }
   const titleId = `${uid}-title`
   const descId = `${uid}-desc`

@@ -1,0 +1,228 @@
+{
+ "max-path-sum": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "2a008d0549bda3925ba1815e5a3441a5be6e365ecf4d8e4d63cd2dd1e4b433ed",
+  "stdout": [
+   "42"
+  ],
+  "pauses": [
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": 9,
+     "left": 0,
+     "right": 0,
+     "ans": 9,
+     "shape": [
+      9,
+      null,
+      null
+     ]
+    },
+    "returned": 9
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": 15,
+     "left": 0,
+     "right": 0,
+     "ans": 15,
+     "shape": [
+      15,
+      null,
+      null
+     ]
+    },
+    "returned": 15
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": 7,
+     "left": 0,
+     "right": 0,
+     "ans": 15,
+     "shape": [
+      7,
+      null,
+      null
+     ]
+    },
+    "returned": 7
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": 20,
+     "left": 15,
+     "right": 7,
+     "ans": 42,
+     "shape": [
+      20,
+      [
+       15,
+       null,
+       null
+      ],
+      [
+       7,
+       null,
+       null
+      ]
+     ]
+    },
+    "returned": 35
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": -10,
+     "left": 9,
+     "right": 35,
+     "ans": 42,
+     "shape": [
+      -10,
+      [
+       9,
+       null,
+       null
+      ],
+      [
+       20,
+       [
+        15,
+        null,
+        null
+       ],
+       [
+        7,
+        null,
+        null
+       ]
+      ]
+     ]
+    },
+    "returned": 25
+   }
+  ]
+ },
+ "max-path-sum-negative": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "e554a54790339a2e45e1bf995c9b403f1e703b4cad7adfeac2de06ca59d537f9",
+  "stdout": [
+   "42"
+  ],
+  "pauses": [
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": -9,
+     "left": 0,
+     "right": 0,
+     "ans": -9,
+     "shape": [
+      -9,
+      null,
+      null
+     ]
+    },
+    "returned": -9
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": 15,
+     "left": 0,
+     "right": 0,
+     "ans": 15,
+     "shape": [
+      15,
+      null,
+      null
+     ]
+    },
+    "returned": 15
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": 7,
+     "left": 0,
+     "right": 0,
+     "ans": 15,
+     "shape": [
+      7,
+      null,
+      null
+     ]
+    },
+    "returned": 7
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": 20,
+     "left": 15,
+     "right": 7,
+     "ans": 42,
+     "shape": [
+      20,
+      [
+       15,
+       null,
+       null
+      ],
+      [
+       7,
+       null,
+       null
+      ]
+     ]
+    },
+    "returned": 35
+   },
+   {
+    "probe": "call",
+    "line": 34,
+    "vars": {
+     "val": -10,
+     "left": 0,
+     "right": 35,
+     "ans": 42,
+     "shape": [
+      -10,
+      [
+       -9,
+       null,
+       null
+      ],
+      [
+       20,
+       [
+        15,
+        null,
+        null
+       ],
+       [
+        7,
+        null,
+        null
+       ]
+      ]
+     ]
+    },
+    "returned": 25
+   }
+  ]
+ }
+}
