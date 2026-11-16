@@ -95,7 +95,14 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/annotated-tree'),
     826,
     472,
-    { 'max-path-gain-vs-through': [826, 472, 472], 'trie-end-markers': [812, 558, 558], 'suffix-tree-banana': [610, 542, 542] },
+    {
+      'max-path-gain-vs-through': [826, 472, 472],
+      'trie-end-markers': [812, 558, 558],
+      'suffix-tree-banana': [610, 542, 542],
+      'combination-sum-take-skip': [803, 735, 735],
+      'water-wells-virtual-source': [648, 422, 422],
+      'k-pairs-lazy-grid': [1052, 734, 734],
+    },
   ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),

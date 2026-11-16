@@ -1,0 +1,543 @@
+{
+ "combination-sum": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "c14e15f9d4c3a48af4b3097582c3f038e2482c1dbff4baf8af886a8d6e165e7b",
+  "stdout": [
+   "[[7],[2,2,3]]"
+  ],
+  "pauses": [
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 0,
+     "s": 7,
+     "t": [],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 1,
+     "s": 7,
+     "t": [],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 2,
+     "s": 7,
+     "t": [],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 3,
+     "s": 7,
+     "t": [],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 4,
+     "s": 7,
+     "t": [],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 4,
+     "s": 7,
+     "c": null,
+     "n": 4
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 3,
+     "s": 0,
+     "t": [
+      7
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "answer",
+    "line": 8,
+    "vars": {
+     "i": 3,
+     "s": 0,
+     "t": [
+      7
+     ]
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 3,
+     "s": 7,
+     "t": [
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 2,
+     "s": 1,
+     "t": [
+      6
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 2,
+     "s": 1,
+     "c": 6,
+     "n": 4
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 2,
+     "s": 7,
+     "t": [
+      6
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 1,
+     "s": 4,
+     "t": [
+      3
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 2,
+     "s": 4,
+     "t": [
+      3
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 2,
+     "s": 4,
+     "c": 6,
+     "n": 4
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 1,
+     "s": 1,
+     "t": [
+      3,
+      3
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 1,
+     "s": 1,
+     "c": 3,
+     "n": 4
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 1,
+     "s": 4,
+     "t": [
+      3,
+      3
+     ]
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 1,
+     "s": 7,
+     "t": [
+      3
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 0,
+     "s": 5,
+     "t": [
+      2
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 1,
+     "s": 5,
+     "t": [
+      2
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 2,
+     "s": 5,
+     "t": [
+      2
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 2,
+     "s": 5,
+     "c": 6,
+     "n": 4
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 1,
+     "s": 2,
+     "t": [
+      2,
+      3
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 1,
+     "s": 2,
+     "c": 3,
+     "n": 4
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 1,
+     "s": 5,
+     "t": [
+      2,
+      3
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 0,
+     "s": 3,
+     "t": [
+      2,
+      2
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 1,
+     "s": 3,
+     "t": [
+      2,
+      2
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 2,
+     "s": 3,
+     "t": [
+      2,
+      2
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 2,
+     "s": 3,
+     "c": 6,
+     "n": 4
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 1,
+     "s": 0,
+     "t": [
+      2,
+      2,
+      3
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "answer",
+    "line": 8,
+    "vars": {
+     "i": 1,
+     "s": 0,
+     "t": [
+      2,
+      2,
+      3
+     ]
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 1,
+     "s": 3,
+     "t": [
+      2,
+      2,
+      3
+     ]
+    }
+   },
+   {
+    "probe": "call",
+    "line": 6,
+    "vars": {
+     "i": 0,
+     "s": 1,
+     "t": [
+      2,
+      2,
+      2
+     ],
+     "candidates": [
+      2,
+      3,
+      6,
+      7
+     ]
+    }
+   },
+   {
+    "probe": "cut",
+    "line": 11,
+    "vars": {
+     "i": 0,
+     "s": 1,
+     "c": 2,
+     "n": 4
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 0,
+     "s": 3,
+     "t": [
+      2,
+      2,
+      2
+     ]
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 0,
+     "s": 5,
+     "t": [
+      2,
+      2
+     ]
+    }
+   },
+   {
+    "probe": "pop",
+    "line": 16,
+    "vars": {
+     "i": 0,
+     "s": 7,
+     "t": [
+      2
+     ]
+    }
+   }
+  ]
+ }
+}

@@ -1,4 +1,3 @@
-import type { CSSProperties, ReactNode } from 'react'
 import { cn as clsx } from '../../primitives/cn'
 import { radius, strokeWidth } from '../../primitives/tokens-v3'
 import type { StaticStageProps } from '../../shell/static-types'
@@ -6,6 +5,8 @@ import { H_CLS, heights } from '../../shell/vars'
 import { routePath } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
 import { toRem } from '../../substrates/units'
+import { HEAD_LEGEND, MARK_EDGE, Notes, Svg, px, r1 } from './parts'
+import { CallsSvg, GraphSvg, GridSvg } from './SinglesSvgs'
 import {
   LABEL_LINE,
   SIZE,
@@ -33,32 +34,6 @@ import type { GainPanel, SuffixPanel, TreeData, TriePanel } from './model'
  * two to a row. Paper keeps every panel whole.
  */
 
-const r1 = (n: number) => Math.round(n * 10) / 10
-const px = (n: number) => Math.round(n) + 0.5
-/** The legend's baseline: the line under the heading. */
-const HEAD_LEGEND = 14 + SIZE.line
-const MARK_EDGE = { '--vz-sw': `${strokeWidth.nowConnector}px` } as CSSProperties
-
-function Svg({ width, height, id, heading, className, children }: { width: number; height: number; id: string; heading: string; className?: string; children: ReactNode }) {
-  return (
-    <svg
-      aria-hidden
-      data-viz-panel={id}
-      viewBox={`0 0 ${width} ${height}`}
-      width="100%"
-      className={clsx('vz-s', className ?? 'block')}
-      style={{ maxWidth: toRem(width), height: toRem(height) }}
-      fontSize={SIZE.value}
-    >
-      {/* The panel heading, in the drawing so it scales with it under large text. */}
-      <text x={0} y={14} className="vz-u" data-viz-part="panel-heading">
-        {heading}
-      </text>
-      {children}
-    </svg>
-  )
-}
-
 function EdgeLabel({ label, className = 'vz-u', part }: { label: Label; className?: string; part: string }) {
   return (
     <text x={r1(label.x)} y={r1(label.y + 10)} textAnchor={label.anchor} className={className} data-viz-part={part}>
@@ -68,18 +43,6 @@ function EdgeLabel({ label, className = 'vz-u', part }: { label: Label; classNam
         </tspan>
       ))}
     </text>
-  )
-}
-
-function Notes({ top, lines }: { top: number; lines: string[] }) {
-  return (
-    <g data-viz-part="notes">
-      {lines.map((l, i) => (
-        <text key={i} x={0} y={r1(top + i * SIZE.line + 12)} className="vz-u">
-          {l}
-        </text>
-      ))}
-    </g>
   )
 }
 
@@ -372,6 +335,14 @@ export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
         >
           {p.kind === 'gain' ? <GainSvg p={p} room={scene.gainRoom} legend={scene.gainLegend} /> : null}
           {p.kind === 'trie' ? <TrieSvg p={p} rows={scene.trieRows} /> : null}
+          {p.kind === 'calls' ? (
+            <>
+              <CallsSvg p={p} variant="narrow" className="block vz-wide:hidden" />
+              <CallsSvg p={p} variant="wide" className="hidden vz-wide:block" />
+            </>
+          ) : null}
+          {p.kind === 'graph' ? <GraphSvg p={p} /> : null}
+          {p.kind === 'grid' ? <GridSvg p={p} /> : null}
           {p.kind === 'suffix' ? (
             <>
               <SuffixSvg p={p} variant="narrow" className="block vz-wide:hidden" />

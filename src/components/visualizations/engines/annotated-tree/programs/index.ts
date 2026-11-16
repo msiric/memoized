@@ -1,3 +1,6 @@
+import { combinationSumProgram } from './backtracking'
+import { kPairsProgram } from './k-way-merge'
+import { waterAllFiveProgram, waterProgram } from './minimum-spanning-trees'
 import { suffixArrayProgram, suffixTreeProgram } from './suffix'
 import { maxPathSumNegativeProgram, maxPathSumProgram } from './tree-dfs'
 import { trieDeleteProgram, trieSearchProgram } from './tries'
@@ -8,4 +11,7 @@ export const TREE_LESSONS: Record<string, readonly TreeProgram[]> = {
   'tree-dfs': [maxPathSumProgram, maxPathSumNegativeProgram],
   tries: [trieSearchProgram, trieDeleteProgram],
   'suffix-arrays-and-suffix-trees': [suffixTreeProgram, suffixArrayProgram],
+  backtracking: [combinationSumProgram],
+  'minimum-spanning-trees': [waterProgram, waterAllFiveProgram],
+  'k-way-merge': [kPairsProgram],
 }
