@@ -33,9 +33,10 @@ export function readBlock(b: BlockRef, root = contentRoot()): string | null {
   if (!fs.existsSync(file)) return null
   const text = fs.readFileSync(file, 'utf8')
   if (isAnswerRef(b)) {
-    const lessons = (JSON.parse(text) as { lessons: { id: string; problems?: { id: string; answer?: string }[] }[] }).lessons
-    const answer = lessons.find((l) => l.id === b.lesson)?.problems?.find((q) => q.id === b.problem)?.answer
-    const block = answer ? fences(answer, b.lang)[0] : undefined
+    const lessons = (JSON.parse(text) as { lessons: { id: string; problems?: { id: string; answer?: string; question?: string }[] }[] }).lessons
+    const problem = lessons.find((l) => l.id === b.lesson)?.problems?.find((q) => q.id === b.problem)
+    const body = b.field === 'question' ? problem?.question : problem?.answer
+    const block = body ? fences(body, b.lang)[(b.nth ?? 1) - 1] : undefined
     if (!block) throw new Error(`no ${b.lang} block in ${refLabel(b)}`)
     return block.body
   }
