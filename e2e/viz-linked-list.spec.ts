@@ -47,9 +47,10 @@ test.afterEach(() => {
 async function openStep(page: Page, preset: string, width = 1024, query = '') {
   await page.setViewportSize({ width, height: 900 })
   await page.goto(`/dev/visualizations?ll=${preset}${query}`, { waitUntil: 'load' })
+  // The frame is replaced when it hydrates: wait for the live one before touching it.
+  await expect(page.locator(`${STEP}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 30_000 })
   const f = page.locator(STEP)
   await f.scrollIntoViewIfNeeded()
-  await expect(page.locator(`${STEP}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 30_000 })
   return f
 }
 
@@ -152,9 +153,9 @@ test('375×667: code line, drawing, caption and Next fit under the site header a
     if (skipped(preset)) continue
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto(`/dev/visualizations?ll=${preset}`, { waitUntil: 'load' })
+    await expect(page.locator(`${STEP}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 30_000 })
     const f = page.locator(STEP)
     await f.scrollIntoViewIfNeeded()
-    await expect(page.locator(`${STEP}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 30_000 })
     await f.getByRole('slider').focus()
     for (let i = 0; i <= 20; i++) {
       const v = await page.evaluate((sel) => {

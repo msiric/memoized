@@ -30,13 +30,15 @@ export function showsAnswer(id: string, preset: string): boolean {
   return d?.form === 'step' && Boolean(d.presets.find((p) => p.id === preset)?.log.code?.premium)
 }
 
-/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring), if any. */
+/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring, `?sw=` the sliding window), if any. */
 export function galleryFrame(url: string): { id: string; preset: string } | null {
   const q = new URL(url, 'http://gallery').searchParams
   const fr = q.get('fr')
   if (fr) return { id: 'bfs-dfs-frontier', preset: fr }
   const ll = q.get('ll')
   if (ll && ll !== 'static') return { id: 'linked-list-pointer-rewiring', preset: ll }
+  const sw = q.get('sw')
+  if (sw) return { id: 'sliding-window', preset: sw }
   return null
 }
 

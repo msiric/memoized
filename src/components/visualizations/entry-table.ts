@@ -91,6 +91,12 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     422,
     { 'floyd-rho': [704, 422, 422], 'full-reversal-strip': [914, 528, 528] },
   ],
+  'annotated-tree': [
+    () => import('./engines/annotated-tree'),
+    826,
+    472,
+    { 'max-path-gain-vs-through': [826, 472, 472], 'trie-end-markers': [812, 558, 558], 'suffix-tree-banana': [610, 542, 542] },
+  ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),
     786,
@@ -106,6 +112,26 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'palindrome-split-reverse-compare': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
       'palindrome-1221': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
       'palindrome-1231': ['palindrome-split-reverse-compare', 'palindrome-1221', 'palindrome-1231'],
+    },
+  ],
+  'sliding-window': [
+    () => import('./engines/sliding-window'),
+    792,
+    654,
+    undefined,
+    {
+      'araaci-k2': [792, 654, 792, 968, 992],
+      'araaci-k2-if': [768, 654, 768, 948, 960],
+      'set-shrink-longest-substring': [792, 654, 792, 916, 992],
+      'set-shrink-abcabcbb': [768, 654, 796, 896, 968],
+      'set-shrink-abba': [768, 654, 768, 896, 968],
+      'set-shrink-abba-if': [768, 654, 768, 896, 948],
+    },
+    {
+      'set-shrink-longest-substring': ['set-shrink-longest-substring', 'set-shrink-abcabcbb', 'set-shrink-abba', 'set-shrink-abba-if'],
+      'set-shrink-abcabcbb': ['set-shrink-longest-substring', 'set-shrink-abcabcbb', 'set-shrink-abba', 'set-shrink-abba-if'],
+      'set-shrink-abba': ['set-shrink-longest-substring', 'set-shrink-abcabcbb', 'set-shrink-abba', 'set-shrink-abba-if'],
+      'set-shrink-abba-if': ['set-shrink-longest-substring', 'set-shrink-abcabcbb', 'set-shrink-abba', 'set-shrink-abba-if'],
     },
   ],
   'list-keys': [

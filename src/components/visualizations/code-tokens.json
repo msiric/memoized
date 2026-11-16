@@ -1959,5 +1959,1081 @@
     "color": "#E1E4E8"
    }
   ]
+ ],
+ "sliding-window/araaci-k2": [
+  [
+   {
+    "text": "function",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "longestSubstringWithKDistinct",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "s",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "K",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " windowStart ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    maxLength ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "charFrequency ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " {};",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " windowEnd ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "       windowEnd ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   },
+   {
+    "text": " s.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "       windowEnd",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "rightChar ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " s[windowEnd];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "!",
+    "color": "#F97583"
+   },
+   {
+    "text": "(rightChar ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        charFrequency)) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      charFrequency[rightChar] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    charFrequency[rightChar]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// Shrink the window until we",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "       have ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'K'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": " distinct characters",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "while",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": " (Object.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "keys",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(charFrequency).",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length",
+    "color": "#79B8FF"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "> ",
+    "color": "#F97583"
+   },
+   {
+    "text": "K",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "leftChar ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        s[windowStart];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      charFrequency[leftChar]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "--",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (charFrequency[leftChar]",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "          ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=== ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "delete",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "          charFrequency[leftChar];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      windowStart",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// Update the maximum length",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "    maxLength ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " Math.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "max",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(maxLength,",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      windowEnd ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "-",
+    "color": "#F97583"
+   },
+   {
+    "text": " windowStart ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+ ",
+    "color": "#F97583"
+   },
+   {
+    "text": "1",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ");",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " maxLength;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "sliding-window/araaci-k2-if": [
+  [
+   {
+    "text": "function",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "longestSubstringWithKDistinct",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "s",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "K",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " windowStart ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    maxLength ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "charFrequency ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " {};",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " windowEnd ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "       windowEnd ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   },
+   {
+    "text": " s.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "       windowEnd",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "rightChar ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " s[windowEnd];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "!",
+    "color": "#F97583"
+   },
+   {
+    "text": "(rightChar ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        charFrequency)) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      charFrequency[rightChar] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    charFrequency[rightChar]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// Shrink the window until we",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "       have ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'K'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": " distinct characters",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": " (Object.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "keys",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(charFrequency).",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length",
+    "color": "#79B8FF"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "> ",
+    "color": "#F97583"
+   },
+   {
+    "text": "K",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "leftChar ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        s[windowStart];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      charFrequency[leftChar]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "--",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (charFrequency[leftChar]",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "          ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=== ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "delete",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "          charFrequency[leftChar];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      windowStart",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// Update the maximum length",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "    maxLength ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " Math.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "max",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(maxLength,",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      windowEnd ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "-",
+    "color": "#F97583"
+   },
+   {
+    "text": " windowStart ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+ ",
+    "color": "#F97583"
+   },
+   {
+    "text": "1",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ");",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " maxLength;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
  ]
 }

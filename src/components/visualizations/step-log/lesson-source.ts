@@ -27,11 +27,22 @@ export type BlockRef =
  *   comment prefix (a practice answer's commented `ListNode` declaration);
  *   `lessonSha256` is the sha256 of the whole block as the content holds
  *   it, so a drifted lesson fails the truth test;
+ *   `replace` [from, to] makes a one-keyword variant of the lesson's code
+ *   that a visual contrasts with it (the sliding window's `while` written
+ *   as `if`): `from` must occur exactly once in the selected lines, and
+ *   both are keywords, never solution code, so a practice answer's variant
+ *   commits no answer text;
  * - `code`: a harness line or lines (a call with the register's input, or a
  *   blank separator), never solution code.
  */
 export type SourcePart =
-  | { block: BlockRef; lessonSha256: string; lines?: readonly [number, number?]; uncomment?: true }
+  | {
+      block: BlockRef
+      lessonSha256: string
+      lines?: readonly [number, number?]
+      uncomment?: true
+      replace?: readonly [from: string, to: string]
+    }
   | { code: string }
 
 export type ProgramSource = readonly SourcePart[]
@@ -76,7 +87,14 @@ export function composeProgram(source: ProgramSource, text: (b: BlockRef) => str
       lines = lines.slice(from - 1, to)
     }
     if (part.uncomment) lines = lines.map((l) => l.replace(/^ \* ?/, ''))
-    out.push(lines.join('\n'))
+    let body = lines.join('\n')
+    if (part.replace) {
+      const [from, to] = part.replace
+      const n = body.split(from).length - 1
+      if (n !== 1) throw new Error(`"${from}" occurs ${n} times in the lines of ${refLabel(part.block)} it would replace (exactly once required)`)
+      body = body.replace(from, to)
+    }
+    out.push(body)
   }
   return out.join('\n')
 }

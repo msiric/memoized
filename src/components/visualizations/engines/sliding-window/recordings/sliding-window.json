@@ -1,0 +1,900 @@
+{
+ "k-distinct-araaci-while": {
+  "sha256": "3340bf1a65e80dc2a9c082fe6bb905ff8cb54c3e9f2a127d1c4bc7950200c672",
+  "observed": [
+   "4"
+  ],
+  "pauses": [
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      [
+       "a",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      [
+       "a",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      [
+       "a",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      [
+       "a",
+       1
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      [
+       "a",
+       1
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      [
+       "a",
+       1
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 3,
+     "best": 3,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 3,
+     "best": 3,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 3,
+     "best": 3,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 1,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 2,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 2,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 2,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 2,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 3,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       1
+      ],
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 4,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 4,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 26,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 4,
+     "best": 4,
+     "store": [
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   }
+  ]
+ },
+ "k-distinct-araaci-if": {
+  "sha256": "6fc2a6e8c0746914521f991a8f7febc8b186fbcb190f669fafaa466f81150e33",
+  "observed": [
+   "4"
+  ],
+  "pauses": [
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      [
+       "a",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      [
+       "a",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      [
+       "a",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      [
+       "a",
+       1
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      [
+       "a",
+       1
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      [
+       "a",
+       1
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 3,
+     "best": 3,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 3,
+     "best": 3,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 3,
+     "best": 3,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 0,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       3
+      ],
+      [
+       "r",
+       1
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 1,
+     "right": 4,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "iter",
+    "line": 6,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 1,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ],
+      [
+       "c",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 1,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "r",
+       1
+      ],
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 23,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 2,
+     "right": 5,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 26,
+    "vars": {
+     "s": "araaci",
+     "k": 2,
+     "left": 2,
+     "best": 4,
+     "store": [
+      [
+       "a",
+       2
+      ],
+      [
+       "c",
+       1
+      ],
+      [
+       "i",
+       1
+      ]
+     ]
+    }
+   }
+  ]
+ }
+}

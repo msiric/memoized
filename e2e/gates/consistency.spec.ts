@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, frUrl, lessonUrl, open, settle } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, lessonUrl, open, settle, swUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -402,5 +402,150 @@ for (const width of [375, 1440])
     same('stage node glyph', heap.glyph, await inSvg(step, 'svg [data-node] .vz-g'))
     same('stage link', heap.link, await inSvg(step, 'svg [data-edge] .vz-e'))
     same('stage arrowhead', heap.head, await inSvg(step, 'svg [data-edge] .vz-ah'))
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The sliding window (wave 2C) is a step-through like the event loop: the
+ * same shell, so its frame, store lane, current code line, question,
+ * choices, Skip, reveal marks and feedback compute as the event loop's do.
+ * Its strip draws the pointer-rewiring glyphs: a cell is a node box, an
+ * edge tag a pointer tag, and the step's change the same neutral mark.
+ */
+for (const width of [375, 1440])
+  test(`the sliding window draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [url, sel] of [
+      [GALLERY, EL],
+      [swUrl('araaci-k2'), SW],
+    ] as const) {
+      await open(page, url, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      out.lane = await look(f.locator('[data-viz-region="micro"], [data-viz-region="store"]').first(), PANEL)
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]').first(), ['background-color'])
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      out.anatomy = await anatomy(f)
+      // A wrong pick: the event loop's mid-run answer is its second choice, the sliding window's first.
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      looks.push(out)
+    }
+    const [a, b] = looks
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs sliding window ${b[what][k]}`)
+    expect(diffs).toEqual([])
+  })
+
+for (const width of [375, 1440])
+  test(`sliding-window glyphs compute like pointer rewiring's @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const svgLook = (root: Locator, sel: string) =>
+      root.locator(sel).first().evaluate((el, ps) => {
+        const cs = getComputedStyle(el)
+        return Object.fromEntries((ps as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+      }, SVG as unknown as string[])
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: pointer rewiring ${a[k]} vs sliding window ${b[k]}`)
+    }
+    // Pointer rewiring after its third step: a moved tag carries the changed mark.
+    await open(page, `${GALLERY}?ll=reverse-between-m2-n4`, width)
+    const ll = page.locator('[data-viz="linked-list-pointer-rewiring"] section')
+    await ll.getByRole('button', { name: 'Next' }).click()
+    await ll.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    const ref = {
+      glyph: await svgLook(ll, 'svg [data-node] .vz-g'),
+      label: await svgLook(ll, 'svg [data-node] text'),
+      tag: await svgLook(ll, 'svg [data-tag] rect:not(.vz-ch)'),
+      tagText: await svgLook(ll, 'svg [data-tag] text'),
+      changed: await svgLook(ll, 'svg [data-tag] .vz-ch'),
+    }
+    // Two steps in: cell 0 sits in the window unchanged, cell 1 and the right edge carry the changed mark.
+    await open(page, swUrl('araaci-k2'), width)
+    const sw = page.locator(SW)
+    await sw.getByRole('button', { name: 'Next' }).click()
+    await sw.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    same('cell glyph', ref.glyph, await svgLook(sw, 'svg [data-cell][data-in] .vz-g'))
+    same('cell label', ref.label, await svgLook(sw, 'svg [data-cell][data-in] text'))
+    same('edge tag', ref.tag, await svgLook(sw, 'svg [data-tag] rect:not(.vz-ch)'))
+    same('edge tag text', ref.tagText, await svgLook(sw, 'svg [data-tag] text'))
+    same('changed mark', ref.changed, await svgLook(sw, 'svg [data-tag] .vz-ch'))
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The annotated trees (wave 2D) speak the static figures' vocabulary: a
+ * node is the heap graph's glyph, an edge its link at rest, the one rest
+ * mark its changed glyph and changed link, the panel heading the pointer
+ * frames' heading, and the frame, title and caption the heap graph's. Each
+ * preset is checked, so the three panel kinds agree with each other too.
+ */
+for (const width of [375, 1440])
+  test(`annotated-tree glyphs compute like the heap graph's @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    const inSvg = (root: Locator, sel: string) =>
+      root.evaluate(
+        (f, [q, ps]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) throw new Error(`nothing matches ${q}`)
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as unknown as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, SVG] as const,
+      )
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: heap graph ${a[k]} vs annotated tree ${b[k]}`)
+    }
+    await open(page, `${GALLERY}?static=1`, width)
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const heap = {
+      frame: await look(hg, FRAME),
+      title: await look(hg.locator('p').first(), TEXT),
+      caption: await look(hg.locator('figcaption'), TEXT),
+      glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
+      link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
+      changedLink: await inSvg(hg, 'svg [data-edge][data-changed] .vz-e'),
+      changed: await inSvg(hg, 'svg .vz-ch'),
+    }
+    await open(page, `${GALLERY}?ll=static`, width)
+    const heading = await inSvg(page.locator('figure[data-viz-preset="floyd-rho"]'), 'svg [data-viz-part="panel-heading"]')
+    await open(page, atUrl, width)
+    for (const preset of ['max-path-gain-vs-through', 'trie-end-markers', 'suffix-tree-banana']) {
+      const at = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(at, FRAME))
+      same(`${preset} title`, heap.title, await look(at.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(at.locator('figcaption'), TEXT))
+      same(`${preset} panel heading`, heading, await inSvg(at, 'svg [data-viz-part="panel-heading"]'))
+      same(`${preset} node glyph`, heap.glyph, await inSvg(at, 'svg [data-node] .vz-g'))
+      same(`${preset} link`, heap.link, await inSvg(at, 'svg [data-edge]:not([data-changed]) .vz-e'))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(at, 'svg [data-edge][data-changed] .vz-e'))
+      same(`${preset} changed mark`, heap.changed, await inSvg(at, 'svg .vz-ch'))
+    }
     expect(diffs).toEqual([])
   })

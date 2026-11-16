@@ -73,6 +73,18 @@ describe('loadProgram', () => {
     expect(loadProgram(source, root).ok).toBe(true)
   })
 
+  it('makes a one-keyword variant (`replace`) that keeps every line number, and refuses an ambiguous one', () => {
+    const variant: ProgramSource = [
+      { block: answerRef, lessonSha256: sha256(ANSWER_BLOCK), lines: [7, 7] },
+      { block: answerRef, lessonSha256: sha256(ANSWER_BLOCK), lines: [8, 8], replace: ['n * 2', 'n * 3'] },
+      { block: answerRef, lessonSha256: sha256(ANSWER_BLOCK), lines: [9] },
+    ]
+    const loaded = loadProgram(variant, root)
+    expect(loaded).toEqual({ ok: true, text: 'function twice(n: number): number {\n    return n * 3\n}' })
+    const twice: ProgramSource = [{ block: answerRef, lessonSha256: sha256(ANSWER_BLOCK), lines: [7, 9], replace: ['n', 'm'] }]
+    expect(() => loadProgram(twice, root)).toThrow(/occurs \d+ times/)
+  })
+
   it('says which block is missing instead of guessing (CI)', () => {
     const absent: ProgramSource = [{ block: { ...lessonRef, path: 'content/dsa-track/none/page.mdx' }, lessonSha256: '0' }]
     expect(loadProgram(absent, root)).toEqual({ ok: false, missing: 'content/dsa-track/none/page.mdx ## **Adding** (javascript)' })

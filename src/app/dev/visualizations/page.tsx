@@ -11,7 +11,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -25,6 +25,8 @@ export default function VisualizationGalleryPage({
 
   // `?fr=<preset>`: the frontier step-through alone (wave 2A), one lesson group per page.
   if (searchParams.fr) return <FrontierGallery preset={searchParams.fr} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?sw=<preset>`: the sliding-window step-through alone (wave 2C), one lesson group per page.
+  if (searchParams.sw) return <SlidingWindowGallery preset={searchParams.sw} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
   // Static figures: final server markup, no client JavaScript. `?static=1`
@@ -75,6 +77,30 @@ export default function VisualizationGalleryPage({
             <p>Snapshots of recorded pointer states, drawn on the server as SVG.</p>
             {searchParams.mount === 'client' ? <ClientOnly>{frames}</ClientOnly> : frames}
             <p>Text after the static frames.</p>
+          </Prose>
+        </div>
+      </div>
+    )
+  }
+  // `?at=static`: the annotated-tree figures alone (wave 2D).
+  if (searchParams.at === 'static') {
+    const trees = (
+      <>
+        <Viz id="annotated-tree" preset="max-path-gain-vs-through" />
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="trie-end-markers" />
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="suffix-tree-banana" />
+      </>
+    )
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>Annotated trees</h1>
+            <p>Trees whose nodes and edges carry values recorded from a real Node run, drawn on the server as SVG.</p>
+            {searchParams.mount === 'client' ? <ClientOnly>{trees}</ClientOnly> : trees}
+            <p>Text after the annotated trees.</p>
           </Prose>
         </div>
       </div>
@@ -154,6 +180,26 @@ function FrontierGallery({ preset, mount, spacer }: { preset: string; mount?: st
           </p>
           {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
           <PremiumViz id="bfs-dfs-frontier" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
+/** The sliding-window step-through (a lesson example, or a practice answer from the checkout), between lesson text. */
+function SlidingWindowGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Sliding window step-through</h1>
+          <p>
+            How far the left edge moves when the window breaks its rule. Every edge, count and length is recorded from a
+            real Node run of the lesson&apos;s code and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="sliding-window" preset={preset} mount={mount} />
           <p>Text after the visual, to show it never moves while stepping.</p>
         </Prose>
       </div>

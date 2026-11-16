@@ -101,6 +101,14 @@ const LLF: Record<string, string> = {
   'llf-strip': 'figure[data-viz-preset="full-reversal-strip"]',
 }
 
+/** The annotated trees (wave 2D), static figures alone on their page (`?at=static`). */
+export const atUrl = `${GALLERY}?at=static`
+const AT: Record<string, string> = {
+  'at-gain': 'figure[data-viz-preset="max-path-gain-vs-through"]',
+  'at-trie': 'figure[data-viz-preset="trie-end-markers"]',
+  'at-suffix': 'figure[data-viz-preset="suffix-tree-banana"]',
+}
+
 /** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
 async function llWalk(page: Page, done: (f: Locator) => Promise<boolean>) {
   const f = page.locator(LL).first()
@@ -108,6 +116,43 @@ async function llWalk(page: Page, done: (f: Locator) => Promise<boolean>) {
     if ((await f.getAttribute('data-viz-mode')) === 'ask') await f.locator('[data-viz-part="viz-skip"]').click()
     else await f.getByRole('button', { name: 'Next' }).click()
   }
+  await settle(page)
+}
+
+/** The sliding-window step-through (wave 2C) alone on its page (`?sw=<preset>`). */
+export const SW = '[data-viz="sliding-window"] section'
+export const swUrl = (preset: string) => `${GALLERY}?sw=${preset}`
+const SW_STATES: Record<string, string> = {
+  'sw-start': 'araaci-k2',
+  'sw-ask': 'araaci-k2',
+  'sw-reveal-wrong': 'araaci-k2',
+  'sw-record': 'araaci-k2',
+  'sw-if-locked': 'araaci-k2-if',
+  'sw-if-finale': 'araaci-k2-if',
+  'sw-set-reveal': 'set-shrink-longest-substring',
+  'sw-set-abba-if-finale': 'set-shrink-abba-if',
+}
+
+/** Steps the sliding-window frame forward until `stop` holds (or its end), answering an open question with choice `pick` on the way. */
+async function swWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(SW).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
+  await settle(page)
+}
+/** Answers a prediction asked at Start with choice `pick`, then jumps to the finale. */
+async function swFinale(page: Page, pick: number) {
+  const f = page.locator(SW).first()
+  if ((await f.getAttribute('data-viz-mode')) === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+  await f.getByRole('slider').focus()
+  await page.keyboard.press('End')
+  await page.waitForTimeout(1200)
   await settle(page)
 }
 
@@ -171,7 +216,9 @@ const frEnd = async (page: Page, pick = 1) => {
 export function stateUrl(name: string): string {
   if (name.startsWith('fr-')) return frUrl(frPreset(name))
   if (name.startsWith('llf-')) return llUrl('static')
+  if (name.startsWith('at-')) return atUrl
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
+  if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
   if (name.startsWith('pp-')) return PP
@@ -182,7 +229,9 @@ export function stateUrl(name: string): string {
 export function stateFrame(name: string): string {
   if (name.startsWith('fr-')) return FR
   if (LLF[name]) return LLF[name]
+  if (AT[name]) return AT[name]
   if (LL_STATES[name]) return LL
+  if (SW_STATES[name]) return SW
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
   if (name.startsWith('heap')) return HEAP_DATA_TYPES
@@ -409,6 +458,43 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   },
   'llf-rho': async () => {},
   'llf-strip': async () => {},
+  // The sliding window (wave 2C): Start, the question while 3 keys remain,
+  // its reveal after a wrong pick, a record step (the best length tinted),
+  // the if preset's locked-in prediction and its finale; the Set's first
+  // delete (the read cell dashed) and abba with if returning 3.
+  'sw-start': async () => {},
+  'sw-ask': async (page) => {
+    await swWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'sw-reveal-wrong': async (page) => {
+    await swWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(SW).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'sw-record': async (page) => {
+    await swWalk(page, (s, mode) => s >= 8 && mode !== 'ask')
+  },
+  'sw-if-locked': async (page) => {
+    await page.locator(SW).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await settle(page)
+  },
+  'sw-if-finale': async (page) => {
+    await swFinale(page, 2)
+  },
+  'sw-set-reveal': async (page) => {
+    await swWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(SW).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'sw-set-abba-if-finale': async (page) => {
+    await swFinale(page, 1)
+  },
+  // The annotated trees (wave 2D): static, at rest only.
+  'at-gain': async () => {},
+  'at-trie': async () => {},
+  'at-suffix': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()
@@ -534,6 +620,22 @@ export const MOTION_STATES: Record<string, MotionState> = {
     frame: LL,
     setup: async (page) => {
       const f = page.locator(LL).first()
+      await f.getByRole('slider').focus()
+      for (let i = 0; i < 4; i++) {
+        await page.keyboard.press('ArrowRight')
+        await page.waitForTimeout(650)
+      }
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The sliding window: a paced extend (the right edge's tag slides with the band, a chip enters, Q1).
+  'sw-step': {
+    url: swUrl('araaci-k2'),
+    frame: SW,
+    setup: async (page) => {
+      const f = page.locator(SW).first()
       await f.getByRole('slider').focus()
       for (let i = 0; i < 4; i++) {
         await page.keyboard.press('ArrowRight')

@@ -484,9 +484,11 @@ test('touch at 375', async ({ browser, baseURL }) => {
   const ctx = await browser.newContext({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 667 }, deviceScaleFactor: 2, baseURL })
   const page = await ctx.newPage()
   await page.goto('/dev/visualizations')
+  // The server's Start frame is replaced when the engine hydrates: touch the frame only once the live one is
+  // there (scrolling the server frame raced the swap: "Element is not attached to the DOM").
+  await page.locator(`${EL}[data-viz-interactive="true"]`).waitFor({ timeout: 30_000 })
   const f = page.locator(EL)
   await f.scrollIntoViewIfNeeded()
-  await page.locator(`${EL}[data-viz-interactive="true"]`).waitFor()
   const t: Record<string, unknown> = {}
   const slider = f.getByRole('slider')
   t.sliderTouchAction = await slider.evaluate((e) => getComputedStyle(e).touchAction)
