@@ -95,7 +95,19 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/annotated-tree'),
     826,
     472,
-    { 'max-path-gain-vs-through': [826, 472, 472], 'trie-end-markers': [812, 558, 558], 'suffix-tree-banana': [610, 542, 542] },
+    { 'max-path-gain-vs-through': [826, 472, 472], 'trie-end-markers': [812, 558, 558], 'suffix-tree-banana': [610, 542, 542], 'hidden-class-transitions': [1174, 810, 810] },
+  ],
+  'prototype-object-graph': [
+    () => import('./engines/heap-graph/prototype'),
+    1118,
+    618,
+    { 'lookup-and-shadowing': [1118, 618, 618], 'constructor-fix': [1234, 654, 654] },
+  ],
+  lanes: [
+    () => import('./engines/lanes'),
+    554,
+    454,
+    { 'debounce-vs-throttle': [554, 454, 454], 'event-dispatch-path': [962, 616, 616], 'oauth-pkce-channels': [886, 684, 684], 'union-vs-intersection': [880, 598, 598] },
   ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),

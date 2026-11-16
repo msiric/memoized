@@ -1,0 +1,340 @@
+{
+ "late-properties": {
+  "generator": "node-natives-maps@1",
+  "sha256": "63278f0c289e4dba73ce65cb566a451c6803af6643b8a81bf00a49005558dfcb",
+  "pauses": [
+   {
+    "probe": "ctor-empty",
+    "line": 2,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m0",
+      "parent": null,
+      "keys": []
+     }
+    }
+   },
+   {
+    "probe": "ctor-a",
+    "line": 3,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m1",
+      "parent": "m0",
+      "keys": [
+       "a"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "obj1-ab",
+    "line": 7,
+    "vars": {},
+    "maps": {
+     "obj1": {
+      "map": "m2",
+      "parent": "m1",
+      "keys": [
+       "a",
+       "b"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "ctor-empty",
+    "line": 2,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m0",
+      "parent": null,
+      "keys": []
+     }
+    }
+   },
+   {
+    "probe": "ctor-a",
+    "line": 3,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m1",
+      "parent": "m0",
+      "keys": [
+       "a"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "obj2-ab",
+    "line": 10,
+    "vars": {},
+    "maps": {
+     "obj2": {
+      "map": "m2",
+      "parent": "m1",
+      "keys": [
+       "a",
+       "b"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "end",
+    "line": 11,
+    "vars": {
+     "same": false
+    },
+    "maps": {
+     "obj1": {
+      "map": "m3",
+      "parent": "m2",
+      "keys": [
+       "a",
+       "b",
+       "c"
+      ]
+     },
+     "obj2": {
+      "map": "m4",
+      "parent": "m2",
+      "keys": [
+       "a",
+       "b",
+       "d"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "constructor-fixed": {
+  "generator": "node-natives-maps@1",
+  "sha256": "4480a43596a41807876351b6337d746296ea4d2316523b83e5290ee1e650fd3d",
+  "pauses": [
+   {
+    "probe": "ctor-empty",
+    "line": 2,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m0",
+      "parent": null,
+      "keys": []
+     }
+    }
+   },
+   {
+    "probe": "ctor-a",
+    "line": 3,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m1",
+      "parent": "m0",
+      "keys": [
+       "a"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "ctor-ab",
+    "line": 4,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m2",
+      "parent": "m1",
+      "keys": [
+       "a",
+       "b"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "ctor-abc",
+    "line": 5,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m3",
+      "parent": "m2",
+      "keys": [
+       "a",
+       "b",
+       "c"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "obj1-before",
+    "line": 9,
+    "vars": {},
+    "maps": {
+     "obj1": {
+      "map": "m4",
+      "parent": "m3",
+      "keys": [
+       "a",
+       "b",
+       "c",
+       "d"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "obj1-after",
+    "line": 11,
+    "vars": {},
+    "maps": {
+     "obj1": {
+      "map": "m4",
+      "parent": "m3",
+      "keys": [
+       "a",
+       "b",
+       "c",
+       "d"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "ctor-empty",
+    "line": 2,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m0",
+      "parent": null,
+      "keys": []
+     }
+    }
+   },
+   {
+    "probe": "ctor-a",
+    "line": 3,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m1",
+      "parent": "m0",
+      "keys": [
+       "a"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "ctor-ab",
+    "line": 4,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m2",
+      "parent": "m1",
+      "keys": [
+       "a",
+       "b"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "ctor-abc",
+    "line": 5,
+    "vars": {},
+    "maps": {
+     "this": {
+      "map": "m3",
+      "parent": "m2",
+      "keys": [
+       "a",
+       "b",
+       "c"
+      ]
+     }
+    }
+   },
+   {
+    "probe": "end",
+    "line": 13,
+    "vars": {
+     "same": true
+    },
+    "maps": {
+     "obj1": {
+      "map": "m4",
+      "parent": "m3",
+      "keys": [
+       "a",
+       "b",
+       "c",
+       "d"
+      ]
+     },
+     "obj2": {
+      "map": "m4",
+      "parent": "m3",
+      "keys": [
+       "a",
+       "b",
+       "c",
+       "d"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "property-order": {
+  "generator": "node-natives-maps@1",
+  "sha256": "e94f068b2798c5272f3914d0f09d636cb0e287e9ab300f9c63bfa47c21e2e42b",
+  "pauses": [
+   {
+    "probe": "end",
+    "line": 6,
+    "vars": {
+     "ab": true,
+     "ac": false
+    },
+    "maps": {
+     "a": {
+      "map": "m0",
+      "parent": "m1",
+      "keys": [
+       "x",
+       "y"
+      ]
+     },
+     "b": {
+      "map": "m0",
+      "parent": "m1",
+      "keys": [
+       "x",
+       "y"
+      ]
+     },
+     "c": {
+      "map": "m2",
+      "parent": "m3",
+      "keys": [
+       "y",
+       "x"
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

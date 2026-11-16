@@ -1,3 +1,5 @@
+import type { ShapesPanel } from './shapes'
+
 /**
  * The annotated-tree substrate (R4 shared visual "annotated-tree", wave
  * 2D): static figures of trees whose nodes and edges carry recorded values.
@@ -101,7 +103,7 @@ export type SuffixPanel = {
   notes: string[]
 }
 
-export type TreePanel = GainPanel | TriePanel | SuffixPanel
+export type TreePanel = GainPanel | TriePanel | SuffixPanel | ShapesPanel
 
 export type TreeData = {
   panels: TreePanel[]

@@ -1,0 +1,917 @@
+{
+ "person": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "e626a7e512e915a7254921218c79d8d542c7fc178c4098f962a4ad554ba1206a",
+  "stdout": [
+   "Hello, my name is Alice.",
+   "[object Object]"
+  ],
+  "pauses": [
+   {
+    "probe": "graph",
+    "line": 12,
+    "vars": {
+     "graph": {
+      "objects": [
+       {
+        "label": "alice",
+        "fn": false,
+        "keys": [
+         [
+          "name",
+          {
+           "text": "'Alice'"
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Person.prototype"
+        }
+       },
+       {
+        "label": "Person.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "ref": "Person"
+          },
+          false
+         ],
+         [
+          "sayHello",
+          {
+           "other": "function "
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       },
+       {
+        "label": "Object.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "other": "function Object"
+          },
+          false
+         ],
+         [
+          "__defineGetter__",
+          {
+           "other": "function __defineGetter__"
+          },
+          false
+         ],
+         [
+          "__defineSetter__",
+          {
+           "other": "function __defineSetter__"
+          },
+          false
+         ],
+         [
+          "hasOwnProperty",
+          {
+           "other": "function hasOwnProperty"
+          },
+          false
+         ],
+         [
+          "__lookupGetter__",
+          {
+           "other": "function __lookupGetter__"
+          },
+          false
+         ],
+         [
+          "__lookupSetter__",
+          {
+           "other": "function __lookupSetter__"
+          },
+          false
+         ],
+         [
+          "isPrototypeOf",
+          {
+           "other": "function isPrototypeOf"
+          },
+          false
+         ],
+         [
+          "propertyIsEnumerable",
+          {
+           "other": "function propertyIsEnumerable"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ],
+         [
+          "valueOf",
+          {
+           "other": "function valueOf"
+          },
+          false
+         ],
+         [
+          "__proto__",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "toLocaleString",
+          {
+           "other": "function toLocaleString"
+          },
+          false
+         ]
+        ],
+        "proto": null
+       },
+       {
+        "label": "Person",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "1"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Person'"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Person.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "other": "[object Function]"
+        }
+       }
+      ],
+      "lookups": [
+       {
+        "from": "alice",
+        "key": "toString",
+        "visited": [
+         [
+          "alice",
+          false
+         ],
+         [
+          "Person.prototype",
+          false
+         ],
+         [
+          "Object.prototype",
+          true
+         ]
+        ],
+        "value": {
+         "other": "function toString"
+        }
+       },
+       {
+        "from": "alice",
+        "key": "sayHello",
+        "visited": [
+         [
+          "alice",
+          false
+         ],
+         [
+          "Person.prototype",
+          true
+         ]
+        ],
+        "value": {
+         "other": "function "
+        }
+       },
+       {
+        "from": "alice",
+        "key": "name",
+        "visited": [
+         [
+          "alice",
+          true
+         ]
+        ],
+        "value": {
+         "text": "'Alice'"
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "shadow": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "d4b44d9d70e6ba327232061eeaed09fc5177025b3d56b17a0ad613ad6c736bfd",
+  "stdout": [
+   "bark",
+   "silent"
+  ],
+  "pauses": [
+   {
+    "probe": "graph",
+    "line": 6,
+    "vars": {
+     "graph": {
+      "objects": [
+       {
+        "label": "dog",
+        "fn": false,
+        "keys": [
+         [
+          "sound",
+          {
+           "text": "'bark'"
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "animal"
+        }
+       },
+       {
+        "label": "animal",
+        "fn": false,
+        "keys": [
+         [
+          "sound",
+          {
+           "text": "'silent'"
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       },
+       {
+        "label": "Object.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "other": "function Object"
+          },
+          false
+         ],
+         [
+          "__defineGetter__",
+          {
+           "other": "function __defineGetter__"
+          },
+          false
+         ],
+         [
+          "__defineSetter__",
+          {
+           "other": "function __defineSetter__"
+          },
+          false
+         ],
+         [
+          "hasOwnProperty",
+          {
+           "other": "function hasOwnProperty"
+          },
+          false
+         ],
+         [
+          "__lookupGetter__",
+          {
+           "other": "function __lookupGetter__"
+          },
+          false
+         ],
+         [
+          "__lookupSetter__",
+          {
+           "other": "function __lookupSetter__"
+          },
+          false
+         ],
+         [
+          "isPrototypeOf",
+          {
+           "other": "function isPrototypeOf"
+          },
+          false
+         ],
+         [
+          "propertyIsEnumerable",
+          {
+           "other": "function propertyIsEnumerable"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ],
+         [
+          "valueOf",
+          {
+           "other": "function valueOf"
+          },
+          false
+         ],
+         [
+          "__proto__",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "toLocaleString",
+          {
+           "other": "function toLocaleString"
+          },
+          false
+         ]
+        ],
+        "proto": null
+       }
+      ],
+      "lookups": [
+       {
+        "from": "dog",
+        "key": "sound",
+        "visited": [
+         [
+          "dog",
+          true
+         ]
+        ],
+        "value": {
+         "text": "'bark'"
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "constructor-before": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "d43df4d84634e2459d6c093237556328495eb406794b046c33a0b1436739f2ff",
+  "stdout": [
+   "false"
+  ],
+  "pauses": [
+   {
+    "probe": "graph",
+    "line": 11,
+    "vars": {
+     "graph": {
+      "objects": [
+       {
+        "label": "child",
+        "fn": false,
+        "keys": [],
+        "proto": {
+         "ref": "Child.prototype"
+        }
+       },
+       {
+        "label": "Child.prototype",
+        "fn": false,
+        "keys": [],
+        "proto": {
+         "ref": "Parent.prototype"
+        }
+       },
+       {
+        "label": "Parent.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "ref": "Parent"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       },
+       {
+        "label": "Object.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "other": "function Object"
+          },
+          false
+         ],
+         [
+          "__defineGetter__",
+          {
+           "other": "function __defineGetter__"
+          },
+          false
+         ],
+         [
+          "__defineSetter__",
+          {
+           "other": "function __defineSetter__"
+          },
+          false
+         ],
+         [
+          "hasOwnProperty",
+          {
+           "other": "function hasOwnProperty"
+          },
+          false
+         ],
+         [
+          "__lookupGetter__",
+          {
+           "other": "function __lookupGetter__"
+          },
+          false
+         ],
+         [
+          "__lookupSetter__",
+          {
+           "other": "function __lookupSetter__"
+          },
+          false
+         ],
+         [
+          "isPrototypeOf",
+          {
+           "other": "function isPrototypeOf"
+          },
+          false
+         ],
+         [
+          "propertyIsEnumerable",
+          {
+           "other": "function propertyIsEnumerable"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ],
+         [
+          "valueOf",
+          {
+           "other": "function valueOf"
+          },
+          false
+         ],
+         [
+          "__proto__",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "toLocaleString",
+          {
+           "other": "function toLocaleString"
+          },
+          false
+         ]
+        ],
+        "proto": null
+       },
+       {
+        "label": "Child",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "0"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Child'"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Child.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "other": "[object Function]"
+        }
+       },
+       {
+        "label": "Parent",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "0"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Parent'"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Parent.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "other": "[object Function]"
+        }
+       }
+      ],
+      "lookups": [
+       {
+        "from": "child",
+        "key": "constructor",
+        "visited": [
+         [
+          "child",
+          false
+         ],
+         [
+          "Child.prototype",
+          false
+         ],
+         [
+          "Parent.prototype",
+          true
+         ]
+        ],
+        "value": {
+         "ref": "Parent"
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "constructor-after": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "e30bc68ec36c2d4039f62fb5e6c3dbfa85c70c3e6bd64f7be33286a5aeb68459",
+  "stdout": [
+   "true"
+  ],
+  "pauses": [
+   {
+    "probe": "graph",
+    "line": 12,
+    "vars": {
+     "graph": {
+      "objects": [
+       {
+        "label": "child",
+        "fn": false,
+        "keys": [],
+        "proto": {
+         "ref": "Child.prototype"
+        }
+       },
+       {
+        "label": "Child.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "ref": "Child"
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Parent.prototype"
+        }
+       },
+       {
+        "label": "Parent.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "ref": "Parent"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       },
+       {
+        "label": "Object.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "other": "function Object"
+          },
+          false
+         ],
+         [
+          "__defineGetter__",
+          {
+           "other": "function __defineGetter__"
+          },
+          false
+         ],
+         [
+          "__defineSetter__",
+          {
+           "other": "function __defineSetter__"
+          },
+          false
+         ],
+         [
+          "hasOwnProperty",
+          {
+           "other": "function hasOwnProperty"
+          },
+          false
+         ],
+         [
+          "__lookupGetter__",
+          {
+           "other": "function __lookupGetter__"
+          },
+          false
+         ],
+         [
+          "__lookupSetter__",
+          {
+           "other": "function __lookupSetter__"
+          },
+          false
+         ],
+         [
+          "isPrototypeOf",
+          {
+           "other": "function isPrototypeOf"
+          },
+          false
+         ],
+         [
+          "propertyIsEnumerable",
+          {
+           "other": "function propertyIsEnumerable"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ],
+         [
+          "valueOf",
+          {
+           "other": "function valueOf"
+          },
+          false
+         ],
+         [
+          "__proto__",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "toLocaleString",
+          {
+           "other": "function toLocaleString"
+          },
+          false
+         ]
+        ],
+        "proto": null
+       },
+       {
+        "label": "Child",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "0"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Child'"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Child.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "other": "[object Function]"
+        }
+       },
+       {
+        "label": "Parent",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "0"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Parent'"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Parent.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "other": "[object Function]"
+        }
+       }
+      ],
+      "lookups": [
+       {
+        "from": "child",
+        "key": "constructor",
+        "visited": [
+         [
+          "child",
+          false
+         ],
+         [
+          "Child.prototype",
+          true
+         ]
+        ],
+        "value": {
+         "ref": "Child"
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

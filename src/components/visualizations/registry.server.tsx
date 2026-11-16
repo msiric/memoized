@@ -3,6 +3,8 @@ import AnnotatedTreeViz from './engines/annotated-tree'
 import EnvRecordsViz from './engines/env-records'
 import EventLoopViz from './engines/event-loop'
 import FrontierViz from './engines/frontier'
+import LanesViz from './engines/lanes'
+import PrototypeGraphViz from './engines/heap-graph/prototype'
 import HeapGraphViz from './engines/heap-graph'
 import LinkedListViz from './engines/linked-list'
 import LinkedListFramesViz from './engines/linked-list/frames'
@@ -27,4 +29,6 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'linked-list-frames': LinkedListFramesViz,
   'sliding-window': SlidingWindowViz,
   'annotated-tree': AnnotatedTreeViz,
+  'prototype-object-graph': PrototypeGraphViz,
+  lanes: LanesViz,
 }

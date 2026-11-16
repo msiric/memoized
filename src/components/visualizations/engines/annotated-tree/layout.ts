@@ -2,6 +2,7 @@ import type { Point } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
 import type { PerVariant } from '../../shell/types'
 import type { GainPanel, SuffixPanel, TreeData, TreePanel, TriePanel } from './model'
+import { shapeLabel, type ShapesPanel } from './shapes'
 
 /**
  * Annotated-tree geometry: pure arithmetic on the data, so the server, the
@@ -361,6 +362,10 @@ export function layoutTree(d: TreeData): TreeScene {
       const h = layoutTrie(p, trieRows).height
       return { narrow: h, wide: h }
     }
+    if (p.kind === 'shapes') {
+      const h = layoutShapes(p).height
+      return { narrow: h, wide: h }
+    }
     return { narrow: layoutSuffix(p, 'narrow').height, wide: layoutSuffix(p, 'wide').height }
   })
   const full = d.panels.map((p) => p.kind === 'suffix')
@@ -375,4 +380,84 @@ export function layoutTree(d: TreeData): TreeScene {
   }
   wide += (rows - 1) * SIZE.panelGap
   return { gainRoom, gainLegend, trieRows, blocks, full, height: { narrow, wide } }
+}
+
+// ---------------------------------------------------------------------------
+// Hidden-class trees: a map per node (its keys), top to bottom from the
+// empty object, the added key beside each edge, objects under their map.
+// ---------------------------------------------------------------------------
+
+export const SHAPES = {
+  box: 28,
+  pad: 8,
+  /** Between a map and its children (room for the `+key` label beside the edge). */
+  levelGap: 30,
+  sep: 16,
+  top: 6,
+  /** The objects' line under a map. */
+  objects: 18,
+  labelGap: 6,
+} as const
+
+export type ShapeBox = Box & { id: string; cx: number }
+export type ShapeEdge = { from: string; to: string; x1: number; y1: number; x2: number; y2: number; label: Label }
+export type ShapeGeometry = { width: number; height: number; boxes: Record<string, ShapeBox>; edges: ShapeEdge[]; resultsTop: number }
+
+export function layoutShapes(p: ShapesPanel): ShapeGeometry {
+  const kids = (id: string) => p.nodes.filter((n) => n.parent === id).map((n) => n.id)
+  const byId = new Map(p.nodes.map((n) => [n.id, n]))
+  const boxW = (id: string) => valueW(shapeLabel(byId.get(id)!.keys)) + 2 * SHAPES.pad
+  const objW = (id: string) => (byId.get(id)!.objects.length ? smallW(byId.get(id)!.objects.join(', ')) : 0)
+  const span = new Map<string, number>()
+  const measure = (id: string): number => {
+    const c = kids(id)
+    const own = Math.max(boxW(id), objW(id))
+    const sum = c.reduce((s, k) => s + measure(k), 0) + Math.max(0, c.length - 1) * SHAPES.sep
+    span.set(id, Math.max(own, sum))
+    return span.get(id)!
+  }
+  const root = p.nodes[0].id
+  const total = measure(root)
+  if (total > W) throw new Error(`${p.id}: the tree needs ${total}px, more than ${W}px`)
+  const boxes: Record<string, ShapeBox> = {}
+  const depthOf = (id: string): number => (byId.get(id)!.parent ? depthOf(byId.get(id)!.parent!) + 1 : 0)
+  const levelY = (d: number) => HEAD + SHAPES.top + d * (SHAPES.box + SHAPES.levelGap)
+  const place = (id: string, left: number) => {
+    const s = span.get(id)!
+    const c = kids(id)
+    const sum = c.reduce((a, k) => a + span.get(k)!, 0) + Math.max(0, c.length - 1) * SHAPES.sep
+    let x = left + (s - sum) / 2
+    for (const k of c) {
+      place(k, x)
+      x += span.get(k)! + SHAPES.sep
+    }
+    const cx = c.length ? (boxes[c[0]].cx + boxes[c[c.length - 1]].cx) / 2 : left + s / 2
+    const w = boxW(id)
+    boxes[id] = { id, x: Math.round(cx - w / 2), y: levelY(depthOf(id)), w, h: SHAPES.box, cx: Math.round(cx) }
+  }
+  place(root, (W - total) / 2)
+  const edges: ShapeEdge[] = p.nodes
+    .filter((n) => n.parent)
+    .map((n) => {
+      const a = boxes[n.parent!]
+      const b = boxes[n.id]
+      const siblings = kids(n.parent!)
+      const left = siblings.length > 1 && siblings.indexOf(n.id) < siblings.length / 2 - 0.25
+      const mx = (a.cx + b.cx) / 2
+      const my = (a.y + a.h + b.y) / 2
+      return {
+        from: n.parent!,
+        to: n.id,
+        x1: a.cx,
+        y1: a.y + a.h,
+        x2: b.cx,
+        y2: b.y,
+        label: { x: mx + (left ? -SHAPES.labelGap : SHAPES.labelGap), y: my - 7, anchor: left ? 'end' : 'start', lines: [`+${n.keys[n.keys.length - 1]}`] },
+      }
+    })
+  const depth = Math.max(...p.nodes.map((n) => depthOf(n.id)))
+  const deepestHasObjects = p.nodes.some((n) => n.objects.length)
+  const resultsTop = levelY(depth) + SHAPES.box + (deepestHasObjects ? SHAPES.objects : 0) + SIZE.notesGap
+  const height = resultsTop + (p.results.length + p.notes.length) * SIZE.line + 4
+  return { width: W, height, boxes, edges, resultsTop }
 }

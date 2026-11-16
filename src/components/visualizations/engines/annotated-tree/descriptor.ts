@@ -1,7 +1,8 @@
 import type { HashedProgram, StaticDescriptor, StaticEngineCore, StaticTextAlternative } from '../../shell/static-types'
 import { layoutTree } from './layout'
 import type { GainPanel, SuffixPanel, TreeData, TreePanel, TriePanel } from './model'
-import { maxPathGainVsThrough, suffixTreeBanana, trieEndMarkers } from './presets'
+import { hiddenClassTransitions, maxPathGainVsThrough, suffixTreeBanana, trieEndMarkers } from './presets'
+import { shapeLabel, type ShapesPanel } from './shapes'
 
 /**
  * The annotated-tree substrate without its renderer (R4 shared visual
@@ -60,7 +61,20 @@ function describeSuffix(p: SuffixPanel): string[] {
   return [...lines, ...p.notes.map((n) => `${n}.`)]
 }
 
+function describeShapes(p: ShapesPanel): string[] {
+  const byId = new Map(p.nodes.map((n) => [n.id, n]))
+  const lines = p.nodes.map((n) => {
+    const at = n.objects.length ? `; ${n.objects.join(' and ')} ${n.objects.length > 1 ? 'end' : 'ends'} here` : ''
+    if (!n.parent) return `${shapeLabel(n.keys)}: the root${n.inferred ? ' (inferred, not printed by V8)' : ''}${at}.`
+    const parent = byId.get(n.parent)!
+    return `${shapeLabel(parent.keys)} + ${n.keys[n.keys.length - 1]} → ${shapeLabel(n.keys)}${n.inferred ? ' (inferred from its child’s back pointer)' : ''}${at}.`
+  })
+  for (const r of p.results) lines.push(`${r.expr} is ${r.value}.`)
+  return [...lines, ...p.notes.map((n) => `${n}.`)]
+}
+
 function describePanel(p: TreePanel): string[] {
+  if (p.kind === 'shapes') return describeShapes(p)
   if (p.kind === 'gain') return describeGain(p)
   if (p.kind === 'trie') return describeTrie(p)
   return describeSuffix(p)
@@ -69,8 +83,9 @@ function describePanel(p: TreePanel): string[] {
 export function describeTree(d: TreeData): Omit<StaticTextAlternative, 'outputs'> {
   return {
     parts: d.panels.map((p) => ({ heading: p.heading, lines: describePanel(p) })),
-    model:
-      'Every value is recorded from a real run of the lesson code under the inspector: what each call returned, each node’s flags and children, each edge’s range.' +
+    model: d.panels.every((p) => p.kind === 'shapes')
+      ? 'Hidden classes are not visible to plain JavaScript: each node is a V8 map printed by %DebugPrint in a real run of the lesson code under node --allow-natives-syntax, joined to the map it came from (its back pointer); a dashed node was seen only as a back pointer.'
+      : 'Every value is recorded from a real run of the lesson code under the inspector: what each call returned, each node’s flags and children, each edge’s range.' +
       (d.panels.some((p) => p.kind === 'suffix') ? ' Children are drawn in character order, so the leaves read in suffix-array order (the lesson’s Map keeps insertion order).' : ''),
   }
 }
@@ -86,7 +101,7 @@ export const annotatedTreeDescriptor: StaticDescriptor<TreeData, HashedProgram> 
   form: 'static',
   title: 'Annotated tree',
   engine: annotatedTreeEngineCore,
-  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana],
+  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, hiddenClassTransitions],
   defaultPreset: 'max-path-gain-vs-through',
   since: '2026-11',
 }
