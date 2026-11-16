@@ -24,6 +24,9 @@ const routes = [
   '/dev/visualizations?ll=reverse-between-m2-n4',
   '/dev/visualizations?ll=palindrome-split-reverse-compare',
   '/dev/visualizations?ll=static',
+  // The sliding window (wave 2C), one page per lesson group.
+  '/dev/visualizations?sw=araaci-k2',
+  '/dev/visualizations?sw=set-shrink-longest-substring',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

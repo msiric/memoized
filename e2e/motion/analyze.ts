@@ -257,7 +257,7 @@ export type Flag = { kind: string; detail: string }
 
 /** An element of a visual's designed reveal (`data-viz-reveal`, D21). */
 export const REVEAL = /\bviz-reveal=(\S+)/
-const STAGE_REGION = /\bin=(stack|host|micro|tasks|console|list)\b/
+const STAGE_REGION = /\bin=(stack|host|micro|tasks|console|list|strip|store)\b/
 const GLYPH_KEY = /\b(?:glyph|flip-id|chip)=(\S+)|\bout=(\d+)/
 
 /** The stage glyph an element belongs to (`then`, `out-2`), or null for chrome. */

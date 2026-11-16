@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, freezeAt, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, freezeAt, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -140,4 +140,8 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, 'figure[data-viz-preset="floyd-rho"]', 'print-linked-list-floyd-rho.png')
   await frameShot(page, 'figure[data-viz-preset="full-reversal-strip"]', 'print-linked-list-full-reversal.png')
+  // The sliding window (wave 2C): the lesson example's Start.
+  await open(page, swUrl('araaci-k2'), 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, SW, 'print-sliding-window-araaci.png')
 })
