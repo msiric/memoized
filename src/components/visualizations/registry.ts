@@ -1,3 +1,4 @@
+import { annotatedTreeDescriptor } from './engines/annotated-tree/descriptor'
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
 import { frontierDescriptor } from './engines/frontier/descriptor'
@@ -34,6 +35,7 @@ export const VIZ_DESCRIPTORS = {
   'linked-list-pointer-rewiring': linkedListDescriptor,
   'linked-list-frames': linkedListFramesDescriptor,
   'sliding-window': slidingWindowDescriptor,
+  'annotated-tree': annotatedTreeDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS
@@ -136,7 +138,7 @@ export function vizStaticTextAlternative(id: string, preset?: string): StaticTex
   if (!p) return undefined
   return {
     ...d.engine.describe(p.data),
-    outputs: p.programs.map((pr) => ({ label: pr.id, text: outputText(pr) })),
+    outputs: p.programs.map((pr) => ({ label: pr.id, text: outputText(pr) })).filter((o) => o.text),
   }
 }
 

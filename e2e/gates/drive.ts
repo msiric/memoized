@@ -101,6 +101,14 @@ const LLF: Record<string, string> = {
   'llf-strip': 'figure[data-viz-preset="full-reversal-strip"]',
 }
 
+/** The annotated trees (wave 2D), static figures alone on their page (`?at=static`). */
+export const atUrl = `${GALLERY}?at=static`
+const AT: Record<string, string> = {
+  'at-gain': 'figure[data-viz-preset="max-path-gain-vs-through"]',
+  'at-trie': 'figure[data-viz-preset="trie-end-markers"]',
+  'at-suffix': 'figure[data-viz-preset="suffix-tree-banana"]',
+}
+
 /** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
 async function llWalk(page: Page, done: (f: Locator) => Promise<boolean>) {
   const f = page.locator(LL).first()
@@ -208,6 +216,7 @@ const frEnd = async (page: Page, pick = 1) => {
 export function stateUrl(name: string): string {
   if (name.startsWith('fr-')) return frUrl(frPreset(name))
   if (name.startsWith('llf-')) return llUrl('static')
+  if (name.startsWith('at-')) return atUrl
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
@@ -220,6 +229,7 @@ export function stateUrl(name: string): string {
 export function stateFrame(name: string): string {
   if (name.startsWith('fr-')) return FR
   if (LLF[name]) return LLF[name]
+  if (AT[name]) return AT[name]
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
@@ -481,6 +491,10 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'sw-set-abba-if-finale': async (page) => {
     await swFinale(page, 1)
   },
+  // The annotated trees (wave 2D): static, at rest only.
+  'at-gain': async () => {},
+  'at-trie': async () => {},
+  'at-suffix': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()

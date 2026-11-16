@@ -646,7 +646,11 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
     let boxR: Map<string, R>
     if (named.length) {
       boxR = new Map(
-        named.map((g) => [g.getAttribute('data-node')!, R((g.querySelector(`:scope > ${BOX}`) as SVGRectElement).getBoundingClientRect())]),
+        // A node is its first box, or its first circle (a tree node; the outer one when it is ringed).
+        named.map((g) => [
+          g.getAttribute('data-node')!,
+          R(((g.querySelector(`:scope > ${BOX}`) ?? g.querySelector(':scope > circle')) as SVGGraphicsElement).getBoundingClientRect()),
+        ]),
       )
     } else {
       const boxEls = [
@@ -677,28 +681,31 @@ function runDetectors({ scope, opts }: { scope: string; opts: DetectOptions }): 
       const len = line.getTotalLength()
       const a = line.getPointAtLength(0).matrixTransform(m)
       const z = line.getPointAtLength(len).matrixTransform(m)
-      const hb = R(head.getBoundingClientRect())
+      // An undirected edge (a tree's) has no head: its path must end on the target itself.
+      const hb = head ? R(head.getBoundingClientRect()) : null
       const src = boxR.get(want.from)
       const dst = boxR.get(want.to)
       if (!src || !dst) continue
       const dot = g.querySelector('circle')
       const startOk = want.kind === 'ref' ? Boolean(dot) && inside(a, src) : distToRect(a, src) <= 2
       // The head's tip must touch the target's border.
-      const tipD = Math.min(
-        ...[
-          { x: (hb.l + hb.r) / 2, y: hb.t },
-          { x: (hb.l + hb.r) / 2, y: hb.b },
-          { x: hb.l, y: (hb.t + hb.b) / 2 },
-          { x: hb.r, y: (hb.t + hb.b) / 2 },
-        ].map((p) => distToRect(p, dst)),
-      )
-      const endOk = distToRect(z, dst) <= 8 && tipD <= 2
+      const tipD = hb
+        ? Math.min(
+            ...[
+              { x: (hb.l + hb.r) / 2, y: hb.t },
+              { x: (hb.l + hb.r) / 2, y: hb.b },
+              { x: hb.l, y: (hb.t + hb.b) / 2 },
+              { x: hb.r, y: (hb.t + hb.b) / 2 },
+            ].map((p) => distToRect(p, dst)),
+          )
+        : distToRect(z, dst)
+      const endOk = distToRect(z, dst) <= (hb ? 8 : 2) && tipD <= 2
       if (!startOk || !endOk)
         push({
           detector: 'edge-detached',
           sig: `${section}:${id}`,
           msg: `edge ${id} (${want.from} -> ${want.to}): start ${startOk ? 'ok' : `${n1(distToRect(a, src))}px off source`}, end ${endOk ? 'ok' : `path end ${n1(distToRect(z, dst))}px, head tip ${n1(tipD)}px from target`}`,
-          rects: [page(src), page(dst), page(hb)],
+          rects: [page(src), page(dst), ...(hb ? [page(hb)] : [])],
           data: { startD: n1(distToRect(a, src)), endD: n1(distToRect(z, dst)), tipD: n1(tipD) },
         })
       const pts: DOMPoint[] = []

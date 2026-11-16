@@ -28,6 +28,7 @@ export type LessonFixture = {
   commit?: string
   /** Committed copy, relative to this folder; absent for a local-only (premium) lesson. */
   file?: string
+  /** Each visual goes before the first line starting with `before`; an empty `before` puts it at the end of the body. */
   inserts: { before: string; viz: string }[]
 }
 
@@ -218,6 +219,36 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // String Algorithms, before the interview tips: no prose discusses it.
     inserts: [{ before: '## **Interview Tips and Tricks**', viz: '<Viz id="sliding-window" preset="set-shrink-longest-substring" />' }],
   },
+  // Wave 2D, the annotated trees (all three lessons PREMIUM: local checkout
+  // only). Static figures, each after the example it explains.
+  {
+    slug: 'tree-dfs',
+    title: 'Tree DFS',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/tree-dfs/page.mdx',
+    // The figure explains the Maximum Path Sum practice answer, which the body
+    // has no example of (it teaches the iterative orders only): at the end of
+    // the body, after Post-Order Traversal, the order the recursion returns in.
+    inserts: [{ before: '', viz: '<Viz id="annotated-tree" preset="max-path-gain-vs-through" />' }],
+  },
+  {
+    slug: 'tries',
+    title: 'Tries',
+    section: { title: 'User-Defined Data Structures', href: '/courses/dsa-track/user-defined-data-structures' },
+    source: 'content/dsa-track/user-defined-data-structures/tries/page.mdx',
+    // After Deleting Words, the last of the examples it draws (insert, search,
+    // startsWith, delete), before the tips.
+    inserts: [{ before: '## **Practical Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="trie-end-markers" />' }],
+  },
+  {
+    slug: 'suffix-arrays-and-suffix-trees',
+    title: 'Suffix Arrays and Suffix Trees',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/suffix-arrays-and-suffix-trees/page.mdx',
+    // After Longest Repeated Substring, the last of the examples it draws (the
+    // SuffixTree, buildSuffixArray, buildLCPArray and its "ana").
+    inserts: [{ before: '## **Interview Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="suffix-tree-banana" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a
@@ -244,6 +275,10 @@ export function lessonSource(f: LessonFixture): string | null {
   for (const { before, viz } of f.inserts) {
     // A lesson that already places this visual (a content placement branch) keeps its own tag.
     if (mdx.includes(viz)) continue
+    if (!before) {
+      mdx = `${mdx.trimEnd()}\n\n${viz}\n`
+      continue
+    }
     // A heading match is anchored at a line start; the first one wins.
     const at = mdx.search(new RegExp(`^${before.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'm'))
     if (at < 0) throw new Error(`${f.slug}: no line starting with "${before}" to place ${viz} before`)

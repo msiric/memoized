@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, freezeAt, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, atUrl, freezeAt, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -144,4 +144,9 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await open(page, swUrl('araaci-k2'), 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, SW, 'print-sliding-window-araaci.png')
+  // The annotated trees (wave 2D), every preset on paper.
+  await open(page, atUrl, 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  for (const preset of ['max-path-gain-vs-through', 'trie-end-markers', 'suffix-tree-banana'])
+    await frameShot(page, `figure[data-viz-preset="${preset}"]`, `print-annotated-tree-${preset}.png`)
 })

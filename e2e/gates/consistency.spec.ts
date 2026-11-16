@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, frUrl, lessonUrl, open, settle, swUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, lessonUrl, open, settle, swUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -490,5 +490,62 @@ for (const width of [375, 1440])
     same('edge tag', ref.tag, await svgLook(sw, 'svg [data-tag] rect:not(.vz-ch)'))
     same('edge tag text', ref.tagText, await svgLook(sw, 'svg [data-tag] text'))
     same('changed mark', ref.changed, await svgLook(sw, 'svg [data-tag] .vz-ch'))
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The annotated trees (wave 2D) speak the static figures' vocabulary: a
+ * node is the heap graph's glyph, an edge its link at rest, the one rest
+ * mark its changed glyph and changed link, the panel heading the pointer
+ * frames' heading, and the frame, title and caption the heap graph's. Each
+ * preset is checked, so the three panel kinds agree with each other too.
+ */
+for (const width of [375, 1440])
+  test(`annotated-tree glyphs compute like the heap graph's @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    const inSvg = (root: Locator, sel: string) =>
+      root.evaluate(
+        (f, [q, ps]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) throw new Error(`nothing matches ${q}`)
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as unknown as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, SVG] as const,
+      )
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: heap graph ${a[k]} vs annotated tree ${b[k]}`)
+    }
+    await open(page, `${GALLERY}?static=1`, width)
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const heap = {
+      frame: await look(hg, FRAME),
+      title: await look(hg.locator('p').first(), TEXT),
+      caption: await look(hg.locator('figcaption'), TEXT),
+      glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
+      link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
+      changedLink: await inSvg(hg, 'svg [data-edge][data-changed] .vz-e'),
+      changed: await inSvg(hg, 'svg .vz-ch'),
+    }
+    await open(page, `${GALLERY}?ll=static`, width)
+    const heading = await inSvg(page.locator('figure[data-viz-preset="floyd-rho"]'), 'svg [data-viz-part="panel-heading"]')
+    await open(page, atUrl, width)
+    for (const preset of ['max-path-gain-vs-through', 'trie-end-markers', 'suffix-tree-banana']) {
+      const at = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(at, FRAME))
+      same(`${preset} title`, heap.title, await look(at.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(at.locator('figcaption'), TEXT))
+      same(`${preset} panel heading`, heading, await inSvg(at, 'svg [data-viz-part="panel-heading"]'))
+      same(`${preset} node glyph`, heap.glyph, await inSvg(at, 'svg [data-node] .vz-g'))
+      same(`${preset} link`, heap.link, await inSvg(at, 'svg [data-edge]:not([data-changed]) .vz-e'))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(at, 'svg [data-edge][data-changed] .vz-e'))
+      same(`${preset} changed mark`, heap.changed, await inSvg(at, 'svg .vz-ch'))
+    }
     expect(diffs).toEqual([])
   })

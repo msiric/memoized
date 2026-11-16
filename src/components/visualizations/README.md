@@ -425,6 +425,43 @@ repeating characters, a Set-backed window).
   `?sw=<preset>`) and the consistency checks against the event loop's shell
   and the pointer-rewiring glyphs.
 
+### Annotated tree (R4 shared visual, wave 2D)
+
+`<Viz id="annotated-tree" preset="…" />`, a static substrate (as the heap
+graph) for trees whose nodes and edges carry recorded values, one preset
+per lesson: `max-path-gain-vs-through` (Tree DFS), `trie-end-markers`
+(Tries) and `suffix-tree-banana` (Suffix Arrays and Suffix Trees). Three
+panel kinds (`model.ts`): a binary tree of two-cell boxes (value | the
+through value l + r + value) with what each call returned beside its
+edge; a trie left to right, END nodes double-ringed, a pruned node a dashed
+ghost; a compressed suffix tree left to right, edges labelled with their
+substring and [start, end], leaves top to bottom as the suffix array with
+the LCP beside it (a narrow and a wide drawing, CSS picks one).
+
+- **Built from a recording.** `programs/` names each lesson block (or the
+  Maximum Path Sum practice answer) by locator and sha256 and its probes;
+  `yarn viz:tree` reads the code from the local content checkout and runs it
+  in Node 24 under the inspector (`truth/record.ts`). A line probe pauses
+  before a line; a return probe pauses at the line's return position and
+  records the call's `returnValue` (what `dfs` returned, what each step of
+  the trie's recursive delete returned), so nothing is inserted into the
+  code. `build.ts` arranges the recorded values into panels; a node's
+  through value is the sum of its three recorded terms, which the truth test
+  ties to the recorded `ans`. The figure shows values only, no code.
+- **One mark family per panel**, the neutral `changed` role (never lime):
+  the recorded best path and its through cell, the clamped edge, the search
+  path, the cleared END flag, where pruning stopped, the path to the deepest
+  internal node and its LCP cell. Printed output (`false`, `true`) is the
+  result amber.
+- **Gates.** `annotated-tree.truth.test.ts` (with a checkout: hashes and a
+  fresh re-recording; everywhere: the register's values and lies that must
+  fail: a returned through value, a delete that unmarks apple, a tampered
+  suffix tree or LCP), `layout.test.ts` (text inside, boxes apart, labels
+  clear of boxes, edges and each other), `e2e/viz-annotated-tree.spec.ts`,
+  `e2e/stress/annotated-tree.stress.ts` (the edge detector checks headless
+  tree edges end on their node), the `at-*` gate states (gallery
+  `?at=static`), print, and the heap-graph consistency check.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,
