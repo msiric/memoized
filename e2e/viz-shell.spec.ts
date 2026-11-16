@@ -384,8 +384,9 @@ test('the control row keeps its shape at a checkpoint and after it (D9); Play ad
   ).toBeVisible()
   await page.keyboard.press('2')
   expect(await row()).toEqual(atStart)
-  // The number slots became the marks.
-  await expect(frame(page).locator('[data-choice="c"] [data-choice-slot="right"]')).toHaveText('✓')
+  // The number slots became the marks. On an animated landing the numeral
+  // stays in the slot as the fading-out layer (`vz-land-out`), so read the mark itself.
+  await expect(frame(page).locator('[data-choice="c"] [data-choice-slot="right"] > span:not(.vz-land-out)')).toHaveText('✓')
 
   await page.keyboard.press('Home')
   // Start asks again (R7): lock a prediction in, then Play.
