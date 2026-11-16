@@ -226,7 +226,7 @@ test('touch @375: taps, sticky hover, scrubber vs scroll on reveal controls', as
   res.dragScrubber = { scrolled: (await page.evaluate(() => window.scrollY)) - y1, stepAfter: await f.getAttribute('data-viz-step') }
   // List keys touch: tap a Before card checkbox, then sticky hover on the action button.
   const l = page.locator(LK)
-  await l.scrollIntoViewIfNeeded()
+  await page.locator('[data-viz="list-keys"]').scrollIntoViewIfNeeded()
   await page.locator(`${LK}[data-viz-interactive="true"]`).waitFor({ timeout: 30_000 })
   await page.waitForTimeout(300)
   // At 375 the four action segments do not fit (the action is a native

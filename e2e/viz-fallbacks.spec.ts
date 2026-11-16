@@ -53,7 +53,8 @@ async function open(page: Page, width: number) {
   await page.setViewportSize({ width, height: 900 })
   await page.goto(GALLERY)
   for (const sel of [EL, LK]) {
-    await page.locator(sel).scrollIntoViewIfNeeded()
+    // The mount persists; the frame inside it is replaced at hydration, so it is touched only once live.
+    await page.locator(sel.replace(/ section$/, '')).scrollIntoViewIfNeeded()
     await expect(page.locator(`${sel}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 60_000 })
   }
   await withoutContainerQueries(page)
@@ -132,7 +133,7 @@ for (const width of [375, 1280])
     await page.setViewportSize({ width, height: 900 })
     await page.goto(`${GALLERY}?preset=microtask-vs-timer-12345`)
     const el = page.locator(EL)
-    await el.scrollIntoViewIfNeeded()
+    await page.locator('[data-viz="event-loop"]').scrollIntoViewIfNeeded()
     await expect(page.locator(`${EL}[data-viz-interactive="true"]`)).toBeVisible({ timeout: 60_000 })
     await withoutContainerQueries(page)
     const seg = el.locator('header [data-vz-seg]')
