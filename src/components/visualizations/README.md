@@ -462,6 +462,48 @@ the LCP beside it (a narrow and a wide drawing, CSS picks one).
   tree edges end on their node), the `at-*` gate states (gallery
   `?at=static`), print, and the heap-graph consistency check.
 
+### Frames (wave 3C: generators, mapLimit, reentrant emit)
+
+One step engine (`engines/frames/`) for code that runs in pieces over time,
+three visuals with their own titles, one per lesson:
+`<Viz id="generator-frames">` (Generators: `twoWay-next-arg`,
+`take-closes-source`, `lazy-pipeline-pull`, `yield-star-forwarding`),
+`<Viz id="worker-pool">` (Async/Await: `refill-on-settle`,
+`fixed-batches-contrast`, `failure-stops-claims`) and `<Viz id="emit-frames">`
+(Advanced Patterns: `once-consumed-by-nested-emit`, `removed-before-turn`,
+`added-during-emit`). The stage is readouts (a cursor, counters), one shared
+`Lane` per frame or slot that outlives a call (a generator object, a worker,
+an emit on the stack, a store such as the results array or the registration
+Set) and the console. A lane's first chip says what it is doing (not
+started, running, paused at a line, awaiting, closed); the rest are the
+values it holds.
+
+- **Recorded under the inspector** (`truth/record.ts`, `yarn viz:frames`):
+  breakpoints only (a column for a `for...of` body), values read from the
+  paused frames, each generator's `[[GeneratorState]]` and suspended line
+  (found by name, or through another generator's scopes), each emit frame's
+  cursor, a record number per registration (`__vzId`, a recorder WeakMap),
+  private fields read where debug-evaluate resolves them (`[expr, map]`
+  watches), and how many lines were printed at each pause. mapLimit's
+  timing is the harness's gates, released in the register's order one turn
+  of the event loop apart, never a clock. Builders (`presets/*`) draft one
+  step per resumption, hand-off, claim, settle or Set change from the
+  recording; presets add words and checkpoints only.
+- **Premium.** Every pane but the fixed-batch contrast (the visual's own
+  code, committed with its tokens) is a practice answer or a question's
+  visible checks: `wrap` rows, resolved for a page. `BlockRef` reads the
+  `nth` fence of an answer and, with `field: 'question'`, of a question.
+  Resolved panes are tokenized by whole program line and cut per row
+  (`rowTokens`), so a string or comment broken over rows keeps its colour.
+- **Gates.** `frames.truth.test.ts` (with a checkout: hashes, fresh
+  re-recordings, every row against the content; everywhere: logs rebuilt
+  from the recordings, the register's assertions, no committed content text,
+  lies that must fail), `layout.test.ts`, `e2e/viz-frames.spec.ts` (with the
+  375x667 fit and frames within 850 px), `e2e/motion/frames-steps.spec.ts`,
+  `e2e/stress/frames.stress.ts`, the `fx-*` gate states (gallery
+  `?fx=<preset>`, all local-only) and the consistency check against the
+  event loop's shell and lanes.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,
