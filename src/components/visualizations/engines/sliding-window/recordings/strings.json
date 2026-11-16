@@ -1,0 +1,1115 @@
+{
+ "set-shrink-pwwkew": {
+  "sha256": "ad22fed45da9dcb6001365bcde70e5f86e7c8f4271ab7b94967dc5949101eeeb",
+  "observed": [
+   "3"
+  ],
+  "pauses": [
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "pwwkew",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "pwwkew",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      "p"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "p"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "pwwkew",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "p"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "pwwkew",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "p",
+      "w"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "p",
+      "w"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 1,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "w"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 2,
+     "best": 2,
+     "store": []
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 2,
+     "best": 2,
+     "store": []
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "w"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "w"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "w"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "w",
+      "k"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 4,
+     "best": 2,
+     "store": [
+      "w",
+      "k"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 4,
+     "best": 2,
+     "store": [
+      "w",
+      "k"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 4,
+     "best": 2,
+     "store": [
+      "w",
+      "k",
+      "e"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 2,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "w",
+      "k",
+      "e"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "pwwkew",
+     "left": 3,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "k",
+      "e"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "pwwkew",
+     "left": 3,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "k",
+      "e"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "pwwkew",
+     "left": 3,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "k",
+      "e",
+      "w"
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 11,
+    "vars": {
+     "s": "pwwkew",
+     "best": 3,
+     "store": [
+      "k",
+      "e",
+      "w"
+     ]
+    }
+   }
+  ]
+ },
+ "set-shrink-abcabcbb": {
+  "sha256": "5350f42e3b3812776baeb91119d0633c5ce8ca1b7d920ad643230c3700efd41e",
+  "observed": [
+   "3"
+  ],
+  "pauses": [
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "a",
+      "b",
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 0,
+     "right": 3,
+     "best": 3,
+     "store": [
+      "a",
+      "b",
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 1,
+     "right": 3,
+     "best": 3,
+     "store": [
+      "b",
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 1,
+     "right": 3,
+     "best": 3,
+     "store": [
+      "b",
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 1,
+     "right": 3,
+     "best": 3,
+     "store": [
+      "b",
+      "c",
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 1,
+     "right": 4,
+     "best": 3,
+     "store": [
+      "b",
+      "c",
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 2,
+     "right": 4,
+     "best": 3,
+     "store": [
+      "c",
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 2,
+     "right": 4,
+     "best": 3,
+     "store": [
+      "c",
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 2,
+     "right": 4,
+     "best": 3,
+     "store": [
+      "c",
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 2,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "c",
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 3,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 3,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 3,
+     "right": 5,
+     "best": 3,
+     "store": [
+      "a",
+      "b",
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 3,
+     "right": 6,
+     "best": 3,
+     "store": [
+      "a",
+      "b",
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 4,
+     "right": 6,
+     "best": 3,
+     "store": [
+      "b",
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 5,
+     "right": 6,
+     "best": 3,
+     "store": [
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 5,
+     "right": 6,
+     "best": 3,
+     "store": [
+      "c"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 5,
+     "right": 6,
+     "best": 3,
+     "store": [
+      "c",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 5,
+     "right": 7,
+     "best": 3,
+     "store": [
+      "c",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 6,
+     "right": 7,
+     "best": 3,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 7,
+     "right": 7,
+     "best": 3,
+     "store": []
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 7,
+     "right": 7,
+     "best": 3,
+     "store": []
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abcabcbb",
+     "left": 7,
+     "right": 7,
+     "best": 3,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 11,
+    "vars": {
+     "s": "abcabcbb",
+     "best": 3,
+     "store": [
+      "b"
+     ]
+    }
+   }
+  ]
+ },
+ "set-shrink-abba": {
+  "sha256": "d0ec86cca710450e16f70aaf6faf4d005a3d9615c470c900ad54f661ee61c30e",
+  "observed": [
+   "2"
+  ],
+  "pauses": [
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 1,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 2,
+     "right": 2,
+     "best": 2,
+     "store": []
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 2,
+     "right": 2,
+     "best": 2,
+     "store": []
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 2,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 2,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 2,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 2,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "b",
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 11,
+    "vars": {
+     "s": "abba",
+     "best": 2,
+     "store": [
+      "b",
+      "a"
+     ]
+    }
+   }
+  ]
+ },
+ "set-shrink-abba-if": {
+  "sha256": "bd2ca3f957fb84e7d8445de38660863e85e6bfccaef26cc247c5daf2c2a747a5",
+  "observed": [
+   "3"
+  ],
+  "pauses": [
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": []
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 0,
+     "best": 0,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 1,
+     "best": 1,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 0,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "a",
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 1,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 1,
+     "right": 2,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "check",
+    "line": 5,
+    "vars": {
+     "s": "abba",
+     "left": 1,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "add",
+    "line": 8,
+    "vars": {
+     "s": "abba",
+     "left": 1,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "b"
+     ]
+    }
+   },
+   {
+    "probe": "record",
+    "line": 9,
+    "vars": {
+     "s": "abba",
+     "left": 1,
+     "right": 3,
+     "best": 2,
+     "store": [
+      "b",
+      "a"
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 11,
+    "vars": {
+     "s": "abba",
+     "best": 3,
+     "store": [
+      "b",
+      "a"
+     ]
+    }
+   }
+  ]
+ }
+}

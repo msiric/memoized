@@ -5,6 +5,7 @@ import { heapGraphDescriptor } from './engines/heap-graph/descriptor'
 import { linkedListDescriptor } from './engines/linked-list/descriptor'
 import { linkedListFramesDescriptor } from './engines/linked-list/frames/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
+import { slidingWindowDescriptor } from './engines/sliding-window/descriptor'
 import { footprintOf, groupIndices, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
 import { outputText, type StaticDescriptor, type StaticTextAlternative } from './shell/static-types'
@@ -32,6 +33,7 @@ export const VIZ_DESCRIPTORS = {
   'bfs-dfs-frontier': frontierDescriptor,
   'linked-list-pointer-rewiring': linkedListDescriptor,
   'linked-list-frames': linkedListFramesDescriptor,
+  'sliding-window': slidingWindowDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS

@@ -6,6 +6,7 @@ import HeapGraphViz from './engines/heap-graph'
 import LinkedListViz from './engines/linked-list'
 import LinkedListFramesViz from './engines/linked-list/frames'
 import ListKeysViz from './engines/list-keys'
+import SlidingWindowViz from './engines/sliding-window'
 import type { VizComponentProps } from './shell/types'
 
 /**
@@ -23,4 +24,5 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'bfs-dfs-frontier': FrontierViz,
   'linked-list-pointer-rewiring': LinkedListViz,
   'linked-list-frames': LinkedListFramesViz,
+  'sliding-window': SlidingWindowViz,
 }
