@@ -156,6 +156,33 @@ async function swFinale(page: Page, pick: number) {
   await settle(page)
 }
 
+/** The frames step-throughs (wave 3C) alone on their page (`?fx=<preset>`): one visual per preset. */
+export const fxUrl = (preset: string) => `${GALLERY}?fx=${preset}`
+const FX_STATES: Record<string, { id: string; preset: string }> = {
+  'fx-gen-start': { id: 'generator-frames', preset: 'twoWay-next-arg' },
+  'fx-gen-ask': { id: 'generator-frames', preset: 'twoWay-next-arg' },
+  'fx-gen-reveal-wrong': { id: 'generator-frames', preset: 'twoWay-next-arg' },
+  'fx-gen-pipeline': { id: 'generator-frames', preset: 'lazy-pipeline-pull' },
+  'fx-pool-ask': { id: 'worker-pool', preset: 'refill-on-settle' },
+  'fx-pool-finale': { id: 'worker-pool', preset: 'refill-on-settle' },
+  'fx-pool-batches': { id: 'worker-pool', preset: 'fixed-batches-contrast' },
+  'fx-emit-skip': { id: 'emit-frames', preset: 'once-consumed-by-nested-emit' },
+}
+export const fxFrame = (id: string) => `[data-viz="${id}"] section`
+/** Steps a frames frame forward until `stop` holds (or its end), answering an open question with choice `pick`. */
+async function fxWalk(page: Page, name: string, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(fxFrame(FX_STATES[name].id)).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
+  await settle(page)
+}
+
 /** The Promise Patterns lesson's presets (their own group, `?preset=`). */
 export const PP = `${GALLERY}?preset=microtask-vs-timer-12345`
 export const PP_AWAIT = `${GALLERY}?preset=await-null`
@@ -219,6 +246,7 @@ export function stateUrl(name: string): string {
   if (name.startsWith('at-')) return atUrl
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
+  if (FX_STATES[name]) return fxUrl(FX_STATES[name].preset)
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
   if (name.startsWith('pp-')) return PP
@@ -232,6 +260,7 @@ export function stateFrame(name: string): string {
   if (AT[name]) return AT[name]
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
+  if (FX_STATES[name]) return fxFrame(FX_STATES[name].id)
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
   if (name.startsWith('heap')) return HEAP_DATA_TYPES
@@ -491,6 +520,36 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'sw-set-abba-if-finale': async (page) => {
     await swFinale(page, 1)
   },
+  // The frames visuals (wave 3C, local-only: practice answers): twoWay at Start, its question, its wrong
+  // pick revealed; the pipeline's first value to reach take; the pool's refill question and its finale;
+  // the fixed-batch contrast with b settled and nothing started; the outer emit skipping the once record.
+  'fx-gen-start': async () => {},
+  'fx-gen-ask': async (page) => {
+    await fxWalk(page, 'fx-gen-ask', (_s, mode) => mode === 'ask')
+  },
+  'fx-gen-reveal-wrong': async (page) => {
+    await fxWalk(page, 'fx-gen-reveal-wrong', (_s, mode) => mode === 'ask')
+    await page.locator(fxFrame('generator-frames')).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fx-gen-pipeline': async (page) => {
+    await fxWalk(page, 'fx-gen-pipeline', (s, mode) => s >= 7 && mode !== 'ask')
+  },
+  'fx-pool-ask': async (page) => {
+    await fxWalk(page, 'fx-pool-ask', (_s, mode) => mode === 'ask')
+  },
+  'fx-pool-finale': async (page) => {
+    await fxWalk(page, 'fx-pool-finale', () => false)
+    await page.waitForTimeout(800)
+    await settle(page)
+  },
+  'fx-pool-batches': async (page) => {
+    await fxWalk(page, 'fx-pool-batches', (s, mode) => s >= 2 && mode !== 'ask')
+  },
+  'fx-emit-skip': async (page) => {
+    await fxWalk(page, 'fx-emit-skip', (s, mode) => s >= 8 && mode !== 'ask')
+  },
   // The annotated trees (wave 2D): static, at rest only.
   'at-gain': async () => {},
   'at-trie': async () => {},
@@ -641,6 +700,17 @@ export const MOTION_STATES: Record<string, MotionState> = {
         await page.keyboard.press('ArrowRight')
         await page.waitForTimeout(650)
       }
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The frames: a paced claim in the pool (the readout changes, a chip enters its lane, Q1).
+  'fx-step': {
+    url: fxUrl('refill-on-settle'),
+    frame: fxFrame('worker-pool'),
+    setup: async (page) => {
+      await page.locator(fxFrame('worker-pool')).first().getByRole('slider').focus()
     },
     act: async (page) => {
       await page.keyboard.press('ArrowRight')

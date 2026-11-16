@@ -46,6 +46,10 @@ const ALL_PAGES = [
   // The sliding window (wave 2C): both lesson groups.
   '/dev/visualizations?sw=araaci-k2',
   '/dev/visualizations?sw=set-shrink-longest-substring',
+  // The frames step-throughs (wave 3C), one page per visual.
+  '/dev/visualizations?fx=twoWay-next-arg',
+  '/dev/visualizations?fx=refill-on-settle',
+  '/dev/visualizations?fx=once-consumed-by-nested-emit',
   // The annotated trees (wave 2D, static).
   '/dev/visualizations?at=static',
 ]
