@@ -452,7 +452,8 @@ export function layoutShapes(p: ShapesPanel): ShapeGeometry {
         y1: a.y + a.h,
         x2: b.cx,
         y2: b.y,
-        label: { x: mx + (left ? -SHAPES.labelGap : SHAPES.labelGap), y: my - 7, anchor: left ? 'end' : 'start', lines: [`+${n.keys[n.keys.length - 1]}`] },
+        // Clear of a slanted edge: the run of the edge across the label's height, plus the gap.
+        label: { x: mx + (left ? -1 : 1) * (SHAPES.labelGap + Math.ceil((Math.abs(b.cx - a.cx) / SHAPES.levelGap) * 7)), y: my - 7, anchor: left ? 'end' : 'start', lines: [`+${n.keys[n.keys.length - 1]}`] },
       }
     })
   const depth = Math.max(...p.nodes.map((n) => depthOf(n.id)))

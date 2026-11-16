@@ -1,6 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { Fragment, type CSSProperties, type ReactNode } from 'react'
 import { cn as clsx } from '../../primitives/cn'
-import { DOT_R, radius, strokeWidth } from '../../primitives/tokens-v3'
+import { DOT_R, radius, strokeWidth, svgInk } from '../../primitives/tokens-v3'
 import type { StaticStageProps } from '../../shell/static-types'
 import { arrowHead, routePath, type Point } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
@@ -36,6 +36,11 @@ const r1 = (n: number) => Math.round(n * 10) / 10
 const px = (n: number) => Math.round(n) + 0.5
 const MARK = { '--vz-sw': `${strokeWidth.nowConnector}px` } as CSSProperties
 const tw = (t: string) => monoWidth(t, SIZE.small)
+/** A rounded rectangle as path data (a region's outline, not a box). */
+const roundRect = (x: number, y: number, w: number, h: number) => {
+  const k = radius.glyph.px
+  return `M${x + k} ${y}H${x + w - k}Q${x + w} ${y} ${x + w} ${y + k}V${y + h - k}Q${x + w} ${y + h} ${x + w - k} ${y + h}H${x + k}Q${x} ${y + h} ${x} ${y + h - k}V${y + k}Q${x} ${y} ${x + k} ${y}Z`
+}
 
 function Svg({ width, height, id, heading, children }: { width: number; height: number; id: string; heading: string; children: ReactNode }) {
   return (
@@ -56,11 +61,17 @@ function Svg({ width, height, id, heading, children }: { width: number; height: 
   )
 }
 
-function Arrow({ pts, id, className, marked, dashed }: { pts: Point[]; id: string; className?: string; marked?: boolean; dashed?: boolean }) {
+/**
+ * An arrow. `link` (a message between lifelines) is not an edge between
+ * boxes: it names no ends to check. Glyphs that sit on the arrow (a lane's
+ * listener badges) are its children, drawn over it.
+ */
+function Arrow({ pts, id, className, marked, dashed, link, children }: { pts: Point[]; id: string; className?: string; marked?: boolean; dashed?: boolean; link?: boolean; children?: ReactNode }) {
   return (
-    <g data-edge={id} data-changed={marked ? '' : undefined} className={clsx(marked && 'vz-cm', className)} style={marked ? MARK : undefined}>
+    <g data-edge={link ? undefined : id} data-link={link ? id : undefined} data-changed={marked ? '' : undefined} className={clsx(marked && 'vz-cm', link && svgInk.line, className)} style={marked ? MARK : undefined}>
       <path d={routePath(pts, 8, 2)} className={clsx('vz-e', dashed && 'vz-d')} />
       <path d={arrowHead(pts)} className="vz-ah" />
+      {children}
     </g>
   )
 }
@@ -86,7 +97,7 @@ function TimelineSvg({ p, width }: { p: TimelinePanel; width: number }) {
         const y = top + TL.track
         const ghosts = row.marks.some((m) => m.kind === 'ghost')
         return (
-          <g key={row.id} data-viz-row={row.id}>
+          <g key={row.id} data-viz-row={row.id} className={svgInk.line}>
             {i ? <path d={`M0 ${px(top)}H${width}`} className="vz-hl" /> : null}
             <text x={TL.x0} y={top + TL.label} className="vz-u" data-viz-part="lane-label">
               {row.label}
@@ -151,7 +162,7 @@ function TimelineSvg({ p, width }: { p: TimelinePanel; width: number }) {
           </g>
         )
       })}
-      <g data-viz-part="axis">
+      <g data-viz-part="axis" className={svgInk.line}>
         <path d={`M${TL.x0} ${px(g.axisY)}H${width - TL.right}`} className="vz-e vz-l" strokeWidth={strokeWidth.outline} />
         {p.ticks.map((t) => (
           <g key={t}>
@@ -174,6 +185,21 @@ function DispatchSvg({ p }: { p: DispatchPanel }) {
   const pillL = g.cx - g.pillW / 2
   const pillR = g.cx + g.pillW / 2
   const listeners = new Set(p.steps.map((s) => s.at))
+  // Each listener's numbered badge, on its lane (a lane's badges are drawn with it, over it).
+  const badges = (phase: 1 | 2 | 3) =>
+    p.steps.map((s, i) => {
+      if (s.phase !== phase) return null
+      const b = g.badges[i]
+      const skipped = p.cutAfter !== undefined && s.n > p.cutAfter
+      return (
+        <g key={s.n} data-node={phase === 2 ? `badge-${s.n}` : undefined} data-badge={s.n} data-phase={s.phase} data-at={s.at} data-ran={s.ran ? '' : undefined}>
+          <circle cx={b.x} cy={b.y} r={DP.badge} className={skipped ? 'vz-g vz-l vz-d' : 'vz-g'} strokeWidth={strokeWidth.outline} />
+          <text x={b.x} y={r1(b.y + 4)} className={clsx('vz-c vz-12', skipped && 'vz-m')}>
+            {s.n}
+          </text>
+        </g>
+      )
+    })
   return (
     <Svg width={g.width} height={g.height} id={p.id} heading={p.heading}>
       {!p.compact ? (
@@ -186,8 +212,12 @@ function DispatchSvg({ p }: { p: DispatchPanel }) {
           </text>
         </g>
       ) : null}
-      <Arrow id="capture" pts={[{ x: g.lx, y: g.firstY - (p.compact ? 22 : 12) }, { x: g.lx, y: g.targetY }, { x: pillL, y: g.targetY }]} />
-      <Arrow id="bubble" pts={[{ x: pillR, y: g.targetY }, { x: g.rx, y: g.targetY }, { x: g.rx, y: g.firstY - (p.compact ? 24 : 12) }]} />
+      <Arrow id="capture" pts={[{ x: g.lx, y: g.firstY - (p.compact ? 22 : 12) }, { x: g.lx, y: g.targetY }, { x: pillL, y: g.targetY }]}>
+        {badges(1)}
+      </Arrow>
+      <Arrow id="bubble" pts={[{ x: pillR, y: g.targetY }, { x: g.rx, y: g.targetY }, { x: g.rx, y: g.firstY - (p.compact ? 24 : 12) }]}>
+        {badges(3)}
+      </Arrow>
       {p.path.map((at) => {
         const y = g.rowY(at)
         const quiet = !listeners.has(at)
@@ -213,18 +243,7 @@ function DispatchSvg({ p }: { p: DispatchPanel }) {
           />
         </g>
       ) : null}
-      {p.steps.map((s, i) => {
-        const b = g.badges[i]
-        const skipped = p.cutAfter !== undefined && s.n > p.cutAfter
-        return (
-          <g key={s.n} data-badge={s.n} data-phase={s.phase} data-at={s.at} data-ran={s.ran ? '' : undefined}>
-            <circle cx={b.x} cy={b.y} r={DP.badge} className={skipped ? 'vz-g vz-l vz-d' : 'vz-g'} strokeWidth={strokeWidth.outline} />
-            <text x={b.x} y={r1(b.y + 4)} className={clsx('vz-c vz-12', skipped && 'vz-m')}>
-              {s.n}
-            </text>
-          </g>
-        )
-      })}
+      {badges(2)}
       <g data-viz-part="logs">
         {p.steps.map((s, i) => (
           <text key={s.n} x={0} y={r1(g.logsTop + 12 + i * SIZE.line)} className={clsx('vz-12', s.ran ? 'vz-r' : 'vz-m')}>
@@ -265,7 +284,7 @@ function SequenceSvg({ p, width }: { p: SequencePanel; width: number }) {
             {self ? (
               <circle cx={m.x1} cy={m.y} r={DOT_R} className="vz-ah vz-l" />
             ) : (
-              <Arrow id={`m${m.n}`} pts={[{ x: m.x1, y: m.y }, { x: m.x2, y: m.y }]} />
+              <Arrow id={`m${m.n}`} link pts={[{ x: m.x1, y: m.y }, { x: m.x2, y: m.y }]} />
             )}
           </g>
         )
@@ -290,9 +309,10 @@ function SetsSvg({ p }: { p: SetsPanel }) {
   if (p.mode === 'values') {
     const aR = (W + ST.overlap) / 2
     const bL = (W - ST.overlap) / 2
-    const bracket = (x1: number, x2: number, y: number, label: string, part: string, marked?: boolean) => (
-      <g data-viz-part={part} data-changed={marked ? '' : undefined} data-edge={part} className={marked ? 'vz-cm' : undefined} style={marked ? MARK : undefined}>
-        <path d={`M${x1 + 1} ${y - 5}V${y}H${x2 - 1}V${y - 5}`} className="vz-e" />
+    // A span under the regions (a bracket, not a link between boxes).
+    const bracket = (x1: number, x2: number, y: number, label: string, part: string) => (
+      <g data-viz-part={part} className={svgInk.line}>
+        <path d={`M${x1 + 1} ${y - 5}V${y}H${x2 - 1}V${y - 5}`} className="vz-e vz-l" strokeWidth={strokeWidth.connector} />
         <text x={r1((x1 + x2) / 2)} y={y + 15} className="vz-u vz-c">
           {label}
         </text>
@@ -300,31 +320,34 @@ function SetsSvg({ p }: { p: SetsPanel }) {
     )
     return (
       <Svg width={W} height={g.height} id={p.id} heading={p.heading}>
-        <g data-node="A">
-          <rect x={0.5} y={px(t)} width={aR - 1} height={ST.band} rx={radius.glyph.px} className="vz-l" fill="none" strokeWidth={strokeWidth.outline} />
-        </g>
-        <g data-node="B">
-          <rect x={px(bL)} y={px(t + ST.offset)} width={W - bL - 1} height={ST.band} rx={radius.glyph.px} className="vz-l" fill="none" strokeWidth={strokeWidth.outline} />
-        </g>
-        <rect data-changed="" data-node="both" x={px(bL) + 2} y={px(t + ST.offset) + 2} width={aR - bL - 5} height={ST.band - ST.offset - 5} rx={radius.chip.px} className="vz-ch" strokeWidth={strokeWidth.mark} />
-        <text x={8} y={t + 16} className="vz-t">
-          {p.left.label}
-        </text>
-        <text x={8} y={t + 40} data-viz-part="sample">
-          {p.left.sample}
-        </text>
-        <text x={W - 8} y={t + ST.offset + ST.band - 8} className="vz-t" textAnchor="end">
-          {p.right.label}
-        </text>
-        <text x={W - 8} y={t + ST.offset + 20} textAnchor="end" data-viz-part="sample">
-          {p.right.sample}
-        </text>
-        {p.both.sample.map((l, i) => (
-          <text key={i} x={r1(W / 2)} y={t + ST.offset + 15 + i * 15} className="vz-c" data-viz-part="sample">
-            {l}
+        {/* Regions, not boxes: the two sets overlap by design, so their outlines are paths and each label sits in its region. */}
+        <g data-region="A">
+          <path d={roundRect(0.5, px(t), aR - 1, ST.band)} className="vz-l" fill="none" strokeWidth={strokeWidth.outline} />
+          <text x={8} y={t + 16} className="vz-t">
+            {p.left.label}
           </text>
-        ))}
-        {bracket(bL, aR, t + ST.band + ST.offset + 12, p.both.label, 'both-span', true)}
+          <text x={8} y={t + 40} data-viz-part="sample">
+            {p.left.sample}
+          </text>
+        </g>
+        <g data-region="B">
+          <path d={roundRect(px(bL), px(t + ST.offset), W - bL - 1, ST.band)} className="vz-l" fill="none" strokeWidth={strokeWidth.outline} />
+          <text x={W - 8} y={t + ST.offset + ST.band - 8} className="vz-t" textAnchor="end">
+            {p.right.label}
+          </text>
+          <text x={W - 8} y={t + ST.offset + 20} textAnchor="end" data-viz-part="sample">
+            {p.right.sample}
+          </text>
+        </g>
+        <g data-region="both" data-changed="">
+          <path d={roundRect(px(bL) + 2, px(t + ST.offset) + 2, aR - bL - 5, ST.band - ST.offset - 5)} className="vz-ch" strokeWidth={strokeWidth.mark} />
+          {p.both.sample.map((l, i) => (
+            <text key={i} x={r1(W / 2)} y={t + ST.offset + 15 + i * 15} className="vz-c" data-viz-part="sample">
+              {l}
+            </text>
+          ))}
+        </g>
+        {bracket(bL, aR, t + ST.band + ST.offset + 12, p.both.label, 'both-span')}
         {bracket(0, W, t + ST.band + ST.offset + 12 + ST.bracket, p.union, 'union-span')}
         {notes}
       </Svg>
@@ -374,19 +397,23 @@ function SetsSvg({ p }: { p: SetsPanel }) {
         const w2 = tw(pair.right) + 2 * ST.pillPad
         const x2 = w1 + 8
         return (
-          <g key={i} data-pair={i}>
-            <rect x={0.5} y={px(y)} width={Math.round(w1) - 1} height={23} rx={radius.chip.px} className="vz-g" strokeWidth={strokeWidth.outline} />
-            <text x={ST.pillPad} y={y + 16} className="vz-12">
-              {pair.left}
-            </text>
-            <rect x={px(x2)} y={px(y)} width={Math.round(w2) - 1} height={23} rx={radius.chip.px} className="vz-g" strokeWidth={strokeWidth.outline} />
-            <text x={r1(x2 + ST.pillPad)} y={y + 16} className="vz-12">
-              {pair.right}
-            </text>
+          <Fragment key={i}>
+            <g data-pill="left" data-pair={i}>
+              <rect x={0.5} y={px(y)} width={Math.round(w1) - 1} height={23} rx={radius.chip.px} className="vz-g" strokeWidth={strokeWidth.outline} />
+              <text x={ST.pillPad} y={y + 16} className="vz-12">
+                {pair.left}
+              </text>
+            </g>
+            <g data-pill="right" data-pair={i}>
+              <rect x={px(x2)} y={px(y)} width={Math.round(w2) - 1} height={23} rx={radius.chip.px} className="vz-g" strokeWidth={strokeWidth.outline} />
+              <text x={r1(x2 + ST.pillPad)} y={y + 16} className="vz-12">
+                {pair.right}
+              </text>
+            </g>
             <text x={r1(x2 + w2 + 10)} y={y + 16} className={clsx('vz-12', pair.result === 'never' ? 'vz-r' : 'vz-m')} data-viz-part="result">
               {pair.result}
             </text>
-          </g>
+          </Fragment>
         )
       })}
       {notes}
