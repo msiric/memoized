@@ -6,10 +6,20 @@
  * `yarn viz:tokens` writes `code-tokens.json`; `code-tokens.test.ts` fails
  * when the committed tokens drift from the code.
  */
+import colors from 'tailwindcss/colors'
 import type { CodeToken, StepLog } from './types'
 
 export const CODE_THEME = 'github-dark'
 const LANGS = { js: 'javascript', ts: 'typescript', tsx: 'tsx' } as const
+
+/**
+ * github-dark draws comments in a grey that is 3.0:1 on the code surface;
+ * a pane's comments take the gutter's zinc-400 instead (4.5:1, as the list
+ * keys strip does; it prints as the comment twin, `CODE_PRINT`). Shiki merges
+ * a comment into one token, so it is found by its text.
+ */
+export const COMMENT_COLOR = colors.zinc[400].toUpperCase()
+const isComment = (t: CodeToken) => /^\s*(\/\/|\/\*)/.test(t.text)
 
 export async function tokenizeLines(lines: readonly string[], lang: keyof typeof LANGS): Promise<CodeToken[][]> {
   const { codeToTokensBase } = await import('shiki')
@@ -22,7 +32,7 @@ export async function tokenizeLines(lines: readonly string[], lang: keyof typeof
       if (prev && (prev.color === color || !t.content.trim())) prev.text += t.content
       else merged.push(color ? { text: t.content, color } : { text: t.content })
     }
-    return merged
+    return merged.map((t) => (isComment(t) ? { ...t, color: COMMENT_COLOR } : t))
   })
 }
 
