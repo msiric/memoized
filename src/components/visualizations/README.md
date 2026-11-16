@@ -462,6 +462,80 @@ the LCP beside it (a narrow and a wide drawing, CSS picks one).
   tree edges end on their node), the `at-*` gate states (gallery
   `?at=static`), print, and the heap-graph consistency check.
 
+### Annotated tree, wave 3A: call trees, spanning trees, push forests
+
+Three more presets on the same substrate, each a tree in the reading its
+lesson needs, all built from a recorded run of the lesson's practice answer
+(values only; the figure shows no code):
+
+- `combination-sum-take-skip` (Backtracking, combination sum): a `calls`
+  panel. The recorder pauses at every call's entry (i, s, t) and at the two
+  returns that end a call without children (an answer, a cut with the
+  candidate it compared); `calls.ts` rebuilds the tree from that pre-order
+  (a call not followed by its own end made two calls, skip then take) and
+  draws it left to right, a column per depth and a row per leaf: a skip is
+  straight, a take bends down to its child's row labelled `+c`, a cut is a
+  dashed ghost with its reason (`1 < 6`, `i = 4`), an answer is marked with
+  its path in the result amber. Narrow and wide drawings, CSS picks one.
+- `water-wells-virtual-source` (Minimum Spanning Trees, Optimize Water
+  Distribution): two `graph` panels, the houses with their pipes and well
+  costs, then source 0 with a dashed well edge to each house and the
+  accepted edges marked (the run's `ans += c` pauses, in order); the two
+  wells the loop never tried stay unmarked. The caption variant (every well
+  5, total 7) is a second recorded run.
+- `k-pairs-lazy-grid` (K-way Merge, Find K Pairs): three `grid` panels, an
+  addition table (`+` in the corner) whose cells carry their state in words
+  (`heap`, `pop 1`): after seeding, after three pops with one right arrow
+  per push, and the two-neighbour rule's first collision, (1,1) pushed
+  twice. That rule is not a program of the lesson: its panel is a
+  structural fact the truth test checks, said so in the text alternative.
+- **Gates.** `singles.truth.test.ts` (the register's values; the rule each
+  figure states as a check that lies fail: a skip that subtracts, a cut
+  with no rule, an extra or missing tree edge, a down arrow, a push from an
+  unpopped cell; tampered recordings that cannot build; every label inside
+  its panel), the re-recording in `annotated-tree.truth.test.ts`, and the
+  existing annotated-tree e2e, stress, consistency, print and `at-calls`,
+  `at-water`, `at-kpairs` states on `?at=static`.
+
+### DP table (R4 shared visual 6, `dp-table-dependencies`, wave 3A)
+
+`<Viz id="dp-table-dependencies" preset="…" />`, a step-through with one
+lesson group: `knapsack-1d-desc-vs-asc` (Dynamic Programming: the practice
+answer to partition equal subset sum, its 1D 0/1 subset-sum table for
+[1, 2, 5], j counting down as written) and `knapsack-1d-asc` (the same
+answer with the inner loop counting up).
+
+- **A new engine, not the sliding-window strip.** The strip's state is a
+  contiguous window between two edges with a store; a DP write is a
+  dependency between two cells that need not touch, plus which cells the
+  current item already wrote. The engine reuses the strip's geometry (30 px
+  cells, index row, tag lanes), its tag and cell glyphs and its svg motion
+  (`substrates/svg-motion.ts`, extracted from the sliding window's stage).
+- **Recorded under the inspector** with the annotated-tree recorder
+  (`truth/record.ts` wraps it): probes before the item loop, at each
+  item's inner loop header (so an item whose loop never runs is seen) and
+  before every write; the value a write stored is the table at the next
+  pause. The upward program is the answer with line 10's header changed by
+  four token swaps (`SourcePart.swaps`: `>=`, `--j` and the two bounds, at
+  most four characters each), so the variant commits no answer text.
+- **Steps.** One step per write `f[j] = f[j] || f[j - x]`, drawn as an
+  arrow from the cell read to the cell written (the changed-role connector)
+  landing with the written cell; a bar marks each cell written for the
+  current item (the row labelled "this item"), so an arrow leaving a barred
+  cell is the item counted twice. An item whose loop never runs is one
+  step; the return prints. Downward asks at Start whether [1, 2, 5] splits
+  evenly (judged at the end: false); upward asks, before item 1 reaches
+  j = 2, what f[2] becomes (true, item 1 used twice; f[4] ends true, wrong).
+- **Gates.** `dp-table.truth.test.ts` (with a checkout: the answer's hash,
+  fresh re-recordings, every pane row against the answer, the upward
+  program differing on line 10 only; everywhere: the register's values,
+  every frame a logged write, reuse exactly where the run reads a barred
+  cell, lies that must fail), `layout.test.ts`, `e2e/viz-dp-table.spec.ts`
+  (with the 375x667 fit), `e2e/motion/dp-table-steps.spec.ts`,
+  `e2e/stress/dp-table.stress.ts`, the `dp-*` gate states (gallery
+  `?dp=<preset>`, local-only baselines) and the consistency check against
+  the sliding window's glyphs. Both presets are local-only.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,
