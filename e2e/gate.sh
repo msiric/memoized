@@ -23,7 +23,7 @@
 #   functional-a  viz-list-keys, viz-static, viz-heap-graph, frontier,
 #                 viz-linked-list, viz-annotated-tree               ~410
 #   functional-b  viz-step-through, viz-shell, viz-fallbacks,
-#                 viz-sliding-window                                ~295
+#                 viz-sliding-window, viz-dp-table                  ~350
 #   design-a      contrast crawl at rest (375, 768, 1440)             ~130
 #   design-b      full-motion contrast (375), consistency; visual
 #                 baselines inside the image (~200 more)              ~290
@@ -31,8 +31,8 @@
 #                 instant, interaction                              ~370
 #   motion-b      list-keys reveals, interruption, sliding-window
 #                 steps                                             ~375
-#   motion-c      every list-keys ride (1024)                          ~75
-#   stress-a      stress flagships and frontier                       ~225
+#   motion-c      every list-keys ride (1024), dp-table steps         ~135
+#   stress-a      stress flagships, frontier and dp table             ~255
 #   stress-b      stress adversarial, hydration, linked list,
 #                 sliding window, annotated tree                    ~260
 # Without a shard, `pr` runs them all in sequence.
@@ -61,7 +61,7 @@ stress() { npx playwright test -c e2e/stress/playwright.stress.config.ts "$@"; }
 run() {
   case "$1" in
     functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts e2e/viz-heap-graph.spec.ts e2e/viz-frontier.spec.ts e2e/viz-linked-list.spec.ts e2e/viz-annotated-tree.spec.ts ;;
-    functional-b) pw --project=functional e2e/viz-step-through.spec.ts e2e/viz-shell.spec.ts e2e/viz-sliding-window.spec.ts ;;
+    functional-b) pw --project=functional e2e/viz-step-through.spec.ts e2e/viz-shell.spec.ts e2e/viz-sliding-window.spec.ts e2e/viz-dp-table.spec.ts ;;
     design-a) pw --project=gates e2e/gates/contrast.spec.ts --grep-invert "full motion" ;;
     design-b)
       local a=0 b=0
@@ -70,8 +70,8 @@ run() {
       return $((a || b)) ;;
     motion-a) pw --project=motion e2e/motion/event-loop-steps.spec.ts e2e/motion/linked-list-steps.spec.ts e2e/motion/reveal.spec.ts e2e/motion/instant-paths.spec.ts e2e/motion/interaction.spec.ts e2e/motion/frontier-steps.spec.ts ;;
     motion-b) pw --project=motion e2e/motion/list-keys-reveals.spec.ts e2e/motion/interruption.spec.ts e2e/motion/sliding-window-steps.spec.ts ;;
-    motion-c) pw --project=motion e2e/motion/list-keys-rides.spec.ts ;;
-    stress-a) stress flagships frontier ;;
+    motion-c) pw --project=motion e2e/motion/list-keys-rides.spec.ts e2e/motion/dp-table-steps.spec.ts ;;
+    stress-a) stress flagships frontier dp-table ;;
     stress-b) stress adversarial hydration linked-list sliding-window annotated-tree ;;
     *) echo "unknown shard $1" >&2; return 2 ;;
   esac

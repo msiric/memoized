@@ -107,6 +107,10 @@ const AT: Record<string, string> = {
   'at-gain': 'figure[data-viz-preset="max-path-gain-vs-through"]',
   'at-trie': 'figure[data-viz-preset="trie-end-markers"]',
   'at-suffix': 'figure[data-viz-preset="suffix-tree-banana"]',
+  // Wave 3A on the same page.
+  'at-calls': 'figure[data-viz-preset="combination-sum-take-skip"]',
+  'at-water': 'figure[data-viz-preset="water-wells-virtual-source"]',
+  'at-kpairs': 'figure[data-viz-preset="k-pairs-lazy-grid"]',
 }
 
 /** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
@@ -153,6 +157,32 @@ async function swFinale(page: Page, pick: number) {
   await f.getByRole('slider').focus()
   await page.keyboard.press('End')
   await page.waitForTimeout(1200)
+  await settle(page)
+}
+
+/** The dp-table step-through (wave 3A) alone on its page (`?dp=<preset>`); both presets show a practice answer (local-only). */
+export const DP = '[data-viz="dp-table-dependencies"] section'
+export const dpUrl = (preset: string) => `${GALLERY}?dp=${preset}`
+const DP_STATES: Record<string, string> = {
+  'dp-start': 'knapsack-1d-desc-vs-asc',
+  'dp-skip': 'knapsack-1d-desc-vs-asc',
+  'dp-desc-finale': 'knapsack-1d-desc-vs-asc',
+  'dp-asc-ask': 'knapsack-1d-asc',
+  'dp-asc-reveal-wrong': 'knapsack-1d-asc',
+  'dp-asc-finale': 'knapsack-1d-asc',
+}
+
+/** Steps the dp-table frame forward until `stop` holds (or its end), answering an open question with choice `pick` on the way. */
+async function dpWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(DP).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
   await settle(page)
 }
 
@@ -219,6 +249,7 @@ export function stateUrl(name: string): string {
   if (name.startsWith('at-')) return atUrl
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
+  if (DP_STATES[name]) return dpUrl(DP_STATES[name])
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
   if (name.startsWith('pp-')) return PP
@@ -232,6 +263,7 @@ export function stateFrame(name: string): string {
   if (AT[name]) return AT[name]
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
+  if (DP_STATES[name]) return DP
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
   if (name.startsWith('heap')) return HEAP_DATA_TYPES
@@ -491,10 +523,37 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'sw-set-abba-if-finale': async (page) => {
     await swFinale(page, 1)
   },
+  // The dp table (wave 3A, local-only): Start with its end prediction open,
+  // the item whose loop never runs (x = 5), the false finale; counting up:
+  // the question with f[1] barred, its reveal after a wrong pick (the arrow
+  // out of a barred cell), the true finale.
+  'dp-start': async () => {},
+  'dp-skip': async (page) => {
+    await dpWalk(page, (s, mode) => s >= 8 && mode !== 'ask', 2)
+  },
+  'dp-desc-finale': async (page) => {
+    await dpWalk(page, () => false, 2)
+  },
+  'dp-asc-ask': async (page) => {
+    await dpWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'dp-asc-reveal-wrong': async (page) => {
+    await dpWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(DP).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'dp-asc-finale': async (page) => {
+    await dpWalk(page, () => false, 1)
+  },
   // The annotated trees (wave 2D): static, at rest only.
   'at-gain': async () => {},
   'at-trie': async () => {},
   'at-suffix': async () => {},
+  // The wave 3A annotated trees: static, at rest only.
+  'at-calls': async () => {},
+  'at-water': async () => {},
+  'at-kpairs': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()
@@ -641,6 +700,20 @@ export const MOTION_STATES: Record<string, MotionState> = {
         await page.keyboard.press('ArrowRight')
         await page.waitForTimeout(650)
       }
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The dp table (local-only): a paced write (the index tag slides, the read tag with it, the cell and its bar land, Q1).
+  'dp-step': {
+    url: dpUrl('knapsack-1d-asc'),
+    frame: DP,
+    setup: async (page) => {
+      const f = page.locator(DP).first()
+      await f.getByRole('slider').focus()
+      await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(650)
     },
     act: async (page) => {
       await page.keyboard.press('ArrowRight')

@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, lessonUrl, open, settle, swUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, lessonUrl, open, settle, swUrl, DP, dpUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -547,5 +547,76 @@ for (const width of [375, 1440])
       same(`${preset} changed link`, heap.changedLink, await inSvg(at, 'svg [data-edge][data-changed] .vz-e'))
       same(`${preset} changed mark`, heap.changed, await inSvg(at, 'svg .vz-ch'))
     }
+    // Wave 3A: the call tree, the spanning tree and the push forest, each with the parts it draws.
+    const W3: Record<string, { node: string; link: string; lit?: string; mark?: string }> = {
+      'combination-sum-take-skip': { node: 'svg [data-node]:not([data-end]) .vz-g', link: 'svg [data-edge] .vz-e', mark: 'svg .vz-ch' },
+      'water-wells-virtual-source': { node: 'svg [data-node] .vz-g', link: 'svg [data-edge]:not([data-changed]):not([data-well]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e' },
+      'k-pairs-lazy-grid': { node: 'svg [data-cell]:not([data-changed]) .vz-g', link: 'svg [data-edge]:not([data-changed]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e', mark: 'svg .vz-ch' },
+    }
+    for (const [preset, q] of Object.entries(W3)) {
+      const at = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(at, FRAME))
+      same(`${preset} title`, heap.title, await look(at.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(at.locator('figcaption'), TEXT))
+      same(`${preset} panel heading`, heading, await inSvg(at, 'svg [data-viz-part="panel-heading"]'))
+      same(`${preset} node glyph`, heap.glyph, await inSvg(at, q.node))
+      same(`${preset} link`, heap.link, await inSvg(at, q.link))
+      if (q.lit) same(`${preset} changed link`, heap.changedLink, await inSvg(at, q.lit))
+      if (q.mark) same(`${preset} changed mark`, heap.changed, await inSvg(at, q.mark))
+    }
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The dp table (wave 3A) draws the sliding window's strip glyphs: a cell is
+ * a strip cell, an index tag an edge tag, the written cell and the moved tag
+ * the same neutral changed mark; the dependency arrow is the changed-role
+ * connector the static figures mark edges with. Local-only (a practice
+ * answer): skipped where the content checkout lacks it.
+ */
+for (const width of [375, 1440])
+  test(`dp-table glyphs compute like the sliding window's @${width}`, async ({ page }) => {
+    const skip = urlLocalOnly(dpUrl('knapsack-1d-asc'))
+    test.skip(Boolean(skip), skip ?? '')
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const svgLook = (root: Locator, sel: string) =>
+      root
+        .locator(sel)
+        .first()
+        .evaluate((el, ps) => {
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        }, SVG as unknown as string[])
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: sliding window ${a[k]} vs dp table ${b[k]}`)
+    }
+    // The sliding window two steps in: a cell in the window, a changed cell, the right edge's changed tag.
+    await open(page, swUrl('araaci-k2'), width)
+    const sw = page.locator(SW)
+    await sw.getByRole('button', { name: 'Next' }).click()
+    await sw.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    const ref = {
+      glyph: await svgLook(sw, 'svg [data-cell]:not([data-changed]) .vz-g'),
+      label: await svgLook(sw, 'svg [data-cell][data-in] text'),
+      changedCell: await svgLook(sw, 'svg [data-cell][data-changed] .vz-ch'),
+      tag: await svgLook(sw, 'svg [data-tag] rect:not(.vz-ch)'),
+      tagText: await svgLook(sw, 'svg [data-tag] text'),
+      changed: await svgLook(sw, 'svg [data-tag] .vz-ch'),
+      index: await svgLook(sw, 'svg [data-indices] text'),
+    }
+    // The dp table counting up, two writes in: f[2] written from f[1].
+    await open(page, dpUrl('knapsack-1d-asc'), width)
+    const dp = page.locator(DP)
+    await dp.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    same('cell glyph', ref.glyph, await svgLook(dp, 'svg [data-cell]:not([data-changed]) .vz-g'))
+    same('cell label', ref.label, await svgLook(dp, 'svg [data-cell][data-value="true"] text'))
+    same('changed cell', ref.changedCell, await svgLook(dp, 'svg [data-cell][data-changed] .vz-ch'))
+    same('index tag', ref.tag, await svgLook(dp, 'svg [data-tag] rect:not(.vz-ch)'))
+    same('index tag text', ref.tagText, await svgLook(dp, 'svg [data-tag] text'))
+    same('changed tag', ref.changed, await svgLook(dp, 'svg [data-tag] .vz-ch'))
+    same('index', ref.index, await svgLook(dp, 'svg [data-indices] text'))
     expect(diffs).toEqual([])
   })

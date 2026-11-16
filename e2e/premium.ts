@@ -30,7 +30,7 @@ export function showsAnswer(id: string, preset: string): boolean {
   return d?.form === 'step' && Boolean(d.presets.find((p) => p.id === preset)?.log.code?.premium)
 }
 
-/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring, `?sw=` the sliding window), if any. */
+/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring, `?sw=` the sliding window, `?dp=` the dp table), if any. */
 export function galleryFrame(url: string): { id: string; preset: string } | null {
   const q = new URL(url, 'http://gallery').searchParams
   const fr = q.get('fr')
@@ -39,6 +39,8 @@ export function galleryFrame(url: string): { id: string; preset: string } | null
   if (ll && ll !== 'static') return { id: 'linked-list-pointer-rewiring', preset: ll }
   const sw = q.get('sw')
   if (sw) return { id: 'sliding-window', preset: sw }
+  const dp = q.get('dp')
+  if (dp) return { id: 'dp-table-dependencies', preset: dp }
   return null
 }
 

@@ -3,11 +3,11 @@ import path from 'node:path'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page, type Request } from '@playwright/test'
 import { annotatedTreeDescriptor } from '../src/components/visualizations/engines/annotated-tree/descriptor'
-import type { GainPanel, SuffixPanel } from '../src/components/visualizations/engines/annotated-tree/model'
+import type { CallPanel, GainPanel, GraphPanel, GridPanel, SuffixPanel } from '../src/components/visualizations/engines/annotated-tree/model'
 import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
 
 /**
- * The annotated trees (R4 shared visual "annotated-tree", wave 2D) through
+ * The annotated trees (R4 shared visual "annotated-tree", waves 2D and 3A) through
  * the real `<Viz>` mount on `/dev/visualizations?at=static`: final server
  * SVG (no chunk on a hard load), the entry-table footprint at every width
  * and under a client-side mount, nothing outside its svg or stage, every
@@ -51,7 +51,7 @@ test('hard load ships no visualization JavaScript: the trees are final server SV
   await page.waitForTimeout(1000)
   page.off('request', on)
   expect([...scripts].filter((u) => /annotated-tree|visualizations_engines/.test(u))).toEqual([])
-  await expect(page.locator('[data-viz="annotated-tree"] > [data-viz-ssr]')).toHaveCount(3)
+  await expect(page.locator('[data-viz="annotated-tree"] > [data-viz-ssr]')).toHaveCount(PRESETS.length)
 })
 
 test('the reserved footprint at every width; nothing outside its svg, its stage or the page', async ({ page }) => {
@@ -82,7 +82,7 @@ test('the reserved footprint at every width; nothing outside its svg, its stage 
       expect(out.bad, `${p} @${width}`).toEqual([])
       // One svg per panel on screen: the suffix tree's own for the variant.
       const d = annotatedTreeDescriptor.presets.find((x) => x.id === p)!.data
-      expect(out.shown, `${p} @${width}`).toEqual(d.panels.map((x) => (x.kind === 'suffix' ? `${x.id}-${width < 768 ? 'narrow' : 'wide'}` : x.id)))
+      expect(out.shown, `${p} @${width}`).toEqual(d.panels.map((x) => (x.kind === 'suffix' || x.kind === 'calls' ? `${x.id}-${width < 768 ? 'narrow' : 'wide'}` : x.id)))
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `page @${width}`).toBe(true)
   }
@@ -128,6 +128,32 @@ test('every drawn value is the recorded one', async ({ page }) => {
   await expect(narrow.locator('[data-rank][data-changed] [data-viz-part="lcp"]')).toHaveText('3')
 })
 
+test('wave 3A: every drawn value is the recorded one (calls, the spanning tree, the push forest)', async ({ page }) => {
+  await open(page, 375)
+  const calls = annotatedTreeDescriptor.presets.find((x) => x.id === 'combination-sum-take-skip')!.data.panels[0] as CallPanel
+  const tree = page.locator('svg[data-viz-panel="calls-narrow"]')
+  const drawn = await tree.locator('[data-node]').evaluateAll((es) => es.map((e) => [Number(e.getAttribute('data-i')), Number(e.getAttribute('data-s')), e.getAttribute('data-t')]))
+  expect(drawn).toEqual(calls.nodes.map((n) => [n.i, n.s, n.t.join(',')]))
+  const answers = calls.nodes.filter((n) => n.end?.kind === 'answer').map((n) => `[data-viz-part="path"][data-for="${n.id}"]`)
+  await expect(tree.locator(answers.join(', '))).toHaveText(['[7]', '[2,2,3]'])
+  await expect(tree.locator('[data-end="cut"]')).toHaveCount(8)
+  const take = await tree.locator('[data-kind="take"]').count()
+  expect(take).toBe(calls.nodes.filter((n) => n.edge === 'take').length)
+  // The spanning tree: the accepted edges marked, in order; the two wells never tried unmarked.
+  const source = annotatedTreeDescriptor.presets.find((x) => x.id === 'water-wells-virtual-source')!.data.panels[1] as GraphPanel
+  const marked = await page.locator('svg[data-viz-panel="source"] [data-edge][data-changed]').evaluateAll((es) => es.map((e) => [e.getAttribute('data-edge'), e.getAttribute('data-accepted')]))
+  expect(marked).toEqual(source.edges.filter((e) => e.accepted).map((e) => [`${e.a}-${e.b}`, String(e.accepted)]))
+  await expect(page.locator('svg[data-viz-panel="source"] [data-untried]')).toHaveCount(2)
+  await expect(page.locator('svg[data-viz-panel="houses"] [data-viz-part="node-note"]')).toHaveText(['well 1', 'well 2', 'well 2'])
+  // The push forest: pops numbered in order, one right arrow per push; (1,1) pushed twice by the other rule.
+  const [, popped] = annotatedTreeDescriptor.presets.find((x) => x.id === 'k-pairs-lazy-grid')!.data.panels as GridPanel[]
+  await expect(page.locator('svg[data-viz-panel="popped"] [data-state="popped"] [data-viz-part="cell-label"]')).toHaveText(['pop 1', 'pop 2', 'pop 3'])
+  const arrows = await page.locator('svg[data-viz-panel="popped"] [data-edge]').evaluateAll((es) => es.map((e) => e.getAttribute('data-edge')))
+  expect(arrows).toEqual(popped.arrows.map((a) => `${a.from.join(',')}-${a.to.join(',')}`))
+  await expect(page.locator('svg[data-viz-panel="twice"] [data-cell="1,1"]')).toHaveAttribute('data-state', 'twice')
+  await expect(page.locator('svg[data-viz-panel="twice"] [data-edge][data-to="1,1"]')).toHaveCount(2)
+})
+
 test('the stage is a named group described by the text alternative, with each verified output', async ({ page }) => {
   await open(page, 1024)
   for (const p of PRESETS) {
@@ -140,6 +166,10 @@ test('the stage is a named group described by the text alternative, with each ve
   await expect(figure(page, 'trie-end-markers').locator('details')).toContainText('Verified output, trie-search (Node 24.x): false, true')
   await expect(figure(page, 'trie-end-markers').locator('details')).not.toContainText('trie-delete (Node')
   await expect(figure(page, 'suffix-tree-banana').locator('details')).toContainText('Suffix array (leaves top to bottom): 6, 5, 3, 1, 0, 4, 2.')
+  await expect(figure(page, 'combination-sum-take-skip').locator('details')).toContainText('(0,3) with t [2,2]: skips 2 to (1,3), then takes it to (0,1).')
+  await expect(figure(page, 'combination-sum-take-skip').locator('details')).toContainText('Verified output, combination-sum (Node 24.x): [[7],[2,2,3]]')
+  await expect(figure(page, 'water-wells-virtual-source').locator('details')).toContainText('Well source 0 to 1, cost 1, accepted 3rd (marked).')
+  await expect(figure(page, 'k-pairs-lazy-grid').locator('details')).toContainText('Arrow from (0,0) to (0,1).')
 })
 
 test('zero axe violations, closed and open', async ({ page }) => {
@@ -179,6 +209,9 @@ const LESSONS: Record<string, { slug: string; source: string }> = {
   'max-path-gain-vs-through': { slug: 'tree-dfs', source: 'dsa-track/common-techniques/tree-dfs/page.mdx' },
   'trie-end-markers': { slug: 'tries', source: 'dsa-track/user-defined-data-structures/tries/page.mdx' },
   'suffix-tree-banana': { slug: 'suffix-arrays-and-suffix-trees', source: 'dsa-track/advanced-topics/suffix-arrays-and-suffix-trees/page.mdx' },
+  'combination-sum-take-skip': { slug: 'backtracking', source: 'dsa-track/common-techniques/backtracking/page.mdx' },
+  'water-wells-virtual-source': { slug: 'minimum-spanning-trees', source: 'dsa-track/advanced-topics/minimum-spanning-trees/page.mdx' },
+  'k-pairs-lazy-grid': { slug: 'k-way-merge', source: 'dsa-track/common-techniques/k-way-merge/page.mdx' },
 }
 
 test('in its lesson: the figure, its footprint, nothing wider than the column (local checkout only)', async ({ page }) => {
