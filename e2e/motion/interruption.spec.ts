@@ -2,6 +2,7 @@ import { test, type Page } from '@playwright/test'
 import { motionsAfter } from './analyze'
 import { EL, LK, animated, animatedGlyphs, hydrateListKeys, mark, openGallery, save, startRec, stopRec, strictCheck } from './helpers'
 import { diffGlyphs, snap } from './settle'
+import { motionRules } from '../../src/components/visualizations/primitives/tokens-v3'
 
 /**
  * H0-C task 2: interruption. Each scenario drives input mid-transition, then
@@ -41,7 +42,14 @@ async function reference(page: Page, step: number) {
 }
 
 /** Runs `act` while recording; returns tweens that started after the mark named `after`. */
-type Strict = { instant?: string[]; maxGlyphs?: Record<string, number>; noMoves?: string[] }
+/**
+ * `instant`: commands that must snap whatever the timing (a scrub, a preset
+ * switch). `burst`: commands that snap because they land inside the burst
+ * window after the previous command; checked only when the measured gap really
+ * was inside it, since a loaded runner can stretch a 100 ms wait past the 250 ms window,
+ * and then the command rightly animates.
+ */
+type Strict = { instant?: string[]; burst?: string[]; maxGlyphs?: Record<string, number>; noMoves?: string[] }
 
 async function scenario(
   page: Page,
@@ -99,6 +107,15 @@ async function scenario(
   strictCheck(`${name}: nothing left half-faded`, partialOpacity)
   if (diff) strictCheck(`${name}: settles exactly like a slow walk`, diff)
   for (const label of strict.instant ?? []) strictCheck(`${name}: nothing animates after ${label}`, animsAfter[label] ?? [])
+  const gaps: Record<string, number> = {}
+  for (const label of strict.burst ?? []) {
+    const i = order.findIndex(([l]) => l === label)
+    const gap = i > 0 ? order[i][1] - order[i - 1][1] : Infinity
+    gaps[label] = Math.round(gap)
+    // The mark precedes its key press, so keep a 50 ms margin for dispatch.
+    if (gap < motionRules.burstWindowMs - 50) strictCheck(`${name}: nothing animates after ${label}`, animsAfter[label] ?? [])
+  }
+  ;(results[name] as Record<string, unknown>).burstGaps = gaps
   // M23: after a layout change no move continues from offsets measured on the old layout.
   for (const label of strict.noMoves ?? [])
     strictCheck(`${name}: no move runs after ${label}`, (animsAfter[label] ?? []).filter((a) => a.includes('viz-move')))
@@ -127,7 +144,7 @@ test('event-loop interruptions', async ({ page }) => {
       await page.keyboard.press('ArrowRight')
       await page.waitForTimeout(40)
     }
-  }, async () => Number(await f.getAttribute('data-viz-step')), { instant: ['press1', 'press2', 'press3', 'press4'] })
+  }, async () => Number(await f.getAttribute('data-viz-step')), { burst: ['press1', 'press2', 'press3', 'press4'] })
 
   // 2. Key repeat (held ArrowRight, repeat events every 33 ms).
   await walkTo(page, 0)
@@ -138,7 +155,7 @@ test('event-loop interruptions', async ({ page }) => {
       await page.waitForTimeout(33)
     }
     await page.keyboard.up('ArrowRight')
-  }, async () => Number(await f.getAttribute('data-viz-step')), { instant: ['repeat1', 'repeat2', 'repeat3', 'repeat4', 'repeat5'] })
+  }, async () => Number(await f.getAttribute('data-viz-step')), { burst: ['repeat1', 'repeat2', 'repeat3', 'repeat4', 'repeat5'] })
 
   // 3. Back 100 ms into the move transition 6 -> 7.
   await walkTo(page, 6)
@@ -148,7 +165,7 @@ test('event-loop interruptions', async ({ page }) => {
     await page.waitForTimeout(100)
     await m('back')
     await page.keyboard.press('ArrowLeft')
-  }, 6, { instant: ['back'] })
+  }, 6, { burst: ['back'] })
 
   // 3b. Back after 320 ms (outside the burst window but the 300 ms move is just ending).
   await walkTo(page, 6)
