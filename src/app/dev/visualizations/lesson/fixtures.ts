@@ -219,6 +219,36 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // String Algorithms, before the interview tips: no prose discusses it.
     inserts: [{ before: '## **Interview Tips and Tricks**', viz: '<Viz id="sliding-window" preset="set-shrink-longest-substring" />' }],
   },
+  // Wave 3C, the frames (all three lessons PREMIUM: local checkout only).
+  {
+    slug: 'generators',
+    title: 'Generators and Iterators',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/generators/page.mdx',
+    // After Generator Functions (yield pauses, next() resumes), before the
+    // advanced techniques: no prose says what next(arg) does to a paused
+    // yield, closes a source or forwards through yield*.
+    inserts: [{ before: '## **Advanced Generator Techniques**', viz: '<Viz id="generator-frames" />' }],
+  },
+  {
+    slug: 'async-await',
+    title: 'Async/Await Deep Dive',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/async-await/page.mdx',
+    // After the Promise.all sections (everything starts at once), before
+    // Combining Sequential and Parallel: no prose describes a bounded pool.
+    inserts: [{ before: '### **Combining Sequential and Parallel Operations**', viz: '<Viz id="worker-pool" />' }],
+  },
+  {
+    slug: 'design-patterns',
+    title: 'Advanced Patterns and Best Practices',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/design-patterns/page.mdx',
+    // Right after the Observer dispatch fragment, before the paragraph that
+    // states the membership check skips a removed registration (the
+    // removed-before-turn answer).
+    inserts: [{ before: 'The two records represent', viz: '<Viz id="emit-frames" />' }],
+  },
   // Wave 2D, the annotated trees (all three lessons PREMIUM: local checkout
   // only). Static figures, each after the example it explains.
   {
