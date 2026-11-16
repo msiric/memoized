@@ -43,6 +43,8 @@ const ALL_PAGES = [
   '/dev/visualizations?ll=reverse-between-m2-n4',
   '/dev/visualizations?ll=palindrome-split-reverse-compare',
   '/dev/visualizations?ll=static',
+  // The annotated trees (wave 2D, static).
+  '/dev/visualizations?at=static',
 ]
 /** A practice-answer frame is local-only: checked only where the content checkout has it (never CI). */
 const PAGES = ALL_PAGES.filter((u) => !urlLocalOnly(u))

@@ -24,6 +24,8 @@ const routes = [
   '/dev/visualizations?ll=reverse-between-m2-n4',
   '/dev/visualizations?ll=palindrome-split-reverse-compare',
   '/dev/visualizations?ll=static',
+  // The annotated trees (wave 2D).
+  '/dev/visualizations?at=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

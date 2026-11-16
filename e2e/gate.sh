@@ -21,7 +21,7 @@
 # PR shards (seconds of test time, measured natively on macOS against a warm
 # dev server, H3 round 2 integration; the CI image adds job setup):
 #   functional-a  viz-list-keys, viz-static, viz-heap-graph, frontier,
-#                 viz-linked-list                                   ~380
+#                 viz-linked-list, viz-annotated-tree               ~410
 #   functional-b  viz-step-through, viz-shell, viz-fallbacks          ~235
 #   design-a      contrast crawl at rest (375, 768, 1440)             ~130
 #   design-b      full-motion contrast (375), consistency; visual
@@ -31,7 +31,8 @@
 #   motion-b      list-keys reveals, interruption                     ~305
 #   motion-c      every list-keys ride (1024)                          ~75
 #   stress-a      stress flagships and frontier                       ~225
-#   stress-b      stress adversarial, hydration, linked list          ~160
+#   stress-b      stress adversarial, hydration, linked list,
+#                 annotated tree                                    ~180
 # Without a shard, `pr` runs them all in sequence.
 #
 # Motion timing (tween length, cuts, the 560 ms beat budget, mirrored
@@ -57,7 +58,7 @@ stress() { npx playwright test -c e2e/stress/playwright.stress.config.ts "$@"; }
 
 run() {
   case "$1" in
-    functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts e2e/viz-heap-graph.spec.ts e2e/viz-frontier.spec.ts e2e/viz-linked-list.spec.ts ;;
+    functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts e2e/viz-heap-graph.spec.ts e2e/viz-frontier.spec.ts e2e/viz-linked-list.spec.ts e2e/viz-annotated-tree.spec.ts ;;
     functional-b) pw --project=functional e2e/viz-step-through.spec.ts e2e/viz-shell.spec.ts ;;
     design-a) pw --project=gates e2e/gates/contrast.spec.ts --grep-invert "full motion" ;;
     design-b)
@@ -69,7 +70,7 @@ run() {
     motion-b) pw --project=motion e2e/motion/list-keys-reveals.spec.ts e2e/motion/interruption.spec.ts ;;
     motion-c) pw --project=motion e2e/motion/list-keys-rides.spec.ts ;;
     stress-a) stress flagships frontier ;;
-    stress-b) stress adversarial hydration linked-list ;;
+    stress-b) stress adversarial hydration linked-list annotated-tree ;;
     *) echo "unknown shard $1" >&2; return 2 ;;
   esac
 }
