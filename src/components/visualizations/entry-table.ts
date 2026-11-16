@@ -148,7 +148,7 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     undefined,
     {
       'knapsack-1d-desc-vs-asc': [750, 606, 750, 850, 930],
-      'knapsack-1d-asc': [750, 634, 750, 930, 958],
+      'knapsack-1d-asc': [746, 606, 750, 922, 958],
     },
     {
       'knapsack-1d-desc-vs-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],

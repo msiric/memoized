@@ -126,7 +126,7 @@ test('j upward: asked before f[2] is written, with f[1] already barred; the reve
   const f = await openStep(page, 'knapsack-1d-asc')
   await f.getByRole('slider').focus()
   for (let g = 0; g < 20 && (await f.getAttribute('data-viz-mode')) !== 'ask'; g++) await page.keyboard.press('ArrowRight')
-  await expect(f.locator('[data-viz-part="viz-prompt"]')).toHaveText('f[1] was just set for item 1. What does f[2] become?')
+  await expect(f.locator('[data-viz-part="viz-prompt"]')).toHaveText('f[1] was just set. What is f[2] now?')
   expect((await drawn(page)).bars).toEqual(['cell-1'])
   await page.keyboard.press('1')
   await expect(f.locator('[data-viz-part="viz-feedback"]')).toContainText('Right')

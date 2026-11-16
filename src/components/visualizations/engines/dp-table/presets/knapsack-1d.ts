@@ -137,7 +137,7 @@ export const knapsackUpSpec: PresetSpec = {
   checkpoints: (steps): Checkpoint[] => [
     {
       beforeStep: firstReuse(steps),
-      prompt: 'f[1] was just set for item 1. What does f[2] become?',
+      prompt: 'f[1] was just set. What is f[2] now?',
       choices: [
         { id: 'true', label: 'true' },
         { id: 'false', label: 'false' },
