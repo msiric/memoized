@@ -53,6 +53,12 @@ export const G = {
 export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
 /** The narrow stage under very large text on a phone (`vz-tight`), px at the default root (as the frontier's). */
 export const STAGE_TIGHT = 200
+/**
+ * A lane's chip room in the tight frame, px at the default root: measured at
+ * a 375 phone under Chrome's "Very large" text (150 %), where a lane is
+ * 184.7 rem-px wide with 4 px insets (`vz-tight:px-1`) and a 1 px border.
+ */
+export const TIGHT_LANE_IN = 174
 /** The narrow stage on a 375 phone (the frame's content in the lesson column). */
 export const STAGE_PHONE = 309
 
@@ -131,7 +137,7 @@ export function framesMetrics(logs: readonly StepLog<FState>[], all: readonly St
       for (const lane of state.lanes) {
         const labels = lane.chips.map((c) => c.label)
         const r = (rows[lane.id] ??= { narrow: 1, wide: 1 })
-        r.narrow = Math.max(r.narrow, flowRows(labels.map(chipWidth), laneIn(STAGE_PHONE), G.chipGap), flowRows(labels.map(tightChipWidth), laneIn(STAGE_TIGHT), G.chipGap))
+        r.narrow = Math.max(r.narrow, flowRows(labels.map(chipWidth), laneIn(STAGE_PHONE), G.chipGap), flowRows(labels.map(tightChipWidth), TIGHT_LANE_IN, G.chipGap))
         r.wide = Math.max(r.wide, flowRows(labels.map(chipWidth), laneIn(right), G.chipGap))
       }
       const conIn = (w: number) => w - 2 * G.padNarrow - 2 * G.border

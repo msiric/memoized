@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { monoWidth, sansWidth } from '../../substrates/text-metrics'
 import { emitFramesDescriptor, generatorFramesDescriptor, workerPoolDescriptor } from './descriptor'
-import { G, STAGE_TIGHT, framesMetrics, readoutWidth } from './layout'
+import { G, STAGE_TIGHT, TIGHT_LANE_IN, framesMetrics, readoutWidth } from './layout'
 
 /**
  * Frames geometry: nothing a step draws is clipped, truncated or spills at
@@ -11,7 +11,7 @@ import { G, STAGE_TIGHT, framesMetrics, readoutWidth } from './layout'
  */
 
 const ALL = [generatorFramesDescriptor, workerPoolDescriptor, emitFramesDescriptor]
-const laneIn = STAGE_TIGHT - 2 * G.laneInset - 2 * G.border
+const laneIn = TIGHT_LANE_IN
 
 describe.each(ALL.flatMap((d) => d.presets.map((p) => [`${d.id}/${p.id}`, p.log] as const)))('%s', (_id, log) => {
   const m = framesMetrics([log])

@@ -126,7 +126,7 @@ function twoWayDrafts(r: FramesRecording, display: readonly DisplayRow[]): Draft
       state: state(exit, [x(xv), y(yv)]),
       src: 6,
       focus: [statusId('g'), 'output'],
-      event: 'Body ends: done is true',
+      event: 'Body ends: done',
       why: 'No yield is left, so the body ends and g closes: done is true, value undefined.',
       narration: 'g is closed. next(20) returned { value: undefined, done: true }.',
     },
@@ -210,7 +210,7 @@ function takeDrafts(r: FramesRecording, display: readonly DisplayRow[]): Draft[]
       { id: varId('pulled'), name: 'pulled', value: String(p.vars.pulled) },
       { id: varId('closed'), name: 'closed', value: String(p.vars.closed) },
     ],
-    lanes: [lane('take', 'limited = take(source(), 2)', statusOf(p.gens?.take, 2, display), locals), lane('source', 'source()', statusOf(p.gens?.source, 17, display))],
+    lanes: [lane('take', 'limited = take(…, 2)', statusOf(p.gens?.take, 2, display), locals), lane('source', 'source()', statusOf(p.gens?.source, 17, display))],
     output: [],
   })
   const count = (v: unknown) => chip('count', `count = ${fmt(v)}`)
@@ -303,7 +303,7 @@ function takeDrafts(r: FramesRecording, display: readonly DisplayRow[]): Draft[]
       state: st(after, []),
       src: 24,
       focus: [varId('closed'), statusId('source')],
-      event: 'source closes: finally',
+      event: 'finally: closed is 1',
       why: 'Leaving for...of early calls source.return(), so its finally runs: closed is 1.',
       narration: `source's finally ran: closed is ${fmt(after.vars.closed)}, pulled stays ${fmt(after.vars.pulled)}. Both are closed.`,
     },
@@ -431,7 +431,7 @@ function pipelineDrafts(r: FramesRecording, display: readonly DisplayRow[]): Dra
     const resumed = w.take('take-check')
     count = resumed.vars.count
     drafts.push({
-      state: st(took, { fibonacci: `a = ${a}`, map: `${a} → ${out}`, filter: `passes ${out}`, take: `yields ${out}` }),
+      state: st(took, { fibonacci: `a = ${a}`, map: `${a} → ${out}`, filter: `keeps ${out}`, take: `yield ${out}` }),
       src: 19,
       focus: ['take-value', 'filter-value'],
       event: `${a} → ${out} reaches take`,
@@ -444,7 +444,7 @@ function pipelineDrafts(r: FramesRecording, display: readonly DisplayRow[]): Dra
     state: st(exit, { take: `count = ${fmt(count)}` }, r.observed.slice(0, exit.out)),
     src: 21,
     focus: [statusId('fibonacci'), 'output'],
-    event: `count is ${fmt(count)}: take returns`,
+    event: `take returns at ${fmt(count)}`,
     why: 'take returns at count 3, so its for...of closes filter, which closes map, which closes fibonacci.',
     narration: `All four are closed after ${n} pulls. The spread printed [ 16n, 26n, 42n ].`,
   })

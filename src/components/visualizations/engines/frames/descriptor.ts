@@ -51,7 +51,7 @@ const poolPresets: Preset<FState>[] = [
 export const workerPoolDescriptor: StepThroughDescriptor<FState> = {
   id: 'worker-pool',
   form: 'step',
-  title: 'mapLimit: a slot refills on settle',
+  title: 'mapLimit: refill on settle',
   engine: framesEngineCore,
   presets: poolPresets,
   defaultPreset: 'refill-on-settle',

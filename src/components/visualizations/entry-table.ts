@@ -184,13 +184,13 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
   ],
   'emit-frames': [
     () => import('./engines/frames/emit-frames'),
-    814,
+    850,
     654,
     undefined,
     {
-      'once-consumed-by-nested-emit': [814, 654, 838, 962, 1014],
+      'once-consumed-by-nested-emit': [850, 654, 874, 998, 1050],
       'removed-before-turn': [780, 654, 780, 908, 980],
-      'added-during-emit': [744, 654, 744, 924, 956],
+      'added-during-emit': [816, 654, 816, 996, 1028],
     },
     {
       'once-consumed-by-nested-emit': ['once-consumed-by-nested-emit', 'removed-before-turn', 'added-during-emit'],

@@ -32,8 +32,8 @@ import { OUTPUT_ID, framesIntrospection, type FLane, type FState } from './model
 /**
  * Which chips land at once on this step, per lane: one that leaves while
  * others close up behind it, or arrives where others make room, would cross
- * them mid-fade (G1), so the change lands in one frame, forward and back
- * alike.
+ * them mid-fade (G1), and a group arriving or leaving together would not
+ * mirror on Back, so the change lands in one frame, forward and back alike.
  */
 function frozenChips(prev: FState | undefined, next: FState): Set<string> {
   const out = new Set<string>()
@@ -50,7 +50,9 @@ function frozenChips(prev: FState | undefined, next: FState): Set<string> {
     // A chip leaving from anywhere but the end, or arriving anywhere but the end, moves its neighbours.
     const midLeave = leaving.some((id) => a.indexOf(id) < a.length - leaving.length)
     const midArrive = arriving.some((id) => b.indexOf(id) < b.length - arriving.length)
-    if (shifted || midLeave || midArrive || (leaving.length && arriving.length)) for (const id of [...leaving, ...arriving]) out.add(id)
+    // So does a change of more than one chip in a lane (an emit's whole copy arriving or leaving): one
+    // chip's enter or exit mirrors cleanly, a group's would not (Back mirrors Next, D8).
+    if (shifted || midLeave || midArrive || leaving.length + arriving.length > 1) for (const id of [...leaving, ...arriving]) out.add(id)
   }
   return out
 }

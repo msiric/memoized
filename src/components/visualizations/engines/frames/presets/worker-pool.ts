@@ -134,7 +134,7 @@ function poolDrafts(r: FramesRecording, failure: boolean): Draft[] {
                   state: st(),
                   src: 16,
                   focus: [`slot-${i}`, statusId(`worker-${k}`)],
-                  event: `${ITEMS[i]} settles, worker ${k} exits`,
+                  event: `worker ${k} exits`,
                   why: stopped
                     ? `The result still lands in slot ${i}, but stopped is true, so the loop ends.`
                     : `The result goes to slot ${i}; next is ${next}, past the last index, so the loop ends.`,
@@ -158,7 +158,7 @@ function poolDrafts(r: FramesRecording, failure: boolean): Draft[] {
             state: st(),
             src: 16,
             focus: [`slot-${i}`, statusId(`worker-${k}`)],
-            event: `${ITEMS[i]} settles: results[${i}]`,
+            event: `${ITEMS[i]} lands in [${i}]`,
             why: `worker ${k} resumes and writes to the index it claimed, not to the end, so order is kept.`,
             narration: `results[${i}] is ${fmt(results[i])}. worker ${k} is free.`,
           })
@@ -176,7 +176,7 @@ function poolDrafts(r: FramesRecording, failure: boolean): Draft[] {
         state: st(),
         src: [14, 16],
         focus: [varId('next'), `op-${i}`],
-        event: `worker ${k} claims ${i} (${ITEMS[i]})`,
+        event: `worker ${k} claims ${i}`,
         why: `It reads next (${i}) and adds 1 before its first await, so no other worker can claim ${i}.`,
         narration: `worker ${k} awaits ${ITEMS[i]} (index ${i}); next is ${next}.`,
       })
@@ -208,7 +208,7 @@ function poolDrafts(r: FramesRecording, failure: boolean): Draft[] {
         state: st(),
         src: [18, 19],
         focus: [varId('stopped'), statusId(`worker-${k}`)],
-        event: `${ITEMS[i]} rejects: stopped = true`,
+        event: `${ITEMS[i]} rejects`,
         why: `worker ${k} catches it, sets stopped so no worker claims again, and rethrows, ending its loop.`,
         narration: `worker ${k} threw; stopped is true; slot ${i} stays empty.`,
       })
@@ -225,7 +225,7 @@ function poolDrafts(r: FramesRecording, failure: boolean): Draft[] {
           state: st(),
           src: 25,
           focus: ['output'],
-          event: 'Both done: return results',
+          event: 'Return results',
           why: 'Promise.all waited for both loops, so results is complete and in input order.',
           narration: `Printed: ${r.observed[printed - 1]}.`,
         })
@@ -241,7 +241,7 @@ export const refillSpec: FramesSpec = {
   recording: rec[refillProgram.id],
   display: POOL_DISPLAY,
   checkpoints: (steps): Checkpoint[] => {
-    const settle = steps.findIndex((s) => s.event.startsWith('b settles'))
+    const settle = steps.findIndex((s) => s.event.startsWith('b lands'))
     return [
       {
         beforeStep: settle + 1,
@@ -269,7 +269,7 @@ export const failureSpec: FramesSpec = {
   display: POOL_DISPLAY,
   checkpoints: (steps): Checkpoint[] => [
     {
-      beforeStep: steps.findIndex((s) => s.event.startsWith('a settles')),
+      beforeStep: steps.findIndex((s) => s.event.startsWith('worker 0 exits')),
       prompt: 'a settles. Does worker 0 claim c?',
       choices: [
         { id: 'no', label: 'No' },
@@ -305,7 +305,7 @@ function batchesDrafts(r: FramesRecording): Draft[] {
           id: `slot-lane-${j}`,
           label: `batch[${j}]`,
           kind: 'task',
-          chips: [{ id: statusId(`slot-lane-${j}`), label: s ? (s.settled ? 'settled, waiting' : 'awaiting') : 'empty' }, ...(s ? [op(s.i, s.settled ? fmt(ITEMS[s.i].toUpperCase()) : ITEMS[s.i])] : [])],
+          chips: [{ id: statusId(`slot-lane-${j}`), label: s ? (s.settled ? 'settled' : 'awaiting') : 'empty' }, ...(s ? [op(s.i, s.settled ? fmt(ITEMS[s.i].toUpperCase()) : ITEMS[s.i])] : [])],
         }),
       ),
       { id: 'results', label: 'results', kind: 'micro', chips: results.map((v, i) => ({ id: `res-${i}`, label: `${i}: ${v}` })) },
@@ -316,7 +316,7 @@ function batchesDrafts(r: FramesRecording): Draft[] {
     {
       state: st(),
       focus: [],
-      event: 'mapBatches, batch size 2',
+      event: 'mapBatches, size 2',
       why: 'This contrast awaits each batch with Promise.all before it starts the next one.',
       narration: 'No batch has started; results is empty.',
     },
@@ -350,7 +350,7 @@ function batchesDrafts(r: FramesRecording): Draft[] {
           state: st(),
           src: [6, 10],
           focus: [`op-${i}`, statusId(`slot-lane-${j}`)],
-          event: `${ITEMS[i]} settles: nothing starts`,
+          event: `${ITEMS[i]} done, slot idle`,
           why: `Promise.all still waits for ${ITEMS[other.i]}, so batch[${j}] sits idle and the next batch cannot start.`,
           narration: `${ITEMS[i]} is done but batch[${j}] waits for ${ITEMS[other.i]}.`,
         })
@@ -364,7 +364,7 @@ function batchesDrafts(r: FramesRecording): Draft[] {
         state: st(),
         src: 11,
         focus: [`res-${results.length - 2}`, `res-${results.length - 1}`],
-        event: `${ITEMS[i]} settles: push ${(push.vars.done as string[]).map(fmt).join(', ')}`,
+        event: `push ${(push.vars.done as string[]).map(fmt).join(', ')}`,
         why: 'Only now has every operation of the batch settled, so Promise.all fulfils and the loop pushes both.',
         narration: `results is ${fmt(results)}.`,
       })
@@ -376,7 +376,7 @@ function batchesDrafts(r: FramesRecording): Draft[] {
         state: st(),
         src: 13,
         focus: ['output'],
-        event: 'Both done: return results',
+        event: 'Return results',
         why: 'The same release order took two full waits: c could not start until a settled.',
         narration: `Printed: ${r.observed[printed - 1]}.`,
       })
@@ -392,7 +392,7 @@ export const batchesSpec: FramesSpec = {
   display: BATCHES_DISPLAY,
   checkpoints: (steps): Checkpoint[] => [
     {
-      beforeStep: steps.findIndex((s) => s.event.startsWith('b settles')),
+      beforeStep: steps.findIndex((s) => s.event.startsWith('b done')),
       prompt: 'b settles first. Does c start now?',
       choices: [
         { id: 'no', label: 'No' },
