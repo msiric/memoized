@@ -1,4 +1,5 @@
 import { annotatedTreeDescriptor } from './engines/annotated-tree/descriptor'
+import { dpTableDescriptor } from './engines/dp-table/descriptor'
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
 import { frontierDescriptor } from './engines/frontier/descriptor'
@@ -36,6 +37,7 @@ export const VIZ_DESCRIPTORS = {
   'linked-list-frames': linkedListFramesDescriptor,
   'sliding-window': slidingWindowDescriptor,
   'annotated-tree': annotatedTreeDescriptor,
+  'dp-table-dependencies': dpTableDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS

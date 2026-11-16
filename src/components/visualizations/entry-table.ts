@@ -134,6 +134,20 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'set-shrink-abba-if': ['set-shrink-longest-substring', 'set-shrink-abcabcbb', 'set-shrink-abba', 'set-shrink-abba-if'],
     },
   ],
+  'dp-table-dependencies': [
+    () => import('./engines/dp-table'),
+    750,
+    606,
+    undefined,
+    {
+      'knapsack-1d-desc-vs-asc': [750, 606, 750, 850, 930],
+      'knapsack-1d-asc': [750, 634, 750, 930, 958],
+    },
+    {
+      'knapsack-1d-desc-vs-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],
+      'knapsack-1d-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],
+    },
+  ],
   'list-keys': [
     () => import('./engines/list-keys'),
     862,

@@ -1,0 +1,386 @@
+{
+ "can-partition-125-down": {
+  "generator": "node-inspector-dp@1",
+  "sha256": "ad23a8548065e1b5ef7b5d3dd71886ed8ce5e482e3154923fb113edc979ca642",
+  "stdout": [
+   "false"
+  ],
+  "pauses": [
+   {
+    "probe": "start",
+    "line": 9,
+    "vars": {
+     "nums": [
+      1,
+      2,
+      5
+     ],
+     "m": 4,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "item",
+    "line": 10,
+    "vars": {
+     "x": 1,
+     "m": 4,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 4,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 3,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 2,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 1,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "item",
+    "line": 10,
+    "vars": {
+     "x": 2,
+     "m": 4,
+     "f": [
+      true,
+      true,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 2,
+     "j": 4,
+     "f": [
+      true,
+      true,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 2,
+     "j": 3,
+     "f": [
+      true,
+      true,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 2,
+     "j": 2,
+     "f": [
+      true,
+      true,
+      false,
+      true,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "item",
+    "line": 10,
+    "vars": {
+     "x": 5,
+     "m": 4,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 14,
+    "vars": {
+     "m": 4,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      false
+     ]
+    }
+   }
+  ]
+ },
+ "can-partition-125-up": {
+  "generator": "node-inspector-dp@1",
+  "sha256": "7de3b7b2c01f6aaa8bc2372f97876d571e9594f2a349cccf750c792aa18fc7e0",
+  "stdout": [
+   "true"
+  ],
+  "pauses": [
+   {
+    "probe": "start",
+    "line": 9,
+    "vars": {
+     "nums": [
+      1,
+      2,
+      5
+     ],
+     "m": 4,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "item",
+    "line": 10,
+    "vars": {
+     "x": 1,
+     "m": 4,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 1,
+     "f": [
+      true,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 2,
+     "f": [
+      true,
+      true,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 3,
+     "f": [
+      true,
+      true,
+      true,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 1,
+     "j": 4,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      false
+     ]
+    }
+   },
+   {
+    "probe": "item",
+    "line": 10,
+    "vars": {
+     "x": 2,
+     "m": 4,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 2,
+     "j": 2,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 2,
+     "j": 3,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 11,
+    "vars": {
+     "x": 2,
+     "j": 4,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "probe": "item",
+    "line": 10,
+    "vars": {
+     "x": 5,
+     "m": 4,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "probe": "return",
+    "line": 14,
+    "vars": {
+     "m": 4,
+     "f": [
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   }
+  ]
+ }
+}

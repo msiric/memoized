@@ -8,6 +8,7 @@ import LinkedListViz from './engines/linked-list'
 import LinkedListFramesViz from './engines/linked-list/frames'
 import ListKeysViz from './engines/list-keys'
 import SlidingWindowViz from './engines/sliding-window'
+import DpTableViz from './engines/dp-table'
 import type { VizComponentProps } from './shell/types'
 
 /**
@@ -27,4 +28,5 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'linked-list-frames': LinkedListFramesViz,
   'sliding-window': SlidingWindowViz,
   'annotated-tree': AnnotatedTreeViz,
+  'dp-table-dependencies': DpTableViz,
 }

@@ -32,6 +32,11 @@ export type BlockRef =
  *   as `if`): `from` must occur exactly once in the selected lines, and
  *   both are keywords, never solution code, so a practice answer's variant
  *   commits no answer text;
+ *   `swaps` makes a variant one operator or name at a time (the dp loop
+ *   counting up instead of down): each [from, to] pair is applied in order
+ *   and must occur exactly once in the selected lines when it applies; every
+ *   `from` and `to` is a token of at most four characters (an operator, a
+ *   bound's name), never a line of solution code;
  * - `code`: a harness line or lines (a call with the register's input, or a
  *   blank separator), never solution code.
  */
@@ -42,6 +47,7 @@ export type SourcePart =
       lines?: readonly [number, number?]
       uncomment?: true
       replace?: readonly [from: string, to: string]
+      swaps?: readonly (readonly [from: string, to: string])[]
     }
   | { code: string }
 
@@ -92,6 +98,11 @@ export function composeProgram(source: ProgramSource, text: (b: BlockRef) => str
       const [from, to] = part.replace
       const n = body.split(from).length - 1
       if (n !== 1) throw new Error(`"${from}" occurs ${n} times in the lines of ${refLabel(part.block)} it would replace (exactly once required)`)
+      body = body.replace(from, to)
+    }
+    for (const [from, to] of part.swaps ?? []) {
+      const n = body.split(from).length - 1
+      if (n !== 1) throw new Error(`"${from}" occurs ${n} times in the lines of ${refLabel(part.block)} it would swap (exactly once required)`)
       body = body.replace(from, to)
     }
     out.push(body)
