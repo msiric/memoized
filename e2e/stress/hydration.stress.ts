@@ -52,6 +52,10 @@ const ALL_PAGES = [
   '/dev/visualizations?fx=twoWay-next-arg',
   '/dev/visualizations?fx=refill-on-settle',
   '/dev/visualizations?fx=once-consumed-by-nested-emit',
+  // The wave 4C event-loop groups (Exercise 2; the call-stack traces, local-only) and core figures.
+  '/dev/visualizations?el=exercise-2-async1-async2',
+  '/dev/visualizations?el=who-called-inner',
+  '/dev/visualizations?core=static',
   // The annotated trees (wave 2D, static).
   '/dev/visualizations?at=static',
   // The wave 3B JavaScript-track figures (static).
