@@ -22,7 +22,7 @@ import { RECORDER } from './recorder'
 import { localOnly, localOnlyNote } from '../premium'
 
 /**
- * The frontier step-through (wave 2A): every step of every preset, in both
+ * The frontier step-through (waves 2A and 4B): every step of every preset, in both
  * directions, at full and reduced motion, under the same assertions as the
  * event loop's walk (event-loop-steps.spec.ts): no section 4 flag, no text
  * crossing text in motion (G1), Back mirroring Next (D8, G4), the three
@@ -32,7 +32,21 @@ import { localOnly, localOnlyNote } from '../premium'
  */
 
 const EL = '[data-viz="bfs-dfs-frontier"] section'
-const PRESETS = ['bfs-levels', 'binary-matrix-8dir', 'dijkstra-lazy-heap', 'min-effort-grid', 'bst-iterator-stack']
+const PRESETS = [
+  'bfs-levels',
+  'binary-matrix-8dir',
+  'dijkstra-lazy-heap',
+  'min-effort-grid',
+  'bst-iterator-stack',
+  // Wave 4B: Graph DFS (stack mode) and Topological Sort (queue mode, in-degree badges).
+  'dfs-directed-recstack',
+  'dfs-back-edge',
+  'dfs-finish-order',
+  'kahn-indegree',
+  'course-schedule-ii-edges',
+  'kahn-cycle-stall',
+  'mht-leaf-peeling',
+]
 
 async function openGallery(page: Page, opts: { width: number; query: string; reduced: boolean }) {
   await page.addInitScript(RECORDER)

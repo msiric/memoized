@@ -5,7 +5,7 @@ import { answersOf, walkStepThrough } from './flows'
 import { localOnly, localOnlyNote } from '../premium'
 
 /**
- * The frontier step-through (wave 2A) across the tier's configs, as the
+ * The frontier step-through (waves 2A and 4B) across the tier's configs, as the
  * flagships are walked: one page per lesson group (`?fr=`), every preset of
  * the group (switched with the control that shows) and every step, three
  * times per preset (questions answered right, wrong and skipped); every
@@ -15,7 +15,7 @@ import { localOnly, localOnlyNote } from '../premium'
 
 const ANSWERS = answersOf(frontierDescriptor.presets)
 /** The first preset of each lesson group: its page offers the rest of the group. */
-const ALL_GROUPS = ['bfs-levels', 'dijkstra-lazy-heap', 'bst-iterator-stack']
+const ALL_GROUPS = ['bfs-levels', 'dijkstra-lazy-heap', 'bst-iterator-stack', 'dfs-directed-recstack', 'kahn-indegree']
 /** A group with a practice answer is local-only: walked only where the content checkout has it (never CI). */
 const GROUPS = ALL_GROUPS.filter((p) => !localOnly('bfs-dfs-frontier', p))
 const SKIPPED = ALL_GROUPS.filter((p) => !GROUPS.includes(p)).map((p) => localOnlyNote('bfs-dfs-frontier', p))

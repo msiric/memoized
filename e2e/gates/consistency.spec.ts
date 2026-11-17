@@ -154,23 +154,29 @@ for (const width of [375, 1440]) {
  * shell, so its frame, question, choices, Skip, current code line, reveal
  * marks and lane panel compute as the event loop's do.
  */
+// The Graph DFS group (wave 4B) has no practice answer, so it runs in CI too.
+const FR_LOOKS = [
+  { preset: 'bfs-levels', lane: 'queue', wrong: 1 },
+  { preset: 'dfs-directed-recstack', lane: 'visited', wrong: 0 },
+] as const
 for (const width of [375, 1440])
-  test(`the frontier draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
-    // Its lesson group includes a practice answer: local-only without the content checkout (CI).
-    test.skip(urlLocalOnly(frUrl('bfs-levels')) !== null, urlLocalOnly(frUrl('bfs-levels')) ?? '')
+  for (const fr of FR_LOOKS)
+  test(`the frontier (${fr.preset}) draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
+    // A lesson group with a practice answer is local-only without the content checkout (CI).
+    test.skip(urlLocalOnly(frUrl(fr.preset)) !== null, urlLocalOnly(frUrl(fr.preset)) ?? '')
     const diffs: string[] = []
     const looks: Record<string, Record<string, string>>[] = []
     const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
     const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
     for (const [url, sel] of [
       [GALLERY, EL],
-      [frUrl('bfs-levels'), FR],
+      [frUrl(fr.preset), FR],
     ] as const) {
       await open(page, url, width)
       const f = page.locator(sel).first()
       const out: Record<string, Record<string, string>> = {}
       out.frame = await look(f, FRAME)
-      out.lane = await look(f.locator('[data-viz-region="micro"], [data-viz-region="queue"]').first(), PANEL)
+      out.lane = await look(f.locator(`[data-viz-region="micro"], [data-viz-region="${fr.lane}"]`).first(), PANEL)
       // To the first question (the event loop asks at Start; answer it and step once for a code line).
       if ((await f.getAttribute('data-viz-mode')) === 'ask') {
         await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
@@ -185,7 +191,7 @@ for (const width of [375, 1440])
       out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
       out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
       // A wrong pick: the event loop's mid-run answer is its second choice, the frontier's first.
-      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : fr.wrong).click()
       await settle(page)
       out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
       out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
@@ -547,11 +553,14 @@ for (const width of [375, 1440])
       same(`${preset} changed link`, heap.changedLink, await inSvg(at, 'svg [data-edge][data-changed] .vz-e'))
       same(`${preset} changed mark`, heap.changed, await inSvg(at, 'svg .vz-ch'))
     }
-    // Wave 3A: the call tree, the spanning tree and the push forest, each with the parts it draws.
+    // Waves 3A and 4B: the call tree, the spanning tree, the push forest and the residual graphs, each with the parts it draws.
     const W3: Record<string, { node: string; link: string; lit?: string; mark?: string }> = {
       'combination-sum-take-skip': { node: 'svg [data-node]:not([data-end]) .vz-g', link: 'svg [data-edge] .vz-e', mark: 'svg .vz-ch' },
       'water-wells-virtual-source': { node: 'svg [data-node] .vz-g', link: 'svg [data-edge]:not([data-changed]):not([data-well]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e' },
       'k-pairs-lazy-grid': { node: 'svg [data-cell]:not([data-changed]) .vz-g', link: 'svg [data-edge]:not([data-changed]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e', mark: 'svg .vz-ch' },
+      // Wave 4B: the residual graphs (an edge's solid connector, the marked path or cut edges; reverses are dashed).
+      'diamond-reverse-edge': { node: 'svg [data-node] .vz-g', link: 'svg [data-edge]:not([data-changed]):not([data-reverse]) .vz-e', lit: 'svg [data-edge][data-changed]:not([data-reverse]) .vz-e' },
+      'clrs-23-min-cut': { node: 'svg [data-node] .vz-g', link: 'svg [data-edge]:not([data-changed]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e' },
     }
     for (const [preset, q] of Object.entries(W3)) {
       const at = page.locator(`figure[data-viz-preset="${preset}"]`)

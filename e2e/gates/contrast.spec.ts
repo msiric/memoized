@@ -123,7 +123,7 @@ test('print: the light rendering passes', async ({ page }) => {
   test.setTimeout(120_000)
   const problems: string[] = []
   // The frontier: one page per lesson group (graph, grid and tree canvases).
-  const frontier = ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack'].map(frUrl)
+  const frontier = ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack', 'dfs-directed-recstack', 'kahn-indegree'].map(frUrl)
   for (const url of [SPECIMEN, GALLERY, PP, PP_AWAIT, `${GALLERY}?static=1`, ...frontier, llUrl('reverse-between-m2-n4'), llUrl('static'), swUrl('araaci-k2'), swUrl('set-shrink-longest-substring'), dpUrl('knapsack-1d-desc-vs-asc'), dpUrl('knapsack-1d-asc'), atUrl, jsUrl, fxUrl('twoWay-next-arg'), fxUrl('refill-on-settle'), fxUrl('once-consumed-by-nested-emit')]) {
     const skip = urlLocalOnly(url)
     if (skip) {

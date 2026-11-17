@@ -111,6 +111,9 @@ const AT: Record<string, string> = {
   'at-calls': 'figure[data-viz-preset="combination-sum-take-skip"]',
   'at-water': 'figure[data-viz-preset="water-wells-virtual-source"]',
   'at-kpairs': 'figure[data-viz-preset="k-pairs-lazy-grid"]',
+  // Wave 4B: the residual graphs.
+  'at-diamond': 'figure[data-viz-preset="diamond-reverse-edge"]',
+  'at-clrs': 'figure[data-viz-preset="clrs-23-min-cut"]',
 }
 
 /** The wave 3B JavaScript-track figures, static, alone on their page (`?js=static`). */
@@ -254,6 +257,14 @@ const FR_PRESET: Record<string, string> = {
   dijkstra: 'dijkstra-lazy-heap',
   effort: 'min-effort-grid',
   bst: 'bst-iterator-stack',
+  // Wave 4B: Graph DFS and Topological Sort.
+  recstack: 'dfs-directed-recstack',
+  backedge: 'dfs-back-edge',
+  finish: 'dfs-finish-order',
+  kahn: 'kahn-indegree',
+  course: 'course-schedule-ii-edges',
+  stall: 'kahn-cycle-stall',
+  mht: 'mht-leaf-peeling',
 }
 export const frPreset = (name: string) => FR_PRESET[name.split('-')[1]]
 
@@ -500,6 +511,56 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'fr-bst-end': async (page) => {
     await frEnd(page)
   },
+  // Wave 4B, Graph DFS: the visited-but-done question, its reveal after a
+  // wrong pick (A -> C, C solid, off recStack), the false end; the back
+  // edge found on recStack; the finish order mid-run and reversed.
+  'fr-recstack-ask': async (page) => {
+    await frAsk(page)
+  },
+  'fr-recstack-reveal-wrong': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-recstack-end': async (page) => {
+    await frEnd(page, 2)
+  },
+  'fr-backedge-reveal': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-finish-mid': async (page) => {
+    await frStep(page, 7)
+  },
+  'fr-finish-end': async (page) => {
+    await frEnd(page, 2)
+  },
+  // Topological Sort (local-only: its group holds two practice answers):
+  // Start with the seeding question open, badges counting down mid-run,
+  // the end; the course pairs' direction revealed; the stalled cycle; a
+  // peeled layer.
+  'fr-kahn-start': async () => {},
+  'fr-kahn-badges': async (page) => {
+    await frStep(page, 7, 2)
+  },
+  'fr-kahn-end': async (page) => {
+    await frEnd(page, 2)
+  },
+  'fr-course-reveal': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-stall-end': async (page) => {
+    await frEnd(page, 1)
+  },
+  'fr-mht-peel': async (page) => {
+    await frStep(page, 5, 2)
+  },
   // Pointer rewiring (wave 2B): Start, the temporary loop revealed after a
   // wrong pick, the printed list; the palindrome's question, a flip with t
   // saved, and the false preset's end. Then the two static frames.
@@ -627,6 +688,9 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'at-calls': async () => {},
   'at-water': async () => {},
   'at-kpairs': async () => {},
+  // The wave 4B residual graphs: static, at rest only.
+  'at-diamond': async () => {},
+  'at-clrs': async () => {},
   // The wave 3B JavaScript-track figures: static, at rest only.
   'js-proto-lookup': async () => {},
   'js-proto-ctor': async () => {},
@@ -748,6 +812,18 @@ export const MOTION_STATES: Record<string, MotionState> = {
     frame: FR,
     setup: async (page) => {
       await frStep(page, 1)
+      await page.waitForTimeout(900)
+    },
+    act: async (page) => {
+      await page.locator(FR).first().getByRole('button', { name: 'Next' }).click()
+    },
+  },
+  // Graph DFS: a paced call (the vertex joins visited and recStack, two chips enter, Q1).
+  'fr-dfs-call': {
+    url: frUrl('dfs-directed-recstack'),
+    frame: FR,
+    setup: async (page) => {
+      await frStep(page, 2)
       await page.waitForTimeout(900)
     },
     act: async (page) => {

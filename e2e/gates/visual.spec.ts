@@ -121,8 +121,8 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, 'figure[data-viz-preset="identity-alias-rebind-spread"]', 'print-heap-graph-data-types.png')
   await frameShot(page, 'figure[data-viz-preset="spread-vs-nested-vs-deep"]', 'print-heap-graph-objects.png')
-  // The frontier: a graph, a grid and a tree on paper.
-  for (const preset of ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack']) {
+  // The frontier: a graph, a grid and a tree on paper; DFS stack mode and Kahn's badges (wave 4B).
+  for (const preset of ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack', 'dfs-directed-recstack', 'kahn-indegree']) {
     const skip = urlLocalOnly(frUrl(preset))
     if (skip) {
       test.info().annotations.push({ type: 'skipped state', description: `print ${preset}: ${skip}` })
@@ -155,7 +155,7 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   // The annotated trees (waves 2D and 3A), every preset on paper.
   await open(page, atUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
-  for (const preset of ['max-path-gain-vs-through', 'trie-end-markers', 'suffix-tree-banana', 'combination-sum-take-skip', 'water-wells-virtual-source', 'k-pairs-lazy-grid'])
+  for (const preset of ['max-path-gain-vs-through', 'trie-end-markers', 'suffix-tree-banana', 'combination-sum-take-skip', 'water-wells-virtual-source', 'k-pairs-lazy-grid', 'diamond-reverse-edge', 'clrs-23-min-cut'])
     await frameShot(page, `figure[data-viz-preset="${preset}"]`, `print-annotated-tree-${preset}.png`)
   // The wave 3B JavaScript-track figures, every preset on paper.
   await open(page, jsUrl, 768)
