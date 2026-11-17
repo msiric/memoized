@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, jsUrl, lessonUrl, open, settle, swUrl, DP, dpUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, lessonUrl, open, settle, swUrl, DP, dpUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -679,5 +679,59 @@ for (const width of [375, 1440])
       same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
       same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch', true))
     }
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The frames visuals (wave 3C) are step-throughs like the event loop: the
+ * same shell and the shared `Lane`, so the frame, a lane panel and its chip,
+ * the changed mark, the current code line, the question, choices, Skip,
+ * reveal marks and feedback compute as the event loop's do. Local-only (the
+ * frames show practice answers).
+ */
+for (const width of [375, 1440])
+  test(`the frames draw the shell and their lanes like the event loop @${width}`, async ({ page }) => {
+    const url = fxUrl('refill-on-settle')
+    test.skip(urlLocalOnly(url) !== null, urlLocalOnly(url) ?? '')
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
+    // Geometry and type: the fill is the step's (a changed chip takes its lane's tint).
+    const CHIP = ['height', 'border-top-left-radius', 'border-top-width', 'font-family', 'font-size'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [u, sel] of [
+      [GALLERY, EL],
+      [url, fxFrame('worker-pool')],
+    ] as const) {
+      await open(page, u, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out.lane = await look(f.locator('[data-viz-region="stack"], [data-viz-region^="fx-"]').first(), PANEL)
+      out.chip = await look(f.locator('[data-viz-region="stack"] [data-chip], [data-viz-region^="fx-"] [data-chip]').first(), CHIP)
+      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]').first(), ['background-color'])
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      out.anatomy = await anatomy(f)
+      // A wrong pick: the event loop's mid-run answer is its second choice, the pool's first.
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      looks.push(out)
+    }
+    const [a, b] = looks
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frames ${b[what][k]}`)
     expect(diffs).toEqual([])
   })

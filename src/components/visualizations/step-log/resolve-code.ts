@@ -11,7 +11,7 @@
  */
 import { descriptorFor, vizPremiumPresets } from '../registry'
 import type { VizCode } from '../shell/types'
-import { tokenizeLines } from './code-tokens'
+import { rowTokens } from './code-tokens'
 import { contentRoot, loadProgram } from './lesson-block'
 import { displayText } from './lesson-source'
 
@@ -45,7 +45,7 @@ export async function resolveVizCode(id: string, preset?: string, root = content
     // Same widths as the committed placeholders, or the reserve would be wrong.
     const bad = lines.findIndex((l, i) => cols(l) !== cols(log.code!.lines[i]))
     if (bad >= 0) return { kind: 'missing', why: `${presetId}: row ${bad + 1} is not the committed width` }
-    code[presetId] = { lines, tokens: await tokenizeLines(lines, log.code!.lang) }
+    code[presetId] = { lines, tokens: await rowTokens(loaded.text.split('\n'), premium.rows, log.code!.lang) }
   }
   return { kind: 'resolved', code }
 }

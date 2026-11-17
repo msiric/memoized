@@ -48,6 +48,10 @@ const ALL_PAGES = [
   '/dev/visualizations?sw=set-shrink-longest-substring',
   // The dp table (wave 3A): one lesson group, local-only.
   '/dev/visualizations?dp=knapsack-1d-desc-vs-asc',
+  // The frames step-throughs (wave 3C), one page per visual.
+  '/dev/visualizations?fx=twoWay-next-arg',
+  '/dev/visualizations?fx=refill-on-settle',
+  '/dev/visualizations?fx=once-consumed-by-nested-emit',
   // The annotated trees (wave 2D, static).
   '/dev/visualizations?at=static',
   // The wave 3B JavaScript-track figures (static).

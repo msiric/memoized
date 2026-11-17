@@ -1,0 +1,2531 @@
+{
+ "two-way-next-arg": {
+  "sha256": "b32b3ef79172c59587787d4e7875a23694e7bf8f6837b2a7f92ba5787e2597fc",
+  "observed": [
+   "{ value: 'first', done: false }",
+   "got: 10",
+   "{ value: 'second', done: false }",
+   "got: 20",
+   "{ value: undefined, done: true }"
+  ],
+  "pauses": [
+   {
+    "probe": "create",
+    "line": 8,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 8
+     }
+    ],
+    "out": 0,
+    "gens": {}
+   },
+   {
+    "probe": "call",
+    "line": 9,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 9
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "g": {
+      "state": "suspended",
+      "line": 1
+     }
+    }
+   },
+   {
+    "probe": "start",
+    "line": 2,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "twoWay",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 9
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "g": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "call",
+    "line": 10,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 10
+     }
+    ],
+    "out": 1,
+    "gens": {
+     "g": {
+      "state": "suspended",
+      "line": 2
+     }
+    }
+   },
+   {
+    "probe": "got-x",
+    "line": 3,
+    "vars": {
+     "x": 10
+    },
+    "stack": [
+     {
+      "fn": "twoWay",
+      "line": 3
+     },
+     {
+      "fn": "",
+      "line": 10
+     }
+    ],
+    "out": 1,
+    "gens": {
+     "g": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "yield-2",
+    "line": 4,
+    "vars": {
+     "x": 10
+    },
+    "stack": [
+     {
+      "fn": "twoWay",
+      "line": 4
+     },
+     {
+      "fn": "",
+      "line": 10
+     }
+    ],
+    "out": 2,
+    "gens": {
+     "g": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "call",
+    "line": 11,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 11
+     }
+    ],
+    "out": 3,
+    "gens": {
+     "g": {
+      "state": "suspended",
+      "line": 4
+     }
+    }
+   },
+   {
+    "probe": "got-y",
+    "line": 5,
+    "vars": {
+     "x": 10,
+     "y": 20
+    },
+    "stack": [
+     {
+      "fn": "twoWay",
+      "line": 5
+     },
+     {
+      "fn": "",
+      "line": 11
+     }
+    ],
+    "out": 3,
+    "gens": {
+     "g": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "end",
+    "line": 6,
+    "vars": {
+     "x": 10,
+     "y": 20
+    },
+    "stack": [
+     {
+      "fn": "twoWay",
+      "line": 6
+     },
+     {
+      "fn": "",
+      "line": 11
+     }
+    ],
+    "out": 4,
+    "gens": {
+     "g": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 5,
+    "gens": {
+     "g": {
+      "state": "closed"
+     }
+    }
+   }
+  ]
+ },
+ "take-closes-source": {
+  "sha256": "fb33104b93957fef3d1c28687ab52a11efbfafeb0d8002d73ef2e87755c94a40",
+  "observed": [],
+  "pauses": [
+   {
+    "probe": "create",
+    "line": 27,
+    "vars": {
+     "pulled": 0,
+     "closed": 0
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 27
+     }
+    ],
+    "out": 0,
+    "gens": {}
+   },
+   {
+    "probe": "check",
+    "line": 28,
+    "vars": {
+     "pulled": 0,
+     "closed": 0
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 28
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "suspended",
+      "line": 2
+     },
+     "source": {
+      "state": "suspended",
+      "line": 17
+     }
+    }
+   },
+   {
+    "probe": "call",
+    "line": 29,
+    "vars": {
+     "pulled": 0,
+     "closed": 0
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 29
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "suspended",
+      "line": 2
+     },
+     "source": {
+      "state": "suspended",
+      "line": 17
+     }
+    }
+   },
+   {
+    "probe": "take-start",
+    "line": 7,
+    "vars": {
+     "pulled": 0,
+     "closed": 0
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 7
+     },
+     {
+      "fn": "",
+      "line": 29
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "suspended",
+      "line": 17
+     }
+    }
+   },
+   {
+    "probe": "source-pull",
+    "line": 20,
+    "vars": {
+     "pulled": 0,
+     "closed": 0,
+     "count": 0
+    },
+    "stack": [
+     {
+      "fn": "source",
+      "line": 20
+     },
+     {
+      "fn": "take",
+      "line": 8
+     },
+     {
+      "fn": "",
+      "line": 29
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "source-yield",
+    "line": 21,
+    "vars": {
+     "pulled": 1,
+     "closed": 0,
+     "count": 0
+    },
+    "stack": [
+     {
+      "fn": "source",
+      "line": 21
+     },
+     {
+      "fn": "take",
+      "line": 8
+     },
+     {
+      "fn": "",
+      "line": 29
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "take-yield",
+    "line": 9,
+    "vars": {
+     "pulled": 1,
+     "closed": 0,
+     "count": 0,
+     "value": 1
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 9
+     },
+     {
+      "fn": "",
+      "line": 29
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "call",
+    "line": 30,
+    "vars": {
+     "pulled": 1,
+     "closed": 0
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 30
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "suspended",
+      "line": 9
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "take-count",
+    "line": 10,
+    "vars": {
+     "pulled": 1,
+     "closed": 0,
+     "count": 0
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 10
+     },
+     {
+      "fn": "",
+      "line": 30
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "take-check",
+    "line": 11,
+    "vars": {
+     "pulled": 1,
+     "closed": 0,
+     "count": 1
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 11
+     },
+     {
+      "fn": "",
+      "line": 30
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "source-pull",
+    "line": 20,
+    "vars": {
+     "pulled": 1,
+     "closed": 0,
+     "count": 1
+    },
+    "stack": [
+     {
+      "fn": "source",
+      "line": 20
+     },
+     {
+      "fn": "take",
+      "line": 8
+     },
+     {
+      "fn": "",
+      "line": 30
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "source-yield",
+    "line": 21,
+    "vars": {
+     "pulled": 2,
+     "closed": 0,
+     "count": 1
+    },
+    "stack": [
+     {
+      "fn": "source",
+      "line": 21
+     },
+     {
+      "fn": "take",
+      "line": 8
+     },
+     {
+      "fn": "",
+      "line": 30
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "take-yield",
+    "line": 9,
+    "vars": {
+     "pulled": 2,
+     "closed": 0,
+     "count": 1,
+     "value": 2
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 9
+     },
+     {
+      "fn": "",
+      "line": 30
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "check",
+    "line": 31,
+    "vars": {
+     "pulled": 2,
+     "closed": 0
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 31
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "suspended",
+      "line": 9
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "call",
+    "line": 32,
+    "vars": {
+     "pulled": 2,
+     "closed": 0
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "suspended",
+      "line": 9
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "take-count",
+    "line": 10,
+    "vars": {
+     "pulled": 2,
+     "closed": 0,
+     "count": 1
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 10
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "take-check",
+    "line": 11,
+    "vars": {
+     "pulled": 2,
+     "closed": 0,
+     "count": 2
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 11
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "suspended",
+      "line": 21
+     }
+    }
+   },
+   {
+    "probe": "source-finally",
+    "line": 24,
+    "vars": {
+     "pulled": 2,
+     "closed": 0,
+     "count": 2
+    },
+    "stack": [
+     {
+      "fn": "source",
+      "line": 24
+     },
+     {
+      "fn": "take",
+      "line": 8
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "source": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "check",
+    "line": 33,
+    "vars": {
+     "pulled": 2,
+     "closed": 1
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 33
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "closed"
+     },
+     "source": {
+      "state": "closed"
+     }
+    }
+   },
+   {
+    "probe": "check",
+    "line": 34,
+    "vars": {
+     "pulled": 2,
+     "closed": 1
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 34
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "closed"
+     },
+     "source": {
+      "state": "closed"
+     }
+    }
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "closed"
+     },
+     "source": {
+      "state": "closed"
+     }
+    }
+   }
+  ]
+ },
+ "lazy-pipeline-pull": {
+  "sha256": "97d1597f3bb32794e28c1c3881dd30d64c643ab0c5120bc475572770c13a21ed",
+  "observed": [
+   "[ 16n, 26n, 42n ]"
+  ],
+  "pauses": [
+   {
+    "probe": "create",
+    "line": 31,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 31
+     }
+    ],
+    "out": 0,
+    "gens": {}
+   },
+   {
+    "probe": "spread",
+    "line": 32,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "suspended",
+      "line": 12
+     },
+     "filter": {
+      "state": "suspended",
+      "line": 28
+     },
+     "map": {
+      "state": "suspended",
+      "line": 25
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 1
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "0"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "0"
+     },
+     "out": {
+      "$n": "0"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "0"
+     },
+     "pass": false
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "1"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "1"
+     },
+     "out": {
+      "$n": "2"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "2"
+     },
+     "pass": false
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "1"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "1"
+     },
+     "out": {
+      "$n": "2"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "2"
+     },
+     "pass": false
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "2"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "2"
+     },
+     "out": {
+      "$n": "4"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "4"
+     },
+     "pass": false
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "3"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "3"
+     },
+     "out": {
+      "$n": "6"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "6"
+     },
+     "pass": false
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "5"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "5"
+     },
+     "out": {
+      "$n": "10"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "10"
+     },
+     "pass": false
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "8"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "8"
+     },
+     "out": {
+      "$n": "16"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "16"
+     },
+     "pass": true
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-yield",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "16"
+     }
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "take-yield",
+    "line": 19,
+    "vars": {
+     "value": {
+      "$n": "16"
+     },
+     "count": 0
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 19
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "suspended",
+      "line": 29
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "take-check",
+    "line": 21,
+    "vars": {
+     "count": 1
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 21
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "suspended",
+      "line": 29
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "13"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "13"
+     },
+     "out": {
+      "$n": "26"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "26"
+     },
+     "pass": true
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-yield",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "26"
+     }
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "take-yield",
+    "line": 19,
+    "vars": {
+     "value": {
+      "$n": "26"
+     },
+     "count": 1
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 19
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "suspended",
+      "line": 29
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "take-check",
+    "line": 21,
+    "vars": {
+     "count": 2
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 21
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "suspended",
+      "line": 29
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "fib-yield",
+    "line": 5,
+    "vars": {
+     "a": {
+      "$n": "21"
+     }
+    },
+    "stack": [
+     {
+      "fn": "fibonacci",
+      "line": 5
+     },
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "map-call",
+    "line": 26,
+    "vars": {
+     "value": {
+      "$n": "21"
+     },
+     "out": {
+      "$n": "42"
+     }
+    },
+    "stack": [
+     {
+      "fn": "map",
+      "line": 26
+     },
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "running"
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-test",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "42"
+     },
+     "pass": true
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "filter-yield",
+    "line": 29,
+    "vars": {
+     "value": {
+      "$n": "42"
+     }
+    },
+    "stack": [
+     {
+      "fn": "filter",
+      "line": 29
+     },
+     {
+      "fn": "take",
+      "line": 18
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "running"
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "take-yield",
+    "line": 19,
+    "vars": {
+     "value": {
+      "$n": "42"
+     },
+     "count": 2
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 19
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "suspended",
+      "line": 29
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "take-check",
+    "line": 21,
+    "vars": {
+     "count": 3
+    },
+    "stack": [
+     {
+      "fn": "take",
+      "line": 21
+     },
+     {
+      "fn": "",
+      "line": 32
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "take": {
+      "state": "running"
+     },
+     "filter": {
+      "state": "suspended",
+      "line": 29
+     },
+     "map": {
+      "state": "suspended",
+      "line": 26
+     },
+     "fibonacci": {
+      "state": "suspended",
+      "line": 5
+     }
+    }
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 1,
+    "gens": {
+     "take": {
+      "state": "closed"
+     },
+     "filter": {
+      "state": "closed"
+     },
+     "map": {
+      "state": "closed"
+     },
+     "fibonacci": {
+      "state": "closed"
+     }
+    }
+   }
+  ]
+ },
+ "yield-star-forwarding": {
+  "sha256": "bc368e9a4af7a50951b7992034ff046a2028af61af8e9440ac695e08c9fce745",
+  "observed": [
+   "{ value: 'awaiting', done: false }",
+   "{ value: 'got 42', done: true }"
+  ],
+  "pauses": [
+   {
+    "probe": "create",
+    "line": 10,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 10
+     }
+    ],
+    "out": 0,
+    "gens": {}
+   },
+   {
+    "probe": "call",
+    "line": 11,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 11
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "outer": {
+      "state": "suspended",
+      "line": 6
+     }
+    }
+   },
+   {
+    "probe": "outer-start",
+    "line": 7,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "outer",
+      "line": 7
+     },
+     {
+      "fn": "",
+      "line": 11
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "outer": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "inner-start",
+    "line": 2,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "inner",
+      "line": 2
+     },
+     {
+      "fn": "outer",
+      "line": 7
+     },
+     {
+      "fn": "",
+      "line": 11
+     }
+    ],
+    "out": 0,
+    "gens": {
+     "outer": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "call",
+    "line": 12,
+    "vars": {},
+    "stack": [
+     {
+      "fn": "",
+      "line": 12
+     }
+    ],
+    "out": 1,
+    "gens": {
+     "outer": {
+      "state": "suspended",
+      "line": 7
+     }
+    }
+   },
+   {
+    "probe": "inner-return",
+    "line": 3,
+    "vars": {
+     "x": 42
+    },
+    "stack": [
+     {
+      "fn": "inner",
+      "line": 3
+     },
+     {
+      "fn": "outer",
+      "line": 7
+     },
+     {
+      "fn": "",
+      "line": 12
+     }
+    ],
+    "out": 1,
+    "gens": {
+     "outer": {
+      "state": "running"
+     }
+    }
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 2,
+    "gens": {
+     "outer": {
+      "state": "closed"
+     }
+    }
+   }
+  ]
+ }
+}

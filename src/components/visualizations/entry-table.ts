@@ -182,4 +182,54 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'parent-type-change': [770, 542, 826, 1006, 1070],
     },
   ],
+  'generator-frames': [
+    () => import('./engines/frames/generator-frames'),
+    824,
+    678,
+    undefined,
+    {
+      'twoWay-next-arg': [824, 678, 824, 952, 1024],
+      'take-closes-source': [758, 654, 758, 882, 958],
+      'lazy-pipeline-pull': [838, 662, 838, 1018, 1050],
+      'yield-star-forwarding': [810, 678, 810, 978, 1042],
+    },
+    {
+      'twoWay-next-arg': ['twoWay-next-arg', 'take-closes-source', 'lazy-pipeline-pull', 'yield-star-forwarding'],
+      'take-closes-source': ['twoWay-next-arg', 'take-closes-source', 'lazy-pipeline-pull', 'yield-star-forwarding'],
+      'lazy-pipeline-pull': ['twoWay-next-arg', 'take-closes-source', 'lazy-pipeline-pull', 'yield-star-forwarding'],
+      'yield-star-forwarding': ['twoWay-next-arg', 'take-closes-source', 'lazy-pipeline-pull', 'yield-star-forwarding'],
+    },
+  ],
+  'worker-pool': [
+    () => import('./engines/frames/worker-pool'),
+    826,
+    654,
+    undefined,
+    {
+      'refill-on-settle': [826, 654, 826, 1006, 1058],
+      'fixed-batches-contrast': [826, 702, 826, 974, 1026],
+      'failure-stops-claims': [826, 654, 826, 954, 1026],
+    },
+    {
+      'refill-on-settle': ['refill-on-settle', 'failure-stops-claims'],
+      'fixed-batches-contrast': ['refill-on-settle', 'failure-stops-claims'],
+      'failure-stops-claims': ['refill-on-settle', 'failure-stops-claims'],
+    },
+  ],
+  'emit-frames': [
+    () => import('./engines/frames/emit-frames'),
+    850,
+    654,
+    undefined,
+    {
+      'once-consumed-by-nested-emit': [850, 654, 874, 998, 1050],
+      'removed-before-turn': [780, 654, 780, 908, 980],
+      'added-during-emit': [816, 654, 816, 996, 1028],
+    },
+    {
+      'once-consumed-by-nested-emit': ['once-consumed-by-nested-emit', 'removed-before-turn', 'added-during-emit'],
+      'removed-before-turn': ['once-consumed-by-nested-emit', 'removed-before-turn', 'added-during-emit'],
+      'added-during-emit': ['once-consumed-by-nested-emit', 'removed-before-turn', 'added-during-emit'],
+    },
+  ],
 }

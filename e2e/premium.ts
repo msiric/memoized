@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { framesVizFor } from '../src/components/visualizations/engines/frames/gallery'
 import { descriptorFor, vizPremiumPresets } from '../src/components/visualizations/registry'
 
 // `part.block.path` is `content/<track>/...`: under `src/` in the app checkout.
@@ -30,7 +31,7 @@ export function showsAnswer(id: string, preset: string): boolean {
   return d?.form === 'step' && Boolean(d.presets.find((p) => p.id === preset)?.log.code?.premium)
 }
 
-/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring, `?sw=` the sliding window, `?dp=` the dp table), if any. */
+/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring, `?sw=` the sliding window, `?dp=` the dp table, `?fx=` a frames visual), if any. */
 export function galleryFrame(url: string): { id: string; preset: string } | null {
   const q = new URL(url, 'http://gallery').searchParams
   const fr = q.get('fr')
@@ -41,6 +42,9 @@ export function galleryFrame(url: string): { id: string; preset: string } | null
   if (sw) return { id: 'sliding-window', preset: sw }
   const dp = q.get('dp')
   if (dp) return { id: 'dp-table-dependencies', preset: dp }
+  const fx = q.get('fx')
+  const fxId = fx ? framesVizFor(fx) : undefined
+  if (fx && fxId) return { id: fxId, preset: fx }
   return null
 }
 

@@ -32,7 +32,7 @@ function write(rel: string, text: string) {
   fs.writeFileSync(file, text)
 }
 write(MDX, `# Demo\n\n## **Adding**\n\nText.\n\n\`\`\`typescript\nconst ignored = 1\n\`\`\`\n\n<CodeGroup>\n\n\`\`\`javascript\n${LESSON_BLOCK}\n\`\`\`\n\n</CodeGroup>\n`)
-write(JSON_PATH, JSON.stringify({ lessons: [{ id: '/demo', problems: [{ id: 'twice', answer: `Intro.\n\n\`\`\`typescript\n${ANSWER_BLOCK}\n\`\`\`\n` }] }] }))
+write(JSON_PATH, JSON.stringify({ lessons: [{ id: '/demo', problems: [{ id: 'twice', question: 'Starter.\n\n```typescript\nlet a = 1\n```\n\n```typescript\nlet b = 2\n```\n', answer: `Intro.\n\n\`\`\`typescript\n${ANSWER_BLOCK}\n\`\`\`\n\n\`\`\`typescript\nlet second = 2\n\`\`\`\n` }] }] }))
 
 const lessonRef = { path: MDX, heading: '## **Adding**', lang: 'javascript' }
 const answerRef = { path: JSON_PATH, lesson: '/demo', problem: 'twice', lang: 'typescript' }
@@ -41,6 +41,13 @@ describe('readBlock', () => {
   it('reads the first fence of the language after a heading, and a practice answer’s fence', () => {
     expect(readBlock(lessonRef, root)).toBe(LESSON_BLOCK)
     expect(readBlock(answerRef, root)).toBe(ANSWER_BLOCK)
+  })
+
+  it('reads the nth fence of an answer, and a fence of the question (its visible checks)', () => {
+    expect(readBlock({ ...answerRef, nth: 2 }, root)).toBe('let second = 2')
+    expect(readBlock({ ...answerRef, field: 'question' }, root)).toBe('let a = 1')
+    expect(readBlock({ ...answerRef, field: 'question', nth: 2 }, root)).toBe('let b = 2')
+    expect(() => readBlock({ ...answerRef, field: 'question', nth: 3 }, root)).toThrow(/no typescript block/)
   })
 
   it('is null when the file is not in the checkout (CI), and throws when the lesson moved', () => {

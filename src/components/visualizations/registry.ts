@@ -2,6 +2,7 @@ import { annotatedTreeDescriptor } from './engines/annotated-tree/descriptor'
 import { dpTableDescriptor } from './engines/dp-table/descriptor'
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
+import { emitFramesDescriptor, generatorFramesDescriptor, workerPoolDescriptor } from './engines/frames/descriptor'
 import { frontierDescriptor } from './engines/frontier/descriptor'
 import { lanesDescriptor } from './engines/lanes/descriptor'
 import { protoDescriptor } from './engines/heap-graph/proto-descriptor'
@@ -42,6 +43,9 @@ export const VIZ_DESCRIPTORS = {
   'dp-table-dependencies': dpTableDescriptor,
   'prototype-object-graph': protoDescriptor,
   lanes: lanesDescriptor,
+  'generator-frames': generatorFramesDescriptor,
+  'worker-pool': workerPoolDescriptor,
+  'emit-frames': emitFramesDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS

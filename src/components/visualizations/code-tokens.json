@@ -3035,5 +3035,315 @@
     "color": "#E1E4E8"
    }
   ]
+ ],
+ "frames/fixed-batches-contrast": [
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "mapBatches",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "items",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "n",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "fn",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "results ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " []",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "; i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   },
+   {
+    "text": " items.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+=",
+    "color": "#F97583"
+   },
+   {
+    "text": " n) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "batch ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "      items.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "slice",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(i, i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+",
+    "color": "#F97583"
+   },
+   {
+    "text": " n)",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "done ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "= await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Promise",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ".",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "all",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      batch.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "map",
+    "color": "#B392F0"
+   },
+   {
+    "text": "((",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "x",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "j",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "fn",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(x, i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "+",
+    "color": "#F97583"
+   },
+   {
+    "text": " j)))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    results.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "...",
+    "color": "#F97583"
+   },
+   {
+    "text": "done)",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " results",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
  ]
 }

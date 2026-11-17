@@ -2,6 +2,9 @@ import type { ComponentType } from 'react'
 import AnnotatedTreeViz from './engines/annotated-tree'
 import EnvRecordsViz from './engines/env-records'
 import EventLoopViz from './engines/event-loop'
+import EmitFramesViz from './engines/frames/emit-frames'
+import GeneratorFramesViz from './engines/frames/generator-frames'
+import WorkerPoolViz from './engines/frames/worker-pool'
 import FrontierViz from './engines/frontier'
 import LanesViz from './engines/lanes'
 import PrototypeGraphViz from './engines/heap-graph/prototype'
@@ -33,4 +36,7 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'dp-table-dependencies': DpTableViz,
   'prototype-object-graph': PrototypeGraphViz,
   lanes: LanesViz,
+  'generator-frames': GeneratorFramesViz,
+  'worker-pool': WorkerPoolViz,
+  'emit-frames': EmitFramesViz,
 }
