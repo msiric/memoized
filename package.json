@@ -63,6 +63,7 @@
     "viz:maps": "tsx src/scripts/viz-hidden-class-record.ts",
     "viz:lanes": "tsx src/scripts/viz-lanes-record.ts",
     "viz:frames": "tsx src/scripts/viz-frames-record.ts",
+    "viz:traces": "tsx src/scripts/viz-trace-record.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
     "test": "vitest",
     "test:check": "vitest run",

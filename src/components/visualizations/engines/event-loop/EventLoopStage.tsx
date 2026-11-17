@@ -14,6 +14,7 @@ import { useFlip } from '../../shell/flip'
 import { beatDelay, presence, transitionFor } from '../../shell/motion'
 import type { PerVariant, StageProps } from '../../shell/types'
 import { Lane, showCls, type LaneChip } from '../../substrates/Lane'
+import { monoWidth } from '../../substrates/text-metrics'
 import { remHeights, toRem } from '../../substrates/units'
 import {
   G,
@@ -30,6 +31,8 @@ import {
   consoleReveal,
   eventLoopIntrospection,
   outId,
+  revealCount,
+  traceId,
   type ElChip,
   type EventLoopState,
 } from './model'
@@ -152,7 +155,7 @@ export function EventLoopStage({
   useFlip(root, gate, step)
   // The end of the run: every output is part of the answer (D21).
   const resolved = index === log.steps.length - 1
-  const sweep = consoleReveal(state.console.length)
+  const sweep = consoleReveal(revealCount(state))
   const sources = useMemo(() => outputLines(log), [log])
 
   const rows = G.queueRows
@@ -415,7 +418,7 @@ export function EventLoopStage({
                       aria-hidden
                       data-viz-reveal="tag"
                       data-line={source}
-                      className={clsx('col-start-2 h-4', typeScale.meta.cls, ink.muted)}
+                      className={clsx('col-start-2 h-4', typeScale.meta.cls, ink.muted, !metrics.tags.narrow && 'hidden vz-wide:block')}
                       initial={playing ? { opacity: 0 } : false}
                       animate={{ opacity: resolved ? 1 : 0 }}
                       transition={beat}
@@ -446,7 +449,54 @@ export function EventLoopStage({
             </m.li>
           ) : null}
         </ol>
+        {metrics.traceRows ? (
+          // The frames console.trace() printed under its `Trace` output,
+          // innermost first, set right under the strip's reserved rows. They
+          // arrive only with the finale, after the console's own outputs, in
+          // the same sweep (D21); every other render lands them at once.
+          <ol
+            data-viz-part="trace"
+            className="absolute inset-x-2 m-0 flex list-none flex-col p-0 top-[var(--vz-tt-n)] vz-wide:top-[var(--vz-tt-w)]"
+            style={{
+              ['--vz-tt-n' as string]: toRem(traceTop(metrics.consoleRows.narrow, metrics.tags.narrow)),
+              ['--vz-tt-w' as string]: toRem(traceTop(metrics.consoleRows.wide, metrics.tags.wide)),
+              paddingLeft: toRem(Math.ceil(monoWidth('›', G.text)) + G.outMark),
+            }}
+          >
+            {(state.trace ?? []).map((frame, k) => {
+              const playing = gate.reveal && resolved
+              const at = state.console.length + k
+              return (
+                <m.li
+                  key={`${traceId(k)}:${gate.epoch}`}
+                  data-trace={k}
+                  data-viz-reveal="trace"
+                  className={clsx('m-0 flex min-w-0 items-center p-0', typeScale.value.cls)}
+                  style={{ height: toRem(G.traceRow), columnGap: toRem(G.outMark * 2) }}
+                  initial={playing ? { opacity: 0 } : false}
+                  animate={{ opacity: 1 }}
+                  transition={
+                    playing
+                      ? gate.reduce
+                        ? transitionFor('enter', gate)
+                        : { ...transitionFor('enter', gate), delay: (at * sweep.staggerMs) / 1000 }
+                      : { duration: 0 }
+                  }
+                >
+                  <span className={ink.muted}>at</span>
+                  <span className={clsx('min-w-0 truncate', ink.result)}>{frame}</span>
+                </m.li>
+              )
+            })}
+          </ol>
+        ) : null}
       </div>
     </div>
   )
+}
+
+/** Where the trace list starts in the console: border, padding, the label, the strip's rows, the gap. */
+function traceTop(rows: number, tags: boolean): number {
+  const n = Math.max(1, rows)
+  return G.pad + G.label + G.labelGap + n * (tags ? G.outLine : G.outValue) + (n - 1) * G.outRowGap + G.traceGap
 }

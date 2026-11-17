@@ -12,7 +12,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string; el?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -32,6 +32,8 @@ export default function VisualizationGalleryPage({
   if (searchParams.dp) return <DpTableGallery preset={searchParams.dp} mount={searchParams.mount} spacer={searchParams.spacer} />
   // `?fx=<preset>`: a frames step-through alone (wave 3C: generators, mapLimit, reentrant emit), its own lesson's presets.
   if (searchParams.fx) return <FramesGallery preset={searchParams.fx} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?el=<preset>`: an event-loop lesson group alone (wave 4C: Exercise 2, the call-stack traces).
+  if (searchParams.el) return <EventLoopGallery preset={searchParams.el} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
   // Static figures: final server markup, no client JavaScript. `?static=1`
@@ -270,6 +272,26 @@ function FramesGallery({ preset, mount, spacer }: { preset: string; mount?: stri
           </p>
           {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
           <PremiumViz id={id} preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
+/** An event-loop lesson group (wave 4C), between lesson text; the call-stack traces read a practice question. */
+function EventLoopGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Event-loop lesson groups</h1>
+          <p>
+            One runtime event per step. Every output and every printed stack frame is recorded from a real Node run and
+            re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="event-loop" preset={preset} mount={mount} />
           <p>Text after the visual, to show it never moves while stepping.</p>
         </Prose>
       </div>

@@ -69,8 +69,19 @@ export const G = {
   /** A phone shows a listing of up to 5 rows whole; a longer one in a 4-row window that follows the code (Q7, Q15). */
   codeRowsNarrow: 5,
   codeWindowNarrow: 4,
+  /**
+   * A 3-row phone window when the machine under the code is taller than
+   * this (a 3-deep stack, a trace list): the code line, the stage, the
+   * caption and Next still share one 375x667 screen (Q15). The shipped
+   * presets stay under it.
+   */
+  codeWindowTight: 3,
+  tallRest: 280,
   codeRowsMax: 14,
   codeRowsWindow: 12,
+  /** A trace frame's row under the console strip (the value line) and the gap above the list. */
+  traceRow: 20,
+  traceGap: 4,
   /** Most rows a queue or the console may take before collapsing. */
   queueRows: 2,
   consoleRows: 3,
@@ -199,6 +210,14 @@ export type EventLoopMetrics = {
   /** Rows reserved per queue and for the console strip, per variant. */
   queueRows: PerVariant<number>
   consoleRows: PerVariant<number>
+  /** Trace frames reserved under the console strip (0 when the preset never traces). */
+  traceRows: number
+  /**
+   * Whether outputs reserve the finale's source-line tag under them, per
+   * variant. A phone drops it where the strip needs three rows or a trace
+   * list sits under it (the pane still relights each line); from 768 always.
+   */
+  tags: PerVariant<boolean>
   /** Content width each flow is packed into, per variant (for the visible counts). */
   queueWidth: PerVariant<number>
   hostWidth: PerVariant<number>
@@ -268,12 +287,15 @@ export function eventLoopMetrics(
 ): EventLoopMetrics & { layout: EngineLayout } {
   let maxStack = 1
   let maxCols = 1
+  let traceRows = 0
   for (const log of all)
     for (const l of log.code?.lines ?? [])
       maxCols = Math.max(maxCols, [...l].length)
   for (const log of logs)
-    for (const step of log.steps)
+    for (const step of log.steps) {
       maxStack = Math.max(maxStack, step.state.stack.length)
+      traceRows = Math.max(traceRows, step.state.trace?.length ?? 0)
+    }
   const w = widths(maxCols)
   const per = <T>(f: (v: Variant) => T): PerVariant<T> => ({
     narrow: f('narrow'),
@@ -333,20 +355,17 @@ export function eventLoopMetrics(
     narrowRows = Math.max(narrowRows, visualRows(log.code?.lines ?? [], NARROW_CODE_COLS))
     wideRows = Math.max(wideRows, visualRows(log.code?.lines ?? [], wideCols))
   }
-  const codeRows: PerVariant<number> = {
-    narrow: narrowRows <= G.codeRowsNarrow ? narrowRows : G.codeWindowNarrow,
-    wide: wideRows <= G.codeRowsMax ? wideRows : G.codeRowsWindow,
-  }
-  // The host note is a word in the step bar now (Q15), not a band under the code.
-  const code = per((v) => codePaneHeight(codeRows[v]))
   const stackContent = (v: Variant) =>
     maxStack * G.frame[v] + (maxStack - 1) * G.frameGap
   const queueContent = (v: Variant) =>
     rowsHeight(rows[v].queue, G.chip, G.chipGap)
   const hostContent = (v: Variant) =>
     rowsHeight(rows[v].host, G.chip, G.chipGap)
+  // A preset that traces reserves its frames' rows under the strip.
+  const traceH = traceRows ? G.traceGap + traceRows * G.traceRow : 0
+  const tags: PerVariant<boolean> = { narrow: rows.narrow.out < 3 && !traceRows, wide: true }
   const consoleH = per((v) =>
-    laneTop(rowsHeight(rows[v].out, G.outLine, G.outRowGap)),
+    laneTop(rowsHeight(rows[v].out, tags[v] ? G.outLine : G.outValue, G.outRowGap) + traceH),
   )
 
   // Narrow: two grid rows, each as tall as its taller lane.
@@ -355,6 +374,13 @@ export function eventLoopMetrics(
     laneTop(hostContent('narrow'), G.padNarrow),
   )
   const row2 = laneTop(queueContent('narrow'), G.padNarrow)
+  const rest = G.gap + row1 + G.gap + row2 + G.gap + consoleH.narrow
+  const codeRows: PerVariant<number> = {
+    narrow: narrowRows <= G.codeRowsNarrow ? narrowRows : rest > G.tallRest ? G.codeWindowTight : G.codeWindowNarrow,
+    wide: wideRows <= G.codeRowsMax ? wideRows : G.codeRowsWindow,
+  }
+  // The host note is a word in the step bar now (Q15), not a band under the code.
+  const code = per((v) => codePaneHeight(codeRows[v]))
   const narrowStage =
     code.narrow + G.gap + row1 + G.gap + row2 + G.gap + consoleH.narrow
 
@@ -377,6 +403,8 @@ export function eventLoopMetrics(
     console: consoleH,
     queueRows: per((v) => rows[v].queue),
     consoleRows: per((v) => rows[v].out),
+    traceRows,
+    tags,
     queueWidth: w.queueWidth,
     hostWidth: w.hostWidth,
     consoleWidth: w.consoleWidth,

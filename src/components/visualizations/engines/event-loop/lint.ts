@@ -69,6 +69,11 @@ export function lintEventLoopLogs(
             `${at}: ${lane} holds ${state[lane].length} items, more than ${G.queueRows} rows at 320 (it would collapse)`,
           )
       }
+      for (const frame of state.trace ?? []) {
+        const w = Math.ceil(outWidth(`at ${frame}`))
+        if (w > m.consoleWidth.narrow)
+          once(`${log.id}: trace frame "${frame}" is ${w}px > ${m.consoleWidth.narrow}px at 320 (it would truncate)`)
+      }
       for (const out of state.console) {
         const w = outWidth(out)
         if (w > m.consoleWidth.narrow)

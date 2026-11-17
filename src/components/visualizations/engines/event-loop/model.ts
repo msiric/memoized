@@ -15,11 +15,24 @@ export type EventLoopState = {
   micro: readonly ElChip[]
   tasks: readonly ElChip[]
   console: readonly string[]
+  /**
+   * The frames the last `console.trace()` printed under its `Trace` output,
+   * innermost first, as Node names them (the context-and-call-stack
+   * presets). Absent in every other preset.
+   */
+  trace?: readonly string[]
 }
 
 export const REGIONS = ['stack', 'host', 'micro', 'tasks', 'console'] as const
 
 export const outId = (k: number) => `out-${k}`
+export const traceId = (k: number) => `trace-${k}`
+
+/** What the run printed so far, as the state shows it: the console, then the trace's frames. */
+export const printed = (state: EventLoopState): readonly string[] => [...state.console, ...(state.trace ?? [])]
+
+/** Outputs the finale plays back: every console output, then every trace frame. */
+export const revealCount = (state: EventLoopState) => state.console.length + (state.trace?.length ?? 0)
 
 export const eventLoopIntrospection: StateIntrospection<EventLoopState> = {
   ids(state) {
@@ -27,9 +40,10 @@ export const eventLoopIntrospection: StateIntrospection<EventLoopState> = {
     for (const lane of [state.stack, state.host, state.micro, state.tasks])
       for (const c of lane) ids.add(c.id)
     state.console.forEach((_, k) => ids.add(outId(k)))
+    state.trace?.forEach((_, k) => ids.add(traceId(k)))
     return ids
   },
-  observedLog: (state) => state.console,
+  observedLog: printed,
   region(state, id) {
     for (const lane of ['stack', 'host', 'micro', 'tasks'] as const)
       if (state[lane].some((c) => c.id === id)) return lane
@@ -48,6 +62,7 @@ export function describeEventLoop(state: EventLoopState): string {
     `Microtasks: ${names(state.micro)}.`,
     `Tasks: ${names(state.tasks)}.`,
     `Console: ${state.console.length ? state.console.join(', ') : 'empty'}.`,
+    ...(state.trace?.length ? [`Stack trace: ${state.trace.join(', ')}.`] : []),
   ].join(' ')
 }
 
