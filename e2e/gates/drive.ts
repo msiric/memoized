@@ -125,6 +125,16 @@ export const JS: Record<string, string> = {
   'js-types': 'figure[data-viz-preset="union-vs-intersection"]',
 }
 
+/** The wave 4A DSA-track figures, static, alone on their page (`?dsa=static`). */
+export const dsaUrl = `${GALLERY}?dsa=static`
+export const DSA: Record<string, string> = {
+  'dsa-segment': 'figure[data-viz-preset="segment-tree-query-cover"]',
+  'dsa-forest': 'figure[data-viz-preset="dsu-parent-forest"]',
+  'dsa-heap': 'figure[data-viz-preset="insert-4-10-3-5-1-then-extract"]',
+  'dsa-fib': 'figure[data-viz-preset="fib5"]',
+  'dsa-lps': 'figure[data-viz-preset="lps-interval-triangle"]',
+}
+
 /** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
 async function llWalk(page: Page, done: (f: Locator) => Promise<boolean>) {
   const f = page.locator(LL).first()
@@ -287,6 +297,7 @@ export function stateUrl(name: string): string {
   if (name.startsWith('llf-')) return llUrl('static')
   if (name.startsWith('at-')) return atUrl
   if (name.startsWith('js-')) return jsUrl
+  if (name.startsWith('dsa-')) return dsaUrl
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (DP_STATES[name]) return dpUrl(DP_STATES[name])
@@ -303,6 +314,7 @@ export function stateFrame(name: string): string {
   if (LLF[name]) return LLF[name]
   if (AT[name]) return AT[name]
   if (JS[name]) return JS[name]
+  if (DSA[name]) return DSA[name]
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
   if (DP_STATES[name]) return DP
@@ -635,6 +647,12 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'js-dispatch': async () => {},
   'js-pkce': async () => {},
   'js-types': async () => {},
+  // The wave 4A DSA-track figures: static, at rest only.
+  'dsa-segment': async () => {},
+  'dsa-forest': async () => {},
+  'dsa-heap': async () => {},
+  'dsa-fib': async () => {},
+  'dsa-lps': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()

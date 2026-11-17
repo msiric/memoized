@@ -37,6 +37,8 @@ const routes = [
   '/dev/visualizations?at=static',
   // The wave 3B JavaScript-track figures (static).
   '/dev/visualizations?js=static',
+  // The wave 4A DSA-track figures (static).
+  '/dev/visualizations?dsa=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

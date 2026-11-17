@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, atUrl, dpUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, atUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -161,4 +161,8 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await open(page, jsUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   for (const [state, frame] of Object.entries(JS)) await frameShot(page, frame, `print-${state}.png`)
+  // The wave 4A DSA-track figures, every preset on paper.
+  await open(page, dsaUrl, 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  for (const [state, frame] of Object.entries(DSA)) await frameShot(page, frame, `print-${state}.png`)
 })
