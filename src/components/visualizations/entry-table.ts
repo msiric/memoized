@@ -115,7 +115,7 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'k-pairs-lazy-grid': [1052, 734, 734],
       'hidden-class-transitions': [1174, 810, 810],
       'diamond-reverse-edge': [1010, 690, 690],
-      'clrs-23-min-cut': [522, 470, 470],
+      'clrs-23-min-cut': [546, 478, 478],
     },
   ],
   'prototype-object-graph': [

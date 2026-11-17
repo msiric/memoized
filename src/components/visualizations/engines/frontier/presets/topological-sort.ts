@@ -126,7 +126,8 @@ function kahnLog(o: KahnOpts): StepLog<FrontierState> {
     event: `Seed the queue: ${seedQ.join(', ')}`,
     why: `The loop pushes every vertex at in-degree 0 in index order, so ${seedQ[0]} is at the head${seedQ.length > 1 ? ` before ${list(seedQ.slice(1).map(String))}` : ''}.`,
     narration: `The queue holds ${list(seedQ.map(String))}.`,
-    line: lines(P, ...at.seed),
+    // The push alone: the seeding loop's rows would not fit the phone's code window.
+    line: line(P, at.seed[1]),
     focus: seedQ.slice(0, 2).map((v) => qChip(v).id),
     claim: 'modelled',
   })
@@ -360,7 +361,7 @@ function mhtLog(): StepLog<FrontierState> {
     event: `Seed q with the leaves: ${q0.join(', ')}`,
     why: `Only vertices of degree 1 go in, so q holds the outermost layer: ${list(q0.map(String))}.`,
     narration: `q holds ${list(q0.map(String))}.`,
-    line: lines(P, 14, 16),
+    line: line(P, 16),
     focus: q0.slice(0, 2).map((v) => k(v).id),
     claim: 'modelled',
   })

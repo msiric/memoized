@@ -255,7 +255,7 @@ export const FLOW = {
   r: 14,
   /** Margin left and right of the outer nodes' centres (room for a label beside an edge). */
   margin: 30,
-  pitchY: { narrow: 48, wide: 56 },
+  pitchY: { narrow: 48, wide: 60 },
   top: 10,
   bottom: 10,
   /** A line's offset from the centre line when the panel draws reverses (the forward edge right of its travel, the reverse left). */
@@ -320,8 +320,9 @@ function offsetLine(a: Point, b: Point, off: number): FlowLine {
   return {
     x1,
     y1,
-    x2: tip.x - ux * (ARROW_HEAD.length - 1),
-    y2: tip.y - uy * (ARROW_HEAD.length - 1),
+    // The line runs on under the head to 2 px short of its tip, so it meets the target however the drawing scales.
+    x2: tip.x - ux * 2,
+    y2: tip.y - uy * 2,
     head: head(tip, ux, uy),
   }
 }
@@ -423,7 +424,8 @@ export function layoutResidual(
   noteLines = p.notes.length,
 ): FlowGeometry {
   const width = p.wide && variant === 'wide' ? W_WIDE : W
-  const pitchY = FLOW.pitchY[p.wide && variant === 'wide' ? 'wide' : 'narrow']
+  // A panel with a wide drawing has six vertices and more labels: it keeps the taller pitch at both widths.
+  const pitchY = FLOW.pitchY[p.wide ? 'wide' : 'narrow']
   const xs = p.nodes.map((n) => n.at[0])
   const ys = p.nodes.map((n) => n.at[1])
   const [minX, maxX, minY, maxY] = [
