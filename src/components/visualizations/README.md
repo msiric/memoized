@@ -535,6 +535,48 @@ answer with the inner loop counting up).
   `e2e/stress/dp-table.stress.ts`, the `dp-*` gate states (gallery
   `?dp=<preset>`, local-only baselines) and the consistency check against
   the sliding window's glyphs. Both presets are local-only.
+### JavaScript-track figures (wave 3B)
+
+Seven static figures, three systems, every value recorded:
+
+- **Prototype object graph** (`<Viz id="prototype-object-graph">`, R4
+  shared visual 3; Prototypes: `lookup-and-shadowing`, `constructor-fix`).
+  The heap graph's boxes and rows in a chain arrangement
+  (`engines/heap-graph/proto-*.ts`, `ProtoStage.tsx`): the [[Prototype]]
+  spine down the left (plain vertical links, no dot, down to `null`), each
+  constructor function a pill beside the object its `.prototype` names, the
+  `.prototype` arrow solid and hooked over the pill, `.constructor` dashed
+  and straight across. The one mark is a lookup: the links it followed and
+  the row that answered. `yarn viz:prototypes` reads each graph in the
+  paused frame of a real run (the annotated-tree recorder): own keys and
+  values, [[Prototype]] identities, and the objects each lookup visited.
+- **Hidden-class trees** (`<Viz id="annotated-tree" preset="hidden-class-transitions">`,
+  Engine and Runtime), the annotated tree's `shapes` panel kind
+  (`engines/annotated-tree/shapes.ts`): V8 maps are not visible to plain
+  JavaScript, so `yarn viz:maps` runs the lesson code under
+  `node --allow-natives-syntax` and the inspector, prints each object's map
+  with `%DebugPrint` at every probe (its map, its own keys, the map's back
+  pointer) and reads `%HaveSameMap` at the end
+  (`truth/record-maps.ts`). Nodes are maps joined by back pointers; a map
+  seen only as a back pointer is drawn dashed and said in words.
+- **Lanes** (`<Viz id="lanes">`, `engines/lanes/`), a new static substrate
+  for orders and places, four panel kinds packed into rows per variant
+  (`pack`: a compact panel sits beside another where the stage allows):
+  `timeline` (Performance Optimization: the lesson's debounce and
+  throttle on a controlled clock), `dispatch` (Event Handling: a trusted
+  click in Chromium through Playwright, plus two `stopPropagation()`
+  variants; badges ride their lane), `sequence` (Frontend Security: the
+  answer's OAuth routes against a local token endpoint that checks
+  S256(code_verifier); messages are links between lifelines, which break
+  behind labels) and `sets` (Advanced Types: `tsc --strict` on the
+  register's panel code; overlapping sets are regions, not boxes).
+  `yarn viz:lanes` records all four.
+- **Gates.** `prototype.truth.test.ts`, `hidden-classes.truth.test.ts`,
+  `lanes.truth.test.ts` (fresh runs with a checkout; everywhere the
+  register's assertions and lies that must fail),
+  `e2e/viz-js-statics.spec.ts`, `e2e/stress/js-statics.stress.ts`, the
+  `js-*` gate states and print baselines, and the heap-graph consistency
+  check. Gallery: `?js=static`.
 
 ### Premium code (owner policy, wave 2)
 

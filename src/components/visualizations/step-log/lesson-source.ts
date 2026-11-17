@@ -13,12 +13,14 @@
 /**
  * A code block in the content repo, by locator:
  * - a lesson's fence: the first (or `nth`) ```lang fence after the line `heading`;
- * - a practice answer: the first ```lang fence of problem `problem` in
- *   lesson `lesson` (its `id`, e.g. `/trees`) of a `_lessons.json`.
+ * - a practice answer: the first (or `nth`) ```lang fence of problem
+ *   `problem` in lesson `lesson` (its `id`, e.g. `/trees`) of a
+ *   `_lessons.json`; `field: 'question'` reads the problem's question (its
+ *   starter and visible checks) instead of its answer. Both are premium text.
  */
 export type BlockRef =
   | { path: string; heading: string; lang: string; nth?: number }
-  | { path: string; lesson: string; problem: string; lang: string }
+  | { path: string; lesson: string; problem: string; lang: string; nth?: number; field?: 'question' }
 
 /**
  * One part of a program as run, in order, joined with newlines:
@@ -72,7 +74,9 @@ export const isAnswerSource = (s: ProgramSource): boolean => s.some((p) => 'bloc
 
 /** A short human label for a locator (provenance, skip messages). */
 export function refLabel(b: BlockRef): string {
-  return isAnswerRef(b) ? `${b.path} ${b.lesson} > ${b.problem} (answer, ${b.lang})` : `${b.path} ${b.heading} (${b.lang}${b.nth ? ` #${b.nth}` : ''})`
+  return isAnswerRef(b)
+    ? `${b.path} ${b.lesson} > ${b.problem} (${b.field ?? 'answer'}, ${b.lang}${b.nth ? ` #${b.nth}` : ''})`
+    : `${b.path} ${b.heading} (${b.lang}${b.nth ? ` #${b.nth}` : ''})`
 }
 
 /**

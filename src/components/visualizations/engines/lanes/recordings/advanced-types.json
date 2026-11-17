@@ -1,0 +1,51 @@
+{
+ "generator": "node-lanes@1",
+ "tsc": "5.9.2",
+ "sha256": "7c9cac102acfc16a97c06487b3743d597703b03f1bf82664d8e2fa2475e5c9bd",
+ "cases": {
+  "union-a": [],
+  "union-both": [],
+  "union-b": [],
+  "inter-a": [
+   {
+    "code": 2322,
+    "line": 3,
+    "message": "Type '{ a: string; shared: number; }' is not assignable to type 'A & B'.   Property 'b' is missing in type '{ a: string; shared: number; }' but required in type 'B'."
+   }
+  ],
+  "inter-both": [],
+  "inter-b": [
+   {
+    "code": 2322,
+    "line": 3,
+    "message": "Type '{ b: string; shared: number; }' is not assignable to type 'A & B'.   Property 'a' is missing in type '{ b: string; shared: number; }' but required in type 'A'."
+   }
+  ],
+  "union-shared": [],
+  "union-a-read": [
+   {
+    "code": 2339,
+    "line": 4,
+    "message": "Property 'a' does not exist on type 'A | B'.   Property 'a' does not exist on type 'B'."
+   }
+  ],
+  "union-b-read": [
+   {
+    "code": 2339,
+    "line": 4,
+    "message": "Property 'b' does not exist on type 'A | B'.   Property 'b' does not exist on type 'A'."
+   }
+  ],
+  "inter-reads": [],
+  "never-kind": [],
+  "never-prims": [],
+  "never-kind-false": [
+   {
+    "code": 2322,
+    "line": 2,
+    "message": "Type 'false' is not assignable to type 'true'."
+   }
+  ],
+  "never-x": []
+ }
+}

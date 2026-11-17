@@ -31,6 +31,8 @@ const routes = [
   '/dev/visualizations?dp=knapsack-1d-desc-vs-asc',
   // The annotated trees (wave 2D).
   '/dev/visualizations?at=static',
+  // The wave 3B JavaScript-track figures (static).
+  '/dev/visualizations?js=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

@@ -11,7 +11,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -79,6 +79,22 @@ export default function VisualizationGalleryPage({
             <p>Snapshots of recorded pointer states, drawn on the server as SVG.</p>
             {searchParams.mount === 'client' ? <ClientOnly>{frames}</ClientOnly> : frames}
             <p>Text after the static frames.</p>
+          </Prose>
+        </div>
+      </div>
+    )
+  }
+  // `?js=static`: the wave 3B JavaScript-track figures alone.
+  if (searchParams.js === 'static') {
+    const figures = <JsStatics />
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>JavaScript track figures</h1>
+            <p>Static figures for the JavaScript track, drawn on the server as SVG from recorded runs.</p>
+            {searchParams.mount === 'client' ? <ClientOnly>{figures}</ClientOnly> : figures}
+            <p>Text after the JavaScript track figures.</p>
           </Prose>
         </div>
       </div>
@@ -253,4 +269,25 @@ async function PremiumViz({ id, preset, mount }: { id: string; preset: string; m
     )
   const viz = <Viz id={id} preset={preset} code={r.kind === 'resolved' ? r.code : undefined} />
   return mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz
+}
+
+/** The wave 3B figures, one after another (`?js=static`). */
+function JsStatics() {
+  return (
+    <>
+      <Viz id="prototype-object-graph" preset="lookup-and-shadowing" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="prototype-object-graph" preset="constructor-fix" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="annotated-tree" preset="hidden-class-transitions" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="debounce-vs-throttle" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="event-dispatch-path" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="oauth-pkce-channels" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="union-vs-intersection" />
+    </>
+  )
 }

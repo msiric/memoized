@@ -19,7 +19,8 @@ import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
 const URL_ = '/dev/visualizations?at=static'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
 const FOOTPRINT = VIZ_TABLE['annotated-tree'][3]!
-const PRESETS = annotatedTreeDescriptor.presets.map((p) => p.id)
+// The hidden-class trees (wave 3B) are on the JavaScript-track page (`viz-js-statics.spec.ts`).
+const PRESETS = annotatedTreeDescriptor.presets.map((p) => p.id).filter((id) => id !== 'hidden-class-transitions')
 const tierOf = (width: number) => (width < 768 ? 0 : width < 1280 ? 1 : 2)
 const figure = (page: Page, preset: string) => page.locator(`figure[data-viz-preset="${preset}"]`)
 

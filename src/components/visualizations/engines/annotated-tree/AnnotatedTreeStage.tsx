@@ -13,12 +13,14 @@ import {
   SUFFIX,
   TRIE,
   layoutGain,
+  layoutShapes,
   layoutSuffix,
   layoutTree,
   layoutTrie,
   type Label,
 } from './layout'
 import type { GainPanel, SuffixPanel, TreeData, TriePanel } from './model'
+import { shapeLabel, type ShapesPanel } from './shapes'
 
 /**
  * The annotated-tree stage: server markup only (no state, no script), in
@@ -322,6 +324,69 @@ function SuffixSvg({ p, variant, className }: { p: SuffixPanel; variant: 'narrow
   )
 }
 
+// ---------------------------------------------------------------------------
+
+function ShapesSvg({ p }: { p: ShapesPanel }) {
+  const g = layoutShapes(p)
+  return (
+    <Svg width={g.width} height={g.height} id={p.id} heading={p.heading}>
+      {g.edges.map((e) => {
+        const ghost = p.nodes.find((n) => n.id === e.to)!.inferred
+        return (
+          <g key={e.to} data-edge={`${e.from}-${e.to}`} data-from={e.from} data-to={e.to}>
+            <path d={`M${r1(e.x1)} ${r1(e.y1)}L${r1(e.x2)} ${r1(e.y2)}`} className={clsx('vz-e', ghost && 'vz-d')} />
+          </g>
+        )
+      })}
+      {g.edges.map((e) => (
+        <EdgeLabel key={e.to} label={e.label} part="added-key" />
+      ))}
+      {p.nodes.map((n) => {
+        const b = g.boxes[n.id]
+        return (
+          <g key={n.id} data-node={n.id} data-keys={n.keys.join(',')} data-inferred={n.inferred ? '' : undefined}>
+            <rect
+              x={px(b.x)}
+              y={px(b.y)}
+              width={Math.round(b.w) - 1}
+              height={b.h - 1}
+              rx={radius.chip.px}
+              className={n.inferred ? 'vz-l vz-d' : 'vz-g'}
+              fill={n.inferred ? 'none' : undefined}
+              strokeWidth={strokeWidth.outline}
+            />
+            <text x={b.cx} y={r1(b.y + b.h / 2 + 4.5)} className={clsx('vz-c', n.inferred && 'vz-m')}>
+              {shapeLabel(n.keys)}
+            </text>
+            {n.objects.length ? (
+              <text x={b.cx} y={r1(b.y + b.h + 14)} className="vz-c vz-u" data-viz-part="objects">
+                {n.objects.join(', ')}
+              </text>
+            ) : null}
+          </g>
+        )
+      })}
+      <g data-viz-part="results">
+        {p.results.map((r, i) => {
+          const y = r1(g.resultsTop + i * SIZE.line + 12)
+          const call = `${r.expr} → `
+          return (
+            <g key={i}>
+              <text x={0} y={y} className="vz-u">
+                {call}
+              </text>
+              <text x={r1(monoWidth(call, SIZE.small))} y={y} className="vz-r vz-12" data-viz-part="result">
+                {r.value}
+              </text>
+            </g>
+          )
+        })}
+      </g>
+      <Notes top={g.resultsTop + p.results.length * SIZE.line} lines={p.notes} />
+    </Svg>
+  )
+}
+
 export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
   const scene = layoutTree(data)
   return (
@@ -343,6 +408,7 @@ export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
           ) : null}
           {p.kind === 'graph' ? <GraphSvg p={p} /> : null}
           {p.kind === 'grid' ? <GridSvg p={p} /> : null}
+          {p.kind === 'shapes' ? <ShapesSvg p={p} /> : null}
           {p.kind === 'suffix' ? (
             <>
               <SuffixSvg p={p} variant="narrow" className="block vz-wide:hidden" />

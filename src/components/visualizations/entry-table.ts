@@ -102,7 +102,20 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'combination-sum-take-skip': [803, 735, 735],
       'water-wells-virtual-source': [648, 422, 422],
       'k-pairs-lazy-grid': [1052, 734, 734],
+      'hidden-class-transitions': [1174, 810, 810],
     },
+  ],
+  'prototype-object-graph': [
+    () => import('./engines/heap-graph/prototype'),
+    1118,
+    618,
+    { 'lookup-and-shadowing': [1118, 618, 618], 'constructor-fix': [1234, 654, 654] },
+  ],
+  lanes: [
+    () => import('./engines/lanes'),
+    554,
+    454,
+    { 'debounce-vs-throttle': [554, 454, 454], 'event-dispatch-path': [962, 616, 616], 'oauth-pkce-channels': [886, 684, 684], 'union-vs-intersection': [880, 598, 598] },
   ],
   'linked-list-pointer-rewiring': [
     () => import('./engines/linked-list'),

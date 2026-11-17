@@ -50,6 +50,8 @@ const ALL_PAGES = [
   '/dev/visualizations?dp=knapsack-1d-desc-vs-asc',
   // The annotated trees (wave 2D, static).
   '/dev/visualizations?at=static',
+  // The wave 3B JavaScript-track figures (static).
+  '/dev/visualizations?js=static',
 ]
 /** A practice-answer frame is local-only: checked only where the content checkout has it (never CI). */
 const PAGES = ALL_PAGES.filter((u) => !urlLocalOnly(u))

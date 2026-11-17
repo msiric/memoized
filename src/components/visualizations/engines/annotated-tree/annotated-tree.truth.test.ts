@@ -4,7 +4,7 @@ import { loadProgram, skipNote } from '../../step-log/lesson-block'
 import { gainPanel, suffixPanel, trieDeletePanels, trieNodes, trieSearchPanel, type RecordedSuffixNode, type RecordedTrie } from './build'
 import { annotatedTreeDescriptor } from './descriptor'
 import type { GainPanel, SuffixPanel, TriePanel } from './model'
-import { RECORDINGS, maxPathData, maxPathGainVsThrough, suffixData, suffixTreeBanana, trieData, trieEndMarkers, type TreeRecordings } from './presets'
+import { RECORDINGS, hiddenClassTransitions, maxPathData, maxPathGainVsThrough, suffixData, suffixTreeBanana, trieData, trieEndMarkers, type TreeRecordings } from './presets'
 import { SINGLES_RECORDINGS } from './presets/singles'
 import { TREE_LESSONS } from './programs'
 import { suffixArrayProgram, suffixTreeProgram } from './programs/suffix'
@@ -55,7 +55,8 @@ describe('annotated-tree recordings', () => {
     expect(maxPathData(rec)).toEqual(maxPathGainVsThrough.data)
     expect(trieData(rec)).toEqual(trieEndMarkers.data)
     expect(suffixData(rec)).toEqual(suffixTreeBanana.data)
-    for (const preset of annotatedTreeDescriptor.presets)
+    // The hidden-class preset has its own recorder and test (`hidden-classes.truth.test.ts`).
+    for (const preset of annotatedTreeDescriptor.presets.filter((p) => p !== hiddenClassTransitions))
       for (const prog of preset.programs) {
         expect(prog.sha256).toBe(rec[prog.id].sha256)
         expect(prog.observed).toEqual(rec[prog.id].stdout)
