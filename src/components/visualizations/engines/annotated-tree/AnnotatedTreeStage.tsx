@@ -6,6 +6,7 @@ import { routePath } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
 import { toRem } from '../../substrates/units'
 import { HEAD_LEGEND, MARK_EDGE, Notes, Svg, px, r1 } from './parts'
+import { FlowSvg } from './FlowSvg'
 import { CallsSvg, GraphSvg, GridSvg } from './SinglesSvgs'
 import {
   LABEL_LINE,
@@ -409,6 +410,16 @@ export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
           {p.kind === 'graph' ? <GraphSvg p={p} /> : null}
           {p.kind === 'grid' ? <GridSvg p={p} /> : null}
           {p.kind === 'shapes' ? <ShapesSvg p={p} /> : null}
+          {p.kind === 'residual' ? (
+            p.wide ? (
+              <>
+                <FlowSvg p={p} variant="narrow" legend={scene.flowLegend} notes={scene.flowNotes} className="block vz-wide:hidden" />
+                <FlowSvg p={p} variant="wide" legend={scene.flowLegend} notes={scene.flowNotes} className="hidden vz-wide:block" />
+              </>
+            ) : (
+              <FlowSvg p={p} variant="narrow" legend={scene.flowLegend} notes={scene.flowNotes} />
+            )
+          ) : null}
           {p.kind === 'suffix' ? (
             <>
               <SuffixSvg p={p} variant="narrow" className="block vz-wide:hidden" />

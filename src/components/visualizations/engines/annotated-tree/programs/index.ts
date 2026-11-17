@@ -1,4 +1,5 @@
 import { combinationSumProgram } from './backtracking'
+import { ekClrsProgram, ekDiamondProgram, ffDiamondNetworkProgram, ffDiamondProgram, ffSabtProgram } from './flow'
 import { kPairsProgram } from './k-way-merge'
 import { waterAllFiveProgram, waterProgram } from './minimum-spanning-trees'
 import { suffixArrayProgram, suffixTreeProgram } from './suffix'
@@ -14,4 +15,7 @@ export const TREE_LESSONS: Record<string, readonly TreeProgram[]> = {
   backtracking: [combinationSumProgram],
   'minimum-spanning-trees': [waterProgram, waterAllFiveProgram],
   'k-way-merge': [kPairsProgram],
+  // Wave 4B: the residual-graph figures.
+  'maximum-flow': [ffDiamondProgram, ffSabtProgram, ekDiamondProgram],
+  'network-flow-algorithms': [ffDiamondNetworkProgram, ekClrsProgram],
 }
