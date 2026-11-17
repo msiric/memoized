@@ -10,19 +10,24 @@
 import fs from 'fs'
 import path from 'path'
 import { recordTree } from '../components/visualizations/engines/annotated-tree/truth/record'
-import { PROTOTYPE_PROGRAMS } from '../components/visualizations/engines/heap-graph/proto-programs'
+import { CLASS_PROGRAMS, PROTOTYPE_PROGRAMS } from '../components/visualizations/engines/heap-graph/proto-programs'
 import { loadProgram, skipNote } from '../components/visualizations/step-log/lesson-block'
 
-const FILE = path.join('src', 'components', 'visualizations', 'engines', 'heap-graph', 'recordings', 'prototypes.json')
-const out: Record<string, unknown> = {}
-for (const p of PROTOTYPE_PROGRAMS) {
-  const loaded = loadProgram(p.source)
-  if (!loaded.ok) {
-    console.warn(`prototypes: skipped, ${skipNote(loaded.missing)}`)
-    process.exit(0)
+const DIR = path.join('src', 'components', 'visualizations', 'engines', 'heap-graph', 'recordings')
+// prototypes.json: the Prototypes lesson; classes.json: Objects and Classes (wave 4C).
+for (const [name, programs] of [['prototypes', PROTOTYPE_PROGRAMS], ['classes', CLASS_PROGRAMS]] as const) {
+  const out: Record<string, unknown> = {}
+  let skipped = false
+  for (const p of programs) {
+    const loaded = loadProgram(p.source)
+    if (!loaded.ok) {
+      console.warn(`${name}: skipped, ${skipNote(loaded.missing)}`)
+      skipped = true
+      break
+    }
+    const { runtime, ...rec } = recordTree(p, loaded.text)
+    out[p.id] = rec
+    console.log(`${p.id}: printed ${JSON.stringify(rec.stdout)} on ${runtime}`)
   }
-  const { runtime, ...rec } = recordTree(p, loaded.text)
-  out[p.id] = rec
-  console.log(`${p.id}: printed ${JSON.stringify(rec.stdout)} on ${runtime}`)
+  if (!skipped) fs.writeFileSync(path.join(DIR, `${name}.json`), `${JSON.stringify(out, null, 1)}\n`)
 }
-fs.writeFileSync(FILE, `${JSON.stringify(out, null, 1)}\n`)

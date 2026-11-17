@@ -12,7 +12,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string; el?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string; el?: string; core?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -84,6 +84,22 @@ export default function VisualizationGalleryPage({
             <p>Snapshots of recorded pointer states, drawn on the server as SVG.</p>
             {searchParams.mount === 'client' ? <ClientOnly>{frames}</ClientOnly> : frames}
             <p>Text after the static frames.</p>
+          </Prose>
+        </div>
+      </div>
+    )
+  }
+  // `?core=static`: the wave 4C JavaScript core figures alone (memory and classes).
+  if (searchParams.core === 'static') {
+    const figures = <CoreStatics />
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>JavaScript core figures</h1>
+            <p>Reachability and class chains, drawn on the server as SVG from recorded runs.</p>
+            {searchParams.mount === 'client' ? <ClientOnly>{figures}</ClientOnly> : figures}
+            <p>Text after the JavaScript core figures.</p>
           </Prose>
         </div>
       </div>
@@ -319,6 +335,19 @@ async function PremiumViz({ id, preset, mount }: { id: string; preset: string; m
 }
 
 /** The wave 3B figures, one after another (`?js=static`). */
+/** The wave 4C figures, one after another (`?core=static`). */
+function CoreStatics() {
+  return (
+    <>
+      <Viz id="heap-graph" preset="gc-reachability-cycle-and-weak-edge" />
+      <p>Between the JavaScript core figures.</p>
+      <Viz id="heap-graph" preset="retainer-paths" />
+      <p>Between the JavaScript core figures.</p>
+      <Viz id="prototype-object-graph" preset="extends-two-chains" />
+    </>
+  )
+}
+
 function JsStatics() {
   return (
     <>

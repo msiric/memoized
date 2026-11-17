@@ -1,5 +1,5 @@
 import { StaticFigure } from '../../shell/StaticFigure'
-import type { StaticDefinition, VizStaticProps } from '../../shell/static-types'
+import type { AnyProgram, StaticDefinition, VizStaticProps } from '../../shell/static-types'
 import { heapGraphDescriptor, heapGraphEngineCore } from './descriptor'
 import { HeapGraphStage } from './HeapGraphStage'
 import type { HeapDiagram } from './model'
@@ -10,7 +10,7 @@ import type { HeapDiagram } from './model'
  * client-side navigation, where there is no server HTML to keep.
  */
 
-const definition: StaticDefinition<HeapDiagram> = {
+const definition: StaticDefinition<HeapDiagram, AnyProgram> = {
   ...heapGraphDescriptor,
   engine: { ...heapGraphEngineCore, Stage: HeapGraphStage },
 }

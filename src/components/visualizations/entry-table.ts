@@ -90,7 +90,12 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/heap-graph'),
     1013,
     874,
-    { 'identity-alias-rebind-spread': [1013, 874, 874], 'spread-vs-nested-vs-deep': [1533, 1088, 1088] },
+    {
+      'identity-alias-rebind-spread': [1013, 874, 874],
+      'spread-vs-nested-vs-deep': [1533, 1088, 1088],
+      'gc-reachability-cycle-and-weak-edge': [1348, 1280, 1280],
+      'retainer-paths': [1552, 1484, 1484],
+    },
   ],
   'linked-list-frames': [
     () => import('./engines/linked-list/frames'),
@@ -116,7 +121,11 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/heap-graph/prototype'),
     1118,
     618,
-    { 'lookup-and-shadowing': [1118, 618, 618], 'constructor-fix': [1234, 654, 654] },
+    {
+      'lookup-and-shadowing': [1118, 618, 618],
+      'constructor-fix': [1234, 654, 654],
+      'extends-two-chains': [1454, 790, 790],
+    },
   ],
   lanes: [
     () => import('./engines/lanes'),

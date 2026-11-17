@@ -1,7 +1,7 @@
 import type { PerVariant } from '../../shell/types'
 import { arrowHead, routePath, textWidth, type Point, type Rect } from '../../substrates/box-arrow'
 import { SIZE } from './layout'
-import { besideOf, spineOf, type ProtoDiagram, type ProtoObject, type ProtoPanel } from './proto-model'
+import { besideOf, isCtor, spineOf, type ProtoDiagram, type ProtoObject, type ProtoPanel } from './proto-model'
 
 /**
  * Layout for the prototype object graph: the heap graph's boxes and rows
@@ -245,8 +245,10 @@ export type ProtoScene = {
 }
 
 export function layoutProto(d: ProtoDiagram): ProtoScene {
-  const cols = protoColumns(d)
-  const panels = d.panels.map((p) => layoutProtoPanel(p, cols))
+  const two = d.panels.some((p) => p.columns === 2)
+  const cols = two ? undefined : protoColumns(d)
+  const cols2 = two ? twoColumns(d) : undefined
+  const panels = d.panels.map((p) => (cols2 ? layoutTwoChains(p, cols2) : layoutProtoPanel(p, cols!)))
   const blocks = panels.map((s, i) => {
     const mate = panels[i % 2 === 0 ? i + 1 : i - 1]
     return { narrow: s.height, wide: Math.max(s.height, mate?.height ?? 0) }
@@ -256,4 +258,159 @@ export function layoutProto(d: ProtoDiagram): ProtoScene {
   let wide = PROTO.panelGap * (rows - 1)
   for (let r = 0; r < rows; r++) wide += blocks[2 * r].wide
   return { panels, blocks, height: { narrow, wide } }
+}
+
+// ---------------------------------------------------------------------------
+// Two chains (Objects and Classes): the instance chain down the left, the
+// constructors' own chain down the right.
+// ---------------------------------------------------------------------------
+
+/**
+ * Between the chains: the `.prototype` arrow runs straight from a
+ * constructor's pill to the header of the object it names, its label above
+ * it, so the gap holds that label (66 px) and a hair either side.
+ */
+export const TWO = { gap: 69, linkInset: 30, elbowRight: 73, maxWidth: 291 } as const
+
+/** Columns every panel shares: the instance chain's boxes, then the constructor pills; Function.prototype a box at the foot. */
+export function twoColumns(d: ProtoDiagram) {
+  const spine = Math.max(...d.panels.flatMap((p) => spineOf(p).map(boxWidth)))
+  const ctors = d.panels.flatMap((p) => p.objects.filter(isCtor))
+  const fn = Math.max(...ctors.map(pillWidth))
+  const ends = d.panels.flatMap((p) => p.objects.filter((o) => o.fn && !isCtor(o)))
+  const end = ends.length ? Math.max(...ends.map(boxWidth)) : 0
+  const fnX = spine + TWO.gap
+  const width = Math.max(fnX + fn, spine + end, ...d.panels.map((p) => resultsWidth(p)))
+  // Two panels still sit side by side at 768 (291 px each); a 320 phone's 288 px stage scales the svg by at most 1 %.
+  if (width > TWO.maxWidth) throw new Error(`the two chains need ${width}px, more than ${TWO.maxWidth}px`)
+  return { spine, fn, fnX, end, width }
+}
+
+export function layoutTwoChains(p: ProtoPanel, cols: ReturnType<typeof twoColumns>): ProtoPanelScene {
+  const spine = spineOf(p)
+  const lookup = p.lookup
+  const boxes: ProtoBoxScene[] = []
+  const edges: ProtoEdgeScene[] = []
+  const rectOf = new Map<string, Rect>()
+  let y = PROTO.heading + PROTO.headingGap
+  for (const o of spine) {
+    const rect = { x: 0, y, w: cols.spine, h: boxHeight(o) }
+    rectOf.set(o.id, rect)
+    const kw = keyWidth(o)
+    const rows: ProtoRowScene[] = o.rows.map((r, k) => ({
+      key: r.key,
+      value: valueText(r.value),
+      top: y + headerH + k * SIZE.row,
+      keyWidth: kw,
+      changed: lookup?.found === o.id && lookup.key === r.key ? true : undefined,
+    }))
+    const muted = mutedLine(o)
+    if (muted) rows.push({ key: '', value: null, top: y + headerH + o.rows.length * SIZE.row, keyWidth: kw, muted })
+    boxes.push({ id: o.id, fn: false, title: o.title, rect, rows })
+    y += rect.h + PROTO.vgap
+  }
+  const cx = Math.round(cols.spine / 2)
+  const nullRect = { x: cx - PROTO.nullW / 2, y, w: PROTO.nullW, h: PROTO.nullH }
+  // Constructor pills level with the header of the object their `.prototype` names.
+  const ctors = p.objects.filter(isCtor)
+  for (const f of ctors) {
+    const target = besideOf(p, f)
+    const t = rectOf.get(target)
+    if (!t) throw new Error(`${p.id}: ${f.id}.prototype names ${target}, which is not on the instance chain`)
+    const cy = t.y + headerH / 2
+    const rect = { x: cols.fnX, y: cy - PROTO.pill / 2, w: pillWidth(f), h: PROTO.pill }
+    rectOf.set(f.id, rect)
+    boxes.push({ id: f.id, fn: true, title: f.title, rect, rows: [] })
+    const pts = [
+      { x: rect.x, y: cy },
+      { x: t.x + t.w, y: cy },
+    ]
+    edges.push({
+      id: `prototype:${f.id}`,
+      kind: 'prototype',
+      from: f.id,
+      to: target,
+      d: routePath(pts, 8, 2),
+      head: arrowHead(pts),
+      dot: pts[0],
+      label: { text: 'prototype', x: Math.round((t.x + t.w + rect.x) / 2), y: cy - 6, anchor: 'middle' },
+    })
+  }
+  // The end of the constructors' chain (Function.prototype): a box at the foot, right-aligned, level with null.
+  const ends = p.objects.filter((o) => o.fn && !isCtor(o))
+  for (const e of ends) {
+    const w = boxWidth(e)
+    const rect = { x: cols.width - w, y: nullRect.y, w, h: boxHeight(e) }
+    rectOf.set(e.id, rect)
+    const kw = keyWidth(e)
+    const muted = mutedLine(e)
+    boxes.push({ id: e.id, fn: false, title: e.title, rect, rows: muted ? [{ key: '', value: null, top: rect.y + headerH, keyWidth: kw, muted }] : [] })
+  }
+  const linkX = cols.fnX + TWO.linkInset
+  // The constructors' [[Prototype]] links: straight down the right column, pill to pill or to the end box.
+  const fnLinks: { top: number; bottom: number }[] = []
+  for (const f of ctors) {
+    if (typeof f.proto !== 'string') continue
+    const a = rectOf.get(f.id)!
+    const b = rectOf.get(f.proto)
+    if (!b) throw new Error(`${p.id}: the [[Prototype]] of ${f.id} is not drawn`)
+    const pts = [
+      { x: linkX, y: a.y + a.h },
+      { x: linkX, y: b.y },
+    ]
+    fnLinks.push({ top: a.y + a.h, bottom: b.y })
+    edges.push({ id: `proto:${f.id}`, kind: 'proto', from: f.id, to: f.proto, d: routePath(pts, 8, 2), head: arrowHead(pts), changed: undefined })
+  }
+  // The end box's [[Prototype]]: up and back into the instance chain's object (Object.prototype).
+  for (const e of ends) {
+    if (typeof e.proto !== 'string') continue
+    const a = rectOf.get(e.id)!
+    const b = rectOf.get(e.proto)
+    if (!b) throw new Error(`${p.id}: the [[Prototype]] of ${e.id} is not drawn`)
+    const ex = cols.spine + TWO.elbowRight
+    const by = b.y + b.h / 2
+    const pts = [
+      { x: ex, y: a.y },
+      { x: ex, y: by },
+      { x: b.x + b.w, y: by },
+    ]
+    edges.push({ id: `proto:${e.id}`, kind: 'proto', from: e.id, to: e.proto, d: routePath(pts, 8, 2), head: arrowHead(pts) })
+  }
+  // The instance chain's links. Where a constructor's link runs beside one, a single label between the two names both.
+  const hops = new Set<string>()
+  if (lookup) {
+    const path = [...(lookup.start ? [lookup.start] : []), ...lookup.visited]
+    path.slice(1).forEach((id, i) => hops.add(`${path[i]}>${id}`))
+  }
+  spine.forEach((o, i) => {
+    const a = rectOf.get(o.id)!
+    const to = i + 1 < spine.length ? spine[i + 1].id : 'null'
+    const bTop = i + 1 < spine.length ? rectOf.get(to)!.y : nullRect.y
+    const mid = Math.round((a.y + a.h + bTop) / 2 + 4)
+    const beside = fnLinks.some((l) => l.top <= a.y + a.h && l.bottom >= bTop)
+    const pts = [
+      { x: cx, y: a.y + a.h },
+      { x: cx, y: bTop },
+    ]
+    edges.push({
+      id: `proto:${o.id}`,
+      kind: 'proto',
+      from: o.id,
+      to,
+      d: routePath(pts, 8, 2),
+      head: arrowHead(pts),
+      label: beside ? { text: '[[Prototype]]', x: Math.round((cx + linkX) / 2), y: mid, anchor: 'middle' } : { text: '[[Prototype]]', x: cx + 8, y: mid, anchor: 'start' },
+      changed: hops.has(`${o.id}>${to}`) ? true : undefined,
+    })
+  })
+  let bottom = Math.max(nullRect.y + nullRect.h, ...[...rectOf.values()].map((r) => r.y + r.h))
+  const results = p.results.map((r) => {
+    const top = bottom + (r === p.results[0] ? PROTO.resultGap : 0)
+    bottom = top + PROTO.line
+    return { ...r, y: top + 14, textX: Math.ceil(textWidth(`${r.expr} `, SIZE.value)) }
+  })
+  if (!p.results.length && p.note) bottom += PROTO.resultGap - 4
+  const note = p.note ? { text: p.note, y: bottom + 14 } : undefined
+  if (note) bottom += PROTO.line
+  return { id: p.id, width: cols.width, height: Math.ceil(bottom), boxes, edges, nullRect, results, note }
 }

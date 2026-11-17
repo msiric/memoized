@@ -153,3 +153,70 @@ export const constructorAfterProgram = program(
 )
 
 export const PROTOTYPE_PROGRAMS: ProtoProgram[] = [personProgram, shadowProgram, constructorBeforeProgram, constructorAfterProgram]
+
+// ---------------------------------------------------------------------------
+// Objects and Classes (js-track/core-fundamentals/objects-and-classes, FREE):
+// the two chains `extends` builds, and the one the manual pattern builds.
+// ---------------------------------------------------------------------------
+
+const OC_PAGE = 'content/js-track/core-fundamentals/objects-and-classes/page.mdx'
+const OC_ANSWERS = 'content/js-track/core-fundamentals/_lessons.json'
+
+const INHERIT = {
+  block: { path: OC_ANSWERS, lesson: '/objects-and-classes', problem: 'inheritance-with-extends-and-super', lang: 'javascript' },
+  lessonSha256: '426a277f50401d33288f925fd35a1c774319f7a8633465e93a6b868aa5e8fb05',
+} as const
+const MANUAL = {
+  block: { path: OC_PAGE, heading: '## **Combining Constructor Functions and Prototypes**', lang: 'javascript' },
+  lessonSha256: 'a7c629cf28c3657b007c0e789a2f1ab3bb5b1d3ca6541e8999ac5f4a15818292',
+} as const
+
+/**
+ * The inheritance answer (lines 1-22, premium: locator only), paused on the
+ * harness line 23 for the graph, and inside the parent's speak (line 6) when
+ * `super.speak()` calls it, where `this === rex` is read.
+ */
+const EXTENDS_TARGETS: readonly ProtoTarget[] = [
+  ['rex', 'rex'],
+  ['Dog.prototype', 'Dog.prototype'],
+  ['Animal.prototype', 'Animal.prototype'],
+  ['Object.prototype', 'Object.prototype'],
+  ['Dog', 'Dog'],
+  ['Animal', 'Animal'],
+  ['Function.prototype', 'Function.prototype'],
+]
+const EXTENDS_LOOKUPS: readonly ProtoLookup[] = [
+  ['rex', 'speak'],
+  // super.speak() starts at the home object's [[Prototype]]: Animal.prototype.
+  ['Animal.prototype', 'speak'],
+]
+export const extendsProgram: ProtoProgram = {
+  id: 'extends',
+  lang: 'js',
+  source: [INHERIT, PAUSE],
+  probes: [
+    { line: 6, as: 'super', read: ['thisIsRex'] },
+    { line: 23, as: 'graph', read: ['graph'] },
+  ],
+  watch: { graph: graphWatch(EXTENDS_TARGETS, EXTENDS_LOOKUPS), thisIsRex: 'this === rex' },
+  targets: EXTENDS_TARGETS,
+  lookups: EXTENDS_LOOKUPS,
+}
+
+/** "Combining Constructor Functions and Prototypes" (lines 1-23), paused on line 24. */
+export const manualProgram = program(
+  'manual',
+  [MANUAL, PAUSE],
+  24,
+  [
+    ['myCar', 'myCar'],
+    ['Car.prototype', 'Car.prototype'],
+    ['Vehicle.prototype', 'Vehicle.prototype'],
+    ['Object.prototype', 'Object.prototype'],
+    ['Car', 'Car'],
+    ['Function.prototype', 'Function.prototype'],
+  ],
+  [['myCar', 'drive']],
+)
+
+export const CLASS_PROGRAMS: ProtoProgram[] = [extendsProgram, manualProgram]

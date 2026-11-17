@@ -107,13 +107,20 @@ function ObjectBox({ box }: { box: LaidBox }) {
   const W = Math.round(w) - 1
   const headerBottom = y + 2 * SIZE.headerPad + SIZE.headerLine
   const rowBase = (top: number) => r1(top + 18.5)
+  // A collectible object (reachability presets) is greyed: a dashed outline and muted text throughout.
+  const muted = box.gone ? 'vz-m' : undefined
   return (
-    <g data-node={box.id}>
-      <rect x={X} y={px(y)} width={W} height={Math.round(h) - 1} rx={radius.glyph.px} className="vz-g" />
+    <g data-node={box.id} data-gone={box.gone ? '' : undefined}>
+      <rect x={X} y={px(y)} width={W} height={Math.round(h) - 1} rx={radius.glyph.px} className={clsx('vz-g', box.gone && 'vz-d')} />
       {/* `vz-t`: the header role, 12 px medium (the closures record header). */}
-      <text x={r1(x + SIZE.cellPad)} y={r1(y + SIZE.headerPad + 12)} className="vz-t">
+      <text x={r1(x + SIZE.cellPad)} y={r1(y + SIZE.headerPad + 12)} className={box.gone ? 'vz-m vz-12' : 'vz-t'}>
         {box.title}
       </text>
+      {box.badge ? (
+        <text x={r1(x + w - SIZE.cellPad)} y={r1(y + SIZE.headerPad + 12)} textAnchor="end" className="vz-m vz-12" data-viz-part="badge">
+          {box.badge}
+        </text>
+      ) : null}
       {box.rows
         .filter((row) => row.changed)
         .map((row) => (
@@ -132,30 +139,37 @@ function ObjectBox({ box }: { box: LaidBox }) {
             className="vz-ch"
           />
         ))}
-      {box.rows.length ? (
+      {box.rows.length || box.note ? (
         <path
-          d={box.rows
-            .map((row, i) => {
+          d={[
+            ...box.rows.map((row, i) => {
               const sep = i === 0 ? headerBottom : row.top
-              const bottomY = row.top + SIZE.row - (i === box.rows.length - 1 ? 1 : 0)
+              const last = i === box.rows.length - 1 && !box.note
+              const bottomY = row.top + SIZE.row - (last ? 1 : 0)
               return `M${r1(x + 1)} ${px(sep)}H${r1(x + w - 1)}M${px(x + row.keyWidth)} ${row.top + 1}V${bottomY}`
-            })
-            .join('')}
+            }),
+            box.note ? `M${r1(x + 1)} ${px(box.rows.length ? box.note.top : headerBottom)}H${r1(x + w - 1)}` : '',
+          ].join('')}
           className="vz-hl"
         />
       ) : null}
       {box.rows.map((row) => (
         <Fragment key={row.key}>
-          <text x={r1(x + SIZE.cellPad)} y={rowBase(row.top)}>
+          <text x={r1(x + SIZE.cellPad)} y={rowBase(row.top)} className={muted}>
             {row.key}
           </text>
           {row.value !== null ? (
-            <text x={r1(x + row.keyWidth + SIZE.cellPad)} y={rowBase(row.top)}>
+            <text x={r1(x + row.keyWidth + SIZE.cellPad)} y={rowBase(row.top)} className={muted}>
               {row.value}
             </text>
           ) : null}
         </Fragment>
       ))}
+      {box.note ? (
+        <text x={r1(x + SIZE.cellPad)} y={rowBase(box.note.top)} className="vz-m vz-12" data-viz-part="note">
+          {box.note.text}
+        </text>
+      ) : null}
     </g>
   )
 }
@@ -168,11 +182,13 @@ function Edge({ edge }: { edge: LaidEdge }) {
       data-from={edge.from}
       data-to={edge.to}
       data-changed={edge.changed ? '' : undefined}
+      data-weak={edge.weak ? '' : undefined}
+      data-gone={edge.gone ? '' : undefined}
       className={edge.changed ? 'vz-cm' : undefined}
       // The moved arrow at the `now` connector weight, in its neutral colour (a lit trace sets the same width).
       style={edge.changed ? ({ '--vz-sw': `${strokeWidth.nowConnector}px` } as React.CSSProperties) : undefined}
     >
-      <path d={edge.d} className="vz-e" />
+      <path d={edge.d} className={clsx('vz-e', edge.weak && 'vz-d')} />
       <path d={edge.head} className="vz-ah" />
       <circle cx={r1(edge.dot.x)} cy={r1(edge.dot.y)} r={SIZE.dot} className="vz-ah" />
     </g>
@@ -181,6 +197,13 @@ function Edge({ edge }: { edge: LaidEdge }) {
 
 /** The program's own output under a panel: the expression (muted), then `› value` (the output role, N12). */
 function Result({ t }: { t: LaidText }) {
+  // Reachability: the roots label over the names, the island's label under the greyed objects.
+  if (t.kind === 'roots' || t.kind === 'island')
+    return (
+      <text x={r1(t.x)} y={r1(t.y)} className="vz-m vz-12" data-viz-part={t.kind}>
+        {t.text}
+      </text>
+    )
   if (t.kind === 'expr')
     return (
       <text x={r1(t.x)} y={r1(t.y)} className="vz-m">
