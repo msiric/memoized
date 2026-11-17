@@ -486,9 +486,12 @@ lesson needs, all built from a recorded run of the lesson's practice answer
 - `k-pairs-lazy-grid` (K-way Merge, Find K Pairs): three `grid` panels, an
   addition table (`+` in the corner) whose cells carry their state in words
   (`heap`, `pop 1`): after seeding, after three pops with one right arrow
-  per push, and the two-neighbour rule's first collision, (1,1) pushed
-  twice. That rule is not a program of the lesson: its panel is a
-  structural fact the truth test checks, said so in the text alternative.
+  per push, and the two-neighbour rule's first collision: that rule starts
+  from (0,0), so 3 is popped first and pushes 5 and 9, which each push
+  (1,1), pushed twice (only the two arrows into it are marked). That rule
+  is not a program of the lesson: its panel is a structural illustration
+  the truth test checks (every popped cell's parent is popped), said so in
+  the text alternative.
 - **Gates.** `singles.truth.test.ts` (the register's values; the rule each
   figure states as a check that lies fail: a skip that subtracts, a cut
   with no rule, an extra or missing tree edge, a down arrow, a push from an

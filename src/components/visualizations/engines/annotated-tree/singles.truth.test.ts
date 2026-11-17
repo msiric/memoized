@@ -4,6 +4,7 @@ import { monoWidth } from '../../substrates/text-metrics'
 import { CALLS, layoutCalls, popAt, underText } from './calls'
 import { GRAPH, layoutGraph, waterRun } from './graph'
 import { GRID, kPairsRun, layoutGrid } from './grid'
+import { annotatedTreeDescriptor } from './descriptor'
 import { SIZE } from './layout'
 import type { CallPanel, GraphPanel, GridPanel, TreeData } from './model'
 import { SINGLES_RECORDINGS, combinationSumData, combinationSumTakeSkip, kPairsData, kPairsLazyGrid, waterData, waterWellsSource } from './presets/singles'
@@ -69,6 +70,44 @@ export function frontierProblems(p: GridPanel): string[] {
     into.set(`${a.to}`, (into.get(`${a.to}`) ?? 0) + 1)
   }
   for (const [k, n] of into) if (n > 1) out.push(`${k} has ${n} parents`)
+  // A popped cell past column 0 (the seeds) was pushed by a pop: its parent, one to the left, is popped.
+  for (const c of p.cells.filter((x) => x.state === 'popped' && x.j > 0)) {
+    const parent = p.cells.find((x) => x.i === c.i && x.j === c.j - 1)!
+    if (parent.state !== 'popped') out.push(`${c.i},${c.j} is popped but its parent ${parent.i},${parent.j} is not`)
+  }
+  return out
+}
+
+/**
+ * The two-neighbour rule's panel, as a structure: it starts from (0,0) alone;
+ * every arrow points right or down by one, from a popped cell; every popped
+ * cell but (0,0) has a parent and that parent is popped (a cell is pushed
+ * only by a pop); the cell marked twice has exactly two parents.
+ */
+export function twoNeighbourProblems(p: GridPanel): string[] {
+  const out: string[] = []
+  const at = (i: number, j: number) => p.cells.find((c) => c.i === i && c.j === j)!
+  const popped = (c: GridPanel['cells'][number]) => c.state === 'pop' || c.state === 'popped'
+  for (const a of p.arrows) {
+    const right = a.from[0] === a.to[0] && a.to[1] === a.from[1] + 1
+    const down = a.from[1] === a.to[1] && a.to[0] === a.from[0] + 1
+    if (!right && !down) out.push(`${a.from}->${a.to} is not a right or down neighbour`)
+    if (!popped(at(...a.from))) out.push(`${a.from} pushed without being popped`)
+  }
+  for (const c of p.cells.filter(popped)) {
+    const into = p.arrows.filter((a) => a.to[0] === c.i && a.to[1] === c.j)
+    if (c.i === 0 && c.j === 0) {
+      if (into.length) out.push('(0,0) is the start: it has no parent')
+      continue
+    }
+    if (!into.length) out.push(`${c.i},${c.j} is popped but nothing pushed it`)
+    for (const a of into) if (!popped(at(...a.from))) out.push(`${c.i},${c.j} is popped but its parent ${a.from} is not`)
+  }
+  if (!p.cells.some((c) => c.i === 0 && c.j === 0 && popped(c))) out.push('(0,0), the start, is not popped')
+  for (const c of p.cells.filter((x) => x.state === 'twice')) {
+    const n = p.arrows.filter((a) => a.to[0] === c.i && a.to[1] === c.j).length
+    if (n !== 2) out.push(`${c.i},${c.j} is marked twice with ${n} parents`)
+  }
   return out
 }
 
@@ -208,8 +247,35 @@ describe('k-pairs-lazy-grid (k-way-merge, find-k-pairs-with-smallest-sums)', () 
     expect(pushedTwice(3, 3)[0] ?? null).toBeDefined()
     expect(pushedTwice(3, 3)).toContain('1,1')
     expect(twice.cells.filter((c) => c.state === 'twice').map((c) => `${c.i},${c.j}`)).toEqual(['1,1'])
-    expect(twice.arrows.map((a) => a.from.join(','))).toEqual(['0,1', '1,0'])
+    expect(twice.arrows.filter((a) => a.to.join(',') === '1,1').map((a) => a.from.join(','))).toEqual(['0,1', '1,0'])
     expect(frontierProblems(twice).join('\n')).toMatch(/1,1 has 2 parents/)
+  })
+
+  it('snapshot 3 is a structure whose pops all have popped parents: 3 first, pushing 5 and 9, which each push 11', () => {
+    const at = (i: number, j: number) => twice.cells.find((c) => c.i === i && c.j === j)!
+    expect(twice.cells.filter((c) => c.state === 'pop').map((c) => [c.i, c.j, c.sum])).toEqual([
+      [0, 0, 3],
+      [0, 1, 5],
+      [1, 0, 9],
+    ])
+    expect(at(1, 1).sum).toBe(11)
+    expect(twice.arrows.map((a) => `${a.from}->${a.to}`)).toEqual(['0,0->0,1', '0,0->1,0', '0,1->1,1', '1,0->1,1'])
+    expect(twoNeighbourProblems(twice)).toEqual([])
+    // A structure, not a run: no pop numbers, and the text alternative says the rule is not run.
+    expect(twice.cells.some((c) => c.order !== undefined)).toBe(false)
+    expect(annotatedTreeDescriptor.engine.describe(kPairsLazyGrid.data).model).toMatch(/two-neighbour rule is not run: its panel is a structural illustration, not a run/)
+  })
+
+  it('a lie fails: a popped cell whose parent is not popped, a pop nothing pushed, a diagonal, a twice with one parent', () => {
+    const plainStart = { ...twice, cells: twice.cells.map((c) => (c.i === 0 && c.j === 0 ? { i: c.i, j: c.j, sum: c.sum } : c)) }
+    expect(twoNeighbourProblems(plainStart).join('\n')).toMatch(/0,1 is popped but its parent 0,0 is not/)
+    expect(twoNeighbourProblems(plainStart).join('\n')).toMatch(/0,0 pushed without being popped/)
+    const orphan = { ...twice, arrows: twice.arrows.filter((a) => a.from.join(',') !== '0,0') }
+    expect(twoNeighbourProblems(orphan).join('\n')).toMatch(/0,1 is popped but nothing pushed it/)
+    const diagonal = { ...twice, arrows: [...twice.arrows, { from: [0, 0] as [number, number], to: [1, 1] as [number, number] }] }
+    expect(twoNeighbourProblems(diagonal).join('\n')).toMatch(/not a right or down neighbour/)
+    const once = { ...twice, arrows: twice.arrows.slice(0, 3) }
+    expect(twoNeighbourProblems(once).join('\n')).toMatch(/1,1 is marked twice with 1 parents/)
   })
 
   it('a lie fails: a down arrow, a push from an unpopped cell, two parents', () => {
@@ -217,6 +283,8 @@ describe('k-pairs-lazy-grid (k-way-merge, find-k-pairs-with-smallest-sums)', () 
     expect(frontierProblems(down).join('\n')).toMatch(/not the right neighbour/)
     const unpopped = { ...popped, arrows: [{ from: [1, 0] as [number, number], to: [1, 1] as [number, number] }] }
     expect(frontierProblems(unpopped).join('\n')).toMatch(/without being popped/)
+    const orphan = { ...popped, cells: popped.cells.map((c) => (c.i === 0 && c.j === 1 ? { i: c.i, j: c.j, sum: c.sum } : c)) }
+    expect(frontierProblems(orphan).join('\n')).toMatch(/0,2 is popped but its parent 0,1 is not/)
   })
 
   it('a tampered recording cannot build: a pop that pushed two cells', () => {

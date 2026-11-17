@@ -234,7 +234,8 @@ export function GridSvg({ p }: { p: GridPanel }) {
           ? { x: g.x[a.from[1]] + GRID.cell.w + GRID.arrowInset, y: from.y }
           : { x: from.x, y: g.y[a.from[0]] + GRID.cell.h + GRID.arrowInset }
         const end = across ? { x: g.x[a.to[1]] - GRID.arrowInset, y: to.y } : { x: to.x, y: g.y[a.to[0]] - GRID.arrowInset }
-        const lit = p.mark === 'twice'
+        // Under the twice mark only the arrows into the cell pushed twice are lit.
+        const lit = p.mark === 'twice' && p.cells.some((c) => c.state === 'twice' && c.i === a.to[0] && c.j === a.to[1])
         return (
           <g
             key={`${a.from}-${a.to}`}

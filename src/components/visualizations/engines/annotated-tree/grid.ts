@@ -112,9 +112,13 @@ export function poppedPanel(run: KPairsRun, n: number, opts: { id: string; headi
 }
 
 /**
- * The alternative rule's first collision: the cell (1, 1) is the down
- * neighbour of (0, 1) and the right neighbour of (1, 0), so pushing both
- * neighbours of every pop reaches it twice. Values are the run's sums.
+ * The alternative rule's first collision, as a structure (not a run): that
+ * rule starts from (0, 0) alone, so (0, 0) is popped first and pushes both
+ * its neighbours, (0, 1) and (1, 0); each of those, popped in turn, pushes
+ * its own neighbours, and (1, 1) is the down neighbour of (0, 1) and the
+ * right neighbour of (1, 0), so it is reached twice. Every popped cell's
+ * parent is popped. Values are the run's sums; the marked arrows are the
+ * two into (1, 1).
  */
 export function twicePanel(run: KPairsRun, opts: { id: string; heading: string; notes: string[] }): GridPanel {
   const into: [number, number] = [1, 1]
@@ -122,9 +126,11 @@ export function twicePanel(run: KPairsRun, opts: { id: string; heading: string; 
     [into[0] - 1, into[1]],
     [into[0], into[1] - 1],
   ]
+  const root: [number, number] = [0, 0]
+  const popped = [root, ...parents]
   const cells = sums(run).map((c): GridCellView => {
     if (c.i === into[0] && c.j === into[1]) return { ...c, state: 'twice' }
-    return parents.some(([i, j]) => i === c.i && j === c.j) ? { ...c, state: 'pop' } : c
+    return popped.some(([i, j]) => i === c.i && j === c.j) ? { ...c, state: 'pop' } : c
   })
   return {
     kind: 'grid',
@@ -132,7 +138,7 @@ export function twicePanel(run: KPairsRun, opts: { id: string; heading: string; 
     heading: opts.heading,
     ...axes(run),
     cells,
-    arrows: parents.map((from) => ({ from, to: into })),
+    arrows: [...parents.map((to) => ({ from: root, to })), ...parents.map((from) => ({ from, to: into }))],
     mark: 'twice',
     notes: opts.notes,
   }

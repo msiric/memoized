@@ -153,6 +153,11 @@ test('wave 3A: every drawn value is the recorded one (calls, the spanning tree, 
   expect(arrows).toEqual(popped.arrows.map((a) => `${a.from.join(',')}-${a.to.join(',')}`))
   await expect(page.locator('svg[data-viz-panel="twice"] [data-cell="1,1"]')).toHaveAttribute('data-state', 'twice')
   await expect(page.locator('svg[data-viz-panel="twice"] [data-edge][data-to="1,1"]')).toHaveCount(2)
+  // The other rule starts from (0,0): 3 is popped first and pushes 5 and 9, which each push 11; only the two arrows into 11 are marked.
+  const twicePanel = page.locator('svg[data-viz-panel="twice"]').first()
+  expect(await twicePanel.locator('[data-state="pop"]').evaluateAll((es) => es.map((e) => e.getAttribute('data-sum')))).toEqual(['3', '5', '9'])
+  expect(await twicePanel.locator('[data-edge]').evaluateAll((es) => es.map((e) => e.getAttribute('data-edge')))).toEqual(['0,0-0,1', '0,0-1,0', '0,1-1,1', '1,0-1,1'])
+  expect(await twicePanel.locator('[data-edge][data-changed]').evaluateAll((es) => es.map((e) => e.getAttribute('data-to')))).toEqual(['1,1', '1,1'])
 })
 
 test('the stage is a named group described by the text alternative, with each verified output', async ({ page }) => {
@@ -171,6 +176,8 @@ test('the stage is a named group described by the text alternative, with each ve
   await expect(figure(page, 'combination-sum-take-skip').locator('details')).toContainText('Verified output, combination-sum (Node 24.x): [[7],[2,2,3]]')
   await expect(figure(page, 'water-wells-virtual-source').locator('details')).toContainText('Well source 0 to 1, cost 1, accepted 3rd (marked).')
   await expect(figure(page, 'k-pairs-lazy-grid').locator('details')).toContainText('Arrow from (0,0) to (0,1).')
+  await expect(figure(page, 'k-pairs-lazy-grid').locator('details')).toContainText('Arrow from (0,0) to (1,0).')
+  await expect(figure(page, 'k-pairs-lazy-grid').locator('details')).toContainText('its panel is a structural illustration, not a run')
 })
 
 test('zero axe violations, closed and open', async ({ page }) => {
