@@ -103,7 +103,7 @@ export default function VisualizationGalleryPage({
       </div>
     )
   }
-  // `?at=static`: the annotated-tree figures alone (waves 2D and 3A).
+  // `?at=static`: the annotated-tree figures alone (waves 2D, 3A and 4B).
   if (searchParams.at === 'static') {
     const trees = (
       <>
@@ -119,6 +119,11 @@ export default function VisualizationGalleryPage({
         <Viz id="annotated-tree" preset="water-wells-virtual-source" />
         <p>Between the annotated trees.</p>
         <Viz id="annotated-tree" preset="k-pairs-lazy-grid" />
+        {/* Wave 4B: residual graphs (Maximum Flow, Network Flow Algorithms). */}
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="diamond-reverse-edge" />
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="clrs-23-min-cut" />
       </>
     )
     return (
