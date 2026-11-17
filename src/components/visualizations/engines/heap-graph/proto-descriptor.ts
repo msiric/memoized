@@ -15,7 +15,8 @@ function describeObject(p: ProtoPanel, o: ProtoObject): string {
   if (isCtor(o)) return `${o.title} (a function): prototype → ${besideOf(p, o)} (solid arrow)${up}.`
   if (o.fn) return `${o.title} (a function): ${o.hidden} own properties, not listed${up}.`
   const rows = o.rows.map((r) => ('ref' in r.value ? `${r.key} → ${r.value.ref}${r.key === 'constructor' ? ' (dashed arrow)' : ''}` : 'fn' in r.value ? `${r.key} = a function` : `${r.key} = ${r.value.text}`))
-  if (o.hidden) rows.push(o.rows.length ? `and ${o.hidden} more own properties` : `${o.hidden} own properties, not listed`)
+  const props = (n: number) => `${n} more own propert${n === 1 ? 'y' : 'ies'}`
+  if (o.hidden) rows.push(o.rows.length ? `and ${props(o.hidden)}` : `${o.hidden} own properties, not listed`)
   return `${o.title}: ${rows.length ? rows.join(', ') : 'no own properties'}.`
 }
 
@@ -43,7 +44,7 @@ function describePanel(p: ProtoPanel): string[] {
       `Marked lookup of ${l.from}.${l.key}: ${misses.length ? `${misses.join(', then ')} ${misses.length > 1 ? 'have' : 'has'} no own ${l.key}; ` : ''}${l.found ? `found on ${l.found}` : 'not found before null'}${l.found === l.from ? ', the object itself' : ''}.`,
     )
   }
-  for (const r of p.results) lines.push(`${r.expr} logs ${r.text}.`)
+  for (const r of p.results) lines.push(`${r.expr} logs ${r.text}${/[.!?]$/.test(r.text) ? '' : '.'}`)
   if (p.note) lines.push(`${p.note[0].toUpperCase()}${p.note.slice(1)}.`)
   return lines
 }
