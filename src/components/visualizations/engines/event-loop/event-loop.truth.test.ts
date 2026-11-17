@@ -14,7 +14,7 @@ import { TRACE_RECORDINGS, awaitAsyncFrames, whoCalledInner } from './presets/ca
 import { AWAIT_SNIPPET, whoCalledInnerProgram } from './programs'
 import { recordTraces, type TraceRecording } from './truth/trace'
 import { lintEventLoopLogs } from './lint'
-import { eventLoopIntrospection } from './model'
+import { eventLoopIntrospection, stackClosesUp } from './model'
 
 /**
  * Truthful by construction (spec P6): every committed event-loop log is
@@ -158,6 +158,25 @@ describe('the trace presets match real runs', () => {
     expect(claims('await-async-frames', { ...a, traces: [...a.traces, ...a.traces] }).join('\n')).toMatch(/2 traces/)
     const steps = whoCalledInner.steps.map((s, i) => (i === 6 ? { ...s, state: { ...s.state, trace: ['Timeout.inner', 'outer'] } } : s))
     expect(validateStepLog({ ...whoCalledInner, steps }, eventLoopIntrospection).join('\n')).toMatch(/trace so far/)
+  })
+})
+
+describe('stack pushes and pops over kept frames land in one frame', () => {
+  it('only the wave 4C presets push or pop a frame with frames under it (the shipped presets never do)', () => {
+    const hits = eventLoopDescriptor.presets.flatMap((p) =>
+      p.log.steps.slice(1).flatMap((s, i) => (stackClosesUp(p.log.steps[i].state, s.state) ? [`${p.id} ${i}->${i + 1}`] : [])),
+    )
+    expect(hits.every((h) => /^(exercise-2-async1-async2|who-called-inner|await-async-frames) /.test(h))).toBe(true)
+    expect(hits).toEqual([
+      'exercise-2-async1-async2 2->3',
+      'exercise-2-async1-async2 4->5',
+      'exercise-2-async1-async2 6->7',
+      'exercise-2-async1-async2 7->8',
+      'exercise-2-async1-async2 9->10',
+      'who-called-inner 2->3',
+      'await-async-frames 1->2',
+      'await-async-frames 3->4',
+    ])
   })
 })
 

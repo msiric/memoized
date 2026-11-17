@@ -32,6 +32,7 @@ import {
   eventLoopIntrospection,
   outId,
   revealCount,
+  stackClosesUp,
   traceId,
   type ElChip,
   type EventLoopState,
@@ -62,24 +63,33 @@ import {
 
 const both = { narrow: true, wide: true }
 
-/** Chips visible per variant, plus one `+N more` chip per variant that collapses (A1). */
+/**
+ * Chips visible per variant, plus one `+N more` chip per variant that
+ * collapses (A1); the tight frame (very large text on a phone) collapses
+ * more of the tail into its own `+N more`, as the console does there (R9).
+ */
 function laneChips(
   lane: string,
   chips: readonly ElChip[],
   kind: LaneKind,
   width: PerVariant<number>,
   rows: number,
+  tightWidth: number,
+  /** The rows the lane reserves on a phone (the tight frame keeps them). */
+  tightRows: number,
 ): LaneChip[] {
   const k = {
     narrow: queueVisible(chips, kind, width.narrow, rows),
     wide: queueVisible(chips, kind, width.wide, rows),
   }
+  const kt = Math.min(k.narrow, queueVisible(chips, kind, tightWidth, tightRows))
   const out: LaneChip[] = chips.map((c, i) => ({
     ...c,
     show:
       i < k.narrow && i < k.wide
         ? undefined
         : { narrow: i < k.narrow, wide: i < k.wide },
+    ...(i >= kt && i < k.narrow ? { tight: false } : {}),
   }))
   for (const v of ['narrow', 'wide'] as const)
     if (k[v] < chips.length)
@@ -88,7 +98,10 @@ function laneChips(
         label: moreLabel(chips.length - k[v]),
         more: true,
         show: { narrow: v === 'narrow', wide: v === 'wide' },
+        ...(v === 'narrow' && kt < k.narrow ? { tight: false } : {}),
       })
+  if (kt < k.narrow)
+    out.push({ id: `${lane}-more-tight`, label: moreLabel(chips.length - kt), more: true, show: { narrow: true, wide: false }, tight: true })
   return out
 }
 
@@ -151,6 +164,16 @@ export function EventLoopStage({
   })
 
   const common = { focus, created, present: ids, before, gate }
+  // A pop with frames left under it lands in one frame (`stackClosesUp`): the stack's presence group
+  // remounts under a per-lane epoch (it only ever grows), judged on the pair in log order both ways.
+  const pair = gate.direction === -1 ? stackClosesUp(state, log.steps[index + 1]?.state ?? state) : stackClosesUp(log.steps[index - 1]?.state, state)
+  const stackEpochs = useRef(0)
+  const seenStep = useRef<unknown>(null)
+  if (seenStep.current !== step) {
+    seenStep.current = step
+    if (pair && !gate.instant) stackEpochs.current++
+  }
+  const stackGate = stackEpochs.current ? { ...gate, epoch: gate.epoch * 1000 + stackEpochs.current } : gate
   const root = useRef<HTMLDivElement>(null)
   useFlip(root, gate, step)
   // The end of the run: every output is part of the answer (D21).
@@ -159,21 +182,9 @@ export function EventLoopStage({
   const sources = useMemo(() => outputLines(log), [log])
 
   const rows = G.queueRows
-  const micro = laneChips(
-    'micro',
-    state.micro,
-    'micro',
-    metrics.queueWidth,
-    rows,
-  )
-  const tasks = laneChips(
-    'tasks',
-    state.tasks,
-    'task',
-    metrics.queueWidth,
-    rows,
-  )
-  const host = laneChips('host', state.host, 'host', metrics.hostWidth, rows)
+  const micro = laneChips('micro', state.micro, 'micro', metrics.queueWidth, rows, metrics.queueTight, metrics.queueRows.narrow)
+  const tasks = laneChips('tasks', state.tasks, 'task', metrics.queueWidth, rows, metrics.queueTight, metrics.queueRows.narrow)
+  const host = laneChips('host', state.host, 'host', metrics.hostWidth, rows, metrics.queueTight, metrics.queueRows.narrow)
 
   // The console keeps the newest outputs; the oldest collapse into `N earlier`.
   const out = state.console
@@ -219,6 +230,7 @@ export function EventLoopStage({
       >
         <Lane
           {...common}
+          gate={stackGate}
           id="stack"
           label="Call stack"
           kind="frame"
@@ -456,10 +468,10 @@ export function EventLoopStage({
           // the same sweep (D21); every other render lands them at once.
           <ol
             data-viz-part="trace"
-            className="absolute inset-x-2 m-0 flex list-none flex-col p-0 top-[var(--vz-tt-n)] vz-wide:top-[var(--vz-tt-w)]"
+            className="absolute inset-x-2 m-0 flex list-none flex-col p-0 top-[var(--vz-tt-n)] vz-wide:top-[var(--vz-tt-w)] vz-tight:!pl-0"
             style={{
-              ['--vz-tt-n' as string]: toRem(traceTop(metrics.consoleRows.narrow, metrics.tags.narrow)),
-              ['--vz-tt-w' as string]: toRem(traceTop(metrics.consoleRows.wide, metrics.tags.wide)),
+              ['--vz-tt-n' as string]: toRem(traceTop(metrics.consoleRows.narrow, metrics.tags.narrow, G.traceGap.narrow)),
+              ['--vz-tt-w' as string]: toRem(traceTop(metrics.consoleRows.wide, metrics.tags.wide, G.traceGap.wide)),
               paddingLeft: toRem(Math.ceil(monoWidth('›', G.text)) + G.outMark),
             }}
           >
@@ -483,7 +495,8 @@ export function EventLoopStage({
                       : { duration: 0 }
                   }
                 >
-                  <span className={ink.muted}>at</span>
+                  {/* The tight frame drops the `at`, so the longest frame name keeps its line. */}
+                  <span className={clsx(ink.muted, 'vz-tight:hidden')}>at</span>
                   <span className={clsx('min-w-0 truncate', ink.result)}>{frame}</span>
                 </m.li>
               )
@@ -496,7 +509,7 @@ export function EventLoopStage({
 }
 
 /** Where the trace list starts in the console: border, padding, the label, the strip's rows, the gap. */
-function traceTop(rows: number, tags: boolean): number {
+function traceTop(rows: number, tags: boolean, gap: number): number {
   const n = Math.max(1, rows)
-  return G.pad + G.label + G.labelGap + n * (tags ? G.outLine : G.outValue) + (n - 1) * G.outRowGap + G.traceGap
+  return G.pad + G.label + G.labelGap + n * (tags ? G.outLine : G.outValue) + (n - 1) * G.outRowGap + gap
 }

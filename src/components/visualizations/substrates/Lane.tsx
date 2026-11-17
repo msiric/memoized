@@ -70,6 +70,12 @@ export type LaneChip = {
   show?: PerVariant<boolean>
   /** The `+N more` summary of a collapsed queue tail: quiet, sans. */
   more?: boolean
+  /**
+   * In the tight frame (`vz-tight`, very large text on a phone), where a
+   * queue collapses more of its tail: `false` hides the chip there, `true`
+   * shows it only there (that frame's own `+N more`). Default: as narrow.
+   */
+  tight?: boolean
 }
 
 /** Classes that show an element only in the variants where `show` is true. */
@@ -211,7 +217,7 @@ export function Lane(props: LaneProps) {
       <LaneItem
         key={`${chip.id}:${gate.epoch}`}
         id={chip.id}
-        className={clsx('min-w-0 max-w-full flex-none', showCls(chip.show))}
+        className={clsx('min-w-0 max-w-full flex-none', showCls(chip.show), chip.tight === false && 'vz-tight:hidden', chip.tight && 'hidden vz-tight:block')}
         {...presence(chip.id, gate, { from, to }, { moved })}
         custom={custom}
       >

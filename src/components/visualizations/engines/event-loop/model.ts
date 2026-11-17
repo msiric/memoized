@@ -91,3 +91,25 @@ export function consoleReveal(outputs: number): { staggerMs: number; settleMs: n
   const settleMs = Math.max(0, outputs - 1) * staggerMs + (outputs ? enterMs : 0)
   return { staggerMs, settleMs, endMs: settleMs + captionMs }
 }
+
+/**
+ * A push or pop with frames left under it (the stack packs from its top
+ * edge, so every frame under the change moves): fading, the frame that
+ * enters or leaves would cross the frame sliding into or out of its place
+ * (G1), so the stack lane's change lands in one frame, both ways (D8), as
+ * the frontier's stack does. A frame that moves to or from a queue keeps its
+ * move.
+ */
+export function stackClosesUp(prev: EventLoopState | undefined, next: EventLoopState): boolean {
+  if (!prev) return false
+  const a = prev.stack.map((c) => c.id)
+  const b = next.stack.map((c) => c.id)
+  const kept = b.filter((id) => a.includes(id))
+  const was = eventLoopIntrospection.ids(prev)
+  const now = eventLoopIntrospection.ids(next)
+  const gone = a.filter((id) => !b.includes(id) && !now.has(id))
+  const born = b.filter((id) => !a.includes(id) && !was.has(id))
+  // Frames are listed bottom first and drawn top first: a kept frame moves when its index from the top changes.
+  const fromTop = (list: string[], id: string) => list.length - 1 - list.indexOf(id)
+  return gone.length + born.length > 0 && kept.some((id) => fromTop(a, id) !== fromTop(b, id))
+}

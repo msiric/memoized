@@ -47,8 +47,8 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'microtask-vs-timer-12345': [792, 672, 820, 984, 1048],
       'await-null': [792, 640, 840, 912, 964],
       'exercise-2-async1-async2': [812, 800, 840, 992, 1032],
-      'who-called-inner': [876, 684, 904, 1028, 1096],
-      'await-async-frames': [888, 712, 916, 1060, 1108],
+      'who-called-inner': [876, 688, 904, 1028, 1096],
+      'await-async-frames': [888, 716, 916, 1060, 1108],
     },
     {
       'who-called-inner': ['who-called-inner'],

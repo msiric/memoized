@@ -81,7 +81,8 @@ export const G = {
   codeRowsWindow: 12,
   /** A trace frame's row under the console strip (the value line) and the gap above the list. */
   traceRow: 20,
-  traceGap: 4,
+  /** Under a tagged strip (from 768) the finale's line tag needs the wider gap above the trace. */
+  traceGap: { narrow: 4, wide: 8 } as PerVariant<number>,
   /** Most rows a queue or the console may take before collapsing. */
   queueRows: 2,
   consoleRows: 3,
@@ -95,9 +96,12 @@ export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
  * The frame below the 320 design width (`vz-tight`, under 17.875rem): very
  * large text on a phone (375 at 150 % is 12.9rem) or 200 % text in a lesson
  * column (14.9rem). The console keeps its reserved rows there by collapsing
- * more of its oldest outputs into `N earlier` (R9), measured at 12.5rem.
+ * more of its oldest outputs into `N earlier` (R9), and a queue collapses
+ * more of its tail into `+N more`. Measured at 11.5rem: the stage of a 375
+ * phone at 150 % text, frame padding and the lanes' tight inset taken out
+ * (wave 4C; 12.5rem before, which an eight-output console outgrew).
  */
-export const STAGE_TIGHT = 200
+export const STAGE_TIGHT = 184
 
 export type LaneKind = 'frame' | 'host' | 'micro' | 'task'
 
@@ -224,6 +228,8 @@ export type EventLoopMetrics = {
   consoleWidth: PerVariant<number>
   /** Console content width in the tight frame (`vz-tight`, R9). */
   consoleTight: number
+  /** A queue lane's content width in the tight frame (`vz-tight:px-1`): its tail collapses there instead of spilling. */
+  queueTight: number
   maxStack: number
   /** The fixed code column width from 768 and from 1280. */
   codeColumn: { md: number; xl: number }
@@ -362,10 +368,10 @@ export function eventLoopMetrics(
   const hostContent = (v: Variant) =>
     rowsHeight(rows[v].host, G.chip, G.chipGap)
   // A preset that traces reserves its frames' rows under the strip.
-  const traceH = traceRows ? G.traceGap + traceRows * G.traceRow : 0
+  const traceH = (v: Variant) => (traceRows ? G.traceGap[v] + traceRows * G.traceRow : 0)
   const tags: PerVariant<boolean> = { narrow: rows.narrow.out < 3 && !traceRows, wide: true }
   const consoleH = per((v) =>
-    laneTop(rowsHeight(rows[v].out, tags[v] ? G.outLine : G.outValue, G.outRowGap) + traceH),
+    laneTop(rowsHeight(rows[v].out, tags[v] ? G.outLine : G.outValue, G.outRowGap) + traceH(v)),
   )
 
   // Narrow: two grid rows, each as tall as its taller lane.
@@ -409,6 +415,7 @@ export function eventLoopMetrics(
     hostWidth: w.hostWidth,
     consoleWidth: w.consoleWidth,
     consoleTight: STAGE_TIGHT - 2 * G.border - 2 * G.pad,
+    queueTight: (STAGE_TIGHT - G.gap) / 2 - 2 * 4,
     maxStack,
     codeColumn: codeColumn(maxCols),
   }

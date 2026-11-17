@@ -92,7 +92,7 @@ const innerSteps: Step<EventLoopState>[] = [
     why: 'outer has nothing left to do after scheduling, so its frame is popped.',
     narration: 'outer returns and its frame leaves the stack.',
     line: 5,
-    focus: ['script'],
+    focus: ['stack'],
     claim: 'modelled',
   },
   {
@@ -214,7 +214,7 @@ const awaitSteps: Step<EventLoopState>[] = [
     why: "o2's promise is still pending, so o1 waits off the stack and no queue holds it yet.",
     narration: "o1 pauses until o2's promise settles and leaves the stack.",
     line: 6,
-    focus: ['script'],
+    focus: ['stack'],
     claim: 'modelled',
   },
   {

@@ -46,7 +46,8 @@ const snippet = [
 const script = { id: 'script', label: 'script' }
 const async1 = { id: 'async1', label: 'async1' }
 const async2 = { id: 'async2', label: 'async2' }
-const executor = { id: 'executor', label: 'executor' }
+// `exec`: with the top marker it keeps its whole label in a phone's stack lane at very large text.
+const executor = { id: 'executor', label: 'exec' }
 const timerCb = { id: 'timer', label: 'cb Timeout' }
 // `then`, not `cb Promise 2`: with async1 it keeps one row in a phone's queue lane.
 const thenCb = { id: 'then', label: 'then' }
