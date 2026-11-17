@@ -374,6 +374,49 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // of Secure Authentication Practices, before authorization.
     inserts: [{ before: '## **Secure Authorization Practices**', viz: '<Viz id="lanes" preset="oauth-pkce-channels" />' }],
   },
+  // Wave 4A, the DSA static figures (all five lessons PREMIUM: local checkout
+  // only). Static figures, each after the example it explains.
+  {
+    slug: 'segment-trees',
+    title: 'Segment Trees',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/segment-trees/page.mdx',
+    // After Lazy Propagation, the second of the two examples it runs (the
+    // SegmentTree's query and update, then the lazy tree's tags), before the tips.
+    inserts: [{ before: '## **Practical Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="segment-tree-query-cover" />' }],
+  },
+  {
+    slug: 'union-find',
+    title: 'Union-Find (Disjoint Set)',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/union-find/page.mdx',
+    // After Union by Rank/Size, once both examples it runs (rank, then size) are shown, before Cycle Detection.
+    inserts: [{ before: '### **Cycle Detection in Graph**', viz: '<Viz id="annotated-tree" preset="dsu-parent-forest" />' }],
+  },
+  {
+    slug: 'heaps',
+    title: 'Heaps',
+    section: { title: 'User-Defined Data Structures', href: '/courses/dsa-track/user-defined-data-structures' },
+    source: 'content/dsa-track/user-defined-data-structures/heaps/page.mdx',
+    // After Extracting the Minimum/Maximum Element, the MinHeap it runs (insert, extractMin, sift down), before Peeking.
+    inserts: [{ before: '### **Peeking the Minimum/Maximum Element**', viz: '<Viz id="annotated-tree" preset="insert-4-10-3-5-1-then-extract" />' }],
+  },
+  {
+    slug: 'recursion-and-memoization',
+    title: 'Recursion and Memoization',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/recursion-and-memoization/page.mdx',
+    // After Memoized Fibonacci Sequence, the second of the two functions it draws, before Factorial.
+    inserts: [{ before: '### **Factorial Calculation**', viz: '<Viz id="annotated-tree" preset="fib5" />' }],
+  },
+  {
+    slug: 'palindromic-subsequence',
+    title: 'Palindromic Subsequence',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/palindromic-subsequence/page.mdx',
+    // After the Longest Palindromic Subsequence example (its "bbbab" table), before its tips (the first Tips and Tricks).
+    inserts: [{ before: '### **Tips and Tricks:**', viz: '<Viz id="annotated-tree" preset="lps-interval-triangle" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a
