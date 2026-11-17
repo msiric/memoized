@@ -272,7 +272,7 @@ export function layoutSegment(p: SegmentPanel): SegGeometry {
 // Union-find forests
 // ---------------------------------------------------------------------------
 
-export const FOREST = { r: 10, pitch: 24, cellW: 22, gutter: 46, top: 8, levelGap: 34, rowsGap: 14 } as const
+export const FOREST = { r: 10, pitch: 23.5, cellW: 22, gutter: 51, top: 8, levelGap: 34, rowsGap: 14 } as const
 
 export type ForestGeometry = {
   width: number
@@ -315,7 +315,8 @@ export function layoutForest(p: ForestPanel): ForestGeometry {
     const ua = unit(a, { x: mx, y: my })
     const ub = unit(b, { x: mx, y: my })
     const s = { x: a.x + ua.x * (FOREST.r + 1), y: a.y + ua.y * (FOREST.r + 1) }
-    const e = { x: b.x + ub.x * (FOREST.r + 2), y: b.y + ub.y * (FOREST.r + 2) }
+    // The head's tip touches the parent's circle.
+    const e = { x: b.x + ub.x * (FOREST.r + 0.5), y: b.y + ub.y * (FOREST.r + 0.5) }
     const f = (v: number) => Math.round(v * 10) / 10
     const d = lift ? `M${f(s.x)} ${f(s.y)}Q${f(mx)} ${f(my)} ${f(e.x)} ${f(e.y)}` : `M${f(s.x)} ${f(s.y)}L${f(e.x)} ${f(e.y)}`
     arrows.push({ from: i, to: j, d, head: slantHead(lift ? { x: mx, y: my } : s, e) })
@@ -463,10 +464,10 @@ export function layoutInterval(p: IntervalPanel): IntervalGeometry {
     const dy = Math.sign(ai - ti)
     const cx = (j: number) => x[j] + INTERVAL.cell.w / 2
     const cy = (i: number) => y[i] + INTERVAL.cell.h / 2
-    const hw = INTERVAL.cell.w / 2 + 2
-    const hh = INTERVAL.cell.h / 2 + 2
-    const s = { x: cx(tj) + dx * (dy ? hw - 8 : hw), y: cy(ti) + dy * (dx ? hh - 4 : hh) }
-    const e = { x: cx(aj) - dx * (dy ? hw - 8 : hw), y: cy(ai) - dy * (dx ? hh - 4 : hh) }
+    const hw = INTERVAL.cell.w / 2
+    const hh = INTERVAL.cell.h / 2
+    const s = { x: cx(tj) + dx * (dy ? hw - 7 : hw), y: cy(ti) + dy * (dx ? hh - 3 : hh) }
+    const e = { x: cx(aj) - dx * (dy ? hw - 7 : hw), y: cy(ai) - dy * (dx ? hh - 3 : hh) }
     const f = (v: number) => Math.round(v * 10) / 10
     return { to: a.to, used: a.used, d: `M${f(s.x)} ${f(s.y)}L${f(e.x)} ${f(e.y)}`, head: slantHead(s, e, 6, 3.5) }
   })

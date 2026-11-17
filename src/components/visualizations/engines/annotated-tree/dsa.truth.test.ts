@@ -438,6 +438,8 @@ describe('wave 4A layouts', () => {
       apart(g.at.map((a, i) => ({ id: `${p.id}:${i}`, x: a.x - FOREST.r, y: a.y - FOREST.r, w: 2 * FOREST.r, h: 2 * FOREST.r })))
       expect(g.colX[g.colX.length - 1] + FOREST.cellW / 2).toBeLessThanOrEqual(W)
       expect(g.rows.rowY[0]).toBeGreaterThan(Math.max(...g.at.map((a) => a.y)) + FOREST.r)
+      // The row names sit in the gutter, right-aligned against the first cell.
+      for (const r of p.rows) expect(g.colX[0] - FOREST.cellW / 2 - ROW.gutterGap - smallW(r.name), r.name).toBeGreaterThanOrEqual(0)
     }
   })
 
@@ -449,12 +451,14 @@ describe('wave 4A layouts', () => {
         ...g.cellX.map((x, i) => ({ id: `${p.id}:c${i}`, x: x - HEAP.cellW / 2, y: g.rows.rowY[0], w: HEAP.cellW, h: ROW.cell.h })),
       ])
       expect(g.bend).toBeLessThan(g.rows.headerY! - 13)
+      expect(g.cellX[0] - HEAP.cellW / 2).toBeGreaterThanOrEqual(0)
     }
   })
 
   it('call trees: nodes and memo-hit leaves inside and apart', () => {
     for (const p of fib5.data.panels as RecursionPanel[]) {
       const g = layoutRecursion(p)
+      if (g.memo) for (const name of ['memo', 'write', 'n']) expect(g.memo.cellX[0] - REC.cellW / 2 - ROW.gutterGap - smallW(name), name).toBeGreaterThanOrEqual(0)
       apart(
         p.nodes.map((n) => {
           const a = g.at[n.id]

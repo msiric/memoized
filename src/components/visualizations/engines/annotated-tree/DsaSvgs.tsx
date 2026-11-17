@@ -91,7 +91,7 @@ function ArrayRows({
 }) {
   const gutter = xs[0] - w / 2 - ROW.gutterGap
   return (
-    <g data-viz-part={part}>
+    <g data-viz-part={part} data-array="">
       {g.headerY !== null ? (
         <g className="vz-m vz-12" data-viz-part="index">
           {header.map((h, k) => (
@@ -419,7 +419,7 @@ export function IntervalSvg({ p }: { p: IntervalPanel }) {
         const base = c.i === c.j
         const text = p.show === 'value' ? String(c.value) : base ? 'base' : String(c.order)
         return (
-          <g key={`${c.i},${c.j}`} data-cell={`${c.i},${c.j}`} data-value={c.value} data-order={c.order} data-changed={on ? '' : undefined}>
+          <g key={`${c.i},${c.j}`} data-node={`${c.i},${c.j}`} data-cell={`${c.i},${c.j}`} data-value={c.value} data-order={c.order} data-changed={on ? '' : undefined}>
             <rect
               x={px(g.x[c.j])}
               y={px(g.y[c.i])}
