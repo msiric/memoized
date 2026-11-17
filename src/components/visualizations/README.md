@@ -330,6 +330,70 @@ SVG), the frontier lane(s) on the shared `Lane` substrate (a queue, `q` and
   `e2e/viz-frontier.spec.ts`, `e2e/motion/frontier-steps.spec.ts`,
   `e2e/stress/frontier.stress.ts`, the `fr-*` gate states and the
   consistency check against the event loop. Gallery: `?fr=<preset>`.
+### Frontier, wave 4B: DFS stack mode and Kahn's in-degrees
+
+Two more lesson groups on the frontier engine, every drawn set, stack,
+queue and badge read from a recording (`programs/graph-dfs.ts`,
+`programs/topological-sort.ts`, `yarn viz:frontier`):
+
+- **Graph DFS** (`dfs-directed-recstack`, `dfs-back-edge`,
+  `dfs-finish-order`): stack mode. `visited` and `recStack` are two lanes
+  side by side; on the canvas a vertex on recStack keeps the queued sky
+  edge, the running call the doubled edge, a finished vertex the solid
+  fill, so visited and on-the-stack read apart. A step enters a vertex
+  through the edge that called it, examines an edge to a visited vertex,
+  or finishes one (`recStack.delete`). The first preset is the lesson's
+  cycle example with E's list emptied (`replace: ["E: ['A']", 'E: []']`):
+  as written the run returns true before it ever examines A -> C, so only
+  the variant asks "C is visited. Is A -> C a cycle?" (no: done, off the
+  stack). The second is the example as written (E -> A meets A on the
+  stack), the third topologicalSort's finish order, reversed.
+- **Topological Sort** (`kahn-indegree`, `course-schedule-ii-edges`,
+  `kahn-cycle-stall`, `mht-leaf-peeling`): queue mode with badges. A
+  vertex's badge is its recorded in-degree (`scene.badge` names it in the
+  text alternative); a dequeued vertex's edges are examined one step at a
+  time, the target's badge counts down and the edge is then spent, drawn
+  dashed (`FEdge.removed`). The order is a lane of its own. Course
+  Schedule II starts with no edges and asks which way [1, 0] points (b ->
+  a); the cycle preset is the example with [3, 1] turned into [3, 5], so
+  the queue empties with badges left and it returns []; Minimum Height
+  Trees peels leaves (degree badges) through `q` and `t`. The two answers
+  are premium: `wrap` rows, the group is local-only.
+- **Gates.** `frontier.truth.test.ts` (the register's values, the drawn
+  states against the lanes, badges the run held, the variant being one
+  token, lies), the existing frontier e2e, motion, stress and consistency
+  specs (the Graph DFS group runs in CI; Topological Sort is local-only),
+  the `fr-recstack-*`, `fr-backedge-*`, `fr-finish-*`, `fr-kahn-*`,
+  `fr-course-*`, `fr-stall-*`, `fr-mht-*` states and the `fr-dfs-call`
+  motion state.
+
+### Residual graphs (annotated tree, wave 4B)
+
+`<Viz id="annotated-tree" preset="diamond-reverse-edge" />` (Maximum Flow
+and Network Flow Algorithms) and `preset="clrs-23-min-cut"` (Network Flow
+Algorithms): the `residual` panel kind (`flow.ts`, `FlowSvg.tsx`). Each
+edge carries flow / capacity; a panel that shows reverses draws each
+edge's reverse residual (worth its flow) dashed, offset beside it; one
+augmenting path is marked (a hop back along an edge marks its dashed
+reverse), or the minimum cut: the vertices the source still reaches
+through positive residuals, shaded (`hullPath`, the convex hull grown by
+22 px), and the edges leaving them marked.
+
+- **Built from a recording** (`programs/flow.ts`, `yarn viz:tree`): the
+  lessons' Ford-Fulkerson class (lines 1-63) on the register's diamond and
+  on the lesson's S/A/B/T network, Edmonds-Karp on the diamond (the
+  contrast: two short paths, no reverse hop) and the Edmonds-Karp example
+  as written (CLRS, 23). Probes read `this.graph` at the start, after each
+  augmentation (with `parent` and `parentEdge`) and at the return; a path
+  hop through a reverse entry is known from the entry, never guessed.
+- **Gates.** `flow.truth.test.ts` (fresh runs; both lessons' blocks
+  byte-identical; the register's 2, 12 and 23; every panel a flow:
+  capacity, conservation, reverse = flow, cut edges full and summing to the
+  flow; lies; layout: labels clear of vertices and each other, the cut
+  region around its vertices only), `e2e/viz-annotated-tree.spec.ts`, the
+  `at-diamond` and `at-clrs` states, print and the heap-graph consistency
+  check.
+
 ### Pointer rewiring (R4 shared visual 3, wave 2B)
 
 `<Viz id="linked-list-pointer-rewiring" preset="…" />` (step-through) and
