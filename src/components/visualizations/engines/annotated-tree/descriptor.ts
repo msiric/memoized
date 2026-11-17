@@ -1,7 +1,11 @@
 import type { HashedProgram, StaticDescriptor, StaticEngineCore, StaticTextAlternative } from '../../shell/static-types'
 import { layoutTree } from './layout'
-import type { GainPanel, SuffixPanel, TreeData, TreePanel, TriePanel } from './model'
-import { maxPathGainVsThrough, suffixTreeBanana, trieEndMarkers } from './presets'
+import { callLabel, cutText, pathText } from './calls'
+import { cellLabel } from './grid'
+import type { CallPanel, GainPanel, GraphPanel, GridPanel, SuffixPanel, TreeData, TreePanel, TriePanel } from './model'
+import { hiddenClassTransitions, maxPathGainVsThrough, suffixTreeBanana, trieEndMarkers } from './presets'
+import { combinationSumTakeSkip, kPairsLazyGrid, waterWellsSource } from './presets/singles'
+import { shapeLabel, type ShapesPanel } from './shapes'
 
 /**
  * The annotated-tree substrate without its renderer (R4 shared visual
@@ -60,17 +64,65 @@ function describeSuffix(p: SuffixPanel): string[] {
   return [...lines, ...p.notes.map((n) => `${n}.`)]
 }
 
+function describeCalls(p: CallPanel): string[] {
+  const lines = p.nodes.map((n) => {
+    const head = `(${callLabel(n)}) with t ${pathText(n.t)}`
+    if (n.end?.kind === 'answer') return `${head}: s is 0, an answer.`
+    if (n.end?.kind === 'cut') return `${head}: cut, ${n.end.index ? `i = ${n.end.n} is past the candidates` : `${cutText(n)}, s is less than c[i]`}.`
+    const [skip, take] = p.nodes.filter((k) => k.parent === n.id)
+    return `${head}: skips ${p.candidates[n.i]} to (${callLabel(skip)}), then takes it to (${callLabel(take)}).`
+  })
+  return [...lines, ...p.notes.map((n) => `${n}.`)]
+}
+
+const ordinal = (n: number) => `${n}${['st', 'nd', 'rd'][n - 1] ?? 'th'}`
+
+function describeGraph(p: GraphPanel): string[] {
+  const name = (id: string) => p.nodes.find((n) => n.id === id)!.label
+  const houses = p.nodes.filter((n) => !n.source).map((n) => `house ${n.label}${n.note ? `, ${n.note}` : ''}`)
+  const edges = p.edges.map(
+    (e) => `${e.well ? 'Well' : 'Pipe'} ${name(e.a)} to ${name(e.b)}, cost ${e.w}${e.accepted ? `, accepted ${ordinal(e.accepted)} (marked)` : ''}${e.untried ? ', never tried' : ''}.`,
+  )
+  return [`${houses.join('; ')}.`, ...edges, ...p.notes.map((n) => `${n}.`)]
+}
+
+function describeGrid(p: GridPanel): string[] {
+  const at = (i: number, j: number) => `(${i},${j})`
+  const lines = [`Rows ${p.rows.name} [${p.rows.values.join(', ')}], columns ${p.cols.name} [${p.cols.values.join(', ')}]; each cell is the pair's sum.`]
+  for (const c of p.cells) if (cellLabel(c)) lines.push(`${at(c.i, c.j)} ${c.sum}: ${cellLabel(c)}${p.mark === 'heap' && c.state === 'heap' ? ' (marked)' : ''}.`)
+  for (const a of p.arrows) lines.push(`Arrow from ${at(...a.from)} to ${at(...a.to)}.`)
+  return [...lines, ...p.notes.map((n) => `${n}.`)]
+}
+
+function describeShapes(p: ShapesPanel): string[] {
+  const byId = new Map(p.nodes.map((n) => [n.id, n]))
+  const lines = p.nodes.map((n) => {
+    const at = n.objects.length ? `; ${n.objects.join(' and ')} ${n.objects.length > 1 ? 'end' : 'ends'} here` : ''
+    if (!n.parent) return `${shapeLabel(n.keys)}: the root${n.inferred ? ' (inferred, not printed by V8)' : ''}${at}.`
+    const parent = byId.get(n.parent)!
+    return `${shapeLabel(parent.keys)} + ${n.keys[n.keys.length - 1]} → ${shapeLabel(n.keys)}${n.inferred ? ' (inferred from its child’s back pointer)' : ''}${at}.`
+  })
+  for (const r of p.results) lines.push(`${r.expr} is ${r.value}.`)
+  return [...lines, ...p.notes.map((n) => `${n}.`)]
+}
+
 function describePanel(p: TreePanel): string[] {
+  if (p.kind === 'shapes') return describeShapes(p)
   if (p.kind === 'gain') return describeGain(p)
   if (p.kind === 'trie') return describeTrie(p)
+  if (p.kind === 'calls') return describeCalls(p)
+  if (p.kind === 'graph') return describeGraph(p)
+  if (p.kind === 'grid') return describeGrid(p)
   return describeSuffix(p)
 }
 
 export function describeTree(d: TreeData): Omit<StaticTextAlternative, 'outputs'> {
   return {
     parts: d.panels.map((p) => ({ heading: p.heading, lines: describePanel(p) })),
-    model:
-      'Every value is recorded from a real run of the lesson code under the inspector: what each call returned, each node’s flags and children, each edge’s range.' +
+    model: d.panels.every((p) => p.kind === 'shapes')
+      ? 'Hidden classes are not visible to plain JavaScript: each node is a V8 map printed by %DebugPrint in a real run of the lesson code under node --allow-natives-syntax, joined to the map it came from (its back pointer); a dashed node was seen only as a back pointer.'
+      : 'Every value is recorded from a real run of the lesson code under the inspector: what each call returned, each node’s flags and children, each edge’s range.' +
+        (d.panels.some((p) => p.kind === 'grid' && p.mark === 'twice') ? ' The two-neighbour rule is not run: its panel is a structural illustration, not a run, of how that rule reaches one cell from two parents, both pushed by the first pop.' : '') +
       (d.panels.some((p) => p.kind === 'suffix') ? ' Children are drawn in character order, so the leaves read in suffix-array order (the lesson’s Map keeps insertion order).' : ''),
   }
 }
@@ -86,7 +138,7 @@ export const annotatedTreeDescriptor: StaticDescriptor<TreeData, HashedProgram> 
   form: 'static',
   title: 'Annotated tree',
   engine: annotatedTreeEngineCore,
-  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana],
+  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, combinationSumTakeSkip, waterWellsSource, kPairsLazyGrid, hiddenClassTransitions],
   defaultPreset: 'max-path-gain-vs-through',
   since: '2026-11',
 }

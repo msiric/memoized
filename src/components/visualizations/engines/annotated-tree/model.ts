@@ -1,3 +1,5 @@
+import type { ShapesPanel } from './shapes'
+
 /**
  * The annotated-tree substrate (R4 shared visual "annotated-tree", wave
  * 2D): static figures of trees whose nodes and edges carry recorded values.
@@ -13,6 +15,16 @@
  *   with their substring and [start, end] range, leaves read top to bottom
  *   as the suffix array, with the LCP beside it (Suffix Arrays and Suffix
  *   Trees).
+ *
+ * Wave 3A adds three more, each a tree in the reading the lesson needs:
+ *
+ * - `calls`: a recursion's call tree drawn left to right, one node per call
+ *   with its arguments, skip edges straight and take edges bent, cut leaves
+ *   dashed with the reason (Backtracking, combination sum);
+ * - `graph`: a small weighted graph whose chosen edges form a spanning tree
+ *   (Minimum Spanning Trees, wells as edges to a source node);
+ * - `grid`: a 2D grid of candidates whose push arrows form a forest, one
+ *   parent per cell (K-way Merge, k pairs with smallest sums).
  *
  * Each panel has at most one rest mark family, the neutral `changed` role
  * (H3 R2 Q9, never lime): the recorded path, the cleared flag, the deepest
@@ -101,7 +113,87 @@ export type SuffixPanel = {
   notes: string[]
 }
 
-export type TreePanel = GainPanel | TriePanel | SuffixPanel
+/** One call of a take/skip recursion, as recorded at its entry. */
+export type CallNode = {
+  id: string
+  /** The call's arguments and the path it was called with (recorded). */
+  i: number
+  s: number
+  t: number[]
+  parent: string | null
+  /** How the parent called it: skip moves to i + 1, take stays on i and subtracts the candidate. */
+  edge: 'skip' | 'take' | null
+  /** Take only: the candidate taken, c[i] of the parent (recorded on the parent's candidates). */
+  took?: number
+  /** A call with no children: an answer (s = 0), or a cut by the index or by the candidate it compared. */
+  end?: { kind: 'answer' } | { kind: 'cut'; index: true; n: number } | { kind: 'cut'; index?: false; c: number }
+}
+
+export type CallPanel = {
+  kind: 'calls'
+  id: string
+  heading: string
+  candidates: number[]
+  /** In call (pre-) order. */
+  nodes: CallNode[]
+  legend: string[]
+  notes: string[]
+}
+
+export type GraphNodeView = {
+  id: string
+  /** A house number, or the source. */
+  label: string
+  source?: boolean
+  /** A line under the node (a house's well cost). */
+  note?: string
+}
+
+export type GraphEdgeView = {
+  a: string
+  b: string
+  w: number
+  /** A well, drawn dashed (an edge to the source). */
+  well?: boolean
+  /** Accepted by the run: its 1-based order of acceptance (the marked tree). */
+  accepted?: number
+  /** Never reached by the loop (it stopped once every house was joined). */
+  untried?: boolean
+}
+
+export type GraphPanel = {
+  kind: 'graph'
+  id: string
+  heading: string
+  nodes: GraphNodeView[]
+  edges: GraphEdgeView[]
+  notes: string[]
+}
+
+export type GridCellView = {
+  i: number
+  j: number
+  sum: number
+  /** Its label: in the heap, popped (with its pop number), pushed twice, or a parent of that cell. */
+  state?: 'heap' | 'popped' | 'twice' | 'pop'
+  order?: number
+}
+
+export type GridPanel = {
+  kind: 'grid'
+  id: string
+  heading: string
+  rows: { name: string; values: number[] }
+  cols: { name: string; values: number[] }
+  cells: GridCellView[]
+  /** Push arrows, parent cell to the cell it pushed. */
+  arrows: { from: [number, number]; to: [number, number] }[]
+  /** Which cells carry the panel's one mark (the heap's cells, or the cell pushed twice and its arrows). */
+  mark: 'heap' | 'twice' | 'none'
+  notes: string[]
+}
+
+export type TreePanel = GainPanel | TriePanel | SuffixPanel | CallPanel | GraphPanel | GridPanel | ShapesPanel
 
 export type TreeData = {
   panels: TreePanel[]

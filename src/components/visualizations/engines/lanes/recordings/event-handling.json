@@ -1,0 +1,105 @@
+{
+ "generator": "node-lanes@1",
+ "sha256": "0733e63a6452d70566871c31c85732ea715e76c3a160464efd606b9eaa83b343",
+ "browser": "chromium@156.0.8078.4",
+ "scenarios": {
+  "default": {
+   "logs": [
+    "outer capture",
+    "middle capture",
+    "inner target",
+    "middle bubble",
+    "outer bubble"
+   ],
+   "calls": [
+    [
+     "#outer",
+     1
+    ],
+    [
+     "#middle",
+     1
+    ],
+    [
+     "#inner",
+     2
+    ],
+    [
+     "#middle",
+     3
+    ],
+    [
+     "#outer",
+     3
+    ]
+   ],
+   "path": [
+    "#inner",
+    "#middle",
+    "#outer",
+    "body",
+    "html",
+    "document",
+    "window"
+   ]
+  },
+  "stop-at-target": {
+   "logs": [
+    "outer capture",
+    "middle capture",
+    "inner target"
+   ],
+   "calls": [
+    [
+     "#outer",
+     1
+    ],
+    [
+     "#middle",
+     1
+    ],
+    [
+     "#inner",
+     2
+    ],
+    [
+     "#inner",
+     2
+    ]
+   ],
+   "path": [
+    "#inner",
+    "#middle",
+    "#outer",
+    "body",
+    "html",
+    "document",
+    "window"
+   ]
+  },
+  "stop-in-capture": {
+   "logs": [
+    "outer capture"
+   ],
+   "calls": [
+    [
+     "#outer",
+     1
+    ],
+    [
+     "#outer",
+     1
+    ]
+   ],
+   "path": [
+    "#inner",
+    "#middle",
+    "#outer",
+    "body",
+    "html",
+    "document",
+    "window"
+   ]
+  }
+ }
+}

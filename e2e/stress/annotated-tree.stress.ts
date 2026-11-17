@@ -9,7 +9,8 @@ import { BASE, Recorder, type Row, failing, gated, activeConfigs, goto, markScop
  * detectors. Strict by default.
  */
 
-const PRESETS = annotatedTreeDescriptor.presets.map((p) => p.id)
+// The hidden-class trees (wave 3B) are stressed on the JavaScript-track page (`js-statics.stress.ts`).
+const PRESETS = annotatedTreeDescriptor.presets.map((p) => p.id).filter((id) => id !== 'hidden-class-transitions')
 
 async function hoverPass(page: Page, rec: Recorder, scope: string, visual: string) {
   const n = await page.evaluate((s) => {

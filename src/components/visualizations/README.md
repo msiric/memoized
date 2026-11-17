@@ -462,6 +462,166 @@ the LCP beside it (a narrow and a wide drawing, CSS picks one).
   tree edges end on their node), the `at-*` gate states (gallery
   `?at=static`), print, and the heap-graph consistency check.
 
+### Annotated tree, wave 3A: call trees, spanning trees, push forests
+
+Three more presets on the same substrate, each a tree in the reading its
+lesson needs, all built from a recorded run of the lesson's practice answer
+(values only; the figure shows no code):
+
+- `combination-sum-take-skip` (Backtracking, combination sum): a `calls`
+  panel. The recorder pauses at every call's entry (i, s, t) and at the two
+  returns that end a call without children (an answer, a cut with the
+  candidate it compared); `calls.ts` rebuilds the tree from that pre-order
+  (a call not followed by its own end made two calls, skip then take) and
+  draws it left to right, a column per depth and a row per leaf: a skip is
+  straight, a take bends down to its child's row labelled `+c`, a cut is a
+  dashed ghost with its reason (`1 < 6`, `i = 4`), an answer is marked with
+  its path in the result amber. Narrow and wide drawings, CSS picks one.
+- `water-wells-virtual-source` (Minimum Spanning Trees, Optimize Water
+  Distribution): two `graph` panels, the houses with their pipes and well
+  costs, then source 0 with a dashed well edge to each house and the
+  accepted edges marked (the run's `ans += c` pauses, in order); the two
+  wells the loop never tried stay unmarked. The caption variant (every well
+  5, total 7) is a second recorded run.
+- `k-pairs-lazy-grid` (K-way Merge, Find K Pairs): three `grid` panels, an
+  addition table (`+` in the corner) whose cells carry their state in words
+  (`heap`, `pop 1`): after seeding, after three pops with one right arrow
+  per push, and the two-neighbour rule's first collision: that rule starts
+  from (0,0), so 3 is popped first and pushes 5 and 9, which each push
+  (1,1), pushed twice (only the two arrows into it are marked). That rule
+  is not a program of the lesson: its panel is a structural illustration
+  the truth test checks (every popped cell's parent is popped), said so in
+  the text alternative.
+- **Gates.** `singles.truth.test.ts` (the register's values; the rule each
+  figure states as a check that lies fail: a skip that subtracts, a cut
+  with no rule, an extra or missing tree edge, a down arrow, a push from an
+  unpopped cell; tampered recordings that cannot build; every label inside
+  its panel), the re-recording in `annotated-tree.truth.test.ts`, and the
+  existing annotated-tree e2e, stress, consistency, print and `at-calls`,
+  `at-water`, `at-kpairs` states on `?at=static`.
+
+### DP table (R4 shared visual 6, `dp-table-dependencies`, wave 3A)
+
+`<Viz id="dp-table-dependencies" preset="…" />`, a step-through with one
+lesson group: `knapsack-1d-desc-vs-asc` (Dynamic Programming: the practice
+answer to partition equal subset sum, its 1D 0/1 subset-sum table for
+[1, 2, 5], j counting down as written) and `knapsack-1d-asc` (the same
+answer with the inner loop counting up).
+
+- **A new engine, not the sliding-window strip.** The strip's state is a
+  contiguous window between two edges with a store; a DP write is a
+  dependency between two cells that need not touch, plus which cells the
+  current item already wrote. The engine reuses the strip's geometry (30 px
+  cells, index row, tag lanes), its tag and cell glyphs and its svg motion
+  (`substrates/svg-motion.ts`, extracted from the sliding window's stage).
+- **Recorded under the inspector** with the annotated-tree recorder
+  (`truth/record.ts` wraps it): probes before the item loop, at each
+  item's inner loop header (so an item whose loop never runs is seen) and
+  before every write; the value a write stored is the table at the next
+  pause. The upward program is the answer with line 10's header changed by
+  four token swaps (`SourcePart.swaps`: `>=`, `--j` and the two bounds, at
+  most four characters each), so the variant commits no answer text.
+- **Steps.** One step per write `f[j] = f[j] || f[j - x]`, drawn as an
+  arrow from the cell read to the cell written (the changed-role connector)
+  landing with the written cell; a bar marks each cell written for the
+  current item (the row labelled "this item"), so an arrow leaving a barred
+  cell is the item counted twice. An item whose loop never runs is one
+  step; the return prints. Downward asks at Start whether [1, 2, 5] splits
+  evenly (judged at the end: false); upward asks, before item 1 reaches
+  j = 2, what f[2] becomes (true, item 1 used twice; f[4] ends true, wrong).
+- **Gates.** `dp-table.truth.test.ts` (with a checkout: the answer's hash,
+  fresh re-recordings, every pane row against the answer, the upward
+  program differing on line 10 only; everywhere: the register's values,
+  every frame a logged write, reuse exactly where the run reads a barred
+  cell, lies that must fail), `layout.test.ts`, `e2e/viz-dp-table.spec.ts`
+  (with the 375x667 fit), `e2e/motion/dp-table-steps.spec.ts`,
+  `e2e/stress/dp-table.stress.ts`, the `dp-*` gate states (gallery
+  `?dp=<preset>`, local-only baselines) and the consistency check against
+  the sliding window's glyphs. Both presets are local-only.
+### JavaScript-track figures (wave 3B)
+
+Seven static figures, three systems, every value recorded:
+
+- **Prototype object graph** (`<Viz id="prototype-object-graph">`, R4
+  shared visual 3; Prototypes: `lookup-and-shadowing`, `constructor-fix`).
+  The heap graph's boxes and rows in a chain arrangement
+  (`engines/heap-graph/proto-*.ts`, `ProtoStage.tsx`): the [[Prototype]]
+  spine down the left (plain vertical links, no dot, down to `null`), each
+  constructor function a pill beside the object its `.prototype` names, the
+  `.prototype` arrow solid and hooked over the pill, `.constructor` dashed
+  and straight across. The one mark is a lookup: the links it followed and
+  the row that answered. `yarn viz:prototypes` reads each graph in the
+  paused frame of a real run (the annotated-tree recorder): own keys and
+  values, [[Prototype]] identities, and the objects each lookup visited.
+- **Hidden-class trees** (`<Viz id="annotated-tree" preset="hidden-class-transitions">`,
+  Engine and Runtime), the annotated tree's `shapes` panel kind
+  (`engines/annotated-tree/shapes.ts`): V8 maps are not visible to plain
+  JavaScript, so `yarn viz:maps` runs the lesson code under
+  `node --allow-natives-syntax` and the inspector, prints each object's map
+  with `%DebugPrint` at every probe (its map, its own keys, the map's back
+  pointer) and reads `%HaveSameMap` at the end
+  (`truth/record-maps.ts`). Nodes are maps joined by back pointers; a map
+  seen only as a back pointer is drawn dashed and said in words.
+- **Lanes** (`<Viz id="lanes">`, `engines/lanes/`), a new static substrate
+  for orders and places, four panel kinds packed into rows per variant
+  (`pack`: a compact panel sits beside another where the stage allows):
+  `timeline` (Performance Optimization: the lesson's debounce and
+  throttle on a controlled clock), `dispatch` (Event Handling: a trusted
+  click in Chromium through Playwright, plus two `stopPropagation()`
+  variants; badges ride their lane), `sequence` (Frontend Security: the
+  answer's OAuth routes against a local token endpoint that checks
+  S256(code_verifier); messages are links between lifelines, which break
+  behind labels) and `sets` (Advanced Types: `tsc --strict` on the
+  register's panel code; overlapping sets are regions, not boxes).
+  `yarn viz:lanes` records all four.
+- **Gates.** `prototype.truth.test.ts`, `hidden-classes.truth.test.ts`,
+  `lanes.truth.test.ts` (fresh runs with a checkout; everywhere the
+  register's assertions and lies that must fail),
+  `e2e/viz-js-statics.spec.ts`, `e2e/stress/js-statics.stress.ts`, the
+  `js-*` gate states and print baselines, and the heap-graph consistency
+  check. Gallery: `?js=static`.
+### Frames (wave 3C: generators, mapLimit, reentrant emit)
+
+One step engine (`engines/frames/`) for code that runs in pieces over time,
+three visuals with their own titles, one per lesson:
+`<Viz id="generator-frames">` (Generators: `twoWay-next-arg`,
+`take-closes-source`, `lazy-pipeline-pull`, `yield-star-forwarding`),
+`<Viz id="worker-pool">` (Async/Await: `refill-on-settle`,
+`fixed-batches-contrast`, `failure-stops-claims`) and `<Viz id="emit-frames">`
+(Advanced Patterns: `once-consumed-by-nested-emit`, `removed-before-turn`,
+`added-during-emit`). The stage is readouts (a cursor, counters), one shared
+`Lane` per frame or slot that outlives a call (a generator object, a worker,
+an emit on the stack, a store such as the results array or the registration
+Set) and the console. A lane's first chip says what it is doing (not
+started, running, paused at a line, awaiting, closed); the rest are the
+values it holds.
+
+- **Recorded under the inspector** (`truth/record.ts`, `yarn viz:frames`):
+  breakpoints only (a column for a `for...of` body), values read from the
+  paused frames, each generator's `[[GeneratorState]]` and suspended line
+  (found by name, or through another generator's scopes), each emit frame's
+  cursor, a record number per registration (`__vzId`, a recorder WeakMap),
+  private fields read where debug-evaluate resolves them (`[expr, map]`
+  watches), and how many lines were printed at each pause. mapLimit's
+  timing is the harness's gates, released in the register's order one turn
+  of the event loop apart, never a clock. Builders (`presets/*`) draft one
+  step per resumption, hand-off, claim, settle or Set change from the
+  recording; presets add words and checkpoints only.
+- **Premium.** Every pane but the fixed-batch contrast (the visual's own
+  code, committed with its tokens) is a practice answer or a question's
+  visible checks: `wrap` rows, resolved for a page. `BlockRef` reads the
+  `nth` fence of an answer and, with `field: 'question'`, of a question.
+  Resolved panes are tokenized by whole program line and cut per row
+  (`rowTokens`), so a string or comment broken over rows keeps its colour.
+- **Gates.** `frames.truth.test.ts` (with a checkout: hashes, fresh
+  re-recordings, every row against the content; everywhere: logs rebuilt
+  from the recordings, the register's assertions, no committed content text,
+  lies that must fail), `layout.test.ts`, `e2e/viz-frames.spec.ts` (with the
+  375x667 fit and frames within 850 px), `e2e/motion/frames-steps.spec.ts`,
+  `e2e/stress/frames.stress.ts`, the `fx-*` gate states (gallery
+  `?fx=<preset>`, all local-only) and the consistency check against the
+  event loop's shell and lanes.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,

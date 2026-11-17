@@ -13,12 +13,14 @@
 /**
  * A code block in the content repo, by locator:
  * - a lesson's fence: the first (or `nth`) ```lang fence after the line `heading`;
- * - a practice answer: the first ```lang fence of problem `problem` in
- *   lesson `lesson` (its `id`, e.g. `/trees`) of a `_lessons.json`.
+ * - a practice answer: the first (or `nth`) ```lang fence of problem
+ *   `problem` in lesson `lesson` (its `id`, e.g. `/trees`) of a
+ *   `_lessons.json`; `field: 'question'` reads the problem's question (its
+ *   starter and visible checks) instead of its answer. Both are premium text.
  */
 export type BlockRef =
   | { path: string; heading: string; lang: string; nth?: number }
-  | { path: string; lesson: string; problem: string; lang: string }
+  | { path: string; lesson: string; problem: string; lang: string; nth?: number; field?: 'question' }
 
 /**
  * One part of a program as run, in order, joined with newlines:
@@ -32,6 +34,11 @@ export type BlockRef =
  *   as `if`): `from` must occur exactly once in the selected lines, and
  *   both are keywords, never solution code, so a practice answer's variant
  *   commits no answer text;
+ *   `swaps` makes a variant one operator or name at a time (the dp loop
+ *   counting up instead of down): each [from, to] pair is applied in order
+ *   and must occur exactly once in the selected lines when it applies; every
+ *   `from` and `to` is a token of at most four characters (an operator, a
+ *   bound's name), never a line of solution code;
  * - `code`: a harness line or lines (a call with the register's input, or a
  *   blank separator), never solution code.
  */
@@ -42,6 +49,7 @@ export type SourcePart =
       lines?: readonly [number, number?]
       uncomment?: true
       replace?: readonly [from: string, to: string]
+      swaps?: readonly (readonly [from: string, to: string])[]
     }
   | { code: string }
 
@@ -66,7 +74,9 @@ export const isAnswerSource = (s: ProgramSource): boolean => s.some((p) => 'bloc
 
 /** A short human label for a locator (provenance, skip messages). */
 export function refLabel(b: BlockRef): string {
-  return isAnswerRef(b) ? `${b.path} ${b.lesson} > ${b.problem} (answer, ${b.lang})` : `${b.path} ${b.heading} (${b.lang}${b.nth ? ` #${b.nth}` : ''})`
+  return isAnswerRef(b)
+    ? `${b.path} ${b.lesson} > ${b.problem} (${b.field ?? 'answer'}, ${b.lang}${b.nth ? ` #${b.nth}` : ''})`
+    : `${b.path} ${b.heading} (${b.lang}${b.nth ? ` #${b.nth}` : ''})`
 }
 
 /**
@@ -92,6 +102,11 @@ export function composeProgram(source: ProgramSource, text: (b: BlockRef) => str
       const [from, to] = part.replace
       const n = body.split(from).length - 1
       if (n !== 1) throw new Error(`"${from}" occurs ${n} times in the lines of ${refLabel(part.block)} it would replace (exactly once required)`)
+      body = body.replace(from, to)
+    }
+    for (const [from, to] of part.swaps ?? []) {
+      const n = body.split(from).length - 1
+      if (n !== 1) throw new Error(`"${from}" occurs ${n} times in the lines of ${refLabel(part.block)} it would swap (exactly once required)`)
       body = body.replace(from, to)
     }
     out.push(body)

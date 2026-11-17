@@ -27,8 +27,16 @@ const routes = [
   // The sliding window (wave 2C), one page per lesson group.
   '/dev/visualizations?sw=araaci-k2',
   '/dev/visualizations?sw=set-shrink-longest-substring',
+  // The dp table (wave 3A), one lesson group.
+  '/dev/visualizations?dp=knapsack-1d-desc-vs-asc',
+  // The frames step-throughs (wave 3C), one page per visual.
+  '/dev/visualizations?fx=twoWay-next-arg',
+  '/dev/visualizations?fx=refill-on-settle',
+  '/dev/visualizations?fx=once-consumed-by-nested-emit',
   // The annotated trees (wave 2D).
   '/dev/visualizations?at=static',
+  // The wave 3B JavaScript-track figures (static).
+  '/dev/visualizations?js=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

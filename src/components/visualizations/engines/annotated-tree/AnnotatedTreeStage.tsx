@@ -1,4 +1,3 @@
-import type { CSSProperties, ReactNode } from 'react'
 import { cn as clsx } from '../../primitives/cn'
 import { radius, strokeWidth } from '../../primitives/tokens-v3'
 import type { StaticStageProps } from '../../shell/static-types'
@@ -6,18 +5,22 @@ import { H_CLS, heights } from '../../shell/vars'
 import { routePath } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
 import { toRem } from '../../substrates/units'
+import { HEAD_LEGEND, MARK_EDGE, Notes, Svg, px, r1 } from './parts'
+import { CallsSvg, GraphSvg, GridSvg } from './SinglesSvgs'
 import {
   LABEL_LINE,
   SIZE,
   SUFFIX,
   TRIE,
   layoutGain,
+  layoutShapes,
   layoutSuffix,
   layoutTree,
   layoutTrie,
   type Label,
 } from './layout'
 import type { GainPanel, SuffixPanel, TreeData, TriePanel } from './model'
+import { shapeLabel, type ShapesPanel } from './shapes'
 
 /**
  * The annotated-tree stage: server markup only (no state, no script), in
@@ -33,32 +36,6 @@ import type { GainPanel, SuffixPanel, TreeData, TriePanel } from './model'
  * two to a row. Paper keeps every panel whole.
  */
 
-const r1 = (n: number) => Math.round(n * 10) / 10
-const px = (n: number) => Math.round(n) + 0.5
-/** The legend's baseline: the line under the heading. */
-const HEAD_LEGEND = 14 + SIZE.line
-const MARK_EDGE = { '--vz-sw': `${strokeWidth.nowConnector}px` } as CSSProperties
-
-function Svg({ width, height, id, heading, className, children }: { width: number; height: number; id: string; heading: string; className?: string; children: ReactNode }) {
-  return (
-    <svg
-      aria-hidden
-      data-viz-panel={id}
-      viewBox={`0 0 ${width} ${height}`}
-      width="100%"
-      className={clsx('vz-s', className ?? 'block')}
-      style={{ maxWidth: toRem(width), height: toRem(height) }}
-      fontSize={SIZE.value}
-    >
-      {/* The panel heading, in the drawing so it scales with it under large text. */}
-      <text x={0} y={14} className="vz-u" data-viz-part="panel-heading">
-        {heading}
-      </text>
-      {children}
-    </svg>
-  )
-}
-
 function EdgeLabel({ label, className = 'vz-u', part }: { label: Label; className?: string; part: string }) {
   return (
     <text x={r1(label.x)} y={r1(label.y + 10)} textAnchor={label.anchor} className={className} data-viz-part={part}>
@@ -68,18 +45,6 @@ function EdgeLabel({ label, className = 'vz-u', part }: { label: Label; classNam
         </tspan>
       ))}
     </text>
-  )
-}
-
-function Notes({ top, lines }: { top: number; lines: string[] }) {
-  return (
-    <g data-viz-part="notes">
-      {lines.map((l, i) => (
-        <text key={i} x={0} y={r1(top + i * SIZE.line + 12)} className="vz-u">
-          {l}
-        </text>
-      ))}
-    </g>
   )
 }
 
@@ -359,6 +324,69 @@ function SuffixSvg({ p, variant, className }: { p: SuffixPanel; variant: 'narrow
   )
 }
 
+// ---------------------------------------------------------------------------
+
+function ShapesSvg({ p }: { p: ShapesPanel }) {
+  const g = layoutShapes(p)
+  return (
+    <Svg width={g.width} height={g.height} id={p.id} heading={p.heading}>
+      {g.edges.map((e) => {
+        const ghost = p.nodes.find((n) => n.id === e.to)!.inferred
+        return (
+          <g key={e.to} data-edge={`${e.from}-${e.to}`} data-from={e.from} data-to={e.to}>
+            <path d={`M${r1(e.x1)} ${r1(e.y1)}L${r1(e.x2)} ${r1(e.y2)}`} className={clsx('vz-e', ghost && 'vz-d')} />
+          </g>
+        )
+      })}
+      {g.edges.map((e) => (
+        <EdgeLabel key={e.to} label={e.label} part="added-key" />
+      ))}
+      {p.nodes.map((n) => {
+        const b = g.boxes[n.id]
+        return (
+          <g key={n.id} data-node={n.id} data-keys={n.keys.join(',')} data-inferred={n.inferred ? '' : undefined}>
+            <rect
+              x={px(b.x)}
+              y={px(b.y)}
+              width={Math.round(b.w) - 1}
+              height={b.h - 1}
+              rx={radius.chip.px}
+              className={n.inferred ? 'vz-l vz-d' : 'vz-g'}
+              fill={n.inferred ? 'none' : undefined}
+              strokeWidth={strokeWidth.outline}
+            />
+            <text x={b.cx} y={r1(b.y + b.h / 2 + 4.5)} className={clsx('vz-c', n.inferred && 'vz-m')}>
+              {shapeLabel(n.keys)}
+            </text>
+            {n.objects.length ? (
+              <text x={b.cx} y={r1(b.y + b.h + 14)} className="vz-c vz-u" data-viz-part="objects">
+                {n.objects.join(', ')}
+              </text>
+            ) : null}
+          </g>
+        )
+      })}
+      <g data-viz-part="results">
+        {p.results.map((r, i) => {
+          const y = r1(g.resultsTop + i * SIZE.line + 12)
+          const call = `${r.expr} → `
+          return (
+            <g key={i}>
+              <text x={0} y={y} className="vz-u">
+                {call}
+              </text>
+              <text x={r1(monoWidth(call, SIZE.small))} y={y} className="vz-r vz-12" data-viz-part="result">
+                {r.value}
+              </text>
+            </g>
+          )
+        })}
+      </g>
+      <Notes top={g.resultsTop + p.results.length * SIZE.line} lines={p.notes} />
+    </Svg>
+  )
+}
+
 export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
   const scene = layoutTree(data)
   return (
@@ -372,6 +400,15 @@ export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
         >
           {p.kind === 'gain' ? <GainSvg p={p} room={scene.gainRoom} legend={scene.gainLegend} /> : null}
           {p.kind === 'trie' ? <TrieSvg p={p} rows={scene.trieRows} /> : null}
+          {p.kind === 'calls' ? (
+            <>
+              <CallsSvg p={p} variant="narrow" className="block vz-wide:hidden" />
+              <CallsSvg p={p} variant="wide" className="hidden vz-wide:block" />
+            </>
+          ) : null}
+          {p.kind === 'graph' ? <GraphSvg p={p} /> : null}
+          {p.kind === 'grid' ? <GridSvg p={p} /> : null}
+          {p.kind === 'shapes' ? <ShapesSvg p={p} /> : null}
           {p.kind === 'suffix' ? (
             <>
               <SuffixSvg p={p} variant="narrow" className="block vz-wide:hidden" />

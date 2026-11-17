@@ -1,0 +1,81 @@
+{
+ "generator": "node-lanes@1",
+ "sha256": "443be75ebd39b16c60145a8040028d48e1293f2df4ae9c067c090769d7c9c364",
+ "hops": [
+  {
+   "n": 1,
+   "channel": "front",
+   "from": "browser",
+   "to": "auth",
+   "what": "GET accounts.google.com/o/oauth2/v2/auth",
+   "params": [
+    "client_id",
+    "redirect_uri",
+    "response_type",
+    "scope",
+    "code_challenge",
+    "code_challenge_method",
+    "state"
+   ]
+  },
+  {
+   "n": 3,
+   "channel": "front",
+   "from": "auth",
+   "to": "browser",
+   "what": "redirect /auth/callback",
+   "params": [
+    "code",
+    "state"
+   ]
+  },
+  {
+   "n": 4,
+   "channel": "back",
+   "from": "app",
+   "to": "auth",
+   "what": "POST /token",
+   "params": [
+    "code",
+    "client_id",
+    "client_secret",
+    "redirect_uri",
+    "grant_type",
+    "code_verifier"
+   ]
+  },
+  {
+   "n": 5,
+   "channel": "back",
+   "from": "auth",
+   "to": "app",
+   "what": "200 tokens",
+   "params": [
+    "access_token",
+    "id_token"
+   ]
+  },
+  {
+   "n": 6,
+   "channel": "front",
+   "from": "app",
+   "to": "browser",
+   "what": "redirect /dashboard",
+   "params": []
+  }
+ ],
+ "holds": {
+  "session": [
+   "state",
+   "codeVerifier"
+  ],
+  "userId": "user-42",
+  "challengeIsS256": true,
+  "verifierInFront": false,
+  "tokensInFront": false
+ },
+ "attacks": {
+  "forgedState": 400,
+  "codeWithoutVerifier": "invalid_grant"
+ }
+}

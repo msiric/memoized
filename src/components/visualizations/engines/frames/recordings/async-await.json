@@ -1,0 +1,1311 @@
+{
+ "refill-on-settle": {
+  "sha256": "30e643d5b0a28773c8e4864bdf56eaa672748c7c9a5b79bb0540b7ee03973901",
+  "observed": [
+   "[ 'A', 'B', 'C', 'D' ]"
+  ],
+  "pauses": [
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 0,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": 0
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "claim",
+    "line": 14,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 0,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 14,
+      "vars": {
+       "worker": 0
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 16,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 1,
+     "stopped": false,
+     "index": 0
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 16,
+      "vars": {
+       "worker": 0,
+       "index": 0
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 1,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": 1
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "claim",
+    "line": 14,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 1,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 14,
+      "vars": {
+       "worker": 1
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 16,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 2,
+     "stopped": false,
+     "index": 1
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 16,
+      "vars": {
+       "worker": 1,
+       "index": 1
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 37,
+    "vars": {
+     "i": 1,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 37
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      "B",
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 2,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": {
+        "$u": 1
+       }
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "claim",
+    "line": 14,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      "B",
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 2,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 14,
+      "vars": {
+       "worker": {
+        "$u": 1
+       },
+       "index": 1
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 16,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      "B",
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 3,
+     "stopped": false,
+     "index": 2
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 16,
+      "vars": {
+       "worker": {
+        "$u": 1
+       },
+       "index": 2
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 37,
+    "vars": {
+     "i": 0,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 37
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      "A",
+      "B",
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 3,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": {
+        "$u": 1
+       }
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "claim",
+    "line": 14,
+    "vars": {
+     "results": [
+      "A",
+      "B",
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 3,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 14,
+      "vars": {
+       "worker": {
+        "$u": 1
+       },
+       "index": 0
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 16,
+    "vars": {
+     "results": [
+      "A",
+      "B",
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 4,
+     "stopped": false,
+     "index": 3
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 16,
+      "vars": {
+       "worker": {
+        "$u": 1
+       },
+       "index": 3
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 37,
+    "vars": {
+     "i": 2,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 37
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      "A",
+      "B",
+      "C",
+      {
+       "$u": 1
+      }
+     ],
+     "next": 4,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": {
+        "$u": 1
+       }
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 37,
+    "vars": {
+     "i": 3,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 37
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "next": 4,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": {
+        "$u": 1
+       }
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "return",
+    "line": 25,
+    "vars": {
+     "results": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ],
+     "next": 4,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "mapLimit",
+      "line": 25
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 1
+   }
+  ]
+ },
+ "fixed-batches-contrast": {
+  "sha256": "643ad75680a57d1ad7e056e1c7e305999f185782df2a05525ce4cafc04ae7b21",
+  "observed": [
+   "[ 'A', 'B', 'C', 'D' ]"
+  ],
+  "pauses": [
+   {
+    "probe": "loop",
+    "line": 4,
+    "vars": {
+     "results": []
+    },
+    "stack": [
+     {
+      "fn": "mapBatches",
+      "line": 4
+     },
+     {
+      "fn": "",
+      "line": 22
+     },
+     {
+      "fn": "",
+      "line": 28
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "batch",
+    "line": 7,
+    "vars": {
+     "results": [],
+     "i": 0
+    },
+    "stack": [
+     {
+      "fn": "mapBatches",
+      "line": 7
+     },
+     {
+      "fn": "",
+      "line": 22
+     },
+     {
+      "fn": "",
+      "line": 28
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "start",
+    "line": 18,
+    "vars": {
+     "index": 0
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 18
+     },
+     {
+      "fn": "asyncFn",
+      "line": 17
+     },
+     {
+      "fn": "",
+      "line": 10
+     },
+     {
+      "fn": "mapBatches",
+      "line": 9
+     },
+     {
+      "fn": "",
+      "line": 22
+     },
+     {
+      "fn": "",
+      "line": 28
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "start",
+    "line": 18,
+    "vars": {
+     "index": 1
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 18
+     },
+     {
+      "fn": "asyncFn",
+      "line": 17
+     },
+     {
+      "fn": "",
+      "line": 10
+     },
+     {
+      "fn": "mapBatches",
+      "line": 9
+     },
+     {
+      "fn": "",
+      "line": 22
+     },
+     {
+      "fn": "",
+      "line": 28
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 25,
+    "vars": {
+     "i": 1,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 25
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 25,
+    "vars": {
+     "i": 0,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 25
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "push",
+    "line": 11,
+    "vars": {
+     "results": [],
+     "i": 0,
+     "done": [
+      "A",
+      "B"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "mapBatches",
+      "line": 11
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "batch",
+    "line": 7,
+    "vars": {
+     "results": [
+      "A",
+      "B"
+     ],
+     "i": 2
+    },
+    "stack": [
+     {
+      "fn": "mapBatches",
+      "line": 7
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "start",
+    "line": 18,
+    "vars": {
+     "index": 2
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 18
+     },
+     {
+      "fn": "asyncFn",
+      "line": 17
+     },
+     {
+      "fn": "",
+      "line": 10
+     },
+     {
+      "fn": "mapBatches",
+      "line": 9
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "start",
+    "line": 18,
+    "vars": {
+     "index": 3
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 18
+     },
+     {
+      "fn": "asyncFn",
+      "line": 17
+     },
+     {
+      "fn": "",
+      "line": 10
+     },
+     {
+      "fn": "mapBatches",
+      "line": 9
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 25,
+    "vars": {
+     "i": 2,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 25
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 25,
+    "vars": {
+     "i": 3,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 25
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "push",
+    "line": 11,
+    "vars": {
+     "results": [
+      "A",
+      "B"
+     ],
+     "i": 2,
+     "done": [
+      "C",
+      "D"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "mapBatches",
+      "line": 11
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "return",
+    "line": 13,
+    "vars": {
+     "results": [
+      "A",
+      "B",
+      "C",
+      "D"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "mapBatches",
+      "line": 13
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 1
+   }
+  ]
+ },
+ "failure-stops-claims": {
+  "sha256": "0eed339232ef06c490b23f681c8f6fb13aa624c2ddd09645de603c2f4e2e6f2a",
+  "observed": [
+   "rejected: b failed"
+  ],
+  "pauses": [
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 0,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": 0
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "claim",
+    "line": 14,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 0,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 14,
+      "vars": {
+       "worker": 0
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 16,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 1,
+     "stopped": false,
+     "index": 0
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 16,
+      "vars": {
+       "worker": 0,
+       "index": 0
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 1,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": 1
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "claim",
+    "line": 14,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 1,
+     "stopped": false
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 14,
+      "vars": {
+       "worker": 1
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 16,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 2,
+     "stopped": false,
+     "index": 1
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 16,
+      "vars": {
+       "worker": 1,
+       "index": 1
+      }
+     },
+     {
+      "fn": "mapLimit",
+      "line": 24
+     },
+     {
+      "fn": "",
+      "line": 34
+     },
+     {
+      "fn": "",
+      "line": 40
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 37,
+    "vars": {
+     "i": 1,
+     "ok": false
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 37
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "catch",
+    "line": 18,
+    "vars": {
+     "results": [
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 2,
+     "stopped": false,
+     "index": 1
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 18,
+      "vars": {
+       "worker": {
+        "$u": 1
+       },
+       "index": 1
+      }
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "release",
+    "line": 37,
+    "vars": {
+     "i": 0,
+     "ok": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 37
+     }
+    ],
+    "out": 1
+   },
+   {
+    "probe": "check",
+    "line": 13,
+    "vars": {
+     "results": [
+      "A",
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      },
+      {
+       "$u": 1
+      }
+     ],
+     "next": 2,
+     "stopped": true
+    },
+    "stack": [
+     {
+      "fn": "worker",
+      "line": 13,
+      "vars": {
+       "worker": {
+        "$u": 1
+       }
+      }
+     }
+    ],
+    "out": 1
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 1
+   }
+  ]
+ }
+}

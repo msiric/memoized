@@ -1,0 +1,222 @@
+{
+ "water-wells-122": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "e7d78907b64c825155325984966242404b9738ed8e92610e494ec6650582e46f",
+  "stdout": [
+   "3"
+  ],
+  "pauses": [
+   {
+    "probe": "edges",
+    "line": 41,
+    "vars": {
+     "pipes": [
+      [
+       1,
+       2,
+       1
+      ],
+      [
+       2,
+       3,
+       1
+      ],
+      [
+       0,
+       1,
+       1
+      ],
+      [
+       0,
+       2,
+       2
+      ],
+      [
+       0,
+       3,
+       2
+      ]
+     ],
+     "n": 3
+    }
+   },
+   {
+    "probe": "try",
+    "line": 44,
+    "vars": {
+     "a": 1,
+     "b": 2,
+     "c": 1,
+     "ans": 0
+    }
+   },
+   {
+    "probe": "accept",
+    "line": 45,
+    "vars": {
+     "a": 1,
+     "b": 2,
+     "c": 1,
+     "ans": 0
+    }
+   },
+   {
+    "probe": "try",
+    "line": 44,
+    "vars": {
+     "a": 2,
+     "b": 3,
+     "c": 1,
+     "ans": 1
+    }
+   },
+   {
+    "probe": "accept",
+    "line": 45,
+    "vars": {
+     "a": 2,
+     "b": 3,
+     "c": 1,
+     "ans": 1
+    }
+   },
+   {
+    "probe": "try",
+    "line": 44,
+    "vars": {
+     "a": 0,
+     "b": 1,
+     "c": 1,
+     "ans": 2
+    }
+   },
+   {
+    "probe": "accept",
+    "line": 45,
+    "vars": {
+     "a": 0,
+     "b": 1,
+     "c": 1,
+     "ans": 2
+    }
+   },
+   {
+    "probe": "return",
+    "line": 51,
+    "vars": {
+     "ans": 3
+    }
+   }
+  ]
+ },
+ "water-wells-555": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "1d423b9bc5adbb96ac7da316d45628998c4e4d5cb93af434a3400baab3e62db9",
+  "stdout": [
+   "7"
+  ],
+  "pauses": [
+   {
+    "probe": "edges",
+    "line": 41,
+    "vars": {
+     "pipes": [
+      [
+       1,
+       2,
+       1
+      ],
+      [
+       2,
+       3,
+       1
+      ],
+      [
+       0,
+       1,
+       5
+      ],
+      [
+       0,
+       2,
+       5
+      ],
+      [
+       0,
+       3,
+       5
+      ]
+     ],
+     "n": 3
+    }
+   },
+   {
+    "probe": "try",
+    "line": 44,
+    "vars": {
+     "a": 1,
+     "b": 2,
+     "c": 1,
+     "ans": 0
+    }
+   },
+   {
+    "probe": "accept",
+    "line": 45,
+    "vars": {
+     "a": 1,
+     "b": 2,
+     "c": 1,
+     "ans": 0
+    }
+   },
+   {
+    "probe": "try",
+    "line": 44,
+    "vars": {
+     "a": 2,
+     "b": 3,
+     "c": 1,
+     "ans": 1
+    }
+   },
+   {
+    "probe": "accept",
+    "line": 45,
+    "vars": {
+     "a": 2,
+     "b": 3,
+     "c": 1,
+     "ans": 1
+    }
+   },
+   {
+    "probe": "try",
+    "line": 44,
+    "vars": {
+     "a": 0,
+     "b": 1,
+     "c": 5,
+     "ans": 2
+    }
+   },
+   {
+    "probe": "accept",
+    "line": 45,
+    "vars": {
+     "a": 0,
+     "b": 1,
+     "c": 5,
+     "ans": 2
+    }
+   },
+   {
+    "probe": "return",
+    "line": 51,
+    "vars": {
+     "ans": 7
+    }
+   }
+  ]
+ }
+}

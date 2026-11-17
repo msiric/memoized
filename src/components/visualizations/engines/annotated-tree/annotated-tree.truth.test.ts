@@ -4,7 +4,8 @@ import { loadProgram, skipNote } from '../../step-log/lesson-block'
 import { gainPanel, suffixPanel, trieDeletePanels, trieNodes, trieSearchPanel, type RecordedSuffixNode, type RecordedTrie } from './build'
 import { annotatedTreeDescriptor } from './descriptor'
 import type { GainPanel, SuffixPanel, TriePanel } from './model'
-import { RECORDINGS, maxPathData, maxPathGainVsThrough, suffixData, suffixTreeBanana, trieData, trieEndMarkers, type TreeRecordings } from './presets'
+import { RECORDINGS, hiddenClassTransitions, maxPathData, maxPathGainVsThrough, suffixData, suffixTreeBanana, trieData, trieEndMarkers, type TreeRecordings } from './presets'
+import { SINGLES_RECORDINGS } from './presets/singles'
 import { TREE_LESSONS } from './programs'
 import { suffixArrayProgram, suffixTreeProgram } from './programs/suffix'
 import { maxPathSumNegativeProgram, maxPathSumProgram } from './programs/tree-dfs'
@@ -40,7 +41,7 @@ const missing = ALL.map((p) => loadProgram(p.source)).find((l) => !l.ok)
 
 describe('annotated-tree recordings', () => {
   it.skipIf(Boolean(missing)).each(ALL.map((p) => p.id))('%s: a fresh Node 24 run under the inspector equals the committed recording', (id) => {
-    expect(fresh(id)).toEqual(RECORDINGS[id])
+    expect(fresh(id)).toEqual({ ...RECORDINGS, ...SINGLES_RECORDINGS }[id])
   })
 
   it('says why the re-recording skipped (no content checkout)', () => {
@@ -49,12 +50,13 @@ describe('annotated-tree recordings', () => {
   })
 
   it('every preset is its recordings, rebuilt (fresh where the checkout has the code)', () => {
-    const rec: TreeRecordings = { ...RECORDINGS }
+    const rec: TreeRecordings = { ...RECORDINGS, ...SINGLES_RECORDINGS }
     if (!missing) for (const p of ALL) rec[p.id] = fresh(p.id)!
     expect(maxPathData(rec)).toEqual(maxPathGainVsThrough.data)
     expect(trieData(rec)).toEqual(trieEndMarkers.data)
     expect(suffixData(rec)).toEqual(suffixTreeBanana.data)
-    for (const preset of annotatedTreeDescriptor.presets)
+    // The hidden-class preset has its own recorder and test (`hidden-classes.truth.test.ts`).
+    for (const preset of annotatedTreeDescriptor.presets.filter((p) => p !== hiddenClassTransitions))
       for (const prog of preset.programs) {
         expect(prog.sha256).toBe(rec[prog.id].sha256)
         expect(prog.observed).toEqual(rec[prog.id].stdout)

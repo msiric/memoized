@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Prose } from '@/components/Prose'
 import { Viz } from '@/components/visualizations/Viz'
 import { resolveVizCode } from '@/components/visualizations/step-log/resolve-code'
+import { framesVizFor } from '@/components/visualizations/engines/frames/gallery'
 import { ClientOnly } from './ClientOnly'
 
 /**
@@ -11,7 +12,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -27,6 +28,10 @@ export default function VisualizationGalleryPage({
   if (searchParams.fr) return <FrontierGallery preset={searchParams.fr} mount={searchParams.mount} spacer={searchParams.spacer} />
   // `?sw=<preset>`: the sliding-window step-through alone (wave 2C), one lesson group per page.
   if (searchParams.sw) return <SlidingWindowGallery preset={searchParams.sw} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?dp=<preset>`: the dp-table step-through alone (wave 3A), one lesson group per page.
+  if (searchParams.dp) return <DpTableGallery preset={searchParams.dp} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?fx=<preset>`: a frames step-through alone (wave 3C: generators, mapLimit, reentrant emit), its own lesson's presets.
+  if (searchParams.fx) return <FramesGallery preset={searchParams.fx} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
   // Static figures: final server markup, no client JavaScript. `?static=1`
@@ -82,7 +87,23 @@ export default function VisualizationGalleryPage({
       </div>
     )
   }
-  // `?at=static`: the annotated-tree figures alone (wave 2D).
+  // `?js=static`: the wave 3B JavaScript-track figures alone.
+  if (searchParams.js === 'static') {
+    const figures = <JsStatics />
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>JavaScript track figures</h1>
+            <p>Static figures for the JavaScript track, drawn on the server as SVG from recorded runs.</p>
+            {searchParams.mount === 'client' ? <ClientOnly>{figures}</ClientOnly> : figures}
+            <p>Text after the JavaScript track figures.</p>
+          </Prose>
+        </div>
+      </div>
+    )
+  }
+  // `?at=static`: the annotated-tree figures alone (waves 2D and 3A).
   if (searchParams.at === 'static') {
     const trees = (
       <>
@@ -91,6 +112,13 @@ export default function VisualizationGalleryPage({
         <Viz id="annotated-tree" preset="trie-end-markers" />
         <p>Between the annotated trees.</p>
         <Viz id="annotated-tree" preset="suffix-tree-banana" />
+        {/* Wave 3A: a call tree, a spanning tree and a push forest. */}
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="combination-sum-take-skip" />
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="water-wells-virtual-source" />
+        <p>Between the annotated trees.</p>
+        <Viz id="annotated-tree" preset="k-pairs-lazy-grid" />
       </>
     )
     return (
@@ -207,6 +235,48 @@ function SlidingWindowGallery({ preset, mount, spacer }: { preset: string; mount
   )
 }
 
+/** The dp-table step-through (a practice answer from the checkout), between lesson text. */
+function DpTableGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>DP table step-through</h1>
+          <p>
+            Which cell each write reads, and whether the current item already wrote it. Every cell is recorded from a
+            real Node run of the answer&apos;s code and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="dp-table-dependencies" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
+/** A frames step-through (practice answers from the checkout), between lesson text: the visual is found by its preset. */
+function FramesGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  const id = framesVizFor(preset)
+  if (!id) notFound()
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Frames step-through</h1>
+          <p>
+            Code that runs in pieces over time: suspended generator frames, worker slots, nested emits. Every state is
+            recorded from a real Node run and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id={id} preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
 /**
  * A step-through whose frame may show a practice answer (premium-code
  * policy): its pane is resolved here, on the server, from the local content
@@ -224,4 +294,25 @@ async function PremiumViz({ id, preset, mount }: { id: string; preset: string; m
     )
   const viz = <Viz id={id} preset={preset} code={r.kind === 'resolved' ? r.code : undefined} />
   return mount === 'client' ? <ClientOnly>{viz}</ClientOnly> : viz
+}
+
+/** The wave 3B figures, one after another (`?js=static`). */
+function JsStatics() {
+  return (
+    <>
+      <Viz id="prototype-object-graph" preset="lookup-and-shadowing" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="prototype-object-graph" preset="constructor-fix" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="annotated-tree" preset="hidden-class-transitions" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="debounce-vs-throttle" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="event-dispatch-path" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="oauth-pkce-channels" />
+      <p>Between the JavaScript track figures.</p>
+      <Viz id="lanes" preset="union-vs-intersection" />
+    </>
+  )
 }

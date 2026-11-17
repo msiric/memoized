@@ -2,12 +2,18 @@ import type { ComponentType } from 'react'
 import AnnotatedTreeViz from './engines/annotated-tree'
 import EnvRecordsViz from './engines/env-records'
 import EventLoopViz from './engines/event-loop'
+import EmitFramesViz from './engines/frames/emit-frames'
+import GeneratorFramesViz from './engines/frames/generator-frames'
+import WorkerPoolViz from './engines/frames/worker-pool'
 import FrontierViz from './engines/frontier'
+import LanesViz from './engines/lanes'
+import PrototypeGraphViz from './engines/heap-graph/prototype'
 import HeapGraphViz from './engines/heap-graph'
 import LinkedListViz from './engines/linked-list'
 import LinkedListFramesViz from './engines/linked-list/frames'
 import ListKeysViz from './engines/list-keys'
 import SlidingWindowViz from './engines/sliding-window'
+import DpTableViz from './engines/dp-table'
 import type { VizComponentProps } from './shell/types'
 
 /**
@@ -27,4 +33,10 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'linked-list-frames': LinkedListFramesViz,
   'sliding-window': SlidingWindowViz,
   'annotated-tree': AnnotatedTreeViz,
+  'dp-table-dependencies': DpTableViz,
+  'prototype-object-graph': PrototypeGraphViz,
+  lanes: LanesViz,
+  'generator-frames': GeneratorFramesViz,
+  'worker-pool': WorkerPoolViz,
+  'emit-frames': EmitFramesViz,
 }

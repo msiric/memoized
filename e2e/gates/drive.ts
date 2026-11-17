@@ -107,6 +107,22 @@ const AT: Record<string, string> = {
   'at-gain': 'figure[data-viz-preset="max-path-gain-vs-through"]',
   'at-trie': 'figure[data-viz-preset="trie-end-markers"]',
   'at-suffix': 'figure[data-viz-preset="suffix-tree-banana"]',
+  // Wave 3A on the same page.
+  'at-calls': 'figure[data-viz-preset="combination-sum-take-skip"]',
+  'at-water': 'figure[data-viz-preset="water-wells-virtual-source"]',
+  'at-kpairs': 'figure[data-viz-preset="k-pairs-lazy-grid"]',
+}
+
+/** The wave 3B JavaScript-track figures, static, alone on their page (`?js=static`). */
+export const jsUrl = `${GALLERY}?js=static`
+export const JS: Record<string, string> = {
+  'js-proto-lookup': 'figure[data-viz-preset="lookup-and-shadowing"]',
+  'js-proto-ctor': 'figure[data-viz-preset="constructor-fix"]',
+  'js-hidden-class': 'figure[data-viz-preset="hidden-class-transitions"]',
+  'js-timers': 'figure[data-viz-preset="debounce-vs-throttle"]',
+  'js-dispatch': 'figure[data-viz-preset="event-dispatch-path"]',
+  'js-pkce': 'figure[data-viz-preset="oauth-pkce-channels"]',
+  'js-types': 'figure[data-viz-preset="union-vs-intersection"]',
 }
 
 /** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
@@ -153,6 +169,59 @@ async function swFinale(page: Page, pick: number) {
   await f.getByRole('slider').focus()
   await page.keyboard.press('End')
   await page.waitForTimeout(1200)
+  await settle(page)
+}
+
+/** The dp-table step-through (wave 3A) alone on its page (`?dp=<preset>`); both presets show a practice answer (local-only). */
+export const DP = '[data-viz="dp-table-dependencies"] section'
+export const dpUrl = (preset: string) => `${GALLERY}?dp=${preset}`
+const DP_STATES: Record<string, string> = {
+  'dp-start': 'knapsack-1d-desc-vs-asc',
+  'dp-skip': 'knapsack-1d-desc-vs-asc',
+  'dp-desc-finale': 'knapsack-1d-desc-vs-asc',
+  'dp-asc-ask': 'knapsack-1d-asc',
+  'dp-asc-reveal-wrong': 'knapsack-1d-asc',
+  'dp-asc-finale': 'knapsack-1d-asc',
+}
+
+/** Steps the dp-table frame forward until `stop` holds (or its end), answering an open question with choice `pick` on the way. */
+async function dpWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(DP).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
+  await settle(page)
+}
+
+/** The frames step-throughs (wave 3C) alone on their page (`?fx=<preset>`): one visual per preset. */
+export const fxUrl = (preset: string) => `${GALLERY}?fx=${preset}`
+const FX_STATES: Record<string, { id: string; preset: string }> = {
+  'fx-gen-start': { id: 'generator-frames', preset: 'twoWay-next-arg' },
+  'fx-gen-ask': { id: 'generator-frames', preset: 'twoWay-next-arg' },
+  'fx-gen-reveal-wrong': { id: 'generator-frames', preset: 'twoWay-next-arg' },
+  'fx-gen-pipeline': { id: 'generator-frames', preset: 'lazy-pipeline-pull' },
+  'fx-pool-ask': { id: 'worker-pool', preset: 'refill-on-settle' },
+  'fx-pool-finale': { id: 'worker-pool', preset: 'refill-on-settle' },
+  'fx-pool-batches': { id: 'worker-pool', preset: 'fixed-batches-contrast' },
+  'fx-emit-skip': { id: 'emit-frames', preset: 'once-consumed-by-nested-emit' },
+}
+export const fxFrame = (id: string) => `[data-viz="${id}"] section`
+/** Steps a frames frame forward until `stop` holds (or its end), answering an open question with choice `pick`. */
+async function fxWalk(page: Page, name: string, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(fxFrame(FX_STATES[name].id)).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
   await settle(page)
 }
 
@@ -217,8 +286,11 @@ export function stateUrl(name: string): string {
   if (name.startsWith('fr-')) return frUrl(frPreset(name))
   if (name.startsWith('llf-')) return llUrl('static')
   if (name.startsWith('at-')) return atUrl
+  if (name.startsWith('js-')) return jsUrl
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
+  if (DP_STATES[name]) return dpUrl(DP_STATES[name])
+  if (FX_STATES[name]) return fxUrl(FX_STATES[name].preset)
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
   if (name.startsWith('pp-')) return PP
@@ -230,8 +302,11 @@ export function stateFrame(name: string): string {
   if (name.startsWith('fr-')) return FR
   if (LLF[name]) return LLF[name]
   if (AT[name]) return AT[name]
+  if (JS[name]) return JS[name]
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
+  if (DP_STATES[name]) return DP
+  if (FX_STATES[name]) return fxFrame(FX_STATES[name].id)
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
   if (name.startsWith('heap')) return HEAP_DATA_TYPES
@@ -491,10 +566,75 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'sw-set-abba-if-finale': async (page) => {
     await swFinale(page, 1)
   },
+  // The dp table (wave 3A, local-only): Start with its end prediction open,
+  // the item whose loop never runs (x = 5), the false finale; counting up:
+  // the question with f[1] barred, its reveal after a wrong pick (the arrow
+  // out of a barred cell), the true finale.
+  'dp-start': async () => {},
+  'dp-skip': async (page) => {
+    await dpWalk(page, (s, mode) => s >= 8 && mode !== 'ask', 2)
+  },
+  'dp-desc-finale': async (page) => {
+    await dpWalk(page, () => false, 2)
+  },
+  'dp-asc-ask': async (page) => {
+    await dpWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'dp-asc-reveal-wrong': async (page) => {
+    await dpWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(DP).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'dp-asc-finale': async (page) => {
+    await dpWalk(page, () => false, 1)
+  },
+  // The frames visuals (wave 3C, local-only: practice answers): twoWay at Start, its question, its wrong
+  // pick revealed; the pipeline's first value to reach take; the pool's refill question and its finale;
+  // the fixed-batch contrast with b settled and nothing started; the outer emit skipping the once record.
+  'fx-gen-start': async () => {},
+  'fx-gen-ask': async (page) => {
+    await fxWalk(page, 'fx-gen-ask', (_s, mode) => mode === 'ask')
+  },
+  'fx-gen-reveal-wrong': async (page) => {
+    await fxWalk(page, 'fx-gen-reveal-wrong', (_s, mode) => mode === 'ask')
+    await page.locator(fxFrame('generator-frames')).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fx-gen-pipeline': async (page) => {
+    await fxWalk(page, 'fx-gen-pipeline', (s, mode) => s >= 7 && mode !== 'ask')
+  },
+  'fx-pool-ask': async (page) => {
+    await fxWalk(page, 'fx-pool-ask', (_s, mode) => mode === 'ask')
+  },
+  'fx-pool-finale': async (page) => {
+    await fxWalk(page, 'fx-pool-finale', () => false)
+    await page.waitForTimeout(800)
+    await settle(page)
+  },
+  'fx-pool-batches': async (page) => {
+    await fxWalk(page, 'fx-pool-batches', (s, mode) => s >= 2 && mode !== 'ask')
+  },
+  'fx-emit-skip': async (page) => {
+    await fxWalk(page, 'fx-emit-skip', (s, mode) => s >= 8 && mode !== 'ask')
+  },
   // The annotated trees (wave 2D): static, at rest only.
   'at-gain': async () => {},
   'at-trie': async () => {},
   'at-suffix': async () => {},
+  // The wave 3A annotated trees: static, at rest only.
+  'at-calls': async () => {},
+  'at-water': async () => {},
+  'at-kpairs': async () => {},
+  // The wave 3B JavaScript-track figures: static, at rest only.
+  'js-proto-lookup': async () => {},
+  'js-proto-ctor': async () => {},
+  'js-hidden-class': async () => {},
+  'js-timers': async () => {},
+  'js-dispatch': async () => {},
+  'js-pkce': async () => {},
+  'js-types': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()
@@ -641,6 +781,31 @@ export const MOTION_STATES: Record<string, MotionState> = {
         await page.keyboard.press('ArrowRight')
         await page.waitForTimeout(650)
       }
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The dp table (local-only): a paced write (the index tag slides, the read tag with it, the cell and its bar land, Q1).
+  'dp-step': {
+    url: dpUrl('knapsack-1d-asc'),
+    frame: DP,
+    setup: async (page) => {
+      const f = page.locator(DP).first()
+      await f.getByRole('slider').focus()
+      await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(650)
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The frames: a paced claim in the pool (the readout changes, a chip enters its lane, Q1).
+  'fx-step': {
+    url: fxUrl('refill-on-settle'),
+    frame: fxFrame('worker-pool'),
+    setup: async (page) => {
+      await page.locator(fxFrame('worker-pool')).first().getByRole('slider').focus()
     },
     act: async (page) => {
       await page.keyboard.press('ArrowRight')

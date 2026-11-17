@@ -1,0 +1,2249 @@
+{
+ "once-consumed-by-nested-emit": {
+  "sha256": "02484cb60c564899cc652f661e8d38fbeab6e9629b7f1cc96cf90072e4a0f7a1",
+  "observed": [],
+  "pauses": [
+   {
+    "probe": "register",
+    "line": 53,
+    "vars": {
+     "records": [],
+     "order": []
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 53
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "register",
+    "line": 61,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": []
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 61
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "emit",
+    "line": 62,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": []
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "snapshot",
+    "line": 40,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [],
+     "snapshot": [
+      0,
+      1
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 40,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [],
+     "entry": 0,
+     "member": true
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "once",
+    "line": 42,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 42,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 44,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler",
+    "line": 54,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [],
+     "nested": false
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 54
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "nested-emit",
+    "line": 57,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "snapshot",
+    "line": 40,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer"
+     ],
+     "snapshot": [
+      0,
+      1
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 40,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer"
+     ],
+     "entry": 0,
+     "member": true
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "once",
+    "line": 42,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer"
+     ],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 42,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 44,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer"
+     ],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler",
+    "line": 54,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer"
+     ],
+     "nested": true
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 54
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner"
+     ],
+     "entry": 1,
+     "member": true
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 1
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "once",
+    "line": 42,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       true
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner"
+     ],
+     "entry": 1
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 42,
+      "vars": {
+       "entry": 1
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 44,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner"
+     ],
+     "entry": 1
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 1
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler",
+    "line": 61,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 61
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 1
+      }
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "emit-end",
+    "line": 46,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner",
+      "once"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 46,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "nested-done",
+    "line": 58,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner",
+      "once"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 58
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner",
+      "once"
+     ],
+     "entry": 1,
+     "member": false
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 1
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "emit-end",
+    "line": 46,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner",
+      "once"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 46,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "assert",
+    "line": 63,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "outer",
+      "inner",
+      "once"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 63
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 0
+   }
+  ]
+ },
+ "snapshot-add-remove": {
+  "sha256": "f4706fdfbcedb79da60615fa7e7ae2cdb63c3756cb0445ee00c2cb8be4eb69c1",
+  "observed": [],
+  "pauses": [
+   {
+    "probe": "register",
+    "line": 54,
+    "vars": {
+     "records": [],
+     "order": []
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 54
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "register",
+    "line": 59,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": []
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 59
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "emit",
+    "line": 60,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       false
+      ]
+     ],
+     "order": []
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "snapshot",
+    "line": 40,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       false
+      ]
+     ],
+     "order": [],
+     "snapshot": [
+      0,
+      1
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 40,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       false
+      ]
+     ],
+     "order": [],
+     "entry": 0,
+     "member": true
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "once",
+    "line": 42,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       false
+      ]
+     ],
+     "order": [],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 42,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 44,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       false
+      ]
+     ],
+     "order": [],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler",
+    "line": 55,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       false
+      ]
+     ],
+     "order": []
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 55
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "off",
+    "line": 56,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       1,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 56
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "on",
+    "line": 57,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler-end",
+    "line": 58,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 58
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ],
+     "entry": 1,
+     "member": false
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 1
+      }
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "emit-end",
+    "line": 46,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 46,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 60
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "assert",
+    "line": 61,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 61
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "emit",
+    "line": 62,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "snapshot",
+    "line": 40,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ],
+     "snapshot": [
+      0,
+      2
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 40,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ],
+     "entry": 0,
+     "member": true
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "once",
+    "line": 42,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 42,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 44,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ],
+     "entry": 0
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler",
+    "line": 55,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 55
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "off",
+    "line": 56,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 56
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "on",
+    "line": 57,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 57
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler-end",
+    "line": 58,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ],
+      [
+       3,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 58
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 0
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "turn",
+    "line": 41,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ],
+      [
+       3,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first"
+     ],
+     "entry": 2,
+     "member": true
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 41,
+      "vars": {
+       "entry": 2
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "once",
+    "line": 42,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ],
+      [
+       3,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first"
+     ],
+     "entry": 2
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 42,
+      "vars": {
+       "entry": 2
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "call",
+    "line": 44,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ],
+      [
+       3,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first"
+     ],
+     "entry": 2
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 2
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "handler",
+    "line": 52,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ],
+      [
+       3,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "late",
+      "line": 52
+     },
+     {
+      "fn": "emit",
+      "line": 44,
+      "vars": {
+       "entry": 2
+      }
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "emit-end",
+    "line": 46,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ],
+      [
+       3,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first",
+      "late"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "emit",
+      "line": 46,
+      "vars": {}
+     },
+     {
+      "fn": "",
+      "line": 62
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "assert",
+    "line": 63,
+    "vars": {
+     "records": [
+      [
+       0,
+       false
+      ],
+      [
+       2,
+       false
+      ],
+      [
+       3,
+       false
+      ]
+     ],
+     "order": [
+      "first",
+      "first",
+      "late"
+     ]
+    },
+    "stack": [
+     {
+      "fn": "",
+      "line": 63
+     },
+     {
+      "fn": "test",
+      "line": 2
+     },
+     {
+      "fn": "",
+      "line": 49
+     }
+    ],
+    "out": 0
+   },
+   {
+    "probe": "exit",
+    "line": 0,
+    "vars": {},
+    "stack": [],
+    "out": 0
+   }
+  ]
+ }
+}

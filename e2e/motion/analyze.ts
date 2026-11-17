@@ -257,7 +257,7 @@ export type Flag = { kind: string; detail: string }
 
 /** An element of a visual's designed reveal (`data-viz-reveal`, D21). */
 export const REVEAL = /\bviz-reveal=(\S+)/
-const STAGE_REGION = /\bin=(stack|host|micro|tasks|console|list|strip|store)\b/
+const STAGE_REGION = /\bin=(stack|host|micro|tasks|console|list|strip|store|table|fx-[\w-]+)(?![\w-])/
 const GLYPH_KEY = /\b(?:glyph|flip-id|chip)=(\S+)|\bout=(\d+)/
 
 /** The stage glyph an element belongs to (`then`, `out-2`), or null for chrome. */
@@ -357,8 +357,9 @@ export function flagsFor(ms: ElementMotion[], opts: { reduced?: boolean; maxGlyp
         if (p.prop === 'sc') flags.push({ kind: 'scale', detail: `${e.label}: scale ${p.start}->${p.end}` })
         if (opts.reduced && p.prop !== 'op')
           flags.push({ kind: 'reduced-motion-move', detail: `${e.label}: ${p.prop} ${p.start}->${p.end} ${p.duration}ms` })
-        // Reduced enter and exit are 120 ms; frame sampling adds up to two frames.
-        if (opts.reduced && p.prop === 'op' && p.duration > 150)
+        // Reduced enter and exit are 120 ms; frame sampling adds up to two frames,
+        // and one late frame inside the fade lengthens it by its lateness.
+        if (opts.reduced && p.prop === 'op' && p.duration - Math.max(0, (p.maxGapMs ?? 0) - FRAME_MS) > 150)
           flags.push({ kind: 'reduced-motion-long', detail: `${e.label}: opacity ${p.duration}ms` })
       }
       if (p.prop === 'eff' && !p.monotonic && !e.removed)

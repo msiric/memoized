@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, atUrl, freezeAt, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, atUrl, dpUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -144,9 +144,21 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await open(page, swUrl('araaci-k2'), 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, SW, 'print-sliding-window-araaci.png')
-  // The annotated trees (wave 2D), every preset on paper.
+  // The dp table (wave 3A): its Start on paper, local-only (a practice answer).
+  const dpSkip = urlLocalOnly(dpUrl('knapsack-1d-desc-vs-asc'))
+  if (dpSkip) test.info().annotations.push({ type: 'skipped state', description: `print dp table: ${dpSkip}` })
+  else {
+    await open(page, dpUrl('knapsack-1d-desc-vs-asc'), 768)
+    await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+    await frameShot(page, DP, baselineName(dpUrl('knapsack-1d-desc-vs-asc'), 'print-dp-table-knapsack.png'))
+  }
+  // The annotated trees (waves 2D and 3A), every preset on paper.
   await open(page, atUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
-  for (const preset of ['max-path-gain-vs-through', 'trie-end-markers', 'suffix-tree-banana'])
+  for (const preset of ['max-path-gain-vs-through', 'trie-end-markers', 'suffix-tree-banana', 'combination-sum-take-skip', 'water-wells-virtual-source', 'k-pairs-lazy-grid'])
     await frameShot(page, `figure[data-viz-preset="${preset}"]`, `print-annotated-tree-${preset}.png`)
+  // The wave 3B JavaScript-track figures, every preset on paper.
+  await open(page, jsUrl, 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  for (const [state, frame] of Object.entries(JS)) await frameShot(page, frame, `print-${state}.png`)
 })
