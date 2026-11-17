@@ -622,6 +622,59 @@ values it holds.
   `?fx=<preset>`, all local-only) and the consistency check against the
   event loop's shell and lanes.
 
+### DSA-track figures (wave 4A: segment trees, union-find, heaps, recursion, interval DP)
+
+Five static presets of `<Viz id="annotated-tree" preset="…" />`, alone on
+`/dev/visualizations?dsa=static`, each built from a recorded Node 24 run of
+its lesson's example as written (`programs/dsa.ts`, `presets/dsa.ts`,
+`recordings/<lesson>.json`, `yarn viz:tree`). Five panel kinds in `dsa.ts`
+(geometry) and `DsaSvgs.tsx` (markup), every panel 288 wide:
+
+- `segment-tree-query-cover` (Segment Trees): four `segment` panels, the
+  tree for [1,3,5,7,9,11] top down, each node its [start,end], sum and
+  `#tree[] index`. query(1, 3): its cover from which line each call ended
+  on (doubled full, plain partial, dashed disjoint); update(1, 10): the
+  root-to-leaf path with old→new sums; the lesson's lazy example:
+  updateRange(0, 2, 10)'s tags on nodes 3 and 4 (their sums stale), then
+  queryRange(1, 3) applying them on entry (13 + 15 + 7 = 35, no tag left).
+  The lesson's own query (1, 3) is used, not the register's (0, 1).
+- `dsu-parent-forest` (Union-Find): four `forest` panels, node i in column
+  i above its parent[] and rank[] cells, an arrow to its parent (an arc
+  when it passes a column). union(1, 2), union(2, 3) by rank (find returns
+  1; the size variant's root 2 in a note), then a chain written into
+  parent[] by the harness (union by rank never builds one; said in the text
+  alternative) before and after find(4)'s path compression.
+- `insert-4-10-3-5-1-then-extract` (Heaps): three `heap` panels, the array
+  as a complete tree above its indexed cells, `2i+1` / `2i+2` on the root's
+  edges; extractMin's [5,3,4,10] with the smaller child marked, then
+  [3,5,4,10] where 5 stops.
+- `fib5` (Recursion and Memoization): two `recursion` panels, the 15-call
+  tree rebuilt from the recorded pre-order (a call that is not a base case
+  or a memo hit made two calls), repeated subproblems marked; the 9-call
+  memo tree with memo-hit leaves (`n in memo` read at each call's entry) and
+  the memo table in write order.
+- `lps-interval-triangle` (Palindromic Subsequence): three `interval`
+  panels, the dp table of "bbbab" with the three cells dp[0][4] reads (the
+  used one bright), then the fill order of the lesson (by length) and of
+  the practice answer (rows from the bottom) as numbers only.
+- **Shared parts.** The array-cells row (`arrayRows`, `ArrayRows`, a cell
+  linked to its node by the dashed hairline: straight down below the tree,
+  then an S-curve into its cell, so links cross only in that band), the
+  lazy-tag mark (`LazyTag`, a changed pill `+v` beside the index) and the
+  memo-hit leaf (`MemoHit`). One mark family per panel (the neutral
+  `changed` role); array cells take the node's line role (`[data-array]`).
+- **Premium.** The answer's order is recorded from the answer read from the
+  local checkout; the repo keeps its locator, sha256 and the (i, j) order
+  only. Every figure shows values, never code.
+- **Gates.** `dsa.truth.test.ts` (the register's values; the rule each
+  figure states as a check lies fail: a wrong cover, a path off the index,
+  an unmarked or falsely marked pointer, a cycle, a heap violation, a hit
+  with calls below it, an order that reads unwritten cells; tampered
+  recordings that cannot build; every label inside its panel), the
+  re-recording in `annotated-tree.truth.test.ts`, `viz-dsa-statics.spec.ts`,
+  `dsa-statics.stress.ts`, consistency, contrast, print and the `dsa-*`
+  states.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,
