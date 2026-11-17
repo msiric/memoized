@@ -2,6 +2,7 @@ import type { Point } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
 import type { PerVariant } from '../../shell/types'
 import { layoutCalls } from './calls'
+import { isDsa, layoutDsa } from './dsa'
 import { layoutGraph } from './graph'
 import { layoutGrid } from './grid'
 import type { GainPanel, SuffixPanel, TreeData, TreePanel, TriePanel } from './model'
@@ -363,6 +364,10 @@ export function layoutTree(d: TreeData): TreeScene {
     }
     if (p.kind === 'trie') {
       const h = layoutTrie(p, trieRows).height
+      return { narrow: h, wide: h }
+    }
+    if (isDsa(p)) {
+      const h = layoutDsa(p).height
       return { narrow: h, wide: h }
     }
     if (p.kind === 'shapes') {

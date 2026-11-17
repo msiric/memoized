@@ -1,3 +1,4 @@
+import type { DsaPanel } from './dsa'
 import type { ShapesPanel } from './shapes'
 
 /**
@@ -25,6 +26,10 @@ import type { ShapesPanel } from './shapes'
  *   (Minimum Spanning Trees, wells as edges to a source node);
  * - `grid`: a 2D grid of candidates whose push arrows form a forest, one
  *   parent per cell (K-way Merge, k pairs with smallest sums).
+ *
+ * Wave 4A adds five more for the DSA static figures (`./dsa.ts`): a
+ * segment tree, a union-find forest, a heap tree over its array, a call
+ * tree with memo hits and an interval dp table.
  *
  * Each panel has at most one rest mark family, the neutral `changed` role
  * (H3 R2 Q9, never lime): the recorded path, the cleared flag, the deepest
@@ -193,7 +198,7 @@ export type GridPanel = {
   notes: string[]
 }
 
-export type TreePanel = GainPanel | TriePanel | SuffixPanel | CallPanel | GraphPanel | GridPanel | ShapesPanel
+export type TreePanel = GainPanel | TriePanel | SuffixPanel | CallPanel | GraphPanel | GridPanel | ShapesPanel | DsaPanel
 
 export type TreeData = {
   panels: TreePanel[]

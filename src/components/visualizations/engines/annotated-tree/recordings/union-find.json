@@ -1,0 +1,235 @@
+{
+ "union-find-rank": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "44664e06c4bffb06cbc6a85b198b827a1a0f9e186ec81e9601ede66c0db19a25",
+  "stdout": [
+   "1",
+   "1",
+   "1",
+   "4"
+  ],
+  "pauses": [
+   {
+    "probe": "state",
+    "line": 34,
+    "vars": {
+     "parent": [
+      0,
+      1,
+      1,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "rank": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "state",
+    "line": 35,
+    "vars": {
+     "parent": [
+      0,
+      1,
+      1,
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "rank": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  ]
+ },
+ "union-find-size": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "d8d4067654d9a6b60dbf570ff9717c47aa9031c16a1888f2227e63df459f8a58",
+  "stdout": [
+   "2",
+   "2",
+   "2",
+   "4"
+  ],
+  "pauses": [
+   {
+    "probe": "state",
+    "line": 34,
+    "vars": {
+     "parent": [
+      0,
+      2,
+      2,
+      2,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+     ],
+     "size": [
+      1,
+      1,
+      3,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ]
+    }
+   }
+  ]
+ },
+ "union-find-chain": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "bdd7b227a028f14c7fa6a293553dce293001583db83fc6afe9eb4791314301e0",
+  "stdout": [
+   "7"
+  ],
+  "pauses": [
+   {
+    "probe": "state",
+    "line": 32,
+    "vars": {
+     "parent": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      7,
+      8,
+      9
+     ],
+     "rank": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "find",
+    "line": 11,
+    "vars": {
+     "x": 7,
+     "parent": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      7,
+      8,
+      9
+     ]
+    },
+    "returned": 7
+   },
+   {
+    "probe": "find",
+    "line": 11,
+    "vars": {
+     "x": 6,
+     "parent": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      7,
+      8,
+      9
+     ]
+    },
+    "returned": 7
+   },
+   {
+    "probe": "find",
+    "line": 11,
+    "vars": {
+     "x": 5,
+     "parent": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      7,
+      7,
+      7,
+      8,
+      9
+     ]
+    },
+    "returned": 7
+   },
+   {
+    "probe": "find",
+    "line": 11,
+    "vars": {
+     "x": 4,
+     "parent": [
+      0,
+      1,
+      2,
+      3,
+      7,
+      7,
+      7,
+      7,
+      8,
+      9
+     ]
+    },
+    "returned": 7
+   }
+  ]
+ }
+}

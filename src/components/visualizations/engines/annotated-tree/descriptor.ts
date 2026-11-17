@@ -6,6 +6,9 @@ import type { CallPanel, GainPanel, GraphPanel, GridPanel, SuffixPanel, TreeData
 import { hiddenClassTransitions, maxPathGainVsThrough, suffixTreeBanana, trieEndMarkers } from './presets'
 import { combinationSumTakeSkip, kPairsLazyGrid, waterWellsSource } from './presets/singles'
 import { shapeLabel, type ShapesPanel } from './shapes'
+import { isDsa } from './dsa'
+import { describeDsa } from './dsa-describe'
+import { DSA_PRESETS } from './presets/dsa'
 
 /**
  * The annotated-tree substrate without its renderer (R4 shared visual
@@ -107,6 +110,7 @@ function describeShapes(p: ShapesPanel): string[] {
 }
 
 function describePanel(p: TreePanel): string[] {
+  if (isDsa(p)) return describeDsa(p)
   if (p.kind === 'shapes') return describeShapes(p)
   if (p.kind === 'gain') return describeGain(p)
   if (p.kind === 'trie') return describeTrie(p)
@@ -122,6 +126,8 @@ export function describeTree(d: TreeData): Omit<StaticTextAlternative, 'outputs'
     model: d.panels.every((p) => p.kind === 'shapes')
       ? 'Hidden classes are not visible to plain JavaScript: each node is a V8 map printed by %DebugPrint in a real run of the lesson code under node --allow-natives-syntax, joined to the map it came from (its back pointer); a dashed node was seen only as a back pointer.'
       : 'Every value is recorded from a real run of the lesson code under the inspector: what each call returned, each node’s flags and children, each edge’s range.' +
+        (d.panels.some((p) => p.kind === 'forest' && p.id === 'chain') ? ' The chain’s parent[] is written by hand before find runs (union by rank never builds a chain); find and its path compression are the lesson’s code.' : '') +
+        (d.panels.some((p) => p.kind === 'interval' && p.id === 'by-row') ? ' The bottom-up order is recorded from the practice answer; only its order numbers are shown.' : '') +
         (d.panels.some((p) => p.kind === 'grid' && p.mark === 'twice') ? ' The two-neighbour rule is not run: its panel is a structural illustration, not a run, of how that rule reaches one cell from two parents, both pushed by the first pop.' : '') +
       (d.panels.some((p) => p.kind === 'suffix') ? ' Children are drawn in character order, so the leaves read in suffix-array order (the lesson’s Map keeps insertion order).' : ''),
   }
@@ -138,7 +144,7 @@ export const annotatedTreeDescriptor: StaticDescriptor<TreeData, HashedProgram> 
   form: 'static',
   title: 'Annotated tree',
   engine: annotatedTreeEngineCore,
-  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, combinationSumTakeSkip, waterWellsSource, kPairsLazyGrid, hiddenClassTransitions],
+  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, combinationSumTakeSkip, waterWellsSource, kPairsLazyGrid, hiddenClassTransitions, ...DSA_PRESETS],
   defaultPreset: 'max-path-gain-vs-through',
   since: '2026-11',
 }

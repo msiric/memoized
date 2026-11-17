@@ -1,0 +1,1813 @@
+{
+ "segment-tree": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "6cd67b29e25a340bf7e1fcbf9cb1ed9daad2435cb42219f1dc55399c110485d6",
+  "stdout": [
+   "15",
+   "22"
+  ],
+  "pauses": [
+   {
+    "probe": "tree",
+    "line": 51,
+    "vars": {
+     "tree": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 0,
+     "start": 0,
+     "end": 5,
+     "L": 1,
+     "R": 3,
+     "sum": 36
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 0
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 1,
+     "start": 0,
+     "end": 2,
+     "L": 1,
+     "R": 3,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 1
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 3,
+     "start": 0,
+     "end": 1,
+     "L": 1,
+     "R": 3,
+     "sum": 4
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 3
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 7,
+     "start": 0,
+     "end": 0,
+     "L": 1,
+     "R": 3,
+     "sum": 1
+    }
+   },
+   {
+    "probe": "disjoint",
+    "line": 35,
+    "vars": {
+     "node": 7
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 8,
+     "start": 1,
+     "end": 1,
+     "L": 1,
+     "R": 3,
+     "sum": 3
+    }
+   },
+   {
+    "probe": "full",
+    "line": 38,
+    "vars": {
+     "node": 8,
+     "sum": 3
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 4,
+     "start": 2,
+     "end": 2,
+     "L": 1,
+     "R": 3,
+     "sum": 5
+    }
+   },
+   {
+    "probe": "full",
+    "line": 38,
+    "vars": {
+     "node": 4,
+     "sum": 5
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 2,
+     "start": 3,
+     "end": 5,
+     "L": 1,
+     "R": 3,
+     "sum": 27
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 2
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 5,
+     "start": 3,
+     "end": 4,
+     "L": 1,
+     "R": 3,
+     "sum": 16
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 5
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 11,
+     "start": 3,
+     "end": 3,
+     "L": 1,
+     "R": 3,
+     "sum": 7
+    }
+   },
+   {
+    "probe": "full",
+    "line": 38,
+    "vars": {
+     "node": 11,
+     "sum": 7
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 12,
+     "start": 4,
+     "end": 4,
+     "L": 1,
+     "R": 3,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "disjoint",
+    "line": 35,
+    "vars": {
+     "node": 12
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 6,
+     "start": 5,
+     "end": 5,
+     "L": 1,
+     "R": 3,
+     "sum": 11
+    }
+   },
+   {
+    "probe": "disjoint",
+    "line": 35,
+    "vars": {
+     "node": 6
+    }
+   },
+   {
+    "probe": "tree",
+    "line": 52,
+    "vars": {
+     "tree": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "update",
+    "line": 20,
+    "vars": {
+     "node": 0,
+     "start": 0,
+     "end": 5,
+     "sum": 36
+    }
+   },
+   {
+    "probe": "update",
+    "line": 20,
+    "vars": {
+     "node": 1,
+     "start": 0,
+     "end": 2,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "update",
+    "line": 20,
+    "vars": {
+     "node": 3,
+     "start": 0,
+     "end": 1,
+     "sum": 4
+    }
+   },
+   {
+    "probe": "update",
+    "line": 20,
+    "vars": {
+     "node": 8,
+     "start": 1,
+     "end": 1,
+     "sum": 3
+    }
+   },
+   {
+    "probe": "tree",
+    "line": 53,
+    "vars": {
+     "tree": [
+      43,
+      16,
+      27,
+      11,
+      5,
+      16,
+      11,
+      1,
+      10,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 0,
+     "start": 0,
+     "end": 5,
+     "L": 1,
+     "R": 3,
+     "sum": 43
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 0
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 1,
+     "start": 0,
+     "end": 2,
+     "L": 1,
+     "R": 3,
+     "sum": 16
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 1
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 3,
+     "start": 0,
+     "end": 1,
+     "L": 1,
+     "R": 3,
+     "sum": 11
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 3
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 7,
+     "start": 0,
+     "end": 0,
+     "L": 1,
+     "R": 3,
+     "sum": 1
+    }
+   },
+   {
+    "probe": "disjoint",
+    "line": 35,
+    "vars": {
+     "node": 7
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 8,
+     "start": 1,
+     "end": 1,
+     "L": 1,
+     "R": 3,
+     "sum": 10
+    }
+   },
+   {
+    "probe": "full",
+    "line": 38,
+    "vars": {
+     "node": 8,
+     "sum": 10
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 4,
+     "start": 2,
+     "end": 2,
+     "L": 1,
+     "R": 3,
+     "sum": 5
+    }
+   },
+   {
+    "probe": "full",
+    "line": 38,
+    "vars": {
+     "node": 4,
+     "sum": 5
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 2,
+     "start": 3,
+     "end": 5,
+     "L": 1,
+     "R": 3,
+     "sum": 27
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 2
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 5,
+     "start": 3,
+     "end": 4,
+     "L": 1,
+     "R": 3,
+     "sum": 16
+    }
+   },
+   {
+    "probe": "partial",
+    "line": 40,
+    "vars": {
+     "node": 5
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 11,
+     "start": 3,
+     "end": 3,
+     "L": 1,
+     "R": 3,
+     "sum": 7
+    }
+   },
+   {
+    "probe": "full",
+    "line": 38,
+    "vars": {
+     "node": 11,
+     "sum": 7
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 12,
+     "start": 4,
+     "end": 4,
+     "L": 1,
+     "R": 3,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "disjoint",
+    "line": 35,
+    "vars": {
+     "node": 12
+    }
+   },
+   {
+    "probe": "visit",
+    "line": 34,
+    "vars": {
+     "node": 6,
+     "start": 5,
+     "end": 5,
+     "L": 1,
+     "R": 3,
+     "sum": 11
+    }
+   },
+   {
+    "probe": "disjoint",
+    "line": 35,
+    "vars": {
+     "node": 6
+    }
+   }
+  ]
+ },
+ "lazy-segment-tree": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "7b183391e598fd81a871d8761cd98d63107df2bd2e699c8413c62a5b4a6c0df0",
+  "stdout": [
+   "15",
+   "35"
+  ],
+  "pauses": [
+   {
+    "probe": "state",
+    "line": 72,
+    "vars": {
+     "tree": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 0,
+     "start": 0,
+     "end": 5,
+     "sum": 36,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 0,
+     "sum": 36
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 1,
+     "start": 0,
+     "end": 2,
+     "sum": 9,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 1,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 3,
+     "start": 0,
+     "end": 1,
+     "sum": 4,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 3,
+     "sum": 4
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 7,
+     "start": 0,
+     "end": 0,
+     "sum": 1,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-disjoint",
+    "line": 56,
+    "vars": {
+     "node": 7,
+     "sum": 1
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 8,
+     "start": 1,
+     "end": 1,
+     "sum": 3,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-full",
+    "line": 59,
+    "vars": {
+     "node": 8,
+     "sum": 3
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 3,
+     "own": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 4,
+     "start": 2,
+     "end": 2,
+     "sum": 5,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-full",
+    "line": 59,
+    "vars": {
+     "node": 4,
+     "sum": 5
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 1,
+     "own": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 2,
+     "start": 3,
+     "end": 5,
+     "sum": 27,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 2,
+     "sum": 27
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 5,
+     "start": 3,
+     "end": 4,
+     "sum": 16,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 5,
+     "sum": 16
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 11,
+     "start": 3,
+     "end": 3,
+     "sum": 7,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-full",
+    "line": 59,
+    "vars": {
+     "node": 11,
+     "sum": 7
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 12,
+     "start": 4,
+     "end": 4,
+     "sum": 9,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-disjoint",
+    "line": 56,
+    "vars": {
+     "node": 12,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 5,
+     "own": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 6,
+     "start": 5,
+     "end": 5,
+     "sum": 11,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-disjoint",
+    "line": 56,
+    "vars": {
+     "node": 6,
+     "sum": 11
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 2,
+     "own": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 0,
+     "own": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "state",
+    "line": 73,
+    "vars": {
+     "tree": [
+      36,
+      9,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "u-visit",
+    "line": 29,
+    "vars": {
+     "node": 0,
+     "start": 0,
+     "end": 5
+    }
+   },
+   {
+    "probe": "u-partial",
+    "line": 40,
+    "vars": {
+     "node": 0
+    }
+   },
+   {
+    "probe": "u-visit",
+    "line": 29,
+    "vars": {
+     "node": 1,
+     "start": 0,
+     "end": 2
+    }
+   },
+   {
+    "probe": "u-full",
+    "line": 33,
+    "vars": {
+     "node": 1,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "u-visit",
+    "line": 29,
+    "vars": {
+     "node": 2,
+     "start": 3,
+     "end": 5
+    }
+   },
+   {
+    "probe": "u-disjoint",
+    "line": 30,
+    "vars": {
+     "node": 2
+    }
+   },
+   {
+    "probe": "state",
+    "line": 74,
+    "vars": {
+     "tree": [
+      66,
+      39,
+      27,
+      4,
+      5,
+      16,
+      11,
+      1,
+      3,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      10,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 0,
+     "start": 0,
+     "end": 5,
+     "sum": 66,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 0,
+     "sum": 66
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 1,
+     "start": 0,
+     "end": 2,
+     "sum": 39,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 1,
+     "sum": 39
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 3,
+     "start": 0,
+     "end": 1,
+     "sum": 4,
+     "tag": 10
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 3,
+     "sum": 24
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 7,
+     "start": 0,
+     "end": 0,
+     "sum": 1,
+     "tag": 10
+    }
+   },
+   {
+    "probe": "q-disjoint",
+    "line": 56,
+    "vars": {
+     "node": 7,
+     "sum": 11
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 8,
+     "start": 1,
+     "end": 1,
+     "sum": 3,
+     "tag": 10
+    }
+   },
+   {
+    "probe": "q-full",
+    "line": 59,
+    "vars": {
+     "node": 8,
+     "sum": 13
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 3,
+     "own": [
+      66,
+      39,
+      27,
+      24,
+      5,
+      16,
+      11,
+      11,
+      13,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      10,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 4,
+     "start": 2,
+     "end": 2,
+     "sum": 5,
+     "tag": 10
+    }
+   },
+   {
+    "probe": "q-full",
+    "line": 59,
+    "vars": {
+     "node": 4,
+     "sum": 15
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 1,
+     "own": [
+      66,
+      39,
+      27,
+      24,
+      15,
+      16,
+      11,
+      11,
+      13,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 2,
+     "start": 3,
+     "end": 5,
+     "sum": 27,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 2,
+     "sum": 27
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 5,
+     "start": 3,
+     "end": 4,
+     "sum": 16,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-partial",
+    "line": 61,
+    "vars": {
+     "node": 5,
+     "sum": 16
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 11,
+     "start": 3,
+     "end": 3,
+     "sum": 7,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-full",
+    "line": 59,
+    "vars": {
+     "node": 11,
+     "sum": 7
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 12,
+     "start": 4,
+     "end": 4,
+     "sum": 9,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-disjoint",
+    "line": 56,
+    "vars": {
+     "node": 12,
+     "sum": 9
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 5,
+     "own": [
+      66,
+      39,
+      27,
+      24,
+      15,
+      16,
+      11,
+      11,
+      13,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-visit",
+    "line": 47,
+    "vars": {
+     "node": 6,
+     "start": 5,
+     "end": 5,
+     "sum": 11,
+     "tag": 0
+    }
+   },
+   {
+    "probe": "q-disjoint",
+    "line": 56,
+    "vars": {
+     "node": 6,
+     "sum": 11
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 2,
+     "own": [
+      66,
+      39,
+      27,
+      24,
+      15,
+      16,
+      11,
+      11,
+      13,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   },
+   {
+    "probe": "q-return",
+    "line": 64,
+    "vars": {
+     "node": 0,
+     "own": [
+      66,
+      39,
+      27,
+      24,
+      15,
+      16,
+      11,
+      11,
+      13,
+      0,
+      0,
+      7,
+      9,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lazy": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    }
+   }
+  ]
+ }
+}

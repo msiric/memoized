@@ -103,6 +103,11 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'water-wells-virtual-source': [648, 422, 422],
       'k-pairs-lazy-grid': [1052, 734, 734],
       'hidden-class-transitions': [1174, 810, 810],
+      'segment-tree-query-cover': [1850, 986, 986],
+      'dsu-parent-forest': [1242, 722, 722],
+      'insert-4-10-3-5-1-then-extract': [1116, 766, 766],
+      'fib5': [988, 580, 580],
+      'lps-interval-triangle': [1248, 846, 846],
     },
   ],
   'prototype-object-graph': [

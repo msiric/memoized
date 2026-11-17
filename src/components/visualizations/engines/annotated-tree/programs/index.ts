@@ -1,4 +1,5 @@
 import { combinationSumProgram } from './backtracking'
+import { fibMemoProgram, fibProgram, heapProgram, lazyProgram, lpsAnswerProgram, lpsProgram, segmentProgram, unionChainProgram, unionRankProgram, unionSizeProgram } from './dsa'
 import { kPairsProgram } from './k-way-merge'
 import { waterAllFiveProgram, waterProgram } from './minimum-spanning-trees'
 import { suffixArrayProgram, suffixTreeProgram } from './suffix'
@@ -14,4 +15,9 @@ export const TREE_LESSONS: Record<string, readonly TreeProgram[]> = {
   backtracking: [combinationSumProgram],
   'minimum-spanning-trees': [waterProgram, waterAllFiveProgram],
   'k-way-merge': [kPairsProgram],
+  'segment-trees': [segmentProgram, lazyProgram],
+  'union-find': [unionRankProgram, unionSizeProgram, unionChainProgram],
+  heaps: [heapProgram],
+  'recursion-and-memoization': [fibProgram, fibMemoProgram],
+  'palindromic-subsequence': [lpsProgram, lpsAnswerProgram],
 }

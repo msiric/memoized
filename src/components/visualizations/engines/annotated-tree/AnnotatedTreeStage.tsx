@@ -7,6 +7,8 @@ import { monoWidth } from '../../substrates/text-metrics'
 import { toRem } from '../../substrates/units'
 import { HEAD_LEGEND, MARK_EDGE, Notes, Svg, px, r1 } from './parts'
 import { CallsSvg, GraphSvg, GridSvg } from './SinglesSvgs'
+import { DsaSvg } from './DsaSvgs'
+import { isDsa } from './dsa'
 import {
   LABEL_LINE,
   SIZE,
@@ -409,6 +411,7 @@ export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
           {p.kind === 'graph' ? <GraphSvg p={p} /> : null}
           {p.kind === 'grid' ? <GridSvg p={p} /> : null}
           {p.kind === 'shapes' ? <ShapesSvg p={p} /> : null}
+          {isDsa(p) ? <DsaSvg p={p} /> : null}
           {p.kind === 'suffix' ? (
             <>
               <SuffixSvg p={p} variant="narrow" className="block vz-wide:hidden" />
