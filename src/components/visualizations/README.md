@@ -622,6 +622,64 @@ values it holds.
   `?fx=<preset>`, all local-only) and the consistency check against the
   event loop's shell and lanes.
 
+### JavaScript core (wave 4C)
+
+Two event-loop lesson groups and three static presets on the shipped engines:
+
+- **Exercise 2** (`<Viz id="event-loop" preset="exercise-2-async1-async2">`,
+  Event Loop): the lesson's Exercise 2 question exactly (a free lesson's
+  example, already in the committed lesson fixture), its own one-preset group
+  so the flagship frame keeps Basics and Drain. One question, "What logs after
+  Script End?", on the step before async1 resumes.
+- **Call-stack traces** (`who-called-inner`, `await-async-frames`, Context and
+  Call Stack): the async-call-stack question's snippet (premium: `wrap` rows
+  resolved for the page, `field: 'question'`) and an await contrast (the
+  visual's own code). The event-loop state gains `trace`: the frames a
+  `console.trace()` printed, a list under the console strip that arrives with
+  the finale after the outputs. `yarn viz:traces` records stdout and frame
+  names only (`truth/trace.ts`): `Timeout.inner, listOnTimeout,
+  process.processTimers`; `o2, async o1`.
+- **Engine rules these presets needed** (none changes a shipped preset; a unit
+  guard lists every step they apply to): a 3-row phone code window when the
+  machine under the code is taller than `tallRest`; phones drop the finale's
+  line tags where the strip needs three rows or a trace sits under it; a push
+  or pop with frames left under it lands the stack lane in one frame, both ways
+  (`stackClosesUp`, the frontier's rule), so a leaving frame never crosses the
+  frame closing up behind it; in the tight frame a queue collapses its tail
+  into its own `+N more` (as the console does, R9), measured at 11.5rem.
+- **Reachability heap graphs** (`<Viz id="heap-graph" preset="gc-reachability-cycle-and-weak-edge">`,
+  Memory Management; `retainer-paths`, Memory Leaks): the names column is the
+  root set (`roots`), a weak link is dashed (`ref.weak`), what a full
+  collection freed is greyed and dashed at the foot of its column with its
+  label (`gone`, `island`), reference-count badges count the drawn strong
+  links (`badge`), a collapsed subtree is a muted note (`100 li`), and the one
+  mark is the link that still retains (`{ edge }`). `yarn viz:reach`
+  (`truth/record-gc.ts`) runs each program as a classic script (top-level
+  bindings stay roots, a block's locals die), Node 24 with `--expose-gc` or
+  Chromium for the DOM answers, probes by line number with values passed
+  directly (a getter closure would join the context it observes), lets the loop
+  turn, collects, and records which objects survived. Nothing about GC timing
+  is asserted. The shared closure context is drawn from the answer's code (V8
+  contexts are not visible to JavaScript); huge's survival is recorded, and
+  without the timer line the same run frees it.
+- **Two chains** (`<Viz id="prototype-object-graph" preset="extends-two-chains">`,
+  Objects and Classes): the instance chain down the left, the constructors' own
+  chain (Dog → Animal → Function.prototype) in a second column, `.prototype`
+  straight across from each pill, Function.prototype a box at the foot linking
+  back to Object.prototype; one `[[Prototype]]` label names both links where
+  the columns run side by side. The mark is the `super.speak()` lookup: the hop
+  from the home object and the row it finds; `this === rex` is read in the
+  paused parent method. The register's `manual-object-create` is the second
+  panel (Car → Function.prototype); its `Dog.create()` static lookup is not
+  drawn (no lesson code defines it).
+- **Gates.** `event-loop.truth.test.ts` (the lesson fence, the recorded traces,
+  lies), `reach.truth.test.ts` and `classes.truth.test.ts` (fresh recordings
+  with a checkout; the register's verification and lies everywhere),
+  `e2e/viz-js-core.spec.ts`, `e2e/motion/js-core-steps.spec.ts`,
+  `e2e/stress/js-core.stress.ts`, the `el-*` and `core-*` gate states and print
+  baselines, and the consistency checks against the heap graph, the shipped
+  prototype graph and the console. Gallery: `?el=<preset>`, `?core=static`.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,

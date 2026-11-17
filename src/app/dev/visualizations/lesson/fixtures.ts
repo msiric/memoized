@@ -52,7 +52,12 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     file: 'fixtures/event-loop.mdx',
     // Before Practical Examples: Example 1 is the visual's program with its
     // output printed, so the prediction comes first (content PR placement).
-    inserts: [{ before: '## **Practical Examples**', viz: '<Viz id="event-loop" />' }],
+    inserts: [
+      { before: '## **Practical Examples**', viz: '<Viz id="event-loop" />' },
+      // Wave 4C: Exercise 2's own frame, right after its question and before its answer (the
+      // prediction "What logs after Script End?" comes before the prose that states it).
+      { before: '**Answer:**\n\n```\nScript Start\nAsync 1 Start', viz: '<Viz id="event-loop" preset="exercise-2-async1-async2" />' },
+    ],
   },
   {
     slug: 'closures',
@@ -373,6 +378,44 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // The body has no OAuth example (it is in the practice answer): at the end
     // of Secure Authentication Practices, before authorization.
     inserts: [{ before: '## **Secure Authorization Practices**', viz: '<Viz id="lanes" preset="oauth-pkce-channels" />' }],
+  },
+  // Wave 4C, the JavaScript core visuals. Local checkout only: the app repo keeps no lesson body
+  // (the premium-code policy), free lessons included.
+  {
+    slug: 'context-and-call-stack',
+    title: 'Execution Context and Call Stack',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/context-and-call-stack/page.mdx',
+    // A prediction: after Call Stack Flow (push and pop), before the first Recursion section. No prose
+    // in the body says what console.trace() prints in a timer callback.
+    inserts: [{ before: '### **Recursion and the Call Stack**', viz: '<Viz id="event-loop" preset="who-called-inner" />' }],
+  },
+  {
+    slug: 'memory-management',
+    title: 'Memory Management and Garbage Collection',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/memory-management/page.mdx',
+    // A static figure after the last example it draws: Exercise 5's answer (the registry cycle), after
+    // Exercise 2's (the WeakMap), before the closing paragraph.
+    inserts: [{ before: 'Understanding how JavaScript manages memory', viz: '<Viz id="heap-graph" preset="gc-reachability-cycle-and-weak-edge" />' }],
+  },
+  {
+    slug: 'memory-leaks',
+    title: 'Memory Leaks and Prevention',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/memory-leaks/page.mdx',
+    // After WeakMap and WeakSet, the last body example of what it draws (detached nodes, closures and
+    // WeakMap come before), before Performance Profiling.
+    inserts: [{ before: '### **Performance Profiling**', viz: '<Viz id="heap-graph" preset="retainer-paths" />' }],
+  },
+  {
+    slug: 'objects-and-classes',
+    title: 'Object Creation and Class Patterns',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/objects-and-classes/page.mdx',
+    // After Combining Constructor Functions and Prototypes (the Car/Vehicle example, panel 2), with
+    // Class Inheritance with extends earlier: both chains are explained, before Advantages of ES6 Classes.
+    inserts: [{ before: '## **Advantages of ES6 Classes**', viz: '<Viz id="prototype-object-graph" preset="extends-two-chains" />' }],
   },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
