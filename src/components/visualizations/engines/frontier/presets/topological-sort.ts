@@ -55,6 +55,8 @@ type KahnOpts = {
   ask: (steps: Step<FrontierState>[], marks: Record<string, number>) => Checkpoint[]
   /** Start with no edges drawn (the edges are a step: the course pairs). */
   buildStep?: boolean
+  /** The Start caption, where the preset changes the lesson's input. */
+  startWhy?: string
 }
 
 function kahnLog(o: KahnOpts): StepLog<FrontierState> {
@@ -112,7 +114,7 @@ function kahnLog(o: KahnOpts): StepLog<FrontierState> {
     steps.push({
       state: state({ degree: indeg, queue: [], order: [] }),
       event: 'Start: in-degrees counted',
-      why: `Each badge counts the edges into its vertex; only a vertex at 0 has nothing left to wait for, so only it may be output.`,
+      why: o.startWhy ?? `Each badge counts the edges into its vertex; only a vertex at 0 has nothing left to wait for, so only it may be output.`,
       narration: `In-degrees ${indeg.map((d, v) => `${v}: ${d}`).join(', ')}.`,
       focus: [],
       claim: 'modelled',
@@ -165,7 +167,7 @@ function kahnLog(o: KahnOpts): StepLog<FrontierState> {
       marks[`${u}>${v}`] = steps.length
       steps.push({
         state: state({ degree: N.decAfter ? deg(p) : deg(next), queue, order: nums(next.vars[N.order]), current: u, active: id, v }),
-        event: pushed ? `${u} → ${v}: ${v} reaches 0, enqueue` : `${u} → ${v}: in-degree ${before} → ${after}`,
+        event: pushed ? `${u} → ${v}: enqueue ${v}` : `${u} → ${v}: in-degree ${before} → ${after}`,
         why: pushed
           ? `${v}'s last incoming edge is spent, so nothing it waits for is left: it joins the back of the queue.`
           : `${u} is output, so this edge no longer holds ${v} back; ${v} still waits for ${after} more.`,
@@ -184,7 +186,7 @@ function kahnLog(o: KahnOpts): StepLog<FrontierState> {
       marks.end = steps.length
       steps.push({
         state: state({ degree: deg(p), queue: [], order, console: [out] }),
-        event: ok ? `Return all ${n}` : `Stalled at ${order.length} of ${n}: []`,
+        event: ok ? `Return all ${n}` : `Stalled: return []`,
         why: ok
           ? 'Every vertex reached 0 and was output, so every edge points forward.'
           : 'Badges above 0 are left: those vertices wait on each other, so it fails.',
@@ -208,7 +210,7 @@ const kahnScene = (): FrontierScene => ({
   pos: KAHN_POS,
   lanes: [
     { id: 'queue', label: 'queue' },
-    { id: 'order', label: 'topologicalOrder' },
+    { id: 'order', label: 'order' },
   ],
   laneRow: true,
   words: { frontier: 'queued', current: 'dequeued', done: 'output' },
@@ -244,7 +246,8 @@ export const kahnCycleLog = kahnLog({
   id: 'kahn-cycle-stall',
   P: kahnCycle,
   rec: kahnCycleRec as FrontierRecording,
-  scene: { ...kahnScene(), title: 'Graph: [3, 1] is now [3, 5]' },
+  scene: { ...kahnScene(), title: 'Graph' },
+  startWhy: 'The example with [3, 1] turned into [3, 5]: 5 → 2 → 3 → 5 is a cycle, so those three each wait on another.',
   names: KAHN_NAMES,
   at: KAHN_AT,
   ask: (_s, m) => [
@@ -358,7 +361,7 @@ function mhtLog(): StepLog<FrontierState> {
   const q0 = nums(seeded.vars.q)
   steps.push({
     state: state({ degree: degree(seeded), q: q0, t: [] }),
-    event: `Seed q with the leaves: ${q0.join(', ')}`,
+    event: `Seed q: leaves ${q0.join(', ')}`,
     why: `Only vertices of degree 1 go in, so q holds the outermost layer: ${list(q0.map(String))}.`,
     narration: `q holds ${list(q0.map(String))}.`,
     line: line(P, 16),
@@ -382,7 +385,7 @@ function mhtLog(): StepLog<FrontierState> {
       const drop = (b: number) => `degree[${b}] ${d[b] + 1} → ${d[b]}`
       steps.push({
         state: state({ degree: d, q, t, current: a }),
-        event: pushed.length ? `Peel ${a}: ${pushed[0]} becomes a leaf` : nbrs.length === 1 ? `Peel ${a}: ${drop(nbrs[0])}` : `Peel ${a}`,
+        event: pushed.length ? `Peel ${a}: ${pushed[0]} to t` : nbrs.length === 1 ? `Peel ${a}: degree[${nbrs[0]}] → ${d[nbrs[0]]}` : `Peel ${a}`,
         why: pushed.length
           ? `Peeling ${a} drops degree[${pushed[0]}] to 1, so ${pushed[0]} is a leaf of the next layer and joins t.`
           : nbrs.length === 1
@@ -415,7 +418,7 @@ function mhtLog(): StepLog<FrontierState> {
       const out = rec.stdout[0]
       steps.push({
         state: state({ degree: degree(p), q: [], t: [], console: [out] }),
-        event: `Return the last layer`,
+        event: 'Return the last layer',
         why: 'The last layer pushed no new leaves, so ans keeps it: the centre of the tree.',
         narration: `findMinHeightTrees returns ${out}.`,
         line: line(P, 33),
