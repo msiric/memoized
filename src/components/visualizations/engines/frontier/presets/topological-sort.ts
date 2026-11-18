@@ -332,7 +332,9 @@ function mhtLog(): StepLog<FrontierState> {
     badge: 'degree',
   }
   const peeled = new Set<number>()
-  const k = (v: number): FChip => ({ id: `k-${v}`, label: String(v) })
+  // One chip id per lane: q = t swaps the layer (t's chips leave, q's arrive), never a chip travelling over the old layer.
+  const kq = (v: number): FChip => ({ id: `k-q-${v}`, label: String(v) })
+  const kt = (v: number): FChip => ({ id: `k-t-${v}`, label: String(v) })
   const state = (s: { degree: number[]; q: number[]; t: number[]; current?: number; b?: number; console?: string[] }): FrontierState => ({
     scene,
     nodes: Array.from({ length: n }, (_, v): FNode => ({
@@ -342,7 +344,7 @@ function mhtLog(): StepLog<FrontierState> {
       badge: String(s.degree[v]),
     })),
     edges: pairs.map(([a, b]): FEdge => ({ id: `e-${a}-${b}`, from: nodeId(a), to: nodeId(b), ...(peeled.has(a) || peeled.has(b) ? { removed: true } : {}) })),
-    lanes: { q: s.q.map(k), t: s.t.map(k) },
+    lanes: { q: s.q.map(kq), t: s.t.map(kt) },
     vars: [...(s.current !== undefined ? [{ name: 'a', value: String(s.current) }] : [])],
     console: s.console ?? [],
   })
@@ -365,7 +367,7 @@ function mhtLog(): StepLog<FrontierState> {
     why: `Only vertices of degree 1 go in, so q holds the outermost layer: ${list(q0.map(String))}.`,
     narration: `q holds ${list(q0.map(String))}.`,
     line: line(P, 16),
-    focus: q0.slice(0, 2).map((v) => k(v).id),
+    focus: q0.slice(0, 2).map((v) => kq(v).id),
     claim: 'modelled',
   })
   let q = q0
@@ -393,7 +395,7 @@ function mhtLog(): StepLog<FrontierState> {
             : `Peeling ${a} lowers the degrees of ${list(nbrs.map(String))}; none lands on exactly 1, so t stays empty.`,
         narration: `${a} is peeled; ${nbrs.map(drop).join(', ')}${pushed.length ? `; ${pushed[0]} joins t` : ''}.`,
         line: pushed.length ? lines(P, 26, 27) : line(P, 26),
-        focus: pushed.length ? [nodeId(a), k(pushed[0]).id] : [nodeId(a)],
+        focus: pushed.length ? [nodeId(a), kt(pushed[0]).id] : [nodeId(a)],
         claim: 'modelled',
       })
       i = j - 1
@@ -409,7 +411,7 @@ function mhtLog(): StepLog<FrontierState> {
         why: `Round over: the old layer is gone, so the next layer's leaves, ${list(t.map(String))}, become q.`,
         narration: `q is now ${list(t.map(String))}.`,
         line: line(P, 31),
-        focus: t.slice(0, 2).map((v) => k(v).id),
+        focus: t.slice(0, 2).map((v) => kq(v).id),
         claim: 'modelled',
       })
       continue

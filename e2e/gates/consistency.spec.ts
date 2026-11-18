@@ -184,7 +184,8 @@ for (const width of [375, 1440])
       }
       await f.getByRole('button', { name: 'Next' }).click()
       await settle(page)
-      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]'), ['background-color'])
+      // A step may light a range (Graph DFS's two adds): the first row stands for it.
+      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]').first(), ['background-color'])
       for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
       await settle(page)
       out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
