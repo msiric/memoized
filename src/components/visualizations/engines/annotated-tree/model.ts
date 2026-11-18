@@ -1,3 +1,4 @@
+import type { BoxesPanel } from './boxes'
 import type { DsaPanel } from './dsa'
 import type { ResidualPanel } from './flow'
 import type { ShapesPanel } from './shapes'
@@ -35,6 +36,11 @@ import type { ShapesPanel } from './shapes'
  * Wave 4B adds `residual` (`./flow.ts`): a flow network's residual graph,
  * flow / capacity on each edge, reverse residuals dashed, one augmenting
  * path marked or the minimum cut shaded (Maximum Flow, Network Flow).
+ *
+ * Wave 4D adds `boxes` (`./boxes.ts`): a generic box-and-arrow scene the
+ * frontend figures place from their recordings (a component tree, Module
+ * Federation containers, a DOM tree and its accessibility tree, commit
+ * graphs).
  *
  * Each panel has at most one rest mark family, the neutral `changed` role
  * (H3 R2 Q9, never lime): the recorded path, the cleared flag, the deepest
@@ -203,7 +209,7 @@ export type GridPanel = {
   notes: string[]
 }
 
-export type TreePanel = GainPanel | TriePanel | SuffixPanel | CallPanel | GraphPanel | GridPanel | ShapesPanel | DsaPanel | ResidualPanel
+export type TreePanel = GainPanel | TriePanel | SuffixPanel | CallPanel | GraphPanel | GridPanel | ShapesPanel | DsaPanel | ResidualPanel | BoxesPanel
 
 export type TreeData = {
   panels: TreePanel[]

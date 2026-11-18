@@ -6,6 +6,7 @@ import { routePath } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
 import { toRem } from '../../substrates/units'
 import { HEAD_LEGEND, MARK_EDGE, Notes, Svg, px, r1 } from './parts'
+import { BoxesSvg } from './BoxesSvg'
 import { FlowSvg } from './FlowSvg'
 import { CallsSvg, GraphSvg, GridSvg } from './SinglesSvgs'
 import { DsaSvg } from './DsaSvgs'
@@ -411,6 +412,7 @@ export function AnnotatedTreeStage({ data }: StaticStageProps<TreeData>) {
           ) : null}
           {p.kind === 'graph' ? <GraphSvg p={p} /> : null}
           {p.kind === 'grid' ? <GridSvg p={p} /> : null}
+          {p.kind === 'boxes' ? <BoxesSvg p={p} /> : null}
           {p.kind === 'shapes' ? <ShapesSvg p={p} /> : null}
           {isDsa(p) ? <DsaSvg p={p} /> : null}
           {p.kind === 'residual' ? (
