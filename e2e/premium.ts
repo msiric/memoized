@@ -31,7 +31,7 @@ export function showsAnswer(id: string, preset: string): boolean {
   return d?.form === 'step' && Boolean(d.presets.find((p) => p.id === preset)?.log.code?.premium)
 }
 
-/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring, `?sw=` the sliding window, `?dp=` the dp table, `?fx=` a frames visual, `?el=` an event-loop lesson group), if any. */
+/** The step-through a gallery URL opens (`?fr=` the frontier, `?ll=` pointer rewiring, `?sw=` the sliding window, `?dp=` the dp table, `?ch=` the convex-hull turn stack, `?fx=` a frames visual, `?el=` an event-loop lesson group), if any. */
 export function galleryFrame(url: string): { id: string; preset: string } | null {
   const q = new URL(url, 'http://gallery').searchParams
   const fr = q.get('fr')
@@ -42,6 +42,8 @@ export function galleryFrame(url: string): { id: string; preset: string } | null
   if (sw) return { id: 'sliding-window', preset: sw }
   const dp = q.get('dp')
   if (dp) return { id: 'dp-table-dependencies', preset: dp }
+  const ch = q.get('ch')
+  if (ch) return { id: 'hull-turn-stack', preset: ch }
   const fx = q.get('fx')
   const fxId = fx ? framesVizFor(fx) : undefined
   if (fx && fxId) return { id: fxId, preset: fx }

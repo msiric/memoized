@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, CH, chUrl, coreUrl, elUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -628,6 +628,60 @@ for (const width of [375, 1440])
     same('index tag text', ref.tagText, await svgLook(dp, 'svg [data-tag] text'))
     same('changed tag', ref.changed, await svgLook(dp, 'svg [data-tag] .vz-ch'))
     same('index', ref.index, await svgLook(dp, 'svg [data-indices] text'))
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The convex-hull turn stack (wave 4E) draws with the dp table's vocabulary:
+ * the turn arrow is the dp table's dependency arrow (the changed-role
+ * connector at 2.5 px), the point just pushed the dp table's changed cell,
+ * an idle point a dp cell's glyph, a coordinate label a dp index, and the
+ * panel heading the dp table's. Local-only (practice answers): skipped where
+ * the content checkout lacks them.
+ */
+for (const width of [375, 1440])
+  test(`turn-stack glyphs compute like the dp table's @${width}`, async ({ page }) => {
+    const skip = urlLocalOnly(dpUrl('knapsack-1d-asc')) ?? urlLocalOnly(chUrl('monotone-chain-turn-pops'))
+    test.skip(Boolean(skip), skip ?? '')
+    const SVG = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const look = (root: Locator, sel: string) =>
+      root
+        .locator(sel)
+        .first()
+        .evaluate((el, ps) => {
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        }, SVG as unknown as string[])
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: dp table ${a[k]} vs turn stack ${b[k]}`)
+    }
+    await open(page, dpUrl('knapsack-1d-asc'), width)
+    const dp = page.locator(DP)
+    await dp.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    const ref = {
+      arrow: await look(dp, 'svg [data-viz-part="arc"] path.vz-e'),
+      head: await look(dp, 'svg [data-viz-part="arc"] path.vz-ah'),
+      changed: await look(dp, 'svg [data-cell][data-changed] .vz-ch'),
+      glyph: await look(dp, 'svg [data-cell]:not([data-changed]) .vz-g'),
+      index: await look(dp, 'svg [data-indices] text'),
+      heading: await look(dp, '[data-viz-region="table"] > div:first-child > span:first-child'),
+    }
+    // The turn stack three steps in: (0,3) pushed onto (0,0), then popped on a right turn.
+    await open(page, chUrl('monotone-chain-turn-pops'), width)
+    const ch = page.locator(CH)
+    await ch.getByRole('button', { name: 'Next' }).click()
+    await ch.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    same('changed point', ref.changed, await look(ch, 'svg [data-role="arriving"] .vz-ch'))
+    same('idle point', ref.glyph, await look(ch, 'svg [data-role="idle"] .vz-g'))
+    same('coordinate label', ref.index, await look(ch, 'svg [data-labels] text.vz-m'))
+    same('panel heading', ref.heading, await look(ch, '[data-viz-region="plot"] [data-chain]'))
+    await ch.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    same('turn arrow', ref.arrow, await look(ch, 'svg [data-viz-part="turn"] [data-edge] path.vz-e'))
+    same('turn arrowhead', ref.head, await look(ch, 'svg [data-viz-part="turn"] [data-edge] path.vz-ah'))
     expect(diffs).toEqual([])
   })
 

@@ -803,6 +803,54 @@ and Promise Patterns keep the engine's.
   baselines, and the consistency checks against the heap graph, the shipped
   prototype graph and the console. Gallery: `?el=<preset>`, `?core=static`.
 
+### Turn stack (wave 4E: convex hull, `hull-turn-stack`)
+
+`<Viz id="hull-turn-stack" preset="…" />`, a step-through with one lesson
+group (Convex Hull, titled "Convex hull: which turns pop"): the practice
+answer to Erect the Fence (Andrew's monotone chain) on the lesson's seven
+points (`monotone-chain-turn-pops`), and on a fence whose bottom edge holds
+(1,0) and (2,0), as written with `< 0` (`fence-collinear-lt`) and with both
+turn tests changed to `<= 0` (`fence-collinear-le`, two `SourcePart.swaps`
+of one token each, so the variant commits no answer text).
+
+- **A new engine** (`engines/turn-stack/`): no shipped substrate has a plane.
+  The plot is one svg on a faint lattice; the points never move. The
+  current chain's stack is a polyline through its points in stack order
+  (its points filled, the finished lower chain dashed while the upper one
+  is built); the step's turn test is the dp table's changed-role connector
+  from `o` through `a` to an arrowhead at the arriving `p`; a popped point is
+  left as a dashed ring. Beside the plot (under it from 768 until the full
+  column) the turn column spells `cross(o,a,p)`, the three points, the value
+  with its turn and what the loop does; at the end it holds the printed
+  line, broken after each point (its text is exactly the output). Each
+  coordinate label takes the first place around its point that no point,
+  label or line of any step crosses (`layout.ts`, checked by
+  `labelProblems`).
+- **Recorded under the inspector** (the dp table's recorder, `yarn
+  viz:hull`): pauses after the sort, before every pop and every push of each
+  chain, before the trimming pops and after them; the turn value is the
+  answer's own `cross` called in the paused frame on the stack's top two and
+  `p`. `build.ts` makes one step per pop and per push; the stack a step draws
+  is the one the next pause recorded, and a pause whose pop or keep
+  disagrees with the program's comparison refuses to build. Presets add
+  words and checkpoints only: "Does (1,1) stay?" with (0,0), (1,1) on the
+  lower stack before (2,1) (popped, cross −1), and on the fence "Does (1,0)
+  stay?" before (2,0) (stays with `< 0`, popped with `<= 0`, cross 0).
+- **Premium.** The pane is the answer's lines 20 to 49 as `wrap` rows (the
+  upper chain's callback body shown at the lower chain's depth, whitespace
+  only); every preset is local-only.
+- **Gates.** `turn-stack.truth.test.ts` (with a checkout: the hash, fresh
+  re-recordings, every row against the answer, the `<=` program differing on
+  lines 24 and 38 only; everywhere: the printed hulls, every step a logged
+  pop or push, pops exactly where the comparison holds, each turn value the
+  cross of the drawn points, the checkpoints' answers, the trim and the
+  joined hull equal to the output, lies that must fail), `layout.test.ts`,
+  `e2e/viz-turn-stack.spec.ts` (with the 375x667 fit and frames within 850
+  px), `e2e/motion/turn-stack-steps.spec.ts`,
+  `e2e/stress/turn-stack.stress.ts`, the `ch-*` gate states (gallery
+  `?ch=<preset>`, local-only baselines) and the consistency check against the
+  dp table's glyphs.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,

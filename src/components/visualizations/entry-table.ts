@@ -202,6 +202,22 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'knapsack-1d-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],
     },
   ],
+  'hull-turn-stack': [
+    () => import('./engines/turn-stack'),
+    780,
+    682,
+    undefined,
+    {
+      'monotone-chain-turn-pops': [780, 682, 784, 956, 1020],
+      'fence-collinear-lt': [784, 682, 784, 956, 1020],
+      'fence-collinear-le': [784, 682, 784, 956, 1020],
+    },
+    {
+      'monotone-chain-turn-pops': ['monotone-chain-turn-pops', 'fence-collinear-lt', 'fence-collinear-le'],
+      'fence-collinear-lt': ['monotone-chain-turn-pops', 'fence-collinear-lt', 'fence-collinear-le'],
+      'fence-collinear-le': ['monotone-chain-turn-pops', 'fence-collinear-lt', 'fence-collinear-le'],
+    },
+  ],
   'list-keys': [
     () => import('./engines/list-keys'),
     862,

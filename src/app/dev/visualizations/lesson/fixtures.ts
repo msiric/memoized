@@ -296,6 +296,19 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // follow-ups only).
     inserts: [{ before: '### **Edit Distance**', viz: '<Viz id="dp-table-dependencies" preset="knapsack-1d-desc-vs-asc" />' }],
   },
+  // Wave 4E (PREMIUM: local checkout only).
+  {
+    slug: 'convex-hull',
+    title: 'Convex Hull',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/convex-hull/page.mdx',
+    // A prediction: after the stack-based algorithms (Graham scan's pop
+    // loop, Jarvis march), before the tips. No prose in the body says which
+    // monotone-chain point pops or that `< 0` keeps collinear posts (both
+    // are in the practice answer only); "Handling Collinear Points" below it
+    // names the question without answering it.
+    inserts: [{ before: '## **Practical Tips and Tricks**', viz: '<Viz id="hull-turn-stack" preset="monotone-chain-turn-pops" />' }],
+  },
   {
     slug: 'backtracking',
     title: 'Backtracking',

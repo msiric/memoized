@@ -11,6 +11,7 @@ import { linkedListDescriptor } from './engines/linked-list/descriptor'
 import { linkedListFramesDescriptor } from './engines/linked-list/frames/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
 import { slidingWindowDescriptor } from './engines/sliding-window/descriptor'
+import { turnStackDescriptor } from './engines/turn-stack/descriptor'
 import { footprintOf, groupIndices, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
 import { outputText, type StaticDescriptor, type StaticTextAlternative } from './shell/static-types'
@@ -41,6 +42,7 @@ export const VIZ_DESCRIPTORS = {
   'sliding-window': slidingWindowDescriptor,
   'annotated-tree': annotatedTreeDescriptor,
   'dp-table-dependencies': dpTableDescriptor,
+  'hull-turn-stack': turnStackDescriptor,
   'prototype-object-graph': protoDescriptor,
   lanes: lanesDescriptor,
   'generator-frames': generatorFramesDescriptor,

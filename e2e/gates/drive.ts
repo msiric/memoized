@@ -211,6 +211,35 @@ async function dpWalk(page: Page, stop: (step: number, mode: string | null) => b
   await settle(page)
 }
 
+/** The convex-hull turn-stack step-through (wave 4E) alone on its page (`?ch=<preset>`); every preset shows a practice answer (local-only). */
+export const CH = '[data-viz="hull-turn-stack"] section'
+export const chUrl = (preset: string) => `${GALLERY}?ch=${preset}`
+const CH_STATES: Record<string, string> = {
+  'ch-start': 'monotone-chain-turn-pops',
+  'ch-ask': 'monotone-chain-turn-pops',
+  'ch-reveal-wrong': 'monotone-chain-turn-pops',
+  'ch-upper': 'monotone-chain-turn-pops',
+  'ch-hull': 'monotone-chain-turn-pops',
+  'ch-finale': 'monotone-chain-turn-pops',
+  'ch-lt-straight': 'fence-collinear-lt',
+  'ch-lt-finale': 'fence-collinear-lt',
+  'ch-le-pop': 'fence-collinear-le',
+}
+
+/** Steps the turn-stack frame forward until `stop` holds (or its end), answering an open question with choice `pick` on the way. */
+async function chWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(CH).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
+  await settle(page)
+}
+
 /** The frames step-throughs (wave 3C) alone on their page (`?fx=<preset>`): one visual per preset. */
 export const fxUrl = (preset: string) => `${GALLERY}?fx=${preset}`
 const FX_STATES: Record<string, { id: string; preset: string }> = {
@@ -348,6 +377,7 @@ export function stateUrl(name: string): string {
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (DP_STATES[name]) return dpUrl(DP_STATES[name])
+  if (CH_STATES[name]) return chUrl(CH_STATES[name])
   if (FX_STATES[name]) return fxUrl(FX_STATES[name].preset)
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
@@ -367,6 +397,7 @@ export function stateFrame(name: string): string {
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
   if (DP_STATES[name]) return DP
+  if (CH_STATES[name]) return CH
   if (FX_STATES[name]) return fxFrame(FX_STATES[name].id)
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
@@ -700,6 +731,38 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'dp-asc-finale': async (page) => {
     await dpWalk(page, () => false, 1)
   },
+  // The convex-hull turn stack (wave 4E, local-only): Start; the question with (0,0), (1,1) on the
+  // lower stack; its reveal after a wrong pick (the pop on a right turn); the upper chain over the
+  // dashed lower one, mid-pop; the joined hull; the printed result; the fence with < 0 keeping (1,0)
+  // on a straight run, and its six-post finale; with <= 0 popping it.
+  'ch-start': async () => {},
+  'ch-ask': async (page) => {
+    await chWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'ch-reveal-wrong': async (page) => {
+    await chWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(CH).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'ch-upper': async (page) => {
+    await chWalk(page, (s, mode) => s >= 19 && mode !== 'ask', 2)
+  },
+  'ch-hull': async (page) => {
+    await chWalk(page, (s, mode) => s >= 23 && mode !== 'ask', 2)
+  },
+  'ch-finale': async (page) => {
+    await chWalk(page, () => false, 2)
+  },
+  'ch-lt-straight': async (page) => {
+    await chWalk(page, (s, mode) => s >= 8 && mode !== 'ask', 1)
+  },
+  'ch-lt-finale': async (page) => {
+    await chWalk(page, () => false, 1)
+  },
+  'ch-le-pop': async (page) => {
+    await chWalk(page, (s, mode) => s >= 7 && mode !== 'ask', 2)
+  },
   // The frames visuals (wave 3C, local-only: practice answers): twoWay at Start, its question, its wrong
   // pick revealed; the pipeline's first value to reach take; the pool's refill question and its finale;
   // the fixed-batch contrast with b settled and nothing started; the outer emit skipping the once record.
@@ -953,6 +1016,21 @@ export const MOTION_STATES: Record<string, MotionState> = {
     setup: async (page) => {
       const f = page.locator(DP).first()
       await f.getByRole('slider').focus()
+      await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(650)
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The convex-hull turn stack (local-only): a paced pop (the turn arrow lands, the point leaves the chain, Q1).
+  'ch-step': {
+    url: chUrl('monotone-chain-turn-pops'),
+    frame: CH,
+    setup: async (page) => {
+      const f = page.locator(CH).first()
+      await f.getByRole('slider').focus()
+      await page.keyboard.press('ArrowRight')
       await page.keyboard.press('ArrowRight')
       await page.waitForTimeout(650)
     },

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, atUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, CH, JS, DSA, atUrl, chUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -151,6 +151,14 @@ test('print: specimen and gallery on paper', async ({ page }) => {
     await open(page, dpUrl('knapsack-1d-desc-vs-asc'), 768)
     await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
     await frameShot(page, DP, baselineName(dpUrl('knapsack-1d-desc-vs-asc'), 'print-dp-table-knapsack.png'))
+  }
+  // The convex-hull turn stack (wave 4E): its Start on paper, local-only (a practice answer).
+  const chSkip = urlLocalOnly(chUrl('monotone-chain-turn-pops'))
+  if (chSkip) test.info().annotations.push({ type: 'skipped state', description: `print convex hull: ${chSkip}` })
+  else {
+    await open(page, chUrl('monotone-chain-turn-pops'), 768)
+    await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+    await frameShot(page, CH, baselineName(chUrl('monotone-chain-turn-pops'), 'print-hull-turn-stack.png'))
   }
   // The annotated trees (waves 2D and 3A), every preset on paper.
   await open(page, atUrl, 768)
