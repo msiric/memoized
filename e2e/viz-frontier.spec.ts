@@ -4,7 +4,7 @@ import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
 import { localOnly, localOnlyNote } from './premium'
 
 /**
- * The frontier step-through (wave 2A, `bfs-dfs-frontier`) on
+ * The frontier step-through (waves 2A and 4B, `bfs-dfs-frontier`) on
  * /dev/visualizations?fr=<preset>, through the real `<Viz>` mount: every
  * preset walked to its end with the keyboard, the frame never moving, nothing
  * clipping at any width, the lazy reserve (also under text zoom), the
@@ -13,15 +13,48 @@ import { localOnly, localOnlyNote } from './premium'
  */
 
 const GALLERY = '/dev/visualizations'
-const PRESETS = ['bfs-levels', 'binary-matrix-8dir', 'dijkstra-lazy-heap', 'min-effort-grid', 'bst-iterator-stack'] as const
+const ALL_PRESETS = [
+  'bfs-levels',
+  'binary-matrix-8dir',
+  'dijkstra-lazy-heap',
+  'min-effort-grid',
+  'bst-iterator-stack',
+  // Wave 4B: Graph DFS (stack mode) and Topological Sort (queue mode, in-degree badges).
+  'dfs-directed-recstack',
+  'dfs-back-edge',
+  'dfs-finish-order',
+  'kahn-indegree',
+  'course-schedule-ii-edges',
+  'kahn-cycle-stall',
+  'mht-leaf-peeling',
+] as const
+/**
+ * Radios at Start at 1024: the group switcher's segments (one preset: none;
+ * four: a select, none) plus the choices of a question asked at Start.
+ */
+const RADIOS: Record<string, number> = {
+  'bst-iterator-stack': 0,
+  'dfs-directed-recstack': 3,
+  'dfs-back-edge': 3,
+  'dfs-finish-order': 3,
+  'kahn-indegree': 2,
+  'course-schedule-ii-edges': 2,
+  'kahn-cycle-stall': 0,
+  'mht-leaf-peeling': 3,
+}
 const STEPS = VIZ_TABLE['bfs-dfs-frontier'][4]!
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
 
-// Every lesson group of the frontier has a practice-answer preset (binary
-// matrix, minimum effort, the BST iterator): its frames are local-only, so
-// without the content checkout (CI) this file skips, saying why.
-const LOCAL_ONLY = PRESETS.filter((p) => localOnly('bfs-dfs-frontier', p))
-test.skip(() => LOCAL_ONLY.length > 0, LOCAL_ONLY.map((p) => localOnlyNote('bfs-dfs-frontier', p)).join('; '))
+// A lesson group with a practice-answer preset (binary matrix, minimum
+// effort, the BST iterator, course schedule and minimum height trees) is
+// local-only: without the content checkout (CI) its presets are skipped,
+// saying why, and the rest (the Graph DFS group) still run.
+const LOCAL_ONLY = ALL_PRESETS.filter((p) => localOnly('bfs-dfs-frontier', p))
+const PRESETS = ALL_PRESETS.filter((p) => !LOCAL_ONLY.includes(p))
+test.skip(() => PRESETS.length === 0, LOCAL_ONLY.map((p) => localOnlyNote('bfs-dfs-frontier', p)).join('; '))
+test.beforeEach(() => {
+  for (const p of LOCAL_ONLY) test.info().annotations.push({ type: 'skipped preset', description: localOnlyNote('bfs-dfs-frontier', p) })
+})
 
 const mount = (page: Page) => page.locator('[data-viz="bfs-dfs-frontier"]')
 const frame = (page: Page) => mount(page).locator('section')
@@ -74,6 +107,7 @@ async function layoutSnapshot(page: Page) {
 }
 
 test('loads paused at Start with its group switcher, and walks to the end with the keyboard', async ({ page }) => {
+  test.setTimeout(300_000)
   for (const preset of PRESETS) {
     await open(page, 1024, preset)
     const s0 = await state(page)
@@ -82,7 +116,7 @@ test('loads paused at Start with its group switcher, and walks to the end with t
     expect((await state(page)).step, 'no autoplay').toBe(0)
     // Each lesson's frame offers only its own presets.
     const radios = await frame(page).locator('[data-viz-part="viz-presets"] [role="radio"], [role="radiogroup"] [role="radio"]').count()
-    expect(radios, preset).toBe(preset === 'bst-iterator-stack' ? 0 : 2)
+    expect(radios, preset).toBe(RADIOS[preset] ?? 2)
     await slider(page).focus()
     let asked = 0
     for (let g = 0; g < 40; g++) {
@@ -107,7 +141,7 @@ test('loads paused at Start with its group switcher, and walks to the end with t
 })
 
 test('the frame never moves while stepping, answering and bursting (zero layout shift)', async ({ page }) => {
-  test.setTimeout(240_000)
+  test.setTimeout(600_000)
   for (const width of [375, 1024])
     for (const preset of PRESETS) {
       await open(page, width, preset)
@@ -138,7 +172,7 @@ test('the frame never moves while stepping, answering and bursting (zero layout 
 })
 
 test('nothing overflows its reserved box at any width or step', async ({ page }) => {
-  test.setTimeout(300_000)
+  test.setTimeout(720_000)
   for (const width of WIDTHS)
     for (const preset of PRESETS) {
       await open(page, width, preset)
@@ -173,7 +207,7 @@ test('nothing overflows its reserved box at any width or step', async ({ page })
 })
 
 test('lazy mount: the client placeholder reserves the entry table, at least the live frame, also under text zoom', async ({ browser }) => {
-  test.setTimeout(240_000)
+  test.setTimeout(600_000)
   for (const preset of PRESETS)
     for (const [width, zoom] of [
       [375, 100],
@@ -208,7 +242,7 @@ test('lazy mount: the client placeholder reserves the entry table, at least the 
 // a 375x667 phone, the current line, the changed glyphs, the caption and
 // Next are all on screen, at every step of every preset.
 test('375x667 fit: code line, changed glyph, caption and Next stay visible under the site header (Q15)', async ({ page }) => {
-  test.setTimeout(180_000)
+  test.setTimeout(420_000)
   for (const preset of PRESETS) {
     await open(page, 375, preset, '', 667)
     await slider(page).focus()
@@ -259,6 +293,7 @@ test.describe('without JavaScript', () => {
 })
 
 test('zero axe violations at Start, at the question and at its reveal', async ({ page }) => {
+  test.setTimeout(300_000)
   for (const width of [375, 1024])
     for (const preset of PRESETS) {
       await open(page, width, preset)

@@ -5,6 +5,7 @@ import { gainPanel, suffixPanel, trieDeletePanels, trieNodes, trieSearchPanel, t
 import { annotatedTreeDescriptor } from './descriptor'
 import type { GainPanel, SuffixPanel, TriePanel } from './model'
 import { RECORDINGS, hiddenClassTransitions, maxPathData, maxPathGainVsThrough, suffixData, suffixTreeBanana, trieData, trieEndMarkers, type TreeRecordings } from './presets'
+import { FLOW_RECORDINGS } from './presets/flow'
 import { SINGLES_RECORDINGS } from './presets/singles'
 import { DSA_RECORDINGS } from './presets/dsa'
 import { TREE_LESSONS } from './programs'
@@ -42,7 +43,7 @@ const missing = ALL.map((p) => loadProgram(p.source)).find((l) => !l.ok)
 
 describe('annotated-tree recordings', () => {
   it.skipIf(Boolean(missing)).each(ALL.map((p) => p.id))('%s: a fresh Node 24 run under the inspector equals the committed recording', (id) => {
-    expect(fresh(id)).toEqual({ ...RECORDINGS, ...SINGLES_RECORDINGS, ...DSA_RECORDINGS }[id])
+    expect(fresh(id)).toEqual({ ...RECORDINGS, ...SINGLES_RECORDINGS, ...DSA_RECORDINGS, ...FLOW_RECORDINGS }[id])
   })
 
   it('says why the re-recording skipped (no content checkout)', () => {
@@ -51,7 +52,7 @@ describe('annotated-tree recordings', () => {
   })
 
   it('every preset is its recordings, rebuilt (fresh where the checkout has the code)', () => {
-    const rec: TreeRecordings = { ...RECORDINGS, ...SINGLES_RECORDINGS, ...DSA_RECORDINGS }
+    const rec: TreeRecordings = { ...RECORDINGS, ...SINGLES_RECORDINGS, ...DSA_RECORDINGS, ...FLOW_RECORDINGS }
     if (!missing) for (const p of ALL) rec[p.id] = fresh(p.id)!
     expect(maxPathData(rec)).toEqual(maxPathGainVsThrough.data)
     expect(trieData(rec)).toEqual(trieEndMarkers.data)

@@ -2,8 +2,10 @@ import type { HashedProgram, StaticDescriptor, StaticEngineCore, StaticTextAlter
 import { layoutTree } from './layout'
 import { callLabel, cutText, pathText } from './calls'
 import { cellLabel } from './grid'
+import { flowLabel, type ResidualPanel } from './flow'
 import type { CallPanel, GainPanel, GraphPanel, GridPanel, SuffixPanel, TreeData, TreePanel, TriePanel } from './model'
 import { hiddenClassTransitions, maxPathGainVsThrough, suffixTreeBanana, trieEndMarkers } from './presets'
+import { clrsMinCut, diamondReverseEdge } from './presets/flow'
 import { combinationSumTakeSkip, kPairsLazyGrid, waterWellsSource } from './presets/singles'
 import { shapeLabel, type ShapesPanel } from './shapes'
 import { isDsa } from './dsa'
@@ -109,8 +111,21 @@ function describeShapes(p: ShapesPanel): string[] {
   return [...lines, ...p.notes.map((n) => `${n}.`)]
 }
 
+function describeResidual(p: ResidualPanel): string[] {
+  const name = (id: string) => p.nodes.find((n) => n.id === id)!.label
+  const lines = p.edges.map((e) => {
+    const back = p.reverse && e.back && e.back.residual > 0 ? `; reverse ${name(e.to)} to ${name(e.from)} has ${e.back.residual} (dashed)` : ''
+    const mark = e.mark === 'path' ? ', on the marked path' : e.mark === 'cut' ? ', a cut edge (marked)' : ''
+    const via = e.back?.mark === 'path' ? `; the marked path runs back from ${name(e.to)} to ${name(e.from)}, cancelling flow` : ''
+    return `${name(e.from)} to ${name(e.to)}: flow ${flowLabel(e)}${mark}${back}${via}.`
+  })
+  if (p.cut) lines.push(`Shaded, still reachable from ${name(p.nodes[0].id)}: ${p.cut.map(name).join(', ')}.`)
+  return [...lines, ...p.notes.map((n) => `${n}.`)]
+}
+
 function describePanel(p: TreePanel): string[] {
   if (isDsa(p)) return describeDsa(p)
+  if (p.kind === 'residual') return describeResidual(p)
   if (p.kind === 'shapes') return describeShapes(p)
   if (p.kind === 'gain') return describeGain(p)
   if (p.kind === 'trie') return describeTrie(p)
@@ -125,7 +140,9 @@ export function describeTree(d: TreeData): Omit<StaticTextAlternative, 'outputs'
     parts: d.panels.map((p) => ({ heading: p.heading, lines: describePanel(p) })),
     model: d.panels.every((p) => p.kind === 'shapes')
       ? 'Hidden classes are not visible to plain JavaScript: each node is a V8 map printed by %DebugPrint in a real run of the lesson code under node --allow-natives-syntax, joined to the map it came from (its back pointer); a dashed node was seen only as a back pointer.'
-      : 'Every value is recorded from a real run of the lesson code under the inspector: what each call returned, each node’s flags and children, each edge’s range.' +
+      : d.panels.every((p) => p.kind === 'residual')
+        ? 'Every flow and residual is recorded from a real run of the lesson code under the inspector: the residual lists after each augmenting path, and the path itself from parent and parentEdge.'
+        : 'Every value is recorded from a real run of the lesson code under the inspector: what each call returned, each node’s flags and children, each edge’s range.' +
         (d.panels.some((p) => p.kind === 'forest' && p.id === 'chain') ? ' The chain’s parent[] is written by hand before find runs (union by rank never builds a chain); find and its path compression are the lesson’s code.' : '') +
         (d.panels.some((p) => p.kind === 'interval' && p.id === 'by-row') ? ' The bottom-up order is recorded from the practice answer; only its order numbers are shown.' : '') +
         (d.panels.some((p) => p.kind === 'grid' && p.mark === 'twice') ? ' The two-neighbour rule is not run: its panel is a structural illustration, not a run, of how that rule reaches one cell from two parents, both pushed by the first pop.' : '') +
@@ -144,7 +161,7 @@ export const annotatedTreeDescriptor: StaticDescriptor<TreeData, HashedProgram> 
   form: 'static',
   title: 'Annotated tree',
   engine: annotatedTreeEngineCore,
-  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, combinationSumTakeSkip, waterWellsSource, kPairsLazyGrid, hiddenClassTransitions, ...DSA_PRESETS],
+  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, combinationSumTakeSkip, waterWellsSource, kPairsLazyGrid, hiddenClassTransitions, ...DSA_PRESETS, diamondReverseEdge, clrsMinCut],
   defaultPreset: 'max-path-gain-vs-through',
   since: '2026-11',
 }

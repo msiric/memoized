@@ -70,6 +70,13 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'dijkstra-lazy-heap': [876, 654, 876, 1028, 1064],
       'min-effort-grid': [854, 654, 854, 1034, 1034],
       'bst-iterator-stack': [826, 638, 826, 978, 1006],
+      'dfs-directed-recstack': [866, 658, 890, 994, 1090],
+      'dfs-back-edge': [866, 658, 866, 994, 1066],
+      'dfs-finish-order': [868, 654, 892, 1016, 1092],
+      'kahn-indegree': [820, 654, 844, 948, 1020],
+      'course-schedule-ii-edges': [762, 654, 762, 898, 974],
+      'kahn-cycle-stall': [808, 654, 808, 944, 1020],
+      'mht-leaf-peeling': [862, 682, 862, 1010, 1042],
     },
     {
       'bfs-levels': ['binary-matrix-8dir'],
@@ -77,6 +84,10 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'dijkstra-lazy-heap': ['min-effort-grid'],
       'min-effort-grid': ['min-effort-grid'],
       'bst-iterator-stack': ['bst-iterator-stack'],
+      'kahn-indegree': ['course-schedule-ii-edges', 'mht-leaf-peeling'],
+      'course-schedule-ii-edges': ['course-schedule-ii-edges', 'mht-leaf-peeling'],
+      'kahn-cycle-stall': ['course-schedule-ii-edges', 'mht-leaf-peeling'],
+      'mht-leaf-peeling': ['course-schedule-ii-edges', 'mht-leaf-peeling'],
     },
   ],
   'heap-graph': [
@@ -108,6 +119,8 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'insert-4-10-3-5-1-then-extract': [1116, 766, 766],
       'fib5': [988, 580, 580],
       'lps-interval-triangle': [1248, 846, 846],
+      'diamond-reverse-edge': [1010, 690, 690],
+      'clrs-23-min-cut': [546, 478, 478],
     },
   ],
   'prototype-object-graph': [

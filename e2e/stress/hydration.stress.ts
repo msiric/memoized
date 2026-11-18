@@ -34,6 +34,9 @@ const ALL_PAGES = [
   '/dev/visualizations?fr=bfs-levels',
   '/dev/visualizations?fr=dijkstra-lazy-heap',
   '/dev/visualizations?fr=bst-iterator-stack',
+  // Wave 4B: Graph DFS and Topological Sort (the second is local-only).
+  '/dev/visualizations?fr=dfs-directed-recstack',
+  '/dev/visualizations?fr=kahn-indegree',
   // The committed stand-in lesson body for list keys (R2 G-02).
   '/dev/visualizations/lesson/list-keys',
   // The heap-graph lessons (both FREE, committed copies).

@@ -1,0 +1,839 @@
+{
+ "generator": "node-inspector-frontier@1",
+ "sha256": "64d3fe3a63d73f2a3509d1348bda39777e4e254e48f3c5aa652778618b9cf3ad",
+ "stdout": [
+  "false"
+ ],
+ "pauses": [
+  {
+   "probe": "outer",
+   "line": 21,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "A",
+    "visited": [],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "A",
+    "visited": [],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "edge",
+   "line": 13,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "A",
+    "neighbor": "B",
+    "visited": [
+     "A"
+    ],
+    "recStack": [
+     "A"
+    ]
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "B",
+    "visited": [
+     "A"
+    ],
+    "recStack": [
+     "A"
+    ]
+   }
+  },
+  {
+   "probe": "edge",
+   "line": 13,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "B",
+    "neighbor": "D",
+    "visited": [
+     "A",
+     "B"
+    ],
+    "recStack": [
+     "A",
+     "B"
+    ]
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "D",
+    "visited": [
+     "A",
+     "B"
+    ],
+    "recStack": [
+     "A",
+     "B"
+    ]
+   }
+  },
+  {
+   "probe": "edge",
+   "line": 13,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "D",
+    "neighbor": "C",
+    "visited": [
+     "A",
+     "B",
+     "D"
+    ],
+    "recStack": [
+     "A",
+     "B",
+     "D"
+    ]
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "C",
+    "visited": [
+     "A",
+     "B",
+     "D"
+    ],
+    "recStack": [
+     "A",
+     "B",
+     "D"
+    ]
+   }
+  },
+  {
+   "probe": "edge",
+   "line": 13,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "C",
+    "neighbor": "E",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C"
+    ],
+    "recStack": [
+     "A",
+     "B",
+     "D",
+     "C"
+    ]
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "E",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C"
+    ],
+    "recStack": [
+     "A",
+     "B",
+     "D",
+     "C"
+    ]
+   }
+  },
+  {
+   "probe": "finish",
+   "line": 16,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "E",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ]
+   }
+  },
+  {
+   "probe": "finish",
+   "line": 16,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "C",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": [
+     "A",
+     "B",
+     "D",
+     "C"
+    ]
+   }
+  },
+  {
+   "probe": "finish",
+   "line": 16,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "D",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": [
+     "A",
+     "B",
+     "D"
+    ]
+   }
+  },
+  {
+   "probe": "finish",
+   "line": 16,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "B",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": [
+     "A",
+     "B"
+    ]
+   }
+  },
+  {
+   "probe": "edge",
+   "line": 13,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "A",
+    "neighbor": "C",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": [
+     "A"
+    ]
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "C",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": [
+     "A"
+    ]
+   }
+  },
+  {
+   "probe": "finish",
+   "line": 16,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "A",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": [
+     "A"
+    ]
+   }
+  },
+  {
+   "probe": "outer",
+   "line": 21,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "B",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "B",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "outer",
+   "line": 21,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "C",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "C",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "outer",
+   "line": 21,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "D",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "D",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "outer",
+   "line": 21,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "E",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "enter",
+   "line": 6,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "vertex": "E",
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  },
+  {
+   "probe": "return",
+   "line": 24,
+   "vars": {
+    "graph": {
+     "A": [
+      "B",
+      "C"
+     ],
+     "B": [
+      "D"
+     ],
+     "C": [
+      "E"
+     ],
+     "D": [
+      "C"
+     ],
+     "E": []
+    },
+    "visited": [
+     "A",
+     "B",
+     "D",
+     "C",
+     "E"
+    ],
+    "recStack": []
+   }
+  }
+ ]
+}

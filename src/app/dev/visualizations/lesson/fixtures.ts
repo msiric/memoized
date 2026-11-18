@@ -318,6 +318,47 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // is, before the linked-list version.
     inserts: [{ before: '## **Merging K Sorted Linked Lists**', viz: '<Viz id="annotated-tree" preset="k-pairs-lazy-grid" />' }],
   },
+  // Wave 4B, graph visuals (all four lessons PREMIUM: local checkout only).
+  {
+    slug: 'graph-dfs',
+    title: 'Graph DFS (Depth-First Search)',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/graph-dfs/page.mdx',
+    // A prediction: under the cycle problem, before its Step-by-Step, whose
+    // step 4 states the rule the question asks for (visited is not enough,
+    // only a vertex on the recursion stack closes a cycle).
+    inserts: [{ before: '### **Step-by-Step Solution:**', viz: '<Viz id="bfs-dfs-frontier" preset="dfs-directed-recstack" />' }],
+  },
+  {
+    slug: 'topological-sort',
+    title: 'Topological Sort',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/topological-sort/page.mdx',
+    // A prediction: under Kahn's heading, before its Step-by-Step and the
+    // example whose output comment ([4, 5, 2, 0, 3, 1]) answers 4 or 5.
+    inserts: [{ before: '### **Step-by-Step Solution:**', viz: '<Viz id="bfs-dfs-frontier" preset="kahn-indegree" />' }],
+  },
+  {
+    slug: 'maximum-flow',
+    title: 'Maximum Flow',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/maximum-flow/page.mdx',
+    // After the Ford-Fulkerson example, the DFS search whose reverse edge
+    // the figure draws, before Edmonds-Karp.
+    inserts: [{ before: '### **Edmonds-Karp Algorithm**', viz: '<Viz id="annotated-tree" preset="diamond-reverse-edge" />' }],
+  },
+  {
+    slug: 'network-flow-algorithms',
+    title: 'Network Flow Algorithms',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/network-flow-algorithms/page.mdx',
+    inserts: [
+      // After the Ford-Fulkerson example, as in Maximum Flow.
+      { before: '### **Edmonds-Karp Algorithm**', viz: '<Viz id="annotated-tree" preset="diamond-reverse-edge" />' },
+      // After the Edmonds-Karp example, the network the cut is of (it prints 23).
+      { before: '## **Practical Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="clrs-23-min-cut" />' },
+    ],
+  },
   // Wave 3B, the JavaScript-track figures. Local checkout only: the two free
   // lessons too (the app repo keeps no lesson body under the premium-code
   // policy). Static figures, each after the example it explains.

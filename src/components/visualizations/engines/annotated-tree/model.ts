@@ -1,4 +1,5 @@
 import type { DsaPanel } from './dsa'
+import type { ResidualPanel } from './flow'
 import type { ShapesPanel } from './shapes'
 
 /**
@@ -30,6 +31,10 @@ import type { ShapesPanel } from './shapes'
  * Wave 4A adds five more for the DSA static figures (`./dsa.ts`): a
  * segment tree, a union-find forest, a heap tree over its array, a call
  * tree with memo hits and an interval dp table.
+ *
+ * Wave 4B adds `residual` (`./flow.ts`): a flow network's residual graph,
+ * flow / capacity on each edge, reverse residuals dashed, one augmenting
+ * path marked or the minimum cut shaded (Maximum Flow, Network Flow).
  *
  * Each panel has at most one rest mark family, the neutral `changed` role
  * (H3 R2 Q9, never lime): the recorded path, the cleared flag, the deepest
@@ -198,7 +203,7 @@ export type GridPanel = {
   notes: string[]
 }
 
-export type TreePanel = GainPanel | TriePanel | SuffixPanel | CallPanel | GraphPanel | GridPanel | ShapesPanel | DsaPanel
+export type TreePanel = GainPanel | TriePanel | SuffixPanel | CallPanel | GraphPanel | GridPanel | ShapesPanel | DsaPanel | ResidualPanel
 
 export type TreeData = {
   panels: TreePanel[]

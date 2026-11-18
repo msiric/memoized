@@ -1,5 +1,6 @@
 import { combinationSumProgram } from './backtracking'
 import { fibMemoProgram, fibProgram, heapProgram, lazyProgram, lpsAnswerProgram, lpsProgram, segmentProgram, unionChainProgram, unionRankProgram, unionSizeProgram } from './dsa'
+import { ekClrsProgram, ekDiamondProgram, ffDiamondNetworkProgram, ffDiamondProgram, ffSabtProgram } from './flow'
 import { kPairsProgram } from './k-way-merge'
 import { waterAllFiveProgram, waterProgram } from './minimum-spanning-trees'
 import { suffixArrayProgram, suffixTreeProgram } from './suffix'
@@ -20,4 +21,7 @@ export const TREE_LESSONS: Record<string, readonly TreeProgram[]> = {
   heaps: [heapProgram],
   'recursion-and-memoization': [fibProgram, fibMemoProgram],
   'palindromic-subsequence': [lpsProgram, lpsAnswerProgram],
+  // Wave 4B: the residual-graph figures.
+  'maximum-flow': [ffDiamondProgram, ffSabtProgram, ekDiamondProgram],
+  'network-flow-algorithms': [ffDiamondNetworkProgram, ekClrsProgram],
 }

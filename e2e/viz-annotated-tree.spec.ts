@@ -4,11 +4,12 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page, type Request } from '@playwright/test'
 import { annotatedTreeDescriptor } from '../src/components/visualizations/engines/annotated-tree/descriptor'
 import { DSA_PRESETS } from '../src/components/visualizations/engines/annotated-tree/presets/dsa'
+import type { ResidualPanel } from '../src/components/visualizations/engines/annotated-tree/flow'
 import type { CallPanel, GainPanel, GraphPanel, GridPanel, SuffixPanel } from '../src/components/visualizations/engines/annotated-tree/model'
 import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
 
 /**
- * The annotated trees (R4 shared visual "annotated-tree", waves 2D and 3A) through
+ * The annotated trees (R4 shared visual "annotated-tree", waves 2D, 3A and 4B) through
  * the real `<Viz>` mount on `/dev/visualizations?at=static`: final server
  * SVG (no chunk on a hard load), the entry-table footprint at every width
  * and under a client-side mount, nothing outside its svg or stage, every
@@ -84,7 +85,9 @@ test('the reserved footprint at every width; nothing outside its svg, its stage 
       expect(out.bad, `${p} @${width}`).toEqual([])
       // One svg per panel on screen: the suffix tree's own for the variant.
       const d = annotatedTreeDescriptor.presets.find((x) => x.id === p)!.data
-      expect(out.shown, `${p} @${width}`).toEqual(d.panels.map((x) => (x.kind === 'suffix' || x.kind === 'calls' ? `${x.id}-${width < 768 ? 'narrow' : 'wide'}` : x.id)))
+      expect(out.shown, `${p} @${width}`).toEqual(
+        d.panels.map((x) => (x.kind === 'suffix' || x.kind === 'calls' || (x.kind === 'residual' && x.wide) ? `${x.id}-${width < 768 ? 'narrow' : 'wide'}` : x.id)),
+      )
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `page @${width}`).toBe(true)
   }
@@ -161,6 +164,36 @@ test('wave 3A: every drawn value is the recorded one (calls, the spanning tree, 
   expect(await twicePanel.locator('[data-edge][data-changed]').evaluateAll((es) => es.map((e) => e.getAttribute('data-to')))).toEqual(['1,1', '1,1'])
 })
 
+test('wave 4B: every drawn flow, reverse residual, path and cut is the recorded one', async ({ page }) => {
+  await open(page, 375)
+  const [one, two, cut] = annotatedTreeDescriptor.presets.find((x) => x.id === 'diamond-reverse-edge')!.data.panels as ResidualPanel[]
+  for (const panel of [one, two, cut]) {
+    const svg = page.locator(`svg[data-viz-panel="${panel.id}"]`)
+    const drawn = await svg.locator('[data-edge]:not([data-reverse])').evaluateAll((es) => es.map((e) => [e.getAttribute('data-edge'), e.getAttribute('data-flow'), e.getAttribute('data-cap')]))
+    expect(drawn, panel.id).toEqual(panel.edges.map((e) => [`${e.from}-${e.to}`, String(e.flow), String(e.cap)]))
+    await expect(svg.locator('[data-viz-part="flow"]')).toHaveText(panel.edges.map((e) => `${e.flow}/${e.cap}`))
+    // One dashed reverse per edge carrying flow, worth that flow.
+    const reverses = await svg.locator('[data-reverse]').evaluateAll((es) => es.map((e) => [e.getAttribute('data-edge'), e.getAttribute('data-residual')]))
+    expect(reverses, panel.id).toEqual(panel.edges.filter((e) => e.flow > 0).map((e) => [`${e.to}-${e.from}`, String(e.flow)]))
+  }
+  // Path 1 marks S-A, A-B, B-T; path 2 marks S-B and A-T and runs back along A -> B (its dashed reverse, B -> A).
+  const lit = (id: string) => page.locator(`svg[data-viz-panel="${id}"] [data-edge][data-changed]`).evaluateAll((es) => es.map((e) => e.getAttribute('data-edge')))
+  expect(await lit('path-1')).toEqual(['v0-v1', 'v1-v2', 'v2-v3'])
+  expect(await lit('path-2')).toEqual(['v0-v2', 'v2-v1', 'v1-v3'])
+  // The cut: S alone shaded, its two edges marked; A -> B carries nothing.
+  await expect(page.locator('svg[data-viz-panel="cut"] [data-node][data-cut]')).toHaveCount(1)
+  expect(await lit('cut')).toEqual(['v0-v1', 'v0-v2'])
+  await expect(page.locator('svg[data-viz-panel="cut"] [data-edge="v1-v2"]')).toHaveAttribute('data-flow', '0')
+  // CLRS at the end: 0 reaches 0, 1, 2, 4; the cut edges 1->3, 4->3, 4->5 are marked and full.
+  const clrs = page.locator('svg[data-viz-panel="clrs-narrow"]')
+  expect(await clrs.locator('[data-node][data-cut]').evaluateAll((es) => es.map((e) => e.getAttribute('data-node')))).toEqual(['v0', 'v1', 'v2', 'v4'])
+  expect(await clrs.locator('[data-edge][data-changed]').evaluateAll((es) => es.map((e) => [e.getAttribute('data-edge'), e.getAttribute('data-flow'), e.getAttribute('data-cap')]))).toEqual([
+    ['v1-v3', '12', '12'],
+    ['v4-v3', '7', '7'],
+    ['v4-v5', '4', '4'],
+  ])
+})
+
 test('the stage is a named group described by the text alternative, with each verified output', async ({ page }) => {
   await open(page, 1024)
   for (const p of PRESETS) {
@@ -179,6 +212,10 @@ test('the stage is a named group described by the text alternative, with each ve
   await expect(figure(page, 'k-pairs-lazy-grid').locator('details')).toContainText('Arrow from (0,0) to (0,1).')
   await expect(figure(page, 'k-pairs-lazy-grid').locator('details')).toContainText('Arrow from (0,0) to (1,0).')
   await expect(figure(page, 'k-pairs-lazy-grid').locator('details')).toContainText('its panel is a structural illustration, not a run')
+  await expect(figure(page, 'diamond-reverse-edge').locator('details')).toContainText('the marked path runs back from B to A, cancelling flow')
+  await expect(figure(page, 'diamond-reverse-edge').locator('details')).toContainText('Verified output, ff-diamond (Node 24.x): 2')
+  await expect(figure(page, 'clrs-23-min-cut').locator('details')).toContainText('Shaded, still reachable from 0: 0, 1, 2, 4.')
+  await expect(figure(page, 'clrs-23-min-cut').locator('details')).toContainText('Verified output, ek-clrs (Node 24.x): 23')
 })
 
 test('zero axe violations, closed and open', async ({ page }) => {
@@ -221,6 +258,9 @@ const LESSONS: Record<string, { slug: string; source: string }> = {
   'combination-sum-take-skip': { slug: 'backtracking', source: 'dsa-track/common-techniques/backtracking/page.mdx' },
   'water-wells-virtual-source': { slug: 'minimum-spanning-trees', source: 'dsa-track/advanced-topics/minimum-spanning-trees/page.mdx' },
   'k-pairs-lazy-grid': { slug: 'k-way-merge', source: 'dsa-track/common-techniques/k-way-merge/page.mdx' },
+  // Wave 4B (the diamond is placed in network-flow-algorithms too, before the CLRS cut).
+  'diamond-reverse-edge': { slug: 'maximum-flow', source: 'dsa-track/advanced-topics/maximum-flow/page.mdx' },
+  'clrs-23-min-cut': { slug: 'network-flow-algorithms', source: 'dsa-track/advanced-topics/network-flow-algorithms/page.mdx' },
 }
 
 test('in its lesson: the figure, its footprint, nothing wider than the column (local checkout only)', async ({ page }) => {

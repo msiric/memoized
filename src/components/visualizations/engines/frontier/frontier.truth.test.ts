@@ -15,6 +15,13 @@ import matrixRec from './recordings/binary-matrix.json'
 import iteratorRec from './recordings/bst-iterator.json'
 import dijkstraRec from './recordings/dijkstra.json'
 import effortRec from './recordings/min-effort.json'
+import courseRec from './recordings/course-schedule-ii.json'
+import noBackRec from './recordings/dfs-cycle-no-back-edge.json'
+import cycleRec from './recordings/dfs-cycle.json'
+import topoRec from './recordings/dfs-topological.json'
+import kahnCycleRec from './recordings/kahn-cycle.json'
+import kahnRec from './recordings/kahn.json'
+import mhtRec from './recordings/min-height-trees.json'
 import { recordFrontier } from './truth/record'
 
 /**
@@ -35,6 +42,13 @@ const RECORDINGS: Record<string, FrontierRecording> = {
   dijkstra: dijkstraRec as FrontierRecording,
   'min-effort': effortRec as FrontierRecording,
   'bst-iterator': iteratorRec as FrontierRecording,
+  'dfs-cycle-no-back-edge': noBackRec as FrontierRecording,
+  'dfs-cycle': cycleRec as FrontierRecording,
+  'dfs-topological': topoRec as FrontierRecording,
+  kahn: kahnRec as FrontierRecording,
+  'course-schedule-ii': courseRec as FrontierRecording,
+  'kahn-cycle': kahnCycleRec as FrontierRecording,
+  'min-height-trees': mhtRec as FrontierRecording,
 }
 const program = (id: string) => FRONTIER_PROGRAMS.find((p) => p.id === id)!
 const log = (id: string) => frontierDescriptor.presets.find((p) => p.id === id)!.log
@@ -68,6 +82,13 @@ const PRESET_PROGRAM: Record<string, string> = {
   'dijkstra-lazy-heap': 'dijkstra',
   'min-effort-grid': 'min-effort',
   'bst-iterator-stack': 'bst-iterator',
+  'dfs-directed-recstack': 'dfs-cycle-no-back-edge',
+  'dfs-back-edge': 'dfs-cycle',
+  'dfs-finish-order': 'dfs-topological',
+  'kahn-indegree': 'kahn',
+  'course-schedule-ii-edges': 'course-schedule-ii',
+  'kahn-cycle-stall': 'kahn-cycle',
+  'mht-leaf-peeling': 'min-height-trees',
 }
 
 /**
@@ -86,6 +107,10 @@ function recordedFrontiers(id: string, rec: FrontierRecording): Set<string> {
     if (id === 'min-effort' && v.heap)
       out.add(JSON.stringify([...(v.heap as number[][])].sort((a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2]).map((e) => `[${e.join(', ')}]`)))
     if (id === 'bst-iterator' && v.stack) out.add(JSON.stringify((v.stack as number[]).map(String)))
+    // Wave 4B: every set, stack, queue and order the run held (values as the lanes label them).
+    for (const k of ['visited', 'recStack', 'stack', 'queue', 'order', 'q', 'ans', 't'] as const)
+      if (id.startsWith('dfs-') || ['kahn', 'kahn-cycle', 'course-schedule-ii', 'min-height-trees'].includes(id))
+        if (Array.isArray(v[k])) out.add(JSON.stringify((v[k] as unknown[]).map(String)))
   }
   return out
 }
@@ -283,5 +308,172 @@ describe('the truth checks catch a lie', () => {
     const p = program('bst-iterator')
     const display = p.display.map((d, i) => (i === 3 && 'wrap' in d ? { ...d, wrap: [d.wrap[0], d.wrap[1] + 1, d.wrap[2]] as const } : d))
     expect(displayProblems({ ...p, display }, textOf('bst-iterator')).join('\n')).toMatch(/line 14/)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Wave 4B: Graph DFS (stack mode, recStack beside visited) and Topological
+// Sort (queue mode, in-degree badges).
+// ---------------------------------------------------------------------------
+
+/** Every degree array the run held (Kahn's inDegree, the answers' indeg and degree), as the badges label them. */
+function badgesNotRecorded(id: string, l: StepLog<FrontierState>, rec: FrontierRecording): string[] {
+  const seen = new Set<string>()
+  for (const p of rec.pauses)
+    for (const k of ['inDegree', 'indeg', 'degree'] as const) if (Array.isArray(p.vars[k])) seen.add(JSON.stringify((p.vars[k] as number[]).map(String)))
+  return l.steps.flatMap((s, i) => {
+    const badges = s.state.nodes.map((n) => n.badge)
+    if (badges.every((b) => b === undefined)) return []
+    const drawn = JSON.stringify(badges)
+    return seen.has(drawn) ? [] : [`step ${i} badges ${drawn}`]
+  })
+}
+
+/**
+ * The rule the DFS presets draw: a vertex with the queued edge or the doubled
+ * edge is on recStack (or the call path), a solid one is visited and off it,
+ * an empty one unvisited, and each step's canvas agrees with its lanes.
+ */
+function statusProblems(l: StepLog<FrontierState>, onPath: string, done: string): string[] {
+  return l.steps.flatMap((s, i) => {
+    const path = new Set(s.state.lanes[onPath]?.map((c) => c.label))
+    const visited = new Set(s.state.lanes.visited.map((c) => c.label))
+    const finished = new Set(s.state.lanes[done]?.map((c) => c.label) ?? [])
+    return s.state.nodes.flatMap((n) => {
+      const ok =
+        n.status === 'idle'
+          ? !visited.has(n.label)
+          : n.status === 'done'
+            ? visited.has(n.label) && !path.has(n.label) && (done === 'visited' || finished.has(n.label))
+            : onPath === 'recStack'
+              ? path.has(n.label)
+              : visited.has(n.label) && !finished.has(n.label)
+      return ok ? [] : [`step ${i} ${n.label} ${n.status}`]
+    })
+  })
+}
+
+describe('wave 4B: the register verification assertions hold on the recorded runs', () => {
+  it('Graph DFS: the lesson graph (E -> A) prints true; with E: [] it prints false', () => {
+    expect(recorded('dfs-cycle').stdout).toEqual(['true'])
+    expect(recorded('dfs-cycle-no-back-edge').stdout).toEqual(['false'])
+    // The variant is the lesson block with one token changed, shown with the same rows.
+    const variant = program('dfs-cycle-no-back-edge')
+    expect(variant.source).toEqual([{ ...program('dfs-cycle').source[0], replace: ["E: ['A']", 'E: []'] }])
+    expect(variant.display).toEqual(program('dfs-cycle').display)
+  })
+
+  it('Graph DFS: A -> C meets C visited and off recStack (no cycle); E -> A meets A on recStack (a cycle)', () => {
+    const ac = recorded('dfs-cycle-no-back-edge').pauses.find((p) => p.probe === 'edge' && p.vars.vertex === 'A' && p.vars.neighbor === 'C')!
+    expect(ac.vars.visited).toContain('C')
+    expect(ac.vars.recStack).toEqual(['A'])
+    const ea = recorded('dfs-cycle').pauses.find((p) => p.probe === 'edge' && p.vars.vertex === 'E' && p.vars.neighbor === 'A')!
+    expect(ea.vars.recStack).toEqual(['A', 'B', 'D', 'C', 'E'])
+    // In the lesson run A -> C is never examined: the cycle is found first, so the variant is needed for that question.
+    expect(recorded('dfs-cycle').pauses.some((p) => p.probe === 'edge' && p.vars.vertex === 'A' && p.vars.neighbor === 'C')).toBe(false)
+    const l = log('dfs-directed-recstack')
+    const reveal = l.steps[l.checkpoints[0].beforeStep].state
+    expect(reveal.edges.find((e) => e.active)!.id).toBe('e-A-C')
+    expect(reveal.lanes.recStack.map((c) => c.label)).toEqual(['A'])
+    expect(reveal.nodes.find((n) => n.label === 'C')!.status).toBe('done')
+    const back = log('dfs-back-edge')
+    const hit = back.steps[back.checkpoints[0].beforeStep].state
+    expect(hit.edges.find((e) => e.active)!.id).toBe('e-E-A')
+    expect(hit.lanes.recStack.map((c) => c.label)).toContain('A')
+  })
+
+  it("Graph DFS: topologicalSort prints [ 'B', 'D', 'A', 'C', 'E', 'F' ], the finish order F, E, C, A, D, B reversed", () => {
+    const run = recorded('dfs-topological')
+    expect(run.stdout).toEqual(["[ 'B', 'D', 'A', 'C', 'E', 'F' ]"])
+    expect(run.pauses.filter((p) => p.probe === 'push').map((p) => p.vars.vertex)).toEqual(['F', 'E', 'C', 'A', 'D', 'B'])
+  })
+
+  it('Graph DFS: every vertex is drawn in the state its sets give it', () => {
+    for (const id of ['dfs-directed-recstack', 'dfs-back-edge']) expect(statusProblems(log(id), 'recStack', 'visited'), id).toEqual([])
+    // Topological: on the call path means visited and not yet pushed; done means pushed.
+    const l = log('dfs-finish-order')
+    for (const [i, s] of l.steps.entries())
+      for (const n of s.state.nodes) {
+        const v = s.state.lanes.visited.some((c) => c.label === n.label)
+        const pushed = s.state.lanes.stack.some((c) => c.label === n.label)
+        const want = !v ? 'idle' : pushed ? 'done' : ['current', 'frontier']
+        expect(Array.isArray(want) ? want.includes(n.status) : n.status === want, `step ${i} ${n.label}`).toBe(true)
+      }
+  })
+
+  it('Topological Sort: Kahn prints [ 4, 5, 2, 0, 3, 1 ], seeded 4 then 5; badges start 2, 2, 1, 1, 0, 0', () => {
+    const run = recorded('kahn')
+    expect(run.stdout).toEqual(['[ 4, 5, 2, 0, 3, 1 ]'])
+    expect(run.pauses.find((p) => p.probe === 'built')!.vars.inDegree).toEqual([2, 2, 1, 1, 0, 0])
+    expect(run.pauses.find((p) => p.probe === 'seeded')!.vars.queue).toEqual([4, 5])
+    const l = log('kahn-indegree')
+    expect(l.steps[0].state.nodes.map((n) => n.badge)).toEqual(['2', '2', '1', '1', '0', '0'])
+  })
+
+  it('Topological Sort: findOrder(4, [[1,0],[2,1],[3,2]]) is [0, 1, 2, 3]; each pair [a, b] is the edge b -> a', () => {
+    const run = recorded('course-schedule-ii')
+    expect(run.stdout).toEqual(['[ 0, 1, 2, 3 ]'])
+    expect(run.pauses.find((p) => p.probe === 'built')!.vars.g).toEqual([[1], [2], [3], []])
+    const l = log('course-schedule-ii-edges')
+    expect(l.steps[0].state.edges).toEqual([])
+    expect(l.steps[l.checkpoints[0].beforeStep].state.edges.map((e) => e.id)).toEqual(['e-0-1', 'e-1-2', 'e-2-3'])
+  })
+
+  it('Topological Sort: the cycle variant outputs 4 and 1, stalls with 0, 2, 3 and 5 above 0, and returns []', () => {
+    const run = recorded('kahn-cycle')
+    expect(run.stdout).toEqual(['[]'])
+    const end = run.pauses.find((p) => p.probe === 'end')!.vars as { order: number[]; inDegree: number[] }
+    expect(end.order).toEqual([4, 1])
+    expect([0, 2, 3, 5].every((v) => end.inDegree[v] > 0)).toBe(true)
+  })
+
+  it('Topological Sort: Minimum Height Trees peels 0, 1, 2, 5, then 3 and 4, and returns [ 3, 4 ]', () => {
+    const run = recorded('min-height-trees')
+    expect(run.stdout).toEqual(['[ 3, 4 ]'])
+    expect(run.pauses.find((p) => p.probe === 'seeded')!.vars.q).toEqual([0, 1, 2, 5])
+    expect(run.pauses.filter((p) => p.probe === 'peel').map((p) => p.vars.a)).toEqual([0, 1, 2, 5, 3, 4])
+  })
+
+  it('every badge is a degree array the run held', () => {
+    for (const id of ['kahn-indegree', 'course-schedule-ii-edges', 'kahn-cycle-stall', 'mht-leaf-peeling'])
+      expect(badgesNotRecorded(PRESET_PROGRAM[id], log(id), recorded(PRESET_PROGRAM[id])), id).toEqual([])
+  })
+})
+
+describe('wave 4B: the truth checks catch a lie', () => {
+  it('fails when a step puts a finished vertex back on recStack (the visited-means-cycle error)', () => {
+    const l = log('dfs-directed-recstack')
+    const reveal = l.checkpoints[0].beforeStep
+    const steps = l.steps.map((s, i) =>
+      i === reveal ? { ...s, state: { ...s.state, lanes: { ...s.state.lanes, recStack: [...s.state.lanes.recStack, { id: 'k-r-C', label: 'C' }] } } } : s,
+    )
+    expect(drawnNotRecorded('dfs-cycle-no-back-edge', { ...l, steps }, recorded('dfs-cycle-no-back-edge'))).toEqual([`step ${reveal} recStack ["A","C"]`])
+  })
+
+  it('fails when a vertex on recStack is drawn finished', () => {
+    const l = log('dfs-back-edge')
+    const at = l.checkpoints[0].beforeStep
+    const steps = l.steps.map((s, i) =>
+      i === at ? { ...s, state: { ...s.state, nodes: s.state.nodes.map((n) => (n.label === 'A' ? { ...n, status: 'done' as const } : n)) } } : s,
+    )
+    expect(statusProblems({ ...l, steps }, 'recStack', 'visited')).toEqual([`step ${at} A done`])
+  })
+
+  it('fails when a badge skips a count the run never held', () => {
+    const l = log('kahn-indegree')
+    const steps = l.steps.map((s, i) => (i === 3 ? { ...s, state: { ...s.state, nodes: s.state.nodes.map((n) => (n.label === '0' ? { ...n, badge: '0' } : n)) } } : s))
+    expect(badgesNotRecorded('kahn', { ...l, steps }, recorded('kahn'))).toHaveLength(1)
+  })
+
+  it.skipIf(withText('dfs-cycle', '')[1])(withText('dfs-cycle', 'the lesson graph as written does not give the variant run (the replace matters)')[0], () => {
+    const { runtime: _r, ...run } = record('dfs-cycle')
+    expect(run.stdout).not.toEqual(recorded('dfs-cycle-no-back-edge').stdout)
+  })
+
+  it.skipIf(withText('kahn', '')[1])(withText('kahn', 'fails when an edge is read the wrong way round (a -> b for [a, b])')[0], () => {
+    // The lesson's edges reversed: the output changes, so a drawing of the wrong direction cannot pass.
+    const edited = textOf('kahn').replace('graph[u].push(v);\n        inDegree[v]++;', 'graph[v].push(u);\n        inDegree[u]++;')
+    expect(edited).not.toBe(textOf('kahn'))
+    expect(recordFrontier(program('kahn'), edited).stdout).not.toEqual(RECORDINGS.kahn.stdout)
   })
 })

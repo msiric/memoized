@@ -20,6 +20,9 @@ const routes = [
   '/dev/visualizations?fr=bfs-levels',
   '/dev/visualizations?fr=dijkstra-lazy-heap',
   '/dev/visualizations?fr=bst-iterator-stack',
+  // Wave 4B: Graph DFS and Topological Sort (the second is local-only).
+  '/dev/visualizations?fr=dfs-directed-recstack',
+  '/dev/visualizations?fr=kahn-indegree',
   // Pointer rewiring (wave 2B).
   '/dev/visualizations?ll=reverse-between-m2-n4',
   '/dev/visualizations?ll=palindrome-split-reverse-compare',
