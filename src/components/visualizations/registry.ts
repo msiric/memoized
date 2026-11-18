@@ -1,5 +1,6 @@
 import { annotatedTreeDescriptor } from './engines/annotated-tree/descriptor'
 import { dpTableDescriptor } from './engines/dp-table/descriptor'
+import { ssrDescriptor } from './engines/ssr-stream/descriptor'
 import { envRecordsDescriptor } from './engines/env-records/descriptor'
 import { eventLoopDescriptor } from './engines/event-loop/descriptor'
 import { emitFramesDescriptor, generatorFramesDescriptor, workerPoolDescriptor } from './engines/frames/descriptor'
@@ -11,6 +12,8 @@ import { linkedListDescriptor } from './engines/linked-list/descriptor'
 import { linkedListFramesDescriptor } from './engines/linked-list/frames/descriptor'
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
 import { slidingWindowDescriptor } from './engines/sliding-window/descriptor'
+import { turnStackDescriptor } from './engines/turn-stack/descriptor'
+import { swDescriptor } from './engines/sw-lifecycle/descriptor'
 import { footprintOf, groupIndices, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
 import { outputText, type StaticDescriptor, type StaticTextAlternative } from './shell/static-types'
@@ -41,11 +44,14 @@ export const VIZ_DESCRIPTORS = {
   'sliding-window': slidingWindowDescriptor,
   'annotated-tree': annotatedTreeDescriptor,
   'dp-table-dependencies': dpTableDescriptor,
+  'hull-turn-stack': turnStackDescriptor,
+  'ssr-stream': ssrDescriptor,
   'prototype-object-graph': protoDescriptor,
   lanes: lanesDescriptor,
   'generator-frames': generatorFramesDescriptor,
   'worker-pool': workerPoolDescriptor,
   'emit-frames': emitFramesDescriptor,
+  'sw-lifecycle': swDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS

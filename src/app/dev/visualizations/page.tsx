@@ -12,7 +12,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string; dsa?: string; el?: string; core?: string; fe?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; ch?: string; ssr?: string; swl?: string; js?: string; fx?: string; dsa?: string; el?: string; core?: string; fe?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -30,9 +30,15 @@ export default function VisualizationGalleryPage({
   if (searchParams.sw) return <SlidingWindowGallery preset={searchParams.sw} mount={searchParams.mount} spacer={searchParams.spacer} />
   // `?dp=<preset>`: the dp-table step-through alone (wave 3A), one lesson group per page.
   if (searchParams.dp) return <DpTableGallery preset={searchParams.dp} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?ch=<preset>`: the convex-hull turn-stack step-through alone (wave 4E), one lesson group per page.
+  if (searchParams.ch) return <TurnStackGallery preset={searchParams.ch} mount={searchParams.mount} spacer={searchParams.spacer} />
+  // `?ssr=<preset>`: the streaming-SSR step-through alone (wave 4E), one lesson group.
+  if (searchParams.ssr) return <SsrGallery preset={searchParams.ssr} mount={searchParams.mount} spacer={searchParams.spacer} />
   // `?fx=<preset>`: a frames step-through alone (wave 3C: generators, mapLimit, reentrant emit), its own lesson's presets.
   if (searchParams.fx) return <FramesGallery preset={searchParams.fx} mount={searchParams.mount} spacer={searchParams.spacer} />
   // `?el=<preset>`: an event-loop lesson group alone (wave 4C: Exercise 2, the call-stack traces).
+  // `?swl=<preset>`: the service-worker lifecycle step-through alone (wave 4E), one lesson group.
+  if (searchParams.swl) return <SwLifecycleGallery preset={searchParams.swl} mount={searchParams.mount} spacer={searchParams.spacer} />
   if (searchParams.el) return <EventLoopGallery preset={searchParams.el} mount={searchParams.mount} spacer={searchParams.spacer} />
 
   const viz = <Viz id="event-loop" preset={searchParams.preset} />
@@ -310,6 +316,46 @@ function DpTableGallery({ preset, mount, spacer }: { preset: string; mount?: str
   )
 }
 
+/** The streaming-SSR step-through (the visual's own app, recorded), between lesson text. */
+function SsrGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Streaming SSR step-through</h1>
+          <p>
+            What the server writes, what the screen shows and when each boundary hydrates. Every write, screen change
+            and hydration order is recorded from React 19 on Node 24 and in Chromium, and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="ssr-stream" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
+/** The convex-hull turn-stack step-through (a practice answer from the checkout), between lesson text. */
+function TurnStackGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Convex hull step-through</h1>
+          <p>
+            Which turns pop a point off the monotone chain. Every point, stack and cross product is recorded from a real
+            Node run of the answer&apos;s code and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="hull-turn-stack" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
 /** A frames step-through (practice answers from the checkout), between lesson text: the visual is found by its preset. */
 function FramesGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
   const id = framesVizFor(preset)
@@ -358,6 +404,26 @@ function EventLoopGallery({ preset, mount, spacer }: { preset: string; mount?: s
  * checkout, as `sync-content.ts` does for a lesson. Without the content (CI)
  * the frame is local-only, like a premium lesson fixture: a note stands in.
  */
+/** The service-worker lifecycle step-through (the visual's own worker, recorded in Chromium), between lesson text. */
+function SwLifecycleGallery({ preset, mount, spacer }: { preset: string; mount?: string; spacer?: string }) {
+  return (
+    <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+      <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+        <Prose>
+          <h1>Service worker lifecycle step-through</h1>
+          <p>
+            Which worker controls each tab while an update installs, waits and activates. Every slot, controller and
+            cache name is recorded from a real Chromium run and re-verified by unit tests.
+          </p>
+          {spacer ? <div data-testid="spacer" style={{ height: 3000 }} /> : null}
+          <PremiumViz id="sw-lifecycle" preset={preset} mount={mount} />
+          <p>Text after the visual, to show it never moves while stepping.</p>
+        </Prose>
+      </div>
+    </div>
+  )
+}
+
 async function PremiumViz({ id, preset, mount }: { id: string; preset: string; mount?: string }) {
   const r = await resolveVizCode(id, preset)
   if (r.kind === 'missing')

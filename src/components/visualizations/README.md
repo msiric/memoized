@@ -864,6 +864,151 @@ tag off its line, a note wider than the panel.
   `fe-statics.stress.ts`, consistency, contrast, print and the `fe-*`
   states. `yarn viz:frontend` records all four.
 
+### Turn stack (wave 4E: convex hull, `hull-turn-stack`)
+
+`<Viz id="hull-turn-stack" preset="…" />`, a step-through with one lesson
+group (Convex Hull, titled "Convex hull: which turns pop"): the practice
+answer to Erect the Fence (Andrew's monotone chain) on the lesson's seven
+points (`monotone-chain-turn-pops`), and on a fence whose bottom edge holds
+(1,0) and (2,0), as written with `< 0` (`fence-collinear-lt`) and with both
+turn tests changed to `<= 0` (`fence-collinear-le`, two `SourcePart.swaps`
+of one token each, so the variant commits no answer text).
+
+- **A new engine** (`engines/turn-stack/`): no shipped substrate has a plane.
+  The plot is one svg on a faint lattice; the points never move. The
+  current chain's stack is a polyline through its points in stack order
+  (its points filled, the finished lower chain dashed while the upper one
+  is built); the step's turn test is the dp table's changed-role connector
+  from `o` through `a` to an arrowhead at the arriving `p`; a popped point is
+  left as a dashed ring. Beside the plot (under it from 768 until the full
+  column) the turn column spells `cross(o,a,p)`, the three points, the value
+  with its turn and what the loop does; at the end it holds the printed
+  line, broken after each point (its text is exactly the output). Each
+  coordinate label takes the first place around its point that no point,
+  label or line of any step crosses (`layout.ts`, checked by
+  `labelProblems`).
+- **Recorded under the inspector** (the dp table's recorder, `yarn
+  viz:hull`): pauses after the sort, before every pop and every push of each
+  chain, before the trimming pops and after them; the turn value is the
+  answer's own `cross` called in the paused frame on the stack's top two and
+  `p`. `build.ts` makes one step per pop and per push; the stack a step draws
+  is the one the next pause recorded, and a pause whose pop or keep
+  disagrees with the program's comparison refuses to build. Presets add
+  words and checkpoints only: "Does (1,1) stay?" with (0,0), (1,1) on the
+  lower stack before (2,1) (popped, cross −1), and on the fence "Does (1,0)
+  stay?" before (2,0) (stays with `< 0`, popped with `<= 0`, cross 0).
+- **Premium.** The pane is the answer's lines 20 to 49 as `wrap` rows (the
+  upper chain's callback body shown at the lower chain's depth, whitespace
+  only); every preset is local-only.
+- **Gates.** `turn-stack.truth.test.ts` (with a checkout: the hash, fresh
+  re-recordings, every row against the answer, the `<=` program differing on
+  lines 24 and 38 only; everywhere: the printed hulls, every step a logged
+  pop or push, pops exactly where the comparison holds, each turn value the
+  cross of the drawn points, the checkpoints' answers, the trim and the
+  joined hull equal to the output, lies that must fail), `layout.test.ts`,
+  `e2e/viz-turn-stack.spec.ts` (with the 375x667 fit and frames within 850
+  px), `e2e/motion/turn-stack-steps.spec.ts`,
+  `e2e/stress/turn-stack.stress.ts`, the `ch-*` gate states (gallery
+  `?ch=<preset>`, local-only baselines) and the consistency check against the
+  dp table's glyphs.
+### Streaming SSR (wave 4E, `ssr-stream`)
+
+`<Viz id="ssr-stream" preset="…" />`, a step-through with one lesson group
+(Server-Side Rendering, titled "Streaming SSR and hydration"):
+`two-boundary-stream` (the default) and `renderToString-contrast`. No code
+pane: three synced parts, the wire (each server write as short lines cut
+from the recorded HTML, beside its time), the screen (Header and two slots,
+Product upper and Reviews lower) and a badge per boundary (fallback, HTML
+hidden, static HTML, hydrating, interactive), plus the click handler's log.
+
+- **The visual's own app, recorded** (`truth/app.ts`, `yarn viz:ssr`):
+  Header and two Suspense boundaries, Product's data at 120 ms and Reviews'
+  at 80 ms. `truth/run.ts` (React 19 through the `react-19` aliases, as the
+  list-keys recorder) pipes `renderToPipeableStream` into a stream that
+  records every write and its time, and writes `renderToString` once after
+  both fetches. The same apps are served to Chromium (Playwright): a
+  MutationObserver logs what each slot shows; the client bundle (esbuild)
+  is held until the stream has ended, then hydrates, once untouched and
+  once with a trusted click on Reviews' button sent as hydration begins
+  (each boundary takes 200 ms to render on the client, a busy loop, so the
+  click lands mid-hydration; a native capture listener logs where its
+  pointerdown landed, and a streaming run whose press came after the first
+  commit is run again; the contrast keeps only its commit and click, since
+  where its press lands depends on load). A layout effect marks the commit
+  that hydrated each boundary. Values only: the writes' HTML, rounded times, the
+  slots' views, the effects' and the handler's order.
+- **What the run shows** (and the visual draws): the shell at 0 ms with
+  `<!--$?--><template id="B:0">` and `B:1` placeholders around the
+  fallbacks; Reviews' segment first (`<div hidden id="S:1">`, its
+  `$RC("B:1","S:1")`), Product's at 120 ms. React 19 does not reveal each
+  segment as it arrives: `$RC` queues it into `$RB` and `$RV` swaps the batch
+  about 300 ms after the shell painted (`$RT`), so both slots fill together.
+  A press on Reviews before it hydrates makes React hydrate Reviews ahead of
+  Product, then the click runs once; untouched, both hydrate in one commit.
+  The contrast writes once at 120 ms with no markers, paints everything at
+  once and hydrates in one pass; the click runs only after that pass.
+- **Drawing.** Both panels are one svg each, 1:1 at the default text size
+  and scaled down under very large text (never clipped). A write fades in on
+  the glyph beat with the `changed` mark and fades out on Back; a slot drops
+  its old view and fades the new one in, both ways (two texts never share
+  the cell); the handler log lands on the third beat in the result amber.
+- **Gates.** `ssr-stream.truth.test.ts` (with Playwright's Chromium: a fresh
+  recording equals the committed one, HTML and orders exactly, times within
+  60 ms on the wire and 250 ms on screen, one retry; everywhere: the app's sha256, the
+  register's claims on the recording, every wire line cut from its write,
+  the presets rebuilt and linted, lies that must fail), `layout.test.ts`,
+  `e2e/viz-ssr-stream.spec.ts` (the 375x667 fit, frames within 850 px),
+  `e2e/motion/ssr-stream-steps.spec.ts`, `e2e/stress/ssr-stream.stress.ts`,
+  the `ssr-*` gate states and print baseline (gallery `?ssr=<preset>`) and
+  the consistency check against the event loop's shell. Not premium: every
+  test runs in CI.
+
+### Service-worker lifecycle (wave 4E)
+
+`<Viz id="sw-lifecycle" preset="…" />`, a step-through with one lesson
+group (Service Workers), titled "Service worker: who controls each tab"
+(`Preset.title`): `update-and-reload` (v2 installs and waits while v1
+controls tabs A and B; a reload of A, then of B as the only tab, keeps v1;
+closing every tab activates v2), `skipWaiting` (v2 activates over v1 and
+both open tabs switch at activation, each with one `controllerchange`) and
+`first-install-claim` (a first visit stays uncontrolled after v1 activates,
+until it reloads; with `clients.claim()` it is taken at activation, a second
+recorded run the caption and the truth test use). No code pane: the run is
+the browser's lifecycle, and the worker is the visual's own code.
+
+- **Recorded in Chromium** (`engines/sw-lifecycle/truth/record.ts`, `yarn
+  viz:sw`): Playwright opens tabs on a local `localhost` server that serves
+  the page and a /worker.js whose bytes the recorder changes per version
+  (`programs/scenarios.ts`: precache into `<v>-static`, delete other caches
+  on activate, optional `skipWaiting()` / `clients.claim()`). The slots come
+  from the DevTools ServiceWorker domain (an observer page on another
+  origin, so they are read with no tab open), each tab's controller is the
+  slot whose worker object it is (no worker is messaged: a busy active worker
+  delays a skipWaiting activation in Chromium), caches from `caches.keys()`.
+  The worker holds `install` / `activate` on a server gate it polls (message
+  events are held for an activating worker), so the installing and
+  activating states are recorded while they last. A step is recorded once
+  the state has held for four reads; an open tab's view must equal DevTools'.
+  A probe scenario, not drawn, records which worker answers a fetch while
+  v2 is still activating.
+- **Drawing** (`SwStage.tsx`, `layout.ts`): the two tab cards (`→ v1`, `no
+  controller`, `closed`), the installing, waiting and active slots as shared
+  `Lane`s (a worker card keeps its id and travels between slots on the move
+  spring, lifted; a redundant worker leaves the active slot, at once when
+  another arrives there), and Cache Storage (a store lane). A changed tab or
+  a worker that changes state in place takes the neutral `changed` mark.
+  One chip row per band, checked against every step at the tight frame.
+- **Gates.** `sw-lifecycle.truth.test.ts` (a fresh Chromium re-recording
+  where Playwright's Chromium is installed; everywhere: the recording is of
+  the scenarios in the repo, the lesson's claims hold and tampered copies
+  fail, each preset is its recording rebuilt, checkpoint answers and
+  caption values are what the step draws), `layout.test.ts`,
+  `e2e/viz-sw-lifecycle.spec.ts` (with the 375x667 fit and frames within
+  850 px), `e2e/motion/sw-lifecycle-steps.spec.ts`,
+  `e2e/stress/sw-lifecycle.stress.ts`, the `swl-*` gate states and the
+  `swl-step` motion state (gallery `?swl=<preset>`, committed baselines),
+  print, and the consistency check against the event loop's shell and lanes.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,

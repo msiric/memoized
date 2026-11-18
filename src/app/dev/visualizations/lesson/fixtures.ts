@@ -296,6 +296,19 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // follow-ups only).
     inserts: [{ before: '### **Edit Distance**', viz: '<Viz id="dp-table-dependencies" preset="knapsack-1d-desc-vs-asc" />' }],
   },
+  // Wave 4E (PREMIUM: local checkout only).
+  {
+    slug: 'convex-hull',
+    title: 'Convex Hull',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/convex-hull/page.mdx',
+    // A prediction: after the stack-based algorithms (Graham scan's pop
+    // loop, Jarvis march), before the tips. No prose in the body says which
+    // monotone-chain point pops or that `< 0` keeps collinear posts (both
+    // are in the practice answer only); "Handling Collinear Points" below it
+    // names the question without answering it.
+    inserts: [{ before: '## **Practical Tips and Tricks**', viz: '<Viz id="hull-turn-stack" preset="monotone-chain-turn-pops" />' }],
+  },
   {
     slug: 'backtracking',
     title: 'Backtracking',
@@ -535,6 +548,29 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // After Combining Constructor Functions and Prototypes (the Car/Vehicle example, panel 2), with
     // Class Inheritance with extends earlier: both chains are explained, before Advantages of ES6 Classes.
     inserts: [{ before: '## **Advantages of ES6 Classes**', viz: '<Viz id="prototype-object-graph" preset="extends-two-chains" />' }],
+  },
+  // Wave 4E. Local checkout only (premium lesson).
+  {
+    slug: 'server-side-rendering',
+    title: 'Server-Side Rendering (SSR)',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/server-side-rendering/page.mdx',
+    // A prediction: after Overview of React SSR, which names renderToString, renderToPipeableStream and
+    // hydrateRoot, before the setup example. No prose in the body says that React 19 reveals streamed
+    // boundaries together or that an early click hydrates its boundary first.
+    inserts: [{ before: '### **Setting Up a Basic React SSR Application**', viz: '<Viz id="ssr-stream" />' }],
+  },
+  // Wave 4E, the service-worker lifecycle (PREMIUM lesson: local checkout only).
+  {
+    slug: 'service-workers',
+    title: 'Service Workers and Progressive Web Apps (PWAs)',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/service-workers/page.mdx',
+    // A prediction: after Service Worker Lifecycle (the states and the event example, so installing,
+    // waiting and active are defined), before Caching Strategies. No prose in the body says that a
+    // reload keeps the old worker, that skipWaiting moves open tabs, or that a first visit stays
+    // uncontrolled (those are in the practice answers only).
+    inserts: [{ before: '## **Caching Strategies**', viz: '<Viz id="sw-lifecycle" preset="update-and-reload" />' }],
   },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with

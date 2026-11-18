@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, FE, atUrl, dpUrl, dsaUrl, feUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, FE, atUrl, dpUrl, dsaUrl, feUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl, CH, chUrl, SSR, ssrUrl, SWL, swlUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -49,8 +49,8 @@ for (const width of WIDTHS) {
   })
 
   test(`gallery states @${width}`, async ({ page }) => {
-    // Every gallery state in one test: wave 4 brought it near five minutes in the image, so it gets seven.
-    test.setTimeout(420_000)
+    // Every gallery state in one test: waves 4D and 4E took the walk past seven minutes, so it gets ten.
+    test.setTimeout(600_000)
     for (const [name, drive] of Object.entries(STATES)) {
       const url = stateUrl(name)
       const skip = urlLocalOnly(url)
@@ -99,6 +99,7 @@ for (const width of WIDTHS) {
 }
 
 test('print: specimen and gallery on paper', async ({ page }) => {
+  test.setTimeout(180_000)
   await open(page, SPECIMEN, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   for (const id of ['code', 'checkbox', 'lanes', 'scrubber']) {
@@ -153,6 +154,31 @@ test('print: specimen and gallery on paper', async ({ page }) => {
     await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
     await frameShot(page, DP, baselineName(dpUrl('knapsack-1d-desc-vs-asc'), 'print-dp-table-knapsack.png'))
   }
+  // The convex-hull turn stack (wave 4E): its Start on paper, local-only (a practice answer).
+  const chSkip = urlLocalOnly(chUrl('monotone-chain-turn-pops'))
+  if (chSkip) test.info().annotations.push({ type: 'skipped state', description: `print convex hull: ${chSkip}` })
+  else {
+    await open(page, chUrl('monotone-chain-turn-pops'), 768)
+    await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+    await frameShot(page, CH, baselineName(chUrl('monotone-chain-turn-pops'), 'print-hull-turn-stack.png'))
+  }
+  // Streaming SSR (wave 4E): its finale on paper (every wire line, both slots interactive, the handler log).
+  // Stepped to the end on screen (paper hides the controls), then printed.
+  await open(page, ssrUrl('two-boundary-stream'), 768)
+  await page.emulateMedia({ media: 'screen', reducedMotion: 'reduce' })
+  {
+    const f = page.locator(SSR).first()
+    await f.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await page.waitForTimeout(600)
+    await settle(page)
+  }
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, SSR, 'print-ssr-stream-finale.png')
+  // The service-worker lifecycle (wave 4E): the update's Start on paper.
+  await open(page, swlUrl('update-and-reload'), 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, SWL, 'print-sw-lifecycle-update.png')
   // The annotated trees (waves 2D and 3A), every preset on paper.
   await open(page, atUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
