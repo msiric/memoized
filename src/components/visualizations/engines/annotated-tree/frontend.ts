@@ -260,6 +260,8 @@ export function domRowText(d: AxRecording['dom'][number]): string {
 const ROW = BOX.row
 const INDENT = 12
 const GUTTER = 20
+/** A row's box starts 4 px before its text (`BoxesSvg`): the first column keeps it inside the panel. */
+const ROW_INSET = 4
 
 export function domPanel(rec: AxRecording, o: { heading: string; notes: string[] }): BoxesPanel {
   const top = bodyTop([])
@@ -333,7 +335,7 @@ export function axPanel(rec: AxRecording, o: { heading: string; notes: string[] 
     const y = top + k * ROW
     const n = rec.ax[r.i]
     const overridden = r.dom !== null && NATIVE[r.dom.tag] !== undefined && NATIVE[r.dom.tag] !== n.role && r.dom.attrs.some((a) => a.startsWith('role='))
-    nodes.push({ id: `ax-${r.i}`, lines: [r.text], x: r.depth * INDENT, y, w: Math.ceil(smallW(r.text)), h: ROW, shape: 'row', align: 'start', small: true, ...(overridden ? { state: 'mark' as const } : {}), data: { role: n.role, name: n.name, depth: r.depth, ...(r.dom ? { dom: r.dom.id } : {}) } })
+    nodes.push({ id: `ax-${r.i}`, lines: [r.text], x: ROW_INSET + r.depth * INDENT, y, w: Math.ceil(smallW(r.text)), h: ROW, shape: 'row', align: 'start', small: true, ...(overridden ? { state: 'mark' as const } : {}), data: { role: n.role, name: n.name, depth: r.depth, ...(r.dom ? { dom: r.dom.id } : {}) } })
     if (r.dom) labels.push({ x: W, y: y + 15, text: r.dom.tag, anchor: 'end', tone: overridden ? 'note' : 'muted', part: 'from', for: `ax-${r.i}` })
   })
   return finish({ kind: 'boxes', id: 'ax', heading: o.heading, keys: [], nodes, edges: [], labels, notes: o.notes }, top + rows.length * ROW)

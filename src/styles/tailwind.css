@@ -383,6 +383,8 @@
   .vz-s [data-stub].vz-cm { @apply text-zinc-300 print:text-zinc-700; }
   /* engines/annotated-tree (wave 4A): an array row's cells are drawn in the node's line role, like the tree above them. */
   .vz-s [data-array] { @apply text-zinc-500 print:text-zinc-600; }
+  /* engines/annotated-tree (wave 4D): a ref tag (a branch, a Tab stop) draws its outline in the node's line role, so its changed mark is the heap graph's. */
+  .vz-s [data-ref] { @apply text-zinc-500 print:text-zinc-600; }
   /*
    * engines/frontier (bfs-dfs-frontier): the step-through's canvas shares
    * the glyph, outline, dash, muted, result, plate and changed roles above,

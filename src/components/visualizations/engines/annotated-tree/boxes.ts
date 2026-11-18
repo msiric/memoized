@@ -206,6 +206,7 @@ export function checkBoxes(p: BoxesPanel): string[] {
   for (const n of p.nodes) {
     if (!contains(frame, nodeRect(n), 0.5)) out.push(`${p.id}: node ${n.id} is outside the panel`)
     const t = textBox(n)
+    if (n.shape === 'row' && (n.x - 4 < -0.5 || n.x + n.w + 6 > p.width + 0.5)) out.push(`${p.id}: the box of row ${n.id} leaves the panel`)
     if (n.shape !== 'row' && !contains(nodeRect(n), t, 1)) out.push(`${p.id}: the text of ${n.id} leaves its node`)
     if (!contains(frame, t, 0.5)) out.push(`${p.id}: the text of ${n.id} leaves the panel`)
     texts.push({ what: `node ${n.id}`, r: n.shape === 'row' ? t : nodeRect(n), owner: n.id })
