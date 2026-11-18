@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, feUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -639,7 +639,7 @@ for (const width of [375, 1440])
  * like the heap graph's changed mark and changed link (never lime).
  */
 for (const width of [375, 1440])
-  test(`wave 3B and 4A figures compute like the heap graph @${width}`, async ({ page }) => {
+  test(`wave 3B, 4A and 4D figures compute like the heap graph @${width}`, async ({ page }) => {
     const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
     const TEXT = LOOK.filter((k) => k !== 'min-height')
     const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
@@ -701,6 +701,19 @@ for (const width of [375, 1440])
       same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge]:not([data-changed]) > .vz-e', true))
       same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
       same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch', true))
+    }
+    // The wave 4D frontend figures (the `boxes` panel kind): the same frame, heading, glyph, link and changed roles.
+    await open(page, feUrl, width)
+    for (const preset of ['context-render-causes', 'federation-react-singleton', 'dom-vs-accessibility-tree', 'merge-rebase-squash-revert-reset']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(f, FRAME))
+      same(`${preset} title`, heap.title, await look(f.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(f.locator('figcaption'), TEXT))
+      same(`${preset} panel heading`, heading, await inSvg(f, 'svg [data-viz-part="panel-heading"]'))
+      if (preset !== 'dom-vs-accessibility-tree') same(`${preset} glyph`, heap.glyph, await inSvg(f, 'svg [data-node]:not([data-changed]) > .vz-g'))
+      same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge]:not([data-changed]) > .vz-e', true))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
+      same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch, svg circle.vz-ch', true))
     }
     expect(diffs).toEqual([])
   })

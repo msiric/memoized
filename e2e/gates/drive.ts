@@ -128,6 +128,15 @@ export const JS: Record<string, string> = {
   'js-types': 'figure[data-viz-preset="union-vs-intersection"]',
 }
 
+/** The wave 4D frontend figures, static, alone on their page (`?fe=static`). */
+export const feUrl = `${GALLERY}?fe=static`
+export const FE: Record<string, string> = {
+  'fe-context': 'figure[data-viz-preset="context-render-causes"]',
+  'fe-federation': 'figure[data-viz-preset="federation-react-singleton"]',
+  'fe-axtree': 'figure[data-viz-preset="dom-vs-accessibility-tree"]',
+  'fe-git': 'figure[data-viz-preset="merge-rebase-squash-revert-reset"]',
+}
+
 /** The wave 4A DSA-track figures, static, alone on their page (`?dsa=static`). */
 export const dsaUrl = `${GALLERY}?dsa=static`
 export const DSA: Record<string, string> = {
@@ -343,6 +352,7 @@ export function stateUrl(name: string): string {
   if (name.startsWith('at-')) return atUrl
   if (name.startsWith('js-')) return jsUrl
   if (name.startsWith('dsa-')) return dsaUrl
+  if (name.startsWith('fe-')) return feUrl
   if (name.startsWith('core-')) return coreUrl
   if (EL_STATES[name]) return elUrl(EL_STATES[name])
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
@@ -362,6 +372,7 @@ export function stateFrame(name: string): string {
   if (AT[name]) return AT[name]
   if (JS[name]) return JS[name]
   if (DSA[name]) return DSA[name]
+  if (FE[name]) return FE[name]
   if (CORE[name]) return CORE[name]
   if (EL_STATES[name]) return ELF
   if (LL_STATES[name]) return LL
@@ -783,6 +794,11 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'dsa-heap': async () => {},
   'dsa-fib': async () => {},
   'dsa-lps': async () => {},
+  // The wave 4D frontend figures: static, at rest only.
+  'fe-context': async () => {},
+  'fe-federation': async () => {},
+  'fe-axtree': async () => {},
+  'fe-git': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()

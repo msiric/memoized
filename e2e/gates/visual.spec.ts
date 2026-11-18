@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, atUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, FE, atUrl, dpUrl, dsaUrl, feUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -49,7 +49,8 @@ for (const width of WIDTHS) {
   })
 
   test(`gallery states @${width}`, async ({ page }) => {
-    test.setTimeout(300_000)
+    // Every gallery state in one test: wave 4 brought it near five minutes in the image, so it gets seven.
+    test.setTimeout(420_000)
     for (const [name, drive] of Object.entries(STATES)) {
       const url = stateUrl(name)
       const skip = urlLocalOnly(url)
@@ -165,6 +166,10 @@ test('print: specimen and gallery on paper', async ({ page }) => {
   await open(page, dsaUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   for (const [state, frame] of Object.entries(DSA)) await frameShot(page, frame, `print-${state}.png`)
+  // The wave 4D frontend figures, every preset on paper.
+  await open(page, feUrl, 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  for (const [state, frame] of Object.entries(FE)) await frameShot(page, frame, `print-${state}.png`)
   // The wave 4C JavaScript core figures on paper.
   await open(page, coreUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })

@@ -12,7 +12,7 @@ import { ClientOnly } from './ClientOnly'
  * never shipped to readers. Add a specimen here whenever a visual lands. The
  * v1 components and the Mermaid SVG are retired (VIZ-H D20).
  */
-type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string; dsa?: string; el?: string; core?: string }
+type GalleryParams = { mount?: string; spacer?: string; preset?: string; static?: string; lk?: string; fr?: string; ll?: string; sw?: string; at?: string; dp?: string; js?: string; fx?: string; dsa?: string; el?: string; core?: string; fe?: string }
 
 export default function VisualizationGalleryPage({
   searchParams = {},
@@ -100,6 +100,22 @@ export default function VisualizationGalleryPage({
             <p>Static figures for the DSA track, drawn on the server as SVG from recorded runs.</p>
             {searchParams.mount === 'client' ? <ClientOnly>{figures}</ClientOnly> : figures}
             <p>Text after the DSA track figures.</p>
+          </Prose>
+        </div>
+      </div>
+    )
+  }
+  // `?fe=static`: the wave 4D frontend figures alone.
+  if (searchParams.fe === 'static') {
+    const figures = <FrontendStatics />
+    return (
+      <div className="lg:ml-sidebar-lg xl:ml-sidebar-xl">
+        <div className="px-4 pb-16 pt-14 sm:px-6 lg:px-8">
+          <Prose>
+            <h1>Frontend figures</h1>
+            <p>Static figures for the frontend lessons, drawn on the server as SVG from recorded runs.</p>
+            {searchParams.mount === 'client' ? <ClientOnly>{figures}</ClientOnly> : figures}
+            <p>Text after the frontend figures.</p>
           </Prose>
         </div>
       </div>
@@ -385,6 +401,21 @@ function JsStatics() {
       <Viz id="lanes" preset="oauth-pkce-channels" />
       <p>Between the JavaScript track figures.</p>
       <Viz id="lanes" preset="union-vs-intersection" />
+    </>
+  )
+}
+
+/** The wave 4D figures, one after another (`?fe=static`). */
+function FrontendStatics() {
+  return (
+    <>
+      <Viz id="annotated-tree" preset="context-render-causes" />
+      <p>Between the frontend figures.</p>
+      <Viz id="annotated-tree" preset="federation-react-singleton" />
+      <p>Between the frontend figures.</p>
+      <Viz id="annotated-tree" preset="dom-vs-accessibility-tree" />
+      <p>Between the frontend figures.</p>
+      <Viz id="annotated-tree" preset="merge-rebase-squash-revert-reset" />
     </>
   )
 }
