@@ -1,0 +1,69 @@
+{
+ "generator": "frontend@1",
+ "react": "19.3.1",
+ "reactDom": "19.3.1",
+ "sha256": {
+  "one-context": "77a09de2a2ab464e2009474105496da4c39622d0802ebf96e02dd6423e75dd4f",
+  "split": "2f93b5d918213e7f058dd9205d940544a0248252da51737cfc71610af30af46f",
+  "split-memo": "fd909167bcd6ff252d4ffb8906d62e139de7a880cb5fb6af94846ae23974c549",
+  "providers": "1f9ac9078941883b822df19fcda1ddd09d64425160a2571a08ce70655dd4bcf3"
+ },
+ "runs": {
+  "one-context": {
+   "mount": [
+    "App",
+    "Sidebar",
+    "Header"
+   ],
+   "userOwner": "App",
+   "afterSetUser": [
+    "App",
+    "Sidebar",
+    "Header"
+   ],
+   "text": "     light     Bob      "
+  },
+  "split": {
+   "mount": [
+    "App",
+    "Sidebar",
+    "Header"
+   ],
+   "userOwner": "App",
+   "afterSetUser": [
+    "App",
+    "Sidebar",
+    "Header"
+   ],
+   "text": "lightBob"
+  },
+  "split-memo": {
+   "mount": [
+    "App",
+    "Sidebar",
+    "Header"
+   ],
+   "userOwner": "App",
+   "afterSetUser": [
+    "App",
+    "Header"
+   ],
+   "text": "lightBob"
+  },
+  "providers": {
+   "mount": [
+    "App",
+    "ThemeProvider",
+    "UserProvider",
+    "Sidebar",
+    "Header"
+   ],
+   "userOwner": "UserProvider",
+   "afterSetUser": [
+    "UserProvider",
+    "Header"
+   ],
+   "text": "light     Bob      "
+  }
+ }
+}

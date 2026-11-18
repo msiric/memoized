@@ -1,0 +1,117 @@
+{
+ "generator": "frontend@1",
+ "sha256": "6b51ec11cffba60b1f11c82eb31f8bcb552e346079fc1c2161b746d9f3702d23",
+ "webpack": "5.112.2",
+ "browser": "chromium@156.0.8078.4",
+ "scenarios": {
+  "singleton": {
+   "scope": {
+    "19.0.0": "shell",
+    "18.3.1": "cart"
+   },
+   "containers": [
+    {
+     "name": "shell",
+     "react": "19.0.0",
+     "from": "shell",
+     "sameInstanceAsShell": true,
+     "hook": "hook ok",
+     "requiredVersion": "^19.0.0",
+     "provides": "19.0.0"
+    },
+    {
+     "name": "products",
+     "react": "19.0.0",
+     "from": "shell",
+     "sameInstanceAsShell": true,
+     "hook": "hook ok",
+     "requiredVersion": "^19.0.0",
+     "provides": "19.0.0"
+    },
+    {
+     "name": "cart",
+     "react": "19.0.0",
+     "from": "shell",
+     "sameInstanceAsShell": true,
+     "hook": "hook ok",
+     "requiredVersion": "^18.0.0",
+     "provides": "18.3.1"
+    }
+   ],
+   "warnings": [
+    "Unsatisfied version 19.0.0 from shell of shared singleton module react (required ^18.0.0)"
+   ],
+   "errors": []
+  },
+  "strict": {
+   "scope": {
+    "19.0.0": "shell",
+    "18.3.1": "cart"
+   },
+   "containers": [
+    {
+     "name": "shell",
+     "react": "19.0.0",
+     "from": "shell",
+     "sameInstanceAsShell": true,
+     "hook": "hook ok",
+     "requiredVersion": "^19.0.0",
+     "provides": "19.0.0"
+    },
+    {
+     "name": "products",
+     "react": "19.0.0",
+     "from": "shell",
+     "sameInstanceAsShell": true,
+     "hook": "hook ok",
+     "requiredVersion": "^19.0.0",
+     "provides": "19.0.0"
+    }
+   ],
+   "warnings": [],
+   "errors": [
+    "cart: Unsatisfied version 19.0.0 from shell of shared singleton module react (required ^18.0.0)"
+   ]
+  },
+  "unshared": {
+   "scope": {
+    "19.0.0": "shell",
+    "18.3.1": "cart"
+   },
+   "containers": [
+    {
+     "name": "shell",
+     "react": "19.0.0",
+     "from": "shell",
+     "sameInstanceAsShell": true,
+     "hook": "hook ok",
+     "requiredVersion": "^19.0.0",
+     "provides": "19.0.0"
+    },
+    {
+     "name": "products",
+     "react": "19.0.0",
+     "from": "shell",
+     "sameInstanceAsShell": true,
+     "hook": "hook ok",
+     "requiredVersion": "^19.0.0",
+     "provides": "19.0.0"
+    },
+    {
+     "name": "cart",
+     "react": "18.3.1",
+     "from": "cart",
+     "sameInstanceAsShell": false,
+     "hook": "Cannot read properties of null (reading 'useState')",
+     "requiredVersion": "^18.0.0",
+     "provides": "18.3.1"
+    }
+   ],
+   "warnings": [],
+   "errors": [
+    "Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:",
+    "Warning: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:"
+   ]
+  }
+ }
+}

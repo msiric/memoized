@@ -1,0 +1,606 @@
+{
+ "generator": "frontend@1",
+ "git": "git version 2.51.0",
+ "sha256": "e2a361362fbfd786775e432ca21138f3b5eae2c6240761908e88c3d75c47b919",
+ "base": {
+  "commits": [
+   {
+    "hash": "d6990b4",
+    "parents": [],
+    "subject": "A"
+   },
+   {
+    "hash": "7a02890",
+    "parents": [
+     "d6990b4"
+    ],
+    "subject": "B"
+   },
+   {
+    "hash": "51d4329",
+    "parents": [
+     "7a02890"
+    ],
+    "subject": "C"
+   },
+   {
+    "hash": "ae642be",
+    "parents": [
+     "7a02890"
+    ],
+    "subject": "D"
+   },
+   {
+    "hash": "3fe3d3c",
+    "parents": [
+     "ae642be"
+    ],
+    "subject": "E"
+   }
+  ],
+  "refs": {
+   "feature": "3fe3d3c",
+   "main": "51d4329",
+   "HEAD": "-> main"
+  },
+  "reflog": [
+   [
+    "51d4329",
+    "HEAD@{0}",
+    "checkout: moving from feature to main"
+   ],
+   [
+    "3fe3d3c",
+    "HEAD@{1}",
+    "commit: E"
+   ],
+   [
+    "ae642be",
+    "HEAD@{2}",
+    "commit: D"
+   ],
+   [
+    "7a02890",
+    "HEAD@{3}",
+    "checkout: moving from main to feature"
+   ],
+   [
+    "51d4329",
+    "HEAD@{4}",
+    "commit: C"
+   ],
+   [
+    "7a02890",
+    "HEAD@{5}",
+    "commit: B"
+   ],
+   [
+    "d6990b4",
+    "HEAD@{6}",
+    "commit (initial): A"
+   ]
+  ],
+  "unreachable": [],
+  "pushes": []
+ },
+ "panels": {
+  "merge": {
+   "commits": [
+    {
+     "hash": "d6990b4",
+     "parents": [],
+     "subject": "A"
+    },
+    {
+     "hash": "7a02890",
+     "parents": [
+      "d6990b4"
+     ],
+     "subject": "B"
+    },
+    {
+     "hash": "51d4329",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "C"
+    },
+    {
+     "hash": "ae642be",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "D"
+    },
+    {
+     "hash": "3fe3d3c",
+     "parents": [
+      "ae642be"
+     ],
+     "subject": "E"
+    },
+    {
+     "hash": "b1b6ce4",
+     "parents": [
+      "51d4329",
+      "3fe3d3c"
+     ],
+     "subject": "M"
+    }
+   ],
+   "refs": {
+    "feature": "3fe3d3c",
+    "main": "b1b6ce4",
+    "HEAD": "-> main"
+   },
+   "reflog": [
+    [
+     "b1b6ce4",
+     "HEAD@{0}",
+     "merge feature: Merge made by the 'ort' strategy."
+    ],
+    [
+     "51d4329",
+     "HEAD@{1}",
+     "checkout: moving from feature to main"
+    ],
+    [
+     "3fe3d3c",
+     "HEAD@{2}",
+     "commit: E"
+    ],
+    [
+     "ae642be",
+     "HEAD@{3}",
+     "commit: D"
+    ],
+    [
+     "7a02890",
+     "HEAD@{4}",
+     "checkout: moving from main to feature"
+    ],
+    [
+     "51d4329",
+     "HEAD@{5}",
+     "commit: C"
+    ],
+    [
+     "7a02890",
+     "HEAD@{6}",
+     "commit: B"
+    ],
+    [
+     "d6990b4",
+     "HEAD@{7}",
+     "commit (initial): A"
+    ]
+   ],
+   "unreachable": [],
+   "pushes": []
+  },
+  "rebase": {
+   "commits": [
+    {
+     "hash": "d6990b4",
+     "parents": [],
+     "subject": "A"
+    },
+    {
+     "hash": "7a02890",
+     "parents": [
+      "d6990b4"
+     ],
+     "subject": "B"
+    },
+    {
+     "hash": "51d4329",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "C"
+    },
+    {
+     "hash": "ae642be",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "D"
+    },
+    {
+     "hash": "3fe3d3c",
+     "parents": [
+      "ae642be"
+     ],
+     "subject": "E"
+    },
+    {
+     "hash": "c7a0c7a",
+     "parents": [
+      "51d4329"
+     ],
+     "subject": "D"
+    },
+    {
+     "hash": "c1061e9",
+     "parents": [
+      "c7a0c7a"
+     ],
+     "subject": "E"
+    }
+   ],
+   "refs": {
+    "feature": "c1061e9",
+    "main": "51d4329",
+    "HEAD": "-> feature"
+   },
+   "reflog": [
+    [
+     "c1061e9",
+     "HEAD@{0}",
+     "rebase (finish): returning to refs/heads/feature"
+    ],
+    [
+     "c1061e9",
+     "HEAD@{1}",
+     "rebase (pick): E"
+    ],
+    [
+     "c7a0c7a",
+     "HEAD@{2}",
+     "rebase (pick): D"
+    ],
+    [
+     "51d4329",
+     "HEAD@{3}",
+     "rebase (start): checkout main"
+    ],
+    [
+     "3fe3d3c",
+     "HEAD@{4}",
+     "checkout: moving from main to feature"
+    ],
+    [
+     "51d4329",
+     "HEAD@{5}",
+     "checkout: moving from feature to main"
+    ],
+    [
+     "3fe3d3c",
+     "HEAD@{6}",
+     "commit: E"
+    ],
+    [
+     "ae642be",
+     "HEAD@{7}",
+     "commit: D"
+    ],
+    [
+     "7a02890",
+     "HEAD@{8}",
+     "checkout: moving from main to feature"
+    ],
+    [
+     "51d4329",
+     "HEAD@{9}",
+     "commit: C"
+    ],
+    [
+     "7a02890",
+     "HEAD@{10}",
+     "commit: B"
+    ],
+    [
+     "d6990b4",
+     "HEAD@{11}",
+     "commit (initial): A"
+    ]
+   ],
+   "unreachable": [
+    "ae642be",
+    "3fe3d3c"
+   ],
+   "pushes": []
+  },
+  "squash": {
+   "commits": [
+    {
+     "hash": "d6990b4",
+     "parents": [],
+     "subject": "A"
+    },
+    {
+     "hash": "7a02890",
+     "parents": [
+      "d6990b4"
+     ],
+     "subject": "B"
+    },
+    {
+     "hash": "51d4329",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "C"
+    },
+    {
+     "hash": "ae642be",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "D"
+    },
+    {
+     "hash": "3fe3d3c",
+     "parents": [
+      "ae642be"
+     ],
+     "subject": "E"
+    },
+    {
+     "hash": "baa1baf",
+     "parents": [
+      "51d4329"
+     ],
+     "subject": "S"
+    }
+   ],
+   "refs": {
+    "feature": "3fe3d3c",
+    "main": "baa1baf",
+    "HEAD": "-> main"
+   },
+   "reflog": [
+    [
+     "baa1baf",
+     "HEAD@{0}",
+     "commit: S"
+    ],
+    [
+     "51d4329",
+     "HEAD@{1}",
+     "checkout: moving from feature to main"
+    ],
+    [
+     "3fe3d3c",
+     "HEAD@{2}",
+     "commit: E"
+    ],
+    [
+     "ae642be",
+     "HEAD@{3}",
+     "commit: D"
+    ],
+    [
+     "7a02890",
+     "HEAD@{4}",
+     "checkout: moving from main to feature"
+    ],
+    [
+     "51d4329",
+     "HEAD@{5}",
+     "commit: C"
+    ],
+    [
+     "7a02890",
+     "HEAD@{6}",
+     "commit: B"
+    ],
+    [
+     "d6990b4",
+     "HEAD@{7}",
+     "commit (initial): A"
+    ]
+   ],
+   "unreachable": [],
+   "pushes": []
+  },
+  "revert": {
+   "commits": [
+    {
+     "hash": "d6990b4",
+     "parents": [],
+     "subject": "A"
+    },
+    {
+     "hash": "7a02890",
+     "parents": [
+      "d6990b4"
+     ],
+     "subject": "B"
+    },
+    {
+     "hash": "51d4329",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "C"
+    },
+    {
+     "hash": "ae642be",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "D"
+    },
+    {
+     "hash": "3fe3d3c",
+     "parents": [
+      "ae642be"
+     ],
+     "subject": "E"
+    },
+    {
+     "hash": "0cf916b",
+     "parents": [
+      "51d4329"
+     ],
+     "subject": "Revert \"C\""
+    }
+   ],
+   "refs": {
+    "feature": "3fe3d3c",
+    "main": "0cf916b",
+    "origin/main": "0cf916b",
+    "HEAD": "-> main"
+   },
+   "reflog": [
+    [
+     "0cf916b",
+     "HEAD@{0}",
+     "revert: Revert \"C\""
+    ],
+    [
+     "51d4329",
+     "HEAD@{1}",
+     "checkout: moving from feature to main"
+    ],
+    [
+     "3fe3d3c",
+     "HEAD@{2}",
+     "commit: E"
+    ],
+    [
+     "ae642be",
+     "HEAD@{3}",
+     "commit: D"
+    ],
+    [
+     "7a02890",
+     "HEAD@{4}",
+     "checkout: moving from main to feature"
+    ],
+    [
+     "51d4329",
+     "HEAD@{5}",
+     "commit: C"
+    ],
+    [
+     "7a02890",
+     "HEAD@{6}",
+     "commit: B"
+    ],
+    [
+     "d6990b4",
+     "HEAD@{7}",
+     "commit (initial): A"
+    ]
+   ],
+   "unreachable": [],
+   "pushes": [
+    {
+     "args": "push origin main",
+     "status": 0
+    },
+    {
+     "args": "push origin main",
+     "status": 0
+    }
+   ]
+  },
+  "reset": {
+   "commits": [
+    {
+     "hash": "d6990b4",
+     "parents": [],
+     "subject": "A"
+    },
+    {
+     "hash": "7a02890",
+     "parents": [
+      "d6990b4"
+     ],
+     "subject": "B"
+    },
+    {
+     "hash": "51d4329",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "C"
+    },
+    {
+     "hash": "ae642be",
+     "parents": [
+      "7a02890"
+     ],
+     "subject": "D"
+    },
+    {
+     "hash": "3fe3d3c",
+     "parents": [
+      "ae642be"
+     ],
+     "subject": "E"
+    }
+   ],
+   "refs": {
+    "feature": "3fe3d3c",
+    "main": "7a02890",
+    "origin/main": "51d4329",
+    "HEAD": "-> main"
+   },
+   "reflog": [
+    [
+     "7a02890",
+     "HEAD@{0}",
+     "reset: moving to HEAD~1"
+    ],
+    [
+     "51d4329",
+     "HEAD@{1}",
+     "checkout: moving from feature to main"
+    ],
+    [
+     "3fe3d3c",
+     "HEAD@{2}",
+     "commit: E"
+    ],
+    [
+     "ae642be",
+     "HEAD@{3}",
+     "commit: D"
+    ],
+    [
+     "7a02890",
+     "HEAD@{4}",
+     "checkout: moving from main to feature"
+    ],
+    [
+     "51d4329",
+     "HEAD@{5}",
+     "commit: C"
+    ],
+    [
+     "7a02890",
+     "HEAD@{6}",
+     "commit: B"
+    ],
+    [
+     "d6990b4",
+     "HEAD@{7}",
+     "commit (initial): A"
+    ]
+   ],
+   "unreachable": [],
+   "pushes": [
+    {
+     "args": "push origin main",
+     "status": 0
+    },
+    {
+     "args": "push origin main",
+     "status": 1,
+     "error": "! [rejected]        main -> main (non-fast-forward)"
+    },
+    {
+     "args": "push --force-with-lease origin main",
+     "status": 0
+    }
+   ]
+  }
+ },
+ "expiry": {
+  "kept29": true,
+  "kept31": false
+ }
+}

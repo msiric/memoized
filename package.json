@@ -65,6 +65,7 @@
     "viz:frames": "tsx src/scripts/viz-frames-record.ts",
     "viz:traces": "tsx src/scripts/viz-trace-record.ts",
     "viz:reach": "tsx src/scripts/viz-reach-record.ts",
+    "viz:frontend": "tsx src/scripts/viz-frontend-record.ts",
     "webhook": "stripe listen --forward-to localhost:3000/api/webhook",
     "test": "vitest",
     "test:check": "vitest run",
