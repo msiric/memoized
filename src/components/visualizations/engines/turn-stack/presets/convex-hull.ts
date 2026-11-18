@@ -120,7 +120,7 @@ const START: StepWords = {
 }
 
 const trim = (s: HullState): StepWords => ({
-  event: 'Drop each chain’s last point',
+  event: 'Trim each chain’s end',
   why: 'Each chain ends where the other begins, so popping one end of each keeps every corner once.',
   narration: `The upper chain drops ${label(s.lower[0])}, where the lower chain starts, and the lower chain drops ${label(s.upper![0])}, where the upper starts.`,
 })
