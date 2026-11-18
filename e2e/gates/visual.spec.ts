@@ -49,7 +49,8 @@ for (const width of WIDTHS) {
   })
 
   test(`gallery states @${width}`, async ({ page }) => {
-    test.setTimeout(300_000)
+    // Every gallery state in one test: wave 4 brought it near five minutes in the image, so it gets seven.
+    test.setTimeout(420_000)
     for (const [name, drive] of Object.entries(STATES)) {
       const url = stateUrl(name)
       const skip = urlLocalOnly(url)
