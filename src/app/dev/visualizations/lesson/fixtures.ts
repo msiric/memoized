@@ -420,6 +420,41 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // of Secure Authentication Practices, before authorization.
     inserts: [{ before: '## **Secure Authorization Practices**', viz: '<Viz id="lanes" preset="oauth-pkce-channels" />' }],
   },
+  // Wave 4D, the frontend static figures (all four lessons PREMIUM: local
+  // checkout only). Static figures, each after the example it explains.
+  {
+    slug: 'state-management',
+    title: 'State Management',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/state-management/page.mdx',
+    // After the Context API's Limitations and Best Practices ("use multiple
+    // contexts"), the claim the figure qualifies, before the modern landscape.
+    inserts: [{ before: '## **Modern State Management Landscape (2025/2026)**', viz: '<Viz id="annotated-tree" preset="context-render-causes" />' }],
+  },
+  {
+    slug: 'micro-frontends',
+    title: 'Micro-Frontends',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/micro-frontends/page.mdx',
+    // After Module Federation in depth (the host and remote configs, singleton: true), before Server-Side Integration.
+    inserts: [{ before: '### **Server-Side Integration**', viz: '<Viz id="annotated-tree" preset="federation-react-singleton" />' }],
+  },
+  {
+    slug: 'accessibility',
+    title: 'Accessibility',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/accessibility/page.mdx',
+    // After Common ARIA Attributes (aria-labelledby, aria-hidden examples), before Implementing ARIA.
+    inserts: [{ before: '## **Implementing ARIA in Web Applications**', viz: '<Viz id="annotated-tree" preset="dom-vs-accessibility-tree" />' }],
+  },
+  {
+    slug: 'git',
+    title: 'Git',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/git/page.mdx',
+    // After Merging and Rebasing (the merge and rebase commands), before Collaboration with Git.
+    inserts: [{ before: '## **Collaboration with Git**', viz: '<Viz id="annotated-tree" preset="merge-rebase-squash-revert-reset" />' }],
+  },
   // Wave 4A, the DSA static figures (all five lessons PREMIUM: local checkout
   // only). Static figures, each after the example it explains.
   {
