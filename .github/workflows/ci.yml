@@ -73,7 +73,7 @@ jobs:
     # (viz-nightly.yml), and the full-motion contrast pass at 375 only.
     # e2e/gate.sh lists the shards and their measured times.
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:

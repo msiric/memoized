@@ -30,7 +30,7 @@
 #                 viz-sw-lifecycle                                  ~540
 #   design-a      contrast crawl at rest (375, 768, 1440)             ~130
 #   design-b      full-motion contrast (375), consistency; visual
-#                 baselines inside the image (~200 more)              ~290
+#                 baselines inside the image (~1150 more)             ~1440
 #   motion-a      event-loop, frontier and linked-list steps, reveals,
 #                 instant, interaction                              ~370
 #   motion-b      list-keys reveals, interruption, sliding-window
