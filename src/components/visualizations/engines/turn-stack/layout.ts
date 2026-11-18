@@ -213,17 +213,23 @@ export function labelProblems(g: PlotGeometry, logs: readonly StepLog<HullState>
   return [...new Set(out)]
 }
 
-/** A filled arrowhead whose tip is `to`, pointing along `from -> to`, the tip on the point's edge. */
+/**
+ * A filled arrowhead whose tip is on the point `to`, pointing along `from -> to`: on the point's edge for a
+ * straight arrow, 2.5 px inside the ring for a slanted one (the ring is drawn over it), so the head's box meets
+ * the point. The line runs under the head to its middle, so no gap shows between them at any scale.
+ */
 export function turnArrow(from: { x: number; y: number }, to: { x: number; y: number }) {
   const dx = to.x - from.x
   const dy = to.y - from.y
   const len = Math.hypot(dx, dy) || 1
   const [ux, uy] = [dx / len, dy / len]
-  const tip = { x: to.x - ux * PLOT.r, y: to.y - uy * PLOT.r }
+  const into = dx === 0 || dy === 0 ? PLOT.r : PLOT.r - 2.5
+  const tip = { x: to.x - ux * into, y: to.y - uy * into }
   const { length: l, halfWidth: w } = ARROW_HEAD
   const b = { x: tip.x - ux * l, y: tip.y - uy * l }
+  const end = { x: tip.x - ux * (l / 2), y: tip.y - uy * (l / 2) }
   return {
-    line: `M${r1(from.x)} ${r1(from.y)}L${r1(b.x)} ${r1(b.y)}`,
+    line: `M${r1(from.x)} ${r1(from.y)}L${r1(end.x)} ${r1(end.y)}`,
     head: `M${r1(tip.x)} ${r1(tip.y)}L${r1(b.x - uy * w)} ${r1(b.y + ux * w)}L${r1(b.x + uy * w)} ${r1(b.y - ux * w)}Z`,
   }
 }
