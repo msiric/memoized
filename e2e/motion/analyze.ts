@@ -410,7 +410,8 @@ const MOVING_GLYPH = /viz-reveal=rider|\bchip=|\bglyph=|flip-id=|scrubber-toolti
  * another lane. Anything else that covers text (the scrubber tooltip over
  * the dock, the list-keys rider over a row) is a finding.
  */
-const LANE = /\bin=(stack|host|micro|tasks|console)\b/
+// The service-worker lifecycle's registration slots (wave 4E) are lanes too: a worker card lifts across them.
+const LANE = /\bin=(stack|host|micro|tasks|console|swl-installing|swl-waiting|swl-active)\b/
 const COVER_OK: [RegExp, RegExp][] = [[LANE, LANE]]
 
 export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {

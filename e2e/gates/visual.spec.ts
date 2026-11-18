@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, atUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, JS, DSA, atUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl, SWL, swlUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -152,6 +152,10 @@ test('print: specimen and gallery on paper', async ({ page }) => {
     await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
     await frameShot(page, DP, baselineName(dpUrl('knapsack-1d-desc-vs-asc'), 'print-dp-table-knapsack.png'))
   }
+  // The service-worker lifecycle (wave 4E): the update's Start on paper.
+  await open(page, swlUrl('update-and-reload'), 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await frameShot(page, SWL, 'print-sw-lifecycle-update.png')
   // The annotated trees (waves 2D and 3A), every preset on paper.
   await open(page, atUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })

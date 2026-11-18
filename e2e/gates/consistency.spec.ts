@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl, SWL, swlUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -756,6 +756,63 @@ for (const width of [375, 1440])
     const [a, b] = looks
     for (const what of Object.keys(a))
       for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frames ${b[what][k]}`)
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The service-worker lifecycle (wave 4E) is a step-through on the shared
+ * `Lane`, with no code pane: its frame, a slot lane and its worker chip, a
+ * tab card (a lane panel), the question, choices, Skip, reveal marks and
+ * feedback compute as the event loop's do. The visual's own worker: CI runs it.
+ */
+for (const width of [375, 1440])
+  test(`the service-worker lifecycle draws the shell and its lanes like the event loop @${width}`, async ({ page }) => {
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
+    const CHIP = ['height', 'border-top-left-radius', 'border-top-width', 'font-family', 'font-size'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [u, sel] of [
+      [GALLERY, EL],
+      [swlUrl('update-and-reload'), SWL],
+    ] as const) {
+      await open(page, u, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out.lane = await look(f.locator('[data-viz-region="stack"], [data-viz-region="swl-active"]').first(), PANEL)
+      out.chip = await look(f.locator('[data-viz-region="stack"] [data-chip], [data-viz-region="swl-active"] [data-chip]').first(), CHIP)
+      if (sel === SWL) {
+        out.tab = await look(f.locator('[data-viz-region="swl-tab-A"]'), PANEL)
+        out.tabChip = await look(f.locator('[data-viz-region="swl-tab-A"] [data-glyph]'), CHIP)
+      }
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      out.anatomy = await anatomy(f)
+      // A wrong pick: the event loop's mid-run answer is its second choice, the update's (v1) its first.
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      looks.push(out)
+    }
+    const [a, b] = looks
+    // The tab card is a lane panel and its controller a chip: they compute like the event loop's.
+    diffs.push(...Object.keys(a.lane).filter((k) => a.lane[k] !== b.tab[k]).map((k) => `tab card ${k}: event loop lane ${a.lane[k]} vs tab ${b.tab[k]}`))
+    diffs.push(...Object.keys(a.chip).filter((k) => a.chip[k] !== b.tabChip[k]).map((k) => `tab chip ${k}: event loop chip ${a.chip[k]} vs tab ${b.tabChip[k]}`))
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs service worker ${b[what][k]}`)
+    // (The event loop has no tab card; `tab` and `tabChip` were compared above.)
     expect(diffs).toEqual([])
   })
 

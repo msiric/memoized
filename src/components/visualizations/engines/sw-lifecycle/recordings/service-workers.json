@@ -1,0 +1,900 @@
+{
+ "generator": "chromium-sw-lifecycle@1",
+ "sha256": "8ea0ad8aa0387c101f92d94fbbc3f7579e9785367e1ec8480b3f78f9ab2c6e76",
+ "browser": "chromium@156.0.8078.4",
+ "scenarios": {
+  "update-and-reload": [
+   {
+    "as": "start",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "installing",
+    "snap": {
+     "slots": {
+      "installing": {
+       "v": "v2",
+       "state": "installing"
+      },
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "waiting",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": {
+       "v": "v2",
+       "state": "installed"
+      },
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "reload-a",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": {
+       "v": "v2",
+       "state": "installed"
+      },
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "close-a",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": {
+       "v": "v2",
+       "state": "installed"
+      },
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "reload-b",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": {
+       "v": "v2",
+       "state": "installed"
+      },
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "close-b",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activating"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "reopen-a",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activated"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v2-static"
+     ]
+    }
+   }
+  ],
+  "skip-waiting": [
+   {
+    "as": "start",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "installing",
+    "snap": {
+     "slots": {
+      "installing": {
+       "v": "v2",
+       "state": "installing"
+      },
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "activating",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activating"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "activated",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activated"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v2-static"
+     ]
+    }
+   }
+  ],
+  "activating-fetch": [
+   {
+    "as": "start",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "activating",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activating"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "fetch",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activating"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": "v2"
+      },
+      "B": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "activated",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activated"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": "v2"
+      },
+      "B": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v2-static"
+     ]
+    }
+   }
+  ],
+  "skip-waiting-claim": [
+   {
+    "as": "start",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "installing",
+    "snap": {
+     "slots": {
+      "installing": {
+       "v": "v2",
+       "state": "installing"
+      },
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "activating",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activating"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static",
+      "v2-static"
+     ]
+    }
+   },
+   {
+    "as": "activated",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v2",
+       "state": "activated"
+      }
+     },
+     "redundant": [
+      "v1"
+     ],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      },
+      "B": {
+       "open": true,
+       "controller": "v2",
+       "changes": 1,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v2-static"
+     ]
+    }
+   }
+  ],
+  "first-install-claim": [
+   {
+    "as": "installing",
+    "snap": {
+     "slots": {
+      "installing": {
+       "v": "v1",
+       "state": "installing"
+      },
+      "waiting": null,
+      "active": null
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": []
+    }
+   },
+   {
+    "as": "activating",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activating"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "claimed",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 1,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   }
+  ],
+  "first-install": [
+   {
+    "as": "installing",
+    "snap": {
+     "slots": {
+      "installing": {
+       "v": "v1",
+       "state": "installing"
+      },
+      "waiting": null,
+      "active": null
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": []
+    }
+   },
+   {
+    "as": "activating",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activating"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "activated",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   },
+   {
+    "as": "reload-a",
+    "snap": {
+     "slots": {
+      "installing": null,
+      "waiting": null,
+      "active": {
+       "v": "v1",
+       "state": "activated"
+      }
+     },
+     "redundant": [],
+     "tabs": {
+      "A": {
+       "open": true,
+       "controller": "v1",
+       "changes": 0,
+       "fetched": null
+      },
+      "B": {
+       "open": false,
+       "controller": null,
+       "changes": 0,
+       "fetched": null
+      }
+     },
+     "caches": [
+      "v1-static"
+     ]
+    }
+   }
+  ]
+ }
+}

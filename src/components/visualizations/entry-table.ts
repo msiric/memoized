@@ -202,6 +202,17 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'knapsack-1d-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],
     },
   ],
+  'sw-lifecycle': [
+    () => import('./engines/sw-lifecycle'),
+    840,
+    600,
+    undefined,
+    {
+      'update-and-reload': [840, 600, 896, 988, 1076],
+      skipWaiting: [844, 576, 844, 936, 1064],
+      'first-install-claim': [844, 600, 844, 988, 1076],
+    },
+  ],
   'list-keys': [
     () => import('./engines/list-keys'),
     862,

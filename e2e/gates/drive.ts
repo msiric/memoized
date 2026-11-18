@@ -211,6 +211,31 @@ async function dpWalk(page: Page, stop: (step: number, mode: string | null) => b
   await settle(page)
 }
 
+/** The service-worker lifecycle step-through (wave 4E) alone on its page (`?swl=<preset>`); the visual's own worker, so CI runs it. */
+export const SWL = '[data-viz="sw-lifecycle"] section'
+export const swlUrl = (preset: string) => `${GALLERY}?swl=${preset}`
+const SWL_STATES: Record<string, string> = {
+  'swl-start': 'update-and-reload',
+  'swl-waiting-ask': 'update-and-reload',
+  'swl-reload-reveal-wrong': 'update-and-reload',
+  'swl-update-finale': 'update-and-reload',
+  'swl-skip-activating': 'skipWaiting',
+  'swl-first-uncontrolled': 'first-install-claim',
+}
+/** Steps the service-worker frame forward until `stop` holds (or its end), answering an open question with choice `pick`. */
+async function swlWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(SWL).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
+  await settle(page)
+}
+
 /** The frames step-throughs (wave 3C) alone on their page (`?fx=<preset>`): one visual per preset. */
 export const fxUrl = (preset: string) => `${GALLERY}?fx=${preset}`
 const FX_STATES: Record<string, { id: string; preset: string }> = {
@@ -348,6 +373,7 @@ export function stateUrl(name: string): string {
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (DP_STATES[name]) return dpUrl(DP_STATES[name])
+  if (SWL_STATES[name]) return swlUrl(SWL_STATES[name])
   if (FX_STATES[name]) return fxUrl(FX_STATES[name].preset)
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
@@ -367,6 +393,7 @@ export function stateFrame(name: string): string {
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
   if (DP_STATES[name]) return DP
+  if (SWL_STATES[name]) return SWL
   if (FX_STATES[name]) return fxFrame(FX_STATES[name].id)
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
@@ -681,6 +708,28 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   // the item whose loop never runs (x = 5), the false finale; counting up:
   // the question with f[1] barred, its reveal after a wrong pick (the arrow
   // out of a barred cell), the true finale.
+  // The service-worker lifecycle (wave 4E): Start, the reload question open on the waiting step, its
+  // reveal answered wrong (v2), the update's finale, skipWaiting's activation and the first visit's
+  // uncontrolled tab (answered right).
+  'swl-start': async () => {},
+  'swl-waiting-ask': async (page) => {
+    await swlWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'swl-reload-reveal-wrong': async (page) => {
+    await swlWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(SWL).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(900)
+    await settle(page)
+  },
+  'swl-update-finale': async (page) => {
+    await swlWalk(page, () => false, 1)
+  },
+  'swl-skip-activating': async (page) => {
+    await swlWalk(page, (s, mode) => s >= 2 && mode !== 'ask', 2)
+  },
+  'swl-first-uncontrolled': async (page) => {
+    await swlWalk(page, (s, mode) => s >= 2 && mode !== 'ask', 2)
+  },
   'dp-start': async () => {},
   'dp-skip': async (page) => {
     await dpWalk(page, (s, mode) => s >= 8 && mode !== 'ask', 2)
@@ -952,6 +1001,20 @@ export const MOTION_STATES: Record<string, MotionState> = {
     frame: DP,
     setup: async (page) => {
       const f = page.locator(DP).first()
+      await f.getByRole('slider').focus()
+      await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(650)
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // The service-worker lifecycle: a paced step, v2 moving from installing to waiting as v2-static arrives (Q1).
+  'swl-step': {
+    url: swlUrl('update-and-reload'),
+    frame: SWL,
+    setup: async (page) => {
+      const f = page.locator(SWL).first()
       await f.getByRole('slider').focus()
       await page.keyboard.press('ArrowRight')
       await page.waitForTimeout(650)
