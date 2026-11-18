@@ -65,6 +65,8 @@ const ALL_PAGES = [
   '/dev/visualizations?js=static',
   // The wave 4A DSA-track figures (static).
   '/dev/visualizations?dsa=static',
+  // The wave 4D frontend figures (static).
+  '/dev/visualizations?fe=static',
 ]
 /** A practice-answer frame is local-only: checked only where the content checkout has it (never CI). */
 const PAGES = ALL_PAGES.filter((u) => !urlLocalOnly(u))
