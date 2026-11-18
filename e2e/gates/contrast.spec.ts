@@ -9,7 +9,7 @@ import {
 } from '../../src/components/visualizations/primitives/tokens-v3'
 import { urlLocalOnly } from '../premium'
 import { auditContrast, type Pair } from './contrast-audit'
-import { GALLERY, LESSONS, MOTION_STATES, PP, PP_AWAIT, SPECIMEN, STATES, atUrl, chUrl, dpUrl, freezeForContrast, jsUrl, dsaUrl, frUrl, lessonUrl, llUrl, open, stateUrl, swUrl, fxUrl, coreUrl, elUrl } from './drive'
+import { GALLERY, LESSONS, MOTION_STATES, PP, PP_AWAIT, SPECIMEN, STATES, atUrl, chUrl, dpUrl, freezeForContrast, jsUrl, dsaUrl, frUrl, lessonUrl, llUrl, open, stateUrl, swUrl, fxUrl, coreUrl, elUrl, ssrUrl } from './drive'
 
 /**
  * Contrast gate (VIZ-H G, R1 L05): the token table (`tokens-v3.test.ts`)
@@ -124,7 +124,7 @@ test('print: the light rendering passes', async ({ page }) => {
   const problems: string[] = []
   // The frontier: one page per lesson group (graph, grid and tree canvases).
   const frontier = ['bfs-levels', 'min-effort-grid', 'bst-iterator-stack', 'dfs-directed-recstack', 'kahn-indegree'].map(frUrl)
-  for (const url of [SPECIMEN, GALLERY, PP, PP_AWAIT, `${GALLERY}?static=1`, ...frontier, llUrl('reverse-between-m2-n4'), llUrl('static'), swUrl('araaci-k2'), swUrl('set-shrink-longest-substring'), dpUrl('knapsack-1d-desc-vs-asc'), dpUrl('knapsack-1d-asc'), chUrl('monotone-chain-turn-pops'), chUrl('fence-collinear-le'), atUrl, jsUrl, dsaUrl, fxUrl('twoWay-next-arg'), fxUrl('refill-on-settle'), fxUrl('once-consumed-by-nested-emit'), coreUrl, elUrl('exercise-2-async1-async2'), elUrl('who-called-inner')]) {
+  for (const url of [SPECIMEN, GALLERY, PP, PP_AWAIT, `${GALLERY}?static=1`, ...frontier, llUrl('reverse-between-m2-n4'), llUrl('static'), swUrl('araaci-k2'), swUrl('set-shrink-longest-substring'), dpUrl('knapsack-1d-desc-vs-asc'), dpUrl('knapsack-1d-asc'), chUrl('monotone-chain-turn-pops'), chUrl('fence-collinear-le'), ssrUrl('two-boundary-stream'), ssrUrl('renderToString-contrast'), atUrl, jsUrl, dsaUrl, fxUrl('twoWay-next-arg'), fxUrl('refill-on-settle'), fxUrl('once-consumed-by-nested-emit'), coreUrl, elUrl('exercise-2-async1-async2'), elUrl('who-called-inner')]) {
     const skip = urlLocalOnly(url)
     if (skip) {
       test.info().annotations.push({ type: 'skipped page', description: skip })

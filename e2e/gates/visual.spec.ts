@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { baselineName, urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, CH, JS, DSA, atUrl, chUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl } from './drive'
+import { FR, GALLERY, LESSONS, LL, MOTION_STATES, PP, SPECIMEN, STATES, SW, DP, CH, JS, DSA, atUrl, chUrl, dpUrl, dsaUrl, freezeAt, jsUrl, frUrl, lessonUrl, llUrl, open, settle, stateFrame, stateUrl, swUrl, CORE, coreUrl, SSR, ssrUrl } from './drive'
 
 /**
  * Visual regression (VIZ-H G, H4): the specimen (every primitive in every
@@ -160,6 +160,17 @@ test('print: specimen and gallery on paper', async ({ page }) => {
     await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
     await frameShot(page, CH, baselineName(chUrl('monotone-chain-turn-pops'), 'print-hull-turn-stack.png'))
   }
+  // Streaming SSR (wave 4E): its finale on paper (every wire line, both slots interactive, the handler log).
+  await open(page, ssrUrl('two-boundary-stream'), 768)
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  {
+    const f = page.locator(SSR).first()
+    await f.getByRole('slider').focus()
+    await page.keyboard.press('End')
+    await page.waitForTimeout(600)
+    await settle(page)
+  }
+  await frameShot(page, SSR, 'print-ssr-stream-finale.png')
   // The annotated trees (waves 2D and 3A), every preset on paper.
   await open(page, atUrl, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })

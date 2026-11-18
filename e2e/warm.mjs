@@ -34,6 +34,8 @@ const routes = [
   '/dev/visualizations?dp=knapsack-1d-desc-vs-asc',
   // The convex-hull turn stack (wave 4E), one lesson group.
   '/dev/visualizations?ch=monotone-chain-turn-pops',
+  // Streaming SSR (wave 4E), one lesson group.
+  '/dev/visualizations?ssr=two-boundary-stream',
   // The frames step-throughs (wave 3C), one page per visual.
   '/dev/visualizations?fx=twoWay-next-arg',
   '/dev/visualizations?fx=refill-on-settle',

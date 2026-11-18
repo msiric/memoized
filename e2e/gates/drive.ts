@@ -211,6 +211,33 @@ async function dpWalk(page: Page, stop: (step: number, mode: string | null) => b
   await settle(page)
 }
 
+/** The streaming-SSR step-through (wave 4E) alone on its page (`?ssr=<preset>`); the visual's own app, so every state runs in CI. */
+export const SSR = '[data-viz="ssr-stream"] section'
+export const ssrUrl = (preset: string) => `${GALLERY}?ssr=${preset}`
+const SSR_STATES: Record<string, string> = {
+  'ssr-start': 'two-boundary-stream',
+  'ssr-fill-ask': 'two-boundary-stream',
+  'ssr-hidden-reveal-wrong': 'two-boundary-stream',
+  'ssr-click-ask': 'two-boundary-stream',
+  'ssr-click-reveal': 'two-boundary-stream',
+  'ssr-finale': 'two-boundary-stream',
+  'ssr-string-finale': 'renderToString-contrast',
+}
+
+/** Steps the SSR frame forward until `stop` holds (or its end), answering an open question with choice `pick` on the way. */
+async function ssrWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(SSR).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(400)
+  await settle(page)
+}
+
 /** The convex-hull turn-stack step-through (wave 4E) alone on its page (`?ch=<preset>`); every preset shows a practice answer (local-only). */
 export const CH = '[data-viz="hull-turn-stack"] section'
 export const chUrl = (preset: string) => `${GALLERY}?ch=${preset}`
@@ -378,6 +405,7 @@ export function stateUrl(name: string): string {
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (DP_STATES[name]) return dpUrl(DP_STATES[name])
   if (CH_STATES[name]) return chUrl(CH_STATES[name])
+  if (SSR_STATES[name]) return ssrUrl(SSR_STATES[name])
   if (FX_STATES[name]) return fxUrl(FX_STATES[name].preset)
   if (name.startsWith('closures') || name.startsWith('heap') || name.startsWith('sc-')) return `${GALLERY}?static=1`
   if (name.startsWith('pp-await')) return PP_AWAIT
@@ -398,6 +426,7 @@ export function stateFrame(name: string): string {
   if (SW_STATES[name]) return SW
   if (DP_STATES[name]) return DP
   if (CH_STATES[name]) return CH
+  if (SSR_STATES[name]) return SSR
   if (FX_STATES[name]) return fxFrame(FX_STATES[name].id)
   if (name.startsWith('closures')) return '[data-viz="environment-records"] figure'
   if (name.startsWith('heap-objects')) return HEAP_OBJECTS
@@ -731,6 +760,34 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'dp-asc-finale': async (page) => {
     await dpWalk(page, () => false, 1)
   },
+  // Streaming SSR (wave 4E): the empty Start; the shell with "Which slot fills first?" open; Reviews' hidden
+  // HTML after a wrong pick; the click question on hydration; its reveal (Reviews interactive, the handler
+  // log); the finale; the renderToString finale (the click run after the whole page).
+  'ssr-start': async () => {},
+  'ssr-fill-ask': async (page) => {
+    await ssrWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'ssr-hidden-reveal-wrong': async (page) => {
+    await ssrWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(SSR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'ssr-click-ask': async (page) => {
+    await ssrWalk(page, (s, mode) => s >= 5 && mode === 'ask', 2)
+  },
+  'ssr-click-reveal': async (page) => {
+    await ssrWalk(page, (s, mode) => s >= 5 && mode === 'ask', 2)
+    await page.locator(SSR).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'ssr-finale': async (page) => {
+    await ssrWalk(page, () => false, 2)
+  },
+  'ssr-string-finale': async (page) => {
+    await ssrWalk(page, () => false, 2)
+  },
   // The convex-hull turn stack (wave 4E, local-only): Start; the question with (0,0), (1,1) on the
   // lower stack; its reveal after a wrong pick (the pop on a right turn); the upper chain over the
   // dashed lower one, mid-pop; the joined hull; the printed result; the fence with < 0 keeping (1,0)
@@ -1017,6 +1074,22 @@ export const MOTION_STATES: Record<string, MotionState> = {
       const f = page.locator(DP).first()
       await f.getByRole('slider').focus()
       await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(650)
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // Streaming SSR: a paced write (Reviews' hidden HTML enters the wire, its badge turns, Q1).
+  'ssr-step': {
+    url: ssrUrl('two-boundary-stream'),
+    frame: SSR,
+    setup: async (page) => {
+      const f = page.locator(SSR).first()
+      await f.getByRole('slider').focus()
+      await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(400)
+      await f.locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
       await page.waitForTimeout(650)
     },
     act: async (page) => {

@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, CH, chUrl, coreUrl, elUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, CH, chUrl, coreUrl, elUrl, SSR, ssrUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -810,6 +810,59 @@ for (const width of [375, 1440])
     const [a, b] = looks
     for (const what of Object.keys(a))
       for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frames ${b[what][k]}`)
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * Streaming SSR (wave 4E) draws the shell like the event loop: the frame,
+ * its panels' fill and radius like the event loop's console panel,
+ * the checkpoint anatomy, the choice rows at rest and on the reveal, Skip,
+ * the prompt and the feedback; the handler log's output computes like the
+ * console's output line.
+ */
+for (const width of [375, 1440])
+  test(`streaming SSR draws the shell and its panels like the event loop @${width}`, async ({ page }) => {
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    // The wire is a 31-column strip that fits a 320 phone with the narrow panel inset: fill and radius only.
+    const PANEL = ['background-color', 'border-top-left-radius'] as const
+    // The handler log is svg text (no line box): its face and size match the console line's.
+    const OUT = ['font-family', 'font-size', 'font-weight'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [u, sel] of [
+      [GALLERY, EL],
+      [ssrUrl('two-boundary-stream'), SSR],
+    ] as const) {
+      await open(page, u, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out.panel = await look(f.locator('[data-viz-region="console"], [data-viz-region="wire"]').first(), PANEL)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      out.anatomy = await anatomy(f)
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(0).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      await f.getByRole('slider').focus()
+      await page.keyboard.press('End')
+      await page.waitForTimeout(1200)
+      await settle(page)
+      out.output = await look(f.locator('[data-out]').last(), OUT)
+      looks.push(out)
+    }
+    const [a, b] = looks
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs ssr ${b[what][k]}`)
     expect(diffs).toEqual([])
   })
 
