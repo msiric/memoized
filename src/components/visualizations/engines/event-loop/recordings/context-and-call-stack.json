@@ -1,0 +1,29 @@
+{
+ "who-called-inner": {
+  "sha256": "3511a3f32e799ba88095a22d1b958a9f3b54463386be6496a90da7cf593583b8",
+  "stdout": [],
+  "traces": [
+   {
+    "header": "Trace",
+    "frames": [
+     "Timeout.inner",
+     "listOnTimeout",
+     "process.processTimers"
+    ]
+   }
+  ]
+ },
+ "await-async-frames": {
+  "sha256": "447b53e4857399e85e6cb32e80b881dffe398aa7f36e503e79dc979786c3a37b",
+  "stdout": [],
+  "traces": [
+   {
+    "header": "Trace",
+    "frames": [
+     "o2",
+     "async o1"
+    ]
+   }
+  ]
+ }
+}

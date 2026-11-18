@@ -70,6 +70,12 @@ export type LaneChip = {
   show?: PerVariant<boolean>
   /** The `+N more` summary of a collapsed queue tail: quiet, sans. */
   more?: boolean
+  /**
+   * In the tight frame (`vz-tight`, very large text on a phone), where a
+   * queue collapses more of its tail: `false` hides the chip there, `true`
+   * shows it only there (that frame's own `+N more`). Default: as narrow.
+   */
+  tight?: boolean
 }
 
 /** Classes that show an element only in the variants where `show` is true. */
@@ -205,13 +211,16 @@ export function Lane(props: LaneProps) {
   // The live gate and the ids on stage, handed to chips that are leaving.
   const custom: PresenceCustom = { gate, present }
 
-  const items: ReactNode[] = chips.map((chip, i) => {
+  // The tight frame's own `+N more` is plain markup outside the presence group: it never moves,
+  // enters or leaves with the step's glyphs, so wider frames animate exactly as without it.
+  const tightOnly = chips.filter((c) => c.tight === true)
+  const items: ReactNode[] = chips.filter((c) => c.tight !== true).map((chip, i) => {
     const moved = before.has(chip.id)
     return (
       <LaneItem
         key={`${chip.id}:${gate.epoch}`}
         id={chip.id}
-        className={clsx('min-w-0 max-w-full flex-none', showCls(chip.show))}
+        className={clsx('min-w-0 max-w-full flex-none', showCls(chip.show), chip.tight === false && 'vz-tight:hidden')}
         {...presence(chip.id, gate, { from, to }, { moved })}
         custom={custom}
       >
@@ -277,6 +286,11 @@ export function Lane(props: LaneProps) {
         >
           {items}
         </AnimatePresence>
+        {tightOnly.map((chip) => (
+          <div key={chip.id} className="hidden min-w-0 max-w-full flex-none vz-tight:block">
+            <Chip chip={chip} kind={kind} focused={false} />
+          </div>
+        ))}
         <span
           aria-hidden
           className={clsx(

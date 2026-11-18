@@ -15,8 +15,12 @@ export type Label = readonly [string, ...string[]]
 export type HeapValue =
   /** A primitive, as Node prints it (`2`, `'Alice'`, `true`). */
   | { text: string }
-  /** A value that identifies an object: a dot with an arrow to that object. */
-  | { ref: string }
+  /**
+   * A value that identifies an object: a dot with an arrow to that object.
+   * `weak`: a reference the collector does not follow (a WeakMap key), drawn
+   * dashed (the reachability presets).
+   */
+  | { ref: string; weak?: true }
 
 /** A name in scope at the snapshot: drawn as its own box in the left column. */
 export type HeapBinding = { id: string; name: string; value: HeapValue }
@@ -24,13 +28,27 @@ export type HeapBinding = { id: string; name: string; value: HeapValue }
 export type HeapRow = { key: string; value: HeapValue }
 
 /** An object on the heap: a header naming it (`Object A`) and its own properties. */
-export type HeapObject = { id: string; title: Label; rows: HeapRow[] }
+export type HeapObject = {
+  id: string
+  title: Label
+  rows: HeapRow[]
+  /** Reachability presets: collected by the first GC after this snapshot (recorded): drawn greyed and dashed. */
+  gone?: true
+  /** A short tag in the header's right end (`rc 1`: the strong references into it). */
+  badge?: string
+  /** A muted line under the rows (`100 li`, a collapsed subtree): words, not a property. */
+  note?: string
+}
 
 /**
  * The panel's one rest emphasis, "changed" (H3 R2 Q9: the neutral changed
  * role, never lime): the row a mutation wrote, or the arrow a rebinding moved.
  */
-export type HeapMark = { row: { object: string; key: string } } | { binding: string }
+export type HeapMark =
+  | { row: { object: string; key: string } }
+  | { binding: string }
+  /** Reachability presets: the arrow that still retains the island (`ref:<object>.<key>` or `bind:<binding>`). */
+  | { edge: HeapEdgeId }
 
 /** A line of the program's own output, drawn under the panel: `original === alias › true`. */
 export type HeapResult = { expr: string; text: string }
@@ -50,9 +68,17 @@ export type HeapPanel = {
   /** The line of code that made the change the mark shows (for the text alternative). */
   changedBy?: string
   results?: HeapResult[]
+  /** Reachability presets: the names column is labelled as the GC roots. */
+  roots?: string
+  /** Reachability presets: the label under the greyed objects (`collectible`). */
+  island?: string
 }
 
-export type HeapDiagram = { panels: HeapPanel[] }
+export type HeapDiagram = {
+  panels: HeapPanel[]
+  /** The text alternative's note on what is modelled, when it differs from the identity figures'. */
+  model?: string
+}
 
 // ---------------------------------------------------------------------------
 // What a preset declares, and what a real run records.

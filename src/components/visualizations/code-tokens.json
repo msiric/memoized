@@ -650,6 +650,460 @@
    }
   ]
  ],
+ "event-loop/exercise-2-async1-async2": [
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "async1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Async 1 Start'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "async2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Async 1 End'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "async2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Async 2'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Script Start'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "setTimeout",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(() ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Timeout'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}, ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "async1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Promise",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "((",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "resolve",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Promise 1'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "resolve",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}).",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "then",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(() ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Promise 2'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "})",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Script End'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "event-loop/await-async-frames": [
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "o2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "null",
+    "color": "#79B8FF"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "trace",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "o1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "o2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "o1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
  "bfs-dfs-frontier/bfs-levels": [
   [
    {

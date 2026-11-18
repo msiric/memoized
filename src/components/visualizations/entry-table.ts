@@ -46,6 +46,13 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'microtask-queued-during-drain': [844, 716, 872, 964, 1072],
       'microtask-vs-timer-12345': [792, 672, 820, 984, 1048],
       'await-null': [792, 640, 840, 912, 964],
+      'exercise-2-async1-async2': [812, 800, 840, 992, 1032],
+      'who-called-inner': [876, 688, 904, 1028, 1096],
+      'await-async-frames': [888, 716, 916, 1060, 1108],
+    },
+    {
+      'who-called-inner': ['who-called-inner'],
+      'await-async-frames': ['who-called-inner'],
     },
   ],
   'environment-records': [
@@ -94,7 +101,12 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/heap-graph'),
     1013,
     874,
-    { 'identity-alias-rebind-spread': [1013, 874, 874], 'spread-vs-nested-vs-deep': [1533, 1088, 1088] },
+    {
+      'identity-alias-rebind-spread': [1013, 874, 874],
+      'spread-vs-nested-vs-deep': [1533, 1088, 1088],
+      'gc-reachability-cycle-and-weak-edge': [1348, 1280, 1280],
+      'retainer-paths': [1552, 1484, 1484],
+    },
   ],
   'linked-list-frames': [
     () => import('./engines/linked-list/frames'),
@@ -127,7 +139,11 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     () => import('./engines/heap-graph/prototype'),
     1118,
     618,
-    { 'lookup-and-shadowing': [1118, 618, 618], 'constructor-fix': [1234, 654, 654] },
+    {
+      'lookup-and-shadowing': [1118, 618, 618],
+      'constructor-fix': [1234, 654, 654],
+      'extends-two-chains': [1454, 790, 790],
+    },
   ],
   lanes: [
     () => import('./engines/lanes'),

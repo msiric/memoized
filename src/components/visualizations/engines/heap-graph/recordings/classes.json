@@ -1,0 +1,669 @@
+{
+ "extends": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "f3df3884119c78ecdd8fde925f31bdf91bdbf3703182d7032d36244f20415f7c",
+  "stdout": [],
+  "pauses": [
+   {
+    "probe": "super",
+    "line": 6,
+    "vars": {
+     "thisIsRex": true
+    }
+   },
+   {
+    "probe": "graph",
+    "line": 23,
+    "vars": {
+     "graph": {
+      "objects": [
+       {
+        "label": "rex",
+        "fn": false,
+        "keys": [
+         [
+          "name",
+          {
+           "text": "'Rex'"
+          },
+          true
+         ],
+         [
+          "breed",
+          {
+           "text": "'Labrador'"
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Dog.prototype"
+        }
+       },
+       {
+        "label": "Dog.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "ref": "Dog"
+          },
+          false
+         ],
+         [
+          "speak",
+          {
+           "other": "function speak"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Animal.prototype"
+        }
+       },
+       {
+        "label": "Animal.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "ref": "Animal"
+          },
+          false
+         ],
+         [
+          "speak",
+          {
+           "other": "function speak"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       },
+       {
+        "label": "Object.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "other": "function Object"
+          },
+          false
+         ],
+         [
+          "__defineGetter__",
+          {
+           "other": "function __defineGetter__"
+          },
+          false
+         ],
+         [
+          "__defineSetter__",
+          {
+           "other": "function __defineSetter__"
+          },
+          false
+         ],
+         [
+          "hasOwnProperty",
+          {
+           "other": "function hasOwnProperty"
+          },
+          false
+         ],
+         [
+          "__lookupGetter__",
+          {
+           "other": "function __lookupGetter__"
+          },
+          false
+         ],
+         [
+          "__lookupSetter__",
+          {
+           "other": "function __lookupSetter__"
+          },
+          false
+         ],
+         [
+          "isPrototypeOf",
+          {
+           "other": "function isPrototypeOf"
+          },
+          false
+         ],
+         [
+          "propertyIsEnumerable",
+          {
+           "other": "function propertyIsEnumerable"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ],
+         [
+          "valueOf",
+          {
+           "other": "function valueOf"
+          },
+          false
+         ],
+         [
+          "__proto__",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "toLocaleString",
+          {
+           "other": "function toLocaleString"
+          },
+          false
+         ]
+        ],
+        "proto": null
+       },
+       {
+        "label": "Dog",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "2"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Dog'"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Dog.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Animal"
+        }
+       },
+       {
+        "label": "Animal",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "1"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Animal'"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Animal.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Function.prototype"
+        }
+       },
+       {
+        "label": "Function.prototype",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "0"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "''"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "constructor",
+          {
+           "other": "function Function"
+          },
+          false
+         ],
+         [
+          "apply",
+          {
+           "other": "function apply"
+          },
+          false
+         ],
+         [
+          "bind",
+          {
+           "other": "function bind"
+          },
+          false
+         ],
+         [
+          "call",
+          {
+           "other": "function call"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       }
+      ],
+      "lookups": [
+       {
+        "from": "rex",
+        "key": "speak",
+        "visited": [
+         [
+          "rex",
+          false
+         ],
+         [
+          "Dog.prototype",
+          true
+         ]
+        ],
+        "value": {
+         "other": "function speak"
+        }
+       },
+       {
+        "from": "Animal.prototype",
+        "key": "speak",
+        "visited": [
+         [
+          "Animal.prototype",
+          true
+         ]
+        ],
+        "value": {
+         "other": "function speak"
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "manual": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "e0235d4e45d6291e96549a5082086e673572a41f30bc9259bb58ebcea27f19c9",
+  "stdout": [
+   "Toyota is driving.",
+   "Toyota Corolla says beep beep!"
+  ],
+  "pauses": [
+   {
+    "probe": "graph",
+    "line": 24,
+    "vars": {
+     "graph": {
+      "objects": [
+       {
+        "label": "myCar",
+        "fn": false,
+        "keys": [
+         [
+          "make",
+          {
+           "text": "'Toyota'"
+          },
+          true
+         ],
+         [
+          "model",
+          {
+           "text": "'Corolla'"
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Car.prototype"
+        }
+       },
+       {
+        "label": "Car.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "ref": "Car"
+          },
+          true
+         ],
+         [
+          "honk",
+          {
+           "other": "function "
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Vehicle.prototype"
+        }
+       },
+       {
+        "label": "Vehicle.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "other": "function Vehicle"
+          },
+          false
+         ],
+         [
+          "drive",
+          {
+           "other": "function "
+          },
+          true
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       },
+       {
+        "label": "Object.prototype",
+        "fn": false,
+        "keys": [
+         [
+          "constructor",
+          {
+           "other": "function Object"
+          },
+          false
+         ],
+         [
+          "__defineGetter__",
+          {
+           "other": "function __defineGetter__"
+          },
+          false
+         ],
+         [
+          "__defineSetter__",
+          {
+           "other": "function __defineSetter__"
+          },
+          false
+         ],
+         [
+          "hasOwnProperty",
+          {
+           "other": "function hasOwnProperty"
+          },
+          false
+         ],
+         [
+          "__lookupGetter__",
+          {
+           "other": "function __lookupGetter__"
+          },
+          false
+         ],
+         [
+          "__lookupSetter__",
+          {
+           "other": "function __lookupSetter__"
+          },
+          false
+         ],
+         [
+          "isPrototypeOf",
+          {
+           "other": "function isPrototypeOf"
+          },
+          false
+         ],
+         [
+          "propertyIsEnumerable",
+          {
+           "other": "function propertyIsEnumerable"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ],
+         [
+          "valueOf",
+          {
+           "other": "function valueOf"
+          },
+          false
+         ],
+         [
+          "__proto__",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "toLocaleString",
+          {
+           "other": "function toLocaleString"
+          },
+          false
+         ]
+        ],
+        "proto": null
+       },
+       {
+        "label": "Car",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "2"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "'Car'"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "text": "null"
+          },
+          false
+         ],
+         [
+          "prototype",
+          {
+           "ref": "Car.prototype"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Function.prototype"
+        }
+       },
+       {
+        "label": "Function.prototype",
+        "fn": true,
+        "keys": [
+         [
+          "length",
+          {
+           "text": "0"
+          },
+          false
+         ],
+         [
+          "name",
+          {
+           "text": "''"
+          },
+          false
+         ],
+         [
+          "arguments",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "caller",
+          {
+           "other": "accessor"
+          },
+          false
+         ],
+         [
+          "constructor",
+          {
+           "other": "function Function"
+          },
+          false
+         ],
+         [
+          "apply",
+          {
+           "other": "function apply"
+          },
+          false
+         ],
+         [
+          "bind",
+          {
+           "other": "function bind"
+          },
+          false
+         ],
+         [
+          "call",
+          {
+           "other": "function call"
+          },
+          false
+         ],
+         [
+          "toString",
+          {
+           "other": "function toString"
+          },
+          false
+         ]
+        ],
+        "proto": {
+         "ref": "Object.prototype"
+        }
+       }
+      ],
+      "lookups": [
+       {
+        "from": "myCar",
+        "key": "drive",
+        "visited": [
+         [
+          "myCar",
+          false
+         ],
+         [
+          "Car.prototype",
+          false
+         ],
+         [
+          "Vehicle.prototype",
+          true
+         ]
+        ],
+        "value": {
+         "other": "function "
+        }
+       }
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

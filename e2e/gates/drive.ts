@@ -238,6 +238,40 @@ async function fxWalk(page: Page, name: string, stop: (step: number, mode: strin
   await settle(page)
 }
 
+/** The wave 4C event-loop lesson groups alone on their page (`?el=<preset>`): Exercise 2, the call-stack traces (local-only). */
+export const elUrl = (preset: string) => `${GALLERY}?el=${preset}`
+export const ELF = '[data-viz="event-loop"] section'
+const EL_STATES: Record<string, string> = {
+  'el-ex2-start': 'exercise-2-async1-async2',
+  'el-ex2-ask': 'exercise-2-async1-async2',
+  'el-ex2-reveal-wrong': 'exercise-2-async1-async2',
+  'el-ex2-finale': 'exercise-2-async1-async2',
+  'el-trace-ask': 'who-called-inner',
+  'el-trace-finale': 'who-called-inner',
+  'el-await-finale': 'await-async-frames',
+}
+/** Steps an event-loop frame forward until `stop` holds (or its end), answering an open question with choice `pick`. */
+async function elWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(ELF).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(900)
+  await settle(page)
+}
+
+/** The wave 4C JavaScript core figures, static, alone on their page (`?core=static`). */
+export const coreUrl = `${GALLERY}?core=static`
+export const CORE: Record<string, string> = {
+  'core-gc': 'figure[data-viz-preset="gc-reachability-cycle-and-weak-edge"]',
+  'core-retain': 'figure[data-viz-preset="retainer-paths"]',
+  'core-classes': 'figure[data-viz-preset="extends-two-chains"]',
+}
+
 /** The Promise Patterns lesson's presets (their own group, `?preset=`). */
 export const PP = `${GALLERY}?preset=microtask-vs-timer-12345`
 export const PP_AWAIT = `${GALLERY}?preset=await-null`
@@ -309,6 +343,8 @@ export function stateUrl(name: string): string {
   if (name.startsWith('at-')) return atUrl
   if (name.startsWith('js-')) return jsUrl
   if (name.startsWith('dsa-')) return dsaUrl
+  if (name.startsWith('core-')) return coreUrl
+  if (EL_STATES[name]) return elUrl(EL_STATES[name])
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (DP_STATES[name]) return dpUrl(DP_STATES[name])
@@ -326,6 +362,8 @@ export function stateFrame(name: string): string {
   if (AT[name]) return AT[name]
   if (JS[name]) return JS[name]
   if (DSA[name]) return DSA[name]
+  if (CORE[name]) return CORE[name]
+  if (EL_STATES[name]) return ELF
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
   if (DP_STATES[name]) return DP
@@ -703,6 +741,34 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   // The wave 4B residual graphs: static, at rest only.
   'at-diamond': async () => {},
   'at-clrs': async () => {},
+  // The wave 4C event-loop groups: Exercise 2 at Start, its question, a wrong pick revealed, its finale;
+  // the timer trace's question and finale (the trace list), the await contrast's finale (local-only).
+  'el-ex2-start': async () => {},
+  'el-ex2-ask': async (page) => {
+    await elWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'el-ex2-reveal-wrong': async (page) => {
+    await elWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(ELF).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(900)
+    await settle(page)
+  },
+  'el-ex2-finale': async (page) => {
+    await elWalk(page, () => false)
+  },
+  'el-trace-ask': async (page) => {
+    await elWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'el-trace-finale': async (page) => {
+    await elWalk(page, () => false, 2)
+  },
+  'el-await-finale': async (page) => {
+    await elWalk(page, () => false, 2)
+  },
+  // The wave 4C JavaScript core figures: static, at rest only.
+  'core-gc': async () => {},
+  'core-retain': async () => {},
+  'core-classes': async () => {},
   // The wave 3B JavaScript-track figures: static, at rest only.
   'js-proto-lookup': async () => {},
   'js-proto-ctor': async () => {},
@@ -889,6 +955,20 @@ export const MOTION_STATES: Record<string, MotionState> = {
       await f.getByRole('slider').focus()
       await page.keyboard.press('ArrowRight')
       await page.waitForTimeout(650)
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // Exercise 2 (wave 4C): a paced step, async1 pausing into the microtask queue (Q1).
+  'el-ex2-step': {
+    url: elUrl('exercise-2-async1-async2'),
+    frame: ELF,
+    setup: async (page) => {
+      const f = page.locator(ELF).first()
+      await f.getByRole('slider').focus()
+      for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(400)
     },
     act: async (page) => {
       await page.keyboard.press('ArrowRight')

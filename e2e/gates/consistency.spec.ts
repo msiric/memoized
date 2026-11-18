@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -758,3 +758,107 @@ for (const width of [375, 1440])
       for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frames ${b[what][k]}`)
     expect(diffs).toEqual([])
   })
+
+/**
+ * The wave 4C figures speak the heap graph's vocabulary too: each figure's
+ * frame, title, caption and panel heading compute like the identity heap
+ * graph's, its glyphs, links at rest and changed links like the heap
+ * graph's; a collectible object is the glyph outline dashed (never a new
+ * colour), and the two-chain prototype graph's links compute like the
+ * shipped prototype graph's.
+ */
+for (const width of [375, 1440])
+  test(`wave 4C figures compute like the heap graph @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    const inSvg = (root: Locator, sel: string, props: readonly string[] = SVG, optional = false) =>
+      root.evaluate(
+        (f, [q, ps, opt]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) {
+            if (opt) return null
+            throw new Error(`nothing matches ${q}`)
+          }
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as unknown as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, props, optional] as const,
+      )
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string> | null, b: Record<string, string> | null) => {
+      if (!a || !b) return
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: reference ${a[k]} vs ${b[k]}`)
+    }
+    await open(page, `${GALLERY}?static=1`, width)
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const heap = {
+      frame: await look(hg, FRAME),
+      title: await look(hg.locator('p').first(), TEXT),
+      caption: await look(hg.locator('figcaption'), TEXT),
+      glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
+      link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
+      changedLink: await inSvg(hg, 'svg [data-edge][data-changed] .vz-e'),
+    }
+    await open(page, jsUrl, width)
+    const shipped = page.locator('figure[data-viz-preset="lookup-and-shadowing"]')
+    const proto = {
+      heading: await inSvg(shipped, 'svg [data-viz-part="panel-heading"]'),
+      spine: await inSvg(shipped, 'svg [data-kind="proto"]:not([data-changed]) > .vz-e'),
+      prototype: await inSvg(shipped, 'svg [data-kind="prototype"] > .vz-e'),
+      label: await inSvg(shipped, 'svg [data-viz-part="edge-label"]'),
+      pill: await inSvg(shipped, 'svg [data-fn] > .vz-g'),
+    }
+    await open(page, coreUrl, width)
+    for (const preset of ['gc-reachability-cycle-and-weak-edge', 'retainer-paths', 'extends-two-chains']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(f, FRAME))
+      same(`${preset} title`, heap.title, await look(f.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(f.locator('figcaption'), TEXT))
+      same(`${preset} glyph`, heap.glyph, await inSvg(f, 'svg [data-node]:not([data-gone]) > .vz-g'))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', SVG, true))
+    }
+    for (const preset of ['gc-reachability-cycle-and-weak-edge', 'retainer-paths']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge^="bind:"]:not([data-changed]) > .vz-e'))
+      // Greyed means the same fill and colour with a dashed outline: no new colour for collectible.
+      const gone = await inSvg(f, 'svg [data-node][data-gone] > .vz-g', [...SVG, 'stroke-dasharray'], true)
+      if (gone) {
+        same(`${preset} collectible glyph`, heap.glyph, Object.fromEntries(Object.entries(gone).filter(([k]) => k !== 'stroke-dasharray')))
+        if (gone['stroke-dasharray'] === 'none') diffs.push(`${preset}: a collectible glyph is not dashed`)
+      }
+    }
+    const two = page.locator('figure[data-viz-preset="extends-two-chains"]')
+    same('two chains panel heading', proto.heading, await inSvg(two, 'svg [data-viz-part="panel-heading"]'))
+    same('two chains [[Prototype]] link', proto.spine, await inSvg(two, 'svg [data-kind="proto"]:not([data-changed]) > .vz-e'))
+    same('two chains .prototype link', proto.prototype, await inSvg(two, 'svg [data-kind="prototype"] > .vz-e'))
+    same('two chains edge label', proto.label, await inSvg(two, 'svg [data-viz-part="edge-label"]'))
+    same('two chains pill', proto.pill, await inSvg(two, 'svg [data-fn] > .vz-g'))
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The trace list (wave 4C) is console output: each frame name computes like
+ * a console value and its `at` like the console's muted mark, at the finale
+ * of the await contrast (local-only: its group reads a practice question).
+ */
+test('the trace list computes like the console', async ({ page }) => {
+  const url = elUrl('await-async-frames')
+  const skip = urlLocalOnly(url)
+  test.skip(Boolean(skip), skip ?? '')
+  await open(page, url, 1024)
+  const f = page.locator('[data-viz="event-loop"] section')
+  await f.getByRole('slider').focus()
+  await page.keyboard.press('End')
+  await page.waitForTimeout(1500)
+  const PROPS = ['font-family', 'font-size', 'line-height', 'color'] as const
+  const value = await look(f.locator('[data-out] span.relative').first(), PROPS)
+  const mark = await look(f.locator('[data-out] > span').first(), PROPS)
+  const name = await look(f.locator('[data-trace] > span').nth(1), PROPS)
+  const at = await look(f.locator('[data-trace] > span').first(), PROPS)
+  expect(name).toEqual(value)
+  expect(at).toEqual(mark)
+})

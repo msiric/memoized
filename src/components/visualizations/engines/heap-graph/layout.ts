@@ -57,6 +57,13 @@ export const SIZE = {
   dotInset: 14,
   resultGap: 12,
   resultLine: 20,
+  /** Reachability presets: the roots label over the names, a header badge, the island label, a note row. */
+  rootsLine: 16,
+  rootsGap: 8,
+  badgeGap: 8,
+  label: 12,
+  islandGap: 6,
+  islandLine: 16,
 } as const
 
 /** Arrow jogs shorter than this read as a kink (F-ER-08); the layout test forbids them. */
@@ -77,6 +84,11 @@ export type LaidBox = {
   id: string
   kind: 'binding' | 'object'
   rect: Rect
+  /** Collected by the next GC (greyed). */
+  gone?: boolean
+  badge?: string
+  /** A muted line under the rows, and its top. */
+  note?: { text: string; top: number }
   /** A name's text, or an object's header. */
   title: string
   /** A name holding a primitive: its value cell. */
@@ -97,10 +109,14 @@ export type LaidEdge = {
   dot: Point
   /** The arrow a rebinding moved (the panel's mark). */
   changed?: boolean
+  /** A weak reference (dashed). */
+  weak?: boolean
+  /** Leaves a collectible object (greyed with it). */
+  gone?: boolean
 }
 
 export type LaidText = {
-  kind: 'expr' | 'result'
+  kind: 'expr' | 'result' | 'roots' | 'island'
   text: string
   x: number
   /** Baseline. */
@@ -118,7 +134,7 @@ export type PanelScene = {
 }
 
 const headerH = 2 * SIZE.headerPad + SIZE.headerLine
-const objectH = (o: HeapObject) => headerH + o.rows.length * SIZE.row
+const objectH = (o: HeapObject) => headerH + (o.rows.length + (o.note ? 1 : 0)) * SIZE.row
 const rowCenter = (k: number) => headerH + k * SIZE.row + SIZE.row / 2
 
 function nameWidth(name: string) {
@@ -136,18 +152,20 @@ function keyWidth(o: HeapObject) {
 }
 
 function objectWidth(o: HeapObject): number {
-  const header = textWidth(o.title[0], SIZE.header) + 2 * SIZE.cellPad
+  const badge = o.badge ? textWidth(o.badge, SIZE.label) + SIZE.badgeGap : 0
+  const note = o.note ? textWidth(o.note, SIZE.label) + 2 * SIZE.cellPad : 0
+  const header = textWidth(o.title[0], SIZE.header) + 2 * SIZE.cellPad + badge
   const value =
     Math.max(12, ...o.rows.map((r) => (isRef(r.value) ? 2 * SIZE.dot + 8 : textWidth(r.value.text, SIZE.value)))) +
     2 * SIZE.cellPad
-  return Math.ceil(Math.max(header, o.rows.length ? keyWidth(o) + value : 0, 56))
+  return Math.ceil(Math.max(header, note, o.rows.length ? keyWidth(o) + value : 0, 56))
 }
 
 // ---------------------------------------------------------------------------
 // Structure: columns, order, edges.
 // ---------------------------------------------------------------------------
 
-type EdgeSpec = { id: HeapEdgeId; kind: 'bind' | 'ref'; from: string; to: string; row: number }
+type EdgeSpec = { id: HeapEdgeId; kind: 'bind' | 'ref'; from: string; to: string; row: number; weak?: true }
 
 function edgeSpecs(panel: HeapPanel): EdgeSpec[] {
   const out: EdgeSpec[] = []
@@ -155,7 +173,7 @@ function edgeSpecs(panel: HeapPanel): EdgeSpec[] {
     if (isRef(b.value)) out.push({ id: `bind:${b.id}`, kind: 'bind', from: b.id, to: b.value.ref, row: -1 })
   for (const o of panel.objects)
     o.rows.forEach((r, k) => {
-      if (isRef(r.value)) out.push({ id: `ref:${o.id}.${r.key}`, kind: 'ref', from: o.id, to: r.value.ref, row: k })
+      if (isRef(r.value)) out.push({ id: `ref:${o.id}.${r.key}`, kind: 'ref', from: o.id, to: r.value.ref, row: k, ...(r.value.weak ? { weak: true as const } : {}) })
     })
   return out
 }
@@ -166,11 +184,23 @@ function readingOrder(panel: HeapPanel): string[] {
   const visit = (id: string) => {
     if (out.includes(id)) return
     out.push(id)
-    for (const r of panel.objects.find((o) => o.id === id)!.rows) if (isRef(r.value)) visit(r.value.ref)
+    const rows = panel.objects.find((o) => o.id === id)!.rows
+    // Reachability panels visit an object's last link first when it is that object's only way in (a WeakMap
+    // value, a context's last variable): it sits right under and its arrow drops straight in, while the rows
+    // above turn through the lane without crossing it.
+    const last = rows[rows.length - 1]
+    const incoming = (t: string) =>
+      panel.bindings.filter((b) => isRef(b.value) && b.value.ref === t).length +
+      panel.objects.reduce((n, o) => n + o.rows.filter((r) => isRef(r.value) && r.value.ref === t).length, 0)
+    const dropFirst = Boolean(panel.roots) && rows.filter((r) => isRef(r.value)).length > 1 && isRef(last.value) && incoming(last.value.ref) === 1
+    const order = dropFirst ? [last, ...rows.slice(0, -1)] : rows
+    for (const r of order) if (isRef(r.value)) visit(r.value.ref)
   }
   for (const b of panel.bindings) if (isRef(b.value)) visit(b.value.ref)
   for (const o of panel.objects) visit(o.id)
-  return out
+  // Reachability: collectible objects sit together at the foot, with their label under them.
+  const gone = new Set(panel.objects.filter((o) => o.gone).map((o) => o.id))
+  return gone.size ? [...out.filter((id) => !gone.has(id)), ...out.filter((id) => gone.has(id))] : out
 }
 
 /**
@@ -453,6 +483,9 @@ export function layoutPanel(panel: HeapPanel, grid: Grid, gap: number, width: nu
         kind: 'object',
         rect: r,
         title: o.title[0],
+        gone: o.gone ? true : undefined,
+        badge: o.badge,
+        note: o.note ? { text: o.note, top: r.y + headerH + o.rows.length * SIZE.row } : undefined,
         rows: o.rows.map((row, k) => ({
           key: row.key,
           value: isRef(row.value) ? null : row.value.text,
@@ -532,9 +565,22 @@ export function layoutPanel(panel: HeapPanel, grid: Grid, gap: number, width: nu
   // Data order, so the markup reads in the order of the program.
   edges.sort((p, q) => specs.findIndex((s) => s.id === p.id) - specs.findIndex((s) => s.id === q.id))
 
-  // The program's own output under the panel: the expression, then `› value`.
+  // Arrows that leave a collectible object grey with it.
+  const goneIds = new Set(boxes.filter((b) => b.gone).map((b) => b.id))
+  for (const e of edges) if (goneIds.has(e.from)) e.gone = true
+  // Reachability: the greyed island's label, under its lowest box.
   const texts: LaidText[] = []
   let contentBottom = Math.max(0, ...boxes.map((b) => bottom(b.rect)))
+  const goneBoxes = boxes.filter((b) => b.gone)
+  if (panel.island && goneBoxes.length) {
+    const low = goneBoxes.reduce((a, b) => (bottom(b.rect) > bottom(a.rect) ? b : a))
+    const y = bottom(low.rect) + SIZE.islandGap
+    const w = textWidth(panel.island, SIZE.label)
+    // Under the island, which sits at the foot of its column, so nothing is below it.
+    texts.push({ kind: 'island', text: panel.island, x: low.rect.x, y: y + 12, rect: { x: low.rect.x, y, w, h: SIZE.islandLine } })
+    contentBottom = Math.max(contentBottom, y + SIZE.islandLine)
+  }
+  // The program's own output under the panel: the expression, then `› value`.
   let y = contentBottom + SIZE.resultGap
   for (const r of panel.results ?? []) {
     const ew = textWidth(r.expr, SIZE.value)
@@ -553,6 +599,27 @@ export function layoutPanel(panel: HeapPanel, grid: Grid, gap: number, width: nu
     contentBottom = y
   }
 
+  if (panel.roots) {
+    // The names column is the root set: its label sits over it, and the drawing moves down by the label's band.
+    const dy = SIZE.rootsLine + SIZE.rootsGap
+    const shift = (p: Point) => ({ x: p.x, y: p.y + dy })
+    for (const b of boxes) {
+      b.rect = { ...b.rect, y: b.rect.y + dy }
+      for (const r of b.rows) r.top += dy
+      if (b.note) b.note.top += dy
+    }
+    for (let i = 0; i < edges.length; i++) {
+      const e = edges[i]
+      const points = e.points.map(shift)
+      edges[i] = { ...e, points, d: routePath(points, 8, 2), head: arrowHead(points), dot: shift(e.dot) }
+    }
+    for (const t of texts) {
+      t.y += dy
+      t.rect = { ...t.rect, y: t.rect.y + dy }
+    }
+    texts.unshift({ kind: 'roots', text: panel.roots, x: x0, y: 12, rect: { x: x0, y: 0, w: textWidth(panel.roots, SIZE.label), h: SIZE.rootsLine } })
+    contentBottom += dy
+  }
   return { id: panel.id, width, height: Math.ceil(contentBottom), boxes, edges, texts }
 }
 
@@ -623,8 +690,10 @@ function bestLaneOrder<E>(
   return best.map((e, i) => ({ e, laneX: laneAt(i) }))
 }
 
-function edgeOf(e: EdgeSpec, points: Point[], dot: Point, mark: HeapPanel['changed']): LaidEdge {
+function edgeOf(e: EdgeSpec, points: Point[], dot: Point, mark: HeapPanel['changed'], gone?: boolean): LaidEdge {
   return {
+    ...(e.weak ? { weak: true } : {}),
+    ...(gone ? { gone: true } : {}),
     id: e.id,
     kind: e.kind,
     from: e.from,
@@ -633,7 +702,10 @@ function edgeOf(e: EdgeSpec, points: Point[], dot: Point, mark: HeapPanel['chang
     d: routePath(points, 8, 2),
     head: arrowHead(points),
     dot,
-    changed: mark && 'binding' in mark && e.kind === 'bind' && mark.binding === e.from ? true : undefined,
+    changed:
+      (mark && 'binding' in mark && e.kind === 'bind' && mark.binding === e.from) || (mark && 'edge' in mark && mark.edge === e.id)
+        ? true
+        : undefined,
   }
 }
 

@@ -7,28 +7,36 @@ import {
   sha256,
   verifyStepLogTruth,
 } from '../../step-log/truth'
+import { displayProblems, displayText } from '../../step-log/lesson-source'
+import { loadProgram } from '../../step-log/lesson-block'
 import { eventLoopDescriptor } from './descriptor'
+import { TRACE_RECORDINGS, awaitAsyncFrames, whoCalledInner } from './presets/call-stack-traces'
+import { AWAIT_SNIPPET, whoCalledInnerProgram } from './programs'
+import { recordTraces, type TraceRecording } from './truth/trace'
 import { lintEventLoopLogs } from './lint'
-import { eventLoopIntrospection } from './model'
+import { eventLoopIntrospection, stackClosesUp } from './model'
 
 /**
  * Truthful by construction (spec P6): every committed event-loop log is
  * re-executed in a real Node process and must match exactly. Run on Node 24
  * (package.json engines), the runtime each log declares.
  */
+/** The trace presets are verified against their own recordings below (stderr frames, a premium snippet). */
+const TRACED = new Set(['who-called-inner', 'await-async-frames'])
+
 describe.each(eventLoopDescriptor.presets.map((p) => [p.id, p.log] as const))(
   'event-loop/%s',
-  (_id, log) => {
+  (id, log) => {
     it('passes the authoring lint and engine invariants', () => {
       expect(validateStepLog(log, eventLoopIntrospection)).toEqual([])
     })
 
-    it('matches a fresh run of its snippet in Node (hash, runtime and output)', () => {
+    it.skipIf(TRACED.has(id))('matches a fresh run of its snippet in Node (hash, runtime and output)', () => {
       const { errors, recorded } = verifyStepLogTruth(log)
       expect(errors, `recorded: ${JSON.stringify(recorded)}`).toEqual([])
     })
 
-    it('shows the reader exactly the program that was run', () => {
+    it.skipIf(id === 'who-called-inner')('shows the reader exactly the program that was run', () => {
       expect(log.code?.lines.join('\n')).toBe(log.source.snippet)
     })
   },
@@ -58,6 +66,117 @@ describe.each(Object.entries(LESSON_EXAMPLES))('event-loop/%s is a lesson exampl
     expect(block, 'the lesson has no such section: these lines would be practice-answer text').toBeDefined()
     const log = eventLoopDescriptor.presets.find((p) => p.id === id)!.log
     expect(log.source.snippet).toBe(block)
+  })
+})
+
+/**
+ * The Event Loop lesson's Exercise 2 (a free lesson's example, already in the
+ * committed lesson fixture): with a local content checkout the snippet must
+ * be that fence exactly.
+ */
+describe('event-loop/exercise-2-async1-async2 is the lesson example', () => {
+  const ref = { path: 'content/js-track/core-fundamentals/event-loop/page.mdx', heading: '### **Exercise 2: Async/Await Execution**', lang: 'javascript' }
+  const block = readBlock(ref)
+  it.skipIf(block === null)('is Exercise 2\'s question fence, exactly (skipped without src/content)', () => {
+    const log = eventLoopDescriptor.presets.find((p) => p.id === 'exercise-2-async1-async2')!.log
+    expect(log.source.snippet).toBe(block)
+  })
+  it('logs Async 1 End right after Script End, and Timeout last (a real run)', () => {
+    const log = eventLoopDescriptor.presets.find((p) => p.id === 'exercise-2-async1-async2')!.log
+    const run = recordNodeTrace(log.source.snippet!).log
+    expect(run[run.indexOf('Script End') + 1]).toBe('Async 1 End')
+    expect(run.at(-1)).toBe('Timeout')
+    expect(run.indexOf('Async 1 End')).toBeLessThan(run.indexOf('Promise 2'))
+  })
+})
+
+/**
+ * Context and Call Stack: the frames console.trace() printed, from the
+ * committed recording (`yarn viz:traces`). The await contrast re-records
+ * everywhere; the question's snippet only with a local content checkout.
+ */
+describe('the trace presets match real runs', () => {
+  const { runtime: _r, ...fresh } = recordTraces(AWAIT_SNIPPET)
+  it('await-async-frames: a fresh run equals the committed recording and the shown code', () => {
+    expect(fresh).toEqual(TRACE_RECORDINGS['await-async-frames'])
+    expect(awaitAsyncFrames.source.sha256).toBe(sha256(AWAIT_SNIPPET))
+    expect(awaitAsyncFrames.code!.lines.join('\n')).toBe(AWAIT_SNIPPET)
+  })
+
+  const loaded = (() => {
+    try {
+      return 'source' in whoCalledInnerProgram ? loadProgram(whoCalledInnerProgram.source) : null
+    } catch (e) {
+      return { ok: false as const, missing: (e as Error).message }
+    }
+  })()
+  const have = loaded?.ok === true
+  it.skipIf(!have)('who-called-inner: the question\'s snippet re-records the same frames; its rows spell it (skipped without src/content)', () => {
+    if (!loaded?.ok) throw new Error('unreachable')
+    const { runtime: _rt, ...rec } = recordTraces(loaded.text)
+    expect(rec).toEqual(TRACE_RECORDINGS['who-called-inner'])
+    const rows = whoCalledInner.code!.premium!.rows
+    const lines = loaded.text.split('\n')
+    expect(displayProblems(lines, rows, { maxCols: 40, blankRows: true })).toEqual([])
+    expect(displayText(lines, rows).map((l) => [...l].length)).toEqual(whoCalledInner.code!.lines.map((l) => [...l].length))
+  })
+
+  /** The register's claims about a recording: what a figure built from it may say. */
+  function claims(id: string, rec: TraceRecording): string[] {
+    const errors: string[] = []
+    const t = rec.traces
+    if (t.length !== 1) errors.push(`${id}: ${t.length} traces, expected one`)
+    const f = t[0]?.frames ?? []
+    if (id === 'who-called-inner') {
+      if (JSON.stringify(f) !== JSON.stringify(['Timeout.inner', 'listOnTimeout', 'process.processTimers'])) errors.push(`${id}: frames ${f.join(', ')}`)
+      if (f.some((x) => /outer/.test(x))) errors.push(`${id}: outer is in the trace`)
+    } else {
+      if (f[0] !== 'o2' || f[1] !== 'async o1') errors.push(`${id}: frames ${f.join(', ')}`)
+    }
+    return errors
+  }
+
+  it('the register\'s verification holds for both recordings, and every log draws exactly the recorded frames', () => {
+    for (const [id, log] of [['who-called-inner', whoCalledInner], ['await-async-frames', awaitAsyncFrames]] as const) {
+      const rec = TRACE_RECORDINGS[id]
+      expect(claims(id, rec)).toEqual([])
+      const last = log.steps.at(-1)!.state
+      expect([...last.console, ...(last.trace ?? [])]).toEqual(log.observed.log)
+      expect(log.observed.log).toEqual([rec.traces[0].header, ...rec.traces[0].frames])
+    }
+    // The paused caller is off the stack when its async frame is printed.
+    expect(awaitAsyncFrames.steps.at(-1)!.state.stack.map((c) => c.id)).toEqual(['o2'])
+    expect(whoCalledInner.steps.at(-1)!.state.stack.map((c) => c.id)).toEqual(['inner'])
+  })
+
+  it('lies fail: outer in the timer trace, a lost async frame, an extra trace', () => {
+    const r = TRACE_RECORDINGS['who-called-inner']
+    const withOuter = { ...r, traces: [{ ...r.traces[0], frames: ['Timeout.inner', 'outer', 'listOnTimeout'] }] }
+    expect(claims('who-called-inner', withOuter).join('\n')).toMatch(/outer is in the trace/)
+    const a = TRACE_RECORDINGS['await-async-frames']
+    expect(claims('await-async-frames', { ...a, traces: [{ ...a.traces[0], frames: ['o2'] }] }).join('\n')).toMatch(/frames o2$/)
+    expect(claims('await-async-frames', { ...a, traces: [...a.traces, ...a.traces] }).join('\n')).toMatch(/2 traces/)
+    const steps = whoCalledInner.steps.map((s, i) => (i === 6 ? { ...s, state: { ...s.state, trace: ['Timeout.inner', 'outer'] } } : s))
+    expect(validateStepLog({ ...whoCalledInner, steps }, eventLoopIntrospection).join('\n')).toMatch(/trace so far/)
+  })
+})
+
+describe('stack pushes and pops over kept frames land in one frame', () => {
+  it('only the wave 4C presets push or pop a frame with frames under it (the shipped presets never do)', () => {
+    const hits = eventLoopDescriptor.presets.flatMap((p) =>
+      p.log.steps.slice(1).flatMap((s, i) => (stackClosesUp(p.log.steps[i].state, s.state) ? [`${p.id} ${i}->${i + 1}`] : [])),
+    )
+    expect(hits.every((h) => /^(exercise-2-async1-async2|who-called-inner|await-async-frames) /.test(h))).toBe(true)
+    expect(hits).toEqual([
+      'exercise-2-async1-async2 2->3',
+      'exercise-2-async1-async2 4->5',
+      'exercise-2-async1-async2 6->7',
+      'exercise-2-async1-async2 7->8',
+      'exercise-2-async1-async2 9->10',
+      'who-called-inner 2->3',
+      'await-async-frames 1->2',
+      'await-async-frames 3->4',
+    ])
   })
 })
 

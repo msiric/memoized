@@ -17,7 +17,8 @@ import { VIZ_TABLE } from '../src/components/visualizations/entry-table'
 
 const GALLERY = '/dev/visualizations?static=1'
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
-const PRESETS = heapGraphDescriptor.presets.map((p) => p.id)
+// The reachability presets (wave 4C) are on the JavaScript core page (`viz-js-core.spec.ts`).
+const PRESETS = heapGraphDescriptor.presets.map((p) => p.id).filter((id) => !['gc-reachability-cycle-and-weak-edge', 'retainer-paths'].includes(id))
 const FOOTPRINT = VIZ_TABLE['heap-graph'][3]!
 const tierOf = (width: number) => (width < 768 ? 0 : width < 1280 ? 1 : 2)
 const LIME = 'rgb(163, 230, 53)'
@@ -85,7 +86,7 @@ test('fixed footprint, the layout for the width, and no overflow at any width', 
   for (const width of WIDTHS) {
     await open(page, width)
     const variant = width < 768 ? 'narrow' : 'wide'
-    for (const p of heapGraphDescriptor.presets) {
+    for (const p of heapGraphDescriptor.presets.filter((x) => PRESETS.includes(x.id))) {
       expect((await figure(page, p.id).boundingBox())!.height, `${p.id} @${width}`).toBe(FOOTPRINT[p.id][tierOf(width)])
       const scene = layoutDiagram(p.data, variant)
       // The stage holds 288 (320, 375), 606 (768, 1024) or 734 (1440); a sub-width shows from its stage width.

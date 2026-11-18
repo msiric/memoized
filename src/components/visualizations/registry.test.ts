@@ -73,7 +73,7 @@ describe('visualization registry', () => {
     expect(manifest.visuals['event-loop']).toEqual({
       form: 'step',
       engine: 'event-loop',
-      presets: ['basic-ordering', 'microtask-queued-during-drain', 'microtask-vs-timer-12345', 'await-null'],
+      presets: ['basic-ordering', 'microtask-queued-during-drain', 'microtask-vs-timer-12345', 'await-null', 'exercise-2-async1-async2', 'who-called-inner', 'await-async-frames'],
       defaultPreset: 'basic-ordering',
       since: '2026-11',
     })

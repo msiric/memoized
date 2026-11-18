@@ -22,7 +22,7 @@
 # dev server, H3 round 2 integration; the CI image adds job setup):
 #   functional-a  viz-list-keys, viz-static, viz-heap-graph, frontier,
 #                 viz-linked-list, viz-annotated-tree,
-#                 viz-js-statics, viz-dsa-statics                   ~520
+#                 viz-js-statics, viz-dsa-statics, viz-js-core     ~600
 #   functional-b  viz-step-through, viz-shell, viz-fallbacks,
 #                 viz-sliding-window, viz-dp-table, viz-frames      ~430
 #   design-a      contrast crawl at rest (375, 768, 1440)             ~130
@@ -31,12 +31,13 @@
 #   motion-a      event-loop, frontier and linked-list steps, reveals,
 #                 instant, interaction                              ~370
 #   motion-b      list-keys reveals, interruption, sliding-window
-#                 steps                                             ~375
+#                 and js-core steps                                 ~420
 #   motion-c      every list-keys ride (1024), dp-table and frames
 #                 steps                                             ~260
 #   stress-a      stress flagships, frontier, dp table and frames     ~315
 #   stress-b      stress adversarial, hydration, linked list,
-#                 sliding window, annotated tree, js and dsa statics ~320
+#                 sliding window, annotated tree, js and dsa statics,
+#                 js core                                           ~350
 # Without a shard, `pr` runs them all in sequence.
 #
 # Motion timing (tween length, cuts, the 560 ms beat budget, mirrored
@@ -62,7 +63,7 @@ stress() { npx playwright test -c e2e/stress/playwright.stress.config.ts "$@"; }
 
 run() {
   case "$1" in
-    functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts e2e/viz-heap-graph.spec.ts e2e/viz-frontier.spec.ts e2e/viz-linked-list.spec.ts e2e/viz-annotated-tree.spec.ts e2e/viz-js-statics.spec.ts e2e/viz-dsa-statics.spec.ts ;;
+    functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts e2e/viz-heap-graph.spec.ts e2e/viz-frontier.spec.ts e2e/viz-linked-list.spec.ts e2e/viz-annotated-tree.spec.ts e2e/viz-js-statics.spec.ts e2e/viz-dsa-statics.spec.ts e2e/viz-js-core.spec.ts ;;
     functional-b) pw --project=functional e2e/viz-step-through.spec.ts e2e/viz-shell.spec.ts e2e/viz-sliding-window.spec.ts e2e/viz-dp-table.spec.ts e2e/viz-frames.spec.ts ;;
     design-a) pw --project=gates e2e/gates/contrast.spec.ts --grep-invert "full motion" ;;
     design-b)
@@ -71,10 +72,10 @@ run() {
       pw --project=gates ${visual[@]+"${visual[@]}"} e2e/gates/consistency.spec.ts e2e/gates/visual.spec.ts || b=$?
       return $((a || b)) ;;
     motion-a) pw --project=motion e2e/motion/event-loop-steps.spec.ts e2e/motion/linked-list-steps.spec.ts e2e/motion/reveal.spec.ts e2e/motion/instant-paths.spec.ts e2e/motion/interaction.spec.ts e2e/motion/frontier-steps.spec.ts ;;
-    motion-b) pw --project=motion e2e/motion/list-keys-reveals.spec.ts e2e/motion/interruption.spec.ts e2e/motion/sliding-window-steps.spec.ts ;;
+    motion-b) pw --project=motion e2e/motion/list-keys-reveals.spec.ts e2e/motion/interruption.spec.ts e2e/motion/sliding-window-steps.spec.ts e2e/motion/js-core-steps.spec.ts ;;
     motion-c) pw --project=motion e2e/motion/list-keys-rides.spec.ts e2e/motion/dp-table-steps.spec.ts e2e/motion/frames-steps.spec.ts ;;
     stress-a) stress flagships frontier dp-table frames ;;
-    stress-b) stress adversarial hydration linked-list sliding-window annotated-tree js-statics dsa-statics ;;
+    stress-b) stress adversarial hydration linked-list sliding-window annotated-tree js-statics dsa-statics js-core ;;
     *) echo "unknown shard $1" >&2; return 2 ;;
   esac
 }
