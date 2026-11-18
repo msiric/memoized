@@ -13,6 +13,7 @@ import { linkedListFramesDescriptor } from './engines/linked-list/frames/descrip
 import { listKeysDescriptor } from './engines/list-keys/descriptor'
 import { slidingWindowDescriptor } from './engines/sliding-window/descriptor'
 import { turnStackDescriptor } from './engines/turn-stack/descriptor'
+import { swDescriptor } from './engines/sw-lifecycle/descriptor'
 import { footprintOf, groupIndices, presetFootprints } from './shell/footprint'
 import { staticFootprints } from './shell/static-footprint'
 import { outputText, type StaticDescriptor, type StaticTextAlternative } from './shell/static-types'
@@ -50,6 +51,7 @@ export const VIZ_DESCRIPTORS = {
   'generator-frames': generatorFramesDescriptor,
   'worker-pool': workerPoolDescriptor,
   'emit-frames': emitFramesDescriptor,
+  'sw-lifecycle': swDescriptor,
 } satisfies Record<string, AnyDescriptor>
 
 export type VizId = keyof typeof VIZ_DESCRIPTORS

@@ -902,6 +902,52 @@ hidden, static HTML, hydrating, interactive), plus the click handler's log.
   the consistency check against the event loop's shell. Not premium: every
   test runs in CI.
 
+### Service-worker lifecycle (wave 4E)
+
+`<Viz id="sw-lifecycle" preset="…" />`, a step-through with one lesson
+group (Service Workers), titled "Service worker: who controls each tab"
+(`Preset.title`): `update-and-reload` (v2 installs and waits while v1
+controls tabs A and B; a reload of A, then of B as the only tab, keeps v1;
+closing every tab activates v2), `skipWaiting` (v2 activates over v1 and
+both open tabs switch at activation, each with one `controllerchange`) and
+`first-install-claim` (a first visit stays uncontrolled after v1 activates,
+until it reloads; with `clients.claim()` it is taken at activation, a second
+recorded run the caption and the truth test use). No code pane: the run is
+the browser's lifecycle, and the worker is the visual's own code.
+
+- **Recorded in Chromium** (`engines/sw-lifecycle/truth/record.ts`, `yarn
+  viz:sw`): Playwright opens tabs on a local `localhost` server that serves
+  the page and a /worker.js whose bytes the recorder changes per version
+  (`programs/scenarios.ts`: precache into `<v>-static`, delete other caches
+  on activate, optional `skipWaiting()` / `clients.claim()`). The slots come
+  from the DevTools ServiceWorker domain (an observer page on another
+  origin, so they are read with no tab open), each tab's controller is the
+  slot whose worker object it is (no worker is messaged: a busy active worker
+  delays a skipWaiting activation in Chromium), caches from `caches.keys()`.
+  The worker holds `install` / `activate` on a server gate it polls (message
+  events are held for an activating worker), so the installing and
+  activating states are recorded while they last. A step is recorded once
+  the state has held for four reads; an open tab's view must equal DevTools'.
+  A probe scenario, not drawn, records which worker answers a fetch while
+  v2 is still activating.
+- **Drawing** (`SwStage.tsx`, `layout.ts`): the two tab cards (`→ v1`, `no
+  controller`, `closed`), the installing, waiting and active slots as shared
+  `Lane`s (a worker card keeps its id and travels between slots on the move
+  spring, lifted; a redundant worker leaves the active slot, at once when
+  another arrives there), and Cache Storage (a store lane). A changed tab or
+  a worker that changes state in place takes the neutral `changed` mark.
+  One chip row per band, checked against every step at the tight frame.
+- **Gates.** `sw-lifecycle.truth.test.ts` (a fresh Chromium re-recording
+  where Playwright's Chromium is installed; everywhere: the recording is of
+  the scenarios in the repo, the lesson's claims hold and tampered copies
+  fail, each preset is its recording rebuilt, checkpoint answers and
+  caption values are what the step draws), `layout.test.ts`,
+  `e2e/viz-sw-lifecycle.spec.ts` (with the 375x667 fit and frames within
+  850 px), `e2e/motion/sw-lifecycle-steps.spec.ts`,
+  `e2e/stress/sw-lifecycle.stress.ts`, the `swl-*` gate states and the
+  `swl-step` motion state (gallery `?swl=<preset>`, committed baselines),
+  print, and the consistency check against the event loop's shell and lanes.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,

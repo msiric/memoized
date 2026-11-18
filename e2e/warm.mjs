@@ -36,6 +36,8 @@ const routes = [
   '/dev/visualizations?ch=monotone-chain-turn-pops',
   // Streaming SSR (wave 4E), one lesson group.
   '/dev/visualizations?ssr=two-boundary-stream',
+  // The service-worker lifecycle (wave 4E), one lesson group.
+  '/dev/visualizations?swl=update-and-reload',
   // The frames step-throughs (wave 3C), one page per visual.
   '/dev/visualizations?fx=twoWay-next-arg',
   '/dev/visualizations?fx=refill-on-settle',

@@ -525,6 +525,18 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // boundaries together or that an early click hydrates its boundary first.
     inserts: [{ before: '### **Setting Up a Basic React SSR Application**', viz: '<Viz id="ssr-stream" />' }],
   },
+  // Wave 4E, the service-worker lifecycle (PREMIUM lesson: local checkout only).
+  {
+    slug: 'service-workers',
+    title: 'Service Workers and Progressive Web Apps (PWAs)',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/service-workers/page.mdx',
+    // A prediction: after Service Worker Lifecycle (the states and the event example, so installing,
+    // waiting and active are defined), before Caching Strategies. No prose in the body says that a
+    // reload keeps the old worker, that skipWaiting moves open tabs, or that a first visit stays
+    // uncontrolled (those are in the practice answers only).
+    inserts: [{ before: '## **Caching Strategies**', viz: '<Viz id="sw-lifecycle" preset="update-and-reload" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a

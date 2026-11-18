@@ -228,6 +228,17 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'renderToString-contrast': [724, 526, 724, 916, 956],
     },
   ],
+  'sw-lifecycle': [
+    () => import('./engines/sw-lifecycle'),
+    840,
+    600,
+    undefined,
+    {
+      'update-and-reload': [840, 600, 896, 988, 1076],
+      skipWaiting: [844, 576, 844, 936, 1064],
+      'first-install-claim': [844, 600, 844, 988, 1076],
+    },
+  ],
   'list-keys': [
     () => import('./engines/list-keys'),
     862,
