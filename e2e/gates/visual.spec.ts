@@ -49,7 +49,8 @@ for (const width of WIDTHS) {
   })
 
   test(`gallery states @${width}`, async ({ page }) => {
-    test.setTimeout(300_000)
+    // Wave 4E's three visuals add 22 states: the walk outgrew five minutes.
+    test.setTimeout(600_000)
     for (const [name, drive] of Object.entries(STATES)) {
       const url = stateUrl(name)
       const skip = urlLocalOnly(url)
@@ -98,6 +99,7 @@ for (const width of WIDTHS) {
 }
 
 test('print: specimen and gallery on paper', async ({ page }) => {
+  test.setTimeout(180_000)
   await open(page, SPECIMEN, 768)
   await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   for (const id of ['code', 'checkbox', 'lanes', 'scrubber']) {
@@ -161,8 +163,9 @@ test('print: specimen and gallery on paper', async ({ page }) => {
     await frameShot(page, CH, baselineName(chUrl('monotone-chain-turn-pops'), 'print-hull-turn-stack.png'))
   }
   // Streaming SSR (wave 4E): its finale on paper (every wire line, both slots interactive, the handler log).
+  // Stepped to the end on screen (paper hides the controls), then printed.
   await open(page, ssrUrl('two-boundary-stream'), 768)
-  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
+  await page.emulateMedia({ media: 'screen', reducedMotion: 'reduce' })
   {
     const f = page.locator(SSR).first()
     await f.getByRole('slider').focus()
@@ -170,6 +173,7 @@ test('print: specimen and gallery on paper', async ({ page }) => {
     await page.waitForTimeout(600)
     await settle(page)
   }
+  await page.emulateMedia({ media: 'print', reducedMotion: 'reduce' })
   await frameShot(page, SSR, 'print-ssr-stream-finale.png')
   // The service-worker lifecycle (wave 4E): the update's Start on paper.
   await open(page, swlUrl('update-and-reload'), 768)
