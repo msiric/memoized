@@ -334,7 +334,10 @@ SVG), the frontier lane(s) on the shared `Lane` substrate (a queue, `q` and
 
 Two more lesson groups on the frontier engine, every drawn set, stack,
 queue and badge read from a recording (`programs/graph-dfs.ts`,
-`programs/topological-sort.ts`, `yarn viz:frontier`):
+`programs/topological-sort.ts`, `yarn viz:frontier`). Each group's frame
+carries its own title (`Preset.title` on the group's first preset): "Graph
+DFS: stack and recStack" and "Topological sort: in-degree queue"; a group
+without one (Graph BFS, Shortest Path, Trees) keeps the engine's.
 
 - **Graph DFS** (`dfs-directed-recstack`, `dfs-back-edge`,
   `dfs-finish-order`): stack mode. `visited` and `recStack` are two lanes
@@ -741,7 +744,10 @@ its lesson's example as written (`programs/dsa.ts`, `presets/dsa.ts`,
 
 ### JavaScript core (wave 4C)
 
-Two event-loop lesson groups and three static presets on the shipped engines:
+Two event-loop lesson groups and three static presets on the shipped engines.
+Both groups title their frame by what they teach (`Preset.title`): "await:
+where async1 resumes" and "Call stack after setTimeout, await"; the flagship
+and Promise Patterns keep the engine's.
 
 - **Exercise 2** (`<Viz id="event-loop" preset="exercise-2-async1-async2">`,
   Event Loop): the lesson's Exercise 2 question exactly (a free lesson's

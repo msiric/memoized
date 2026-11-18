@@ -72,6 +72,7 @@ export const eventLoopDescriptor: StepThroughDescriptor<EventLoopState> = {
       id: 'exercise-2-async1-async2',
       label: 'Exercise 2',
       group: 'event-loop-exercise-2',
+      title: 'await: where async1 resumes',
       log: withCodeTokens(exercise2Async1Async2, codeTokens),
     },
     // Context and Call Stack: what console.trace() shows after a timer hop
@@ -80,6 +81,7 @@ export const eventLoopDescriptor: StepThroughDescriptor<EventLoopState> = {
       id: 'who-called-inner',
       label: 'setTimeout',
       group: 'context-and-call-stack',
+      title: 'Call stack after setTimeout, await',
       log: whoCalledInner,
     },
     {

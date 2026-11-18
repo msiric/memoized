@@ -61,12 +61,15 @@ export function segmentedWidth(labels: readonly string[]): number {
 export function validateDescriptor(d: {
   id: string
   title: string
-  presets: readonly { id: string; label: string; group?: string }[]
+  presets: readonly { id: string; label: string; group?: string; title?: string }[]
 }): string[] {
   const errors: string[] = []
-  const title = Math.ceil(emWidth(d.title, WIDTHS.titleAdvance) * WIDTHS.titleSize)
-  if (title > WIDTHS.stagePhone)
-    errors.push(`${d.id} title: ${title}px wide > ${WIDTHS.stagePhone}px at 375 (shorten it)`)
+  // The descriptor's title and each lesson group's own (`Preset.title`).
+  for (const [who, t] of [[d.id, d.title], ...d.presets.flatMap((p) => (p.title ? [[`${d.id}/${p.id}`, p.title]] : []))]) {
+    const title = Math.ceil(emWidth(t, WIDTHS.titleAdvance) * WIDTHS.titleSize)
+    if (title > WIDTHS.stagePhone)
+      errors.push(`${who} title: ${title}px wide > ${WIDTHS.stagePhone}px at 375 (shorten it)`)
+  }
   for (const p of d.presets)
     if ([...p.label].length > LIMITS.presetLabel)
       errors.push(`${d.id} preset "${p.label}": ${[...p.label].length} chars > ${LIMITS.presetLabel}`)

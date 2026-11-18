@@ -39,11 +39,11 @@ export const frontierDescriptor: StepThroughDescriptor<FrontierState> = {
     // Trees (user-defined-data-structures/trees).
     { id: 'bst-iterator-stack', label: 'BST iterator', group: 'trees', log: withCodeTokens(bstIteratorLog, codeTokens) },
     // Graph DFS (common-techniques/graph-dfs, wave 4B): DFS stack mode, recStack beside visited.
-    { id: 'dfs-directed-recstack', label: 'No cycle', group: 'graph-dfs', log: withCodeTokens(dfsDirectedRecstackLog, codeTokens) },
+    { id: 'dfs-directed-recstack', label: 'No cycle', group: 'graph-dfs', title: 'Graph DFS: stack and recStack', log: withCodeTokens(dfsDirectedRecstackLog, codeTokens) },
     { id: 'dfs-back-edge', label: 'Cycle', group: 'graph-dfs', log: withCodeTokens(dfsBackEdgeLog, codeTokens) },
     { id: 'dfs-finish-order', label: 'Finish order', group: 'graph-dfs', log: withCodeTokens(dfsFinishOrderLog, codeTokens) },
     // Topological Sort (common-techniques/topological-sort, wave 4B): queue mode with in-degree badges.
-    { id: 'kahn-indegree', label: 'Kahn', group: 'topological-sort', log: withCodeTokens(kahnIndegreeLog, codeTokens) },
+    { id: 'kahn-indegree', label: 'Kahn', group: 'topological-sort', title: 'Topological sort: in-degree queue', log: withCodeTokens(kahnIndegreeLog, codeTokens) },
     { id: 'course-schedule-ii-edges', label: 'Course order', group: 'topological-sort', log: withCodeTokens(courseScheduleLog, codeTokens) },
     { id: 'kahn-cycle-stall', label: 'Cycle', group: 'topological-sort', log: withCodeTokens(kahnCycleLog, codeTokens) },
     { id: 'mht-leaf-peeling', label: 'Leaf peeling', group: 'topological-sort', log: withCodeTokens(mhtLeafPeelingLog, codeTokens) },

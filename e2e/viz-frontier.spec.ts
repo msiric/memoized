@@ -43,6 +43,14 @@ const RADIOS: Record<string, number> = {
   'mht-leaf-peeling': 3,
 }
 const STEPS = VIZ_TABLE['bfs-dfs-frontier'][4]!
+/** The frame title: a lesson group's own (`Preset.title`), else the engine's. */
+const TITLE = (preset: string) =>
+  preset.startsWith('dfs-')
+    ? 'Graph DFS: stack and recStack'
+    : ['kahn-indegree', 'course-schedule-ii-edges', 'kahn-cycle-stall', 'mht-leaf-peeling'].includes(preset)
+      ? 'Topological sort: in-degree queue'
+      : 'Frontier: what is expanded next'
+const title = (page: Page) => frame(page).locator('header > p').first()
 const WIDTHS = [320, 375, 768, 1024, 1440] as const
 
 // A lesson group with a practice-answer preset (binary matrix, minimum
@@ -117,6 +125,9 @@ test('loads paused at Start with its group switcher, and walks to the end with t
     // Each lesson's frame offers only its own presets.
     const radios = await frame(page).locator('[data-viz-part="viz-presets"] [role="radio"], [role="radiogroup"] [role="radio"]').count()
     expect(radios, preset).toBe(RADIOS[preset] ?? 2)
+    // The frame says what its lesson group teaches, and names the scrubber with it.
+    await expect(title(page), preset).toHaveText(TITLE(preset))
+    await expect(slider(page)).toHaveAccessibleName(new RegExp(`^${TITLE(preset)}: step`))
     await slider(page).focus()
     let asked = 0
     for (let g = 0; g < 40; g++) {
@@ -286,6 +297,7 @@ test.describe('without JavaScript', () => {
       await expect(f).toHaveAttribute('data-viz-interactive', 'false')
       expect((await f.boundingBox())!.height).toBeLessThanOrEqual(STEPS[preset][0])
       await expect(f.locator('[data-viz-part="frontier-canvas"]')).toBeVisible()
+      await expect(title(page), preset).toHaveText(TITLE(preset))
       await f.locator('summary').click()
       await expect(f.locator('details').getByText('Verified output (Node 24.x):')).toBeVisible()
     }

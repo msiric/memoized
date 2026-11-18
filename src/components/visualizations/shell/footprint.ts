@@ -251,6 +251,23 @@ export function groupIndices(def: { presets: readonly { group?: string }[] }, in
 }
 
 /**
+ * The frame title with preset `index` on screen: its lesson group's own
+ * title (`Preset.title`, the first one the group sets), else the
+ * descriptor's. Every preset of a group shares it, so a switch never
+ * changes the header.
+ */
+export function frameTitle(
+  def: { title: string; presets: readonly { group?: string; title?: string }[] },
+  index: number,
+): string {
+  for (const i of groupIndices(def, index)) {
+    const t = def.presets[i].title
+    if (t) return t
+  }
+  return def.title
+}
+
+/**
  * The frame's footprint with preset `index` on screen (R2: per preset), laid
  * out at content width `width` (px at the default root) in `variant`. The
  * stage is fixed per variant; the title, the dock, the button row and the
@@ -269,7 +286,7 @@ export function metricsAt<S>(
     group.map((i) => def.presets[i].log),
   )
   const text = dockText(log)
-  const header = headerHeight(group.length, variant, titleLines(def.title, variant === 'wide' ? width / 2 : width))
+  const header = headerHeight(group.length, variant, titleLines(frameTitle(def, index), variant === 'wide' ? width / 2 : width))
   const stage = layout.stage[variant]
   const dock = dockAt(text, width, variant)
   const bar = variant === 'wide' ? BAR.wide : barHeight(width)

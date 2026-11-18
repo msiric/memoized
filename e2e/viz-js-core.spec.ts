@@ -214,6 +214,8 @@ test.describe('static figures', () => {
 test.describe('event-loop lesson groups', () => {
   test('Exercise 2: asked after Script End, before async1 resumes; the finale is the recorded log', async ({ page }) => {
     const f = await openStep(page, 'exercise-2-async1-async2')
+    // Its own title, not the flagship's (Basics and Drain keep the engine's).
+    await expect(f.locator('header > p').first()).toHaveText('await: where async1 resumes')
     await f.getByRole('slider').focus()
     for (let g = 0; g < 30 && (await f.getAttribute('data-viz-mode')) !== 'ask'; g++) await page.keyboard.press('ArrowRight')
     await expect(f.locator('[data-viz-part="viz-prompt"]')).toHaveText('What logs after Script End?')
@@ -229,6 +231,7 @@ test.describe('event-loop lesson groups', () => {
   test('the timer trace: inner and the timer frames, no outer (local-only)', async ({ page }) => {
     test.skip(skipped('who-called-inner'), localOnlyNote('event-loop', 'who-called-inner'))
     const f = await openStep(page, 'who-called-inner')
+    await expect(f.locator('header > p').first()).toHaveText('Call stack after setTimeout, await')
     await f.getByRole('slider').focus()
     for (let g = 0; g < 30 && (await f.getAttribute('data-viz-mode')) !== 'ask'; g++) await page.keyboard.press('ArrowRight')
     await expect(f.locator('[data-viz-part="viz-prompt"]')).toHaveText('Which frames will console.trace() print?')

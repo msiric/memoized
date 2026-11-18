@@ -11,7 +11,7 @@ import {
   vizTextAlternative,
 } from './registry'
 import { VIZ_SERVER } from './registry.server'
-import { definitionMetrics, groupIndices } from './shell/footprint'
+import { definitionMetrics, frameTitle, groupIndices } from './shell/footprint'
 import { LIMITS, validateDescriptor } from './step-log/validate'
 
 describe('visualization registry', () => {
@@ -56,8 +56,10 @@ describe('visualization registry', () => {
     expect(presetIds).toContain(d.defaultPreset)
     for (const p of d.presets) {
       expect(p.label.length).toBeLessThanOrEqual(LIMITS.presetLabel)
-      if ('log' in p) expect(p.log.id).toBe(`${d.engine.id}/${p.id}`)
-      else {
+      if ('log' in p) {
+        expect(p.log.id).toBe(`${d.engine.id}/${p.id}`)
+        if (p.title) expect(p.title.length).toBeLessThanOrEqual(40)
+      } else {
         expect(p.title.length).toBeLessThanOrEqual(40)
         expect(p.caption.length).toBeLessThanOrEqual(LIMITS.why)
       }
@@ -113,6 +115,29 @@ describe('visualization registry', () => {
     expect(ids(at('basic-ordering'))).toEqual(['basic-ordering', 'microtask-queued-during-drain'])
     expect(ids(at('await-null'))).toEqual(['microtask-vs-timer-12345', 'await-null'])
     // The entry table pins the flagship's reserves: another lesson's presets never resize its frame.
+  })
+
+  it("titles a lesson group's frame by what it teaches (Preset.title), shared by the group", () => {
+    const title = (id: keyof typeof VIZ_DESCRIPTORS, preset: string) => {
+      const d = VIZ_DESCRIPTORS[id]
+      return frameTitle(d, d.presets.findIndex((p) => p.id === preset))
+    }
+    const engine = VIZ_DESCRIPTORS['bfs-dfs-frontier'].title
+    expect(title('bfs-dfs-frontier', 'bfs-levels')).toBe(engine)
+    expect(title('bfs-dfs-frontier', 'dijkstra-lazy-heap')).toBe(engine)
+    for (const p of ['dfs-directed-recstack', 'dfs-back-edge', 'dfs-finish-order']) expect(title('bfs-dfs-frontier', p)).toBe('Graph DFS: stack and recStack')
+    for (const p of ['kahn-indegree', 'course-schedule-ii-edges', 'kahn-cycle-stall', 'mht-leaf-peeling'])
+      expect(title('bfs-dfs-frontier', p)).toBe('Topological sort: in-degree queue')
+    expect(title('event-loop', 'basic-ordering')).toBe(VIZ_DESCRIPTORS['event-loop'].title)
+    expect(title('event-loop', 'await-null')).toBe(VIZ_DESCRIPTORS['event-loop'].title)
+    expect(title('event-loop', 'exercise-2-async1-async2')).toBe('await: where async1 resumes')
+    for (const p of ['who-called-inner', 'await-async-frames']) expect(title('event-loop', p)).toBe('Call stack after setTimeout, await')
+    // Every preset of a group shows the same title, so a switch never changes the header.
+    for (const d of Object.values(VIZ_DESCRIPTORS))
+      if (d.form === 'step')
+        d.presets.forEach((_, i) => {
+          for (const k of groupIndices(d, i)) expect(frameTitle(d, k)).toBe(frameTitle(d, i))
+        })
   })
 
   it('documents the footprint arithmetic for the specimen', () => {
