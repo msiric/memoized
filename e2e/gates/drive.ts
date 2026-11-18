@@ -1229,6 +1229,11 @@ export const MOTION_STATES: Record<string, MotionState> = {
  * the pair a reader sees at that moment.
  */
 export async function freezeForContrast(page: Page) {
+  // A text swapped in by a timer just before this call renders its first
+  // frame at the fade's start opacity, and its animation starts on the next
+  // frame: wait two frames so that fade exists and is finished below,
+  // instead of judging the start opacity as the color a reader sees.
+  await page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))))
   await page.evaluate(() => {
     const MOVE = new Set(['opacity', 'transform', 'translate', 'scale', 'offset', 'computedOffset', 'easing', 'composite'])
     // A color tweened to or from transparent is a fade in another property (a ground, a bar).
