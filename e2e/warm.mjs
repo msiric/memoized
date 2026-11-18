@@ -32,6 +32,8 @@ const routes = [
   '/dev/visualizations?sw=set-shrink-longest-substring',
   // The dp table (wave 3A), one lesson group.
   '/dev/visualizations?dp=knapsack-1d-desc-vs-asc',
+  // Streaming SSR (wave 4E), one lesson group.
+  '/dev/visualizations?ssr=two-boundary-stream',
   // The frames step-throughs (wave 3C), one page per visual.
   '/dev/visualizations?fx=twoWay-next-arg',
   '/dev/visualizations?fx=refill-on-settle',
