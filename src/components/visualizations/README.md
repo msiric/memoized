@@ -803,6 +803,67 @@ and Promise Patterns keep the engine's.
   baselines, and the consistency checks against the heap graph, the shipped
   prototype graph and the console. Gallery: `?el=<preset>`, `?core=static`.
 
+### Frontend figures (wave 4D: state, micro-frontends, accessibility, git)
+
+Four static presets of `<Viz id="annotated-tree" preset="…" />`, alone on
+`/dev/visualizations?fe=static`, on one shared panel kind, `boxes`
+(`boxes.ts` geometry and checks, `BoxesSvg.tsx` markup): a box-and-arrow
+scene the figure's builder (`frontend.ts`) places from a recording. Shapes:
+a box, a pill (an element that is not a component, a ref), a circle (a
+commit), a row of an outline tree; a solid or dashed connector with a head,
+a word on a line on a plate (`memo`, `warning`), ref tags. One mark family
+per panel (the neutral `changed` role): a node on the tint, a 2.5 px edge, a
+tag; a ghost is a dashed outline with muted text, a node left out of a tree
+is struck through. `checkBoxes` fails on text outside the panel or over
+other text, an edge that does not end on its nodes or runs through one, a
+tag off its line, a note wider than the panel.
+
+- `context-render-causes` (State Management): the tree App > ThemeContext
+  Provider > UserContext Provider > Sidebar, Header three times after
+  `setUser`: state in App, the same with `React.memo(Sidebar)`, and the
+  practice answer's Fix 2 (two providers that own their state and render
+  `children`; the triage's correction of the spec's single AppProvider).
+  Solid edges are parents, dashed edges context reads; rendered components
+  are marked and each says its cause. Recorded in React 19 (react-dom 19 in
+  jsdom, `truth/render-run.ts`): render counters, the user state's setter
+  found by its value; the causes are the figure's rule (`predictCauses`),
+  which the truth test checks against the counts.
+- `federation-react-singleton` (Micro-frontends): the share scope, the
+  three containers and the React copy each gets. Recorded from a real
+  webpack 5 `ModuleFederationPlugin` shell and two remotes in Chromium
+  (`truth/federation.ts`, react 19.0.0 in shell and products, 18.3.1 in
+  cart, the answer's `requiredVersion`s): singleton (cart gets the shell's
+  19.0.0 and a runtime "Unsatisfied version" warning), `strictVersion`
+  (cart throws while loading) and not singleton (cart's own 18.3.1, a second
+  React object, `useState` fails: Invalid hook call). Webpack and the two
+  React majors are not app dependencies: the harness lives outside the repo
+  (`VIZ_MF_DIR`, `prepareFederationHarness`); without it the recorder and
+  the re-recording skip.
+- `dom-vs-accessibility-tree` (Accessibility): the figure's own fragment
+  (an icon button with an aria-hidden svg, an aria-hidden focusable button,
+  `main inert` behind an open dialog holding a section labelled by its h2, a
+  `role=none` table and an h2 with `role=button`) as DOM rows beside
+  Chromium's full accessibility tree (`Accessibility.getFullAXTree`, inline
+  text boxes left out; each left-out element's own `ignoredReasons`), with
+  the Tab order pressed in the page. The fragment puts the section in the
+  dialog: in an inert `main` it would be pruned.
+- `merge-rebase-squash-revert-reset` (Git): five `git log --graph` panels
+  (newest on top, parent arrows down, cross-lane edges down the child's lane
+  and into the parent's side) from the real `git` in a scratch repository
+  with fixed identities and dates (`recordGit`, hashes repeat anywhere):
+  merge, rebase (new hashes; the originals unreferenced, dashed), squash,
+  revert then push, reset then a rejected push (the force-with-lease after
+  it is recorded too). Reflog expiry with git's defaults: an unreachable
+  entry kept at 29 days, pruned at 31.
+- **Premium.** The practice answer's blocks run by locator and sha256; the
+  figures show values only (component names, versions, roles, hashes).
+- **Gates.** `frontend.truth.test.ts` (fresh git always; React with the
+  checkout; Chromium where installed; federation with `VIZ_MF_DIR`; the
+  register's verification, each figure's rule and lies everywhere; every
+  panel through `checkBoxes`), `viz-fe-statics.spec.ts`,
+  `fe-statics.stress.ts`, consistency, contrast, print and the `fe-*`
+  states. `yarn viz:frontend` records all four.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,
