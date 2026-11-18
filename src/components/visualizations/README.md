@@ -330,6 +330,73 @@ SVG), the frontier lane(s) on the shared `Lane` substrate (a queue, `q` and
   `e2e/viz-frontier.spec.ts`, `e2e/motion/frontier-steps.spec.ts`,
   `e2e/stress/frontier.stress.ts`, the `fr-*` gate states and the
   consistency check against the event loop. Gallery: `?fr=<preset>`.
+### Frontier, wave 4B: DFS stack mode and Kahn's in-degrees
+
+Two more lesson groups on the frontier engine, every drawn set, stack,
+queue and badge read from a recording (`programs/graph-dfs.ts`,
+`programs/topological-sort.ts`, `yarn viz:frontier`). Each group's frame
+carries its own title (`Preset.title` on the group's first preset): "Graph
+DFS: stack and recStack" and "Topological sort: in-degree queue"; a group
+without one (Graph BFS, Shortest Path, Trees) keeps the engine's.
+
+- **Graph DFS** (`dfs-directed-recstack`, `dfs-back-edge`,
+  `dfs-finish-order`): stack mode. `visited` and `recStack` are two lanes
+  side by side; on the canvas a vertex on recStack keeps the queued sky
+  edge, the running call the doubled edge, a finished vertex the solid
+  fill, so visited and on-the-stack read apart. A step enters a vertex
+  through the edge that called it, examines an edge to a visited vertex,
+  or finishes one (`recStack.delete`). The first preset is the lesson's
+  cycle example with E's list emptied (`replace: ["E: ['A']", 'E: []']`):
+  as written the run returns true before it ever examines A -> C, so only
+  the variant asks "C is visited. Is A -> C a cycle?" (no: done, off the
+  stack). The second is the example as written (E -> A meets A on the
+  stack), the third topologicalSort's finish order, reversed.
+- **Topological Sort** (`kahn-indegree`, `course-schedule-ii-edges`,
+  `kahn-cycle-stall`, `mht-leaf-peeling`): queue mode with badges. A
+  vertex's badge is its recorded in-degree (`scene.badge` names it in the
+  text alternative); a dequeued vertex's edges are examined one step at a
+  time, the target's badge counts down and the edge is then spent, drawn
+  dashed (`FEdge.removed`). The order is a lane of its own. Course
+  Schedule II starts with no edges and asks which way [1, 0] points (b ->
+  a); the cycle preset is the example with [3, 1] turned into [3, 5], so
+  the queue empties with badges left and it returns []; Minimum Height
+  Trees peels leaves (degree badges) through `q` and `t`. The two answers
+  are premium: `wrap` rows, the group is local-only.
+- **Gates.** `frontier.truth.test.ts` (the register's values, the drawn
+  states against the lanes, badges the run held, the variant being one
+  token, lies), the existing frontier e2e, motion, stress and consistency
+  specs (the Graph DFS group runs in CI; Topological Sort is local-only),
+  the `fr-recstack-*`, `fr-backedge-*`, `fr-finish-*`, `fr-kahn-*`,
+  `fr-course-*`, `fr-stall-*`, `fr-mht-*` states and the `fr-dfs-call`
+  motion state.
+
+### Residual graphs (annotated tree, wave 4B)
+
+`<Viz id="annotated-tree" preset="diamond-reverse-edge" />` (Maximum Flow
+and Network Flow Algorithms) and `preset="clrs-23-min-cut"` (Network Flow
+Algorithms): the `residual` panel kind (`flow.ts`, `FlowSvg.tsx`). Each
+edge carries flow / capacity; a panel that shows reverses draws each
+edge's reverse residual (worth its flow) dashed, offset beside it; one
+augmenting path is marked (a hop back along an edge marks its dashed
+reverse), or the minimum cut: the vertices the source still reaches
+through positive residuals, shaded (`hullPath`, the convex hull grown by
+22 px), and the edges leaving them marked.
+
+- **Built from a recording** (`programs/flow.ts`, `yarn viz:tree`): the
+  lessons' Ford-Fulkerson class (lines 1-63) on the register's diamond and
+  on the lesson's S/A/B/T network, Edmonds-Karp on the diamond (the
+  contrast: two short paths, no reverse hop) and the Edmonds-Karp example
+  as written (CLRS, 23). Probes read `this.graph` at the start, after each
+  augmentation (with `parent` and `parentEdge`) and at the return; a path
+  hop through a reverse entry is known from the entry, never guessed.
+- **Gates.** `flow.truth.test.ts` (fresh runs; both lessons' blocks
+  byte-identical; the register's 2, 12 and 23; every panel a flow:
+  capacity, conservation, reverse = flow, cut edges full and summing to the
+  flow; lies; layout: labels clear of vertices and each other, the cut
+  region around its vertices only), `e2e/viz-annotated-tree.spec.ts`, the
+  `at-diamond` and `at-clrs` states, print and the heap-graph consistency
+  check.
+
 ### Pointer rewiring (R4 shared visual 3, wave 2B)
 
 `<Viz id="linked-list-pointer-rewiring" preset="…" />` (step-through) and
@@ -621,6 +688,120 @@ values it holds.
   `e2e/stress/frames.stress.ts`, the `fx-*` gate states (gallery
   `?fx=<preset>`, all local-only) and the consistency check against the
   event loop's shell and lanes.
+
+### DSA-track figures (wave 4A: segment trees, union-find, heaps, recursion, interval DP)
+
+Five static presets of `<Viz id="annotated-tree" preset="…" />`, alone on
+`/dev/visualizations?dsa=static`, each built from a recorded Node 24 run of
+its lesson's example as written (`programs/dsa.ts`, `presets/dsa.ts`,
+`recordings/<lesson>.json`, `yarn viz:tree`). Five panel kinds in `dsa.ts`
+(geometry) and `DsaSvgs.tsx` (markup), every panel 288 wide:
+
+- `segment-tree-query-cover` (Segment Trees): four `segment` panels, the
+  tree for [1,3,5,7,9,11] top down, each node its [start,end], sum and
+  `#tree[] index`. query(1, 3): its cover from which line each call ended
+  on (doubled full, plain partial, dashed disjoint); update(1, 10): the
+  root-to-leaf path with old→new sums; the lesson's lazy example:
+  updateRange(0, 2, 10)'s tags on nodes 3 and 4 (their sums stale), then
+  queryRange(1, 3) applying them on entry (13 + 15 + 7 = 35, no tag left).
+  The lesson's own query (1, 3) is used, not the register's (0, 1).
+- `dsu-parent-forest` (Union-Find): four `forest` panels, node i in column
+  i above its parent[] and rank[] cells, an arrow to its parent (an arc
+  when it passes a column). union(1, 2), union(2, 3) by rank (find returns
+  1; the size variant's root 2 in a note), then a chain written into
+  parent[] by the harness (union by rank never builds one; said in the text
+  alternative) before and after find(4)'s path compression.
+- `insert-4-10-3-5-1-then-extract` (Heaps): three `heap` panels, the array
+  as a complete tree above its indexed cells, `2i+1` / `2i+2` on the root's
+  edges; extractMin's [5,3,4,10] with the smaller child marked, then
+  [3,5,4,10] where 5 stops.
+- `fib5` (Recursion and Memoization): two `recursion` panels, the 15-call
+  tree rebuilt from the recorded pre-order (a call that is not a base case
+  or a memo hit made two calls), repeated subproblems marked; the 9-call
+  memo tree with memo-hit leaves (`n in memo` read at each call's entry) and
+  the memo table in write order.
+- `lps-interval-triangle` (Palindromic Subsequence): three `interval`
+  panels, the dp table of "bbbab" with the three cells dp[0][4] reads (the
+  used one bright), then the fill order of the lesson (by length) and of
+  the practice answer (rows from the bottom) as numbers only.
+- **Shared parts.** The array-cells row (`arrayRows`, `ArrayRows`, a cell
+  linked to its node by the dashed hairline: straight down below the tree,
+  then an S-curve into its cell, so links cross only in that band), the
+  lazy-tag mark (`LazyTag`, a changed pill `+v` beside the index) and the
+  memo-hit leaf (`MemoHit`). One mark family per panel (the neutral
+  `changed` role); array cells take the node's line role (`[data-array]`).
+- **Premium.** The answer's order is recorded from the answer read from the
+  local checkout; the repo keeps its locator, sha256 and the (i, j) order
+  only. Every figure shows values, never code.
+- **Gates.** `dsa.truth.test.ts` (the register's values; the rule each
+  figure states as a check lies fail: a wrong cover, a path off the index,
+  an unmarked or falsely marked pointer, a cycle, a heap violation, a hit
+  with calls below it, an order that reads unwritten cells; tampered
+  recordings that cannot build; every label inside its panel), the
+  re-recording in `annotated-tree.truth.test.ts`, `viz-dsa-statics.spec.ts`,
+  `dsa-statics.stress.ts`, consistency, contrast, print and the `dsa-*`
+  states.
+
+### JavaScript core (wave 4C)
+
+Two event-loop lesson groups and three static presets on the shipped engines.
+Both groups title their frame by what they teach (`Preset.title`): "await:
+where async1 resumes" and "Call stack after setTimeout, await"; the flagship
+and Promise Patterns keep the engine's.
+
+- **Exercise 2** (`<Viz id="event-loop" preset="exercise-2-async1-async2">`,
+  Event Loop): the lesson's Exercise 2 question exactly (a free lesson's
+  example, already in the committed lesson fixture), its own one-preset group
+  so the flagship frame keeps Basics and Drain. One question, "What logs after
+  Script End?", on the step before async1 resumes.
+- **Call-stack traces** (`who-called-inner`, `await-async-frames`, Context and
+  Call Stack): the async-call-stack question's snippet (premium: `wrap` rows
+  resolved for the page, `field: 'question'`) and an await contrast (the
+  visual's own code). The event-loop state gains `trace`: the frames a
+  `console.trace()` printed, a list under the console strip that arrives with
+  the finale after the outputs. `yarn viz:traces` records stdout and frame
+  names only (`truth/trace.ts`): `Timeout.inner, listOnTimeout,
+  process.processTimers`; `o2, async o1`.
+- **Engine rules these presets needed** (none changes a shipped preset; a unit
+  guard lists every step they apply to): a 3-row phone code window when the
+  machine under the code is taller than `tallRest`; phones drop the finale's
+  line tags where the strip needs three rows or a trace sits under it; a push
+  or pop with frames left under it lands the stack lane in one frame, both ways
+  (`stackClosesUp`, the frontier's rule), so a leaving frame never crosses the
+  frame closing up behind it; in the tight frame a queue collapses its tail
+  into its own `+N more` (as the console does, R9), measured at 11.5rem.
+- **Reachability heap graphs** (`<Viz id="heap-graph" preset="gc-reachability-cycle-and-weak-edge">`,
+  Memory Management; `retainer-paths`, Memory Leaks): the names column is the
+  root set (`roots`), a weak link is dashed (`ref.weak`), what a full
+  collection freed is greyed and dashed at the foot of its column with its
+  label (`gone`, `island`), reference-count badges count the drawn strong
+  links (`badge`), a collapsed subtree is a muted note (`100 li`), and the one
+  mark is the link that still retains (`{ edge }`). `yarn viz:reach`
+  (`truth/record-gc.ts`) runs each program as a classic script (top-level
+  bindings stay roots, a block's locals die), Node 24 with `--expose-gc` or
+  Chromium for the DOM answers, probes by line number with values passed
+  directly (a getter closure would join the context it observes), lets the loop
+  turn, collects, and records which objects survived. Nothing about GC timing
+  is asserted. The shared closure context is drawn from the answer's code (V8
+  contexts are not visible to JavaScript); huge's survival is recorded, and
+  without the timer line the same run frees it.
+- **Two chains** (`<Viz id="prototype-object-graph" preset="extends-two-chains">`,
+  Objects and Classes): the instance chain down the left, the constructors' own
+  chain (Dog → Animal → Function.prototype) in a second column, `.prototype`
+  straight across from each pill, Function.prototype a box at the foot linking
+  back to Object.prototype; one `[[Prototype]]` label names both links where
+  the columns run side by side. The mark is the `super.speak()` lookup: the hop
+  from the home object and the row it finds; `this === rex` is read in the
+  paused parent method. The register's `manual-object-create` is the second
+  panel (Car → Function.prototype); its `Dog.create()` static lookup is not
+  drawn (no lesson code defines it).
+- **Gates.** `event-loop.truth.test.ts` (the lesson fence, the recorded traces,
+  lies), `reach.truth.test.ts` and `classes.truth.test.ts` (fresh recordings
+  with a checkout; the register's verification and lies everywhere),
+  `e2e/viz-js-core.spec.ts`, `e2e/motion/js-core-steps.spec.ts`,
+  `e2e/stress/js-core.stress.ts`, the `el-*` and `core-*` gate states and print
+  baselines, and the consistency checks against the heap graph, the shipped
+  prototype graph and the console. Gallery: `?el=<preset>`, `?core=static`.
 
 ### Premium code (owner policy, wave 2)
 

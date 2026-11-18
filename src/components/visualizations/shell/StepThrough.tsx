@@ -25,7 +25,7 @@ import { SegmentedControl } from '../primitives/SegmentedControl'
 import { STEP_BEATS, TARGET_GAP_PX, ink, motion, motionRules, type StepBeats, type as typeScale } from '../primitives/tokens-v3'
 import type { Checkpoint, StepLog } from '../step-log/types'
 import { CodePane, codeRows } from './CodePane'
-import { FRAME, NUDGE_TEXT, STEP_BAR, definitionMetrics, groupIndices, lastTimeText, longestLastTime } from './footprint'
+import { FRAME, NUDGE_TEXT, STEP_BAR, definitionMetrics, frameTitle, groupIndices, lastTimeText, longestLastTime } from './footprint'
 import { allFeedback, allRecaps, feedbackText, recapText } from './feedback'
 import {
   dockMode,
@@ -236,6 +236,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
   const metrics = useMemo(() => definitionMetrics(def, s.preset), [def, s.preset])
   // The switcher offers the starting preset's lesson group (`Preset.group`).
   const group = useMemo(() => groupIndices(def, s.preset), [def, s.preset])
+  const title = frameTitle(def, s.preset)
   const layout = useMemo(
     () => def.engine.layout([def.presets[s.preset].log], group.map((i) => def.presets[i].log)),
     [def, s.preset, group],
@@ -685,7 +686,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
         })}
       >
         <p id={titleId} className={cn('m-0 min-w-0 text-pretty', typeScale.title.cls, ink.base)}>
-          {def.title}
+          {title}
         </p>
         {/* One preset has no switcher, and no gap reserved for one (A5). */}
         {group.length > 1 ? (
@@ -785,7 +786,7 @@ export function StepThrough<S>({ def, preset, interactive = true }: StepThroughP
             status: s.status[k],
           }))}
           valueText={valueText}
-          label={`${def.title}: step`}
+          label={`${title}: step`}
           interactive={interactive}
           animate={animate}
           onSeek={(to) => dispatch({ type: 'seek', to }, true)}

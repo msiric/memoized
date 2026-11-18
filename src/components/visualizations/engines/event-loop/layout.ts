@@ -69,8 +69,20 @@ export const G = {
   /** A phone shows a listing of up to 5 rows whole; a longer one in a 4-row window that follows the code (Q7, Q15). */
   codeRowsNarrow: 5,
   codeWindowNarrow: 4,
+  /**
+   * A 3-row phone window when the machine under the code is taller than
+   * this (a 3-deep stack, a trace list): the code line, the stage, the
+   * caption and Next still share one 375x667 screen (Q15). The shipped
+   * presets stay under it.
+   */
+  codeWindowTight: 3,
+  tallRest: 280,
   codeRowsMax: 14,
   codeRowsWindow: 12,
+  /** A trace frame's row under the console strip (the value line) and the gap above the list. */
+  traceRow: 20,
+  /** Under a tagged strip (from 768) the finale's line tag needs the wider gap above the trace. */
+  traceGap: { narrow: 4, wide: 8 } as PerVariant<number>,
   /** Most rows a queue or the console may take before collapsing. */
   queueRows: 2,
   consoleRows: 3,
@@ -84,9 +96,12 @@ export const STAGE_MIN: PerVariant<number> = { narrow: 288, wide: 606 }
  * The frame below the 320 design width (`vz-tight`, under 17.875rem): very
  * large text on a phone (375 at 150 % is 12.9rem) or 200 % text in a lesson
  * column (14.9rem). The console keeps its reserved rows there by collapsing
- * more of its oldest outputs into `N earlier` (R9), measured at 12.5rem.
+ * more of its oldest outputs into `N earlier` (R9), and a queue collapses
+ * more of its tail into `+N more`. Measured at 11.5rem: the stage of a 375
+ * phone at 150 % text, frame padding and the lanes' tight inset taken out
+ * (wave 4C; 12.5rem before, which an eight-output console outgrew).
  */
-export const STAGE_TIGHT = 200
+export const STAGE_TIGHT = 184
 
 export type LaneKind = 'frame' | 'host' | 'micro' | 'task'
 
@@ -199,12 +214,22 @@ export type EventLoopMetrics = {
   /** Rows reserved per queue and for the console strip, per variant. */
   queueRows: PerVariant<number>
   consoleRows: PerVariant<number>
+  /** Trace frames reserved under the console strip (0 when the preset never traces). */
+  traceRows: number
+  /**
+   * Whether outputs reserve the finale's source-line tag under them, per
+   * variant. A phone drops it where the strip needs three rows or a trace
+   * list sits under it (the pane still relights each line); from 768 always.
+   */
+  tags: PerVariant<boolean>
   /** Content width each flow is packed into, per variant (for the visible counts). */
   queueWidth: PerVariant<number>
   hostWidth: PerVariant<number>
   consoleWidth: PerVariant<number>
   /** Console content width in the tight frame (`vz-tight`, R9). */
   consoleTight: number
+  /** A queue lane's content width in the tight frame (`vz-tight:px-1`): its tail collapses there instead of spilling. */
+  queueTight: number
   maxStack: number
   /** The fixed code column width from 768 and from 1280. */
   codeColumn: { md: number; xl: number }
@@ -268,12 +293,15 @@ export function eventLoopMetrics(
 ): EventLoopMetrics & { layout: EngineLayout } {
   let maxStack = 1
   let maxCols = 1
+  let traceRows = 0
   for (const log of all)
     for (const l of log.code?.lines ?? [])
       maxCols = Math.max(maxCols, [...l].length)
   for (const log of logs)
-    for (const step of log.steps)
+    for (const step of log.steps) {
       maxStack = Math.max(maxStack, step.state.stack.length)
+      traceRows = Math.max(traceRows, step.state.trace?.length ?? 0)
+    }
   const w = widths(maxCols)
   const per = <T>(f: (v: Variant) => T): PerVariant<T> => ({
     narrow: f('narrow'),
@@ -333,20 +361,17 @@ export function eventLoopMetrics(
     narrowRows = Math.max(narrowRows, visualRows(log.code?.lines ?? [], NARROW_CODE_COLS))
     wideRows = Math.max(wideRows, visualRows(log.code?.lines ?? [], wideCols))
   }
-  const codeRows: PerVariant<number> = {
-    narrow: narrowRows <= G.codeRowsNarrow ? narrowRows : G.codeWindowNarrow,
-    wide: wideRows <= G.codeRowsMax ? wideRows : G.codeRowsWindow,
-  }
-  // The host note is a word in the step bar now (Q15), not a band under the code.
-  const code = per((v) => codePaneHeight(codeRows[v]))
   const stackContent = (v: Variant) =>
     maxStack * G.frame[v] + (maxStack - 1) * G.frameGap
   const queueContent = (v: Variant) =>
     rowsHeight(rows[v].queue, G.chip, G.chipGap)
   const hostContent = (v: Variant) =>
     rowsHeight(rows[v].host, G.chip, G.chipGap)
+  // A preset that traces reserves its frames' rows under the strip.
+  const traceH = (v: Variant) => (traceRows ? G.traceGap[v] + traceRows * G.traceRow : 0)
+  const tags: PerVariant<boolean> = { narrow: rows.narrow.out < 3 && !traceRows, wide: true }
   const consoleH = per((v) =>
-    laneTop(rowsHeight(rows[v].out, G.outLine, G.outRowGap)),
+    laneTop(rowsHeight(rows[v].out, tags[v] ? G.outLine : G.outValue, G.outRowGap) + traceH(v)),
   )
 
   // Narrow: two grid rows, each as tall as its taller lane.
@@ -355,6 +380,13 @@ export function eventLoopMetrics(
     laneTop(hostContent('narrow'), G.padNarrow),
   )
   const row2 = laneTop(queueContent('narrow'), G.padNarrow)
+  const rest = G.gap + row1 + G.gap + row2 + G.gap + consoleH.narrow
+  const codeRows: PerVariant<number> = {
+    narrow: narrowRows <= G.codeRowsNarrow ? narrowRows : rest > G.tallRest ? G.codeWindowTight : G.codeWindowNarrow,
+    wide: wideRows <= G.codeRowsMax ? wideRows : G.codeRowsWindow,
+  }
+  // The host note is a word in the step bar now (Q15), not a band under the code.
+  const code = per((v) => codePaneHeight(codeRows[v]))
   const narrowStage =
     code.narrow + G.gap + row1 + G.gap + row2 + G.gap + consoleH.narrow
 
@@ -377,10 +409,13 @@ export function eventLoopMetrics(
     console: consoleH,
     queueRows: per((v) => rows[v].queue),
     consoleRows: per((v) => rows[v].out),
+    traceRows,
+    tags,
     queueWidth: w.queueWidth,
     hostWidth: w.hostWidth,
     consoleWidth: w.consoleWidth,
     consoleTight: STAGE_TIGHT - 2 * G.border - 2 * G.pad,
+    queueTight: (STAGE_TIGHT - G.gap) / 2 - 2 * 4,
     maxStack,
     codeColumn: codeColumn(maxCols),
   }

@@ -2,6 +2,8 @@ import type { Point } from '../../substrates/box-arrow'
 import { monoWidth } from '../../substrates/text-metrics'
 import type { PerVariant } from '../../shell/types'
 import { layoutCalls } from './calls'
+import { isDsa, layoutDsa } from './dsa'
+import { flowLegendLines, flowNoteLines, layoutResidual } from './flow'
 import { layoutGraph } from './graph'
 import { layoutGrid } from './grid'
 import type { GainPanel, SuffixPanel, TreeData, TreePanel, TriePanel } from './model'
@@ -341,6 +343,9 @@ export function layoutSuffix(p: SuffixPanel, variant: 'narrow' | 'wide'): Suffix
 // ---------------------------------------------------------------------------
 
 export type TreeScene = {
+  /** Legend and note lines every residual panel of the figure reserves (so side by side they line up). */
+  flowLegend: number
+  flowNotes: number
   gainRoom: number
   gainLegend: number
   trieRows: number
@@ -356,13 +361,21 @@ export function layoutTree(d: TreeData): TreeScene {
   const gainLegend = gainLegendLines(d.panels)
   // Every trie panel of a figure keeps one row count, so the panels line up.
   const trieRows = Math.max(0, ...d.panels.map((p) => (p.kind === 'trie' ? layoutTrie(p).rows : 0)))
+  const flowLegend = flowLegendLines(d.panels)
+  const flowNotes = flowNoteLines(d.panels)
   const blocks = d.panels.map((p): PerVariant<number> => {
+    if (p.kind === 'residual')
+      return { narrow: layoutResidual(p, 'narrow', flowLegend, flowNotes).height, wide: layoutResidual(p, 'wide', flowLegend, flowNotes).height }
     if (p.kind === 'gain') {
       const h = layoutGain(p, gainRoom, gainLegend).height
       return { narrow: h, wide: h }
     }
     if (p.kind === 'trie') {
       const h = layoutTrie(p, trieRows).height
+      return { narrow: h, wide: h }
+    }
+    if (isDsa(p)) {
+      const h = layoutDsa(p).height
       return { narrow: h, wide: h }
     }
     if (p.kind === 'shapes') {
@@ -380,7 +393,7 @@ export function layoutTree(d: TreeData): TreeScene {
     }
     return { narrow: layoutSuffix(p, 'narrow').height, wide: layoutSuffix(p, 'wide').height }
   })
-  const full = d.panels.map((p) => p.kind === 'suffix' || p.kind === 'calls')
+  const full = d.panels.map((p) => p.kind === 'suffix' || p.kind === 'calls' || (p.kind === 'residual' && Boolean(p.wide)))
   const narrow = blocks.reduce((s, b) => s + b.narrow, 0) + (blocks.length - 1) * SIZE.panelGap
   let wide = 0
   let rows = 0
@@ -391,7 +404,7 @@ export function layoutTree(d: TreeData): TreeScene {
     i += pair ? 2 : 1
   }
   wide += (rows - 1) * SIZE.panelGap
-  return { gainRoom, gainLegend, trieRows, blocks, full, height: { narrow, wide } }
+  return { flowLegend, flowNotes, gainRoom, gainLegend, trieRows, blocks, full, height: { narrow, wide } }
 }
 
 // ---------------------------------------------------------------------------

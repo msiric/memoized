@@ -111,6 +111,9 @@ const AT: Record<string, string> = {
   'at-calls': 'figure[data-viz-preset="combination-sum-take-skip"]',
   'at-water': 'figure[data-viz-preset="water-wells-virtual-source"]',
   'at-kpairs': 'figure[data-viz-preset="k-pairs-lazy-grid"]',
+  // Wave 4B: the residual graphs.
+  'at-diamond': 'figure[data-viz-preset="diamond-reverse-edge"]',
+  'at-clrs': 'figure[data-viz-preset="clrs-23-min-cut"]',
 }
 
 /** The wave 3B JavaScript-track figures, static, alone on their page (`?js=static`). */
@@ -123,6 +126,16 @@ export const JS: Record<string, string> = {
   'js-dispatch': 'figure[data-viz-preset="event-dispatch-path"]',
   'js-pkce': 'figure[data-viz-preset="oauth-pkce-channels"]',
   'js-types': 'figure[data-viz-preset="union-vs-intersection"]',
+}
+
+/** The wave 4A DSA-track figures, static, alone on their page (`?dsa=static`). */
+export const dsaUrl = `${GALLERY}?dsa=static`
+export const DSA: Record<string, string> = {
+  'dsa-segment': 'figure[data-viz-preset="segment-tree-query-cover"]',
+  'dsa-forest': 'figure[data-viz-preset="dsu-parent-forest"]',
+  'dsa-heap': 'figure[data-viz-preset="insert-4-10-3-5-1-then-extract"]',
+  'dsa-fib': 'figure[data-viz-preset="fib5"]',
+  'dsa-lps': 'figure[data-viz-preset="lps-interval-triangle"]',
 }
 
 /** Steps the pointer-rewiring frame forward until `done`, skipping any question on the way. */
@@ -225,6 +238,40 @@ async function fxWalk(page: Page, name: string, stop: (step: number, mode: strin
   await settle(page)
 }
 
+/** The wave 4C event-loop lesson groups alone on their page (`?el=<preset>`): Exercise 2, the call-stack traces (local-only). */
+export const elUrl = (preset: string) => `${GALLERY}?el=${preset}`
+export const ELF = '[data-viz="event-loop"] section'
+const EL_STATES: Record<string, string> = {
+  'el-ex2-start': 'exercise-2-async1-async2',
+  'el-ex2-ask': 'exercise-2-async1-async2',
+  'el-ex2-reveal-wrong': 'exercise-2-async1-async2',
+  'el-ex2-finale': 'exercise-2-async1-async2',
+  'el-trace-ask': 'who-called-inner',
+  'el-trace-finale': 'who-called-inner',
+  'el-await-finale': 'await-async-frames',
+}
+/** Steps an event-loop frame forward until `stop` holds (or its end), answering an open question with choice `pick`. */
+async function elWalk(page: Page, stop: (step: number, mode: string | null) => boolean, pick = 1) {
+  const f = page.locator(ELF).first()
+  for (let g = 0; g < 40; g++) {
+    const step = Number(await f.getAttribute('data-viz-step'))
+    const mode = await f.getAttribute('data-viz-mode')
+    if (stop(step, mode) || step === Number(await f.getAttribute('data-viz-last'))) break
+    if (mode === 'ask') await f.locator('[data-viz-region="dock"] [data-choice]').nth(pick - 1).click()
+    else await f.getByRole('button', { name: 'Next' }).click()
+  }
+  await page.waitForTimeout(900)
+  await settle(page)
+}
+
+/** The wave 4C JavaScript core figures, static, alone on their page (`?core=static`). */
+export const coreUrl = `${GALLERY}?core=static`
+export const CORE: Record<string, string> = {
+  'core-gc': 'figure[data-viz-preset="gc-reachability-cycle-and-weak-edge"]',
+  'core-retain': 'figure[data-viz-preset="retainer-paths"]',
+  'core-classes': 'figure[data-viz-preset="extends-two-chains"]',
+}
+
 /** The Promise Patterns lesson's presets (their own group, `?preset=`). */
 export const PP = `${GALLERY}?preset=microtask-vs-timer-12345`
 export const PP_AWAIT = `${GALLERY}?preset=await-null`
@@ -254,6 +301,14 @@ const FR_PRESET: Record<string, string> = {
   dijkstra: 'dijkstra-lazy-heap',
   effort: 'min-effort-grid',
   bst: 'bst-iterator-stack',
+  // Wave 4B: Graph DFS and Topological Sort.
+  recstack: 'dfs-directed-recstack',
+  backedge: 'dfs-back-edge',
+  finish: 'dfs-finish-order',
+  kahn: 'kahn-indegree',
+  course: 'course-schedule-ii-edges',
+  stall: 'kahn-cycle-stall',
+  mht: 'mht-leaf-peeling',
 }
 export const frPreset = (name: string) => FR_PRESET[name.split('-')[1]]
 
@@ -287,6 +342,9 @@ export function stateUrl(name: string): string {
   if (name.startsWith('llf-')) return llUrl('static')
   if (name.startsWith('at-')) return atUrl
   if (name.startsWith('js-')) return jsUrl
+  if (name.startsWith('dsa-')) return dsaUrl
+  if (name.startsWith('core-')) return coreUrl
+  if (EL_STATES[name]) return elUrl(EL_STATES[name])
   if (LL_STATES[name]) return llUrl(LL_STATES[name])
   if (SW_STATES[name]) return swUrl(SW_STATES[name])
   if (DP_STATES[name]) return dpUrl(DP_STATES[name])
@@ -303,6 +361,9 @@ export function stateFrame(name: string): string {
   if (LLF[name]) return LLF[name]
   if (AT[name]) return AT[name]
   if (JS[name]) return JS[name]
+  if (DSA[name]) return DSA[name]
+  if (CORE[name]) return CORE[name]
+  if (EL_STATES[name]) return ELF
   if (LL_STATES[name]) return LL
   if (SW_STATES[name]) return SW
   if (DP_STATES[name]) return DP
@@ -500,6 +561,56 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'fr-bst-end': async (page) => {
     await frEnd(page)
   },
+  // Wave 4B, Graph DFS: the visited-but-done question, its reveal after a
+  // wrong pick (A -> C, C solid, off recStack), the false end; the back
+  // edge found on recStack; the finish order mid-run and reversed.
+  'fr-recstack-ask': async (page) => {
+    await frAsk(page)
+  },
+  'fr-recstack-reveal-wrong': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-recstack-end': async (page) => {
+    await frEnd(page, 2)
+  },
+  'fr-backedge-reveal': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-finish-mid': async (page) => {
+    await frStep(page, 7)
+  },
+  'fr-finish-end': async (page) => {
+    await frEnd(page, 2)
+  },
+  // Topological Sort (local-only: its group holds two practice answers):
+  // Start with the seeding question open, badges counting down mid-run,
+  // the end; the course pairs' direction revealed; the stalled cycle; a
+  // peeled layer.
+  'fr-kahn-start': async () => {},
+  'fr-kahn-badges': async (page) => {
+    await frStep(page, 7, 2)
+  },
+  'fr-kahn-end': async (page) => {
+    await frEnd(page, 2)
+  },
+  'fr-course-reveal': async (page) => {
+    await frAsk(page)
+    await page.locator(FR).first().locator('[data-viz-region="dock"] [data-choice]').first().click()
+    await page.waitForTimeout(400)
+    await settle(page)
+  },
+  'fr-stall-end': async (page) => {
+    await frEnd(page, 1)
+  },
+  'fr-mht-peel': async (page) => {
+    await frStep(page, 5, 2)
+  },
   // Pointer rewiring (wave 2B): Start, the temporary loop revealed after a
   // wrong pick, the printed list; the palindrome's question, a flip with t
   // saved, and the false preset's end. Then the two static frames.
@@ -627,6 +738,37 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'at-calls': async () => {},
   'at-water': async () => {},
   'at-kpairs': async () => {},
+  // The wave 4B residual graphs: static, at rest only.
+  'at-diamond': async () => {},
+  'at-clrs': async () => {},
+  // The wave 4C event-loop groups: Exercise 2 at Start, its question, a wrong pick revealed, its finale;
+  // the timer trace's question and finale (the trace list), the await contrast's finale (local-only).
+  'el-ex2-start': async () => {},
+  'el-ex2-ask': async (page) => {
+    await elWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'el-ex2-reveal-wrong': async (page) => {
+    await elWalk(page, (_s, mode) => mode === 'ask')
+    await page.locator(ELF).first().locator('[data-viz-region="dock"] [data-choice]').nth(1).click()
+    await page.waitForTimeout(900)
+    await settle(page)
+  },
+  'el-ex2-finale': async (page) => {
+    await elWalk(page, () => false)
+  },
+  'el-trace-ask': async (page) => {
+    await elWalk(page, (_s, mode) => mode === 'ask')
+  },
+  'el-trace-finale': async (page) => {
+    await elWalk(page, () => false, 2)
+  },
+  'el-await-finale': async (page) => {
+    await elWalk(page, () => false, 2)
+  },
+  // The wave 4C JavaScript core figures: static, at rest only.
+  'core-gc': async () => {},
+  'core-retain': async () => {},
+  'core-classes': async () => {},
   // The wave 3B JavaScript-track figures: static, at rest only.
   'js-proto-lookup': async () => {},
   'js-proto-ctor': async () => {},
@@ -635,6 +777,12 @@ export const STATES: Record<string, (page: Page) => Promise<void>> = {
   'js-dispatch': async () => {},
   'js-pkce': async () => {},
   'js-types': async () => {},
+  // The wave 4A DSA-track figures: static, at rest only.
+  'dsa-segment': async () => {},
+  'dsa-forest': async () => {},
+  'dsa-heap': async () => {},
+  'dsa-fib': async () => {},
+  'dsa-lps': async () => {},
   'closures-hover': async (page) => {
     // The figure draws one svg per layout width; hover the one on screen.
     const fn = page.locator('[data-viz="environment-records"] svg [tabindex="0"] >> visible=true').first()
@@ -754,6 +902,18 @@ export const MOTION_STATES: Record<string, MotionState> = {
       await page.locator(FR).first().getByRole('button', { name: 'Next' }).click()
     },
   },
+  // Graph DFS: a paced call (the vertex joins visited and recStack, two chips enter, Q1).
+  'fr-dfs-call': {
+    url: frUrl('dfs-directed-recstack'),
+    frame: FR,
+    setup: async (page) => {
+      await frStep(page, 2)
+      await page.waitForTimeout(900)
+    },
+    act: async (page) => {
+      await page.locator(FR).first().getByRole('button', { name: 'Next' }).click()
+    },
+  },
   // Pointer rewiring: a paced flip (the arrow cross-fades, the tag slides, Q1).
   'll-step': {
     url: llUrl('reverse-between-m2-n4'),
@@ -795,6 +955,20 @@ export const MOTION_STATES: Record<string, MotionState> = {
       await f.getByRole('slider').focus()
       await page.keyboard.press('ArrowRight')
       await page.waitForTimeout(650)
+    },
+    act: async (page) => {
+      await page.keyboard.press('ArrowRight')
+    },
+  },
+  // Exercise 2 (wave 4C): a paced step, async1 pausing into the microtask queue (Q1).
+  'el-ex2-step': {
+    url: elUrl('exercise-2-async1-async2'),
+    frame: ELF,
+    setup: async (page) => {
+      const f = page.locator(ELF).first()
+      await f.getByRole('slider').focus()
+      for (let i = 0; i < 6; i++) await page.keyboard.press('ArrowRight')
+      await page.waitForTimeout(400)
     },
     act: async (page) => {
       await page.keyboard.press('ArrowRight')

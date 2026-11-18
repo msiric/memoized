@@ -52,7 +52,12 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     file: 'fixtures/event-loop.mdx',
     // Before Practical Examples: Example 1 is the visual's program with its
     // output printed, so the prediction comes first (content PR placement).
-    inserts: [{ before: '## **Practical Examples**', viz: '<Viz id="event-loop" />' }],
+    inserts: [
+      { before: '## **Practical Examples**', viz: '<Viz id="event-loop" />' },
+      // Wave 4C: Exercise 2's own frame, right after its question and before its answer (the
+      // prediction "What logs after Script End?" comes before the prose that states it).
+      { before: '**Answer:**\n\n```\nScript Start\nAsync 1 Start', viz: '<Viz id="event-loop" preset="exercise-2-async1-async2" />' },
+    ],
   },
   {
     slug: 'closures',
@@ -318,6 +323,47 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // is, before the linked-list version.
     inserts: [{ before: '## **Merging K Sorted Linked Lists**', viz: '<Viz id="annotated-tree" preset="k-pairs-lazy-grid" />' }],
   },
+  // Wave 4B, graph visuals (all four lessons PREMIUM: local checkout only).
+  {
+    slug: 'graph-dfs',
+    title: 'Graph DFS (Depth-First Search)',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/graph-dfs/page.mdx',
+    // A prediction: under the cycle problem, before its Step-by-Step, whose
+    // step 4 states the rule the question asks for (visited is not enough,
+    // only a vertex on the recursion stack closes a cycle).
+    inserts: [{ before: '### **Step-by-Step Solution:**', viz: '<Viz id="bfs-dfs-frontier" preset="dfs-directed-recstack" />' }],
+  },
+  {
+    slug: 'topological-sort',
+    title: 'Topological Sort',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/topological-sort/page.mdx',
+    // A prediction: under Kahn's heading, before its Step-by-Step and the
+    // example whose output comment ([4, 5, 2, 0, 3, 1]) answers 4 or 5.
+    inserts: [{ before: '### **Step-by-Step Solution:**', viz: '<Viz id="bfs-dfs-frontier" preset="kahn-indegree" />' }],
+  },
+  {
+    slug: 'maximum-flow',
+    title: 'Maximum Flow',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/maximum-flow/page.mdx',
+    // After the Ford-Fulkerson example, the DFS search whose reverse edge
+    // the figure draws, before Edmonds-Karp.
+    inserts: [{ before: '### **Edmonds-Karp Algorithm**', viz: '<Viz id="annotated-tree" preset="diamond-reverse-edge" />' }],
+  },
+  {
+    slug: 'network-flow-algorithms',
+    title: 'Network Flow Algorithms',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/network-flow-algorithms/page.mdx',
+    inserts: [
+      // After the Ford-Fulkerson example, as in Maximum Flow.
+      { before: '### **Edmonds-Karp Algorithm**', viz: '<Viz id="annotated-tree" preset="diamond-reverse-edge" />' },
+      // After the Edmonds-Karp example, the network the cut is of (it prints 23).
+      { before: '## **Practical Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="clrs-23-min-cut" />' },
+    ],
+  },
   // Wave 3B, the JavaScript-track figures. Local checkout only: the two free
   // lessons too (the app repo keeps no lesson body under the premium-code
   // policy). Static figures, each after the example it explains.
@@ -373,6 +419,87 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // The body has no OAuth example (it is in the practice answer): at the end
     // of Secure Authentication Practices, before authorization.
     inserts: [{ before: '## **Secure Authorization Practices**', viz: '<Viz id="lanes" preset="oauth-pkce-channels" />' }],
+  },
+  // Wave 4A, the DSA static figures (all five lessons PREMIUM: local checkout
+  // only). Static figures, each after the example it explains.
+  {
+    slug: 'segment-trees',
+    title: 'Segment Trees',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/segment-trees/page.mdx',
+    // After Lazy Propagation, the second of the two examples it runs (the
+    // SegmentTree's query and update, then the lazy tree's tags), before the tips.
+    inserts: [{ before: '## **Practical Tips and Tricks**', viz: '<Viz id="annotated-tree" preset="segment-tree-query-cover" />' }],
+  },
+  {
+    slug: 'union-find',
+    title: 'Union-Find (Disjoint Set)',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/union-find/page.mdx',
+    // After Union by Rank/Size, once both examples it runs (rank, then size) are shown, before Cycle Detection.
+    inserts: [{ before: '### **Cycle Detection in Graph**', viz: '<Viz id="annotated-tree" preset="dsu-parent-forest" />' }],
+  },
+  {
+    slug: 'heaps',
+    title: 'Heaps',
+    section: { title: 'User-Defined Data Structures', href: '/courses/dsa-track/user-defined-data-structures' },
+    source: 'content/dsa-track/user-defined-data-structures/heaps/page.mdx',
+    // After Extracting the Minimum/Maximum Element, the MinHeap it runs (insert, extractMin, sift down), before Peeking.
+    inserts: [{ before: '### **Peeking the Minimum/Maximum Element**', viz: '<Viz id="annotated-tree" preset="insert-4-10-3-5-1-then-extract" />' }],
+  },
+  {
+    slug: 'recursion-and-memoization',
+    title: 'Recursion and Memoization',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/recursion-and-memoization/page.mdx',
+    // After Memoized Fibonacci Sequence, the second of the two functions it draws, before Factorial.
+    inserts: [{ before: '### **Factorial Calculation**', viz: '<Viz id="annotated-tree" preset="fib5" />' }],
+  },
+  {
+    slug: 'palindromic-subsequence',
+    title: 'Palindromic Subsequence',
+    section: { title: 'Common Techniques', href: '/courses/dsa-track/common-techniques' },
+    source: 'content/dsa-track/common-techniques/palindromic-subsequence/page.mdx',
+    // After the Longest Palindromic Subsequence example (its "bbbab" table), before its tips (the first Tips and Tricks).
+    inserts: [{ before: '### **Tips and Tricks:**', viz: '<Viz id="annotated-tree" preset="lps-interval-triangle" />' }],
+  },
+  // Wave 4C, the JavaScript core visuals. Local checkout only: the app repo keeps no lesson body
+  // (the premium-code policy), free lessons included.
+  {
+    slug: 'context-and-call-stack',
+    title: 'Execution Context and Call Stack',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/context-and-call-stack/page.mdx',
+    // A prediction: after Call Stack Flow (push and pop), before the first Recursion section. No prose
+    // in the body says what console.trace() prints in a timer callback.
+    inserts: [{ before: '### **Recursion and the Call Stack**', viz: '<Viz id="event-loop" preset="who-called-inner" />' }],
+  },
+  {
+    slug: 'memory-management',
+    title: 'Memory Management and Garbage Collection',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/memory-management/page.mdx',
+    // A static figure after the last example it draws: Exercise 5's answer (the registry cycle), after
+    // Exercise 2's (the WeakMap), before the closing paragraph.
+    inserts: [{ before: 'Understanding how JavaScript manages memory', viz: '<Viz id="heap-graph" preset="gc-reachability-cycle-and-weak-edge" />' }],
+  },
+  {
+    slug: 'memory-leaks',
+    title: 'Memory Leaks and Prevention',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/memory-leaks/page.mdx',
+    // After WeakMap and WeakSet, the last body example of what it draws (detached nodes, closures and
+    // WeakMap come before), before Performance Profiling.
+    inserts: [{ before: '### **Performance Profiling**', viz: '<Viz id="heap-graph" preset="retainer-paths" />' }],
+  },
+  {
+    slug: 'objects-and-classes',
+    title: 'Object Creation and Class Patterns',
+    section: { title: 'Core Fundamentals', href: '/courses/js-track/core-fundamentals' },
+    source: 'content/js-track/core-fundamentals/objects-and-classes/page.mdx',
+    // After Combining Constructor Functions and Prototypes (the Car/Vehicle example, panel 2), with
+    // Class Inheritance with extends earlier: both chains are explained, before Advantages of ES6 Classes.
+    inserts: [{ before: '## **Advantages of ES6 Classes**', viz: '<Viz id="prototype-object-graph" preset="extends-two-chains" />' }],
   },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with

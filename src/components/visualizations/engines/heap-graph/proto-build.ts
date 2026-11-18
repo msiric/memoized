@@ -32,6 +32,10 @@ export type ProtoPanelSpec = {
   /** Under the panel: an expression, and the line of the program's output it printed (0-based). */
   results?: readonly (readonly [expr: string, stdoutLine: number])[]
   note?: string
+  /** Draw the functions' own [[Prototype]] links too: the two-column layout (Objects and Classes). */
+  chains?: true
+  /** A `super` lookup: the home object it starts after (its [[Prototype]] link is marked). */
+  start?: string
 }
 
 /** The one pause a prototype program records: its graph. */
@@ -62,14 +66,14 @@ export function buildProtoPanel(spec: ProtoPanelSpec, recordings: Record<string,
       const rows = keys.map(([key, v]) => ({ key, value: value(v, `${spec.id}: ${o.label}.${key}`) }))
       for (const r of rows) if ('ref' in r.value && !drawn.has(r.value.ref)) throw new Error(`${spec.id}: ${o.label}.${r.key} points at ${r.value.ref}, which is not drawn`)
       const proto = o.proto === null ? null : 'ref' in o.proto && drawn.has(o.proto.ref) ? o.proto.ref : undefined
-      if (!o.fn && proto === undefined) throw new Error(`${spec.id}: the [[Prototype]] of ${o.label} is not drawn`)
+      if ((!o.fn || spec.chains) && proto === undefined) throw new Error(`${spec.id}: the [[Prototype]] of ${o.label} is not drawn`)
       return {
         id: o.label,
         title: o.label,
         fn: o.fn,
         rows,
         hidden: spec.count?.includes(o.label) ? o.keys.length - rows.length : 0,
-        proto: o.fn ? undefined : proto,
+        proto: o.fn && !spec.chains ? undefined : proto,
       }
     })
   let lookup: ProtoLookupMark | undefined
@@ -78,7 +82,8 @@ export function buildProtoPanel(spec: ProtoPanelSpec, recordings: Record<string,
     const l = graph.lookups.find((x) => x.from === from && x.key === key)
     if (!l) throw new Error(`${spec.id}: no recorded lookup of ${from}.${key}`)
     const last = l.visited[l.visited.length - 1]
-    lookup = { from, key, visited: l.visited.map(([label]) => label), found: last?.[1] ? last[0] : null }
+    lookup = { from, key, visited: l.visited.map(([label]) => label), found: last?.[1] ? last[0] : null, ...(spec.start ? { start: spec.start } : {}) }
+    if (spec.start && objects.find((o) => o.id === spec.start)?.proto !== from) throw new Error(`${spec.id}: ${from} is not the [[Prototype]] of ${spec.start}`)
     if (lookup.found && !objects.find((o) => o.id === lookup!.found)?.rows.some((r) => r.key === key))
       throw new Error(`${spec.id}: ${key} is found on ${lookup.found}, whose row is not drawn`)
   }
@@ -87,5 +92,5 @@ export function buildProtoPanel(spec: ProtoPanelSpec, recordings: Record<string,
     if (text === undefined) throw new Error(`${spec.id}: the program printed no line ${line}`)
     return { expr, text }
   })
-  return { id: spec.id, heading: spec.heading, objects, lookup, results, note: spec.note }
+  return { id: spec.id, heading: spec.heading, objects, lookup, results, note: spec.note, ...(spec.chains ? { columns: 2 as const } : {}) }
 }

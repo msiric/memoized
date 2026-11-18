@@ -177,8 +177,8 @@ describe('the heap graphs say what the register verifies (Node 24)', () => {
     expect(says).toContainEqual(['console.log(copy !== original, copy.b !== original.b)', ['true true']])
   })
 
-  it('both presets are registered on the one heap-graph id', () => {
-    expect(heapGraphDescriptor.presets.map((p) => p.id)).toEqual(['identity-alias-rebind-spread', 'spread-vs-nested-vs-deep'])
+  it('every preset is registered on the one heap-graph id (the reachability presets: reach.truth.test.ts)', () => {
+    expect(heapGraphDescriptor.presets.map((p) => p.id)).toEqual(['identity-alias-rebind-spread', 'spread-vs-nested-vs-deep', 'gc-reachability-cycle-and-weak-edge', 'retainer-paths'])
   })
 })
 

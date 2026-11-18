@@ -650,6 +650,460 @@
    }
   ]
  ],
+ "event-loop/exercise-2-async1-async2": [
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "async1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Async 1 Start'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "async2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Async 1 End'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "async2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Async 2'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Script Start'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "setTimeout",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(() ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Timeout'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}, ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "async1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Promise",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "((",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "resolve",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Promise 1'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "resolve",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}).",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "then",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(() ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Promise 2'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "})",
+    "color": "#E1E4E8"
+   }
+  ],
+  [],
+  [
+   {
+    "text": "console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "log",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "'Script End'",
+    "color": "#9ECBFF"
+   },
+   {
+    "text": ")",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "event-loop/await-async-frames": [
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "o2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "null",
+    "color": "#79B8FF"
+   }
+  ],
+  [
+   {
+    "text": "  console.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "trace",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "async function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "o1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "() {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "await ",
+    "color": "#F97583"
+   },
+   {
+    "text": "o2",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "o1",
+    "color": "#B392F0"
+   },
+   {
+    "text": "()",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
  "bfs-dfs-frontier/bfs-levels": [
   [
    {
@@ -1428,6 +1882,2504 @@
    },
    {
     "text": " dist;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "bfs-dfs-frontier/dfs-directed-recstack": [
+  [
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "dfsCycleDetection",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "graph",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " visited ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Set",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " recStack ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Set",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "vertex",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (recStack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "has",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "true",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (visited.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "has",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "false",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    visited.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "add",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    recStack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "add",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " neighbor ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        graph[vertex]) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(neighbor))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "          ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "true",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    recStack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "delete",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "false",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " vertex ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in",
+    "color": "#F97583"
+   },
+   {
+    "text": " graph) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex)) ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "true",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "false",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "bfs-dfs-frontier/dfs-back-edge": [
+  [
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "dfsCycleDetection",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "graph",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " visited ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Set",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " recStack ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Set",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "vertex",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (recStack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "has",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "true",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (visited.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "has",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "false",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    visited.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "add",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    recStack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "add",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " neighbor ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        graph[vertex]) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(neighbor))",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "          ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "true",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    recStack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "delete",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "false",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " vertex ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in",
+    "color": "#F97583"
+   },
+   {
+    "text": " graph) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex)) ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "true",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return ",
+    "color": "#F97583"
+   },
+   {
+    "text": "false",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "bfs-dfs-frontier/dfs-finish-order": [
+  [
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "topologicalSort",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "graph",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " visited ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= new ",
+    "color": "#F97583"
+   },
+   {
+    "text": "Set",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " stack ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " [];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "vertex",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    visited.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "add",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " neighbor ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "        graph[vertex]) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "!",
+    "color": "#F97583"
+   },
+   {
+    "text": "visited.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "has",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(neighbor)) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(neighbor);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    stack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " vertex ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in",
+    "color": "#F97583"
+   },
+   {
+    "text": " graph) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "!",
+    "color": "#F97583"
+   },
+   {
+    "text": "visited.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "has",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex)) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "dfs",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertex);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " stack.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "reverse",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "bfs-dfs-frontier/kahn-indegree": [
+  [
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "topologicalSort",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "vertices",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "edges",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "inDegree ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "Array",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertices).",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "fill",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ");",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "graph ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " Array.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "from",
+    "color": "#B392F0"
+   },
+   {
+    "text": "({",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      length: vertices }, () ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "      []);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// Build the graph and calculate",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in-",
+    "color": "#F97583"
+   },
+   {
+    "text": "degrees",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const",
+    "color": "#F97583"
+   },
+   {
+    "text": " [",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "u",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "v",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   },
+   {
+    "text": " edges) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    graph[u].",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(v);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    inDegree[v]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "queue ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " [];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "; i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   },
+   {
+    "text": " vertices;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      i",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (inDegree[i] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=== ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(i);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "topologicalOrder ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " [];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "while",
+    "color": "#F97583"
+   },
+   {
+    "text": " (queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "> ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "u ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "shift",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    topologicalOrder.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(u);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "v ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   },
+   {
+    "text": " graph[u]) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      inDegree[v]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "--",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (inDegree[v] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=== ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(v);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (topologicalOrder.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "===",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "      vertices) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " topologicalOrder;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  } ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "else",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// There is a cycle in the",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "        graph",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " [];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "}",
+    "color": "#E1E4E8"
+   }
+  ]
+ ],
+ "bfs-dfs-frontier/kahn-cycle-stall": [
+  [
+   {
+    "text": "function ",
+    "color": "#F97583"
+   },
+   {
+    "text": "topologicalSort",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "vertices",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ",",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "edges",
+    "color": "#FFAB70"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "inDegree ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "Array",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(vertices).",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "fill",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ");",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "graph ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " Array.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "from",
+    "color": "#B392F0"
+   },
+   {
+    "text": "({",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      length: vertices }, () ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=>",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "      []);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// Build the graph and calculate",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "in-",
+    "color": "#F97583"
+   },
+   {
+    "text": "degrees",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const",
+    "color": "#F97583"
+   },
+   {
+    "text": " [",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "u",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ", ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "v",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   },
+   {
+    "text": " edges) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    graph[u].",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(v);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    inDegree[v]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "queue ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " [];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "let",
+    "color": "#F97583"
+   },
+   {
+    "text": " i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "= ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "; i ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "<",
+    "color": "#F97583"
+   },
+   {
+    "text": " vertices;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      i",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "++",
+    "color": "#F97583"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (inDegree[i] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=== ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(i);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "topologicalOrder ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " [];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "while",
+    "color": "#F97583"
+   },
+   {
+    "text": " (queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "> ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "u ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "=",
+    "color": "#F97583"
+   },
+   {
+    "text": " queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "shift",
+    "color": "#B392F0"
+   },
+   {
+    "text": "();",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    topologicalOrder.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(u);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "for",
+    "color": "#F97583"
+   },
+   {
+    "text": " (",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "const ",
+    "color": "#F97583"
+   },
+   {
+    "text": "v ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "of",
+    "color": "#F97583"
+   },
+   {
+    "text": " graph[u]) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      inDegree[v]",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "--",
+    "color": "#F97583"
+   },
+   {
+    "text": ";",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (inDegree[v] ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "=== ",
+    "color": "#F97583"
+   },
+   {
+    "text": "0",
+    "color": "#79B8FF"
+   },
+   {
+    "text": ") {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "        queue.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "push",
+    "color": "#B392F0"
+   },
+   {
+    "text": "(v);",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "      }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "if",
+    "color": "#F97583"
+   },
+   {
+    "text": " (topologicalOrder.",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "length ",
+    "color": "#79B8FF"
+   },
+   {
+    "text": "===",
+    "color": "#F97583"
+   }
+  ],
+  [
+   {
+    "text": "      vertices) {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " topologicalOrder;",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  } ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "else",
+    "color": "#F97583"
+   },
+   {
+    "text": " {",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "// There is a cycle in the",
+    "color": "#A1A1AA"
+   }
+  ],
+  [
+   {
+    "text": "        graph",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "    ",
+    "color": "#E1E4E8"
+   },
+   {
+    "text": "return",
+    "color": "#F97583"
+   },
+   {
+    "text": " [];",
+    "color": "#E1E4E8"
+   }
+  ],
+  [
+   {
+    "text": "  }",
     "color": "#E1E4E8"
    }
   ],

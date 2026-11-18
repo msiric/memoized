@@ -20,6 +20,9 @@ const routes = [
   '/dev/visualizations?fr=bfs-levels',
   '/dev/visualizations?fr=dijkstra-lazy-heap',
   '/dev/visualizations?fr=bst-iterator-stack',
+  // Wave 4B: Graph DFS and Topological Sort (the second is local-only).
+  '/dev/visualizations?fr=dfs-directed-recstack',
+  '/dev/visualizations?fr=kahn-indegree',
   // Pointer rewiring (wave 2B).
   '/dev/visualizations?ll=reverse-between-m2-n4',
   '/dev/visualizations?ll=palindrome-split-reverse-compare',
@@ -33,10 +36,16 @@ const routes = [
   '/dev/visualizations?fx=twoWay-next-arg',
   '/dev/visualizations?fx=refill-on-settle',
   '/dev/visualizations?fx=once-consumed-by-nested-emit',
+  // The wave 4C event-loop groups (Exercise 2; the call-stack traces, local-only) and core figures.
+  '/dev/visualizations?el=exercise-2-async1-async2',
+  '/dev/visualizations?el=who-called-inner',
+  '/dev/visualizations?core=static',
   // The annotated trees (wave 2D).
   '/dev/visualizations?at=static',
   // The wave 3B JavaScript-track figures (static).
   '/dev/visualizations?js=static',
+  // The wave 4A DSA-track figures (static).
+  '/dev/visualizations?dsa=static',
 ]
 const deadline = Date.now() + 300_000
 for (const route of routes) {

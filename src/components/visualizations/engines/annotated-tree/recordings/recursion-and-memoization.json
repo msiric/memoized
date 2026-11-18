@@ -1,0 +1,247 @@
+{
+ "fib-5": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "9b2d1d40aca0b5f28643d3c001a7795cc49615646aa05de8b06ab519df45d756",
+  "stdout": [
+   "5"
+  ],
+  "pauses": [
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 5
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 4
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 3
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 2
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 1
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 0
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 1
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 2
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 1
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 0
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 3
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 2
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 1
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 0
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 1
+    }
+   }
+  ]
+ },
+ "fib-memo-5": {
+  "generator": "node-inspector-tree@1",
+  "sha256": "f3a454c245cf64ac530c5a9154c7fe3cb192325bda4b4ac80ada2a1404558186",
+  "stdout": [
+   "5"
+  ],
+  "pauses": [
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 5,
+     "hit": false,
+     "memo": []
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 4,
+     "hit": false,
+     "memo": []
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 3,
+     "hit": false,
+     "memo": []
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 2,
+     "hit": false,
+     "memo": []
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 1,
+     "hit": false,
+     "memo": []
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 0,
+     "hit": false,
+     "memo": []
+    }
+   },
+   {
+    "probe": "write",
+    "line": 5,
+    "vars": {
+     "n": 2,
+     "value": 1
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 1,
+     "hit": false,
+     "memo": [
+      2
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 5,
+    "vars": {
+     "n": 3,
+     "value": 2
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 2,
+     "hit": true,
+     "memo": [
+      2,
+      3
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 5,
+    "vars": {
+     "n": 4,
+     "value": 3
+    }
+   },
+   {
+    "probe": "call",
+    "line": 2,
+    "vars": {
+     "n": 3,
+     "hit": true,
+     "memo": [
+      2,
+      3,
+      4
+     ]
+    }
+   },
+   {
+    "probe": "write",
+    "line": 5,
+    "vars": {
+     "n": 5,
+     "value": 5
+    }
+   }
+  ]
+ }
+}

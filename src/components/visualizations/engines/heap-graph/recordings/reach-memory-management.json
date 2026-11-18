@@ -1,0 +1,350 @@
+{
+ "cycle-held": {
+  "sha256": "b2a28a12b67fa5704e22a65c102eb56bf5e93e08e7018ed99d5565f8c8df75fe",
+  "env": "node@24",
+  "snapshots": {
+   "held": {
+    "roots": [
+     [
+      "registry",
+      {
+       "ref": 1
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "kind": "Array",
+      "rows": [
+       [
+        "0",
+        {
+         "ref": 2
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "kind": "Node",
+      "rows": [
+       [
+        "value",
+        {
+         "text": "2"
+        }
+       ],
+       [
+        "next",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "kind": "Node",
+      "rows": [
+       [
+        "value",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "next",
+        {
+         "ref": 2
+        }
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  "alive": [
+   1,
+   2,
+   3
+  ],
+  "dead": [],
+  "stdout": []
+ },
+ "cycle-cleared": {
+  "sha256": "f39dd40d8af693fb5d334c0a0f27aa20b715223ff8ea40c8994d541d5af5b6b2",
+  "env": "node@24",
+  "snapshots": {
+   "held": {
+    "roots": [
+     [
+      "registry",
+      {
+       "ref": 1
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "kind": "Array",
+      "rows": [
+       [
+        "0",
+        {
+         "ref": 2
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "kind": "Node",
+      "rows": [
+       [
+        "value",
+        {
+         "text": "2"
+        }
+       ],
+       [
+        "next",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "kind": "Node",
+      "rows": [
+       [
+        "value",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "next",
+        {
+         "ref": 2
+        }
+       ]
+      ]
+     }
+    ]
+   },
+   "cleared": {
+    "roots": [
+     [
+      "registry",
+      {
+       "ref": 1
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "kind": "Array",
+      "rows": []
+     },
+     {
+      "id": 2,
+      "kind": "Node",
+      "rows": [
+       [
+        "value",
+        {
+         "text": "2"
+        }
+       ],
+       [
+        "next",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "kind": "Node",
+      "rows": [
+       [
+        "value",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "next",
+        {
+         "ref": 2
+        }
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  "alive": [
+   1
+  ],
+  "dead": [
+   2,
+   3
+  ],
+  "stdout": []
+ },
+ "weak-key-dropped": {
+  "sha256": "dbc681722c062b3918717587d33e9604d238500f6050c567f333c4ab7007a240",
+  "env": "node@24",
+  "snapshots": {
+   "inside": {
+    "roots": [
+     [
+      "userCache",
+      {
+       "ref": 1
+      }
+     ],
+     [
+      "user",
+      {
+       "ref": 2
+      }
+     ],
+     [
+      "data",
+      {
+       "ref": 3
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "kind": "WeakMap",
+      "rows": [
+       [
+        "key",
+        {
+         "ref": 2,
+         "weak": true
+        }
+       ],
+       [
+        "value",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "kind": "Object",
+      "rows": [
+       [
+        "id",
+        {
+         "text": "1"
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "kind": "Object",
+      "rows": [
+       [
+        "id",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "name",
+        {
+         "text": "'User 1'"
+        }
+       ]
+      ]
+     }
+    ]
+   },
+   "after": {
+    "roots": [
+     [
+      "userCache",
+      {
+       "ref": 1
+      }
+     ]
+    ],
+    "objects": [
+     {
+      "id": 1,
+      "kind": "WeakMap",
+      "rows": [
+       [
+        "key",
+        {
+         "ref": 2,
+         "weak": true
+        }
+       ],
+       [
+        "value",
+        {
+         "ref": 3
+        }
+       ]
+      ]
+     },
+     {
+      "id": 2,
+      "kind": "Object",
+      "rows": [
+       [
+        "id",
+        {
+         "text": "1"
+        }
+       ]
+      ]
+     },
+     {
+      "id": 3,
+      "kind": "Object",
+      "rows": [
+       [
+        "id",
+        {
+         "text": "1"
+        }
+       ],
+       [
+        "name",
+        {
+         "text": "'User 1'"
+        }
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  "alive": [
+   1
+  ],
+  "dead": [
+   2,
+   3
+  ],
+  "stdout": []
+ }
+}

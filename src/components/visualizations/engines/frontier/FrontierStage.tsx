@@ -82,10 +82,11 @@ function Edge({ edge, geo, directed }: { edge: FEdge; geo: CanvasGeometry; direc
     <g
       data-fr-edge={edge.id}
       data-active={edge.active || undefined}
+      data-removed={edge.removed || undefined}
       className={edge.active ? 'vz-ea' : undefined}
       style={edge.active ? ({ ['--vz-sw' as string]: `${strokeWidth.nowConnector}px` } as React.CSSProperties) : undefined}
     >
-      <line className="vz-e" x1={x1} y1={y1} x2={x2} y2={y2} />
+      <line className={clsx('vz-e', edge.removed && !edge.active && 'vz-d')} x1={x1} y1={y1} x2={x2} y2={y2} />
       {directed ? (
         <path className="vz-ah" d={`M${tip.x},${tip.y} L${back.x + px},${back.y + py} L${back.x - px},${back.y - py} Z`} />
       ) : null}

@@ -34,6 +34,12 @@ export type ProtoObject = {
 }
 
 export type ProtoLookupMark = {
+  /**
+   * A `super` lookup: the method's home object, whose [[Prototype]] the
+   * lookup starts at (the link between them is marked; the home object is
+   * not searched).
+   */
+  start?: string
   /** The receiver and the key (`alice`, `toString`). */
   from: string
   key: string
@@ -53,6 +59,12 @@ export type ProtoPanel = {
   results: ProtoResult[]
   /** A short line under the results (words, not code). */
   note?: string
+  /**
+   * Two chains (Objects and Classes): the constructors' own [[Prototype]]
+   * links are drawn too, down a second column to Function.prototype, which
+   * links back to the instance chain's Object.prototype.
+   */
+  columns?: 2
 }
 
 export type ProtoDiagram = { panels: ProtoPanel[] }
@@ -71,6 +83,9 @@ export function spineOf(p: ProtoPanel): ProtoObject[] {
   if (left.length) throw new Error(`${p.id}: ${left.map((o) => o.id).join(', ')} not on the spine`)
   return out
 }
+
+/** A function the figure draws as a constructor pill: it has a drawn `prototype` row. */
+export const isCtor = (o: ProtoObject) => o.fn && o.rows.some((r) => r.key === 'prototype')
 
 /** The object a function's `prototype` row names (the function stands beside it). */
 export function besideOf(p: ProtoPanel, fn: ProtoObject): string {

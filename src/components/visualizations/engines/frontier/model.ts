@@ -38,6 +38,8 @@ export type FEdge = {
   weight?: number
   /** The edge the current step examines. */
   active?: boolean
+  /** Spent: already examined and taken out of play (Kahn's edges out of an output vertex, a peeled leaf's edge), drawn dashed. */
+  removed?: boolean
 }
 
 export type FChip = { id: string; label: string }
@@ -62,6 +64,10 @@ export type FrontierScene = {
   lanes: readonly { id: string; label: string; vertical?: boolean }[]
   /** The lanes sit side by side in one row (`q` and `nq`, one level beside the next). */
   laneRow?: boolean
+  /** What each vertex state means in this preset, in words (the stage's accessible name): `on recStack` for DFS. */
+  words?: Partial<Record<NodeStatus, string>>
+  /** What a vertex's badge counts, said before its value in words (`in-degree`). */
+  badge?: string
 }
 
 export type FrontierState = {
@@ -105,11 +111,20 @@ const STATUS_WORD: Record<NodeStatus, string> = {
 /** The stage's accessible name: every vertex with its state, the lanes and the console (spec §5.3). */
 export function describeFrontier(state: FrontierState): string {
   const nodes = state.nodes
-    .map((n) => `${n.label}${state.scene.kind === 'grid' ? ` at ${n.id.slice(2).replace('-', ',')}` : ''} ${STATUS_WORD[n.status]}${n.badge ? ` (${n.badge})` : ''}`)
+    .map(
+      (n) =>
+        `${n.label}${state.scene.kind === 'grid' ? ` at ${n.id.slice(2).replace('-', ',')}` : ''} ${state.scene.words?.[n.status] ?? STATUS_WORD[n.status]}${n.badge ? ` (${state.scene.badge ? `${state.scene.badge} ` : ''}${n.badge})` : ''}`,
+    )
     .join(', ')
+  const edges = state.edges.some((e) => e.removed)
+    ? ` Spent edges: ${state.edges
+        .filter((e) => e.removed)
+        .map((e) => `${e.from.slice(2)}${state.scene.directed ? ' to ' : '-'}${e.to.slice(2)}`)
+        .join(', ')}.`
+    : ''
   const lanes = state.scene.lanes
     .map((l) => `${l.label}: ${(state.lanes[l.id] ?? []).map((c) => c.label).join(', ') || 'empty'}`)
     .join('. ')
   const vars = state.vars.length ? ` ${state.vars.map((v) => `${v.name} ${v.value}${v.stale ? ' (stale)' : ''}`).join(', ')}.` : ''
-  return `${state.scene.title}: ${nodes}.${vars} ${lanes}. Console: ${state.console.length ? state.console.join(', ') : 'empty'}.`
+  return `${state.scene.title}: ${nodes}.${edges}${vars} ${lanes}. Console: ${state.console.length ? state.console.join(', ') : 'empty'}.`
 }

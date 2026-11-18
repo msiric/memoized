@@ -572,12 +572,14 @@ test('375×667 fit in a real lesson: code line, changed glyph, caption and Next 
   // site header, as a reader on a small phone meets it (H3 R2 Q15, R2 G1).
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto('/dev/visualizations/lesson/event-loop')
-  await mount(page).scrollIntoViewIfNeeded()
-  await mount(page).hover({ position: { x: 3, y: 3 } })
-  await expect(mount(page).locator('[data-viz-interactive="true"]')).toBeVisible()
+  // The lesson's first frame, the flagship (Exercise 2 has its own frame further down, wave 4C).
+  const lm = mount(page).first()
+  await lm.scrollIntoViewIfNeeded()
+  await lm.hover({ position: { x: 3, y: 3 } })
+  await expect(lm.locator('[data-viz-interactive="true"]')).toBeVisible()
   for (const preset of ['Basics', 'Drain']) {
-    await frame(page).getByRole('radio', { name: preset }).click()
-    await slider(page).focus()
+    await lm.locator('section').getByRole('radio', { name: preset }).click()
+    await lm.locator('section').getByRole('slider').focus()
     for (let i = 0; i <= 10; i++) {
       // The reader scrolls the code pane to just under the header.
       const v = await page.evaluate(() => {

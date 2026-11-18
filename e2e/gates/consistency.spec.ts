@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, lessonUrl, open, settle, swUrl, DP, dpUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -154,23 +154,29 @@ for (const width of [375, 1440]) {
  * shell, so its frame, question, choices, Skip, current code line, reveal
  * marks and lane panel compute as the event loop's do.
  */
+// The Graph DFS group (wave 4B) has no practice answer, so it runs in CI too.
+const FR_LOOKS = [
+  { preset: 'bfs-levels', lane: 'queue', wrong: 1 },
+  { preset: 'dfs-directed-recstack', lane: 'visited', wrong: 0 },
+] as const
 for (const width of [375, 1440])
-  test(`the frontier draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
-    // Its lesson group includes a practice answer: local-only without the content checkout (CI).
-    test.skip(urlLocalOnly(frUrl('bfs-levels')) !== null, urlLocalOnly(frUrl('bfs-levels')) ?? '')
+  for (const fr of FR_LOOKS)
+  test(`the frontier (${fr.preset}) draws the shell and its regions like the event loop @${width}`, async ({ page }) => {
+    // A lesson group with a practice answer is local-only without the content checkout (CI).
+    test.skip(urlLocalOnly(frUrl(fr.preset)) !== null, urlLocalOnly(frUrl(fr.preset)) ?? '')
     const diffs: string[] = []
     const looks: Record<string, Record<string, string>>[] = []
     const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
     const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
     for (const [url, sel] of [
       [GALLERY, EL],
-      [frUrl('bfs-levels'), FR],
+      [frUrl(fr.preset), FR],
     ] as const) {
       await open(page, url, width)
       const f = page.locator(sel).first()
       const out: Record<string, Record<string, string>> = {}
       out.frame = await look(f, FRAME)
-      out.lane = await look(f.locator('[data-viz-region="micro"], [data-viz-region="queue"]').first(), PANEL)
+      out.lane = await look(f.locator(`[data-viz-region="micro"], [data-viz-region="${fr.lane}"]`).first(), PANEL)
       // To the first question (the event loop asks at Start; answer it and step once for a code line).
       if ((await f.getAttribute('data-viz-mode')) === 'ask') {
         await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
@@ -178,14 +184,15 @@ for (const width of [375, 1440])
       }
       await f.getByRole('button', { name: 'Next' }).click()
       await settle(page)
-      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]'), ['background-color'])
+      // A step may light a range (Graph DFS's two adds): the first row stands for it.
+      out['current code line'] = await look(f.locator('[data-viz-region="code"] li[aria-current]').first(), ['background-color'])
       for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
       await settle(page)
       out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
       out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
       out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
       // A wrong pick: the event loop's mid-run answer is its second choice, the frontier's first.
-      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : fr.wrong).click()
       await settle(page)
       out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
       out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
@@ -547,11 +554,14 @@ for (const width of [375, 1440])
       same(`${preset} changed link`, heap.changedLink, await inSvg(at, 'svg [data-edge][data-changed] .vz-e'))
       same(`${preset} changed mark`, heap.changed, await inSvg(at, 'svg .vz-ch'))
     }
-    // Wave 3A: the call tree, the spanning tree and the push forest, each with the parts it draws.
+    // Waves 3A and 4B: the call tree, the spanning tree, the push forest and the residual graphs, each with the parts it draws.
     const W3: Record<string, { node: string; link: string; lit?: string; mark?: string }> = {
       'combination-sum-take-skip': { node: 'svg [data-node]:not([data-end]) .vz-g', link: 'svg [data-edge] .vz-e', mark: 'svg .vz-ch' },
       'water-wells-virtual-source': { node: 'svg [data-node] .vz-g', link: 'svg [data-edge]:not([data-changed]):not([data-well]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e' },
       'k-pairs-lazy-grid': { node: 'svg [data-cell]:not([data-changed]) .vz-g', link: 'svg [data-edge]:not([data-changed]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e', mark: 'svg .vz-ch' },
+      // Wave 4B: the residual graphs (an edge's solid connector, the marked path or cut edges; reverses are dashed).
+      'diamond-reverse-edge': { node: 'svg [data-node] .vz-g', link: 'svg [data-edge]:not([data-changed]):not([data-reverse]) .vz-e', lit: 'svg [data-edge][data-changed]:not([data-reverse]) .vz-e' },
+      'clrs-23-min-cut': { node: 'svg [data-node] .vz-g', link: 'svg [data-edge]:not([data-changed]) .vz-e', lit: 'svg [data-edge][data-changed] .vz-e' },
     }
     for (const [preset, q] of Object.entries(W3)) {
       const at = page.locator(`figure[data-viz-preset="${preset}"]`)
@@ -629,7 +639,7 @@ for (const width of [375, 1440])
  * like the heap graph's changed mark and changed link (never lime).
  */
 for (const width of [375, 1440])
-  test(`wave 3B figures compute like the heap graph @${width}`, async ({ page }) => {
+  test(`wave 3B and 4A figures compute like the heap graph @${width}`, async ({ page }) => {
     const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
     const TEXT = LOOK.filter((k) => k !== 'min-height')
     const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
@@ -676,6 +686,19 @@ for (const width of [375, 1440])
       same(`${preset} panel heading`, heading, await inSvg(f, 'svg [data-viz-part="panel-heading"]'))
       same(`${preset} glyph`, heap.glyph, await inSvg(f, 'svg [data-node] > .vz-g', true))
       same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge]:not([data-changed]):not([data-kind="constructor"]) > .vz-e', true))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
+      same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch', true))
+    }
+    // The wave 4A DSA-track figures: the same frame, heading, glyph, link and changed roles.
+    await open(page, dsaUrl, width)
+    for (const preset of ['segment-tree-query-cover', 'dsu-parent-forest', 'insert-4-10-3-5-1-then-extract', 'fib5', 'lps-interval-triangle']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(f, FRAME))
+      same(`${preset} title`, heap.title, await look(f.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(f.locator('figcaption'), TEXT))
+      same(`${preset} panel heading`, heading, await inSvg(f, 'svg [data-viz-part="panel-heading"]'))
+      same(`${preset} glyph`, heap.glyph, await inSvg(f, 'svg [data-node]:not([data-changed]) > .vz-g, svg [data-cell]:not([data-changed]) > .vz-g'))
+      same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge]:not([data-changed]) > .vz-e', true))
       same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
       same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch', true))
     }
@@ -735,3 +758,107 @@ for (const width of [375, 1440])
       for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frames ${b[what][k]}`)
     expect(diffs).toEqual([])
   })
+
+/**
+ * The wave 4C figures speak the heap graph's vocabulary too: each figure's
+ * frame, title, caption and panel heading compute like the identity heap
+ * graph's, its glyphs, links at rest and changed links like the heap
+ * graph's; a collectible object is the glyph outline dashed (never a new
+ * colour), and the two-chain prototype graph's links compute like the
+ * shipped prototype graph's.
+ */
+for (const width of [375, 1440])
+  test(`wave 4C figures compute like the heap graph @${width}`, async ({ page }) => {
+    const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const TEXT = LOOK.filter((k) => k !== 'min-height')
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
+    const inSvg = (root: Locator, sel: string, props: readonly string[] = SVG, optional = false) =>
+      root.evaluate(
+        (f, [q, ps, opt]) => {
+          const el = [...f.querySelectorAll('svg')]
+            .filter((x) => x.getBoundingClientRect().width > 0)
+            .map((x) => x.querySelector(q as string))
+            .find(Boolean)
+          if (!el) {
+            if (opt) return null
+            throw new Error(`nothing matches ${q}`)
+          }
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as unknown as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        },
+        [sel, props, optional] as const,
+      )
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string> | null, b: Record<string, string> | null) => {
+      if (!a || !b) return
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: reference ${a[k]} vs ${b[k]}`)
+    }
+    await open(page, `${GALLERY}?static=1`, width)
+    const hg = page.locator('figure[data-viz-preset="identity-alias-rebind-spread"]')
+    const heap = {
+      frame: await look(hg, FRAME),
+      title: await look(hg.locator('p').first(), TEXT),
+      caption: await look(hg.locator('figcaption'), TEXT),
+      glyph: await inSvg(hg, 'svg [data-node] .vz-g'),
+      link: await inSvg(hg, 'svg [data-edge^="bind:"]:not([data-changed]) .vz-e'),
+      changedLink: await inSvg(hg, 'svg [data-edge][data-changed] .vz-e'),
+    }
+    await open(page, jsUrl, width)
+    const shipped = page.locator('figure[data-viz-preset="lookup-and-shadowing"]')
+    const proto = {
+      heading: await inSvg(shipped, 'svg [data-viz-part="panel-heading"]'),
+      spine: await inSvg(shipped, 'svg [data-kind="proto"]:not([data-changed]) > .vz-e'),
+      prototype: await inSvg(shipped, 'svg [data-kind="prototype"] > .vz-e'),
+      label: await inSvg(shipped, 'svg [data-viz-part="edge-label"]'),
+      pill: await inSvg(shipped, 'svg [data-fn] > .vz-g'),
+    }
+    await open(page, coreUrl, width)
+    for (const preset of ['gc-reachability-cycle-and-weak-edge', 'retainer-paths', 'extends-two-chains']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(f, FRAME))
+      same(`${preset} title`, heap.title, await look(f.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(f.locator('figcaption'), TEXT))
+      same(`${preset} glyph`, heap.glyph, await inSvg(f, 'svg [data-node]:not([data-gone]) > .vz-g'))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', SVG, true))
+    }
+    for (const preset of ['gc-reachability-cycle-and-weak-edge', 'retainer-paths']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge^="bind:"]:not([data-changed]) > .vz-e'))
+      // Greyed means the same fill and colour with a dashed outline: no new colour for collectible.
+      const gone = await inSvg(f, 'svg [data-node][data-gone] > .vz-g', [...SVG, 'stroke-dasharray'], true)
+      if (gone) {
+        same(`${preset} collectible glyph`, heap.glyph, Object.fromEntries(Object.entries(gone).filter(([k]) => k !== 'stroke-dasharray')))
+        if (gone['stroke-dasharray'] === 'none') diffs.push(`${preset}: a collectible glyph is not dashed`)
+      }
+    }
+    const two = page.locator('figure[data-viz-preset="extends-two-chains"]')
+    same('two chains panel heading', proto.heading, await inSvg(two, 'svg [data-viz-part="panel-heading"]'))
+    same('two chains [[Prototype]] link', proto.spine, await inSvg(two, 'svg [data-kind="proto"]:not([data-changed]) > .vz-e'))
+    same('two chains .prototype link', proto.prototype, await inSvg(two, 'svg [data-kind="prototype"] > .vz-e'))
+    same('two chains edge label', proto.label, await inSvg(two, 'svg [data-viz-part="edge-label"]'))
+    same('two chains pill', proto.pill, await inSvg(two, 'svg [data-fn] > .vz-g'))
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The trace list (wave 4C) is console output: each frame name computes like
+ * a console value and its `at` like the console's muted mark, at the finale
+ * of the await contrast (local-only: its group reads a practice question).
+ */
+test('the trace list computes like the console', async ({ page }) => {
+  const url = elUrl('await-async-frames')
+  const skip = urlLocalOnly(url)
+  test.skip(Boolean(skip), skip ?? '')
+  await open(page, url, 1024)
+  const f = page.locator('[data-viz="event-loop"] section')
+  await f.getByRole('slider').focus()
+  await page.keyboard.press('End')
+  await page.waitForTimeout(1500)
+  const PROPS = ['font-family', 'font-size', 'line-height', 'color'] as const
+  const value = await look(f.locator('[data-out] span.relative').first(), PROPS)
+  const mark = await look(f.locator('[data-out] > span').first(), PROPS)
+  const name = await look(f.locator('[data-trace] > span').nth(1), PROPS)
+  const at = await look(f.locator('[data-trace] > span').first(), PROPS)
+  expect(name).toEqual(value)
+  expect(at).toEqual(mark)
+})

@@ -93,6 +93,12 @@ export type Preset<S> = {
    * without a group form one set (the visual's own lesson).
    */
   group?: string
+  /**
+   * The frame title for this preset's lesson group, set on the group's first
+   * preset (a static preset's `title` names its figure the same way). A group
+   * without one shows the descriptor's title. At most 40 characters.
+   */
+  title?: string
 }
 
 /** A step-through visual without its renderer: what the registry and manifest see. */
