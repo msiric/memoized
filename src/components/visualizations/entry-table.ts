@@ -133,6 +133,10 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'lps-interval-triangle': [1248, 846, 846],
       'diamond-reverse-edge': [1010, 690, 690],
       'clrs-23-min-cut': [546, 478, 478],
+      'context-render-causes': [1272, 870, 870],
+      'federation-react-singleton': [894, 500, 500],
+      'dom-vs-accessibility-tree': [928, 578, 578],
+      'merge-rebase-squash-revert-reset': [1586, 1014, 1014],
     },
   ],
   'prototype-object-graph': [

@@ -11,6 +11,8 @@ import { shapeLabel, type ShapesPanel } from './shapes'
 import { isDsa } from './dsa'
 import { describeDsa } from './dsa-describe'
 import { DSA_PRESETS } from './presets/dsa'
+import { describeBoxes } from './frontend-describe'
+import { FRONTEND_PRESETS } from './presets/frontend'
 
 /**
  * The annotated-tree substrate without its renderer (R4 shared visual
@@ -124,6 +126,7 @@ function describeResidual(p: ResidualPanel): string[] {
 }
 
 function describePanel(p: TreePanel): string[] {
+  if (p.kind === 'boxes') return describeBoxes(p)
   if (isDsa(p)) return describeDsa(p)
   if (p.kind === 'residual') return describeResidual(p)
   if (p.kind === 'shapes') return describeShapes(p)
@@ -138,7 +141,9 @@ function describePanel(p: TreePanel): string[] {
 export function describeTree(d: TreeData): Omit<StaticTextAlternative, 'outputs'> {
   return {
     parts: d.panels.map((p) => ({ heading: p.heading, lines: describePanel(p) })),
-    model: d.panels.every((p) => p.kind === 'shapes')
+    model: d.panels.every((p) => p.kind === 'boxes')
+      ? frontendModel(d)
+      : d.panels.every((p) => p.kind === 'shapes')
       ? 'Hidden classes are not visible to plain JavaScript: each node is a V8 map printed by %DebugPrint in a real run of the lesson code under node --allow-natives-syntax, joined to the map it came from (its back pointer); a dashed node was seen only as a back pointer.'
       : d.panels.every((p) => p.kind === 'residual')
         ? 'Every flow and residual is recorded from a real run of the lesson code under the inspector: the residual lists after each augmenting path, and the path itself from parent and parentEdge.'
@@ -148,6 +153,18 @@ export function describeTree(d: TreeData): Omit<StaticTextAlternative, 'outputs'
         (d.panels.some((p) => p.kind === 'grid' && p.mark === 'twice') ? ' The two-neighbour rule is not run: its panel is a structural illustration, not a run, of how that rule reaches one cell from two parents, both pushed by the first pop.' : '') +
       (d.panels.some((p) => p.kind === 'suffix') ? ' Children are drawn in character order, so the leaves read in suffix-array order (the lesson’s Map keeps insertion order).' : ''),
   }
+}
+
+/** What the frontend figures record and what they model, said once. */
+function frontendModel(d: TreeData): string {
+  const ids = d.panels.map((p) => p.id)
+  if (ids.includes('providers'))
+    return 'Every render is counted in a real React 19 run (react-dom in jsdom) after setUser: the practice answer’s Fix 2 as written, and the same tree with both pieces of state in App, with and without React.memo. Causes are the figure’s rule, checked against the counts.'
+  if (ids.includes('singleton'))
+    return 'Recorded from a real webpack 5 (ModuleFederationPlugin) shell and two remotes in Chromium: shell and products built with react 19.0.0, cart with react 18.3.1, requiredVersion as in the practice answer.'
+  if (ids.includes('dom'))
+    return 'The fragment is rendered in Chromium; the right panel is its full accessibility tree read over the DevTools protocol (inline text boxes left out), and the Tab order is pressed with the keyboard.'
+  return 'Every hash, parent, ref and reflog entry is recorded from the real git in a scratch repository (fixed author and dates, so the hashes repeat). Start: main A-B-C, feature from B with D-E.'
 }
 
 export const annotatedTreeEngineCore: StaticEngineCore<TreeData> = {
@@ -161,7 +178,7 @@ export const annotatedTreeDescriptor: StaticDescriptor<TreeData, HashedProgram> 
   form: 'static',
   title: 'Annotated tree',
   engine: annotatedTreeEngineCore,
-  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, combinationSumTakeSkip, waterWellsSource, kPairsLazyGrid, hiddenClassTransitions, ...DSA_PRESETS, diamondReverseEdge, clrsMinCut],
+  presets: [maxPathGainVsThrough, trieEndMarkers, suffixTreeBanana, combinationSumTakeSkip, waterWellsSource, kPairsLazyGrid, hiddenClassTransitions, ...DSA_PRESETS, diamondReverseEdge, clrsMinCut, ...FRONTEND_PRESETS],
   defaultPreset: 'max-path-gain-vs-through',
   since: '2026-11',
 }
