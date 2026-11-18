@@ -59,6 +59,7 @@
     "viz:sliding-window": "tsx src/scripts/viz-sliding-window-record.ts",
     "viz:tree": "tsx src/scripts/viz-annotated-tree-record.ts",
     "viz:dp": "tsx src/scripts/viz-dp-table-record.ts",
+    "viz:ssr": "tsx src/scripts/viz-ssr-record.ts",
     "viz:prototypes": "tsx src/scripts/viz-prototype-record.ts",
     "viz:maps": "tsx src/scripts/viz-hidden-class-record.ts",
     "viz:lanes": "tsx src/scripts/viz-lanes-record.ts",

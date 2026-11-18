@@ -501,6 +501,17 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // Class Inheritance with extends earlier: both chains are explained, before Advantages of ES6 Classes.
     inserts: [{ before: '## **Advantages of ES6 Classes**', viz: '<Viz id="prototype-object-graph" preset="extends-two-chains" />' }],
   },
+  // Wave 4E. Local checkout only (premium lesson).
+  {
+    slug: 'server-side-rendering',
+    title: 'Server-Side Rendering (SSR)',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/server-side-rendering/page.mdx',
+    // A prediction: after Overview of React SSR, which names renderToString, renderToPipeableStream and
+    // hydrateRoot, before the setup example. No prose in the body says that React 19 reveals streamed
+    // boundaries together or that an early click hydrates its boundary first.
+    inserts: [{ before: '### **Setting Up a Basic React SSR Application**', viz: '<Viz id="ssr-stream" />' }],
+  },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
     // representative prose, code blocks and notes, so list keys has a

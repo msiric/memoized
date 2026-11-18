@@ -202,6 +202,16 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'knapsack-1d-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],
     },
   ],
+  'ssr-stream': [
+    () => import('./engines/ssr-stream'),
+    832,
+    576,
+    undefined,
+    {
+      'two-boundary-stream': [832, 576, 860, 1012, 1092],
+      'renderToString-contrast': [724, 526, 724, 916, 956],
+    },
+  ],
   'list-keys': [
     () => import('./engines/list-keys'),
     862,

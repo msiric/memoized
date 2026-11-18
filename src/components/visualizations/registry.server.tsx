@@ -14,6 +14,7 @@ import LinkedListFramesViz from './engines/linked-list/frames'
 import ListKeysViz from './engines/list-keys'
 import SlidingWindowViz from './engines/sliding-window'
 import DpTableViz from './engines/dp-table'
+import SsrStreamViz from './engines/ssr-stream'
 import type { VizComponentProps } from './shell/types'
 
 /**
@@ -34,6 +35,7 @@ export const VIZ_SERVER: Record<string, ComponentType<VizComponentProps>> = {
   'sliding-window': SlidingWindowViz,
   'annotated-tree': AnnotatedTreeViz,
   'dp-table-dependencies': DpTableViz,
+  'ssr-stream': SsrStreamViz,
   'prototype-object-graph': PrototypeGraphViz,
   lanes: LanesViz,
   'generator-frames': GeneratorFramesViz,

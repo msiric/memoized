@@ -803,6 +803,58 @@ and Promise Patterns keep the engine's.
   baselines, and the consistency checks against the heap graph, the shipped
   prototype graph and the console. Gallery: `?el=<preset>`, `?core=static`.
 
+### Streaming SSR (wave 4E, `ssr-stream`)
+
+`<Viz id="ssr-stream" preset="…" />`, a step-through with one lesson group
+(Server-Side Rendering, titled "Streaming SSR and hydration"):
+`two-boundary-stream` (the default) and `renderToString-contrast`. No code
+pane: three synced parts, the wire (each server write as short lines cut
+from the recorded HTML, beside its time), the screen (Header and two slots,
+Product upper and Reviews lower) and a badge per boundary (fallback, HTML
+hidden, static HTML, hydrating, interactive), plus the click handler's log.
+
+- **The visual's own app, recorded** (`truth/app.ts`, `yarn viz:ssr`):
+  Header and two Suspense boundaries, Product's data at 120 ms and Reviews'
+  at 80 ms. `truth/run.ts` (React 19 through the `react-19` aliases, as the
+  list-keys recorder) pipes `renderToPipeableStream` into a stream that
+  records every write and its time, and writes `renderToString` once after
+  both fetches. The same apps are served to Chromium (Playwright): a
+  MutationObserver logs what each slot shows; the client bundle (esbuild)
+  is held until the stream has ended, then hydrates, once untouched and
+  once with a trusted click on Reviews' button sent as hydration begins
+  (each boundary takes 200 ms to render on the client, a busy loop, so the
+  click lands mid-hydration; a native capture listener logs where its
+  pointerdown landed, and a streaming run whose press came after the first
+  commit is run again; the contrast keeps only its commit and click, since
+  where its press lands depends on load). A layout effect marks the commit
+  that hydrated each boundary. Values only: the writes' HTML, rounded times, the
+  slots' views, the effects' and the handler's order.
+- **What the run shows** (and the visual draws): the shell at 0 ms with
+  `<!--$?--><template id="B:0">` and `B:1` placeholders around the
+  fallbacks; Reviews' segment first (`<div hidden id="S:1">`, its
+  `$RC("B:1","S:1")`), Product's at 120 ms. React 19 does not reveal each
+  segment as it arrives: `$RC` queues it into `$RB` and `$RV` swaps the batch
+  about 300 ms after the shell painted (`$RT`), so both slots fill together.
+  A press on Reviews before it hydrates makes React hydrate Reviews ahead of
+  Product, then the click runs once; untouched, both hydrate in one commit.
+  The contrast writes once at 120 ms with no markers, paints everything at
+  once and hydrates in one pass; the click runs only after that pass.
+- **Drawing.** Both panels are one svg each, 1:1 at the default text size
+  and scaled down under very large text (never clipped). A write fades in on
+  the glyph beat with the `changed` mark and fades out on Back; a slot drops
+  its old view and fades the new one in, both ways (two texts never share
+  the cell); the handler log lands on the third beat in the result amber.
+- **Gates.** `ssr-stream.truth.test.ts` (with Playwright's Chromium: a fresh
+  recording equals the committed one, HTML and orders exactly, times within
+  60 ms on the wire and 250 ms on screen, one retry; everywhere: the app's sha256, the
+  register's claims on the recording, every wire line cut from its write,
+  the presets rebuilt and linted, lies that must fail), `layout.test.ts`,
+  `e2e/viz-ssr-stream.spec.ts` (the 375x667 fit, frames within 850 px),
+  `e2e/motion/ssr-stream-steps.spec.ts`, `e2e/stress/ssr-stream.stress.ts`,
+  the `ssr-*` gate states and print baseline (gallery `?ssr=<preset>`) and
+  the consistency check against the event loop's shell. Not premium: every
+  test runs in CI.
+
 ### Premium code (owner policy, wave 2)
 
 The app repo is public. It holds the engines, presets (captions,
