@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { loadProgram, skipNote } from '../../step-log/lesson-block'
 import { gainPanel, suffixPanel, trieDeletePanels, trieNodes, trieSearchPanel, type RecordedSuffixNode, type RecordedTrie } from './build'
+import { FRONTEND_PRESETS } from './presets/frontend'
 import { annotatedTreeDescriptor } from './descriptor'
 import type { GainPanel, SuffixPanel, TriePanel } from './model'
 import { RECORDINGS, hiddenClassTransitions, maxPathData, maxPathGainVsThrough, suffixData, suffixTreeBanana, trieData, trieEndMarkers, type TreeRecordings } from './presets'
@@ -57,8 +58,8 @@ describe('annotated-tree recordings', () => {
     expect(maxPathData(rec)).toEqual(maxPathGainVsThrough.data)
     expect(trieData(rec)).toEqual(trieEndMarkers.data)
     expect(suffixData(rec)).toEqual(suffixTreeBanana.data)
-    // The hidden-class preset has its own recorder and test (`hidden-classes.truth.test.ts`).
-    for (const preset of annotatedTreeDescriptor.presets.filter((p) => p !== hiddenClassTransitions))
+    // The hidden-class preset and the wave 4D frontend figures have their own recorders and tests (`hidden-classes.truth.test.ts`, `frontend.truth.test.ts`).
+    for (const preset of annotatedTreeDescriptor.presets.filter((p) => p !== hiddenClassTransitions && !FRONTEND_PRESETS.includes(p)))
       for (const prog of preset.programs) {
         expect(prog.sha256).toBe(rec[prog.id].sha256)
         expect(prog.observed).toEqual(rec[prog.id].stdout)

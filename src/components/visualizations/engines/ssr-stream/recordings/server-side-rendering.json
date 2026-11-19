@@ -1,0 +1,165 @@
+{
+ "generator": "react-stream-chromium@1",
+ "react": "19.3.1",
+ "browser": "chromium@156.0.8078.4",
+ "sha256": "b212d209c5abd1a517581bfdb1018cc3f4faf0d254e158c972f9287cfd8878c5",
+ "busyMs": 200,
+ "stream": {
+  "wire": [
+   {
+    "ms": 0,
+    "html": "<main><header>Shop</header><!--$?--><template id=\"B:0\"></template><p>Loading product</p><!--/$--><!--$?--><template id=\"B:1\"></template><p>Loading reviews</p><!--/$--></main><script>requestAnimationFrame(function(){$RT=performance.now()});</script>"
+   },
+   {
+    "ms": 80,
+    "html": "<div hidden id=\"S:1\"><section id=\"reviews\"><h2>Reviews</h2><button>Helpful</button></section></div><script>$RB=[];$RV=function(a){$RT=performance.now();for(var b=0;b<a.length;b+=2){var c=a[b],e=a[b+1];null!==e.parentNode&&e.parentNode.removeChild(e);var f=c.parentNode;if(f){var g=c.previousSibling,h=0;do{if(c&&8===c.nodeType){var d=c.data;if(\"/$\"===d||\"/&\"===d)if(0===h)break;else h--;else\"$\"!==d&&\"$?\"!==d&&\"$~\"!==d&&\"$!\"!==d&&\"&\"!==d||h++}d=c.nextSibling;f.removeChild(c);c=d}while(c);for(;e.firstChild;)f.insertBefore(e.firstChild,c);g.data=\"$\";g._reactRetry&&requestAnimationFrame(g._reactRetry)}}a.length=0};\n$RC=function(a,b){if(b=document.getElementById(b))(a=document.getElementById(a))?(a.previousSibling.data=\"$~\",$RB.push(a,b),2===$RB.length&&(\"number\"!==typeof $RT?requestAnimationFrame($RV.bind(null,$RB)):(a=performance.now(),setTimeout($RV.bind(null,$RB),2300>a&&2E3<a?2300-a:$RT+300-a)))):b.parentNode.removeChild(b)};$RC(\"B:1\",\"S:1\")</script>"
+   },
+   {
+    "ms": 120,
+    "html": "<div hidden id=\"S:0\"><section id=\"product\"><h2>Product</h2><button>Add</button></section></div><script>$RC(\"B:0\",\"S:0\")</script>"
+   }
+  ],
+  "screen": [
+   {
+    "ms": 10,
+    "product": "none",
+    "reviews": "none"
+   },
+   {
+    "ms": 10,
+    "product": "fallback",
+    "reviews": "fallback"
+   },
+   {
+    "ms": 310,
+    "product": "content",
+    "reviews": "content"
+   }
+  ],
+  "hydration": {
+   "idle": {
+    "click": false,
+    "events": [
+     {
+      "e": "hydrate-start"
+     },
+     {
+      "e": "hydrated",
+      "name": "product"
+     },
+     {
+      "e": "hydrated",
+      "name": "reviews"
+     }
+    ],
+    "commits": [
+     [
+      "product",
+      "reviews"
+     ]
+    ]
+   },
+   "click": {
+    "click": true,
+    "events": [
+     {
+      "e": "hydrate-start"
+     },
+     {
+      "e": "press"
+     },
+     {
+      "e": "hydrated",
+      "name": "reviews"
+     },
+     {
+      "e": "click",
+      "name": "reviews"
+     },
+     {
+      "e": "hydrated",
+      "name": "product"
+     }
+    ],
+    "commits": [
+     [
+      "reviews"
+     ],
+     [
+      "product"
+     ]
+    ]
+   }
+  }
+ },
+ "string": {
+  "wire": [
+   {
+    "ms": 120,
+    "html": "<main><header>Shop</header><section id=\"product\"><h2>Product</h2><button>Add</button></section><section id=\"reviews\"><h2>Reviews</h2><button>Helpful</button></section></main>"
+   }
+  ],
+  "screen": [
+   {
+    "ms": 0,
+    "product": "none",
+    "reviews": "none"
+   },
+   {
+    "ms": 130,
+    "product": "content",
+    "reviews": "content"
+   }
+  ],
+  "hydration": {
+   "idle": {
+    "click": false,
+    "events": [
+     {
+      "e": "hydrate-start"
+     },
+     {
+      "e": "hydrated",
+      "name": "product"
+     },
+     {
+      "e": "hydrated",
+      "name": "reviews"
+     }
+    ],
+    "commits": [
+     [
+      "product",
+      "reviews"
+     ]
+    ]
+   },
+   "click": {
+    "click": true,
+    "events": [
+     {
+      "e": "hydrate-start"
+     },
+     {
+      "e": "hydrated",
+      "name": "product"
+     },
+     {
+      "e": "hydrated",
+      "name": "reviews"
+     },
+     {
+      "e": "click",
+      "name": "reviews"
+     }
+    ],
+    "commits": [
+     [
+      "product",
+      "reviews"
+     ]
+    ]
+   }
+  }
+ }
+}

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 import { annotatedTreeDescriptor } from '../../src/components/visualizations/engines/annotated-tree/descriptor'
 import { DSA_PRESETS } from '../../src/components/visualizations/engines/annotated-tree/presets/dsa'
+import { FRONTEND_PRESETS } from '../../src/components/visualizations/engines/annotated-tree/presets/frontend'
 import { BASE, Recorder, type Row, failing, gated, activeConfigs, goto, markScope, openContext } from './harness'
 
 /**
@@ -10,8 +11,8 @@ import { BASE, Recorder, type Row, failing, gated, activeConfigs, goto, markScop
  * detectors. Strict by default.
  */
 
-// The hidden-class trees (wave 3B) and the wave 4A DSA figures (`dsa-statics`) are stressed on the JavaScript-track page (`js-statics.stress.ts`).
-const PRESETS = annotatedTreeDescriptor.presets.map((p) => p.id).filter((id) => id !== 'hidden-class-transitions' && !DSA_PRESETS.some((d) => d.id === id))
+// The hidden-class trees (wave 3B) the wave 4A DSA figures (`dsa-statics`) and the wave 4D frontend figures (`fe-statics`) are stressed on the JavaScript-track page (`js-statics.stress.ts`).
+const PRESETS = annotatedTreeDescriptor.presets.map((p) => p.id).filter((id) => id !== 'hidden-class-transitions' && !DSA_PRESETS.some((d) => d.id === id) && !FRONTEND_PRESETS.some((d) => d.id === id))
 
 async function hoverPass(page: Page, rec: Recorder, scope: string, visual: string) {
   const n = await page.evaluate((s) => {

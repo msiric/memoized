@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { urlLocalOnly } from '../premium'
-import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl } from './drive'
+import { FR, GALLERY, LESSONS, SW, atUrl, frUrl, fxFrame, fxUrl, jsUrl, dsaUrl, feUrl, lessonUrl, open, settle, swUrl, DP, dpUrl, coreUrl, elUrl, CH, chUrl, SSR, ssrUrl, SWL, swlUrl } from './drive'
 
 /**
  * Cross-visual consistency (R2 G-05). The visual baselines approve whatever
@@ -632,6 +632,60 @@ for (const width of [375, 1440])
   })
 
 /**
+ * The convex-hull turn stack (wave 4E) draws with the dp table's vocabulary:
+ * the turn arrow is the dp table's dependency arrow (the changed-role
+ * connector at 2.5 px), the point just pushed the dp table's changed cell,
+ * an idle point a dp cell's glyph, a coordinate label a dp index, and the
+ * panel heading the dp table's. Local-only (practice answers): skipped where
+ * the content checkout lacks them.
+ */
+for (const width of [375, 1440])
+  test(`turn-stack glyphs compute like the dp table's @${width}`, async ({ page }) => {
+    const skip = urlLocalOnly(dpUrl('knapsack-1d-asc')) ?? urlLocalOnly(chUrl('monotone-chain-turn-pops'))
+    test.skip(Boolean(skip), skip ?? '')
+    const SVG = ['fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'font-family', 'font-size', 'font-weight', 'color'] as const
+    const look = (root: Locator, sel: string) =>
+      root
+        .locator(sel)
+        .first()
+        .evaluate((el, ps) => {
+          const cs = getComputedStyle(el)
+          return Object.fromEntries((ps as string[]).map((k) => [k, cs.getPropertyValue(k)]))
+        }, SVG as unknown as string[])
+    const diffs: string[] = []
+    const same = (what: string, a: Record<string, string>, b: Record<string, string>) => {
+      for (const k of Object.keys(a)) if (a[k] !== b[k]) diffs.push(`${what} ${k}: dp table ${a[k]} vs turn stack ${b[k]}`)
+    }
+    await open(page, dpUrl('knapsack-1d-asc'), width)
+    const dp = page.locator(DP)
+    await dp.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    const ref = {
+      arrow: await look(dp, 'svg [data-viz-part="arc"] path.vz-e'),
+      head: await look(dp, 'svg [data-viz-part="arc"] path.vz-ah'),
+      changed: await look(dp, 'svg [data-cell][data-changed] .vz-ch'),
+      glyph: await look(dp, 'svg [data-cell]:not([data-changed]) .vz-g'),
+      index: await look(dp, 'svg [data-indices] text'),
+      heading: await look(dp, '[data-viz-region="table"] > div:first-child > span:first-child'),
+    }
+    // The turn stack three steps in: (0,3) pushed onto (0,0), then popped on a right turn.
+    await open(page, chUrl('monotone-chain-turn-pops'), width)
+    const ch = page.locator(CH)
+    await ch.getByRole('button', { name: 'Next' }).click()
+    await ch.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    same('changed point', ref.changed, await look(ch, 'svg [data-role="arriving"] .vz-ch'))
+    same('idle point', ref.glyph, await look(ch, 'svg [data-role="idle"] .vz-g'))
+    same('coordinate label', ref.index, await look(ch, 'svg [data-labels] text.vz-m'))
+    same('panel heading', ref.heading, await look(ch, '[data-viz-region="plot"] [data-chain]'))
+    await ch.getByRole('button', { name: 'Next' }).click()
+    await settle(page)
+    same('turn arrow', ref.arrow, await look(ch, 'svg [data-viz-part="turn"] [data-edge] path.vz-e'))
+    same('turn arrowhead', ref.head, await look(ch, 'svg [data-viz-part="turn"] [data-edge] path.vz-ah'))
+    expect(diffs).toEqual([])
+  })
+
+/**
  * The wave 3B JavaScript-track figures speak the same vocabulary: each
  * figure's frame, title, caption and panel heading compute like the heap
  * graph's and the pointer frames', its glyphs like the heap graph's glyph,
@@ -639,7 +693,7 @@ for (const width of [375, 1440])
  * like the heap graph's changed mark and changed link (never lime).
  */
 for (const width of [375, 1440])
-  test(`wave 3B and 4A figures compute like the heap graph @${width}`, async ({ page }) => {
+  test(`wave 3B, 4A and 4D figures compute like the heap graph @${width}`, async ({ page }) => {
     const SVG = ['fill', 'stroke', 'stroke-width', 'font-family', 'font-size', 'font-weight', 'color'] as const
     const TEXT = LOOK.filter((k) => k !== 'min-height')
     const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color'] as const
@@ -702,6 +756,19 @@ for (const width of [375, 1440])
       same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
       same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch', true))
     }
+    // The wave 4D frontend figures (the `boxes` panel kind): the same frame, heading, glyph, link and changed roles.
+    await open(page, feUrl, width)
+    for (const preset of ['context-render-causes', 'federation-react-singleton', 'dom-vs-accessibility-tree', 'merge-rebase-squash-revert-reset']) {
+      const f = page.locator(`figure[data-viz-preset="${preset}"]`)
+      same(`${preset} frame`, heap.frame, await look(f, FRAME))
+      same(`${preset} title`, heap.title, await look(f.locator('p').first(), TEXT))
+      same(`${preset} caption`, heap.caption, await look(f.locator('figcaption'), TEXT))
+      same(`${preset} panel heading`, heading, await inSvg(f, 'svg [data-viz-part="panel-heading"]'))
+      if (preset !== 'dom-vs-accessibility-tree') same(`${preset} glyph`, heap.glyph, await inSvg(f, 'svg [data-node]:not([data-changed]) > .vz-g'))
+      same(`${preset} link`, heap.link, await inSvg(f, 'svg [data-edge]:not([data-changed]) > .vz-e', true))
+      same(`${preset} changed link`, heap.changedLink, await inSvg(f, 'svg [data-edge][data-changed] > .vz-e', true))
+      same(`${preset} changed mark`, heap.changed, await inSvg(f, 'svg rect.vz-ch, svg circle.vz-ch', true))
+    }
     expect(diffs).toEqual([])
   })
 
@@ -756,6 +823,116 @@ for (const width of [375, 1440])
     const [a, b] = looks
     for (const what of Object.keys(a))
       for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs frames ${b[what][k]}`)
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * Streaming SSR (wave 4E) draws the shell like the event loop: the frame,
+ * its panels' fill and radius like the event loop's console panel,
+ * the checkpoint anatomy, the choice rows at rest and on the reveal, Skip,
+ * the prompt and the feedback; the handler log's output computes like the
+ * console's output line.
+ */
+for (const width of [375, 1440])
+  test(`streaming SSR draws the shell and its panels like the event loop @${width}`, async ({ page }) => {
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    // The wire is a 31-column strip that fits a 320 phone with the narrow panel inset: fill and radius only.
+    const PANEL = ['background-color', 'border-top-left-radius'] as const
+    // The handler log is svg text (no line box): its face and size match the console line's.
+    const OUT = ['font-family', 'font-size', 'font-weight'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [u, sel] of [
+      [GALLERY, EL],
+      [ssrUrl('two-boundary-stream'), SSR],
+    ] as const) {
+      await open(page, u, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out.panel = await look(f.locator('[data-viz-region="console"], [data-viz-region="wire"]').first(), PANEL)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      out.anatomy = await anatomy(f)
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(0).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      await f.getByRole('slider').focus()
+      await page.keyboard.press('End')
+      await page.waitForTimeout(1200)
+      await settle(page)
+      out.output = await look(f.locator('[data-out]').last(), OUT)
+      looks.push(out)
+    }
+    const [a, b] = looks
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs ssr ${b[what][k]}`)
+    expect(diffs).toEqual([])
+  })
+
+/**
+ * The service-worker lifecycle (wave 4E) is a step-through on the shared
+ * `Lane`, with no code pane: its frame, a slot lane and its worker chip, a
+ * tab card (a lane panel), the question, choices, Skip, reveal marks and
+ * feedback compute as the event loop's do. The visual's own worker: CI runs it.
+ */
+for (const width of [375, 1440])
+  test(`the service-worker lifecycle draws the shell and its lanes like the event loop @${width}`, async ({ page }) => {
+    const diffs: string[] = []
+    const looks: Record<string, Record<string, string>>[] = []
+    const PANEL = ['background-color', 'border-top-left-radius', 'padding-left', 'padding-top'] as const
+    const CHIP = ['height', 'border-top-left-radius', 'border-top-width', 'font-family', 'font-size'] as const
+    const FRAME = ['border-top-left-radius', 'border-top-width', 'border-top-color', 'padding-left', 'padding-top', 'background-color', 'margin-left', 'margin-right'] as const
+    for (const [u, sel] of [
+      [GALLERY, EL],
+      [swlUrl('update-and-reload'), SWL],
+    ] as const) {
+      await open(page, u, width)
+      const f = page.locator(sel).first()
+      const out: Record<string, Record<string, string>> = {}
+      out.frame = await look(f, FRAME)
+      if ((await f.getAttribute('data-viz-mode')) === 'ask') {
+        await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(1).click()
+        await settle(page)
+      }
+      await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out.lane = await look(f.locator('[data-viz-region="stack"], [data-viz-region="swl-active"]').first(), PANEL)
+      out.chip = await look(f.locator('[data-viz-region="stack"] [data-chip], [data-viz-region="swl-active"] [data-chip]').first(), CHIP)
+      if (sel === SWL) {
+        out.tab = await look(f.locator('[data-viz-region="swl-tab-A"]'), PANEL)
+        out.tabChip = await look(f.locator('[data-viz-region="swl-tab-A"] [data-glyph]'), CHIP)
+      }
+      for (let i = 0; i < 14 && (await f.getAttribute('data-viz-mode')) !== 'ask'; i++) await f.getByRole('button', { name: 'Next' }).click()
+      await settle(page)
+      out['choice row'] = await look(f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').first())
+      out.prompt = await look(f.locator('[data-viz-part="viz-prompt"]'))
+      out.Skip = await look(f.locator('[data-viz-part="viz-skip"]'))
+      out.anatomy = await anatomy(f)
+      // A wrong pick: the event loop's mid-run answer is its second choice, the update's (v1) its first.
+      await f.locator('[data-viz-part="viz-checkpoint"] [role="radio"]').nth(sel === EL ? 0 : 1).click()
+      await settle(page)
+      out['correct choice'] = await look(f.locator('[role="radio"]:has([data-choice-slot="right"])'))
+      out['wrong pick'] = await look(f.locator('[role="radio"]:has([data-choice-slot="wrong"])'))
+      out.feedback = await look(f.locator('[data-viz-part="viz-feedback"]'))
+      looks.push(out)
+    }
+    const [a, b] = looks
+    // The tab card is a lane panel and its controller a chip: they compute like the event loop's.
+    diffs.push(...Object.keys(a.lane).filter((k) => a.lane[k] !== b.tab[k]).map((k) => `tab card ${k}: event loop lane ${a.lane[k]} vs tab ${b.tab[k]}`))
+    diffs.push(...Object.keys(a.chip).filter((k) => a.chip[k] !== b.tabChip[k]).map((k) => `tab chip ${k}: event loop chip ${a.chip[k]} vs tab ${b.tabChip[k]}`))
+    for (const what of Object.keys(a))
+      for (const k of Object.keys(a[what])) if (a[what][k] !== b[what][k]) diffs.push(`${what} ${k}: event loop ${a[what][k]} vs service worker ${b[what][k]}`)
+    // (The event loop has no tab card; `tab` and `tabChip` were compared above.)
     expect(diffs).toEqual([])
   })
 

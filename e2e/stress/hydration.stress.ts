@@ -51,6 +51,12 @@ const ALL_PAGES = [
   '/dev/visualizations?sw=set-shrink-longest-substring',
   // The dp table (wave 3A): one lesson group, local-only.
   '/dev/visualizations?dp=knapsack-1d-desc-vs-asc',
+  // The convex-hull turn stack (wave 4E): one lesson group, local-only.
+  '/dev/visualizations?ch=monotone-chain-turn-pops',
+  // Streaming SSR (wave 4E): one lesson group, the visual's own app.
+  '/dev/visualizations?ssr=two-boundary-stream',
+  // The service-worker lifecycle (wave 4E): one lesson group.
+  '/dev/visualizations?swl=update-and-reload',
   // The frames step-throughs (wave 3C), one page per visual.
   '/dev/visualizations?fx=twoWay-next-arg',
   '/dev/visualizations?fx=refill-on-settle',
@@ -65,6 +71,8 @@ const ALL_PAGES = [
   '/dev/visualizations?js=static',
   // The wave 4A DSA-track figures (static).
   '/dev/visualizations?dsa=static',
+  // The wave 4D frontend figures (static).
+  '/dev/visualizations?fe=static',
 ]
 /** A practice-answer frame is local-only: checked only where the content checkout has it (never CI). */
 const PAGES = ALL_PAGES.filter((u) => !urlLocalOnly(u))

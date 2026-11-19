@@ -133,6 +133,10 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
       'lps-interval-triangle': [1248, 846, 846],
       'diamond-reverse-edge': [1010, 690, 690],
       'clrs-23-min-cut': [546, 478, 478],
+      'context-render-causes': [1272, 870, 870],
+      'federation-react-singleton': [894, 500, 500],
+      'dom-vs-accessibility-tree': [928, 578, 578],
+      'merge-rebase-squash-revert-reset': [1586, 1014, 1014],
     },
   ],
   'prototype-object-graph': [
@@ -200,6 +204,43 @@ export const VIZ_TABLE: Record<string, VizEntry> = {
     {
       'knapsack-1d-desc-vs-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],
       'knapsack-1d-asc': ['knapsack-1d-desc-vs-asc', 'knapsack-1d-asc'],
+    },
+  ],
+  'hull-turn-stack': [
+    () => import('./engines/turn-stack'),
+    780,
+    682,
+    undefined,
+    {
+      'monotone-chain-turn-pops': [780, 682, 784, 956, 1020],
+      'fence-collinear-lt': [784, 682, 784, 956, 1020],
+      'fence-collinear-le': [784, 682, 784, 956, 1020],
+    },
+    {
+      'monotone-chain-turn-pops': ['monotone-chain-turn-pops', 'fence-collinear-lt', 'fence-collinear-le'],
+      'fence-collinear-lt': ['monotone-chain-turn-pops', 'fence-collinear-lt', 'fence-collinear-le'],
+      'fence-collinear-le': ['monotone-chain-turn-pops', 'fence-collinear-lt', 'fence-collinear-le'],
+    },
+  ],
+  'ssr-stream': [
+    () => import('./engines/ssr-stream'),
+    832,
+    576,
+    undefined,
+    {
+      'two-boundary-stream': [832, 576, 860, 1012, 1092],
+      'renderToString-contrast': [724, 526, 724, 916, 956],
+    },
+  ],
+  'sw-lifecycle': [
+    () => import('./engines/sw-lifecycle'),
+    840,
+    600,
+    undefined,
+    {
+      'update-and-reload': [840, 600, 896, 988, 1076],
+      skipWaiting: [844, 576, 844, 936, 1064],
+      'first-install-claim': [844, 600, 844, 988, 1076],
     },
   ],
   'list-keys': [

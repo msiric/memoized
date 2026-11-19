@@ -364,6 +364,7 @@ export function layoutTree(d: TreeData): TreeScene {
   const flowLegend = flowLegendLines(d.panels)
   const flowNotes = flowNoteLines(d.panels)
   const blocks = d.panels.map((p): PerVariant<number> => {
+    if (p.kind === 'boxes') return { narrow: p.height, wide: p.height }
     if (p.kind === 'residual')
       return { narrow: layoutResidual(p, 'narrow', flowLegend, flowNotes).height, wide: layoutResidual(p, 'wide', flowLegend, flowNotes).height }
     if (p.kind === 'gain') {

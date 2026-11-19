@@ -296,6 +296,19 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // follow-ups only).
     inserts: [{ before: '### **Edit Distance**', viz: '<Viz id="dp-table-dependencies" preset="knapsack-1d-desc-vs-asc" />' }],
   },
+  // Wave 4E (PREMIUM: local checkout only).
+  {
+    slug: 'convex-hull',
+    title: 'Convex Hull',
+    section: { title: 'Advanced Topics', href: '/courses/dsa-track/advanced-topics' },
+    source: 'content/dsa-track/advanced-topics/convex-hull/page.mdx',
+    // A prediction: after the stack-based algorithms (Graham scan's pop
+    // loop, Jarvis march), before the tips. No prose in the body says which
+    // monotone-chain point pops or that `< 0` keeps collinear posts (both
+    // are in the practice answer only); "Handling Collinear Points" below it
+    // names the question without answering it.
+    inserts: [{ before: '## **Practical Tips and Tricks**', viz: '<Viz id="hull-turn-stack" preset="monotone-chain-turn-pops" />' }],
+  },
   {
     slug: 'backtracking',
     title: 'Backtracking',
@@ -420,6 +433,41 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // of Secure Authentication Practices, before authorization.
     inserts: [{ before: '## **Secure Authorization Practices**', viz: '<Viz id="lanes" preset="oauth-pkce-channels" />' }],
   },
+  // Wave 4D, the frontend static figures (all four lessons PREMIUM: local
+  // checkout only). Static figures, each after the example it explains.
+  {
+    slug: 'state-management',
+    title: 'State Management',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/state-management/page.mdx',
+    // After the Context API's Limitations and Best Practices ("use multiple
+    // contexts"), the claim the figure qualifies, before the modern landscape.
+    inserts: [{ before: '## **Modern State Management Landscape (2025/2026)**', viz: '<Viz id="annotated-tree" preset="context-render-causes" />' }],
+  },
+  {
+    slug: 'micro-frontends',
+    title: 'Micro-Frontends',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/micro-frontends/page.mdx',
+    // After Module Federation in depth (the host and remote configs, singleton: true), before Server-Side Integration.
+    inserts: [{ before: '### **Server-Side Integration**', viz: '<Viz id="annotated-tree" preset="federation-react-singleton" />' }],
+  },
+  {
+    slug: 'accessibility',
+    title: 'Accessibility',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/accessibility/page.mdx',
+    // After Common ARIA Attributes (aria-labelledby, aria-hidden examples), before Implementing ARIA.
+    inserts: [{ before: '## **Implementing ARIA in Web Applications**', viz: '<Viz id="annotated-tree" preset="dom-vs-accessibility-tree" />' }],
+  },
+  {
+    slug: 'git',
+    title: 'Git',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/git/page.mdx',
+    // After Merging and Rebasing (the merge and rebase commands), before Collaboration with Git.
+    inserts: [{ before: '## **Collaboration with Git**', viz: '<Viz id="annotated-tree" preset="merge-rebase-squash-revert-reset" />' }],
+  },
   // Wave 4A, the DSA static figures (all five lessons PREMIUM: local checkout
   // only). Static figures, each after the example it explains.
   {
@@ -500,6 +548,29 @@ export const LESSON_FIXTURES: LessonFixture[] = [
     // After Combining Constructor Functions and Prototypes (the Car/Vehicle example, panel 2), with
     // Class Inheritance with extends earlier: both chains are explained, before Advantages of ES6 Classes.
     inserts: [{ before: '## **Advantages of ES6 Classes**', viz: '<Viz id="prototype-object-graph" preset="extends-two-chains" />' }],
+  },
+  // Wave 4E. Local checkout only (premium lesson).
+  {
+    slug: 'server-side-rendering',
+    title: 'Server-Side Rendering (SSR)',
+    section: { title: 'Frontend Development', href: '/courses/js-track/frontend-development' },
+    source: 'content/js-track/frontend-development/server-side-rendering/page.mdx',
+    // A prediction: after Overview of React SSR, which names renderToString, renderToPipeableStream and
+    // hydrateRoot, before the setup example. No prose in the body says that React 19 reveals streamed
+    // boundaries together or that an early click hydrates its boundary first.
+    inserts: [{ before: '### **Setting Up a Basic React SSR Application**', viz: '<Viz id="ssr-stream" />' }],
+  },
+  // Wave 4E, the service-worker lifecycle (PREMIUM lesson: local checkout only).
+  {
+    slug: 'service-workers',
+    title: 'Service Workers and Progressive Web Apps (PWAs)',
+    section: { title: 'Advanced Concepts', href: '/courses/js-track/advanced-concepts' },
+    source: 'content/js-track/advanced-concepts/service-workers/page.mdx',
+    // A prediction: after Service Worker Lifecycle (the states and the event example, so installing,
+    // waiting and active are defined), before Caching Strategies. No prose in the body says that a
+    // reload keeps the old worker, that skipWaiting moves open tabs, or that a first visit stays
+    // uncontrolled (those are in the practice answers only).
+    inserts: [{ before: '## **Caching Strategies**', viz: '<Viz id="sw-lifecycle" preset="update-and-reload" />' }],
   },
   {
     // Not a content-repo copy: an original, non-premium stand-in body with
