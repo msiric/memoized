@@ -26,6 +26,8 @@ export type Sample = {
   s?: string
   ov?: number
   ln?: number
+  /** A wrapped text leaf's line fragments ([x, y, w, h] each), when it has more than one. */
+  fr?: number[][] | null
 }
 export type Frame = { t: number; rows: [number, Sample][]; gone: number[] }
 export type Anim = {
@@ -384,6 +386,8 @@ const clipTo = (a: Box, c: Box): Box | null => {
   const r = { l: Math.max(a.l, c.l), t: Math.max(a.t, c.t), r: Math.min(a.r, c.r), b: Math.min(a.b, c.b) }
   return r.r > r.l && r.b > r.t ? r : null
 }
+/** The boxes an element prints in: a wrapped text leaf's line fragments, else its box. */
+const boxesOf = (s: Sample): Box[] => (s.fr?.length ? s.fr.map(([x, y, w, h]) => ({ l: x, t: y, r: x + w, b: y + h })) : [boxOf(s)])
 
 /**
  * Text that a moving or fading element prints over or covers (G1, R1M-01,
@@ -393,7 +397,10 @@ const clipTo = (a: Box, c: Box): Box | null => {
  * without text (the list-keys rider, a chip, a stage glyph, the scrubber
  * tooltip), against every other visible text leaf. Two boxes that intersect
  * by more than `minArea` px² are an overlap, unless one is the other's
- * ancestor. When the moving element paints in a raised opaque layer (a
+ * ancestor. A text leaf that wraps (an inline code token broken across a
+ * phone's hanging indent) is held as its line fragments: its union box spans
+ * both lines and would cover the tokens beside it, which it never touches.
+ * When the moving element paints in a raised opaque layer (a
  * lifted glyph on its backing, D6, or the scrubber tooltip, D12) and the
  * text does not, it hides that text: a `covers` entry, allowed only for a
  * lifted stage glyph passing over a lane's own text (`COVER_OK`). Text that
@@ -424,16 +431,20 @@ export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {
     for (let p = parents[id]; p; p = parents[p]) out.add(p)
     return out
   }
-  const visibleBox = (id: number): Box | null => {
+  const visibleBoxes = (id: number): Box[] | null => {
     const s = state.get(id)
     if (!s || s.eff <= 0.1 || s.w * s.h <= 0) return null
-    let b: Box | null = boxOf(s)
-    for (let c = clips[id]; c && b; c = clips[c]) {
-      const cs = state.get(c)
-      if (!cs) break
-      b = clipTo(b, boxOf(cs))
+    const out: Box[] = []
+    for (const f of boxesOf(s)) {
+      let b: Box | null = f
+      for (let c = clips[id]; c && b; c = clips[c]) {
+        const cs = state.get(c)
+        if (!cs) break
+        b = clipTo(b, boxOf(cs))
+      }
+      if (b) out.push(b)
     }
-    return b
+    return out.length ? out : null
   }
   const MOVE = ['x', 'y', 'tx', 'ty', 'op', 'eff'] as const
   const seen = new Set<string>()
@@ -447,14 +458,14 @@ export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {
     }
     for (const id of f.gone) state.delete(id)
     if (f.t < from) continue
-    const visible = [...texts].map((id) => [id, visibleBox(id)] as const).filter((x): x is readonly [number, Box] => !!x[1])
+    const visible = [...texts].map((id) => [id, visibleBoxes(id)] as const).filter((x): x is readonly [number, Box[]] => !!x[1])
     for (const a of changed) {
       if (!texts.has(a) && !MOVING_GLYPH.test(cap.labels[a] ?? '')) continue
-      const ab = visibleBox(a)
-      if (!ab) continue
+      const abs = visibleBoxes(a)
+      if (!abs) continue
       const up = ancestors(a)
       const la = state.get(a)?.ly ?? 0
-      for (const [b, bb] of visible) {
+      for (const [b, bbs] of visible) {
         if (b === a || up.has(b) || ancestors(b).has(a)) continue
         const lb = state.get(b)?.ly ?? 0
         // The text sits in a raised opaque layer the moving element is not in: it passes under it.
@@ -466,10 +477,13 @@ export function overlapsDuring(cap: Capture, from = 0, minArea = 4): Overlap[] {
         // 24 px line for 14 px type) is empty, and a glyph passing through it
         // touches no letter.
         const glyphOnly = !texts.has(a)
-        const inset = glyphOnly ? (bb.b - bb.t) * 0.2 : 0
-        const i = clipTo(ab, { ...bb, t: bb.t + inset, b: bb.b - inset })
-        if (!i) continue
-        const area = (i.r - i.l) * (i.b - i.t)
+        let area = 0
+        for (const ab of abs)
+          for (const bb of bbs) {
+            const inset = glyphOnly ? (bb.b - bb.t) * 0.2 : 0
+            const i = clipTo(ab, { ...bb, t: bb.t + inset, b: bb.b - inset })
+            if (i) area += (i.r - i.l) * (i.b - i.t)
+          }
         if (area <= minArea) continue
         const moving = cap.labels[a] ?? String(a)
         const over = cap.labels[b] ?? String(b)
