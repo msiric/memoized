@@ -54,7 +54,8 @@ import { remHeights } from './units'
  * `data-flip-id`, and the stage's `useFlip` plays the `move` spring from its
  * old position (transform only), lifted above every lane while it crosses
  * regions. New chips `enter` from their arrival side; removed chips `exit`
- * toward their departure side; Back mirrors both (D8). The exit is resolved
+ * toward their departure side; Back mirrors both (D8). Toward a label on
+ * top, they travel only the 4 px gap under it, never into the label (G1). The exit is resolved
  * from the live gate, so scrubs, Home, End and preset switches snap leaving
  * chips too (D7). Only glyphs inside the step's budget animate. A chip that
  * moved elsewhere leaves its old lane instantly, so it is never drawn twice.
@@ -171,6 +172,9 @@ const Chip = forwardRef<
   )
 })
 
+/** The share of the 8 px enter and exit travel that fits between a label on top and the first chip (its 4 px gap). */
+const LABEL_GAP_SHARE = 0.5
+
 /** One chip slot. Exiting copies drop `data-flip-id`, so FLIP measures only the live chip. */
 const LaneItem = forwardRef<
   HTMLDivElement,
@@ -208,6 +212,13 @@ export function Lane(props: LaneProps) {
     className,
   } = props
   const vertical = props.vertical ?? kind === 'frame'
+  // A chip never travels into its lane's label (G1). Where the label sits on
+  // top, the first chip slot is 4 px under it (gap-1), so a chip that drops
+  // in from above, or leaves upward, travels half the 8 px token: the full
+  // travel put its top edge on the label's baseline on a phone.
+  const labelOnTop = labelAt.narrow === 'top' || labelAt.wide === 'top'
+  const clear = (v: { x?: number; y?: number }) => (labelOnTop && (v.y ?? 0) < 0 ? { ...v, y: Math.max(v.y ?? 0, -LABEL_GAP_SHARE) } : v)
+  const vectors = { from: clear(from), to: clear(to) }
   // The live gate and the ids on stage, handed to chips that are leaving.
   const custom: PresenceCustom = { gate, present }
 
@@ -221,7 +232,7 @@ export function Lane(props: LaneProps) {
         key={`${chip.id}:${gate.epoch}`}
         id={chip.id}
         className={clsx('min-w-0 max-w-full flex-none', showCls(chip.show), chip.tight === false && 'vz-tight:hidden')}
-        {...presence(chip.id, gate, { from, to }, { moved })}
+        {...presence(chip.id, gate, vectors, { moved })}
         custom={custom}
       >
         <Chip
