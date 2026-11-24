@@ -16,7 +16,8 @@
  * check (analyze.ts `overlapsDuring`, G1) it also keeps, per element, its
  * parent id, its nearest clipping ancestor (overflow other than visible) and
  * whether it is a text leaf. For a text leaf it also keeps its words, whether
- * it is cut (ellipsis, line clamp) and its line count (R2 GB2).
+ * it is cut (ellipsis, line clamp) and its line count (R2 GB2), and, when it
+ * wraps into more than one box, each box (its line fragments).
  */
 export const RECORDER = String.raw`
 (() => {
@@ -116,6 +117,13 @@ export const RECORDER = String.raw`
         const rg = document.createRange()
         rg.selectNodeContents(el)
         rec.ln = new Set([...rg.getClientRects()].filter((q) => q.width > 0).map((q) => Math.round(q.top - b.top))).size
+      }
+      // A text leaf that wraps (an inline code token broken across a hanging
+      // indent): its line fragments, so the overlap check (G1) holds the ink
+      // it prints, not the union box of two lines that covers its neighbours.
+      if (state.texts.has(id)) {
+        const fr = [...el.getClientRects()].filter((q) => q.width > 0 && q.height > 0)
+        rec.fr = fr.length > 1 ? fr.map((q) => [r2(q.left - rr.left), r2(q.top - rr.top), r2(q.width), r2(q.height)]) : null
       }
       const prev = state.last.get(id)
       const key = JSON.stringify(rec)

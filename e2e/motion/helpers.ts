@@ -323,13 +323,19 @@ const BEAT_PART = {
   glyph: /data-glyph|flip-id|chip=/,
   land: /out=|viz-caption/,
 } as const
-export type BeatStarts = Partial<Record<keyof typeof BEAT_PART, number>> & { end: number; maxGapMs: number }
+export type BeatStarts = Partial<Record<keyof typeof BEAT_PART, number>> & {
+  end: number
+  maxGapMs: number
+  /** When the frame first responded to the command (ms after it): the render the beats are timed from. */
+  first?: number
+}
 
 export function beatStarts(ms: ElementMotion[]): BeatStarts {
   const out: BeatStarts = { end: 0, maxGapMs: 0 }
   for (const e of ms) {
     const props = e.props.filter((p) => p.prop !== 'x' && p.prop !== 'y' && p.prop !== 'eff' && p.prop !== 'w' && p.prop !== 'h')
     if (!props.length) continue
+    out.first = Math.min(out.first ?? Infinity, ...props.map((p) => p.delay))
     for (const [beat, re] of Object.entries(BEAT_PART) as [keyof typeof BEAT_PART, RegExp][]) {
       if (!re.test(e.label) || (beat === 'glyph' && BEAT_PART.land.test(e.label))) continue
       const start = Math.min(...props.map((p) => p.delay))
@@ -359,6 +365,9 @@ export const BEATS_MAX_MS = 560 + 34
  */
 export const beatsBudget = (maxGapMs: number) => 560 + 2 * Math.max(17, Math.ceil(maxGapMs))
 
+/** The longest a paced step may take to answer its command on screen (twice the feedback token). */
+export const RESPONSE_MAX_MS = 200
+
 export function beatProblems(b: BeatStarts, dir: 'forward' | 'back', timing = true): string[] {
   const order = dir === 'forward' ? (['line', 'glyph', 'land'] as const) : (['land', 'glyph', 'line'] as const)
   const seen = order.filter((k) => b[k] !== undefined)
@@ -371,8 +380,19 @@ export function beatProblems(b: BeatStarts, dir: 'forward' | 'back', timing = tr
   // A forward step's console line and caption wait for the glyph to land.
   if (dir === 'forward' && b.glyph !== undefined && b.land !== undefined && b.land - b.glyph < 200)
     out.push(`land starts ${Math.round(b.land - b.glyph)} ms after the glyph beat (the glyph has not landed)`)
+  // The beats are timed from the render that answers the command (the
+  // scrubber and the code line move in it), not from the key press: the 30
+  // to 100 ms between them is the input path and a dev-mode render under the
+  // recorder, the same for every step, and charging it to the choreography
+  // failed sliding-window steps whose own three beats took 533 ms.
+  // The input path keeps its own bound, twice the 100 ms feedback token, so
+  // a step that answers late still fails.
+  if (timing && (b.first ?? 0) > RESPONSE_MAX_MS)
+    out.push(`the frame first responds ${Math.round(b.first ?? 0)} ms after the command (> ${RESPONSE_MAX_MS})`)
   const budget = beatsBudget(b.maxGapMs)
-  if (timing && b.end > budget) out.push(`the step ends at ${Math.round(b.end)} ms (> ${budget}, longest frame gap ${b.maxGapMs} ms)`)
+  const own = b.end - (b.first ?? 0)
+  if (timing && own > budget)
+    out.push(`the step ends at ${Math.round(own)} ms after its first response (> ${budget}, longest frame gap ${b.maxGapMs} ms; ${Math.round(b.end)} ms after the command)`)
   return out
 }
 
