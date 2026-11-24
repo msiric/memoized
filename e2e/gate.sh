@@ -48,16 +48,18 @@
 # Without a shard, `pr` runs them all in sequence.
 #
 # Full shards (viz-nightly.yml runs each as its own job; one job for the
-# whole matrix outgrew its 180 minutes after wave 4). The functional and
-# design shards are the PR ones (the design shards' full-motion contrast runs
-# at 375, 768 and 1440 in this tier). Motion is cut by width: motion-<w> runs
+# whole matrix outgrew its 180 minutes after wave 4). The functional shards
+# are the PR ones; the design shards move consistency to design-a. Motion is cut by width: motion-<w> runs
 # every width-bound motion test (its title carries @<w>) at that width only,
 # motion-once the width-free ones once. Stress is cut by file, the full
 # configurations (STRESS_TIER=full). Seconds of test time on CI:
-#   functional-a, functional-b, design-a, design-b     as in the PR tier
-#   motion-320 ... motion-1920   every width-bound motion spec      ~1050 each
+#   functional-a, functional-b   as in the PR tier
+#   design-a     the contrast crawl at rest, consistency             ~1300
+#   design-b     full-motion contrast (375, 768, 1440); visual
+#                baselines inside the image                         ~1500
+#   motion-320 ... motion-1920   every width-bound motion spec      ~1000-1150 each
 #   motion-once  instant, interaction, interruption, list-keys
-#                reveals, the reduced and interrupted reveals         ~460
+#                reveals, the reduced and interrupted reveals         ~430
 #   stress-1     flagships                                          ~1200
 #   stress-2     adversarial, annotated tree, dp table, frames,
 #                turn stack                                         ~1150
@@ -98,11 +100,16 @@ run() {
   case "$1" in
     functional-a) pw --project=functional e2e/viz-list-keys.spec.ts e2e/viz-static.spec.ts e2e/viz-heap-graph.spec.ts e2e/viz-frontier.spec.ts e2e/viz-linked-list.spec.ts e2e/viz-annotated-tree.spec.ts e2e/viz-js-statics.spec.ts e2e/viz-dsa-statics.spec.ts e2e/viz-js-core.spec.ts e2e/viz-fe-statics.spec.ts ;;
     functional-b) pw --project=functional e2e/viz-step-through.spec.ts e2e/viz-shell.spec.ts e2e/viz-fallbacks.spec.ts e2e/viz-sliding-window.spec.ts e2e/viz-dp-table.spec.ts e2e/viz-frames.spec.ts e2e/viz-turn-stack.spec.ts e2e/viz-ssr-stream.spec.ts e2e/viz-sw-lifecycle.spec.ts ;;
-    design-a) pw --project=gates e2e/gates/contrast.spec.ts --grep-invert "full motion" ;;
+    # The full tier's design-b plays the full-motion crawl at three widths,
+    # so consistency moves to design-a there (both stay near 20 minutes).
+    design-a)
+      if [ "$tier" = pr ]; then pw --project=gates e2e/gates/contrast.spec.ts --grep-invert "full motion"
+      else pw --project=gates e2e/gates/contrast.spec.ts e2e/gates/consistency.spec.ts --grep-invert "full motion"; fi ;;
     design-b)
       local a=0 b=0
       pw --project=gates e2e/gates/contrast.spec.ts --grep "full motion" || a=$?
-      pw --project=gates ${visual[@]+"${visual[@]}"} e2e/gates/consistency.spec.ts e2e/gates/visual.spec.ts || b=$?
+      if [ "$tier" = pr ]; then pw --project=gates ${visual[@]+"${visual[@]}"} e2e/gates/consistency.spec.ts e2e/gates/visual.spec.ts || b=$?
+      elif [ ${#visual[@]} -gt 0 ]; then pw "${visual[@]}" e2e/gates/visual.spec.ts || b=$?; fi
       return $((a || b)) ;;
     motion-a) pw --project=motion e2e/motion/event-loop-steps.spec.ts e2e/motion/linked-list-steps.spec.ts e2e/motion/reveal.spec.ts e2e/motion/instant-paths.spec.ts e2e/motion/interaction.spec.ts e2e/motion/frontier-steps.spec.ts ;;
     motion-b) pw --project=motion e2e/motion/list-keys-reveals.spec.ts e2e/motion/interruption.spec.ts e2e/motion/sliding-window-steps.spec.ts e2e/motion/js-core-steps.spec.ts ;;

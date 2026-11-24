@@ -65,7 +65,12 @@ for (const width of WIDTHS) {
   })
 
   test(`gallery states @${width}: every rendered pair passes`, async ({ page }) => {
-    test.setTimeout(300_000)
+    // A hang guard, not a budget: each state opens a page, drives it and
+    // crawls it (about 3 s on CI), and the list grows with every wave (wave
+    // 4 took it to 4.8 of the 5 minutes this was, and a cold first page past
+    // them). Twice the CI pace per state, never under 5 minutes.
+    const states = Object.keys(STATES).filter((name) => !urlLocalOnly(stateUrl(name))).length
+    test.setTimeout(Math.max(300_000, states * 6_000))
     const problems: string[] = []
     for (const [name, drive] of Object.entries(STATES)) {
       // A practice-answer frame is local-only: skipped without the content checkout (CI).
